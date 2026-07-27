@@ -7,7 +7,8 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import javax.inject.Inject
 
 /**
- * Extracts session data from the [CheckoutSessionResponse] already loaded during [Checkout.configure].
+ * Extracts session data from the [CheckoutSessionResponse] already loaded during
+ * [CheckoutController.configure].
  *
  * The checkout session init response contains the elements session and customer data.
  */

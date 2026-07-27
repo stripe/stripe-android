@@ -37,6 +37,8 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
@@ -45,14 +47,14 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChoos
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
@@ -76,6 +78,7 @@ import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -83,6 +86,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 import javax.inject.Named
 import javax.inject.Singleton
@@ -92,6 +96,7 @@ import javax.inject.Singleton
     modules = [
         CheckoutControllerModule::class,
         CheckoutModule::class,
+        ExtendedPaymentElementConfirmationModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         ElementsSessionClientParamsModule::class,
@@ -260,12 +265,6 @@ internal interface CheckoutControllerModule {
         }
 
         @Provides
-        @Singleton
-        fun provideCvcRecollectionHandler(): CvcRecollectionHandler {
-            return CvcRecollectionHandlerImpl()
-        }
-
-        @Provides
         fun providePaymentMethodMetadata(
             stateHolder: CheckoutControllerStateHolder,
         ): PaymentMethodMetadata? {
@@ -278,6 +277,40 @@ internal interface CheckoutControllerModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
+
+        @Provides
+        @Singleton
+        fun provideConfirmationHandler(
+            confirmationHandlerFactory: ConfirmationHandler.Factory,
+            @ViewModelScope coroutineScope: CoroutineScope,
+        ): ConfirmationHandler {
+            return confirmationHandlerFactory.create(coroutineScope)
+        }
+
+        @Provides
+        @Singleton
+        fun provideCustomerStateHolder(
+            savedStateHandle: SavedStateHandle,
+            selectionHolder: EmbeddedSelectionHolder,
+            paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>,
+        ): CustomerStateHolder {
+            val customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow {
+                it?.customerMetadata
+            }
+            return DefaultCustomerStateHolder(
+                savedStateHandle = savedStateHandle,
+                selection = selectionHolder.selection,
+                customerMetadata = customerMetadata,
+                paymentMethodMetadataFlow = paymentMethodMetadataFlow,
+            )
+        }
+
+        @Provides
+        fun providePaymentMethodMetadataFlow(
+            stateHolder: CheckoutControllerStateHolder,
+        ): StateFlow<PaymentMethodMetadata?> {
+            return stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata }
         }
     }
 }

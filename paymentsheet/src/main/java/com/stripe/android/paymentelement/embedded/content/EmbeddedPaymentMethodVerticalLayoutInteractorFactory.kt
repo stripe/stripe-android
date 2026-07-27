@@ -41,7 +41,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    private val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
+    private val sheetStateHolder: SheetStateHolder,
     private val savedPaymentMethodMutatorFactory: EmbeddedContentSavedPaymentMethodMutatorFactory,
 ) : EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
 
@@ -87,7 +87,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             },
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             transitionToManageScreen = {
-                sheetLauncherHolder.sheetLauncher?.launchManage(
+                sheetStateHolder.sheetLauncher?.launchManage(
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
@@ -95,7 +95,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
                 )
             },
             transitionToFormScreen = { code ->
-                sheetLauncherHolder.sheetLauncher?.launchForm(
+                sheetStateHolder.sheetLauncher?.launchForm(
                     code = code,
                     paymentMethodMetadata = paymentMethodMetadata,
                     configuration = configuration,

@@ -142,15 +142,15 @@ internal interface EmbeddedActivityModule {
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
-            val initialScreen = when (launchMode) {
-                is EmbeddedLaunchMode.Form -> formScreenFactory.create(launchMode)
-                is EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
+            val initialBackStack = when (launchMode) {
+                is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
+                is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
                 is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
             }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialScreen = initialScreen,
+                initialBackStack = initialBackStack,
             )
         }
 
@@ -228,6 +228,7 @@ internal interface EmbeddedActivityModule {
             @ViewModelScope coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
             sheetActivityStateHolder: SheetActivityStateHolder,
+            linkAccountHolder: LinkAccountHolder,
             savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
         ): SavedPaymentMethodConfirmInteractor.Factory {
             return DefaultSavedPaymentMethodConfirmInteractor.Factory(
@@ -236,6 +237,7 @@ internal interface EmbeddedActivityModule {
                 processing = sheetActivityStateHolder.state.mapAsStateFlow {
                     it.isProcessing
                 },
+                linkAccountHolder = linkAccountHolder,
                 coroutineScope = coroutineScope,
             )
         }

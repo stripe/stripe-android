@@ -10,6 +10,7 @@ import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -24,6 +25,7 @@ import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNT
 import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -68,6 +70,8 @@ internal abstract class BaseSheetViewModel(
     val customerStateHolderFactory: CustomerStateHolder.Factory,
     val customViewModelScope: CoroutineScope,
     val placesClient: PlacesClientProxy?,
+    val linkAccountHolder: LinkAccountHolder,
+    stripeAutocompleteRepository: StripeAutocompleteRepository,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -92,6 +96,7 @@ internal abstract class BaseSheetViewModel(
                 isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
             ),
             placesClient = placesClient,
+            stripeAutocompleteRepository = stripeAutocompleteRepository,
             coroutineScope = viewModelScope,
             shouldUseAutocompleteProxyEndpointsProvider = {
                 _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false

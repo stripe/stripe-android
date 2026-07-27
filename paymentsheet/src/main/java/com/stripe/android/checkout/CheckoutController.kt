@@ -7,8 +7,12 @@ import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
@@ -39,7 +43,9 @@ class CheckoutController @Inject internal constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val sheetStateHolder: SheetStateHolder,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
         get() = stateHolder.checkoutSession
@@ -57,18 +63,25 @@ class CheckoutController @Inject internal constructor(
     suspend fun configure(
         checkoutSessionClientSecret: String,
         configuration: Configuration = Configuration(),
-    ): kotlin.Result<Unit> = runSerialized {
-        val configurationState = configuration.build()
-        val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
+    ): kotlin.Result<Unit> {
+        // A re-configure while a payment flow is presented would reload the session out from under
+        // the open sheet. The first configure runs with null state, so this only blocks re-configures.
+        if (sheetStateHolder.sheetIsOpen) {
+            return integrationLaunchedFailure()
+        }
+        return runSerialized {
+            val configurationState = configuration.build()
+            val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
 
-        checkoutSessionRepository.init(
-            sessionId = sessionId,
-            adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
-        ).mapCatching { response ->
-            checkoutStateLoader.loadInitial(
-                configuration = configurationState,
-                checkoutSessionResponse = response,
-            )
+            checkoutSessionRepository.init(
+                sessionId = sessionId,
+                adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+            ).mapCatching { response ->
+                checkoutStateLoader.loadInitial(
+                    configuration = configurationState,
+                    checkoutSessionResponse = response,
+                )
+            }
         }
     }
 
@@ -238,11 +251,11 @@ class CheckoutController @Inject internal constructor(
         additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState = { this },
         block: suspend CheckoutControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> {
-        val currentState = stateHolder.state
+        stateHolder.state
             ?: return kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session before it is configured.")
             )
-        if (currentState.integrationLaunched) {
+        if (sheetStateHolder.sheetIsOpen) {
             return kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
             )
@@ -262,6 +275,22 @@ class CheckoutController @Inject internal constructor(
             }
         }
     }
+
+    private fun requireMutableState(): kotlin.Result<Unit> {
+        stateHolder.state
+            ?: return kotlin.Result.failure(
+                IllegalStateException("Cannot mutate checkout session before it is configured.")
+            )
+        return if (sheetStateHolder.sheetIsOpen) {
+            integrationLaunchedFailure()
+        } else {
+            kotlin.Result.success(Unit)
+        }
+    }
+
+    private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
+        IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
+    )
 
     /**
      * Serializes [block] behind [mutex] so configuration and mutations run in sequence, and toggles
@@ -293,7 +322,16 @@ class CheckoutController @Inject internal constructor(
     }
 
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
-        return checkoutPresenterSubcomponentFactory.create().presenter
+        val subcomponent = checkoutPresenterSubcomponentFactory.create(
+            activityResultCaller = PaymentElementActivityResultCaller(
+                key = "CheckoutController(instance = $paymentElementCallbackIdentifier)",
+                registryOwner = activity,
+            ),
+            lifecycleOwner = activity,
+            statusBarColor = StatusBarCompat.color(activity),
+        )
+        subcomponent.initializer.initialize()
+        return subcomponent.presenter
     }
 
     fun destroy() {
@@ -303,9 +341,12 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Clears the customer's selected payment option, resetting it to `null`.
+     *
+     * Returns [kotlin.Result.failure] if the session hasn't been configured yet or a payment flow is
+     * currently presented.
      */
-    fun clearPaymentOption() {
-        stateHolder.clearSelection()
+    fun clearPaymentOption(): kotlin.Result<Unit> {
+        return requireMutableState().map { stateHolder.clearSelection() }
     }
 
     @CheckoutSessionPreview

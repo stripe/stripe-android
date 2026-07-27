@@ -33,9 +33,9 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -70,7 +70,7 @@ import kotlin.coroutines.CoroutineContext
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
-    private val linkAccountHolder: LinkAccountHolder,
+    linkAccountHolder: LinkAccountHolder,
     private val linkGateFactory: LinkGate.Factory,
     private val errorReporter: ErrorReporter,
     val linkPaymentLauncher: LinkPaymentLauncher,
@@ -87,6 +87,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     placesClient: PlacesClientProxy?,
+    stripeAutocompleteRepository: StripeAutocompleteRepository,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -100,6 +101,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
     placesClient = placesClient,
+    linkAccountHolder = linkAccountHolder,
+    stripeAutocompleteRepository = stripeAutocompleteRepository,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

@@ -1023,6 +1023,17 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onNfcScanButtonShown fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onNfcScanButtonShown()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_nfc_scan_button_shown")
+        assertThat(request.params).containsEntry("example_from_test", true)
+    }
+
+    @Test
     fun `onUsBankAccountFormEvent fires started event`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 

@@ -21,6 +21,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -706,7 +707,8 @@ internal class FormHelperTest {
         tapToAddHelper: TapToAddHelper? = null,
         paymentMethodMessagePromotionsHelper: FakePaymentMethodMessagePromotionsHelper =
             FakePaymentMethodMessagePromotionsHelper(),
-        newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
+        newPaymentSelectionProvider: (PaymentMethodCode) -> NewPaymentOptionSelection? =
+            { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
         return DefaultFormHelper(

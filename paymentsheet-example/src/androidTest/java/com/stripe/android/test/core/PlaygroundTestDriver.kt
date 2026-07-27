@@ -48,10 +48,6 @@ import com.stripe.android.paymentsheet.example.playground.activity.CustomPayment
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutSessionAutomaticTaxSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.CustomerEmailSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -72,11 +68,10 @@ import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
+import com.stripe.android.utils.awaitWindowFocus
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
-import org.junit.Assume
 import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
@@ -117,7 +112,12 @@ internal class PlaygroundTestDriver(
         override fun onActivityPaused(activity: Activity) {}
         override fun onActivityStopped(activity: Activity) {}
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-        override fun onActivityDestroyed(activity: Activity) {}
+        override fun onActivityDestroyed(activity: Activity) {
+            // Never keep a reference to a destroyed activity.
+            if (currentActivity === activity) {
+                currentActivity = null
+            }
+        }
         override fun onActivityResumed(activity: Activity) {
             currentActivity = activity
         }
@@ -336,10 +336,7 @@ internal class PlaygroundTestDriver(
         fieldPopulator.populateFields()
 
         // Verify device requirements are met prior to attempting confirmation.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -397,57 +394,6 @@ internal class PlaygroundTestDriver(
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
-
-        teardown()
-    }
-
-    fun confirmGooglePayWithCheckoutSession(
-        merchant: Merchant,
-        customerEmail: String,
-    ) {
-        setup(
-            TestParameters.create(
-                paymentMethodCode = "card",
-            ) { settings ->
-                settings[MerchantSettingsDefinition] = merchant
-                settings[CustomerSettingsDefinition] = CustomerType.GUEST
-                settings.updateConfigurationData {
-                    it.copy(integrationType = PlaygroundConfigurationData.IntegrationType.FlowController)
-                }
-                settings[InitializationTypeSettingsDefinition] = InitializationType.CheckoutSession
-                settings[CheckoutSessionAutomaticTaxSettingsDefinition] = false
-                settings[CustomerEmailSettingsDefinition] = customerEmail
-            }
-        )
-
-        launchCustom(clickMultiStep = false)
-
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
-        resultCountDownLatch = testParameters.countDownLatch()
-
-        selectors.playgroundBuyButton.waitForEnabled()
-        selectors.playgroundBuyButton.click()
-
-        composeTestRule.waitForIdle()
-
-        selectors.googlePaySheet.waitFor()
-        selectors.googlePayCheckoutButton.click()
-
-        composeTestRule.waitForIdle()
-
-        while (currentActivity !is PaymentSheetPlaygroundActivity) {
-            composeTestRule.mainClock.advanceTimeByFrame()
-        }
-
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
-        resultCountDownLatch?.let {
-            assertThat(it.await(5, TimeUnit.SECONDS)).isTrue()
-        }
-        assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
 
         teardown()
     }
@@ -541,10 +487,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -590,10 +533,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -640,10 +580,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -695,10 +632,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -1096,10 +1030,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -1152,10 +1083,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         pressContinue(waitForPlayground = false)
 
@@ -1309,6 +1237,11 @@ internal class PlaygroundTestDriver(
         }
         Espresso.onIdle()
         composeTestRule.waitForIdle()
+        if (!awaitWindowFocus()) {
+            // Returning from a browser/external activity can leave no window focused. Fail fast with a
+            // clear message here instead of surfacing as an opaque Espresso RootViewPicker timeout later.
+            error("Playground did not regain window focus after returning from an external activity")
+        }
     }
 
     /**
@@ -1334,16 +1267,7 @@ internal class PlaygroundTestDriver(
         }
     }
 
-    private fun verifyDeviceSupportsTestAuthorization(
-        authorizeAction: AuthorizeAction?,
-        requestedBrowser: Browser?
-    ) {
-        if (authorizeAction?.requiresBrowser == true) {
-            requestedBrowser?.let {
-                val browserUI = BrowserUI.convert(it)
-                Assume.assumeTrue(getBrowser(browserUI) == browserUI)
-            } ?: Assume.assumeTrue(selectors.getInstalledBrowsers().isNotEmpty())
-        }
+    private fun verifyDeviceSupportsTestAuthorization(authorizeAction: AuthorizeAction?) {
         if (authorizeAction == AuthorizeAction.DisplayQrCode) {
             // Tests fail on pixel 2 API 26.
             assumeFalse("walleye + 26" == "${Build.DEVICE} + ${Build.VERSION.SDK_INT}")
@@ -1353,15 +1277,13 @@ internal class PlaygroundTestDriver(
     private fun getBrowser(requestedBrowser: BrowserUI?): BrowserUI {
         val installedBrowsers = selectors.getInstalledBrowsers()
 
-        return requestedBrowser?.let {
-            // Assume true will mark the test as skipped if it can't be executed
-            Assume.assumeTrue(installedBrowsers.contains(it))
-            it
-        } ?: installedBrowsers.first()
+        return requestedBrowser ?: installedBrowsers.first()
     }
 
     private fun monitorCurrentActivity(application: Application) {
         this.application = application
+        // Unregister first so retried attempts (e.g. RetryRule) don't stack callbacks.
+        application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 
@@ -1416,13 +1338,14 @@ internal class PlaygroundTestDriver(
                     // select the first browser found
                     val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
+                    // Chrome's first-run onboarding blocks the auth page; dismiss it if present.
+                    dismissChromeFirstRunIfPresent()
+
                     // If there are multiple browser there is a browser selector window
                     selectBrowserPrompt.wait(4000)
                     if (selectBrowserPrompt.exists()) {
                         browserIconAtPrompt(selectedBrowser).click()
                     }
-
-                    assumeTrue(browserWindow(selectedBrowser)?.exists() == true)
 
                     blockUntilAuthorizationPageLoaded(isSetup = testParameters.isSetupMode)
                 }
@@ -1857,7 +1780,7 @@ internal class PlaygroundTestDriver(
         launchPlayground.await(5, TimeUnit.SECONDS)
     }
 
-    private fun teardown() {
+    internal fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         playgroundState = null
         currentActivity = null

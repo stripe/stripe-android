@@ -85,8 +85,8 @@ internal class DefaultNfcScanningEventReporterTest {
     }
 
     @Test
-    fun `onNfcScanCancelled ends duration and fires event`() = runScenario {
-        reporter.onNfcScanCancelled()
+    fun `onNfcScanCancelled ends duration and fires event with cancellation reason`() = runScenario {
+        reporter.onNfcScanCancelled(NfcScanCancellationReason.Timeout)
 
         assertThat(
             durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScan))
@@ -94,7 +94,8 @@ internal class DefaultNfcScanningEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_canceled")
-        assertThat(loggedParams).doesNotContainKey("duration")
+        assertThat(loggedParams).containsEntry("duration", 1.0f)
+        assertThat(loggedParams).containsEntry("cancellation_reason", "scanning_timeout")
     }
 
     private class Scenario(

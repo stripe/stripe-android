@@ -4,7 +4,6 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -19,6 +18,8 @@ import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
@@ -27,6 +28,12 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutI
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -46,10 +53,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val formScreenFactory: EmbeddedFormScreenFactory,
     private val linkAccountHolder: LinkAccountHolder,
 ) {
-    fun createInitialScreen(): EmbeddedNavigator.Screen.PaymentOptions {
-        val interactor = createInteractor()
-        return EmbeddedNavigator.Screen.PaymentOptions(
-            interactor = interactor,
+    fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
+        val formHelper = createFormHelper()
+        val paymentOptionsScreen = EmbeddedNavigator.Screen.PaymentOptions(
+            interactor = createInteractor(formHelper),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = {
@@ -64,11 +71,21 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 )
             },
         )
+        return buildList {
+            add(paymentOptionsScreen)
+            // When a new payment method requiring a form is already selected, open directly on that
+            // form with the payment options list underneath, so back returns to the list.
+            val selection = selectionHolder.selection.value
+            if (selection is PaymentSelection.New &&
+                formHelper.formTypeForCode(selection.paymentMethodType) == FormType.UserInteractionRequired
+            ) {
+                add(formScreenFactory.createFormScreen(selection.paymentMethodType))
+            }
+        }
     }
 
-    @Suppress("LongMethod")
-    private fun createInteractor(): PaymentMethodVerticalLayoutInteractor {
-        val formHelper = embeddedFormHelperFactory.create(
+    private fun createFormHelper(): FormHelper {
+        return embeddedFormHelperFactory.create(
             coroutineScope = viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
@@ -79,7 +96,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
+    }
 
+    @Suppress("LongMethod")
+    private fun createInteractor(formHelper: FormHelper): PaymentMethodVerticalLayoutInteractor {
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = stateFlowOf(false),
@@ -104,7 +124,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             updateSelection = { updatedSelection, _ ->
                 selectionHolder.setSelection(updatedSelection)
             },
-            isCurrentScreen = stateFlowOf(true),
+            isCurrentScreen = isCurrentScreen(),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = { savedPaymentMethod ->
@@ -131,6 +151,19 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
+
+    // The navigator is built from this initial screen (see EmbeddedActivityModule.provideEmbeddedNavigator), so
+    // embeddedNavigatorProvider.get() can't be called synchronously here without recursing into the @Singleton
+    // mid-construction. flow { } defers the get() until first collection, by which point the navigator exists.
+    private fun isCurrentScreen(): StateFlow<Boolean> = flow {
+        emitAll(embeddedNavigatorProvider.get().screen)
+    }.map { screen ->
+        screen is EmbeddedNavigator.Screen.PaymentOptions
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = true,
+    )
 
     private fun navigateToManageScreen() {
         val paymentMethods = customerStateHolder.customer.value?.paymentMethods

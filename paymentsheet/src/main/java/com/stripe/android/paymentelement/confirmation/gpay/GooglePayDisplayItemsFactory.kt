@@ -1,28 +1,19 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkout.CheckoutInstances
-import com.stripe.android.checkout.CheckoutSession
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
-@OptIn(CheckoutSessionPreview::class)
 internal object GooglePayDisplayItemsFactory {
 
     fun create(paymentMethodMetadata: PaymentMethodMetadata): List<GooglePayJsonFactory.DisplayItem> {
-        val checkoutSessionMetadata = paymentMethodMetadata.integrationMetadata
-            as? IntegrationMetadata.CheckoutSession ?: return emptyList()
+        val response = paymentMethodMetadata.checkoutSessionResponse ?: return emptyList()
 
-        val checkout = CheckoutInstances[checkoutSessionMetadata.instancesKey]
-            ?: return emptyList()
-
-        val checkoutSession = checkout.checkoutSession.value
         val items = mutableListOf<GooglePayJsonFactory.DisplayItem>()
 
-        items += checkoutSession.lineItems.map { it.asDisplayItem() }
+        items += response.lineItems.map { it.asDisplayItem() }
 
-        checkoutSession.totalSummary?.let { summary ->
+        response.totalSummary?.let { summary ->
             items += summary.discountAmounts.map { it.asDisplayItem() }
             items += summary.taxAmounts.map { it.asDisplayItem() }
         }
@@ -30,7 +21,7 @@ internal object GooglePayDisplayItemsFactory {
         return items
     }
 
-    private fun CheckoutSession.LineItem.asDisplayItem(): GooglePayJsonFactory.DisplayItem {
+    private fun CheckoutSessionResponse.LineItem.asDisplayItem(): GooglePayJsonFactory.DisplayItem {
         val label = if (quantity > 1) "$name x$quantity" else name
         return GooglePayJsonFactory.DisplayItem(
             label = label,
@@ -39,7 +30,7 @@ internal object GooglePayDisplayItemsFactory {
         )
     }
 
-    private fun CheckoutSession.DiscountAmount.asDisplayItem(): GooglePayJsonFactory.DisplayItem {
+    private fun CheckoutSessionResponse.DiscountAmount.asDisplayItem(): GooglePayJsonFactory.DisplayItem {
         return GooglePayJsonFactory.DisplayItem(
             label = displayName,
             type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
@@ -47,7 +38,7 @@ internal object GooglePayDisplayItemsFactory {
         )
     }
 
-    private fun CheckoutSession.TaxAmount.asDisplayItem(): GooglePayJsonFactory.DisplayItem {
+    private fun CheckoutSessionResponse.TaxAmount.asDisplayItem(): GooglePayJsonFactory.DisplayItem {
         return GooglePayJsonFactory.DisplayItem(
             label = displayName,
             type = GooglePayJsonFactory.DisplayItem.Type.TAX,

@@ -29,10 +29,12 @@ class CheckoutSessionRepositoryTest {
         mobileSessionIdProvider = { AnalyticsRequestFactory.sessionId.toString() },
     )
 
+    private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+
     private val repository = CheckoutSessionRepository(
         clientParams = clientParams,
         stripeNetworkClient = DefaultStripeNetworkClient(),
-        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+        analyticsRequestExecutor = analyticsRequestExecutor,
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = ApplicationProvider.getApplicationContext(),
             publishableKey = "pk_test_123",
@@ -90,5 +92,37 @@ class CheckoutSessionRepositoryTest {
         )
 
         assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `updateCurrency fires currency_toggled on success`() = runTest {
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        repository.updateCurrency(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            currencyCode = "eur",
+        ).getOrThrow()
+
+        val params = analyticsRequestExecutor.getExecutedRequests().single().params
+        assertThat(params).containsEntry("event", "elements.adaptive_pricing.currency_toggled")
+    }
+
+    @Test
+    fun `updateCurrency fires currency_toggled_failed on failure`() = runTest {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "Invalid currency"}}""")
+        }
+
+        val result = repository.updateCurrency(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            currencyCode = "invalid",
+        )
+
+        assertThat(result.isFailure).isTrue()
+        val params = analyticsRequestExecutor.getExecutedRequests().single().params
+        assertThat(params).containsEntry("event", "elements.adaptive_pricing.currency_toggled.failed")
     }
 }

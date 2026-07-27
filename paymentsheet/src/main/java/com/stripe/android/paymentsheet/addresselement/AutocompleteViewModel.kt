@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcompone
 import com.stripe.android.paymentsheet.injection.DaggerAutocompleteViewModelFactoryComponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
@@ -112,32 +111,34 @@ internal class AutocompleteViewModel @Inject constructor(
     fun selectPrediction(prediction: AutocompletePrediction) {
         viewModelScope.launch {
             _loading.value = true
-            placesClient?.fetchPlace(
-                placeId = prediction.placeId
-            )?.fold(
-                onSuccess = {
-                    _loading.value = false
-                    val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-                    val address = it.place.transformGoogleToStripeAddress(locale)
-
-                    _event.emit(
-                        Event.GoBack(
-                            address = PaymentSheet.Address(
-                                city = address.city,
-                                country = address.country,
-                                line1 = address.line1,
-                                line2 = address.line2,
-                                postalCode = address.postalCode,
-                                state = address.state
+            val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+            try {
+                placesClient?.fetchPlace(
+                    placeId = prediction.placeId,
+                    locale = locale,
+                )?.fold(
+                    onSuccess = { address ->
+                        _event.emit(
+                            Event.GoBack(
+                                address = PaymentSheet.Address(
+                                    city = address.city,
+                                    country = address.country,
+                                    line1 = address.line1,
+                                    line2 = address.line2,
+                                    postalCode = address.postalCode,
+                                    state = address.state
+                                )
                             )
                         )
-                    )
-                },
-                onFailure = {
-                    _loading.value = false
-                    _event.emit(Event.GoBack(address = null))
-                }
-            )
+                    },
+                    onFailure = {
+                        _event.emit(Event.GoBack(address = null))
+                    }
+                )
+            } finally {
+                _loading.value = false
+                placesClient?.resetSession()
+            }
         }
     }
 

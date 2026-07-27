@@ -10,6 +10,7 @@ import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -82,6 +83,27 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+    }
+
+    @Test
+    fun `new selection requiring a form opens on the form and back returns to the list`() = launch(
+        selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+    ) { scenario ->
+        scenario.onActivity { activity ->
+            assertThat(activity.embeddedNavigator.canGoBack).isTrue()
+            assertThat(activity.embeddedNavigator.screen.value)
+                .isInstanceOf<EmbeddedNavigator.Screen.Form>()
+        }
+
+        Espresso.pressBack()
+        onIdle()
+
+        // Back returns to the payment options list rather than cancelling the sheet.
+        scenario.onActivity { activity ->
+            assertThat(activity.embeddedNavigator.canGoBack).isFalse()
+            assertThat(activity.embeddedNavigator.screen.value)
+                .isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        }
     }
 
     @Test

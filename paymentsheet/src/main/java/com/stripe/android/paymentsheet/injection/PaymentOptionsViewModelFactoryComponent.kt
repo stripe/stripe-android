@@ -21,6 +21,7 @@ import javax.inject.Singleton
         PaymentSheetCommonModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentOptionsViewModelModule::class,
+        PaymentSheetAutocompleteModule::class,
         ElementsSessionClientParamsModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,

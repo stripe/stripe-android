@@ -339,6 +339,48 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `initial back stack with a form on top starts on the form and can go back`() = runTest {
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
+        val eventReporter = FakeEventReporter()
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = EmbeddedNavigator.Screen.PaymentOptions(
+            interactor = paymentOptionsInteractor,
+            isLiveMode = true,
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "".resolvableString,
+                    isEnabled = false,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = false,
+                    shouldDisplayLockIcon = true,
+                    savedPaymentSelectionToConfirm = null,
+                )
+            ),
+            onContinueClick = {},
+        )
+        val (formScreen, formInteractor) = createFormScreen()
+
+        val navigator = EmbeddedNavigator(
+            coroutineScope = scope,
+            eventReporter = eventReporter,
+            initialBackStack = listOf(paymentOptionsScreen, formScreen),
+        )
+
+        // Only the visible top screen is considered shown during initialization.
+        assertThat(navigator.canGoBack).isTrue()
+        assertThat(navigator.screen.value).isEqualTo(formScreen)
+
+        scope.cancel()
+
+        // Both seeded screens are tracked and closed on scope cancellation.
+        assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(paymentOptionsInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        paymentOptionsInteractor.validate()
+        formInteractor.validate()
+        eventReporter.validate()
+    }
+
+    @Test
     fun `PaymentOptions topBarState returns correct state for live mode`() {
         val screen = createPaymentOptionsScreen(isLiveMode = true)
         val topBarState = screen.topBarState().value!!

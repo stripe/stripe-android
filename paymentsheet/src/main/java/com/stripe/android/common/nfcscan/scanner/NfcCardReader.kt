@@ -65,8 +65,9 @@ internal class ApduCardReader @Inject constructor(
                             break@probeFiles
                         }
                     }.onFailure { error ->
-                        if (!isRecordNotFoundError(error)) {
-                            throw error
+                        if (isFileNotFoundError(error)) {
+                            // Breaks the record loop but moves on to the next file
+                            break
                         }
                     }
                 }
@@ -79,9 +80,9 @@ internal class ApduCardReader @Inject constructor(
         }
     }
 
-    private fun isRecordNotFoundError(error: Throwable): Boolean {
+    private fun isFileNotFoundError(error: Throwable): Boolean {
         return error is ApduResponseError.Command &&
-            error.sw1 == RECORD_NOT_FOUND_SW1 && error.sw2 == RECORD_NOT_FOUND_SW2
+            error.sw1 == PARAMETER_ERROR_SW1 && error.sw2 == FILE_NOT_FOUND_SW2
     }
 
     private companion object {
@@ -89,7 +90,7 @@ internal class ApduCardReader @Inject constructor(
         val PROBE_SFIS = 1..3
         const val MAX_RECORDS_PER_SFI = 8
 
-        const val RECORD_NOT_FOUND_SW1 = 0x6A.toByte()
-        const val RECORD_NOT_FOUND_SW2 = 0x83.toByte()
+        const val PARAMETER_ERROR_SW1 = 0x6A.toByte()
+        const val FILE_NOT_FOUND_SW2 = 0x82.toByte()
     }
 }

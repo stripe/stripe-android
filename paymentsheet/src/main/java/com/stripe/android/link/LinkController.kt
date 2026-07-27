@@ -951,7 +951,7 @@ class LinkController @Inject internal constructor(
             return create(
                 application = application,
                 savedStateHandle = savedStateHandle,
-                requestSurface = RequestSurface.PaymentElement,
+                requestSurface = RequestSurface.StandaloneLink,
             )
         }
     }

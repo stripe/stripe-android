@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import kotlinx.coroutines.CoroutineScope
@@ -41,8 +42,11 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             linkInlineHandler = LinkInlineHandler.create(),
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
-            newPaymentSelectionProvider = {
-                when (val currentSelection = embeddedSelectionHolder.selection.value) {
+            newPaymentSelectionProvider = { code ->
+                val currentSelection = embeddedSelectionHolder.selection.value
+                    ?.takeIf { it.paymentMethodType == code }
+                    ?: embeddedSelectionHolder.getPreviousNewSelection(code)
+                when (currentSelection) {
                     is PaymentSelection.ExternalPaymentMethod -> {
                         NewPaymentOptionSelection.External(currentSelection)
                     }

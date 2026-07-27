@@ -998,4 +998,6 @@ private class FakeCustomerSheetEventReporter : CustomerSheetEventReporter {
     override fun onAnalyticsEvent(event: AnalyticsEvent) = Unit
 
     override fun onCardScanEvent(event: CardScanEvent) = Unit
+
+    override fun onNfcScanButtonShown() = Unit
 }

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @CheckoutSessionPreview
 internal class CurrencySelectorViewModel(
@@ -66,9 +67,8 @@ internal class CurrencySelectorViewModel(
         private const val KEY_INITIALIZED = "currency_selector_initialized"
     }
 
-    internal class Factory(
-        private val checkoutSession: StateFlow<CheckoutSession?>,
-        private val updateCurrency: suspend (String) -> Result<Unit>,
+    internal class Factory @Inject constructor(
+        private val checkoutController: CheckoutController,
         private val analyticsRequestExecutor: AnalyticsRequestExecutor,
         private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     ) : ViewModelProvider.Factory {
@@ -83,8 +83,8 @@ internal class CurrencySelectorViewModel(
             extras: androidx.lifecycle.viewmodel.CreationExtras
         ): T {
             return CurrencySelectorViewModel(
-                checkoutSession = checkoutSession,
-                updateCurrency = updateCurrency,
+                checkoutSession = checkoutController.checkoutSession,
+                updateCurrency = checkoutController::updateCurrency,
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
                 savedStateHandle = extras.createSavedStateHandle(),
