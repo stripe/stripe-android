@@ -332,7 +332,7 @@ internal fun PaymentSection(
 private fun samsungPaySelection(): PaymentMethodSelection.SamsungPay {
     return PaymentMethodSelection.SamsungPay(
         currencyCode = "USD",
-        amount = 1_099L,
+        amount = 199L,
         orderNumber = "onramp-example-order",
     )
 }
