@@ -121,7 +121,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
         confirmationHandler.startTurbine.awaitItem()
         assertThat(eventReporter.calls.awaitItem())
-            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentSuccess)
+            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentSuccess(expressButton))
     }
 
     @Test
@@ -140,8 +140,11 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         performer.confirm(expressButton)
 
         confirmationHandler.startTurbine.awaitItem()
-        assertThat(eventReporter.calls.awaitItem())
-            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentFailure)
+        val call = eventReporter.calls.awaitItem()
+        assertThat(call).isInstanceOf(FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentFailure::class.java)
+        val failureCall = call as FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentFailure
+        assertThat(failureCall.expressButton).isEqualTo(expressButton)
+        assertThat(failureCall.error.cause.message).isEqualTo("Payment failed")
     }
 
     private fun googlePayState(): CheckoutControllerState {

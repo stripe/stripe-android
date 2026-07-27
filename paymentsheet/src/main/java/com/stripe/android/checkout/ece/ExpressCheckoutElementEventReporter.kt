@@ -1,10 +1,16 @@
 package com.stripe.android.checkout.ece
 
+import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.mapOfDurationInSeconds
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.analytics.linkContext
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.utils.filterNotNullValues
 import javax.inject.Inject
 
@@ -15,16 +21,25 @@ internal interface ExpressCheckoutElementEventReporter {
         expressButton: ExpressButton,
     )
 
-    fun onEcePaymentSuccess()
+    fun onEcePaymentSuccess(
+        expressButton: ExpressButton,
+    )
 
-    fun onEcePaymentFailure()
+    fun onEcePaymentFailure(
+        expressButton: ExpressButton,
+        error: ConfirmationHandler.Result.Failed,
+    )
 }
 
 internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val durationProvider: DurationProvider,
+    private val stateHolder: CheckoutControllerStateHolder,
+    private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : ExpressCheckoutElementEventReporter {
     override fun onEceDisplayed() {
+        durationProvider.start(DurationProvider.Key.ExpressCheckoutElement)
         fireEvent(
             eventName = ECE_DISPLAYED_EVENT_NAME,
             additionalParams = emptyMap(),
@@ -34,27 +49,65 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     override fun onEceWalletTapped(
         expressButton: ExpressButton,
     ) {
-        val params = mapOf(
+        fireEvent(
+            eventName = ECE_WALLET_TAPPED_EVENT_NAME,
+            additionalParams = durationProvider.elapsed(DurationProvider.Key.ExpressCheckoutElement)
+                .mapOfDurationInSeconds() + paymentMethodParams(expressButton),
+        )
+    }
+
+    override fun onEcePaymentSuccess(expressButton: ExpressButton) {
+        fireEvent(
+            eventName = ECE_PAYMENT_SUCCESS_EVENT_NAME,
+            additionalParams = durationProvider.elapsed(DurationProvider.Key.ExpressCheckoutElement)
+                .mapOfDurationInSeconds() + paymentMethodParams(expressButton),
+        )
+    }
+
+    override fun onEcePaymentFailure(
+        expressButton: ExpressButton,
+        error: ConfirmationHandler.Result.Failed,
+    ) {
+        val confirmationError = error.toConfirmationError()
+            ?: PaymentSheetConfirmationError.Stripe(error.cause)
+        fireEvent(
+            eventName = ECE_PAYMENT_FAILURE_EVENT_NAME,
+            additionalParams = durationProvider.elapsed(DurationProvider.Key.ExpressCheckoutElement)
+                .mapOfDurationInSeconds() +
+                paymentMethodParams(expressButton) +
+                mapOf(
+                    FIELD_ERROR_MESSAGE to confirmationError.analyticsValue,
+                    FIELD_ERROR_CODE to confirmationError.errorCode,
+                ).filterNotNullValues(),
+        )
+    }
+
+    private fun paymentMethodParams(expressButton: ExpressButton): Map<String, Any> {
+        return mapOf(
             FIELD_SELECTED_LPM to expressButton.toWalletType().code,
             FIELD_LINK_CONTEXT to (expressButton.toSelection() as? PaymentSelection.Link)?.linkContext()
         ).filterNotNullValues()
-        fireEvent(
-            eventName = ECE_WALLET_TAPPED_EVENT_NAME,
-            additionalParams = params,
-        )
     }
 
-    override fun onEcePaymentSuccess() {
-        fireEvent(
-            eventName = ECE_PAYMENT_SUCCESS_EVENT_NAME,
-            additionalParams = emptyMap(),
-        )
-    }
-
-    override fun onEcePaymentFailure() {
-        fireEvent(
-            eventName = ECE_PAYMENT_FAILURE_EVENT_NAME,
-            additionalParams = emptyMap(),
+    private fun defaultParams(): Map<String, Any> {
+        val state = stateHolder.state ?: return emptyMap()
+        val expressCheckoutElementConfiguration = state.configuration.expressCheckoutElementConfiguration
+        val orderedLpms = availableExpressButtonTypesFactory.create(
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
+            googlePayConfiguration = state.configuration.googlePayConfiguration,
+        ).map {
+            when (it) {
+                is ExpressButtonType.GooglePay -> "google_pay"
+                ExpressButtonType.Link -> "link"
+            }
+        }
+        return state.paymentMethodMetadata.analyticsMetadata.paramsMap + mapOf(
+            FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
+            FIELD_ECE_CONFIG to mapOf(
+                FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkVisibility.name.lowercase(),
+                FIELD_GOOGLE_PAY_VISIBILITY to expressCheckoutElementConfiguration.googlePayVisibility.name.lowercase(),
+            ),
         )
     }
 
@@ -67,7 +120,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
                 event = object : AnalyticsEvent {
                     override val eventName: String = eventName
                 },
-                additionalParams = additionalParams,
+                additionalParams = defaultParams() + additionalParams,
             )
         )
     }
@@ -80,5 +133,11 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
 
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_LINK_CONTEXT = "link_context"
+        const val FIELD_ERROR_MESSAGE = "error_message"
+        const val FIELD_ERROR_CODE = "error_code"
+        const val FIELD_ORDERED_LPMS = "ordered_lpms"
+        const val FIELD_ECE_CONFIG = "ece_config"
+        const val FIELD_LINK_VISIBILITY = "link_visibility"
+        const val FIELD_GOOGLE_PAY_VISIBILITY = "google_pay_visibility"
     }
 }

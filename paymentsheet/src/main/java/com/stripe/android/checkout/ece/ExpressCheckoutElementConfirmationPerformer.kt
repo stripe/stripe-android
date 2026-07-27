@@ -50,9 +50,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         viewModelScope.launch {
             confirmationHandler.start(confirmationArgs)
 
-            when (confirmationHandler.awaitResult()) {
-                is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess()
-                is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure()
+            when (val result = confirmationHandler.awaitResult()) {
+                is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
+                is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
                 is ConfirmationHandler.Result.Canceled,
                 null -> Unit
             }
