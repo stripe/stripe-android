@@ -161,7 +161,7 @@ internal class SamsungPaySheetFactory(
         message: String,
         cause: Throwable?,
     ): Nothing {
-        throw SamsungPayException(
+        throw SamsungPaySdkException(
             message = message,
             cause = cause,
             errorCode = null,

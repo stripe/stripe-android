@@ -402,8 +402,8 @@ internal class DefaultSamsungPayLauncher(
         message: String,
         reason: Reason,
         errorCode: Int?,
-    ): SamsungPayException {
-        return SamsungPayException(
+    ): SamsungPaySdkException {
+        return SamsungPaySdkException(
             message = message,
             cause = null,
             errorCode = errorCode,

@@ -67,7 +67,7 @@ internal sealed interface SamsungPayResult {
     data class Failed(val error: Throwable) : SamsungPayResult
 }
 
-internal class SamsungPayException(
+internal class SamsungPaySdkException(
     message: String,
     cause: Throwable?,
     val errorCode: Int?,

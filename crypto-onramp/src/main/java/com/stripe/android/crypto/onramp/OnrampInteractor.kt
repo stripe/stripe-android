@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.exception.SamsungPayException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
 import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
@@ -54,6 +55,7 @@ import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.googlePayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
@@ -76,8 +78,6 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.stripe.android.crypto.onramp.R as OnrampR
-import com.stripe.android.crypto.onramp.exception.SamsungPayException as RichSamsungPayException
-import com.stripe.android.crypto.onramp.samsungpay.SamsungPayException as InternalSamsungPayException
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Suppress("LargeClass", "TooManyFunctions")
@@ -785,7 +785,7 @@ internal class OnrampInteractor @Inject constructor(
                 }
             }
             is SamsungPayStatus.Failed -> {
-                val internalError = status.error as? InternalSamsungPayException
+                val internalError = status.error as? SamsungPaySdkException
                 unavailableSamsungPay(
                     reason = internalError?.reason ?: Reason.OperationFailed,
                     underlyingError = status.error,
@@ -827,7 +827,7 @@ internal class OnrampInteractor @Inject constructor(
             return mappedError
         }
 
-        val internalError = mappedError as? InternalSamsungPayException
+        val internalError = mappedError as? SamsungPaySdkException
         return createSamsungPayException(
             reason = internalError?.reason ?: fallbackReason,
             underlyingError = mappedError,
@@ -839,9 +839,9 @@ internal class OnrampInteractor @Inject constructor(
         reason: Reason,
         underlyingError: Throwable?,
         samsungPayErrorCode: Int?,
-    ): RichSamsungPayException {
+    ): SamsungPayException {
         val configuration = state.value.configurationState
-        return RichSamsungPayException(
+        return SamsungPayException(
             reason = reason,
             samsungPayErrorCode = samsungPayErrorCode,
             underlyingError = underlyingError,

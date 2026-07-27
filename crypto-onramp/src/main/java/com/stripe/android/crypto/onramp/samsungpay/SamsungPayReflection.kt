@@ -75,9 +75,9 @@ internal class SamsungPayReflection(
         return runCatching(block).recoverCatching { throwable ->
             val cause = throwable.unwrapInvocationTarget()
             throw when (cause) {
-                is SamsungPayException -> cause
+                is SamsungPaySdkException -> cause
                 is ClassNotFoundException,
-                is NoClassDefFoundError -> SamsungPayException(
+                is NoClassDefFoundError -> SamsungPaySdkException(
                     message = "Samsung Pay SDK 2.22.00 is not available. " +
                         "The client app must include the Samsung Pay SDK JAR.",
                     cause = cause,
@@ -86,14 +86,14 @@ internal class SamsungPayReflection(
                 )
                 is NoSuchMethodException,
                 is NoSuchFieldException,
-                is LinkageError -> SamsungPayException(
+                is LinkageError -> SamsungPaySdkException(
                     message =
                         "The installed Samsung Pay SDK is incompatible with the required 2.22.00 API while $operation.",
                     cause = cause,
                     errorCode = null,
                     reason = Reason.SdkIncompatible,
                 )
-                else -> SamsungPayException(
+                else -> SamsungPaySdkException(
                     message = buildString {
                         append("Samsung Pay failed while $operation.")
                         cause.message?.takeIf(String::isNotBlank)?.let { append(" $it") }

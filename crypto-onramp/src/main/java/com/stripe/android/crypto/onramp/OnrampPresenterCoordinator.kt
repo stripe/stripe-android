@@ -23,10 +23,10 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
-import com.stripe.android.crypto.onramp.samsungpay.SamsungPayException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayLauncher
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayPresentation
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityArgs
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityContract
@@ -252,7 +252,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             if (launcher == null) {
                 handleSamsungPayPaymentSelection(
                     SamsungPayResult.Failed(
-                        SamsungPayException(
+                        SamsungPaySdkException(
                             message = "Samsung Pay is not configured for this onramp coordinator.",
                             cause = null,
                             errorCode = null,
