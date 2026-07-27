@@ -3,7 +3,11 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
@@ -11,6 +15,7 @@ import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
@@ -19,6 +24,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -122,6 +128,35 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
+    fun `back from form keeps PaymentOptions active and preserves previous selection`() = launch(
+        selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        paymentMethodTypes = listOf("card", "cashapp"),
+    ) { scenario ->
+        scenario.onActivity { activity ->
+            assertThat(activity.embeddedNavigator.screen.value)
+                .isInstanceOf<EmbeddedNavigator.Screen.Form>()
+        }
+
+        Espresso.pressBack()
+        onIdle()
+
+        clickOnLpm("cashapp")
+        assertLpmSelected("cashapp")
+
+        clickOnLpm("card")
+
+        scenario.onActivity { activity ->
+            assertThat(activity.embeddedNavigator.screen.value)
+                .isInstanceOf<EmbeddedNavigator.Screen.Form>()
+        }
+
+        Espresso.pressBack()
+        onIdle()
+
+        assertLpmSelected("cashapp")
+    }
+
+    @Test
     fun `cancelled result contains customer state`() = launch { scenario ->
         Espresso.pressBack()
 
@@ -135,13 +170,14 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     private fun launch(
         selection: PaymentSelection? = null,
         previousNewSelections: Bundle = Bundle(),
+        paymentMethodTypes: List<String>? = null,
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                    paymentMethodMetadata = createPaymentMethodMetadata(paymentMethodTypes),
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
@@ -154,6 +190,42 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             )
         ).use { scenario ->
             block(scenario)
+        }
+    }
+
+    private fun createPaymentMethodMetadata(
+        paymentMethodTypes: List<String>?,
+    ) = if (paymentMethodTypes != null) {
+        PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes,
+            ),
+        )
+    } else {
+        PaymentMethodMetadataFactory.create()
+    }
+
+    private fun clickOnLpm(code: String) {
+        val matcher = hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code")
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule
+                .onAllNodes(matcher, useUnmergedTree = true)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNode(matcher, useUnmergedTree = true)
+            .performScrollTo()
+            .performClick()
+    }
+
+    private fun assertLpmSelected(code: String) {
+        val matcher = hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code").and(isSelected())
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule
+                .onAllNodes(matcher, useUnmergedTree = true)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
     }
 }
