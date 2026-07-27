@@ -3,17 +3,18 @@ package com.stripe.android.payments.core.analytics
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.core.injection.ApiConfigurationNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.utils.filterNotNullValues
 import dagger.Binds
@@ -424,7 +425,7 @@ interface ErrorReporter : FraudDetectionErrorReporter {
     }
 }
 
-@Component(modules = [DefaultErrorReporterModule::class])
+@Component(modules = [DefaultErrorReporterModule::class, ApiConfigurationNamedModule::class])
 internal interface DefaultErrorReporterComponent {
     val errorReporter: ErrorReporter
 
@@ -470,9 +471,12 @@ internal interface DefaultErrorReporterModule {
         }
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(context: Context): () -> String {
-            return { PaymentConfiguration.getInstance(context).publishableKey }
+        fun provideApiConfigurationState(context: Context): ApiConfiguration.State {
+            val config = PaymentConfiguration.getInstance(context)
+            return ApiConfiguration.State(
+                publishableKey = config.publishableKey,
+                stripeAccountId = config.stripeAccountId,
+            )
         }
     }
 }

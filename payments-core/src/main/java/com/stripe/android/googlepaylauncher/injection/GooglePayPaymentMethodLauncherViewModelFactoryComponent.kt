@@ -1,17 +1,17 @@
 package com.stripe.android.googlepaylauncher.injection
 
 import android.content.Context
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherViewModel
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiConfigurationNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -29,6 +29,7 @@ import javax.inject.Singleton
     modules = [
         GooglePayPaymentMethodLauncherModule::class,
         StripeRepositoryModule::class,
+        ApiConfigurationNamedModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class
@@ -46,11 +47,7 @@ internal interface GooglePayPaymentMethodLauncherViewModelFactoryComponent {
             @Named(ENABLE_LOGGING)
             enableLogging: Boolean,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
-            @BindsInstance
-            @Named(STRIPE_ACCOUNT_ID)
-            stripeAccountIdProvider: () -> String?,
+            apiConfigurationState: ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,

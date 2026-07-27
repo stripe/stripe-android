@@ -65,9 +65,15 @@ constructor(
         analyticsRequestExecutor,
         paymentAnalyticsRequestFactory,
     )
+    private val apiConfigProvider = javax.inject.Provider {
+        ApiConfiguration.State(
+            publishableKey = publishableKeyProvider(),
+            stripeAccountId = null,
+        )
+    }
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,
-        publishableKeyProvider,
+        apiConfigProvider,
         stripeRepository,
         Logger.getInstance(enableLogging),
         workContext,
@@ -75,7 +81,7 @@ constructor(
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
-        publishableKeyProvider,
+        apiConfigProvider,
         stripeRepository,
         Logger.getInstance(enableLogging),
         workContext,
@@ -104,7 +110,7 @@ constructor(
             enableLogging = enableLogging,
             workContext = workContext,
             uiContext = uiContext,
-            publishableKeyProvider = publishableKeyProvider,
+            apiConfigurationState = apiConfigProvider.get(),
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
             includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.

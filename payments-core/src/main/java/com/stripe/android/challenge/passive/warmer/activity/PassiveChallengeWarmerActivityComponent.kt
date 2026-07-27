@@ -1,12 +1,13 @@
 package com.stripe.android.challenge.passive.warmer.activity
 
 import android.content.Context
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.challenge.passive.PassiveChallengeModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.hcaptcha.HCaptchaModule
 import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.payments.core.injection.ApiConfigurationNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -20,6 +21,7 @@ import javax.inject.Singleton
         HCaptchaModule::class,
         PassiveChallengeModule::class,
         StripeRepositoryModule::class,
+        ApiConfigurationNamedModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class
     ]
@@ -33,8 +35,7 @@ internal interface PassiveChallengeWarmerActivityComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
+            apiConfigurationState: ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
