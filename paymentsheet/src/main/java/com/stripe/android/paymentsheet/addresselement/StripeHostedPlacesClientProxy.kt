@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import android.text.SpannableString
 import androidx.appcompat.app.AppCompatDelegate
 import com.stripe.android.model.Address
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
@@ -11,16 +12,26 @@ import java.util.UUID
 
 internal class StripeHostedPlacesClientProxy(
     private val repository: StripeAutocompleteRepository,
+    private val eventReporter: AddressLauncherEventReporter,
 ) : PlacesClientProxy {
     private val lock = Any()
     private var sessionToken: String = newSessionToken()
+    private var lastQueryLength: Int = 0
     private val predictionCache = mutableMapOf<String, AutocompleteSuggestion>()
 
+    init {
+        eventReporter.onAutocompleteSessionStarted(sessionToken)
+    }
+
     override fun resetSession() {
-        synchronized(lock) {
-            sessionToken = newSessionToken()
-            predictionCache.clear()
+        val newToken = synchronized(lock) {
+            newSessionToken().also {
+                sessionToken = it
+                lastQueryLength = 0
+                predictionCache.clear()
+            }
         }
+        eventReporter.onAutocompleteSessionStarted(newToken)
     }
 
     override suspend fun findAutocompletePredictions(
@@ -30,7 +41,11 @@ internal class StripeHostedPlacesClientProxy(
     ): Result<FindAutocompletePredictionsResponse> {
         val q = query ?: return Result.success(FindAutocompletePredictionsResponse(emptyList()))
         val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-        val token = synchronized(lock) { sessionToken }
+        val token = synchronized(lock) {
+            lastQueryLength = q.length
+            sessionToken
+        }
+        eventReporter.onAutocompleteFetchStarted()
         return repository.findAutocompletePredictions(
             query = q,
             country = country,
@@ -50,14 +65,22 @@ internal class StripeHostedPlacesClientProxy(
                     )
                 }
             )
+        }.onSuccess { response ->
+            eventReporter.onAutocompleteSuggestionsReturned(
+                sessionToken = token,
+                resultCount = response.autocompletePredictions.size,
+            )
+        }.onFailure { error ->
+            eventReporter.onAutocompleteError(sessionToken = token, error = error)
         }
     }
 
     override suspend fun fetchPlace(placeId: String, locale: Locale): Result<Address> {
-        val (cached, token) = synchronized(lock) {
-            predictionCache[placeId] to sessionToken
+        val (cached, token, queryLength) = synchronized(lock) {
+            Triple(predictionCache[placeId], sessionToken, lastQueryLength)
         }
         if (cached?.address != null) {
+            eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
             return Result.success(
                 Address(
                     line1 = cached.address.line1,
@@ -90,6 +113,10 @@ internal class StripeHostedPlacesClientProxy(
                 postalCode = result.address?.postalCode,
                 country = result.address?.country,
             )
+        }.onSuccess {
+            eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
+        }.onFailure { error ->
+            eventReporter.onAutocompleteError(sessionToken = token, error = error)
         }
     }
 

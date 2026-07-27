@@ -215,6 +215,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                     stripeAutocompleteRepository = null,
                                     coroutineScope = null,
                                     shouldUseAutocompleteProxyEndpointsProvider = { false },
+                                    eventReporter = null,
                                 ),
                             isLinkUI = true,
                         ),

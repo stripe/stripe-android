@@ -23,6 +23,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import java.util.Locale
+import kotlin.time.Duration
 
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
@@ -143,7 +144,32 @@ class AutocompleteScreenTest {
             // No-op
         }
 
-        override fun onCompleted(country: String, autocompleteResultSelected: Boolean, editDistance: Int?) {
+        override fun onCompleted(
+            country: String,
+            autocompleteResultSelected: Boolean,
+            editDistance: Int?,
+            timeToComplete: Duration?,
+        ) {
+            // No-op
+        }
+
+        override fun onAutocompleteSessionStarted(sessionToken: String) {
+            // No-op
+        }
+
+        override fun onAutocompleteFetchStarted() {
+            // No-op
+        }
+
+        override fun onAutocompleteSuggestionsReturned(sessionToken: String, resultCount: Int) {
+            // No-op
+        }
+
+        override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?) {
+            // No-op
+        }
+
+        override fun onAutocompleteError(sessionToken: String, error: Throwable) {
             // No-op
         }
     }

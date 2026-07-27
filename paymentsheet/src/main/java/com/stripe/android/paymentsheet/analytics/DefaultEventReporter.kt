@@ -139,7 +139,10 @@ internal class DefaultEventReporter @Inject internal constructor(
                     DurationProvider.Key.Attest,
                     DurationProvider.Key.IntentConfirmationChallenge,
                     DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
-                    DurationProvider.Key.PaymentMethodMessaging -> null
+                    DurationProvider.Key.PaymentMethodMessaging,
+                    DurationProvider.Key.AddressAutocompleteSession,
+                    DurationProvider.Key.AddressAutocompleteFetch,
+                    DurationProvider.Key.AddressElementCompletion -> null
                 }
                 )
         }.mapNotNull { (key, name) ->

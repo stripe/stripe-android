@@ -20,6 +20,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
@@ -190,6 +191,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 placesClient = null,
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )
         }
         return viewModelStoreRule.track(viewModel)
@@ -247,6 +249,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 placesClient = null,
                 linkAccountHolder = LinkAccountHolder(thisSavedStateHandle),
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )
         }
         return viewModelStoreRule.track(viewModel)

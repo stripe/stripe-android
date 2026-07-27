@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -29,6 +30,7 @@ internal class InputAddressViewModel @Inject constructor(
     private val eventReporter: AddressLauncherEventReporter,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
+    private val durationProvider: DurationProvider,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
@@ -108,6 +110,8 @@ internal class InputAddressViewModel @Inject constructor(
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
     init {
+        durationProvider.start(DurationProvider.Key.AddressElementCompletion, reset = true)
+
         viewModelScope.launch {
             navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
                 AddressElementNavigator.AutocompleteEvent.KEY
@@ -210,11 +214,13 @@ internal class InputAddressViewModel @Inject constructor(
 
     @VisibleForTesting
     fun dismissWithAddress(addressDetails: AddressDetails) {
+        val timeToComplete = durationProvider.end(DurationProvider.Key.AddressElementCompletion)
         addressDetails.address?.country?.let { country ->
             eventReporter.onCompleted(
                 country = country,
                 autocompleteResultSelected = collectedAddress.value?.address?.line1 != null,
-                editDistance = addressDetails.editDistance(collectedAddress.value)
+                editDistance = addressDetails.editDistance(collectedAddress.value),
+                timeToComplete = timeToComplete,
             )
         }
         navigator.dismiss(

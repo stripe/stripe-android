@@ -18,6 +18,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.DefaultStripeTheme
 import java.util.Locale
+import kotlin.time.Duration
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -113,8 +114,29 @@ class AutocompleteScreenTest {
         override fun onCompleted(
             country: String,
             autocompleteResultSelected: Boolean,
-            editDistance: Int?
+            editDistance: Int?,
+            timeToComplete: Duration?,
         ) {
+            // no-op
+        }
+
+        override fun onAutocompleteSessionStarted(sessionToken: String) {
+            // no-op
+        }
+
+        override fun onAutocompleteFetchStarted() {
+            // no-op
+        }
+
+        override fun onAutocompleteSuggestionsReturned(sessionToken: String, resultCount: Int) {
+            // no-op
+        }
+
+        override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?) {
+            // no-op
+        }
+
+        override fun onAutocompleteError(sessionToken: String, error: Throwable) {
             // no-op
         }
     }

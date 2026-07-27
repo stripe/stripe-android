@@ -7,7 +7,7 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -17,6 +17,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -24,16 +25,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
-    private val eventReporter = mock<AddressLauncherEventReporter>()
+    private val eventReporter = FakeAddressLauncherEventReporter()
 
     private fun createViewModel(
         address: AddressDetails? = null,
@@ -49,6 +48,7 @@ class InputAddressViewModelTest {
             navigator,
             eventReporter,
             placesClient = null,
+            durationProvider = FakeDurationProvider(),
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -161,11 +161,11 @@ class InputAddressViewModelTest {
                 )
             )
         )
-        verify(eventReporter).onCompleted(
-            country = eq("US"),
-            autocompleteResultSelected = eq(true),
-            editDistance = eq(0)
-        )
+        val completedCall = eventReporter.completedCalls.awaitItem()
+        assertThat(completedCall.country).isEqualTo("US")
+        assertThat(completedCall.autocompleteResultSelected).isTrue()
+        assertThat(completedCall.editDistance).isEqualTo(0)
+        assertThat(completedCall.timeToComplete).isNotNull()
     }
 
     @Test
@@ -979,6 +979,7 @@ class InputAddressViewModelTest {
             navigator,
             eventReporter,
             placesClient = mockPlacesClient,
+            durationProvider = FakeDurationProvider(),
         ).also { viewModelStoreRule.track(it) }
     }
 

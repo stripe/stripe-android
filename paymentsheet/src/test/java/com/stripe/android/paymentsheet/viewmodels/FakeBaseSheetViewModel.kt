@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -60,6 +61,7 @@ internal class FakeBaseSheetViewModel private constructor(
     placesClient = null,
     linkAccountHolder = LinkAccountHolder(savedStateHandle),
     stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+    addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
 ) {
     companion object {
         fun create(
