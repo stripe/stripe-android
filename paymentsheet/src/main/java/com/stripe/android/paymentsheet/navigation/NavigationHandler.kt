@@ -14,10 +14,30 @@ import kotlin.time.Duration.Companion.milliseconds
 
 internal class NavigationHandler<T : Any>(
     private val coroutineScope: CoroutineScope,
-    private val initialScreen: T,
-    private val shouldRemoveInitialScreenOnTransition: Boolean = true,
+    initialBackStack: List<T>,
+    private val shouldRemoveInitialScreenOnTransition: Boolean,
     private val poppedScreenHandler: (T) -> Unit,
 ) {
+    constructor(
+        coroutineScope: CoroutineScope,
+        initialScreen: T,
+        shouldRemoveInitialScreenOnTransition: Boolean = true,
+        poppedScreenHandler: (T) -> Unit,
+    ) : this(
+        coroutineScope = coroutineScope,
+        initialBackStack = listOf(initialScreen),
+        shouldRemoveInitialScreenOnTransition = shouldRemoveInitialScreenOnTransition,
+        poppedScreenHandler = poppedScreenHandler,
+    )
+
+    private val initialBackStack = initialBackStack.toList().also {
+        require(it.isNotEmpty()) {
+            "Initial back stack cannot be empty."
+        }
+    }
+
+    private val initialScreen = this.initialBackStack.first()
+
     private val isTransitioning = AtomicBoolean(false)
 
     // A screen queued by [transitionToWithDelay] whose transition has not been applied yet. Tracked
@@ -27,7 +47,7 @@ internal class NavigationHandler<T : Any>(
     private var pendingTransitionScreen: T? = null
 
     private val backStack = MutableStateFlow<List<T>>(
-        value = listOf(initialScreen),
+        value = initialBackStack,
     )
 
     val currentScreen: StateFlow<T> = backStack
