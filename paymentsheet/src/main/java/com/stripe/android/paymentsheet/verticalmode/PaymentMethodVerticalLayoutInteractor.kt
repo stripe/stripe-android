@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -27,6 +28,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.repositories.PromotionSupportedPaymentMethods
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -34,7 +36,6 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -121,6 +122,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)?,
     private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
     dispatcher: CoroutineContext = Dispatchers.Default,
+    private val coroutineScope: CoroutineScope,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -133,8 +135,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             bankFormInteractor: BankFormInteractor,
             paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
         ): PaymentMethodVerticalLayoutInteractor {
+            val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Default)
+            val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
+                coroutineScope = formHelperScope,
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
@@ -206,13 +211,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     )
                 },
                 updateMandateText = viewModel.mandateHandler::updateMandateText,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
+                coroutineScope = coroutineScope,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             )
         }
     }
-
-    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val _verticalModeScreenSelection = MutableStateFlow(selection.value)
     private val verticalModeScreenSelection = _verticalModeScreenSelection

@@ -485,7 +485,7 @@ internal sealed interface PaymentSheetScreen {
     class SavedPaymentMethodConfirm(
         private val interactor: SavedPaymentMethodConfirmInteractor,
         private val isLiveMode: Boolean,
-    ) : PaymentSheetScreen {
+    ) : PaymentSheetScreen, Closeable {
         override val buyButtonState = stateFlowOf(
             BuyButtonState(visible = true)
         )
@@ -518,6 +518,10 @@ internal sealed interface PaymentSheetScreen {
         @Composable
         override fun Content(modifier: Modifier) {
             SavedPaymentMethodConfirmUI(interactor)
+        }
+
+        override fun close() {
+            interactor.close()
         }
 
         companion object {

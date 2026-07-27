@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -39,21 +42,36 @@ internal fun FormScreenContent(
     savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
 ) {
     val interactorState by interactor.state.collectAsState()
+    val savedPaymentSelectionToConfirm = state.savedPaymentSelectionToConfirm
+    val latestUpdateSelection by rememberUpdatedState(updateSelection)
+    val savedPaymentMethodConfirmInteractor = if (savedPaymentSelectionToConfirm != null) {
+        remember(savedPaymentSelectionToConfirm) {
+            savedPaymentMethodConfirmInteractorFactory.create(
+                initialSelection = savedPaymentSelectionToConfirm,
+                updateSelection = { latestUpdateSelection(it) },
+            )
+        }
+    } else {
+        null
+    }
+
+    DisposableEffect(savedPaymentMethodConfirmInteractor) {
+        onDispose {
+            savedPaymentMethodConfirmInteractor?.close()
+        }
+    }
 
     DismissKeyboardOnProcessing(interactorState.isProcessing)
 
     EventReporterProvider(eventReporter) {
-        if (state.savedPaymentSelectionToConfirm == null) {
+        if (savedPaymentMethodConfirmInteractor == null) {
             VerticalModeFormUI(
                 interactor = interactor,
                 showsWalletHeader = false
             )
         } else {
             SavedPaymentMethodConfirmUI(
-                savedPaymentMethodConfirmInteractor = savedPaymentMethodConfirmInteractorFactory.create(
-                    initialSelection = state.savedPaymentSelectionToConfirm,
-                    updateSelection = updateSelection,
-                ),
+                savedPaymentMethodConfirmInteractor = savedPaymentMethodConfirmInteractor,
             )
         }
         USBankAccountMandate(state)

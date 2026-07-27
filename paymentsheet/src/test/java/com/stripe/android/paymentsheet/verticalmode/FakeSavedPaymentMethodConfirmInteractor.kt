@@ -57,6 +57,10 @@ internal class FakeSavedPaymentMethodConfirmInteractor(
     )
     override val state: StateFlow<SavedPaymentMethodConfirmInteractor.State> = _state.asStateFlow()
 
+    override fun close() {
+        // No op.
+    }
+
     class Factory : SavedPaymentMethodConfirmInteractor.Factory {
         override fun create(
             initialSelection: PaymentSelection.Saved,

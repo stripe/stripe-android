@@ -2025,6 +2025,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             },
             shouldUpdateVerticalModeSelection = shouldUpdateVerticalModeSelection,
             dispatcher = testDispatcher,
+            coroutineScope = TestScope(testDispatcher),
             mainDispatcher = testDispatcher,
             invokeRowSelectionCallback = invokeRowSelectionCallback,
             displaysMandatesInFormScreen = displaysMandatesInFormScreen,

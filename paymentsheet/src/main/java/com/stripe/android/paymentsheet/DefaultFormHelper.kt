@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -28,6 +27,7 @@ import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
@@ -55,13 +55,14 @@ internal class DefaultFormHelper(
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
         fun create(
             viewModel: BaseSheetViewModel,
+            coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
             linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
             paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
         ): FormHelper {
             return DefaultFormHelper(
-                coroutineScope = viewModel.viewModelScope,
+                coroutineScope = coroutineScope,
                 linkInlineHandler = linkInlineHandler,
                 cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -126,7 +127,8 @@ internal class DefaultFormHelper(
         }
     }
 
-    private val lastFormValues = MutableSharedFlow<Pair<FormFieldValues?, String>>()
+    private val lastFormValues = MutableSharedFlow<Pair<FormFieldValues?, String>>(replay = 1)
+    private var paymentSelectionJob: Job? = null
 
     private val paymentSelection: Flow<PaymentSelection?> = combine(
         lastFormValues,
@@ -145,8 +147,12 @@ internal class DefaultFormHelper(
             savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM] = value
         }
 
-    init {
-        coroutineScope.launch {
+    private fun startPaymentSelectionCollection() {
+        if (paymentSelectionJob?.isActive == true) {
+            return
+        }
+
+        paymentSelectionJob = coroutineScope.launch {
             paymentSelection.collect { selection ->
                 selectionUpdater(selection)
                 reportFieldCompleted(selection?.paymentMethodType)
@@ -171,6 +177,8 @@ internal class DefaultFormHelper(
     }
 
     override fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
+        startPaymentSelectionCollection()
+
         coroutineScope.launch {
             lastFormValues.emit(formValues to selectedPaymentMethodCode)
         }
