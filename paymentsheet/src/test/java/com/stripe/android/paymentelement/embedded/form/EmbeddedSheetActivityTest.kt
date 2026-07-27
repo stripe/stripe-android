@@ -90,6 +90,7 @@ internal class EmbeddedSheetActivityTest {
         scenario.onActivity { activity ->
             activity.sheetActivityStateHolder.setResult(
                 EmbeddedActivityResult.Complete(
+                    previousNewSelections = Bundle(),
                     selection = null,
                     hasBeenConfirmed = true,
                     customerState = null,
@@ -153,6 +154,7 @@ internal class EmbeddedSheetActivityTest {
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                     selection = null,
+                    previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),
                     promotion = null,
                     launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = selectedPaymentMethodCode),

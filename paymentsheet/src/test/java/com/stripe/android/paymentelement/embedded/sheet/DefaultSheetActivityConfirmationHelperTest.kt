@@ -83,6 +83,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
 
         assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
             EmbeddedActivityResult.Complete(
+                previousNewSelections = selectionHolder.previousNewSelections,
                 selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
                 hasBeenConfirmed = false,
                 customerState = null,

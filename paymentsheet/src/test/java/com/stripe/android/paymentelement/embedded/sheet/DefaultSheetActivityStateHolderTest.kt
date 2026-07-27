@@ -345,6 +345,7 @@ class DefaultSheetActivityStateHolderTest {
 
                 assertThat(awaitItem()).isEqualTo(
                     EmbeddedActivityResult.Complete(
+                        previousNewSelections = selectionHolder.previousNewSelections,
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
@@ -369,6 +370,7 @@ class DefaultSheetActivityStateHolderTest {
 
                 assertThat(awaitItem()).isEqualTo(
                     EmbeddedActivityResult.Complete(
+                        previousNewSelections = selectionHolder.previousNewSelections,
                         selection = null,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
@@ -399,6 +401,7 @@ class DefaultSheetActivityStateHolderTest {
 
                 assertThat(awaitItem()).isEqualTo(
                     EmbeddedActivityResult.Complete(
+                        previousNewSelections = selectionHolder.previousNewSelections,
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,

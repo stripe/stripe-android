@@ -63,6 +63,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 sheetActivityStateHolder.setResult(
                     EmbeddedActivityResult.Complete(
                         selection = selectionHolder.selection.value,
+                        previousNewSelections = selectionHolder.previousNewSelections,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,

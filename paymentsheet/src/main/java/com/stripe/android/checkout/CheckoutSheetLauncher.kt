@@ -63,6 +63,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
                 selectionHolder.setSelection(result.selection)
             }
             is EmbeddedActivityResult.Cancelled -> {
@@ -76,6 +77,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
                 selectionHolder.setSelection(result.selection)
             }
             is EmbeddedActivityResult.Cancelled -> Unit
@@ -87,6 +89,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
                 selectionHolder.setSelection(result.selection)
             }
             is EmbeddedActivityResult.Cancelled -> {
@@ -133,6 +136,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = currentSelection,
+            previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = promotion,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = code),
@@ -160,6 +164,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
+            previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = null,
             launchMode = EmbeddedLaunchMode.Manage,
@@ -187,6 +192,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
+            previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = null,
             launchMode = EmbeddedLaunchMode.PaymentOptions,

@@ -233,6 +233,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         setActivityResult(
             EmbeddedActivityResult.Complete(
                 selection = selectionHolder.selection.value,
+                previousNewSelections = selectionHolder.previousNewSelections,
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
                 shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
