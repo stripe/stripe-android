@@ -19,7 +19,9 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveIntera
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.job
 import javax.inject.Inject
 
 internal class EmbeddedFormInteractorFactory @Inject constructor(
@@ -36,8 +38,11 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         paymentMethodCode: PaymentMethodCode,
         hasSavedPaymentMethods: Boolean
     ): DefaultVerticalModeFormInteractor {
+        val formScope = CoroutineScope(
+            viewModelScope.coroutineContext + SupervisorJob(viewModelScope.coroutineContext.job)
+        )
         val formHelper = embeddedFormHelperFactory.create(
-            coroutineScope = viewModelScope,
+            coroutineScope = formScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             automaticallyLaunchedCardScanFormDataHelper =
@@ -87,7 +92,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             ).displayedIncentive,
             // Embedded does not support validation at the moment. Should update here once it does.
             validationRequested = MutableSharedFlow(),
-            coroutineScope = viewModelScope,
+            coroutineScope = formScope,
             uiContext = Dispatchers.Main,
         )
     }
