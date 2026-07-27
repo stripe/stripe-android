@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### CryptoOnramp
+* [ADDED][13623] Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
+
 ## 23.13.1 - 2026-07-23
 
 ### Payments
