@@ -291,7 +291,7 @@ class StripeHostedPlacesClientProxyTest {
 
         val token = eventReporter.autocompleteSessionStartedCalls.awaitItem()
         assertThat(token).isNotEmpty()
-        eventReporter.ensureAllEventsConsumed()
+        eventReporter.validate()
     }
 
     @Test
@@ -304,7 +304,7 @@ class StripeHostedPlacesClientProxyTest {
 
         val newToken = eventReporter.autocompleteSessionStartedCalls.awaitItem()
         assertThat(newToken).isNotEqualTo(initialToken)
-        eventReporter.ensureAllEventsConsumed()
+        eventReporter.validate()
     }
 
     @Test
@@ -321,7 +321,7 @@ class StripeHostedPlacesClientProxyTest {
         val suggestionsCall = eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
         assertThat(suggestionsCall.resultCount).isEqualTo(1)
         repository.ensureAllEventsConsumed()
-        eventReporter.ensureAllEventsConsumed()
+        eventReporter.validate()
     }
 
     @Test
@@ -340,7 +340,7 @@ class StripeHostedPlacesClientProxyTest {
         val errorCall = eventReporter.autocompleteErrorCalls.awaitItem()
         assertThat(errorCall.error).hasMessageThat().isEqualTo("Network error")
         repository.ensureAllEventsConsumed()
-        eventReporter.ensureAllEventsConsumed()
+        eventReporter.validate()
     }
 
     @Test
@@ -362,7 +362,7 @@ class StripeHostedPlacesClientProxyTest {
         assertThat(selectedCall.queryLength).isEqualTo("123 Main".length)
         assertThat(selectedCall.placeId).isEqualTo("place_123")
         repository.ensureAllEventsConsumed()
-        eventReporter.ensureAllEventsConsumed()
+        eventReporter.validate()
     }
 
     @Test
@@ -385,7 +385,7 @@ class StripeHostedPlacesClientProxyTest {
         val errorCall = eventReporter.autocompleteErrorCalls.awaitItem()
         assertThat(errorCall.error).hasMessageThat().isEqualTo("Details error")
         repository.ensureAllEventsConsumed()
-        eventReporter.ensureAllEventsConsumed()
+        eventReporter.validate()
     }
 
     private fun createProxy(

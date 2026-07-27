@@ -11,7 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -23,7 +23,6 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import java.util.Locale
-import kotlin.time.Duration
 
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
@@ -115,7 +114,7 @@ class AutocompleteScreenTest {
     private fun createViewModel() = AutocompleteViewModel(
         placesClient = TestPlacesClientProxy(),
         application = ApplicationProvider.getApplicationContext(),
-        eventReporter = TestAddressLauncherEventReporter,
+        eventReporter = FakeAddressLauncherEventReporter(),
         autocompleteArgs = AutocompleteViewModel.Args(country = "US")
     ).also { viewModelStoreRule.track(it) }
 
@@ -137,40 +136,5 @@ class AutocompleteScreenTest {
             placeId: String,
             locale: Locale,
         ): Result<Address> = fetchPlaceResponse
-    }
-
-    private object TestAddressLauncherEventReporter : AddressLauncherEventReporter {
-        override fun onShow(country: String) {
-            // No-op
-        }
-
-        override fun onCompleted(
-            country: String,
-            autocompleteResultSelected: Boolean,
-            editDistance: Int?,
-            timeToComplete: Duration?,
-        ) {
-            // No-op
-        }
-
-        override fun onAutocompleteSessionStarted(sessionToken: String) {
-            // No-op
-        }
-
-        override fun onAutocompleteFetchStarted() {
-            // No-op
-        }
-
-        override fun onAutocompleteSuggestionsReturned(sessionToken: String, resultCount: Int) {
-            // No-op
-        }
-
-        override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?) {
-            // No-op
-        }
-
-        override fun onAutocompleteError(sessionToken: String, error: Throwable) {
-            // No-op
-        }
     }
 }

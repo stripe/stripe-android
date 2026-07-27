@@ -1,19 +1,34 @@
 package com.stripe.android.paymentsheet.addresselement.analytics
 
+import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import kotlin.time.Duration
 
 internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
-    val showCalls = Turbine<ShowCall>()
-    val completedCalls = Turbine<CompletedCall>()
-    val autocompleteSessionStartedCalls = Turbine<String>()
-    val autocompleteFetchStartedCalls = Turbine<Unit>()
-    val autocompleteSuggestionsReturnedCalls = Turbine<SuggestionsReturnedCall>()
-    val autocompleteSelectedCalls = Turbine<SelectedCall>()
-    val autocompleteErrorCalls = Turbine<ErrorCall>()
+    private val _showCalls = Turbine<String>()
+    val showCalls: ReceiveTurbine<String> = _showCalls
+
+    private val _completedCalls = Turbine<CompletedCall>()
+    val completedCalls: ReceiveTurbine<CompletedCall> = _completedCalls
+
+    private val _autocompleteSessionStartedCalls = Turbine<String>()
+    val autocompleteSessionStartedCalls: ReceiveTurbine<String> = _autocompleteSessionStartedCalls
+
+    private val _autocompleteFetchStartedCalls = Turbine<Unit>()
+    val autocompleteFetchStartedCalls: ReceiveTurbine<Unit> = _autocompleteFetchStartedCalls
+
+    private val _autocompleteSuggestionsReturnedCalls = Turbine<SuggestionsReturnedCall>()
+    val autocompleteSuggestionsReturnedCalls: ReceiveTurbine<SuggestionsReturnedCall> =
+        _autocompleteSuggestionsReturnedCalls
+
+    private val _autocompleteSelectedCalls = Turbine<SelectedCall>()
+    val autocompleteSelectedCalls: ReceiveTurbine<SelectedCall> = _autocompleteSelectedCalls
+
+    private val _autocompleteErrorCalls = Turbine<ErrorCall>()
+    val autocompleteErrorCalls: ReceiveTurbine<ErrorCall> = _autocompleteErrorCalls
 
     override fun onShow(country: String) {
-        showCalls.add(ShowCall(country))
+        _showCalls.add(country)
     }
 
     override fun onCompleted(
@@ -22,40 +37,38 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         editDistance: Int?,
         timeToComplete: Duration?,
     ) {
-        completedCalls.add(CompletedCall(country, autocompleteResultSelected, editDistance, timeToComplete))
+        _completedCalls.add(CompletedCall(country, autocompleteResultSelected, editDistance, timeToComplete))
     }
 
     override fun onAutocompleteSessionStarted(sessionToken: String) {
-        autocompleteSessionStartedCalls.add(sessionToken)
+        _autocompleteSessionStartedCalls.add(sessionToken)
     }
 
     override fun onAutocompleteFetchStarted() {
-        autocompleteFetchStartedCalls.add(Unit)
+        _autocompleteFetchStartedCalls.add(Unit)
     }
 
     override fun onAutocompleteSuggestionsReturned(sessionToken: String, resultCount: Int) {
-        autocompleteSuggestionsReturnedCalls.add(SuggestionsReturnedCall(sessionToken, resultCount))
+        _autocompleteSuggestionsReturnedCalls.add(SuggestionsReturnedCall(sessionToken, resultCount))
     }
 
     override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?) {
-        autocompleteSelectedCalls.add(SelectedCall(sessionToken, queryLength, placeId))
+        _autocompleteSelectedCalls.add(SelectedCall(sessionToken, queryLength, placeId))
     }
 
     override fun onAutocompleteError(sessionToken: String, error: Throwable) {
-        autocompleteErrorCalls.add(ErrorCall(sessionToken, error))
+        _autocompleteErrorCalls.add(ErrorCall(sessionToken, error))
     }
 
-    fun ensureAllEventsConsumed() {
-        showCalls.ensureAllEventsConsumed()
-        completedCalls.ensureAllEventsConsumed()
-        autocompleteSessionStartedCalls.ensureAllEventsConsumed()
-        autocompleteFetchStartedCalls.ensureAllEventsConsumed()
-        autocompleteSuggestionsReturnedCalls.ensureAllEventsConsumed()
-        autocompleteSelectedCalls.ensureAllEventsConsumed()
-        autocompleteErrorCalls.ensureAllEventsConsumed()
+    fun validate() {
+        _showCalls.ensureAllEventsConsumed()
+        _completedCalls.ensureAllEventsConsumed()
+        _autocompleteSessionStartedCalls.ensureAllEventsConsumed()
+        _autocompleteFetchStartedCalls.ensureAllEventsConsumed()
+        _autocompleteSuggestionsReturnedCalls.ensureAllEventsConsumed()
+        _autocompleteSelectedCalls.ensureAllEventsConsumed()
+        _autocompleteErrorCalls.ensureAllEventsConsumed()
     }
-
-    data class ShowCall(val country: String)
 
     data class CompletedCall(
         val country: String,

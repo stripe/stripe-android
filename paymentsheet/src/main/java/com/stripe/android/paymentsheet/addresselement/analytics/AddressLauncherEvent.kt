@@ -47,10 +47,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
             }
     }
 
-    /**
-     * Emitted when a new autocomplete session token is created by `StripeHostedPlacesClientProxy`
-     * (on construction, and again every time the session is reset after a selection).
-     */
     class AutocompleteStarted(
         private val autocompleteSessionToken: String,
     ) : AddressLauncherEvent() {
@@ -65,7 +61,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
             )
     }
 
-    /** Emitted after a `StripeHostedPlacesClientProxy` prediction request returns. */
     class AutocompleteSuggestions(
         private val autocompleteSessionToken: String,
         private val timeToFetch: Duration?,
@@ -86,7 +81,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
             }
     }
 
-    /** Emitted when a `StripeHostedPlacesClientProxy` suggestion selection populates the fields. */
     class AutocompleteSelected(
         private val autocompleteSessionToken: String,
         private val queryLength: Int,
@@ -105,7 +99,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
             }
     }
 
-    /** Emitted when a `StripeHostedPlacesClientProxy` prediction or place-details request fails. */
     class AutocompleteError(
         private val autocompleteSessionToken: String,
         private val error: Throwable,

@@ -30,7 +30,7 @@ class AutocompleteScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val eventReporter = FakeEventReporter()
+    private val eventReporter = NoOpAddressLauncherEventReporter
 
     @Test
     fun ensure_elements_exist() {
@@ -106,38 +106,18 @@ class AutocompleteScreenTest {
         }
     }
 
-    private class FakeEventReporter : AddressLauncherEventReporter {
-        override fun onShow(country: String) {
-            // no-op
-        }
-
+    private object NoOpAddressLauncherEventReporter : AddressLauncherEventReporter {
+        override fun onShow(country: String) = Unit
         override fun onCompleted(
             country: String,
             autocompleteResultSelected: Boolean,
             editDistance: Int?,
             timeToComplete: Duration?,
-        ) {
-            // no-op
-        }
-
-        override fun onAutocompleteSessionStarted(sessionToken: String) {
-            // no-op
-        }
-
-        override fun onAutocompleteFetchStarted() {
-            // no-op
-        }
-
-        override fun onAutocompleteSuggestionsReturned(sessionToken: String, resultCount: Int) {
-            // no-op
-        }
-
-        override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?) {
-            // no-op
-        }
-
-        override fun onAutocompleteError(sessionToken: String, error: Throwable) {
-            // no-op
-        }
+        ) = Unit
+        override fun onAutocompleteSessionStarted(sessionToken: String) = Unit
+        override fun onAutocompleteFetchStarted() = Unit
+        override fun onAutocompleteSuggestionsReturned(sessionToken: String, resultCount: Int) = Unit
+        override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?) = Unit
+        override fun onAutocompleteError(sessionToken: String, error: Throwable) = Unit
     }
 }
