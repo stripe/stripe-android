@@ -14,6 +14,10 @@ internal interface ExpressCheckoutElementEventReporter {
     fun onEceWalletTapped(
         expressButton: ExpressButton,
     )
+
+    fun onEcePaymentSuccess()
+
+    fun onEcePaymentFailure()
 }
 
 internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
@@ -40,6 +44,20 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
         )
     }
 
+    override fun onEcePaymentSuccess() {
+        fireEvent(
+            eventName = ECE_PAYMENT_SUCCESS_EVENT_NAME,
+            additionalParams = emptyMap(),
+        )
+    }
+
+    override fun onEcePaymentFailure() {
+        fireEvent(
+            eventName = ECE_PAYMENT_FAILURE_EVENT_NAME,
+            additionalParams = emptyMap(),
+        )
+    }
+
     private fun fireEvent(
         eventName: String,
         additionalParams: Map<String, Any>,
@@ -57,6 +75,8 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     private companion object {
         const val ECE_DISPLAYED_EVENT_NAME = "mc_ece_init"
         const val ECE_WALLET_TAPPED_EVENT_NAME = "mc_ece_wallet_tapped"
+        const val ECE_PAYMENT_SUCCESS_EVENT_NAME = "mc_ece_payment_success"
+        const val ECE_PAYMENT_FAILURE_EVENT_NAME = "mc_ece_payment_failure"
 
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_LINK_CONTEXT = "link_context"

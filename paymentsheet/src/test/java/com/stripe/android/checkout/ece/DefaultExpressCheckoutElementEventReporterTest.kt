@@ -50,6 +50,22 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         assertThat(loggedParams).doesNotContainKey("link_context")
     }
 
+    @Test
+    fun `onEcePaymentSuccess fires expected event`() = runScenario {
+        reporter.onEcePaymentSuccess()
+
+        val loggedParams = executor.getExecutedRequests().single().params
+        assertThat(loggedParams).containsEntry("event", "mc_ece_payment_success")
+    }
+
+    @Test
+    fun `onEcePaymentFailure fires expected event`() = runScenario {
+        reporter.onEcePaymentFailure()
+
+        val loggedParams = executor.getExecutedRequests().single().params
+        assertThat(loggedParams).containsEntry("event", "mc_ece_payment_failure")
+    }
+
     private class Scenario(
         val reporter: ExpressCheckoutElementEventReporter,
         val executor: FakeAnalyticsRequestExecutor,
