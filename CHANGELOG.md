@@ -1,7 +1,10 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### CryptoOnramp
+* [ADDED] Added Tempo as a supported wallet network and pinned Crypto Onramp internal API calls to the preview API version required by newer networks.
 
 ## 23.13.1 - 2026-07-23
 
