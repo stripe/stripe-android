@@ -13,6 +13,9 @@ internal object LinkControllerCustomAppearanceSettingsDefinition : BooleanSettin
     displayName = "LinkController: custom appearance",
     defaultValue = false,
 ) {
+    private val customPrimaryColor = Color(0xFF6B4EFF)
+    private const val primaryButtonCornerRadiusDp = 6f
+
     override fun applicable(
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>,
@@ -27,25 +30,24 @@ internal object LinkControllerCustomAppearanceSettingsDefinition : BooleanSettin
         configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData
     ) {
         if (value) {
-            val purple = Color(0xFF6B4EFF)
             configurationBuilder.appearance(
                 LinkAppearance()
                     .lightColors(
                         LinkAppearance.Colors()
-                            .primary(purple)
+                            .primary(customPrimaryColor)
                             .contentOnPrimary(Color.White)
-                            .borderSelected(purple)
+                            .borderSelected(customPrimaryColor)
                     )
                     .darkColors(
                         LinkAppearance.Colors()
-                            .primary(purple)
+                            .primary(customPrimaryColor)
                             .contentOnPrimary(Color.White)
-                            .borderSelected(purple)
+                            .borderSelected(customPrimaryColor)
                     )
                     .style(LinkAppearance.Style.ALWAYS_DARK)
                     .primaryButton(
                         LinkAppearance.PrimaryButton()
-                            .cornerRadiusDp(6f)
+                            .cornerRadiusDp(primaryButtonCornerRadiusDp)
                     )
             )
         }
