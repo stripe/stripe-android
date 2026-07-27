@@ -14,7 +14,6 @@ import javax.inject.Named
 
 @Subcomponent(
     modules = [
-        CurrencySelectorElementModule::class,
         ExpressCheckoutElementModule::class,
         PaymentElementModule::class,
     ]

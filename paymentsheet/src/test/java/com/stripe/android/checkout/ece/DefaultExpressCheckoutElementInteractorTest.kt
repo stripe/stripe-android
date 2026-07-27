@@ -173,7 +173,11 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         assertThat(confirmedButton).isEqualTo(expressButton)
 
         assertThat(eventReporter.calls.awaitItem())
-            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
+            .isEqualTo(
+                FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped(
+                    expressButton = expressButton,
+                ),
+            )
     }
 
     private fun runScenario(

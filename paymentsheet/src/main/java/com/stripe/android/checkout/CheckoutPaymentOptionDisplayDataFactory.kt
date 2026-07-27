@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.NullUiDefinitionFactoryHelper
@@ -29,6 +30,7 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
     private val iconLoader: PaymentSelection.IconLoader,
     private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
+    private val linkAccountHolder: LinkAccountHolder,
 ) : CheckoutPaymentOptionDisplayDataFactory {
     override fun create(
         selection: PaymentSelection?,
@@ -61,7 +63,11 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
                     darkThemeIconUrl = selection.darkThemeIconUrl,
                 )
             },
-            label = selection.label(paymentMethodMetadata.linkBrand).resolve(context),
+            label = selection.label(
+                paymentMethodMetadata.effectiveLinkBrand(
+                    linkAccountHolder.linkAccountInfo.value.account
+                )
+            ).resolve(context),
             paymentMethodType = selection.paymentMethodType,
             mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context)),
         )

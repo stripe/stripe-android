@@ -9,8 +9,8 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
         calls.add(Call.OnEceDisplayed)
     }
 
-    override fun onEceWalletTapped() {
-        calls.add(Call.OnEceWalletTapped)
+    override fun onEceWalletTapped(expressButton: ExpressButton) {
+        calls.add(Call.OnEceWalletTapped(expressButton))
     }
 
     override fun onEcePaymentSuccess() {
@@ -25,10 +25,13 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
         calls.ensureAllEventsConsumed()
     }
 
-    enum class Call {
-        OnEceDisplayed,
-        OnEceWalletTapped,
-        OnEcePaymentSuccess,
-        OnEcePaymentFailure,
+    sealed interface Call {
+        data object OnEceDisplayed : Call
+
+        data class OnEceWalletTapped(val expressButton: ExpressButton) : Call
+
+        data object OnEcePaymentSuccess : Call
+
+        data object OnEcePaymentFailure : Call
     }
 }
