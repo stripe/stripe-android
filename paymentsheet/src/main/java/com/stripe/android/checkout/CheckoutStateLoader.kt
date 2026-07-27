@@ -5,6 +5,7 @@ import android.os.Bundle
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -17,6 +18,7 @@ internal class CheckoutStateLoader @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val customerStateHolder: CustomerStateHolder,
 ) {
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
@@ -93,6 +95,8 @@ internal class CheckoutStateLoader @Inject constructor(
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
         )
+
+        customerStateHolder.setCustomerState(loaderState.customer)
     }
 
     /**
