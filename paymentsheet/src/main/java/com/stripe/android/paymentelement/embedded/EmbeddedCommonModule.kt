@@ -24,6 +24,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -54,6 +55,7 @@ import kotlin.coroutines.CoroutineContext
         PaymentsIntegrityModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentConfigurationModule::class,
+        ApiConfigurationModule::class,
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
         NfcScanningAvailabilityModule::class,

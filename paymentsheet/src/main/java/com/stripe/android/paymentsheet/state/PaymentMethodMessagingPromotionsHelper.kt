@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.ApiRequest
@@ -50,7 +50,7 @@ internal interface PaymentMethodMessagePromotionsHelper {
 @Singleton
 internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
     private val eventReporter: EventReporter
@@ -68,8 +68,8 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
                 country = intent.countryCode,
                 locale = Locale.getDefault().language,
                 requestOptions = ApiRequest.Options(
-                    apiKey = lazyPaymentConfig.get().publishableKey,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId
+                    apiKey = apiConfigProvider.get().publishableKey,
+                    stripeAccount = apiConfigProvider.get().stripeAccountId
                 )
             )
         }

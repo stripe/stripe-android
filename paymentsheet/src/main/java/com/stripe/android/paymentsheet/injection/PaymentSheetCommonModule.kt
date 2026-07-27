@@ -86,6 +86,7 @@ import javax.inject.Singleton
         TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class,
         PaymentConfigurationModule::class,
+        ApiConfigurationModule::class,
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
         NfcScanningAvailabilityModule::class,
