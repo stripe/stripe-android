@@ -39,7 +39,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
                     data[FIELD_EDIT_DISTANCE] = it
                 }
                 timeToComplete?.let {
-                    data[FIELD_TIME_TO_COMPLETE] = it.toDouble(DurationUnit.SECONDS).toString()
+                    data[FIELD_TIME_TO_COMPLETE] = it.toDouble(DurationUnit.SECONDS)
                 }
                 return mapOf(
                     FIELD_ADDRESS_DATA_BLOB to data
@@ -75,8 +75,8 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
                     FIELD_SOURCE to SOURCE_STRIPE_HOSTED,
                     FIELD_RESULT_COUNT to resultCount,
                 )
-                timeToFetch?.let { data[FIELD_TIME_TO_FETCH] = it.toDouble(DurationUnit.SECONDS).toString() }
-                sessionElapsed?.let { data[FIELD_SESSION_ELAPSED] = it.toDouble(DurationUnit.SECONDS).toString() }
+                timeToFetch?.let { data[FIELD_TIME_TO_FETCH] = it.toDouble(DurationUnit.SECONDS) }
+                sessionElapsed?.let { data[FIELD_SESSION_ELAPSED] = it.toDouble(DurationUnit.SECONDS) }
                 return mapOf(FIELD_ADDRESS_DATA_BLOB to data)
             }
     }
