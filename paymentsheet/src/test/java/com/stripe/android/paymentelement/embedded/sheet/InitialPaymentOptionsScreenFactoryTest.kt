@@ -9,7 +9,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -109,9 +108,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             isGooglePayReady = isGooglePayReady,
         ),
-        configuration: EmbeddedPaymentElement.Configuration = EmbeddedPaymentElement.Configuration
-            .Builder("Example, Inc.")
-            .build(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -180,7 +176,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             embeddedNavigatorProvider = Provider { navigator },
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = testScope,
-            configuration = configuration,
             manageInteractorFactory = manageInteractorFactory,
             updateScreenInteractorFactory = updateScreenInteractorFactory,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
