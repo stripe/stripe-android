@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import android.app.Application
 import com.stripe.android.DefaultFraudDetectionDataRepository
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
 import com.stripe.android.core.exception.StripeException
@@ -47,7 +47,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     application: Application,
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
     private val clientParams: ElementsSessionClientParams,
 ) : ElementsSessionRepository {
@@ -62,12 +62,12 @@ internal class RealElementsSessionRepository @Inject constructor(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
-    // The PaymentConfiguration can change after initialization, so this needs to get a new
+    // The configuration can change after initialization, so this needs to get a new
     // request options each time requested.
     private val requestOptions: ApiRequest.Options
         get() = ApiRequest.Options(
-            apiKey = lazyPaymentConfig.get().publishableKey,
-            stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            apiKey = apiConfigProvider.get().publishableKey,
+            stripeAccount = apiConfigProvider.get().stripeAccountId,
         )
 
     override suspend fun get(

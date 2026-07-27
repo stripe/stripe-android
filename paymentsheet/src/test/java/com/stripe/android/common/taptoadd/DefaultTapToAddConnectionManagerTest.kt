@@ -5,7 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -708,7 +708,7 @@ class DefaultTapToAddConnectionManagerTest {
                         isSimulatedProvider = object : TapToAddIsSimulatedProvider {
                             override fun get(): Boolean = isSimulated
                         },
-                        paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_test") },
+                        apiConfigProvider = { ApiConfiguration.State(publishableKey = "pk_test", stripeAccountId = null) },
                         callbackRetriever = callbackRetriever,
                     ),
                     terminalInstance = terminalInstance,

@@ -2,13 +2,14 @@ package com.stripe.android.checkout.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.di.DisplayDensity
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -17,7 +18,7 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
 
-@Module(includes = [PaymentConfigurationModule::class, StripeNetworkClientModule::class])
+@Module(includes = [PaymentConfigurationModule::class, ApiConfigurationModule::class, StripeNetworkClientModule::class])
 internal object CheckoutModule {
     @Provides
     fun provideContext(application: Application): Context = application.applicationContext
@@ -32,10 +33,10 @@ internal object CheckoutModule {
 
     @Provides
     fun provideApiRequestOptions(
-        paymentConfiguration: Provider<PaymentConfiguration>
+        apiConfigProvider: Provider<ApiConfiguration.State>
     ): ApiRequest.Options = ApiRequest.Options(
-        apiKey = paymentConfiguration.get().publishableKey,
-        stripeAccount = paymentConfiguration.get().stripeAccountId,
+        apiKey = apiConfigProvider.get().publishableKey,
+        stripeAccount = apiConfigProvider.get().stripeAccountId,
     )
 
     @Provides

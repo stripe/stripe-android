@@ -7,7 +7,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
@@ -2124,14 +2124,14 @@ class USBankAccountFormViewModelTest {
         args: USBankAccountFormViewModel.Args = defaultArgs,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): USBankAccountFormViewModel {
-        val paymentConfiguration = PaymentConfiguration(
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            STRIPE_ACCOUNT_ID
+        val apiConfig = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = STRIPE_ACCOUNT_ID
         )
         return USBankAccountFormViewModel(
             args = args,
             application = ApplicationProvider.getApplicationContext(),
-            lazyPaymentConfig = { paymentConfiguration },
+            apiConfigProvider = { apiConfig },
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         ).also { viewModelStoreRule.track(it) }

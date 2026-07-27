@@ -3,8 +3,10 @@ package com.stripe.android.link.injection
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
@@ -209,6 +211,13 @@ internal interface NativeLinkModule {
         @NativeLinkScope
         fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
+        }
+
+        @Provides
+        fun provideApiConfigurationState(
+            paymentMethodMetadata: PaymentMethodMetadata
+        ): ApiConfiguration.State {
+            return paymentMethodMetadata.apiConfiguration
         }
 
         @Provides
