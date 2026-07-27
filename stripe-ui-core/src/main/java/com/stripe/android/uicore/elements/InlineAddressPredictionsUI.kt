@@ -38,6 +38,8 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
 
+private val PredictionsPopupElevation = 8.dp
+
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun InlineAddressPredictionsUI(
@@ -59,7 +61,7 @@ fun InlineAddressPredictionsUI(
         properties = PopupProperties(focusable = false),
     ) {
         Card(
-            elevation = 8.dp,
+            elevation = PredictionsPopupElevation,
             modifier = if (fieldWidthDp > 0.dp) {
                 Modifier.width(fieldWidthDp + 2.dp)
             } else {
@@ -77,14 +79,15 @@ fun InlineAddressPredictionsUI(
     }
 }
 
-private object BelowAnchorPopupPositionProvider : PopupPositionProvider {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+internal object BelowAnchorPopupPositionProvider : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,
         layoutDirection: LayoutDirection,
         popupContentSize: IntSize,
     ): IntOffset {
-        return IntOffset(x = anchorBounds.left - 1, y = anchorBounds.bottom)
+        return IntOffset(x = anchorBounds.left, y = anchorBounds.bottom)
     }
 }
 
@@ -253,7 +256,7 @@ internal fun shouldShowPredictionsDropdown(
 ): Boolean {
     return when (state) {
         AutocompleteAddressInteractor.InlinePredictionsState.Idle -> false
-        AutocompleteAddressInteractor.InlinePredictionsState.Loading -> true
+        AutocompleteAddressInteractor.InlinePredictionsState.Loading -> false
         is AutocompleteAddressInteractor.InlinePredictionsState.Results -> true
     }
 }
