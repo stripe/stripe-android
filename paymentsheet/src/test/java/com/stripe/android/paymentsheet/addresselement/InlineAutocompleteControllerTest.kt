@@ -183,6 +183,51 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
+    fun `subsequent fetch keeps Results instead of Loading`() = runScenario {
+        val firstPredictions = listOf(
+            AutocompletePrediction(
+                SpannableString("123 Main St"),
+                SpannableString("San Francisco, CA"),
+                "place_1",
+            ),
+        )
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(firstPredictions)
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123"
+        advanceTimeBy(500)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(delegate.inlinePredictionsState.value)
+            .isInstanceOf<InlinePredictionsState.Results>()
+
+        val secondPredictions = listOf(
+            AutocompletePrediction(
+                SpannableString("1234 Main St"),
+                SpannableString("San Francisco, CA"),
+                "place_2",
+            ),
+        )
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(secondPredictions)
+        )
+        var stateDuringRefetch: InlinePredictionsState? = null
+        fakePlacesClient.onBeforeFindPredictions = {
+            stateDuringRefetch = delegate.inlinePredictionsState.value
+        }
+
+        queryFlow.value = "1234"
+        advanceTimeBy(500)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+
+        assertThat(stateDuringRefetch).isInstanceOf<InlinePredictionsState.Results>()
+        val results = delegate.inlinePredictionsState.value as InlinePredictionsState.Results
+        assertThat(results.predictions).hasSize(1)
+        assertThat(results.predictions[0].id).isEqualTo("place_2")
+    }
+
+    @Test
     fun `onPredictionSelected fetches place and emits OnValues event`() = runScenario {
         fakePlacesClient.fetchPlaceResult = Result.success(
             Address(

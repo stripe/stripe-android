@@ -116,7 +116,11 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
+        // Keep prior Results visible while refetching so the dropdown doesn't
+        // collapse/expand on every keystroke (noticeable when the menu opens upward).
+        if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
+            _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
+        }
         val result = placesClient.findAutocompletePredictions(
             query = query,
             country = country,
