@@ -3,12 +3,18 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 /**
  * An APDU command for retrieving processing options from a payment application.
  */
-internal data object GetProcessingOptionsCommand : ApduCommand<ProcessingOptionsInfo>() {
+internal class GetProcessingOptionsCommand(
+    val pdolData: ByteArray,
+) : ApduCommand<ProcessingOptionsInfo>() {
     override val classByte = 0x80.toByte()
     override val instructionByte = 0xA8.toByte()
     override val firstParameterByte = 0x00.toByte()
     override val secondParameterByte = 0x00.toByte()
-    override val dataArray = byteArrayOf(0x83.toByte(), 0x00)
+    override val dataArray = if (pdolData.isEmpty()) {
+        byteArrayOf(0x83.toByte(), 0x00)
+    } else {
+        pdolData
+    }
 
     override fun responseData(tlv: Map<String, ByteArray>): ProcessingOptionsInfo? {
         if (tlv.isEmpty()) {
@@ -40,12 +46,14 @@ internal data object GetProcessingOptionsCommand : ApduCommand<ProcessingOptions
             }
     }
 
-    private const val TAG_RESPONSE_TEMPLATE_FORMAT_1 = "80"
-    private const val TAG_AFL = "94"
-    private const val AIP_LENGTH = 2
+    private companion object {
+        const val TAG_RESPONSE_TEMPLATE_FORMAT_1 = "80"
+        const val TAG_AFL = "94"
+        const val AIP_LENGTH = 2
 
-    private const val AFL_ENTRY_LENGTH = 4
-    private const val SFI_SHIFT = 3
-    private const val SFI_MASK = 0x1F
-    private const val BYTE_MASK = 0xFF
+        const val AFL_ENTRY_LENGTH = 4
+        const val SFI_SHIFT = 3
+        const val SFI_MASK = 0x1F
+        const val BYTE_MASK = 0xFF
+    }
 }

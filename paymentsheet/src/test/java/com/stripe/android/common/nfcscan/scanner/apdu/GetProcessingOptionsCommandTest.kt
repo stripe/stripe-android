@@ -10,7 +10,7 @@ internal class GetProcessingOptionsCommandTest {
     fun `transceiveWith sends GPO command with empty PDOL`() = test(
         transceiveResult = apduSuccessResponse(byteArrayOf()),
     ) {
-        GetProcessingOptionsCommand.transceiveWith(transceiver)
+        GetProcessingOptionsCommand(pdolData = byteArrayOf()).transceiveWith(transceiver)
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(
             byteArrayOf(
@@ -27,6 +27,35 @@ internal class GetProcessingOptionsCommandTest {
     }
 
     @Test
+    fun `transceiveWith sends GPO command with populated PDOL`() = test(
+        transceiveResult = apduSuccessResponse(byteArrayOf()),
+    ) {
+        GetProcessingOptionsCommand(
+            pdolData = byteArrayOf(
+                0x83.toByte(),
+                0x02,
+                0x01,
+                0x02,
+            ),
+        ).transceiveWith(transceiver)
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(
+            byteArrayOf(
+                0x80.toByte(),
+                0xA8.toByte(),
+                0x00,
+                0x00,
+                0x04,
+                0x83.toByte(),
+                0x02,
+                0x01,
+                0x02,
+                0x00,
+            ),
+        )
+    }
+
+    @Test
     fun `transceiveWith parses AFL from response template format 2`() = test(
         transceiveResult = apduSuccessResponse(
             tlv(
@@ -35,7 +64,7 @@ internal class GetProcessingOptionsCommandTest {
             ),
         ),
     ) {
-        val result = GetProcessingOptionsCommand.transceiveWith(transceiver)
+        val result = GetProcessingOptionsCommand(pdolData = byteArrayOf()).transceiveWith(transceiver)
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()?.aflEntries).containsExactly(
@@ -64,7 +93,7 @@ internal class GetProcessingOptionsCommandTest {
             ),
         ),
     ) {
-        val result = GetProcessingOptionsCommand.transceiveWith(transceiver)
+        val result = GetProcessingOptionsCommand(pdolData = byteArrayOf()).transceiveWith(transceiver)
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()?.aflEntries).containsExactly(
@@ -86,7 +115,7 @@ internal class GetProcessingOptionsCommandTest {
             ),
         ),
     ) {
-        val result = GetProcessingOptionsCommand.transceiveWith(transceiver)
+        val result = GetProcessingOptionsCommand(pdolData = byteArrayOf()).transceiveWith(transceiver)
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()?.records?.getValue("57")?.contentEquals(TRACK_2_DATA)).isTrue()

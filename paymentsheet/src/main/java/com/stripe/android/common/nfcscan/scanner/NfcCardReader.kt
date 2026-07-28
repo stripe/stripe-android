@@ -4,8 +4,10 @@ import com.stripe.android.common.nfcscan.scanner.apdu.GetProcessingOptionsComman
 import com.stripe.android.common.nfcscan.scanner.apdu.ReadRecordCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
+import com.stripe.android.common.nfcscan.scanner.apdu.pdol.PdolBuilder
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.collections.plusAssign
@@ -29,6 +31,8 @@ internal interface NfcCardReader {
 
 internal class ApduCardReader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
+    private val pdolBuilder: PdolBuilder,
     private val errorMapper: NfcCardReader.ErrorCreator,
     private val cardDataParser: NfcCardDataParser,
 ) : NfcCardReader {
@@ -48,10 +52,19 @@ internal class ApduCardReader @Inject constructor(
     ): ScannedCardData = withContext(workContext) {
         try {
             transceiver.open()
-            val applicationIdentifier = SelectPpseCommand.transceiveWith(transceiver).getOrThrow()
-            SelectApplicationCommand(applicationIdentifier).transceiveWith(transceiver).getOrThrow()
 
-            val processingOptionsInfo = GetProcessingOptionsCommand
+            val applicationIdentifier = SelectPpseCommand.transceiveWith(transceiver).getOrThrow()
+
+            val pdolTemplate = SelectApplicationCommand(applicationIdentifier)
+                .transceiveWith(transceiver)
+                .getOrThrow()
+
+            val pdolData = pdolBuilder.fromTemplate(
+                paymentMethodMetadata = paymentMethodMetadata,
+                template = pdolTemplate,
+            )
+
+            val processingOptionsInfo = GetProcessingOptionsCommand(pdolData)
                 .transceiveWith(transceiver)
                 .getOrThrow()
 
