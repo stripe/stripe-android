@@ -1,3 +1,5 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.link
 
 import android.os.Parcel
@@ -19,7 +21,7 @@ import kotlinx.parcelize.TypeParceler
  * @param primaryButton Configuration for primary button styling (corner radius, height).
  *
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@LinkControllerPreview
 class LinkAppearance {
 
     private var lightColors: Colors? = null
@@ -73,7 +75,7 @@ class LinkAppearance {
     /**
      * Color configuration for Link components.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     class Colors {
         private var primary: Color? = null
         private var contentOnPrimary: Color? = null
@@ -115,7 +117,7 @@ class LinkAppearance {
      * The light/dark mode style of the appearance.
      */
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     enum class Style : Parcelable {
         AUTOMATIC,
         ALWAYS_LIGHT,
@@ -125,7 +127,7 @@ class LinkAppearance {
     /**
      * Configuration for primary button styling.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     class PrimaryButton {
         private var cornerRadiusDp: Float? = null
         private var heightDp: Float? = null

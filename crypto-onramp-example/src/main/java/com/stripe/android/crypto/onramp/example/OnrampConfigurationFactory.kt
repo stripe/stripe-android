@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.link.LinkControllerPreview::class)
+
 package com.stripe.android.crypto.onramp.example
 
 import androidx.compose.ui.graphics.Color

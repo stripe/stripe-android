@@ -6,6 +6,9 @@ NEXT_VERSION_BUMP: MINOR
 ### CryptoOnramp
 * [ADDED] Added Tempo as a supported wallet network and pinned Crypto Onramp internal API calls to the preview API version required by newer networks.
 
+### PaymentSheet
+* [ADDED] `LinkController` now supports appearance customization via `LinkAppearance` (private preview).
+
 ## 23.13.1 - 2026-07-23
 
 ### Payments
