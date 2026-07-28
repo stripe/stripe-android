@@ -4,7 +4,7 @@ package com.stripe.android.paymentmethodmessaging.element
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventReporter
@@ -133,11 +133,10 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
         testBlock: suspend Scenario.() -> Unit
     ) = runTest {
         val repository: StripeRepository = FakeStripeRepository()
-        val paymentConfig = { PaymentConfiguration(publishableKey = "key") }
         val errorReporter = FakeErrorReporter()
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = repository,
-            paymentConfiguration = paymentConfig,
+            apiConfigProvider = { ApiConfiguration.State(publishableKey = "key", stripeAccountId = null) },
             eventReporter = FakeEventReporter(),
             viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             errorReporter = errorReporter
