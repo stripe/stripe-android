@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface InlineAutocompleteHandler {
     val predictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState>
+    val maxVisiblePredictions: Int?
+        get() = null
 
     fun onPredictionSelected(predictionId: String)
 

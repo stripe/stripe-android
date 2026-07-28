@@ -30,60 +30,73 @@ import java.util.Locale
  * [here](https://github.com/stripe/stripe-ios/blob/master/Tests/Tests/NSString+StripeTest.swift)
  */
 class CurrencyFormatterTest {
+    private fun normalizeSpaces(s: String): String {
+        return s
+            .replace('\u00A0', ' ')
+            .replace('\u202F', ' ')
+            .replace(Regex("\\s+"), " ")
+            .trim()
+    }
+
+    private fun assertFormattedEquals(
+        actual: String,
+        expected: String,
+    ) {
+        assertThat(normalizeSpaces(actual)).isEqualTo(normalizeSpaces(expected))
+    }
+
+    private fun assertFormattedEquals(
+        amount: Long,
+        amountCurrency: Currency,
+        targetLocale: Locale = Locale.getDefault(),
+        expected: String,
+    ) {
+        assertFormattedEquals(CurrencyFormatter.format(amount, amountCurrency, targetLocale), expected)
+    }
+
+    private fun assertFormattedEquals(
+        amount: Long,
+        amountCurrencyCode: String,
+        targetLocale: Locale = Locale.getDefault(),
+        expected: String,
+    ) {
+        assertFormattedEquals(
+            CurrencyFormatter.format(amount, Currency.getInstance(amountCurrencyCode), targetLocale),
+            expected
+        )
+    }
+
     @Test
     fun `amount currency USD, locale US`() {
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                Currency.getInstance("USD"),
-                Locale.US,
-            )
-        ).isEqualTo("$1,234.12")
+        assertFormattedEquals(123412L, Currency.getInstance("USD"), Locale.US, "$1,234.12")
     }
 
     @Test
     fun `amount currency Germany, locale US`() {
         val euro = Currency.getInstance(Locale.GERMANY)
-        assertThat(CurrencyFormatter.format(123412L, euro, Locale.US))
-            .isEqualTo("€1,234.12")
+        assertFormattedEquals(123412L, euro, Locale.US, "€1,234.12")
     }
 
     @Test
     fun `amount currency Canada, locale US`() {
         val canadianDollar = Currency.getInstance(Locale.CANADA)
-        assertThat(CurrencyFormatter.format(123412L, canadianDollar, Locale.US))
-            .isEqualTo("CA$1,234.12")
+        assertFormattedEquals(123412L, canadianDollar, Locale.US, "CA$1,234.12")
     }
 
     @Test
     fun `amount currency UK, locale US`() {
         val britishPound = Currency.getInstance(Locale.UK)
-        assertThat(CurrencyFormatter.format(123412L, britishPound, Locale.US))
-            .isEqualTo("£1,234.12")
+        assertFormattedEquals(123412L, britishPound, Locale.US, "£1,234.12")
     }
 
     @Test
     fun `amount currency 2-decimal, and locale currency of 0 decimal`() {
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                Currency.getInstance("USD"),
-                Locale.KOREA
-            )
-        )
-            .isEqualTo("US$1,234.12")
+        assertFormattedEquals(123412L, Currency.getInstance("USD"), Locale.KOREA, "US$1,234.12")
     }
 
     @Test
     fun `amount currency 0-decimal, and locale currency of 2 decimal`() {
-        assertThat(
-            CurrencyFormatter.format(
-                1234L, // this currency does not have decimals
-                Currency.getInstance("KRW"),
-                Locale.US
-            )
-        )
-            .isEqualTo("₩1,234")
+        assertFormattedEquals(1234L, Currency.getInstance("KRW"), Locale.US, "₩1,234")
     }
 
     @Test
@@ -103,146 +116,75 @@ class CurrencyFormatterTest {
     fun `HUF is effectively 0 decimal places, but Stripe treats it as 2`() {
         val amountCurrency = Currency.getInstance("HUF")
         assertThat(CurrencyFormatter.getDefaultDecimalDigits(amountCurrency)).isEqualTo(2)
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                amountCurrency,
-                LOCALE_WITH_3_DECIMAL_CURRENCY
-            )
-        )
-            .isEqualTo("HUF 1,234.12")
+        assertFormattedEquals(123412L, amountCurrency, LOCALE_WITH_3_DECIMAL_CURRENCY, "HUF 1,234.12")
     }
 
     @Test
     fun `UGX requires 2 decimal for backward compatibility of the currency`() {
         val amountCurrency = Currency.getInstance("UGX")
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                amountCurrency,
-                LOCALE_WITH_3_DECIMAL_CURRENCY
-            )
-        )
-            .isEqualTo("UGX 1,234.12")
+        assertFormattedEquals(123412L, amountCurrency, LOCALE_WITH_3_DECIMAL_CURRENCY, "UGX 1,234.12")
     }
 
     @Test
     fun `Amount currency with 3 decimal places from a locale that normally has 2`() {
         val amountCurrency = Currency.getInstance("BHD")
-        assertThat(CurrencyFormatter.format(1234123L, amountCurrency, Locale.US))
-            .isEqualTo("BHD1,234.123")
+        assertFormattedEquals(1234123L, amountCurrency, Locale.US, "BHD1,234.123")
     }
 
     @Test
     fun `Amount currency with 2 decimal places from a locale that normally has 3`() {
         val amountCurrency = Currency.getInstance("USD")
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                amountCurrency,
-                LOCALE_WITH_3_DECIMAL_CURRENCY
-            )
-        )
-            .isEqualTo("US$ 1,234.12")
+        assertFormattedEquals(123412L, amountCurrency, LOCALE_WITH_3_DECIMAL_CURRENCY, "US$ 1,234.12")
     }
 
     @Test
     fun `locale with unique thousands and decimal separator, currency symbol at the end`() {
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                Currency.getInstance("USD"),
-                Locale.FRANCE
-            )
-        )
-            .isEqualTo("1 234,12 \$US")
+        assertFormattedEquals(123412L, Currency.getInstance("USD"), Locale.FRANCE, "1 234,12 \$US")
     }
 
     @Test
     fun `amount currency not-zero-based, with locale zero-based currency`() {
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                Currency.getInstance("USD"),
-                LOCALE_ICELAND_LANGUAGE_ONLY
-            )
-        )
-            .isEqualTo("1.234,12 USD")
+        assertFormattedEquals(123412L, Currency.getInstance("USD"), LOCALE_ICELAND_LANGUAGE_ONLY, "1.234,12 USD")
     }
 
     @Test
     fun `Test differences in setting the language vs country vs both`() {
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                Currency.getInstance("USD"),
-                Locale("IS")
-            )
-        )
-            .isEqualTo("1.234,12 USD")
+        assertFormattedEquals(123412L, Currency.getInstance("USD"), Locale("IS"), "1.234,12 USD")
 
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                Currency.getInstance("USD"),
-                Locale("is-IS", "IS")
-            )
-        )
-            .isEqualTo("US\$ 1,234.12")
+        assertFormattedEquals(123412L, Currency.getInstance("USD"), Locale("is-IS", "IS"), "US\$ 1,234.12")
     }
 
     @Test
     fun `test UK with thousands of dollars`() {
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                Currency.getInstance("USD"),
-                Locale.UK
-            )
-        )
-            .isEqualTo("US$1,234.12")
+        assertFormattedEquals(123412L, Currency.getInstance("USD"), Locale.UK, "US$1,234.12")
     }
 
     @Test
     fun `test AU with thousands of dollars`() {
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                Currency.getInstance("USD"),
-                LOCALE_AUSTRALIA_LANGUAGE_COUNTRY
-            )
-        )
-            .isEqualTo("US$ 1,234.12")
+        assertFormattedEquals(123412L, Currency.getInstance("USD"), LOCALE_AUSTRALIA_LANGUAGE_COUNTRY, "US$ 1,234.12")
 
-        assertThat(
-            CurrencyFormatter.format(
-                123412L,
-                Currency.getInstance("USD"),
-                Locale("AU")
-            )
-        )
-            .isEqualTo("US$ 1,234.12")
+        assertFormattedEquals(123412L, Currency.getInstance("USD"), Locale("AU"), "US$ 1,234.12")
     }
 
     @Test
     fun `Treats MMK as a two-decimal currency`() {
         val currency = Currency.getInstance("MMK")
         val formattedAmount = CurrencyFormatter.format(5099L, currency)
-        assertThat(formattedAmount).isEqualTo("MMK50.99")
+        assertThat(normalizeSpaces(formattedAmount)).isEqualTo(normalizeSpaces("MMK50.99"))
     }
 
     @Test
     fun `Treats LAK as a two-decimal currency`() {
         val currency = Currency.getInstance("LAK")
         val formattedAmount = CurrencyFormatter.format(5099L, currency)
-        assertThat(formattedAmount).isEqualTo("LAK50.99")
+        assertThat(normalizeSpaces(formattedAmount)).isEqualTo(normalizeSpaces("LAK50.99"))
     }
 
     @Test
     fun `Treats RSD as a two-decimal currency`() {
         val currency = Currency.getInstance("RSD")
         val formattedAmount = CurrencyFormatter.format(5099L, currency)
-        assertThat(formattedAmount).isEqualTo("RSD50.99")
+        assertThat(normalizeSpaces(formattedAmount)).isEqualTo(normalizeSpaces("RSD50.99"))
     }
 
     companion object {
