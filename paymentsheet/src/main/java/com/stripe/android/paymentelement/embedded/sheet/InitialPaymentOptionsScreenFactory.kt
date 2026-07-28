@@ -25,7 +25,6 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
-import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -87,15 +86,11 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     private fun createFormHelper(): FormHelper {
-        return embeddedFormHelperFactory.create(
+        return embeddedFormHelperFactory.createForVerticalLayout(
             coroutineScope = viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            // Card scan auto-launch is only relevant in the form, not the list (as the form helper is used here).
-            automaticallyLaunchedCardScanFormDataHelper = null,
-            tapToAddHelper = null,
             selectionUpdater = { selectionHolder.setSelection(it) },
-            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
