@@ -41,7 +41,6 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
 
-private val PredictionsPopupElevation = 8.dp
 internal val PredictionListItemDefaultMinHeight = 56.dp
 
 @Composable
@@ -66,7 +65,7 @@ fun InlineAddressPredictionsUI(
         properties = PopupProperties(focusable = false),
     ) {
         Card(
-            elevation = PredictionsPopupElevation,
+            elevation = 8.dp,
             modifier = if (fieldWidthDp > 0.dp) {
                 Modifier.width(fieldWidthDp + 2.dp)
             } else {
@@ -201,13 +200,15 @@ private fun PredictionsList(
     onEnterManually: (() -> Unit)?,
 ) {
     Divider()
-    if (maxVisiblePredictions != null) {
-        ScrollablePredictionsList(
-            results = results,
-            maxVisiblePredictions = maxVisiblePredictions,
-            onPredictionSelected = onPredictionSelected,
-        )
+    val scrollState = rememberScrollState()
+    val scrollModifier = if (maxVisiblePredictions != null) {
+        Modifier
+            .requiredSizeIn(maxHeight = PredictionListItemDefaultMinHeight * maxVisiblePredictions)
+            .verticalScroll(scrollState)
     } else {
+        Modifier
+    }
+    Column(modifier = Modifier.fillMaxWidth().then(scrollModifier)) {
         PredictionsListItems(
             results = results,
             onPredictionSelected = onPredictionSelected,
@@ -219,9 +220,9 @@ private fun PredictionsList(
             contentAlignment = Alignment.TopStart,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp)
+                .height(32.dp)
                 .clickable(onClick = it)
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 4.dp),
         ) {
             Text(
                 text = stringResource(R.string.stripe_address_enter_manually),
@@ -229,26 +230,6 @@ private fun PredictionsList(
                 style = MaterialTheme.typography.body1,
             )
         }
-    }
-}
-
-@Composable
-private fun ScrollablePredictionsList(
-    results: AutocompleteAddressInteractor.InlinePredictionsState.Results,
-    maxVisiblePredictions: Int,
-    onPredictionSelected: (String) -> Unit,
-) {
-    val scrollState = rememberScrollState()
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .requiredSizeIn(maxHeight = PredictionListItemDefaultMinHeight * maxVisiblePredictions)
-            .verticalScroll(scrollState),
-    ) {
-        PredictionsListItems(
-            results = results,
-            onPredictionSelected = onPredictionSelected,
-        )
     }
 }
 
