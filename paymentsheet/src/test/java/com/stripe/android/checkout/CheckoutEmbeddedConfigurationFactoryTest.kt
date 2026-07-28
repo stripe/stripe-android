@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
 import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
