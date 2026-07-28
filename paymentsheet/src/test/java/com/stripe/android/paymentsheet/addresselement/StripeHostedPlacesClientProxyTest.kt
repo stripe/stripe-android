@@ -308,7 +308,7 @@ class StripeHostedPlacesClientProxyTest {
     }
 
     @Test
-    fun `findAutocompletePredictions success fires fetch started then suggestions returned`() = runTest {
+    fun `findAutocompletePredictions success fires suggestions returned`() = runTest {
         val eventReporter = FakeAddressLauncherEventReporter()
         val repository = defaultRepository()
         val proxy = createProxy(repository = repository, eventReporter = eventReporter)
@@ -317,7 +317,6 @@ class StripeHostedPlacesClientProxyTest {
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
 
-        eventReporter.autocompleteFetchStartedCalls.awaitItem()
         val suggestionsCall = eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
         assertThat(suggestionsCall.resultCount).isEqualTo(1)
         repository.ensureAllEventsConsumed()
@@ -336,7 +335,6 @@ class StripeHostedPlacesClientProxyTest {
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
 
-        eventReporter.autocompleteFetchStartedCalls.awaitItem()
         val errorCall = eventReporter.autocompleteErrorCalls.awaitItem()
         assertThat(errorCall.error).hasMessageThat().isEqualTo("Network error")
         repository.ensureAllEventsConsumed()
@@ -352,7 +350,6 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
-        eventReporter.autocompleteFetchStartedCalls.awaitItem()
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
 
         proxy.fetchPlace("place_123", Locale.US)
@@ -376,7 +373,6 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
-        eventReporter.autocompleteFetchStartedCalls.awaitItem()
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
 
         proxy.fetchPlace("place_123", Locale.US)

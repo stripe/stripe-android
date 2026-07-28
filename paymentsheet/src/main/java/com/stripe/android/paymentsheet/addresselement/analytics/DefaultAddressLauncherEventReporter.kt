@@ -52,17 +52,16 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onAutocompleteFetchStarted() {
-        durationProvider.start(DurationProvider.Key.AddressAutocompleteFetch, reset = true)
-    }
-
-    override fun onAutocompleteSuggestionsReturned(sessionToken: String, resultCount: Int) {
-        val timeToFetch = durationProvider.end(DurationProvider.Key.AddressAutocompleteFetch)
+    override fun onAutocompleteSuggestionsReturned(
+        sessionToken: String,
+        resultCount: Int,
+        fetchDuration: Duration?,
+    ) {
         val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
         fireEvent(
             AddressLauncherEvent.AutocompleteSuggestions(
                 autocompleteSessionToken = sessionToken,
-                timeToFetch = timeToFetch,
+                timeToFetch = fetchDuration,
                 resultCount = resultCount,
                 sessionElapsed = sessionElapsed,
             )

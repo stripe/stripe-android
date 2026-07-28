@@ -9,6 +9,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import java.util.Locale
 import java.util.UUID
+import kotlin.time.TimeSource
 
 internal class StripeHostedPlacesClientProxy(
     private val repository: StripeAutocompleteRepository,
@@ -45,7 +46,7 @@ internal class StripeHostedPlacesClientProxy(
             lastQueryLength = q.length
             sessionToken
         }
-        eventReporter.onAutocompleteFetchStarted()
+        val fetchStart = TimeSource.Monotonic.markNow()
         return repository.findAutocompletePredictions(
             query = q,
             country = country,
@@ -69,6 +70,7 @@ internal class StripeHostedPlacesClientProxy(
             eventReporter.onAutocompleteSuggestionsReturned(
                 sessionToken = token,
                 resultCount = response.autocompletePredictions.size,
+                fetchDuration = fetchStart.elapsedNow(),
             )
         }.onFailure { error ->
             eventReporter.onAutocompleteError(sessionToken = token, error = error)
