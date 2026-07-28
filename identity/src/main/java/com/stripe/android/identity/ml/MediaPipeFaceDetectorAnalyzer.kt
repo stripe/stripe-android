@@ -51,7 +51,7 @@ internal class MediaPipeFaceDetectorAnalyzer(
         preprocessStat.trackResult()
 
         val inferenceStat = modelPerformanceTracker.trackInference()
-        val result = faceLandmarker.detect(mpImage)
+        val result = mpImage.use(faceLandmarker::detect)
         inferenceStat.trackResult()
 
         val landmarks = result.faceLandmarks().firstOrNull()
