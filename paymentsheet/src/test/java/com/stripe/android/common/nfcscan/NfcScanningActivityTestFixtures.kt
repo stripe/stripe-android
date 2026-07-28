@@ -89,7 +89,9 @@ internal object NfcScanningActivityTestFixtures {
     fun successResponses(): List<ByteArray> = listOf(
         apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
         apduSuccessResponse(byteArrayOf()),
-        apduSuccessResponse(tlv(tag = 0x57, value = VALID_TRACK_2_DATA)),
+        apduSuccessResponse(
+            tlv(tag = 0x77, value = tlv(tag = 0x57, value = VALID_TRACK_2_DATA)),
+        ),
     )
 
     fun declinedCardResponses(): List<ByteArray> = listOf(
@@ -103,6 +105,8 @@ internal object NfcScanningActivityTestFixtures {
     fun expiredCardResponses(): List<ByteArray> = listOf(
         apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
         apduSuccessResponse(byteArrayOf()),
-        apduSuccessResponse(tlv(tag = 0x57, value = EXPIRED_TRACK_2_DATA)),
+        apduSuccessResponse(
+            tlv(tag = 0x77, value = tlv(tag = 0x57, value = EXPIRED_TRACK_2_DATA)),
+        ),
     )
 }
