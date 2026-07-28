@@ -31,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.checkout.CheckoutSession
+import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
@@ -160,7 +160,7 @@ private fun PaymentOptionRow(paymentOption: PaymentOptionDisplayData?) {
 }
 
 @Composable
-private fun LineItemsSection(session: CheckoutSession) {
+private fun LineItemsSection(session: Session) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = "Line Items", style = MaterialTheme.typography.h6)
         Spacer(modifier = Modifier.height(8.dp))
@@ -184,7 +184,7 @@ private fun LineItemsSection(session: CheckoutSession) {
 }
 
 @Composable
-private fun TotalSummarySection(session: CheckoutSession) {
+private fun TotalSummarySection(session: Session) {
     val summary = session.totalSummary ?: return
 
     Column(modifier = Modifier.fillMaxWidth()) {

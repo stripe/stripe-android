@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.strings.ResolvableString
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 @CheckoutSessionPreview
 internal class CurrencySelectorViewModel(
-    private val checkoutSession: StateFlow<CheckoutSession?>,
+    private val checkoutSession: StateFlow<Session?>,
     private val updateCurrency: suspend (String) -> Result<Unit>,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,

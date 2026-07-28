@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Parcelable
+import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -39,7 +40,7 @@ internal data class CheckoutControllerState(
     fun asCheckoutSession(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
         availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
-    ): CheckoutSession {
+    ): Session {
         return checkoutSessionResponse.asCheckoutSession(
             flagImages = flagImages,
             paymentOptionDisplayData = paymentOptionFactory.create(
