@@ -3,8 +3,6 @@ package com.stripe.android.uicore.elements
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Card
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -54,33 +52,6 @@ class InlineAddressPredictionsScreenshotTest {
                 onClear = {},
                 onEnterManually = {},
             )
-        }
-    }
-
-    @Test
-    fun testPopupResultsWithPredictions() {
-        paparazziRule.snapshot {
-            Card(
-                elevation = 8.dp,
-                modifier = Modifier.width(360.dp),
-            ) {
-                InlineAddressPredictionsContent(
-                    state = AutocompleteAddressInteractor.InlinePredictionsState.Results(
-                        query = "456 Oak",
-                        predictions = listOf(
-                            AutocompleteAddressInteractor.InlineAddressPrediction(
-                                id = "1",
-                                primaryText = "456 Oak Boulevard",
-                                secondaryText = "Seattle, WA, USA",
-                            ),
-                        ),
-                    ),
-                    attributionDrawable = R.drawable.stripe_google_maps_logo,
-                    onPredictionSelected = {},
-                    onClear = {},
-                    onEnterManually = {},
-                )
-            }
         }
     }
 

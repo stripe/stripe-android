@@ -81,7 +81,9 @@ class AddressTextFieldController(
 
             val onClear = remember { { _inlineQuery.value = "" } }
 
-            Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+            Box(
+                modifier = Modifier.wrapContentSize(Alignment.TopStart)
+            ) {
                 AddressTextFieldUI(
                     controller = this@AddressTextFieldController,
                     enabled = enabled,
