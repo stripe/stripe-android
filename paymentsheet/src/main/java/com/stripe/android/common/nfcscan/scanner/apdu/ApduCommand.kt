@@ -40,12 +40,12 @@ internal abstract class ApduCommand<TResponseData> {
         get() = dataArray?.run { size.toByte() }
 
     /**
-     * Converts TLV data into readable response for another command to process or to use when building the final
+     * Converts raw byte data into readable result for another command to process or to use when building the final
      * response.
      *
-     * @param tlv Tag-Length-Value encoded data separated by string keys which return parsable byte array data.
+     * @param data raw byte array data.
      */
-    protected abstract fun responseData(tlv: Map<String, ByteArray>): TResponseData?
+    protected abstract fun responseData(data: ByteArray): ApduDataResult<TResponseData>
 
     /**
      * Sends a command to the NFC tag then parses out the response returned from the NFC tag.
@@ -81,16 +81,10 @@ internal abstract class ApduCommand<TResponseData> {
 
         val rawData = rawResponse.copyOfRange(0, rawResponse.size - 2)
 
-        return TlvParser.parse(rawData).fold(
-            onSuccess = { tlv ->
-                responseData(tlv)?.let { responseData ->
-                    Result.success(responseData)
-                } ?: Result.failure(ApduResponseError.Invalid(rawData))
-            },
-            onFailure = { cause ->
-                Result.failure(ApduResponseError.Parsing(rawData, cause))
-            }
-        )
+        return when (val apduResult = responseData(rawData)) {
+            is ApduDataResult.Success -> Result.success(apduResult.data)
+            is ApduDataResult.Error -> Result.failure(apduResult.throwable)
+        }
     }
 
     private fun buildData(dataLengthByte: Byte?, dataArray: ByteArray?): ByteArray {
@@ -99,5 +93,33 @@ internal abstract class ApduCommand<TResponseData> {
         } else {
             byteArrayOf()
         }
+    }
+
+    protected sealed interface ApduDataResult<TResponseData> {
+        data class Success<TResponseData>(val data: TResponseData) : ApduDataResult<TResponseData>
+        data class Error<TResponseData>(val throwable: ApduResponseError.Data) : ApduDataResult<TResponseData>
+    }
+
+    abstract class Tlv<TResponseData> : ApduCommand<TResponseData>() {
+        final override fun responseData(data: ByteArray): ApduDataResult<TResponseData> {
+            return TlvParser.parse(data).fold(
+                onSuccess = { tlv ->
+                    responseData(tlv)?.let { responseData ->
+                        ApduDataResult.Success(responseData)
+                    } ?: ApduDataResult.Error(ApduResponseError.Data.Invalid(data))
+                },
+                onFailure = { cause ->
+                    ApduDataResult.Error(ApduResponseError.Data.Parsing(data, cause))
+                }
+            )
+        }
+
+        /**
+         * Converts TLV data into readable response for another command to process or to use when building the final
+         * response.
+         *
+         * @param tlv Tag-Length-Value encoded data separated by string keys which return parsable byte array data.
+         */
+        protected abstract fun responseData(tlv: Map<String, ByteArray>): TResponseData?
     }
 }

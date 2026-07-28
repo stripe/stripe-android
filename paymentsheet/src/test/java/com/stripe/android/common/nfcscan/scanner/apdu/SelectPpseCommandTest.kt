@@ -52,7 +52,7 @@ internal class SelectPpseCommandTest {
         transceiveResult = apduSuccessResponse(tlv(tag = 0x50, value = byteArrayOf(0x56, 0x49, 0x53, 0x41))),
     ) {
         val result = SelectPpseCommand.transceiveWith(transceiver)
-        assertThat(result.exceptionOrNull()).isInstanceOf<ApduResponseError.Invalid>()
+        assertThat(result.exceptionOrNull()).isInstanceOf<ApduResponseError.Data.Invalid>()
         assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
     }
 

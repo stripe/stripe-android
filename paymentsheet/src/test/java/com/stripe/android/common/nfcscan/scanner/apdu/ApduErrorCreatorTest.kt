@@ -61,7 +61,7 @@ internal class ApduErrorCreatorTest {
     @Test
     fun `create returns unsupported card error for invalid PPSE response`() {
         val result = errorMapper.create(
-            ApduResponseError.Invalid(data = byteArrayOf(0x01)),
+            ApduResponseError.Data.Invalid(data = byteArrayOf(0x01)),
         )
 
         assertThat(result.errorCode).isEqualTo("cardUnsupportedByNfc")
@@ -125,7 +125,7 @@ internal class ApduErrorCreatorTest {
     @Test
     fun `create returns parsing error for ApduResponseError Parsing`() {
         val result = errorMapper.create(
-            ApduResponseError.Parsing(
+            ApduResponseError.Data.Parsing(
                 data = byteArrayOf(0x01, 0x02),
                 cause = IllegalArgumentException("invalid tlv"),
             ),

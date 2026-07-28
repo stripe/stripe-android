@@ -90,35 +90,52 @@ internal class ApduCommandTest {
 
     @Test
     fun `transceiveWith returns Invalid error when response data cannot be parsed`() {
-        val responseData = tlv(tag = 0x4F, value = byteArrayOf(0x01))
+        val responseData = byteArrayOf(0x01)
 
         test(
             transceiveResult = apduSuccessResponse(responseData)
         ) {
-            val command = TestApduCommand(response = null)
+            val command = TestApduCommandWithError()
             val result = command.transceiveWith(transceiver)
 
             val error = result.exceptionOrNull()
-            assertThat(error).isInstanceOf<ApduResponseError.Invalid>()
-            assertThat((error as ApduResponseError.Invalid).data.contentEquals(responseData)).isTrue()
+            assertThat(error).isInstanceOf<ApduResponseError.Data.Invalid>()
+            assertThat((error as ApduResponseError.Data.Invalid).data.contentEquals(responseData)).isTrue()
             assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
         }
     }
 
     @Test
-    fun `transceiveWith returns Parsing error when tlv data is malformed`() {
+    fun `transceiveWith returns Invalid error when response data cannot be parsed with Tlv command`() {
+        val responseData = tlv(tag = 0x4F, value = byteArrayOf(0x01))
+
+        test(
+            transceiveResult = apduSuccessResponse(responseData)
+        ) {
+            val command = TestTlvApduCommand(response = null)
+            val result = command.transceiveWith(transceiver)
+
+            val error = result.exceptionOrNull()
+            assertThat(error).isInstanceOf<ApduResponseError.Data.Invalid>()
+            assertThat((error as ApduResponseError.Data.Invalid).data.contentEquals(responseData)).isTrue()
+            assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `transceiveWith returns Parsing error when tlv data is malformed with Tlv command`() {
         val malformedResponseData = byteArrayOf(0x4F, 0x05, 0x01)
 
         test(
             transceiveResult = apduSuccessResponse(malformedResponseData)
         ) {
-            val command = TestApduCommand(response = "parsed")
+            val command = TestTlvApduCommand(response = "parsed")
             val result = command.transceiveWith(transceiver)
 
             val error = result.exceptionOrNull()
-            assertThat(error).isInstanceOf<ApduResponseError.Parsing>()
+            assertThat(error).isInstanceOf<ApduResponseError.Data.Parsing>()
 
-            val parsingError = error as ApduResponseError.Parsing
+            val parsingError = error as ApduResponseError.Data.Parsing
             assertThat(parsingError.data.contentEquals(malformedResponseData)).isTrue()
             assertThat(parsingError.cause).isInstanceOf<IndexOutOfBoundsException>()
 
@@ -149,8 +166,30 @@ internal class ApduCommandTest {
         override val firstParameterByte: Byte = 0x04,
         override val secondParameterByte: Byte = 0x00,
         override val dataArray: ByteArray? = null,
-        private val response: String?,
+        private val response: String,
     ) : ApduCommand<String>() {
+        override fun responseData(data: ByteArray): ApduDataResult<String> = ApduDataResult.Success(response)
+    }
+
+    private class TestApduCommandWithError(
+        override val classByte: Byte = 0x00,
+        override val instructionByte: Byte = 0xA4.toByte(),
+        override val firstParameterByte: Byte = 0x04,
+        override val secondParameterByte: Byte = 0x00,
+        override val dataArray: ByteArray? = null,
+    ) : ApduCommand<String>() {
+        override fun responseData(data: ByteArray): ApduDataResult<String> =
+            ApduDataResult.Error(ApduResponseError.Data.Invalid(data))
+    }
+
+    private class TestTlvApduCommand(
+        override val classByte: Byte = 0x00,
+        override val instructionByte: Byte = 0xA4.toByte(),
+        override val firstParameterByte: Byte = 0x04,
+        override val secondParameterByte: Byte = 0x00,
+        override val dataArray: ByteArray? = null,
+        private val response: String?,
+    ) : ApduCommand.Tlv<String>() {
         override fun responseData(tlv: Map<String, ByteArray>): String? = response
     }
 }

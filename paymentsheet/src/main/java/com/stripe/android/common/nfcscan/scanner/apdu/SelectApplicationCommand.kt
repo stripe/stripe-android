@@ -5,7 +5,7 @@ package com.stripe.android.common.nfcscan.scanner.apdu
  */
 internal data class SelectApplicationCommand(
     val aid: ApplicationIdentifier,
-) : ApduCommand<Unit>() {
+) : ApduCommand.Tlv<Unit>() {
     /*
      * Interindustry standardized command for ISO 7816-4
      */

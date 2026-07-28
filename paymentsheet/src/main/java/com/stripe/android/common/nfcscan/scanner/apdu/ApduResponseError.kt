@@ -12,12 +12,19 @@ internal sealed class ApduResponseError(
         val sw2: Byte,
     ) : ApduResponseError("APDU error: SW1=$sw1, SW2=$sw2")
 
-    class Parsing(
-        val data: ByteArray,
-        override val cause: Throwable?,
-    ) : ApduResponseError("Failed to parse response data: ${data.toHexString()}")
+    sealed class Data(
+        message: String?,
+        cause: Throwable? = null,
+    ) : ApduResponseError(message, cause) {
+        abstract val data: ByteArray
 
-    class Invalid(
-        val data: ByteArray
-    ) : ApduResponseError("Invalid data in response: ${data.toHexString()}")
+        class Parsing(
+            override val data: ByteArray,
+            cause: Throwable?,
+        ) : Data("Failed to parse response data: ${data.toHexString()}", cause)
+
+        class Invalid(
+            override val data: ByteArray,
+        ) : Data("Invalid data in response: ${data.toHexString()}")
+    }
 }

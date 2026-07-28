@@ -6,7 +6,7 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 internal data class ReadRecordCommand(
     val recordNumber: Int,
     val shortFileIdentifier: Int,
-) : ApduCommand<Map<String, ByteArray>>() {
+) : ApduCommand.Tlv<Map<String, ByteArray>>() {
     /*
      * Interindustry standardized command for ISO 7816-4
      */
