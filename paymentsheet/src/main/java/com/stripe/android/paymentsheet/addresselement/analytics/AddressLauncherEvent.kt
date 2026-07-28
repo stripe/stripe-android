@@ -55,7 +55,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
             get() = mapOf(
                 FIELD_ADDRESS_DATA_BLOB to mapOf(
                     FIELD_AUTOCOMPLETE_SESSION_TOKEN to autocompleteSessionToken,
-                    FIELD_SOURCE to SOURCE_STRIPE_HOSTED,
                     FIELD_ADDRESS_INPUT_MODE to ADDRESS_INPUT_MODE_AUTOCOMPLETE,
                 )
             )
@@ -72,7 +71,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
             get() {
                 val data = mutableMapOf<String, Any>(
                     FIELD_AUTOCOMPLETE_SESSION_TOKEN to autocompleteSessionToken,
-                    FIELD_SOURCE to SOURCE_STRIPE_HOSTED,
                     FIELD_RESULT_COUNT to resultCount,
                 )
                 timeToFetch?.let { data[FIELD_TIME_TO_FETCH] = it.toDouble(DurationUnit.SECONDS) }
@@ -91,7 +89,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
             get() = mapOf(
                 FIELD_ADDRESS_DATA_BLOB to mapOf(
                     FIELD_AUTOCOMPLETE_SESSION_TOKEN to autocompleteSessionToken,
-                    FIELD_SOURCE to SOURCE_STRIPE_HOSTED,
                     FIELD_QUERY_LENGTH to queryLength,
                     FIELD_PLACE_ID to placeId,
                 )
@@ -120,7 +117,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         const val FIELD_EDIT_DISTANCE = "edit_distance"
         const val FIELD_TIME_TO_COMPLETE = "time_to_complete"
         const val FIELD_AUTOCOMPLETE_SESSION_TOKEN = "autocomplete_session_token"
-        const val FIELD_SOURCE = "source"
         const val FIELD_ADDRESS_INPUT_MODE = "address_input_mode"
         const val FIELD_TIME_TO_FETCH = "time_to_fetch"
         const val FIELD_RESULT_COUNT = "result_count"
@@ -128,7 +124,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         const val FIELD_QUERY_LENGTH = "query_length"
         const val FIELD_PLACE_ID = "place_id"
 
-        private const val SOURCE_STRIPE_HOSTED = "stripe_hosted"
         private const val ADDRESS_INPUT_MODE_AUTOCOMPLETE = "autocomplete"
     }
 }

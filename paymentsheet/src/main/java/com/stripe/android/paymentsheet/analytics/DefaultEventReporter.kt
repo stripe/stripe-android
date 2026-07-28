@@ -141,6 +141,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                     DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
                     DurationProvider.Key.PaymentMethodMessaging,
                     DurationProvider.Key.AddressAutocompleteSession,
+                    DurationProvider.Key.AddressAutocompleteFetch,
                     DurationProvider.Key.AddressElementCompletion -> null
                 }
                 )

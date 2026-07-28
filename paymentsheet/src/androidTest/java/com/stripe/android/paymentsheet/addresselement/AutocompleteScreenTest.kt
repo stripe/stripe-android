@@ -12,13 +12,12 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.model.Address
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.NoOpAddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.DefaultStripeTheme
 import java.util.Locale
-import kotlin.time.Duration
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -106,21 +105,4 @@ class AutocompleteScreenTest {
         }
     }
 
-    private object NoOpAddressLauncherEventReporter : AddressLauncherEventReporter {
-        override fun onShow(country: String) = Unit
-        override fun onCompleted(
-            country: String,
-            autocompleteResultSelected: Boolean,
-            editDistance: Int?,
-            timeToComplete: Duration?,
-        ) = Unit
-        override fun onAutocompleteSessionStarted(sessionToken: String) = Unit
-        override fun onAutocompleteSuggestionsReturned(
-            sessionToken: String,
-            resultCount: Int,
-            fetchDuration: Duration?,
-        ) = Unit
-        override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String) = Unit
-        override fun onAutocompleteError(sessionToken: String, error: Throwable) = Unit
-    }
 }

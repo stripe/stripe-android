@@ -316,6 +316,7 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
 
         val suggestionsCall = eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
         assertThat(suggestionsCall.resultCount).isEqualTo(1)
@@ -334,6 +335,7 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
 
         val errorCall = eventReporter.autocompleteErrorCalls.awaitItem()
         assertThat(errorCall.error).hasMessageThat().isEqualTo("Network error")
@@ -350,6 +352,7 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
 
         proxy.fetchPlace("place_123", Locale.US)
@@ -373,6 +376,7 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
 
         proxy.fetchPlace("place_123", Locale.US)

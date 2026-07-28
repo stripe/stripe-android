@@ -50,6 +50,7 @@ interface DurationProvider {
         IntentConfirmationChallengeWebViewLoaded,
         PaymentMethodMessaging,
         AddressAutocompleteSession,
+        AddressAutocompleteFetch,
         AddressElementCompletion
     }
 }

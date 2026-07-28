@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.analytics.NoOpAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -215,7 +216,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                     stripeAutocompleteRepository = null,
                                     coroutineScope = null,
                                     shouldUseAutocompleteProxyEndpointsProvider = { false },
-                                    eventReporter = null,
+                                    eventReporter = NoOpAddressLauncherEventReporter,
                                 ),
                             isLinkUI = true,
                         ),

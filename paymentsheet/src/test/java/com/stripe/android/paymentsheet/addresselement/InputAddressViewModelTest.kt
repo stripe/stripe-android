@@ -17,7 +17,6 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -48,7 +47,6 @@ class InputAddressViewModelTest {
             navigator,
             eventReporter,
             placesClient = null,
-            durationProvider = FakeDurationProvider(),
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -165,7 +163,6 @@ class InputAddressViewModelTest {
         assertThat(completedCall.country).isEqualTo("US")
         assertThat(completedCall.autocompleteResultSelected).isTrue()
         assertThat(completedCall.editDistance).isEqualTo(0)
-        assertThat(completedCall.timeToComplete).isNotNull()
     }
 
     @Test
@@ -979,7 +976,6 @@ class InputAddressViewModelTest {
             navigator,
             eventReporter,
             placesClient = mockPlacesClient,
-            durationProvider = FakeDurationProvider(),
         ).also { viewModelStoreRule.track(it) }
     }
 

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.addresselement.analytics
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
-import kotlin.time.Duration
 
 internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
     private val _showCalls = Turbine<String>()
@@ -13,6 +12,9 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
 
     private val _autocompleteSessionStartedCalls = Turbine<String>()
     val autocompleteSessionStartedCalls: ReceiveTurbine<String> = _autocompleteSessionStartedCalls
+
+    private val _autocompleteFetchStartedCalls = Turbine<String>()
+    val autocompleteFetchStartedCalls: ReceiveTurbine<String> = _autocompleteFetchStartedCalls
 
     private val _autocompleteSuggestionsReturnedCalls = Turbine<SuggestionsReturnedCall>()
     val autocompleteSuggestionsReturnedCalls: ReceiveTurbine<SuggestionsReturnedCall> =
@@ -32,19 +34,21 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         country: String,
         autocompleteResultSelected: Boolean,
         editDistance: Int?,
-        timeToComplete: Duration?,
     ) {
-        _completedCalls.add(CompletedCall(country, autocompleteResultSelected, editDistance, timeToComplete))
+        _completedCalls.add(CompletedCall(country, autocompleteResultSelected, editDistance))
     }
 
     override fun onAutocompleteSessionStarted(sessionToken: String) {
         _autocompleteSessionStartedCalls.add(sessionToken)
     }
 
+    override fun onAutocompleteFetchStarted(sessionToken: String) {
+        _autocompleteFetchStartedCalls.add(sessionToken)
+    }
+
     override fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
         resultCount: Int,
-        fetchDuration: Duration?,
     ) {
         _autocompleteSuggestionsReturnedCalls.add(SuggestionsReturnedCall(sessionToken, resultCount))
     }
@@ -61,6 +65,7 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         _showCalls.ensureAllEventsConsumed()
         _completedCalls.ensureAllEventsConsumed()
         _autocompleteSessionStartedCalls.ensureAllEventsConsumed()
+        _autocompleteFetchStartedCalls.ensureAllEventsConsumed()
         _autocompleteSuggestionsReturnedCalls.ensureAllEventsConsumed()
         _autocompleteSelectedCalls.ensureAllEventsConsumed()
         _autocompleteErrorCalls.ensureAllEventsConsumed()
@@ -70,7 +75,6 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         val country: String,
         val autocompleteResultSelected: Boolean,
         val editDistance: Int?,
-        val timeToComplete: Duration?,
     )
 
     data class SuggestionsReturnedCall(val sessionToken: String, val resultCount: Int)

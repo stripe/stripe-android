@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration
 
 @Singleton
 internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
@@ -20,6 +19,7 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
 ) : AddressLauncherEventReporter {
 
     override fun onShow(country: String) {
+        durationProvider.start(DurationProvider.Key.AddressElementCompletion, reset = true)
         fireEvent(
             AddressLauncherEvent.Show(
                 country = country
@@ -31,8 +31,8 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         country: String,
         autocompleteResultSelected: Boolean,
         editDistance: Int?,
-        timeToComplete: Duration?,
     ) {
+        val timeToComplete = durationProvider.end(DurationProvider.Key.AddressElementCompletion)
         fireEvent(
             AddressLauncherEvent.Completed(
                 country = country,
@@ -52,11 +52,15 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onAutocompleteFetchStarted(sessionToken: String) {
+        durationProvider.start(DurationProvider.Key.AddressAutocompleteFetch, reset = true)
+    }
+
     override fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
         resultCount: Int,
-        fetchDuration: Duration?,
     ) {
+        val fetchDuration = durationProvider.end(DurationProvider.Key.AddressAutocompleteFetch)
         val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
         fireEvent(
             AddressLauncherEvent.AutocompleteSuggestions(

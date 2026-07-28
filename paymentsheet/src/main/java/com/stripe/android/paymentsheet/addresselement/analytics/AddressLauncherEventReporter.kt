@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement.analytics
 
-import kotlin.time.Duration
-
 internal interface AddressLauncherEventReporter {
     fun onShow(country: String)
 
@@ -9,15 +7,15 @@ internal interface AddressLauncherEventReporter {
         country: String,
         autocompleteResultSelected: Boolean,
         editDistance: Int?,
-        timeToComplete: Duration?,
     )
 
     fun onAutocompleteSessionStarted(sessionToken: String)
 
+    fun onAutocompleteFetchStarted(sessionToken: String)
+
     fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
         resultCount: Int,
-        fetchDuration: Duration?,
     )
 
     fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String)
