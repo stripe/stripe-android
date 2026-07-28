@@ -1,6 +1,6 @@
 package com.stripe.android.common.nfcscan.scanner
 
-import com.stripe.android.common.nfcscan.scanner.apdu.ApduResponseError
+import com.stripe.android.common.nfcscan.scanner.apdu.GetProcessingOptionsCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.ReadRecordCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
@@ -51,25 +51,19 @@ internal class ApduCardReader @Inject constructor(
             val applicationIdentifier = SelectPpseCommand.transceiveWith(transceiver).getOrThrow()
             SelectApplicationCommand(applicationIdentifier).transceiveWith(transceiver).getOrThrow()
 
-            val records = mutableMapOf<String, ByteArray>()
+            val processingOptionsInfo = GetProcessingOptionsCommand
+                .transceiveWith(transceiver)
+                .getOrThrow()
 
-            probeFiles@ for (sfi in PROBE_SFIS) {
-                for (record in 1..MAX_RECORDS_PER_SFI) {
-                    val result = ReadRecordCommand(record, sfi)
+            val records = processingOptionsInfo.records.toMutableMap()
+
+            processingOptionsInfo.aflEntries.forEach { entry ->
+                for (record in entry.firstRecord..entry.lastRecord) {
+                    ReadRecordCommand(record, entry.shortFileIdentifier)
                         .transceiveWith(transceiver)
-
-                    result.onSuccess { result ->
-                        records += result
-
-                        if (cardDataParser.canParse(records)) {
-                            break@probeFiles
+                        .onSuccess { readRecords ->
+                            records += readRecords
                         }
-                    }.onFailure { error ->
-                        if (isFileNotFoundError(error)) {
-                            // Breaks the record loop but moves on to the next file
-                            break
-                        }
-                    }
                 }
             }
 
@@ -78,19 +72,5 @@ internal class ApduCardReader @Inject constructor(
         } finally {
             transceiver.close()
         }
-    }
-
-    private fun isFileNotFoundError(error: Throwable): Boolean {
-        return error is ApduResponseError.Command &&
-            error.sw1 == PARAMETER_ERROR_SW1 && error.sw2 == FILE_NOT_FOUND_SW2
-    }
-
-    private companion object {
-        // SFIs 1-3 cover virtually all Visa/Mastercard/Amex/Discover payment records.
-        val PROBE_SFIS = 1..3
-        const val MAX_RECORDS_PER_SFI = 8
-
-        const val PARAMETER_ERROR_SW1 = 0x6A.toByte()
-        const val FILE_NOT_FOUND_SW2 = 0x82.toByte()
     }
 }
