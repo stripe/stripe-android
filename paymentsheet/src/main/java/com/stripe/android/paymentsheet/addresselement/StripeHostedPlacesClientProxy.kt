@@ -76,11 +76,16 @@ internal class StripeHostedPlacesClientProxy(
     }
 
     override suspend fun fetchPlace(placeId: String, locale: Locale): Result<Address> {
-        val (cached, token, queryLength) = synchronized(lock) {
-            Triple(predictionCache[placeId], sessionToken, lastQueryLength)
+        val cached: AutocompleteSuggestion?
+        val token: String
+        val queryLength: Int
+        synchronized(lock) {
+            cached = predictionCache[placeId]
+            token = sessionToken
+            queryLength = lastQueryLength
         }
+        eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
         if (cached?.address != null) {
-            eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
             return Result.success(
                 Address(
                     line1 = cached.address.line1,
@@ -113,8 +118,6 @@ internal class StripeHostedPlacesClientProxy(
                 postalCode = result.address?.postalCode,
                 country = result.address?.country,
             )
-        }.onSuccess {
-            eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
         }.onFailure { error ->
             eventReporter.onAutocompleteError(sessionToken = token, error = error)
         }

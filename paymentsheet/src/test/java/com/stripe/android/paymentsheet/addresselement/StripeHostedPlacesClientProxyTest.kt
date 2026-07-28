@@ -382,6 +382,7 @@ class StripeHostedPlacesClientProxyTest {
         proxy.fetchPlace("place_123", Locale.US)
         repository.fetchPlaceDetailsCalls.awaitItem()
 
+        eventReporter.autocompleteSelectedCalls.awaitItem()
         val errorCall = eventReporter.autocompleteErrorCalls.awaitItem()
         assertThat(errorCall.error).hasMessageThat().isEqualTo("Details error")
         repository.ensureAllEventsConsumed()

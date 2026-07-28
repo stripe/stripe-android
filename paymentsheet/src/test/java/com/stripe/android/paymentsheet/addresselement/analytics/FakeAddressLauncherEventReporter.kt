@@ -52,7 +52,7 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         _autocompleteSuggestionsReturnedCalls.add(SuggestionsReturnedCall(sessionToken, resultCount))
     }
 
-    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?) {
+    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String) {
         _autocompleteSelectedCalls.add(SelectedCall(sessionToken, queryLength, placeId))
     }
 
@@ -79,7 +79,7 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
 
     data class SuggestionsReturnedCall(val sessionToken: String, val resultCount: Int)
 
-    data class SelectedCall(val sessionToken: String, val queryLength: Int, val placeId: String?)
+    data class SelectedCall(val sessionToken: String, val queryLength: Int, val placeId: String)
 
     data class ErrorCall(val sessionToken: String, val error: Throwable)
 }

@@ -84,19 +84,18 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
     class AutocompleteSelected(
         private val autocompleteSessionToken: String,
         private val queryLength: Int,
-        private val placeId: String?,
+        private val placeId: String,
     ) : AddressLauncherEvent() {
         override val eventName: String = "mc_address_autocomplete_selected"
         override val additionalParams: Map<String, Any>
-            get() {
-                val data = mutableMapOf<String, Any>(
+            get() = mapOf(
+                FIELD_ADDRESS_DATA_BLOB to mapOf(
                     FIELD_AUTOCOMPLETE_SESSION_TOKEN to autocompleteSessionToken,
                     FIELD_SOURCE to SOURCE_STRIPE_HOSTED,
                     FIELD_QUERY_LENGTH to queryLength,
+                    FIELD_PLACE_ID to placeId,
                 )
-                placeId?.let { data[FIELD_PLACE_ID] = it }
-                return mapOf(FIELD_ADDRESS_DATA_BLOB to data)
-            }
+            )
     }
 
     class AutocompleteError(

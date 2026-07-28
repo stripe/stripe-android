@@ -69,7 +69,7 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?) {
+    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String) {
         fireEvent(
             AddressLauncherEvent.AutocompleteSelected(
                 autocompleteSessionToken = sessionToken,

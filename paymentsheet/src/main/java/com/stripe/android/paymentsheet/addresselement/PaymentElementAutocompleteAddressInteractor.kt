@@ -56,17 +56,14 @@ internal class PaymentElementAutocompleteAddressInteractor(
         override fun create(): AutocompleteAddressInteractor {
             if (coroutineScope != null && autocompleteConfig.isInlineAutocompleteEnabled) {
                 val useStripeHosted = shouldUseAutocompleteProxyEndpointsProvider()
-                val resolvedClient = if (useStripeHosted) {
-                    if (stripeAutocompleteRepository != null && eventReporter != null) {
+                val resolvedClient = when {
+                    useStripeHosted && stripeAutocompleteRepository != null && eventReporter != null ->
                         StripeHostedPlacesClientProxy(
                             repository = stripeAutocompleteRepository,
                             eventReporter = eventReporter,
                         )
-                    } else {
-                        null
-                    }
-                } else {
-                    placesClient
+                    useStripeHosted -> null
+                    else -> placesClient
                 }
                 if (resolvedClient != null) {
                     activeInlineInteractor?.dispose()
