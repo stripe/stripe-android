@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
@@ -28,6 +29,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
+import java.util.WeakHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,7 +49,7 @@ class CheckoutController @Inject internal constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
 ) {
     val checkoutSession: StateFlow<Session?>
         get() = stateHolder.checkoutSession
@@ -622,6 +624,7 @@ class CheckoutController @Inject internal constructor(
         private val savedStateHandle: SavedStateHandle,
     ) {
         private var resultCallback: ResultCallback = ResultCallback {}
+        private var integrationName: String = "stripe_checkout"
 
         fun resultCallback(
             resultCallback: ResultCallback
@@ -629,10 +632,26 @@ class CheckoutController @Inject internal constructor(
             this.resultCallback = resultCallback
         }
 
+        /**
+         * Sets a unique name identifying this integration, allowing multiple [CheckoutController]
+         * instances to coexist.
+         *
+         * The name namespaces the controller's persisted state within [savedStateHandle] and its
+         * entry in global callback state, so instances built from the same [savedStateHandle] stay
+         * isolated from one another. Defaults to `"stripe_checkout"`; provide a distinct name for
+         * each controller when building more than one.
+         */
+        fun integrationName(
+            integrationName: String
+        ): Builder = apply {
+            this.integrationName = integrationName
+        }
+
         fun build(): CheckoutController {
             val component = DaggerCheckoutControllerComponent.factory().create(
                 application = application,
-                savedStateHandle = savedStateHandle,
+                savedStateHandle = savedStateHandle.checkoutSubHandle(integrationName),
+                paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
             )
 
@@ -732,3 +751,31 @@ class CheckoutController @Inject internal constructor(
         fun onResult(result: Result)
     }
 }
+
+/**
+ * Caches the child handle derived for each (parent, integrationName) pair so repeated derivations
+ * return the same instance. Every [CheckoutController] key lives inside its own child, so multiple
+ * controllers sharing one parent handle never clobber one another, and the shared instance means
+ * writes are observable across every reference within a process. Weak keys let a parent — and the
+ * children scoped to it — be collected once the parent goes away.
+ */
+private val checkoutChildHandles = WeakHashMap<SavedStateHandle, MutableMap<String, SavedStateHandle>>()
+
+/**
+ * Derives a child [SavedStateHandle] namespaced under [integrationName] within this parent handle.
+ * The child folds its contents back into the parent through [SavedStateHandle.setSavedStateProvider],
+ * so they persist with the parent and are restored from the parent's bundle after process death.
+ *
+ * [SavedStateHandle.savedStateProvider] is the only way to snapshot a whole handle — there is no
+ * public equivalent — so the RestrictedApi suppression is intentional.
+ */
+@Suppress("RestrictedApi")
+internal fun SavedStateHandle.checkoutSubHandle(integrationName: String): SavedStateHandle =
+    synchronized(checkoutChildHandles) {
+        val children = checkoutChildHandles.getOrPut(this) { mutableMapOf() }
+        children.getOrPut(integrationName) {
+            val subHandle = SavedStateHandle.createHandle(get<Bundle>(integrationName), null)
+            setSavedStateProvider(integrationName) { subHandle.savedStateProvider().saveState() }
+            subHandle
+        }
+    }
