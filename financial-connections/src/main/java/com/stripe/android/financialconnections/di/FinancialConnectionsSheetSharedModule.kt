@@ -8,7 +8,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -119,11 +118,10 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         internal fun providesApiOptions(
-            @Named(PUBLISHABLE_KEY) publishableKey: String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?
+            configuration: FinancialConnectionsSheetConfiguration
         ): ApiRequest.Options = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+            apiKey = configuration.publishableKey,
+            stripeAccount = configuration.stripeAccountId
         )
 
         @Provides
@@ -181,12 +179,12 @@ internal interface FinancialConnectionsSheetSharedModule {
         @ActivityRetainedScope
         internal fun provideAnalyticsRequestFactory(
             application: Application,
-            @Named(PUBLISHABLE_KEY) publishableKey: String
+            configuration: FinancialConnectionsSheetConfiguration
         ): AnalyticsRequestFactory = AnalyticsRequestFactory(
             packageManager = application.packageManager,
             packageName = application.packageName.orEmpty(),
             packageInfo = application.packageInfo,
-            publishableKeyProvider = { publishableKey },
+            publishableKeyProvider = { configuration.publishableKey },
             networkTypeProvider = NetworkTypeDetector(application)::invoke,
         )
 
