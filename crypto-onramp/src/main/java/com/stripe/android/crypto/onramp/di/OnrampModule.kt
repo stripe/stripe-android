@@ -8,8 +8,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -24,14 +23,15 @@ import com.stripe.android.link.LinkController
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PaymentConfigurationModule
+import com.stripe.android.payments.core.injection.ApiConfigurationModule
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
-    includes = [MobileSessionIdModule::class, PaymentConfigurationModule::class, StripeNetworkClientModule::class],
+    includes = [MobileSessionIdModule::class, ApiConfigurationModule::class, StripeNetworkClientModule::class],
     subcomponents = [OnrampPresenterComponent::class]
 )
 internal class OnrampModule {
@@ -57,14 +57,12 @@ internal class OnrampModule {
         stripeNetworkClient: StripeNetworkClient,
         stripeRepository: StripeRepository,
         linkController: LinkController,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
     ): CryptoApiRepository {
         return CryptoApiRepository(
             stripeNetworkClient = stripeNetworkClient,
             stripeRepository = stripeRepository,
-            publishableKeyProvider = publishableKeyProvider,
-            stripeAccountIdProvider = stripeAccountIdProvider,
+            apiConfigProvider = apiConfigProvider,
             apiVersion = ApiVersion.get().code,
             linkController = linkController,
             appInfo = Stripe.appInfo
