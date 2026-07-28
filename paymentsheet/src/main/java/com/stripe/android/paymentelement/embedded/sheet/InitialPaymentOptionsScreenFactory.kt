@@ -5,7 +5,6 @@ import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -45,7 +44,6 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
-    private val configuration: EmbeddedPaymentElement.Configuration,
     private val manageInteractorFactory: EmbeddedManageScreenInteractorFactory,
     private val updateScreenInteractorFactory: EmbeddedUpdateScreenInteractorFactory,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
@@ -193,14 +191,13 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     private fun shouldUpdateSelection(formHelper: FormHelper, paymentMethodCode: String?): Boolean {
-        val isConfirmFlow = configuration.formSheetAction ==
-            EmbeddedPaymentElement.FormSheetAction.Confirm
-        if (isConfirmFlow) {
-            val requiresFormScreen = paymentMethodCode != null &&
-                formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
-            return !requiresFormScreen
-        }
-        return true
+        // Don't fold a selection that requires a form into the vertical list's remembered selection.
+        // The form writes its in-progress selection to the shared holder, so tracking it here would
+        // pollute the list's selection and defeat the restore-on-return behavior that reasserts the
+        // list's selection when it becomes the current screen again (backing out of the form).
+        val requiresFormScreen = paymentMethodCode != null &&
+            formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
+        return !requiresFormScreen
     }
 
     private fun walletsState(): WalletsState? {
