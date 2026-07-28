@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.checkout.PaymentOptionDisplayData
+import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
