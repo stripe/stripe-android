@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
-import com.stripe.android.checkout.Address
+import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
