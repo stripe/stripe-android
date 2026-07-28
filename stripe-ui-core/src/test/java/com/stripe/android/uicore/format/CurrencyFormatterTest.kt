@@ -54,18 +54,6 @@ class CurrencyFormatterTest {
         assertFormattedEquals(CurrencyFormatter.format(amount, amountCurrency, targetLocale), expected)
     }
 
-    private fun assertFormattedEquals(
-        amount: Long,
-        amountCurrencyCode: String,
-        targetLocale: Locale = Locale.getDefault(),
-        expected: String,
-    ) {
-        assertFormattedEquals(
-            CurrencyFormatter.format(amount, Currency.getInstance(amountCurrencyCode), targetLocale),
-            expected
-        )
-    }
-
     @Test
     fun `amount currency USD, locale US`() {
         assertFormattedEquals(123412L, Currency.getInstance("USD"), Locale.US, "$1,234.12")

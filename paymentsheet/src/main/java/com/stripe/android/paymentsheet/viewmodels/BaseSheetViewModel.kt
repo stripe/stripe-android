@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
-import com.stripe.android.paymentsheet.addresselement.INLINE_MAX_VISIBLE_PREDICTIONS
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -95,7 +94,7 @@ internal abstract class BaseSheetViewModel(
                 googlePlacesApiKey = config.googlePlacesApiKey,
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
-                inlineMaxVisiblePredictions = INLINE_MAX_VISIBLE_PREDICTIONS,
+                inlineMaxVisiblePredictions = 3,
             ),
             placesClient = placesClient,
             stripeAutocompleteRepository = stripeAutocompleteRepository,

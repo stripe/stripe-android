@@ -22,5 +22,3 @@ internal val AUTOCOMPLETE_DEFAULT_COUNTRIES = setOf(
     "US",
     "ZA"
 )
-
-internal const val INLINE_MAX_VISIBLE_PREDICTIONS = 3
