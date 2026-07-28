@@ -7,6 +7,11 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,9 +78,10 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
-                                if (session.isExpressCheckoutElementAvailable) {
-                                    presenter.expressCheckoutElement().Content()
-                                }
+                                ExpressCheckoutSection(
+                                    session = session,
+                                    content = { presenter.expressCheckoutElement().Content() },
+                                )
                                 paymentElement.PaymentOptionsContent()
                             }
                         }
@@ -101,6 +107,30 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                     }
                 },
             )
+        }
+    }
+}
+
+@Composable
+private fun ExpressCheckoutSection(
+    session: CheckoutSession,
+    content: @Composable () -> Unit,
+) {
+    val availableMethods = session.availableExpressCheckoutPaymentMethods
+
+    AnimatedVisibility(
+        visible = availableMethods.isNotEmpty(),
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Express checkout: ${availableMethods.joinToString()}",
+                style = MaterialTheme.typography.body2,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            content()
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

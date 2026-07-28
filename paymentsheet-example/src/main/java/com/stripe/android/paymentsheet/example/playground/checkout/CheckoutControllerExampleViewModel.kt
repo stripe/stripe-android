@@ -11,8 +11,10 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.compose.ui.unit.dp
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSession
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.checkout.GooglePayConfiguration.Environment
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -74,6 +76,24 @@ internal class CheckoutControllerExampleViewModel(
                             GooglePayConfiguration(
                                 environment = Environment.Test
                             )
+                        )
+                        .expressCheckoutElement(
+                            ExpressCheckoutElement.Configuration()
+                                .paymentMethods(
+                                    ExpressCheckoutElement.Configuration.PaymentMethods()
+                                        .link(
+                                            ExpressCheckoutElement.Configuration.PaymentMethods
+                                                .LinkVisibility.Auto
+                                        )
+                                        .googlePay(
+                                            ExpressCheckoutElement.Configuration.PaymentMethods
+                                                .GooglePayVisibility.Auto
+                                        )
+                                )
+                                .buttonHeight(52.dp)
+                                .buttonOrientation(
+                                    ExpressCheckoutElement.Configuration.ButtonOrientation.Horizontal
+                                )
                         )
                 ).fold(
                     onSuccess = {
