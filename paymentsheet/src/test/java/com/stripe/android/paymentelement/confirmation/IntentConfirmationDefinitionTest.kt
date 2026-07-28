@@ -26,31 +26,29 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakePaymentLauncher
+import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
 
 class IntentConfirmationDefinitionTest {
     @Test
-    fun `'createLauncher' should register and return the activity result launcher`() {
-        val registeredLauncher = mock<ActivityResultLauncher<PaymentLauncherContract.Args>>()
-
+    fun `'createLauncher' should register and return the activity result launcher`() = runTest {
         val definition = createIntentConfirmationDefinition()
 
-        val createdLauncher = definition.createLauncher(
-            activityResultCaller = mock {
-                on {
-                    registerForActivityResult<PaymentLauncherContract.Args, InternalPaymentResult>(any(), any())
-                } doReturn registeredLauncher
-            },
-            onResult = {}
-        )
+        DummyActivityResultCaller.test {
+            val createdLauncher = definition.createLauncher(
+                activityResultCaller = activityResultCaller,
+                onResult = {},
+            )
 
-        assertThat(createdLauncher).isEqualTo(registeredLauncher)
+            awaitRegisterCall()
+            val registeredLauncher = awaitNextRegisteredLauncher()
+
+            assertThat(createdLauncher).isEqualTo(registeredLauncher)
+        }
     }
 
     @Test
@@ -262,7 +260,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = mock(),
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
@@ -286,7 +284,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = mock(),
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
@@ -314,7 +312,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = mock(),
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
@@ -338,7 +336,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = mock(),
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
@@ -363,7 +361,7 @@ class IntentConfirmationDefinitionTest {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         definition.launch(
-            launcher = mock(),
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
@@ -388,7 +386,7 @@ class IntentConfirmationDefinitionTest {
         val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
 
         definition.launch(
-            launcher = mock(),
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
@@ -414,7 +412,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = mock(),
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 deferredIntentConfirmationType = null,
