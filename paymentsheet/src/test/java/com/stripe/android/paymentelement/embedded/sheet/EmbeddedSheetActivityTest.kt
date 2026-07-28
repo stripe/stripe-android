@@ -269,6 +269,7 @@ internal class EmbeddedSheetActivityTest {
                     paymentElementCallbackIdentifier = "EmbeddedSheetActivityTestCallbackIdentifier",
                     statusBarColor = null,
                     selection = selection,
+                    previousNewSelections = Bundle(),
                     customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                         paymentMethods = paymentMethods,
                     ),

@@ -102,6 +102,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                     is TapToAddNextStep.ShowSavedPaymentMethods -> {
                         EmbeddedActivityResult.Complete(
                             selection = result.paymentSelection,
+                            previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
@@ -111,6 +112,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                     TapToAddNextStep.Complete -> {
                         EmbeddedActivityResult.Complete(
                             selection = null,
+                            previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = true,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
@@ -121,6 +123,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         EmbeddedActivityResult.Complete(
                             selection = result.paymentSelection,
+                            previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,

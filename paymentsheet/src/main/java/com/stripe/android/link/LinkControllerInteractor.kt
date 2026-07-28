@@ -211,6 +211,7 @@ internal class LinkControllerInteractor @Inject constructor(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?,
         paymentMethodTypes: List<LinkController.PaymentMethodType>?,
+        collectName: Boolean = false,
     ) {
         if (_state.value.presentationType != null) return
         updateState { it.copy(presentationType = PresentationType.PaymentMethods) }
@@ -218,6 +219,7 @@ internal class LinkControllerInteractor @Inject constructor(
             launcher = launcher,
             email = email,
             paymentMethodTypes = paymentMethodTypes,
+            collectName = collectName,
             onConfigurationError = { error ->
                 updateState { it.copy(presentationType = null) }
                 _presentPaymentMethodsResultFlow.tryEmit(
@@ -310,13 +312,14 @@ internal class LinkControllerInteractor @Inject constructor(
         email: String?,
         phoneNumber: String? = null,
         paymentMethodTypes: List<LinkController.PaymentMethodType>?,
+        collectName: Boolean = false,
         onError: (Throwable) -> Unit,
         onSuccess: (LinkConfiguration) -> Unit
     ) {
         val configuration = requireLinkComponent()
             .map { it.configuration }
             .map { config ->
-                if (email == null && phoneNumber == null && paymentMethodTypes == null) {
+                if (email == null && phoneNumber == null && paymentMethodTypes == null && !collectName) {
                     // No change needed.
                     config
                 } else {
@@ -326,21 +329,14 @@ internal class LinkControllerInteractor @Inject constructor(
                             phone = phoneNumber ?: config.customerInfo.phone,
                         )
 
-                    val nameCollectionConfig = when {
-                        paymentMethodTypes == null ||
-                            paymentMethodTypes.contains(LinkController.PaymentMethodType.BankAccount) -> {
-                            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                        }
-                        paymentMethodTypes.contains(LinkController.PaymentMethodType.Generic) -> {
-                            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
-                        }
-                        else -> {
-                            config.billingDetailsCollectionConfiguration.name
-                        }
+                    val billingDetailsCollectionConfiguration = if (collectName) {
+                        config.billingDetailsCollectionConfiguration.copy(
+                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        )
+                    } else {
+                        config.billingDetailsCollectionConfiguration
                     }
 
-                    val billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration
-                        .copy(name = nameCollectionConfig)
                     config.copy(
                         customerInfo = customerInfo,
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -689,6 +685,7 @@ internal class LinkControllerInteractor @Inject constructor(
         email: String? = null,
         phoneNumber: String? = null,
         paymentMethodTypes: List<LinkController.PaymentMethodType>? = null,
+        collectName: Boolean = false,
         onConfigurationError: (Throwable) -> Unit,
         getLaunchMode: (linkAccount: LinkAccount?, state: State) -> LinkLaunchMode?
     ) {
@@ -698,6 +695,7 @@ internal class LinkControllerInteractor @Inject constructor(
             email = email,
             phoneNumber = phoneNumber,
             paymentMethodTypes = paymentMethodTypes,
+            collectName = collectName,
             onError = onConfigurationError,
             onSuccess = { configuration ->
                 updateStateOnNewEmail(email)

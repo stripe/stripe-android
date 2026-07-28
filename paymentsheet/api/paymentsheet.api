@@ -249,6 +249,7 @@ public final class com/stripe/android/link/LinkController$Configuration {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun allowLogout (Z)Lcom/stripe/android/link/LinkController$Configuration;
+	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun email (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun paymentMethodTypes (Ljava/util/List;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun phoneNumber (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
