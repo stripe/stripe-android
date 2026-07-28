@@ -16,13 +16,18 @@ import kotlin.coroutines.CoroutineContext
 @JvmOverloads
 fun DefaultFraudDetectionDataRepository(
     context: Context,
+    publishableKey: String,
     workContext: CoroutineContext = Dispatchers.IO,
 ): DefaultFraudDetectionDataRepository {
     return DefaultFraudDetectionDataRepository(
         localStore = DefaultFraudDetectionDataStore(context, workContext),
         fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
         stripeNetworkClient = DefaultStripeNetworkClient(workContext = workContext),
-        errorReporter = ErrorReporter.createFallbackInstance(context, emptySet()),
+        errorReporter = ErrorReporter.createFallbackInstance(
+            context,
+            publishableKey = publishableKey,
+            productUsage = emptySet(),
+        ),
         workContext = workContext,
         fraudDetectionEnabledProvider = { Stripe.advancedFraudSignalsEnabled },
     )

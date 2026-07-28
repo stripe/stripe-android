@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentE
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.paymentsheet.repositories.NoOpPaymentMethodMessagingPromotionHelperModule
@@ -36,6 +37,7 @@ import javax.inject.Singleton
         ExtendedPaymentElementConfirmationModule::class,
         NoOpTapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
+        ApiConfigurationModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,

@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -118,10 +119,10 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         internal fun providesApiOptions(
-            configuration: FinancialConnectionsSheetConfiguration
+            apiConfiguration: ApiConfiguration.State
         ): ApiRequest.Options = ApiRequest.Options(
-            apiKey = configuration.publishableKey,
-            stripeAccount = configuration.stripeAccountId
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId
         )
 
         @Provides
@@ -179,12 +180,12 @@ internal interface FinancialConnectionsSheetSharedModule {
         @ActivityRetainedScope
         internal fun provideAnalyticsRequestFactory(
             application: Application,
-            configuration: FinancialConnectionsSheetConfiguration
+            apiConfiguration: ApiConfiguration.State
         ): AnalyticsRequestFactory = AnalyticsRequestFactory(
             packageManager = application.packageManager,
             packageName = application.packageName.orEmpty(),
             packageInfo = application.packageInfo,
-            publishableKeyProvider = { configuration.publishableKey },
+            publishableKeyProvider = { apiConfiguration.publishableKey },
             networkTypeProvider = NetworkTypeDetector(application)::invoke,
         )
 

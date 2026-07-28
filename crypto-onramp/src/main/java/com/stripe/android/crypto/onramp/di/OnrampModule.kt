@@ -23,7 +23,7 @@ import com.stripe.android.link.LinkController
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.ApiConfigurationModule
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -31,7 +31,7 @@ import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
-    includes = [MobileSessionIdModule::class, ApiConfigurationModule::class, StripeNetworkClientModule::class],
+    includes = [MobileSessionIdModule::class, ApiConfigurationFromPaymentConfigurationModule::class, StripeNetworkClientModule::class],
     subcomponents = [OnrampPresenterComponent::class]
 )
 internal class OnrampModule {

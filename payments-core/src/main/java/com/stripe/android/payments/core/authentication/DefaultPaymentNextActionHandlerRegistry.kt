@@ -36,10 +36,15 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
     @IntentAuthenticatorMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
     @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
+    apiConfigurationState: ApiConfiguration.State,
 ) : PaymentNextActionHandlerRegistry {
 
     private val paymentSheetNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler> by lazy {
-        paymentSheetNextActionHandlers(includePaymentSheetNextActionHandlers, applicationContext)
+        paymentSheetNextActionHandlers(
+            includePaymentSheetNextActionHandlers,
+            applicationContext,
+            apiConfigurationState.publishableKey,
+        )
     }
 
     @VisibleForTesting
@@ -144,7 +149,8 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
 @Suppress("TooGenericExceptionCaught")
 private fun paymentSheetNextActionHandlers(
     includePaymentSheetNextActionHandlers: Boolean,
-    applicationContext: Context
+    applicationContext: Context,
+    publishableKey: String,
 ): Map<NextActionHandlerKey, NextActionHandler> {
     return try {
         if (includePaymentSheetNextActionHandlers) {
@@ -157,7 +163,7 @@ private fun paymentSheetNextActionHandlers(
             emptyMap()
         }
     } catch (e: Exception) {
-        ErrorReporter.createFallbackInstance(applicationContext)
+        ErrorReporter.createFallbackInstance(applicationContext, publishableKey = publishableKey)
             .report(
                 // [PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND] will not be changed to avoid skewed metrics
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND,

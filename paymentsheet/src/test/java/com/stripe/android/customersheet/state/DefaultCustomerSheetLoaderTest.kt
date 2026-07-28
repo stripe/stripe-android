@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -867,7 +868,7 @@ internal class DefaultCustomerSheetLoaderTest {
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = workContext,
-            paymentConfiguration = Provider { PaymentConfiguration("pk_test_123") }
+            apiConfigurationResolver = ApiConfigurationResolver(Provider { PaymentConfiguration("pk_test_123") })
         )
     }
 

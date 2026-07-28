@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
 import android.os.Parcelable
+import com.stripe.android.PaymentConfiguration
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -82,11 +83,11 @@ class AddressLauncher internal constructor(
 
     @JvmOverloads
     fun present(
-        publishableKey: String,
         configuration: Configuration = Configuration()
     ) {
+        val config = PaymentConfiguration.getInstance(application.applicationContext)
         val args = AddressElementActivityContract.Args(
-            publishableKey = publishableKey,
+            publishableKey = config.publishableKey,
             config = configuration,
         )
 

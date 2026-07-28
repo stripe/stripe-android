@@ -38,7 +38,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         val args = PaymentBrowserAuthContract.parseArgs(intent)
         if (args == null) {
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKey = "")
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_NULL_ARGS,
                 )
@@ -70,14 +70,14 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             launcher.launch(intent)
             viewModel.hasLaunched = true
         } catch (e: ActivityNotFoundException) {
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKey = args.publishableKey)
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),
                 )
             finishWithFailure(args)
         } catch (e: SecurityException) {
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKey = args.publishableKey)
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),

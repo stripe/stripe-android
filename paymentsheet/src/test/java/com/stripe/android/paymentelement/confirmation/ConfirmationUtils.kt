@@ -205,8 +205,10 @@ internal fun createTestConfirmationHandlerFactory(
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
                     paymentLauncherFactory = { launcher, _ ->
                         stripePaymentLauncherAssistedFactory.create(
-                            publishableKey = { paymentConfiguration.publishableKey },
-                            stripeAccountId = { paymentConfiguration.stripeAccountId },
+                            apiConfigurationState = ApiConfiguration.State(
+                                publishableKey = paymentConfiguration.publishableKey,
+                                stripeAccountId = paymentConfiguration.stripeAccountId,
+                            ),
                             hostActivityLauncher = launcher,
                             statusBarColor = statusBarColor,
                             includePaymentSheetNextHandlers = true,

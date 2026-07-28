@@ -59,7 +59,8 @@ import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignu
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.ApiConfigurationModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -93,6 +94,7 @@ import javax.inject.Singleton
         DefaultIntentConfirmationModule::class,
         LinkInlineSignupConfirmationModule::class,
         ApiConfigurationModule::class,
+        ApiRequestOptionsModule::class,
         PaymentElementRequestSurfaceModule::class,
         TapToAddViewModelModule::class,
         TapToAddModule::class,

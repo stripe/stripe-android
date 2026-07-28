@@ -1,8 +1,7 @@
 package com.stripe.android.customersheet
 
-import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
@@ -33,7 +32,6 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
@@ -50,7 +48,7 @@ internal class DefaultCustomerSheetLoader(
     private val eventReporter: CustomerSheetEventReporter,
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val apiConfigurationResolver: ApiConfigurationResolver,
 ) : CustomerSheetLoader {
 
     @Inject
@@ -61,7 +59,7 @@ internal class DefaultCustomerSheetLoader(
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
-        paymentConfiguration: Provider<PaymentConfiguration>,
+        apiConfigurationResolver: ApiConfigurationResolver,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
@@ -71,7 +69,7 @@ internal class DefaultCustomerSheetLoader(
         eventReporter = eventReporter,
         errorReporter = errorReporter,
         workContext = workContext,
-        paymentConfiguration = paymentConfiguration,
+        apiConfigurationResolver = apiConfigurationResolver,
     )
 
     override suspend fun load(
@@ -184,10 +182,7 @@ internal class DefaultCustomerSheetLoader(
                     IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach
                 }
             ),
-            apiConfiguration = ApiConfiguration.State(
-                publishableKey = paymentConfiguration.get().publishableKey,
-                stripeAccountId = paymentConfiguration.get().stripeAccountId,
-            ),
+            apiConfiguration = apiConfigurationResolver.resolve(null),
         )
     }
 

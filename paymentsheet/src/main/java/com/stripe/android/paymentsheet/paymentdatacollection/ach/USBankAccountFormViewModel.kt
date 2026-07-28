@@ -10,6 +10,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.ApiConfiguration
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -838,10 +839,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val application = extras.requireApplication()
             return DaggerUSBankAccountFormComponent
                 .factory()
                 .create(
-                    application = extras.requireApplication(),
+                    application = application,
+                    apiConfigurationState = PaymentConfiguration.getInstance(application).let {
+                        ApiConfiguration.State(
+                            publishableKey = it.publishableKey,
+                            stripeAccountId = it.stripeAccountId,
+                        )
+                    },
                 )
                 .subComponentFactoryProvider.get()
                 .create(

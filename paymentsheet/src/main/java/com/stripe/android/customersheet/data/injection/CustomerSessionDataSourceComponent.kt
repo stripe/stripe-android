@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.data.injection
 
 import android.app.Application
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.customersheet.CustomerSheet
@@ -40,6 +41,7 @@ internal interface CustomerSessionDataSourceComponent {
         fun create(
             @BindsInstance application: Application,
             @BindsInstance customerSessionProvider: CustomerSheet.CustomerSessionProvider,
+            @BindsInstance apiConfigurationState: ApiConfiguration.State,
         ): CustomerSessionDataSourceComponent
     }
 }

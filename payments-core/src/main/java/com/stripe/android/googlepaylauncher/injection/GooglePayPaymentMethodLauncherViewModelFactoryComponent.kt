@@ -11,7 +11,7 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherViewModel
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.payments.core.injection.ApiConfigurationNamedModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -28,8 +28,8 @@ import javax.inject.Singleton
 @Component(
     modules = [
         GooglePayPaymentMethodLauncherModule::class,
+        ApiRequestOptionsModule::class,
         StripeRepositoryModule::class,
-        ApiConfigurationNamedModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class

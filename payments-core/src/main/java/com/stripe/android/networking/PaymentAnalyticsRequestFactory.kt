@@ -6,8 +6,8 @@ import android.content.pm.PackageManager
 import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.Stripe
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -48,9 +48,12 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         publishableKey: String,
         defaultProductUsageTokens: Set<String> = emptySet()
     ) : this(
-        context,
-        { publishableKey },
-        defaultProductUsageTokens
+        packageManager = context.applicationContext.packageManager,
+        packageInfo = context.applicationContext.packageInfo,
+        packageName = context.applicationContext.packageName.orEmpty(),
+        publishableKeyProvider = { publishableKey },
+        networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
     internal constructor(
@@ -64,16 +67,17 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
     )
 
+
     @Inject
     internal constructor(
         context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
         @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = { apiConfigProvider.get().publishableKey },
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )

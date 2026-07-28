@@ -604,6 +604,7 @@ class CustomerSheet internal constructor(
                         imageLoader = DefaultStripeImageLoader(application),
                         errorReporter = ErrorReporter.createFallbackInstance(
                             context = application,
+                            publishableKey = "",
                             productUsage = setOf("CustomerSheet"),
                         ),
                         context = application,

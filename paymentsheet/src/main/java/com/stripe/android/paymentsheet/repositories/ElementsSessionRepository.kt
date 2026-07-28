@@ -53,7 +53,7 @@ internal class RealElementsSessionRepository @Inject constructor(
 ) : ElementsSessionRepository {
 
     private val fraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(application, workContext)
+        DefaultFraudDetectionDataRepository(application, apiConfigProvider.get().publishableKey, workContext)
 
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,

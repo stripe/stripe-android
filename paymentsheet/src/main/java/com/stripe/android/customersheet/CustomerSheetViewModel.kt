@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
@@ -102,7 +103,7 @@ internal class CustomerSheetViewModel(
     private val logger: Logger,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
-    paymentConfiguration: PaymentConfiguration,
+    apiConfiguration: ApiConfiguration.State,
     private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
@@ -122,7 +123,7 @@ internal class CustomerSheetViewModel(
         logger: Logger,
         eventReporter: CustomerSheetEventReporter,
         @IOContext workContext: CoroutineContext = Dispatchers.IO,
-        paymentConfiguration: PaymentConfiguration,
+        apiConfiguration: ApiConfiguration.State,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
@@ -142,7 +143,7 @@ internal class CustomerSheetViewModel(
         eventReporter = eventReporter,
         workContext = workContext,
         productUsage = productUsage,
-        paymentConfiguration = paymentConfiguration,
+        apiConfiguration = apiConfiguration,
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         isNfcScanningAvailable = isNfcScanningAvailable,
@@ -170,7 +171,7 @@ internal class CustomerSheetViewModel(
         )
     )
 
-    private val isConfiguredLiveMode = paymentConfiguration.isLiveMode()
+    private val isConfiguredLiveMode = apiConfiguration.isLiveMode()
     private val isLiveMode
         get() = customerState.value.metadata?.stripeIntent?.isLiveMode ?: isConfiguredLiveMode
 
@@ -1323,13 +1324,20 @@ internal class CustomerSheetViewModel(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val application = extras.requireApplication()
             val component = DaggerCustomerSheetViewModelComponent.factory()
                 .create(
-                    application = extras.requireApplication(),
+                    application = application,
                     configuration = args.configuration,
                     args = args,
                     integrationType = args.integrationType,
                     savedStateHandle = extras.createSavedStateHandle(),
+                    apiConfigurationState = PaymentConfiguration.getInstance(application).let {
+                        ApiConfiguration.State(
+                            publishableKey = it.publishableKey,
+                            stripeAccountId = it.stripeAccountId,
+                        )
+                    },
                 )
 
             return component.viewModel as T

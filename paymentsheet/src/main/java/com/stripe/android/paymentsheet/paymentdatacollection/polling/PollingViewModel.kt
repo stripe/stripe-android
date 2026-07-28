@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.StripeIntent
@@ -258,6 +259,10 @@ internal class PollingViewModel @Inject constructor(
                     application = extras.requireApplication(),
                     config = config,
                     ioDispatcher = Dispatchers.IO,
+                    apiConfigurationState = ApiConfiguration.State(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId,
+                    ),
                 )
                 .subcomponentFactory
                 .create(
@@ -273,6 +278,7 @@ internal class PollingViewModel @Inject constructor(
         val timeLimit: Duration,
         val initialDelay: Duration,
         @StringRes val ctaText: Int,
+        val publishableKey: String,
         val stripeAccountId: String?,
         val qrCodeUrl: String?,
         val paymentMethodType: String,

@@ -5,7 +5,6 @@ import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.ApiConfiguration
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -13,8 +12,6 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -210,29 +207,12 @@ internal interface NativeLinkModule {
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
 
         @Provides
-        @NativeLinkScope
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
-            return PaymentConfiguration.getInstance(appContext)
-        }
-
-        @Provides
         fun provideApiConfigurationState(
             paymentMethodMetadata: PaymentMethodMetadata
         ): ApiConfiguration.State {
             return paymentMethodMetadata.apiConfiguration
         }
 
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKeyProvider(
-            apiConfigState: ApiConfiguration.State
-        ): () -> String = { apiConfigState.publishableKey }
-
-        @Provides
-        @Named(STRIPE_ACCOUNT_ID)
-        fun provideStripeAccountIdProvider(
-            apiConfigState: ApiConfiguration.State
-        ): () -> String? = { apiConfigState.stripeAccountId }
 
         @Provides
         @NativeLinkScope

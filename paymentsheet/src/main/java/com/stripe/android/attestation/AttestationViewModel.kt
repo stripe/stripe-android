@@ -1,6 +1,7 @@
 package com.stripe.android.attestation
 
 import android.app.Application
+import com.stripe.android.ApiConfiguration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
@@ -62,7 +63,10 @@ internal class AttestationViewModel @Inject constructor(
                 DaggerAttestationComponent.factory()
                     .build(
                         application = app,
-                        publishableKeyProvider = { args.publishableKey },
+                        apiConfigurationState = ApiConfiguration.State(
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = null,
+                        ),
                         productUsage = args.productUsage.toSet()
                     )
                     .attestationViewModel

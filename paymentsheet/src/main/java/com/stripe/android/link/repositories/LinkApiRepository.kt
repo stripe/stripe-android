@@ -58,7 +58,7 @@ internal class LinkApiRepository @Inject constructor(
 ) : LinkRepository {
 
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(application, workContext)
+        DefaultFraudDetectionDataRepository(application, apiConfigProvider.get().publishableKey, workContext)
 
     private val apiRequestOptions: ApiRequest.Options
         get() = buildRequestOptions()

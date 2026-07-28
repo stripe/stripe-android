@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.injection
 
 import android.content.Context
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.IOContext
@@ -40,6 +41,7 @@ internal interface StripeCustomerAdapterComponent {
             @BindsInstance customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
             @BindsInstance setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
             @BindsInstance paymentMethodTypes: List<String>?,
+            @BindsInstance apiConfigurationState: ApiConfiguration.State,
         ): StripeCustomerAdapterComponent
     }
 }

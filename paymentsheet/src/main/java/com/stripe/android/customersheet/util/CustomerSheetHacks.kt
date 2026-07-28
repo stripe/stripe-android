@@ -14,6 +14,8 @@ import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSourc
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.data.injection.DaggerCustomerAdapterDataSourceComponent
 import com.stripe.android.customersheet.data.injection.DaggerCustomerSessionDataSourceComponent
+import com.stripe.android.ApiConfiguration
+import com.stripe.android.PaymentConfiguration
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -49,6 +51,12 @@ internal object CustomerSheetHacks {
                     .create(
                         application = application,
                         adapter = integration.adapter,
+                        apiConfigurationState = PaymentConfiguration.getInstance(application).let {
+                            ApiConfiguration.State(
+                                publishableKey = it.publishableKey,
+                                stripeAccountId = it.stripeAccountId,
+                            )
+                        },
                     )
 
                 _initializationDataSource.value = adapterDataSourceComponent.customerSheetInitializationDataSource
@@ -62,6 +70,12 @@ internal object CustomerSheetHacks {
                     .create(
                         application = application,
                         customerSessionProvider = integration.customerSessionProvider,
+                        apiConfigurationState = PaymentConfiguration.getInstance(application).let {
+                            ApiConfiguration.State(
+                                publishableKey = it.publishableKey,
+                                stripeAccountId = it.stripeAccountId,
+                            )
+                        },
                     )
 
                 _initializationDataSource.value =

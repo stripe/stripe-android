@@ -1,6 +1,6 @@
 package com.stripe.android.common.taptoadd
 
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.ApiRequest
@@ -59,7 +59,7 @@ internal interface TapToAddCollectionHandler {
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             stripeRepository: StripeRepository,
-            paymentConfiguration: PaymentConfiguration,
+            apiConfiguration: ApiConfiguration.State,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
             userFacingLogger: UserFacingLogger,
@@ -71,7 +71,7 @@ internal interface TapToAddCollectionHandler {
                     terminalWrapper = terminalWrapper,
                     connectionManager = connectionManager,
                     stripeRepository = stripeRepository,
-                    paymentConfiguration = paymentConfiguration,
+                    apiConfiguration = apiConfiguration,
                     tapToPayUxConfiguration = tapToPayUxConfiguration,
                     userFacingLogger = userFacingLogger,
                     errorReporter = errorReporter,
@@ -88,7 +88,7 @@ internal interface TapToAddCollectionHandler {
 internal class DefaultTapToAddCollectionHandler(
     private val terminalWrapper: TerminalWrapper,
     private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: PaymentConfiguration,
+    private val apiConfiguration: ApiConfiguration.State,
     private val connectionManager: TapToAddConnectionManager,
     private val errorReporter: ErrorReporter,
     private val userFacingLogger: UserFacingLogger,
@@ -356,7 +356,7 @@ internal class DefaultTapToAddCollectionHandler(
 
         return ApiRequest.Options(
             apiKey = ephemeralKeySecret,
-            stripeAccount = paymentConfiguration.stripeAccountId,
+            stripeAccount = apiConfiguration.stripeAccountId,
         )
     }
 

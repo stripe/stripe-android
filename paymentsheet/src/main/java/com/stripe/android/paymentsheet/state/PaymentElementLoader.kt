@@ -5,7 +5,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
@@ -61,7 +61,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -282,7 +281,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val apiConfigurationResolver: ApiConfigurationResolver,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val customerRepository: CustomerRepository,
@@ -320,7 +319,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode.validate()
         configuration.validate(
             initializationMode = initializationMode,
-            isLiveMode = paymentConfiguration.get().isLiveMode(),
+            isLiveMode = apiConfigurationResolver.resolve(configuration.apiConfiguration).isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
             isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
@@ -503,7 +502,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         PaymentMethod.Type.SepaDebit,
                         PaymentMethod.Type.USBankAccount,
                     ), // These are the only payment method types we support as saved payment methods.
-                    silentlyFail = paymentConfiguration.get().isLiveMode(),
+                    silentlyFail = apiConfigurationResolver.resolve(configuration.apiConfiguration).isLiveMode(),
                 )
             }
         }
@@ -621,10 +620,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
             paymentMethodLayout = paymentMethodLayout,
-            apiConfiguration = ApiConfiguration.State(
-                publishableKey = paymentConfiguration.get().publishableKey,
-                stripeAccountId = paymentConfiguration.get().stripeAccountId,
-            ),
+            apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration),
         )
 
         return paymentMethodMetadata

@@ -185,6 +185,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     allowCreditCards = config.allowCreditCards,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
+                        publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
                         productUsage = setOf(PRODUCT_USAGE_TOKEN),
                     ),
                     cardFundingFilter = cardFundingFilter,

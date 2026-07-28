@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.ApiConfiguration
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
@@ -41,6 +42,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         ),
         includePaymentSheetNextActionHandlers = false,
         applicationContext = ApplicationProvider.getApplicationContext(),
+        apiConfigurationState = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
     )
 
     private val allAuthenticators = setOf(
