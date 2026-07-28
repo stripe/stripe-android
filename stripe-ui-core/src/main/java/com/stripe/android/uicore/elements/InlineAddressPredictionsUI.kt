@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
@@ -39,6 +42,7 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
 
 private val PredictionsPopupElevation = 8.dp
+internal val PredictionListItemDefaultMinHeight = 56.dp
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -46,6 +50,7 @@ fun InlineAddressPredictionsUI(
     state: AutocompleteAddressInteractor.InlinePredictionsState,
     attributionDrawable: Int?,
     fieldWidthDp: Dp,
+    maxVisiblePredictions: Int?,
     onPredictionSelected: (String) -> Unit,
     onDismiss: () -> Unit,
     onClear: () -> Unit,
@@ -71,6 +76,7 @@ fun InlineAddressPredictionsUI(
             InlineAddressPredictionsContent(
                 state = state,
                 attributionDrawable = attributionDrawable,
+                maxVisiblePredictions = maxVisiblePredictions,
                 onPredictionSelected = onPredictionSelected,
                 onClear = onClear,
                 onEnterManually = onEnterManually,
@@ -96,6 +102,7 @@ internal object BelowAnchorPopupPositionProvider : PopupPositionProvider {
 internal fun InlineAddressPredictionsContent(
     state: AutocompleteAddressInteractor.InlinePredictionsState,
     attributionDrawable: Int?,
+    maxVisiblePredictions: Int?,
     onPredictionSelected: (String) -> Unit,
     onClear: () -> Unit,
     onEnterManually: (() -> Unit)?,
@@ -112,6 +119,7 @@ internal fun InlineAddressPredictionsContent(
         if (results != null) {
             PredictionsList(
                 results = results,
+                maxVisiblePredictions = maxVisiblePredictions,
                 onPredictionSelected = onPredictionSelected,
                 onEnterManually = onEnterManually,
             )
@@ -188,11 +196,68 @@ private fun PredictionsHeader(
 @Composable
 private fun PredictionsList(
     results: AutocompleteAddressInteractor.InlinePredictionsState.Results,
+    maxVisiblePredictions: Int?,
     onPredictionSelected: (String) -> Unit,
     onEnterManually: (() -> Unit)?,
 ) {
-    val queryRegex = remember(results.query) { buildQueryRegex(results.query) }
     Divider()
+    if (maxVisiblePredictions != null) {
+        ScrollablePredictionsList(
+            results = results,
+            maxVisiblePredictions = maxVisiblePredictions,
+            onPredictionSelected = onPredictionSelected,
+        )
+    } else {
+        PredictionsListItems(
+            results = results,
+            onPredictionSelected = onPredictionSelected,
+        )
+    }
+
+    onEnterManually?.let {
+        Box(
+            contentAlignment = Alignment.TopStart,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .clickable(onClick = it)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_address_enter_manually),
+                color = MaterialTheme.colors.primary,
+                style = MaterialTheme.typography.body1,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ScrollablePredictionsList(
+    results: AutocompleteAddressInteractor.InlinePredictionsState.Results,
+    maxVisiblePredictions: Int,
+    onPredictionSelected: (String) -> Unit,
+) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .requiredSizeIn(maxHeight = PredictionListItemDefaultMinHeight * maxVisiblePredictions)
+            .verticalScroll(scrollState),
+    ) {
+        PredictionsListItems(
+            results = results,
+            onPredictionSelected = onPredictionSelected,
+        )
+    }
+}
+
+@Composable
+private fun PredictionsListItems(
+    results: AutocompleteAddressInteractor.InlinePredictionsState.Results,
+    onPredictionSelected: (String) -> Unit,
+) {
+    val queryRegex = remember(results.query) { buildQueryRegex(results.query) }
     results.predictions.forEach { prediction ->
         Column(
             modifier = Modifier
@@ -215,24 +280,6 @@ private fun PredictionsList(
             )
         }
         Divider()
-    }
-
-    onEnterManually?.let {
-        Box(
-            contentAlignment = Alignment.CenterStart,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp)
-                .clickable(onClick = it)
-                .padding(horizontal = 16.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.stripe_address_enter_manually),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.body1,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-        }
     }
 }
 

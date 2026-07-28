@@ -70,6 +70,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
                             isInlineAutocompleteEnabled = autocompleteConfig.isInlineAutocompleteEnabled,
                             shouldUseStripeHostedAutocomplete = useStripeHosted ||
                                 autocompleteConfig.shouldUseStripeHostedAutocomplete,
+                            inlineMaxVisiblePredictions = autocompleteConfig.inlineMaxVisiblePredictions,
                         ),
                         coroutineScope = coroutineScope,
                     ).also { activeInlineInteractor = it }
