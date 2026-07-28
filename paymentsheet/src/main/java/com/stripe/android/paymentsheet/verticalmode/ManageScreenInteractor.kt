@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
@@ -106,6 +107,7 @@ internal class DefaultManageScreenInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
+    private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
     dispatcher: CoroutineContext = Dispatchers.Main,
 ) : ManageScreenInteractor {
 
@@ -130,7 +132,8 @@ internal class DefaultManageScreenInteractor(
         selection,
         editing,
         canEdit,
-    ) { displayablePaymentMethods, paymentSelection, editing, canEdit ->
+        linkAccount,
+    ) { displayablePaymentMethods, paymentSelection, editing, canEdit, linkAccount, ->
         val currentSelection = if (editing) {
             null
         } else {
@@ -142,7 +145,7 @@ internal class DefaultManageScreenInteractor(
             currentSelection = currentSelection,
             isEditing = editing,
             canEdit = canEdit,
-            linkBrand = paymentMethodMetadata.linkBrand,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
         )
     }
 
@@ -215,7 +218,8 @@ internal class DefaultManageScreenInteractor(
                         viewModel.navigationHandler.pop()
                     }
                 },
-                defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId
+                defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
+                linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
             )
         }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.manage
 
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -22,6 +23,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
+    private val linkAccountHolder: LinkAccountHolder,
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val launchMode: EmbeddedLaunchMode,
@@ -52,6 +54,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                 embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
+            linkAccount = linkAccountHolder.linkAccountInfo,
         )
     }
 }
