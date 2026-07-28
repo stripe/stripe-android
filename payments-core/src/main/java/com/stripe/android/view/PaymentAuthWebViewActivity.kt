@@ -24,6 +24,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.SourceCancellationHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,17 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     private val logger: Logger by lazy {
         Logger.getInstance(_args?.enableLogging == true)
     }
+
+    @VisibleForTesting
+    internal var sourceCancellationHandlerFactory:
+        (PaymentBrowserAuthContract.Args, Logger) -> SourceCancellationHandler = { args, activityLogger ->
+            SourceCancellationHandler.create(
+                context = applicationContext,
+                args = args,
+                logger = activityLogger,
+            )
+        }
+
     private val viewModel: PaymentAuthWebViewActivityViewModel by viewModels {
         PaymentAuthWebViewActivityViewModel.Factory(
             application,
@@ -144,24 +156,34 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
                     stripeException = StripeException.create(error),
                 )
             viewModel.logError()
-            setResult(
-                Activity.RESULT_OK,
-                createResultIntent(
-                    PaymentFlowResult.Unvalidated(
-                        clientSecret = viewModel.paymentResult.clientSecret,
-                        flowOutcome = StripeIntentResult.Outcome.FAILED,
-                        exception = StripeException.create(error),
-                        canCancelSource = true,
-                        sourceId = viewModel.paymentResult.sourceId,
-                        source = viewModel.paymentResult.source,
-                        stripeAccountId = viewModel.paymentResult.stripeAccountId
-                    )
+            finishWithSourceCancellation(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = viewModel.paymentResult.clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.FAILED,
+                    exception = StripeException.create(error),
+                    canCancelSource = true,
+                    sourceId = viewModel.paymentResult.sourceId,
+                    source = viewModel.paymentResult.source,
+                    stripeAccountId = viewModel.paymentResult.stripeAccountId
                 )
             )
         } else {
+            logger.debug(
+                "PaymentAuthWebViewActivity#onAuthComplete() - " +
+                    "returning result with canCancelSource=${_args?.shouldCancelSource == true}"
+            )
             viewModel.logComplete()
+            val paymentResult = viewModel.paymentResult
+            finishWithSourceCancellation(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = paymentResult.clientSecret,
+                    canCancelSource = _args?.shouldCancelSource == true,
+                    sourceId = paymentResult.sourceId,
+                    source = paymentResult.source,
+                    stripeAccountId = paymentResult.stripeAccountId,
+                )
+            )
         }
-        finish()
     }
 
     override fun onDestroy() {
@@ -192,8 +214,30 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
 
     private fun cancelIntentSource() {
-        setResult(Activity.RESULT_OK, viewModel.cancellationResult)
-        finish()
+        finishWithSourceCancellation(
+            PaymentFlowResult.Unvalidated.fromIntent(viewModel.cancellationResult)
+        )
+    }
+
+    private fun finishWithSourceCancellation(result: PaymentFlowResult.Unvalidated) {
+        lifecycleScope.launch {
+            val sourceWasCanceled = sourceCancellationHandlerFactory(requireNotNull(_args), logger).cancel()
+            setResult(
+                Activity.RESULT_OK,
+                createResultIntent(
+                    PaymentFlowResult.Unvalidated(
+                        clientSecret = result.clientSecret,
+                        flowOutcome = result.flowOutcome,
+                        exception = result.exception,
+                        canCancelSource = result.canCancelSource && !sourceWasCanceled,
+                        sourceId = result.sourceId,
+                        source = result.source,
+                        stripeAccountId = result.stripeAccountId,
+                    )
+                )
+            )
+            finish()
+        }
     }
 
     private fun customizeToolbar() {

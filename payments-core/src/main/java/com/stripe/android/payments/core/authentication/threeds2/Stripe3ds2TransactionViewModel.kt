@@ -184,7 +184,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 startFrictionlessFlow()
             }
         } else if (result.fallbackRedirectUrl != null) {
-            on3ds2AuthFallback(result.fallbackRedirectUrl)
+            on3ds2AuthFallback(result.fallbackRedirectUrl, sourceId)
         } else {
             val errorMessage = result.error?.let { error ->
                 listOf(
@@ -211,7 +211,8 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
      * Used when standard 3DS2 authentication mechanisms are unavailable.
      */
     private fun on3ds2AuthFallback(
-        fallbackRedirectUrl: String
+        fallbackRedirectUrl: String,
+        sourceId: String,
     ): NextStep {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Fallback)
@@ -234,6 +235,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 toolbarCustomization = StripeToolbarCustomization().apply {
                     setButtonText(context.getString(R.string.stripe_cancel))
                 },
+                sourceId = sourceId,
             )
         )
     }

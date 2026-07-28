@@ -159,7 +159,8 @@ class PaymentAuthWebViewActivityViewModelTest {
             url = "https://example.com",
             statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            isInstantApp = false
+            isInstantApp = false,
+            sourceId = null,
         )
     }
 }

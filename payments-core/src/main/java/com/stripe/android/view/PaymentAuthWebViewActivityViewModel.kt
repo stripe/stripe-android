@@ -53,7 +53,7 @@ internal class PaymentAuthWebViewActivityViewModel(
         get() {
             return PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
-                sourceId = Uri.parse(args.url).lastPathSegment.orEmpty(),
+                sourceId = args.sourceId ?: Uri.parse(args.url).lastPathSegment.orEmpty(),
                 stripeAccountId = args.stripeAccountId
             )
         }
