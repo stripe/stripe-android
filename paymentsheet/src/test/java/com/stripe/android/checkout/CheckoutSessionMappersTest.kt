@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -20,25 +21,25 @@ class CheckoutSessionMappersTest {
     @Test
     fun `maps status open`() {
         val session = createSession(status = CheckoutSessionResponse.Status.OPEN)
-        assertThat(session.status).isEqualTo(CheckoutSession.Status.Open)
+        assertThat(session.status).isEqualTo(Session.Status.Open)
     }
 
     @Test
     fun `maps status complete`() {
         val session = createSession(status = CheckoutSessionResponse.Status.COMPLETE)
-        assertThat(session.status).isEqualTo(CheckoutSession.Status.Complete)
+        assertThat(session.status).isEqualTo(Session.Status.Complete)
     }
 
     @Test
     fun `maps status expired`() {
         val session = createSession(status = CheckoutSessionResponse.Status.EXPIRED)
-        assertThat(session.status).isEqualTo(CheckoutSession.Status.Expired)
+        assertThat(session.status).isEqualTo(Session.Status.Expired)
     }
 
     @Test
     fun `maps status unknown`() {
         val session = createSession(status = CheckoutSessionResponse.Status.UNKNOWN)
-        assertThat(session.status).isEqualTo(CheckoutSession.Status.Unknown)
+        assertThat(session.status).isEqualTo(Session.Status.Unknown)
     }
 
     @Test
@@ -74,7 +75,7 @@ class CheckoutSessionMappersTest {
     @Test
     fun `maps tax status ready`() {
         val session = createSession(taxStatus = CheckoutSessionResponse.TaxStatus.READY)
-        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.Ready)
+        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.Ready)
     }
 
     @Test
@@ -82,7 +83,7 @@ class CheckoutSessionMappersTest {
         val session = createSession(
             taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
         )
-        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.RequiresShippingAddress)
+        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.RequiresShippingAddress)
     }
 
     @Test
@@ -90,13 +91,13 @@ class CheckoutSessionMappersTest {
         val session = createSession(
             taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
         )
-        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.RequiresBillingAddress)
+        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.RequiresBillingAddress)
     }
 
     @Test
     fun `maps tax status unknown`() {
         val session = createSession(taxStatus = CheckoutSessionResponse.TaxStatus.UNKNOWN)
-        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.Unknown)
+        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.Unknown)
     }
 
     @Test
@@ -288,7 +289,7 @@ class CheckoutSessionMappersTest {
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
-    ): CheckoutSession {
+    ): Session {
         return CheckoutSessionResponseFactory.create(
             id = id,
             status = status,
