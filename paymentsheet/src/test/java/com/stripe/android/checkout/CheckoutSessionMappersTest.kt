@@ -279,21 +279,6 @@ class CheckoutSessionMappersTest {
         assertThat(session.shippingOptions).isEmpty()
     }
 
-    @Test
-    fun `maps available express checkout payment methods`() {
-        val session = createSession(
-            availableExpressCheckoutPaymentMethods = listOf(
-                ExpressCheckoutElement.PaymentMethod.Link,
-                ExpressCheckoutElement.PaymentMethod.GooglePay,
-            ),
-        )
-
-        assertThat(session.availableExpressCheckoutPaymentMethods).containsExactly(
-            ExpressCheckoutElement.PaymentMethod.Link,
-            ExpressCheckoutElement.PaymentMethod.GooglePay,
-        ).inOrder()
-    }
-
     private fun createSession(
         id: String = DEFAULT_CHECKOUT_SESSION_ID,
         status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
@@ -304,7 +289,6 @@ class CheckoutSessionMappersTest {
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
-        availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod> = emptyList(),
     ): CheckoutSession {
         return CheckoutSessionResponseFactory.create(
             id = id,
@@ -319,7 +303,6 @@ class CheckoutSessionMappersTest {
         ).asCheckoutSession(
             flagImages = null,
             paymentOptionDisplayData = null,
-            availableExpressCheckoutPaymentMethods = availableExpressCheckoutPaymentMethods,
         )
     }
 }

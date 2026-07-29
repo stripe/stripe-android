@@ -86,7 +86,6 @@ internal class CurrencySelectorViewModelTest {
                 .asCheckoutSession(
                     flagImages = null,
                     paymentOptionDisplayData = null,
-                    availableExpressCheckoutPaymentMethods = emptyList(),
                 )
 
             assertThat(awaitItem()).isNull()
@@ -128,7 +127,6 @@ internal class CurrencySelectorViewModelTest {
             CheckoutSessionResponseFactory.create().asCheckoutSession(
                 flagImages = null,
                 paymentOptionDisplayData = null,
-                availableExpressCheckoutPaymentMethods = emptyList(),
             )
         )
         val updateCurrencyCalls = Turbine<String>()

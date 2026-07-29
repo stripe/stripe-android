@@ -44,7 +44,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         stateFlow.mapAsStateFlow {
             it?.asCheckoutSession(
                 paymentOptionFactory,
-                availableExpressButtonTypesFactory,
             )
         }
 

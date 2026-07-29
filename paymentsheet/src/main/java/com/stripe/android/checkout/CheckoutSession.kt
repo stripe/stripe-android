@@ -55,7 +55,6 @@ class CheckoutSession internal constructor(
      * The customer's currently selected payment option, or `null` if none has been selected yet.
      */
     val paymentOptionDisplayData: PaymentOptionDisplayData?,
-    val availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod>,
     internal val currencySelectorOptions: CurrencySelectorOptions?,
 ) {
 

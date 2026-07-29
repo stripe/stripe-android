@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Parcelable
-import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -38,7 +37,6 @@ internal data class CheckoutControllerState(
 ) : Parcelable {
     fun asCheckoutSession(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
-        availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
     ): CheckoutSession {
         return checkoutSessionResponse.asCheckoutSession(
             flagImages = flagImages,
@@ -46,11 +44,6 @@ internal data class CheckoutControllerState(
                 selection = paymentSelection,
                 paymentMethodMetadata = paymentMethodMetadata,
             ),
-            availableExpressCheckoutPaymentMethods = availableExpressButtonTypesFactory.create(
-                paymentMethodMetadata = paymentMethodMetadata,
-                expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
-                googlePayConfiguration = configuration.googlePayConfiguration,
-            ).map { it.asPaymentMethod() },
         )
     }
 }

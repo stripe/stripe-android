@@ -41,6 +41,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.checkout.CheckoutSession
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
@@ -67,6 +68,8 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 
         setContent {
             val status by viewModel.status.collectAsState()
+            val availableExpressCheckoutPaymentMethods by viewModel.controller
+                .availableExpressCheckoutPaymentMethods.collectAsState()
             val navController = rememberNavController()
             val backStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = backStackEntry?.destination?.route ?: CheckoutScreen.Summary.route
@@ -94,6 +97,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                             )
                                             ExpressCheckoutSection(
                                                 session = session,
+                                                availableMethods = availableExpressCheckoutPaymentMethods,
                                                 content = { presenter.expressCheckoutElement().Content() },
                                             )
                                         }
@@ -112,6 +116,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                         currentStatus.checkoutSession?.let { session ->
                                             ExpressCheckoutSection(
                                                 session = session,
+                                                availableMethods = availableExpressCheckoutPaymentMethods,
                                                 content = { presenter.expressCheckoutElement().Content() },
                                             )
                                             paymentElement.PaymentOptionsContent()
@@ -193,10 +198,9 @@ private fun ExpressCheckoutExamplePicker(
 @Composable
 private fun ExpressCheckoutSection(
     session: CheckoutSession,
+    availableMethods: List<ExpressCheckoutElement.PaymentMethod>,
     content: @Composable () -> Unit,
 ) {
-    val availableMethods = session.availableExpressCheckoutPaymentMethods
-
     AnimatedVisibility(
         visible = availableMethods.isNotEmpty(),
         enter = fadeIn() + expandVertically(),

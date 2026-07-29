@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutSession
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import kotlinx.coroutines.launch
@@ -41,12 +42,15 @@ internal class CheckoutControllerExampleCopyPaymentActivity : AppCompatActivity(
 
         setContent {
             val session by controller.checkoutSession.collectAsState()
+            val availableExpressCheckoutPaymentMethods by controller
+                .availableExpressCheckoutPaymentMethods.collectAsState()
             PlaygroundTheme(
                 content = {
                     session?.let { checkoutSession ->
                         Column(modifier = Modifier.fillMaxWidth()) {
                             CopyExpressCheckoutSection(
                                 session = checkoutSession,
+                                availableMethods = availableExpressCheckoutPaymentMethods,
                                 content = { presenter.expressCheckoutElement().Content() },
                             )
                             paymentElement.PaymentOptionsContent()
