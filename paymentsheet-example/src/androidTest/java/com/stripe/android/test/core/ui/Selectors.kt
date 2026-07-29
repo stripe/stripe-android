@@ -189,8 +189,8 @@ internal class Selectors(
         )
         repeat(8) {
             val clicked = freButtonIds.any { id ->
-                val button = device.findObject(UiSelector().resourceId("$chrome:id/$id"))
-                if (button.exists()) {
+                val button = device.findObject(By.res("$chrome:id/$id"))
+                if (button != null) {
                     runCatching { button.click() }
                     device.waitForIdle()
                     true
