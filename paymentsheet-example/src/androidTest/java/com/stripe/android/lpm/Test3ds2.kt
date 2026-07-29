@@ -5,12 +5,10 @@ import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-@Ignore("#ir-implore-chord")
 internal class Test3ds2 : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "card",
