@@ -7,11 +7,11 @@ import com.stripe.android.common.nfcscan.scanner.apdu.GetProcessingOptionsComman
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.apduSuccessResponse
-import com.stripe.android.common.nfcscan.scanner.apdu.defaultPaymentMethodMetadata
 import com.stripe.android.common.nfcscan.scanner.apdu.tlv
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -231,7 +231,7 @@ internal class ApduCardReaderTest {
         transceiveResults: List<ByteArray> = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID))
         ),
-        paymentMethodMetadata: PaymentMethodMetadata = defaultPaymentMethodMetadata(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         pdolData: ByteArray = byteArrayOf(),
         parseResult: ScannedCardData? = null,
         openException: Throwable? = null,

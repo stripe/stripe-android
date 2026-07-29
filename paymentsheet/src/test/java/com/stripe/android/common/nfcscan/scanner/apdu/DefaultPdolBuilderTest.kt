@@ -3,8 +3,9 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.scanner.apdu.pdol.DefaultPdolBuilder
 import com.stripe.android.common.nfcscan.scanner.apdu.pdol.FakeTagValueProducer
-import com.stripe.android.common.nfcscan.scanner.apdu.pdol.TagValueProducer
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -39,8 +40,9 @@ internal class DefaultPdolBuilderTest {
             template = template,
         )
 
-        val pdolResponse = extractCommandTemplateValue(result)
-        assertThat(pdolResponse).isEqualTo(TERMINAL_TRANSACTION_QUALIFIERS)
+        assertThat(result).isEqualTo(
+            commandTemplateResponse(TERMINAL_TRANSACTION_QUALIFIERS),
+        )
 
         val producer = tagValueProducers.single() as FakeTagValueProducer
         assertThat(producer.produceCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
@@ -64,13 +66,14 @@ internal class DefaultPdolBuilderTest {
             template = template,
         )
 
-        val pdolResponse = extractCommandTemplateValue(result)
-        assertThat(pdolResponse).isEqualTo(
-            byteArrayOf(0x01, 0x02),
+        assertThat(result).isEqualTo(
+            commandTemplateResponse(
+                byteArrayOf(0x01, 0x02),
+            ),
         )
 
-        val producer = tagValueProducers.single() as FakeTagValueProducer
-        assertThat(producer.produceCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
+        assertThat(tagValueProducers.single().produceCalls.awaitItem())
+            .isEqualTo(paymentMethodMetadata)
     }
 
     @Test
@@ -89,18 +92,57 @@ internal class DefaultPdolBuilderTest {
             template = template,
         )
 
-        val pdolResponse = extractCommandTemplateValue(result)
-        assertThat(pdolResponse).isEqualTo(byteArrayOf(0x00, 0x00, 0x00, 0x00))
+        assertThat(result).isEqualTo(
+            commandTemplateResponse(
+                byteArrayOf(0x00, 0x00, 0x00, 0x00),
+            ),
+        )
 
-        val producer = tagValueProducers.single() as FakeTagValueProducer
-        assertThat(producer.produceCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
+        assertThat(tagValueProducers.single().produceCalls.awaitItem())
+            .isEqualTo(paymentMethodMetadata)
+    }
+
+    @Test
+    fun `fromTemplate concatenates values from multiple producers in template order`() = runScenario(
+        tagValueProducers = setOf(
+            FakeTagValueProducer(
+                tag = "9F66",
+                value = TERMINAL_TRANSACTION_QUALIFIERS,
+            ),
+            FakeTagValueProducer(
+                tag = "9F37",
+                value = UNPREDICTABLE_NUMBER,
+            ),
+        ),
+    ) {
+        val template = byteArrayOf(
+            0x9F.toByte(), 0x66, 0x04,
+            0x9F.toByte(), 0x37, 0x04,
+        )
+
+        val result = builder.fromTemplate(
+            paymentMethodMetadata = paymentMethodMetadata,
+            template = template,
+        )
+
+        assertThat(result).isEqualTo(
+            commandTemplateResponse(
+                TERMINAL_TRANSACTION_QUALIFIERS + UNPREDICTABLE_NUMBER,
+            ),
+        )
+
+        tagValueProducers.forEach { producer ->
+            assertThat(producer.produceCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
+        }
     }
 
     private fun runScenario(
-        tagValueProducers: Set<TagValueProducer>,
+        tagValueProducers: Set<FakeTagValueProducer>,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val paymentMethodMetadata = defaultPaymentMethodMetadata()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFactory.create(amount = 5502)
+        )
         val builder = DefaultPdolBuilder(
             tagValueProducers = tagValueProducers,
         )
@@ -111,7 +153,7 @@ internal class DefaultPdolBuilderTest {
             tagValueProducers = tagValueProducers,
         ).apply { block() }
 
-        tagValueProducers.filterIsInstance<FakeTagValueProducer>().forEach {
+        tagValueProducers.forEach {
             it.ensureAllEventsConsumed()
         }
     }
@@ -119,24 +161,16 @@ internal class DefaultPdolBuilderTest {
     private class Scenario(
         val builder: DefaultPdolBuilder,
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val tagValueProducers: Set<TagValueProducer>,
+        val tagValueProducers: Set<FakeTagValueProducer>,
     )
 
-    private fun extractCommandTemplateValue(data: ByteArray): ByteArray {
-        val length = when {
-            data[1].toInt() and 0x80 == 0 -> data[1].toInt() and 0xFF
-            data[1] == 0x81.toByte() -> data[2].toInt() and 0xFF
-            else -> ((data[2].toInt() and 0xFF) shl 8) or (data[3].toInt() and 0xFF)
-        }
-        val valueStartIndex = when {
-            data[1].toInt() and 0x80 == 0 -> 2
-            data[1] == 0x81.toByte() -> 3
-            else -> 4
-        }
-        return data.copyOfRange(valueStartIndex, valueStartIndex + length)
+    private fun commandTemplateResponse(data: ByteArray): ByteArray {
+        return byteArrayOf(COMMAND_TEMPLATE_TAG, data.size.toByte()) + data
     }
 
     private companion object {
+        const val COMMAND_TEMPLATE_TAG = 0x83.toByte()
+
         val TERMINAL_TRANSACTION_QUALIFIERS = byteArrayOf(0x26, 0x00, 0x00, 0x00)
         val UNPREDICTABLE_NUMBER = byteArrayOf(0x01, 0x02, 0x03, 0x04)
     }

@@ -3,7 +3,6 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 import app.cash.turbine.Turbine
 import com.stripe.android.common.nfcscan.scanner.apdu.pdol.PdolBuilder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 
 internal class FakePdolBuilder(
     private val pdolData: ByteArray = byteArrayOf(),
@@ -31,8 +30,4 @@ internal class FakePdolBuilder(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val template: ByteArray,
     )
-}
-
-internal fun defaultPaymentMethodMetadata(): PaymentMethodMetadata {
-    return PaymentMethodMetadataFactory.create()
 }

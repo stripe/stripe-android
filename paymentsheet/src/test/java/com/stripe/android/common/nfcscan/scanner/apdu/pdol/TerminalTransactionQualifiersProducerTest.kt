@@ -1,14 +1,14 @@
 package com.stripe.android.common.nfcscan.scanner.apdu.pdol
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.nfcscan.scanner.apdu.defaultPaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import org.junit.Test
 
 internal class TerminalTransactionQualifiersProducerTest {
     @Test
     fun `produce returns terminal transaction qualifiers tag & contactless read only qualifiers`() {
         val result = TerminalTransactionQualifiersProducer.produce(
-            paymentMethodMetadata = defaultPaymentMethodMetadata(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         )
 
         assertThat(result.tag).isEqualTo("9F66")

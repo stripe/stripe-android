@@ -2,7 +2,6 @@ package com.stripe.android.common.nfcscan.scanner.apdu.pdol
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import javax.inject.Inject
-import kotlin.jvm.JvmSuppressWildcards
 
 internal interface PdolBuilder {
     fun fromTemplate(
@@ -24,7 +23,7 @@ internal interface PdolBuilder {
  * tag `83` followed by the concatenated terminal values in PDOL order.
  */
 internal class DefaultPdolBuilder @Inject constructor(
-    val tagValueProducers: @JvmSuppressWildcards Set<TagValueProducer>,
+    private val tagValueProducers: @JvmSuppressWildcards Set<TagValueProducer>,
 ) : PdolBuilder {
     override fun fromTemplate(
         paymentMethodMetadata: PaymentMethodMetadata,
