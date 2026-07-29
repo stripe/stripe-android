@@ -554,6 +554,33 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `updateEmail sends customer_email on success`() = runMutationScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("customer_email", "buyer@example.com"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = successResponseFactory(),
+        )
+
+        val result = controller.updateEmail("  buyer@example.com  ")
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `updateEmail returns failure and preserves session on error`() = runMutationScenario {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "Invalid email"}}""")
+        }
+        val before = controller.checkoutSession.value
+
+        val result = controller.updateEmail("not-an-email")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(controller.checkoutSession.value).isEqualTo(before)
+    }
+
+    @Test
     fun `updateShippingAddress sends tax_region and stores address when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(

@@ -169,6 +169,18 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
+     * Updates the customer's email address on the checkout session.
+     *
+     * @param email The customer's email address, or `null` to clear it. Leading/trailing whitespace
+     * is trimmed.
+     */
+    suspend fun updateEmail(
+        email: String?,
+    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
+        checkoutSessionRepository.updateEmail(sessionId, email?.trim())
+    }
+
+    /**
      * Updates the customer's tax ID.
      *
      * @param type The type of tax ID (e.g. "eu_vat"). Leading/trailing whitespace is trimmed.

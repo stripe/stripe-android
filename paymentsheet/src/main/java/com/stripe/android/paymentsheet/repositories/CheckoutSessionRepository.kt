@@ -196,6 +196,19 @@ internal class CheckoutSessionRepository @Inject constructor(
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
     }
 
+    // Best-guess param key: the /init-family endpoint for updating the customer email is unconfirmed.
+    // Uses `customer_email` to mirror the field the response parser reads back.
+    suspend fun updateEmail(
+        sessionId: String,
+        email: String?,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "customer_email" to email.orEmpty(),
+            "elements_session_client[is_aggregation_expected]" to "true",
+        ),
+    )
+
     private fun fireEvent(event: PaymentSheetEvent) {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(
