@@ -3,6 +3,7 @@
 package com.stripe.android.checkout.ece
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -29,53 +30,62 @@ internal fun ExpressCheckoutElementContent(
     }
 
     val buttonModifier = state.buttonHeight?.let { Modifier.height(it.dp) } ?: Modifier
-    val content: @Composable () -> Unit = {
-        state.expressButtons.forEach { button ->
-            key(button) {
-                when (button) {
-                    is ExpressButton.GooglePay -> GooglePayButton(
-                        state = PrimaryButton.State.Ready,
-                        allowCreditCards = button.allowCreditCards,
-                        buttonType = button.googlePayButtonType,
-                        billingAddressParameters = button.billingAddressParameters,
-                        isEnabled = true,
-                        cardBrandFilter = button.cardBrandFilter,
-                        cardFundingFilter = button.cardFundingFilter,
-                        additionalEnabledNetworks = button.additionalEnabledNetworks,
-                        modifier = buttonModifier,
-                        onPressed = {
-                            interactor.handleViewAction(
-                                ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
-                                    expressButton = button,
-                                )
-                            )
-                        },
-                    )
-                    is ExpressButton.Link -> LinkButton(
-                        state = button.state,
-                        enabled = true,
-                        theme = button.theme,
-                        linkBrand = button.linkBrand,
-                        modifier = buttonModifier,
-                        onClick = {
-                            interactor.handleViewAction(
-                                ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
-                                    expressButton = button,
-                                )
-                            )
-                        },
-                    )
-                }
-            }
-        }
-    }
-
     when (state.buttonOrientation) {
         ExpressCheckoutElement.Configuration.ButtonOrientation.Horizontal -> Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) { content() }
+        ) {
+            state.expressButtons.forEach { button ->
+                Box(modifier = Modifier.weight(1f)) {
+                    ExpressButtonContent(button, buttonModifier, interactor)
+                }
+            }
+        }
         ExpressCheckoutElement.Configuration.ButtonOrientation.Vertical -> Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) { content() }
+        ) {
+            state.expressButtons.forEach { button ->
+                ExpressButtonContent(button, buttonModifier, interactor)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExpressButtonContent(
+    button: ExpressButton,
+    modifier: Modifier,
+    interactor: ExpressCheckoutElementInteractor,
+) {
+    key(button) {
+        when (button) {
+            is ExpressButton.GooglePay -> GooglePayButton(
+                state = PrimaryButton.State.Ready,
+                allowCreditCards = button.allowCreditCards,
+                buttonType = button.googlePayButtonType,
+                billingAddressParameters = button.billingAddressParameters,
+                isEnabled = true,
+                cardBrandFilter = button.cardBrandFilter,
+                cardFundingFilter = button.cardFundingFilter,
+                additionalEnabledNetworks = button.additionalEnabledNetworks,
+                modifier = modifier,
+                onPressed = {
+                    interactor.handleViewAction(
+                        ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(expressButton = button)
+                    )
+                },
+            )
+            is ExpressButton.Link -> LinkButton(
+                state = button.state,
+                enabled = true,
+                theme = button.theme,
+                linkBrand = button.linkBrand,
+                modifier = modifier,
+                onClick = {
+                    interactor.handleViewAction(
+                        ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(expressButton = button)
+                    )
+                },
+            )
+        }
     }
 }

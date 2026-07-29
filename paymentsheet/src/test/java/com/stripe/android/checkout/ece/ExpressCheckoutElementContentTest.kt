@@ -1,13 +1,17 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout.ece
 
 import android.content.Context
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
@@ -78,6 +82,24 @@ internal class ExpressCheckoutElementContentTest {
 
         composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
         composeRule.onNodeWithTag(LinkButtonTestTag).assertDoesNotExist()
+    }
+
+    @Test
+    fun `renders both wallet buttons in horizontal orientation`() {
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractorStateFactory.create().copy(
+                    buttonOrientation = ExpressCheckoutElement.Configuration.ButtonOrientation.Horizontal,
+                )
+            ),
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(LinkButtonTestTag).assertIsDisplayed()
     }
 
     @Test
