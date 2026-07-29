@@ -102,7 +102,8 @@ internal abstract class BaseSheetViewModel(
             stripeAutocompleteRepository = stripeAutocompleteRepository,
             coroutineScope = viewModelScope,
             shouldUseAutocompleteProxyEndpointsProvider = {
-                _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
+                FeatureFlags.forceStripeHostedAutocomplete.isEnabled ||
+                    (_paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false)
             },
             eventReporter = addressLauncherEventReporter,
         )

@@ -89,7 +89,9 @@ private fun AddressElementExampleScreen(viewModel: AddressElementExampleViewMode
                         },
                     )
                 }
-                var useStripeHostedAutocomplete by remember { mutableStateOf(false) }
+                var useStripeHostedAutocomplete by remember {
+                    mutableStateOf(FeatureFlags.forceStripeHostedAutocomplete.isEnabled)
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Use Stripe-hosted endpoints")
                     Spacer(modifier = Modifier.width(8.dp))
@@ -97,6 +99,7 @@ private fun AddressElementExampleScreen(viewModel: AddressElementExampleViewMode
                         checked = useStripeHostedAutocomplete,
                         onCheckedChange = { enabled ->
                             useStripeHostedAutocomplete = enabled
+                            FeatureFlags.forceStripeHostedAutocomplete.setEnabled(enabled)
                         },
                     )
                 }
