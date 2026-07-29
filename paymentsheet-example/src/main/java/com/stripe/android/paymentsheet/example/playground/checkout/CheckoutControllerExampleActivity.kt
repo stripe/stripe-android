@@ -36,6 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.checkout.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -63,56 +67,107 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 
         setContent {
             val status by viewModel.status.collectAsState()
+            val navController = rememberNavController()
+            val backStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = backStackEntry?.destination?.route ?: CheckoutScreen.Summary.route
 
             PlaygroundTheme(
                 content = {
-                    when (val currentStatus = status) {
-                        is CheckoutControllerExampleViewModel.Status.Loading -> {
-                            LoadingContent()
+                    NavHost(
+                        navController = navController,
+                        startDestination = CheckoutScreen.Summary.route,
+                    ) {
+                        composable(CheckoutScreen.Summary.route) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                when (val currentStatus = status) {
+                                    is CheckoutControllerExampleViewModel.Status.Loading -> LoadingContent()
+                                    is CheckoutControllerExampleViewModel.Status.Error -> {
+                                        ErrorContent(currentStatus.message)
+                                    }
+                                    is CheckoutControllerExampleViewModel.Status.Configured -> {
+                                        currentStatus.checkoutSession?.let { session ->
+                                            LineItemsSection(session)
+                                            TotalSummarySection(session)
+                                            ExpressCheckoutExamplePicker(
+                                                selectedExample = currentStatus.expressCheckoutExample,
+                                                onSelected = viewModel::selectExpressCheckoutExample,
+                                            )
+                                            ExpressCheckoutSection(
+                                                session = session,
+                                                content = { presenter.expressCheckoutElement().Content() },
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        is CheckoutControllerExampleViewModel.Status.Error -> {
-                            ErrorContent(currentStatus.message)
-                        }
-                        is CheckoutControllerExampleViewModel.Status.Configured -> {
-                            val session = currentStatus.checkoutSession
-                            if (session != null) {
-                                LineItemsSection(session)
-                                TotalSummarySection(session)
-                                ExpressCheckoutExamplePicker(
-                                    selectedExample = currentStatus.expressCheckoutExample,
-                                    onSelected = viewModel::selectExpressCheckoutExample,
-                                )
-                                ExpressCheckoutSection(
-                                    session = session,
-                                    content = { presenter.expressCheckoutElement().Content() },
-                                )
-                                paymentElement.PaymentOptionsContent()
+                        composable(CheckoutScreen.Payment.route) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                when (val currentStatus = status) {
+                                    is CheckoutControllerExampleViewModel.Status.Loading -> LoadingContent()
+                                    is CheckoutControllerExampleViewModel.Status.Error -> {
+                                        ErrorContent(currentStatus.message)
+                                    }
+                                    is CheckoutControllerExampleViewModel.Status.Configured -> {
+                                        currentStatus.checkoutSession?.let { session ->
+                                            ExpressCheckoutSection(
+                                                session = session,
+                                                content = { presenter.expressCheckoutElement().Content() },
+                                            )
+                                            paymentElement.PaymentOptionsContent()
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 },
                 bottomBarContent = {
                     val configured = status as? CheckoutControllerExampleViewModel.Status.Configured
-                    PaymentOptionRow(configured?.checkoutSession?.paymentOptionDisplayData)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { paymentElement.presentPaymentOptions() },
-                        enabled = configured != null,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Select Payment Method")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { presenter.confirm() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Confirm")
+                    when (currentRoute) {
+                        CheckoutScreen.Summary.route -> Button(
+                            onClick = { navController.navigate(CheckoutScreen.Payment.route) },
+                            enabled = configured != null,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text("Continue to payment")
+                        }
+                        CheckoutScreen.Payment.route -> {
+                            PaymentOptionRow(configured?.checkoutSession?.paymentOptionDisplayData)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { paymentElement.presentPaymentOptions() },
+                                enabled = configured != null,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text("Select Payment Method")
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { presenter.confirm() },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text("Confirm")
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { navController.popBackStack() },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text("Back to order summary")
+                            }
+                        }
+                        else -> Unit
                     }
                 },
             )
         }
     }
+}
+
+private enum class CheckoutScreen(val route: String) {
+    Summary("summary"),
+    Payment("payment"),
 }
 
 @Composable
