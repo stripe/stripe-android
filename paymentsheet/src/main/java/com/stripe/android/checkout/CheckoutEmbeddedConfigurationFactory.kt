@@ -24,11 +24,14 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .asPaymentSheet()
             .copy(attachDefaultsToPaymentMethod = true)
 
-        return EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
+        return EmbeddedPaymentElement.Configuration.Builder(
+            configuration.merchantDisplayName ?: merchantDisplayName
+        )
             .embeddedViewDisplaysMandateText(
                 configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .link(configuration.linkConfiguration)
             .googlePay(
                 googlePay = checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
                     configuration.googlePayConfiguration?.asPaymentSheet(merchantCountry)

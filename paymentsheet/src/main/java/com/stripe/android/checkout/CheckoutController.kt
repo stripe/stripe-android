@@ -20,6 +20,7 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
@@ -711,6 +712,8 @@ class CheckoutController @Inject internal constructor(
     class Configuration {
         private var adaptivePricingAllowed: Boolean = false
         private var googlePayConfiguration: GooglePayConfiguration? = null
+        private var linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration()
+        private var merchantDisplayName: String? = null
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
             CurrencySelectorElement.Configuration()
@@ -723,6 +726,27 @@ class CheckoutController @Inject internal constructor(
             adaptivePricingAllowed: Boolean
         ): Configuration = apply {
             this.adaptivePricingAllowed = adaptivePricingAllowed
+        }
+
+        /**
+         * Configuration for Link.
+         */
+        fun linkConfiguration(
+            configuration: PaymentSheet.LinkConfiguration
+        ): Configuration = apply {
+            this.linkConfiguration = configuration
+        }
+
+        /**
+         * The customer-facing business name.
+         *
+         * If not set, this defaults to the application's label. Set this to override the name shown to the
+         * customer while paying.
+         */
+        fun merchantDisplayName(
+            merchantDisplayName: String
+        ): Configuration = apply {
+            this.merchantDisplayName = merchantDisplayName
         }
 
         fun paymentElement(
@@ -759,6 +783,8 @@ class CheckoutController @Inject internal constructor(
         internal data class State(
             val adaptivePricingAllowed: Boolean,
             val googlePayConfiguration: GooglePayConfiguration.State?,
+            val linkConfiguration: PaymentSheet.LinkConfiguration,
+            val merchantDisplayName: String?,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
@@ -772,6 +798,8 @@ class CheckoutController @Inject internal constructor(
             shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration?.build(),
+            linkConfiguration = linkConfiguration,
+            merchantDisplayName = merchantDisplayName,
         )
     }
 

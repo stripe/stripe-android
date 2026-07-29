@@ -204,6 +204,43 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
+    fun `propagates the link configuration`() {
+        val linkConfiguration = PaymentSheet.LinkConfiguration(
+            display = PaymentSheet.LinkConfiguration.Display.Never,
+        )
+
+        val result = factory().create(
+            configuration = controllerConfiguration(linkConfiguration = linkConfiguration),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+    }
+
+    @Test
+    fun `merchant display name override takes precedence over the injected default`() {
+        val result = factory(merchantDisplayName = "Injected Default").create(
+            configuration = controllerConfiguration(merchantDisplayName = "Merchant Override"),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.merchantDisplayName).isEqualTo("Merchant Override")
+    }
+
+    @Test
+    fun `falls back to the injected merchant display name when the configuration has none`() {
+        val result = factory(merchantDisplayName = "Injected Default").create(
+            configuration = controllerConfiguration(merchantDisplayName = null),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.merchantDisplayName).isEqualTo("Injected Default")
+    }
+
+    @Test
     fun `sets attachDefaultsToPaymentMethod to true`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
@@ -222,6 +259,8 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         embeddedViewDisplaysMandateText: Boolean = true,
         billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
         googlePayConfiguration: GooglePayConfiguration? = null,
+        linkConfiguration: PaymentSheet.LinkConfiguration? = null,
+        merchantDisplayName: String? = null,
     ): CheckoutController.Configuration.State {
         val builder = CheckoutController.Configuration()
             .paymentElement(
@@ -234,6 +273,8 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         if (googlePayConfiguration != null) {
             builder.googlePayConfiguration(googlePayConfiguration)
         }
+        linkConfiguration?.let { builder.linkConfiguration(it) }
+        merchantDisplayName?.let { builder.merchantDisplayName(it) }
         return builder.build()
     }
 
