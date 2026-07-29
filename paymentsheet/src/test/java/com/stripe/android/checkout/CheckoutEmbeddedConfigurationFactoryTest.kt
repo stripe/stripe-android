@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
 import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -204,6 +205,71 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
+    fun `propagates the payment element appearance`() {
+        val appearance = PaymentSheet.Appearance()
+
+        val result = factory().create(
+            configuration = controllerConfiguration(appearance = appearance),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.appearance).isSameInstanceAs(appearance)
+    }
+
+    @Test
+    fun `propagates preferredNetworks`() {
+        val result = factory().create(
+            configuration = controllerConfiguration(
+                preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+            ),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.preferredNetworks)
+            .containsExactly(CardBrand.CartesBancaires, CardBrand.Visa)
+            .inOrder()
+    }
+
+    @Test
+    fun `propagates paymentMethodOrder`() {
+        val result = factory().create(
+            configuration = controllerConfiguration(paymentMethodOrder = listOf("card", "klarna")),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.paymentMethodOrder).containsExactly("card", "klarna").inOrder()
+    }
+
+    @Test
+    fun `propagates cardBrandAcceptance`() {
+        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+            listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex),
+        )
+
+        val result = factory().create(
+            configuration = controllerConfiguration(cardBrandAcceptance = cardBrandAcceptance),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.cardBrandAcceptance).isEqualTo(cardBrandAcceptance)
+    }
+
+    @Test
+    fun `propagates opensCardScannerAutomatically`() {
+        val result = factory().create(
+            configuration = controllerConfiguration(opensCardScannerAutomatically = true),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.opensCardScannerAutomatically).isTrue()
+    }
+
+    @Test
     fun `sets attachDefaultsToPaymentMethod to true`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
@@ -218,19 +284,29 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         merchantDisplayName: String = "Example, Inc.",
     ) = CheckoutEmbeddedConfigurationFactory(merchantDisplayName = merchantDisplayName)
 
+    @Suppress("LongParameterList")
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,
         billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
         googlePayConfiguration: GooglePayConfiguration? = null,
+        appearance: PaymentSheet.Appearance? = null,
+        preferredNetworks: List<CardBrand>? = null,
+        paymentMethodOrder: List<String>? = null,
+        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance? = null,
+        opensCardScannerAutomatically: Boolean? = null,
     ): CheckoutController.Configuration.State {
-        val builder = CheckoutController.Configuration()
-            .paymentElement(
-                PaymentElement.Configuration()
-                    .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
-                    .billingDetailsCollectionConfiguration(
-                        BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
-                    )
+        val paymentElement = PaymentElement.Configuration()
+            .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
+            .billingDetailsCollectionConfiguration(
+                BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
             )
+        appearance?.let { paymentElement.appearance(it) }
+        preferredNetworks?.let { paymentElement.preferredNetworks(it) }
+        paymentMethodOrder?.let { paymentElement.paymentMethodOrder(it) }
+        cardBrandAcceptance?.let { paymentElement.cardBrandAcceptance(it) }
+        opensCardScannerAutomatically?.let { paymentElement.opensCardScannerAutomatically(it) }
+        val builder = CheckoutController.Configuration()
+            .paymentElement(paymentElement)
         if (googlePayConfiguration != null) {
             builder.googlePayConfiguration(googlePayConfiguration)
         }

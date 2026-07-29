@@ -24,11 +24,18 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .asPaymentSheet()
             .copy(attachDefaultsToPaymentMethod = true)
 
+        val paymentElementConfiguration = configuration.paymentElementConfiguration
+
         return EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
             .embeddedViewDisplaysMandateText(
-                configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
+                paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .appearance(paymentElementConfiguration.appearance)
+            .preferredNetworks(paymentElementConfiguration.preferredNetworks)
+            .paymentMethodOrder(paymentElementConfiguration.paymentMethodOrder)
+            .cardBrandAcceptance(paymentElementConfiguration.cardBrandAcceptance)
+            .opensCardScannerAutomatically(paymentElementConfiguration.opensCardScannerAutomatically)
             .googlePay(
                 googlePay = checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
                     configuration.googlePayConfiguration?.asPaymentSheet(merchantCountry)
