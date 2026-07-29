@@ -195,6 +195,7 @@ internal class EmbeddedContentUiTest {
             coroutineScope = viewModelScope,
             sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
+            linkAccountHolder = linkAccountHolder,
         )
 
         val embeddedContentHelper =

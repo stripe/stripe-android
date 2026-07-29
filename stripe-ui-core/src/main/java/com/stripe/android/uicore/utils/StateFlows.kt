@@ -207,7 +207,7 @@ fun <T1, T2, T3, T4, T5, T6, T7, R> combineAsStateFlow(
 ): StateFlow<R> {
     @Suppress("DEPRECATION", "UNCHECKED_CAST", "MagicNumber")
     return FlowToStateFlow(
-        flow = combine(listOf(flow1, flow2, flow3, flow4, flow5, flow6)) { values ->
+        flow = combine(listOf(flow1, flow2, flow3, flow4, flow5, flow6, flow7)) { values ->
             val flow1Value = values[0] as T1
             val flow2Value = values[1] as T2
             val flow3Value = values[2] as T3
