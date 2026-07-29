@@ -185,6 +185,13 @@ internal class PaymentSheetPlaygroundActivity :
                 flowControllerBuilder(canUseTapToAdd, playgroundState)
             }
                 .build()
+
+            // Keep the FlowController's shippingDetails in sync with the ViewModel state so
+            // relaunching "Set Shipping Address" pre-populates the most recently saved address.
+            val playgroundFlowControllerState by viewModel.flowControllerState.collectAsState()
+            LaunchedEffect(playgroundFlowControllerState) {
+                flowController.shippingDetails = playgroundFlowControllerState?.addressDetails
+            }
             val embeddedPaymentElementBuilder = remember(playgroundState) {
                 if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
                     EmbeddedPaymentElement.Builder(
