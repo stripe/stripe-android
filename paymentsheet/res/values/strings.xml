@@ -108,6 +108,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_error_declined_card">Card declined. Try another card.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
   <string name="stripe_nfc_scan_error_expired_card">Card expired. Try another card.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">Mobile wallets are not supported. Try a physical card.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Hold card behind phone</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
