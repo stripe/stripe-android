@@ -690,7 +690,6 @@ class InlineAutocompleteControllerTest {
         )
     }
 
-
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun runScenario(
         autocompleteCountries: Set<String> = emptySet(),

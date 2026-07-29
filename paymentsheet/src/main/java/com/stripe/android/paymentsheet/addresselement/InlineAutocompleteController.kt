@@ -71,7 +71,7 @@ internal class InlineAutocompleteController(
                 ensureActive()
                 result.fold(
                     onSuccess = { handleFetchPlaceSuccess(it) },
-                    onFailure = { handleFailure() }
+                    onFailure = { handleFailure(queryFlow?.value, countryFlow?.value) }
                 )
             } finally {
                 placesClient.resetSession()
@@ -130,7 +130,7 @@ internal class InlineAutocompleteController(
         currentCoroutineContext().ensureActive()
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
-            onFailure = { handleFailure() }
+            onFailure = { handleFailure(query, country) }
         )
     }
 
@@ -150,21 +150,20 @@ internal class InlineAutocompleteController(
         )
     }
 
-    private fun handleFailure() {
+    private fun handleFailure(query: String?, country: String?) {
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         if (config.shouldUseStripeHostedAutocomplete) {
-            expandFormFromInline()
+            emitExpandForm(query = query, country = country)
         }
     }
 
     private fun emitExpandForm(query: String?, country: String?) {
+        val listener = eventListenerProvider() ?: return
         val values = buildMap<IdentifierSpec, String?> {
             query?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Line1, it) }
             country?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Country, it) }
         }.takeIf { it.isNotEmpty() }
 
-        eventListenerProvider()?.invoke(
-            AutocompleteAddressInteractor.Event.OnExpandForm(values)
-        )
+        listener(AutocompleteAddressInteractor.Event.OnExpandForm(values))
     }
 }
