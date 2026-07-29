@@ -24,14 +24,12 @@ internal class StripeHostedPlacesClientProxy(
     }
 
     override fun resetSession() {
-        val newToken = synchronized(lock) {
-            newSessionToken().also {
-                sessionToken = it
-                lastQueryLength = 0
-                predictionCache.clear()
-            }
+        synchronized(lock) {
+            sessionToken = newSessionToken()
+            lastQueryLength = 0
+            predictionCache.clear()
         }
-        eventReporter.onAutocompleteSessionStarted(newToken)
+        eventReporter.onAutocompleteSessionStarted(sessionToken)
     }
 
     override suspend fun findAutocompletePredictions(
