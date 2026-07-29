@@ -250,7 +250,7 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     override fun onEnterManuallyFromInline() {
-        onEnterManually()
+        inlineAutocompleteController?.expandFormFromInline() ?: onEnterManually()
     }
 
     private fun canUseShippingSameAsBilling(): Boolean {

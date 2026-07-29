@@ -5,13 +5,14 @@ import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -958,8 +959,6 @@ class InputAddressViewModelTest {
     // Core controller logic (predictions, debouncing, selection, suppression, dismissal)
     // is tested in InlineAutocompleteControllerTest.
 
-    private val mockPlacesClient = mock<PlacesClientProxy>()
-
     private fun createInlineViewModel(
         googlePlacesApiKey: String = "test_key",
         autocompleteCountries: Set<String> = emptySet(),
@@ -975,19 +974,46 @@ class InputAddressViewModelTest {
             ),
             navigator,
             eventReporter,
-            placesClient = mockPlacesClient,
+            placesClient = FakePlacesClientProxy(
+                findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+                fetchPlaceResult = Result.success(Address()),
+            ),
         ).also { viewModelStoreRule.track(it) }
     }
 
     @Test
-    fun `onEnterManuallyFromInline emits OnExpandForm event`() = runTest {
+    fun `onEnterManuallyFromInline emits OnExpandForm with null values when query is empty`() = runTest {
         val viewModel = createInlineViewModel()
         var emittedEvent: AutocompleteAddressInteractor.Event? = null
         viewModel.register { emittedEvent = it }
 
         viewModel.onEnterManuallyFromInline()
 
-        assertThat(emittedEvent).isInstanceOf<AutocompleteAddressInteractor.Event.OnExpandForm>()
+        assertThat(emittedEvent)
+            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+    }
+
+    @Test
+    fun `onEnterManuallyFromInline pre-fills Line1 with typed inline query`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createInlineViewModel()
+        var emittedEvent: AutocompleteAddressInteractor.Event? = null
+        viewModel.register { emittedEvent = it }
+
+        val queryFlow = MutableStateFlow("")
+        val countryFlow = MutableStateFlow<String?>("US")
+        viewModel.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main St"
+        viewModel.onEnterManuallyFromInline()
+
+        assertThat(emittedEvent).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main St",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
     }
 
     private fun createShowState(isChecked: Boolean) =

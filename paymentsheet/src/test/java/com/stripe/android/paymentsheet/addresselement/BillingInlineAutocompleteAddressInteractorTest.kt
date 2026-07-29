@@ -5,6 +5,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -25,11 +27,30 @@ class BillingInlineAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `onEnterManuallyFromInline emits OnExpandForm with null values`() = runScenario {
+    fun `onEnterManuallyFromInline emits OnExpandForm with null values when query is empty`() = runScenario {
         interactor.onEnterManuallyFromInline()
 
         assertThat(eventCalls.awaitItem())
             .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+    }
+
+    @Test
+    fun `onEnterManuallyFromInline pre-fills Line1 with typed inline query`() = runScenario {
+        val queryFlow = MutableStateFlow("")
+        val countryFlow = MutableStateFlow<String?>("US")
+        interactor.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main St"
+        interactor.onEnterManuallyFromInline()
+
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main St",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
     }
 
     @Test
