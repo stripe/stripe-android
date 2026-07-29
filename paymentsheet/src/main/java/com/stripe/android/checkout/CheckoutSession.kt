@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.checkout.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import dev.drewhamilton.poko.Poko
@@ -56,18 +55,9 @@ class CheckoutSession internal constructor(
      * The customer's currently selected payment option, or `null` if none has been selected yet.
      */
     val paymentOptionDisplayData: PaymentOptionDisplayData?,
+    val availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod>,
     internal val currencySelectorOptions: CurrencySelectorOptions?,
-    internal val availableExpressButtonTypes: List<ExpressButtonType>,
 ) {
-
-    /**
-     * The wallet payment methods currently available to the Express Checkout Element.
-     *
-     * This value updates with [CheckoutController.checkoutSession], mirroring the web Express
-     * Checkout Element's available payment methods change event.
-     */
-    val availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod> =
-        availableExpressButtonTypes.map { it.asPaymentMethod() }
 
     /**
      * The status of a checkout session.

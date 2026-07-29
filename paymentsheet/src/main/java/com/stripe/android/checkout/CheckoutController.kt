@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
+import com.stripe.android.checkout.ece.ExpressButtonType
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
@@ -49,6 +50,13 @@ class CheckoutController @Inject internal constructor(
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
         get() = stateHolder.checkoutSession
+
+    /** The wallet payment methods currently available to the Express Checkout Element. */
+    val availableExpressCheckoutPaymentMethods: StateFlow<List<ExpressCheckoutElement.PaymentMethod>>
+        get() = stateHolder.availableExpressCheckoutPaymentMethods
+
+    internal val availableExpressButtonTypes: StateFlow<List<ExpressButtonType>>
+        get() = stateHolder.availableExpressButtonTypes
 
     private val mutex = Mutex()
     private val pendingMutations = AtomicInteger(0)

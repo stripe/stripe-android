@@ -282,11 +282,9 @@ class CheckoutSessionMappersTest {
     @Test
     fun `maps available express checkout payment methods`() {
         val session = createSession(
-            availableExpressButtonTypes = listOf(
-                ExpressButtonType.Link,
-                ExpressButtonType.GooglePay(
-                    GooglePayConfiguration(GooglePayConfiguration.Environment.Test).build()
-                ),
+            availableExpressCheckoutPaymentMethods = listOf(
+                ExpressCheckoutElement.PaymentMethod.Link,
+                ExpressCheckoutElement.PaymentMethod.GooglePay,
             ),
         )
 
@@ -306,7 +304,7 @@ class CheckoutSessionMappersTest {
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
-        availableExpressButtonTypes: List<ExpressButtonType> = emptyList(),
+        availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod> = emptyList(),
     ): CheckoutSession {
         return CheckoutSessionResponseFactory.create(
             id = id,
@@ -321,7 +319,7 @@ class CheckoutSessionMappersTest {
         ).asCheckoutSession(
             flagImages = null,
             paymentOptionDisplayData = null,
-            availableExpressButtonTypes = availableExpressButtonTypes,
+            availableExpressCheckoutPaymentMethods = availableExpressCheckoutPaymentMethods,
         )
     }
 }

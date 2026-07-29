@@ -49,9 +49,9 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = combineAsStateFlow(
         linkAccountHolder.linkAccountInfo,
         stateHolder.stateFlow,
-        stateHolder.checkoutSession,
-    ) { linkAccountInfo, state, checkoutSession, ->
-        if (state == null || checkoutSession == null) {
+        stateHolder.availableExpressButtonTypes,
+    ) { linkAccountInfo, state, availableExpressButtonTypes, ->
+        if (state == null) {
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
                 expressButtons = emptyList(),
                 buttonHeight = null,
@@ -60,7 +60,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         }
 
         ExpressCheckoutElementInteractor.State(
-            expressButtons = checkoutSession.availableExpressButtonTypes.map { expressButtonType ->
+            expressButtons = availableExpressButtonTypes.map { expressButtonType ->
                 when (expressButtonType) {
                     ExpressButtonType.Link -> ExpressButton.Link.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,

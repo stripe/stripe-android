@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFacto
 internal fun CheckoutSessionResponse.asCheckoutSession(
     flagImages: Map<String, Bitmap>?,
     paymentOptionDisplayData: PaymentOptionDisplayData?,
-    availableExpressButtonTypes: List<ExpressButtonType>,
+    availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod>,
 ): CheckoutSession {
     return CheckoutSession(
         id = id,
@@ -23,11 +23,11 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         lineItems = lineItems.map { it.asLineItem() },
         shippingOptions = shippingOptions.map { it.asShippingRate() },
         paymentOptionDisplayData = paymentOptionDisplayData,
+        availableExpressCheckoutPaymentMethods = availableExpressCheckoutPaymentMethods,
         currencySelectorOptions = CurrencySelectorOptionsFactory.create(
             adaptivePricingInfo = adaptivePricingInfo,
             flagImages = flagImages,
         ),
-        availableExpressButtonTypes = availableExpressButtonTypes,
     )
 }
 

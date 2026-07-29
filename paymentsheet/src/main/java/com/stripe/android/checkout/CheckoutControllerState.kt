@@ -46,11 +46,11 @@ internal data class CheckoutControllerState(
                 selection = paymentSelection,
                 paymentMethodMetadata = paymentMethodMetadata,
             ),
-            availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
+            availableExpressCheckoutPaymentMethods = availableExpressButtonTypesFactory.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
                 googlePayConfiguration = configuration.googlePayConfiguration,
-            )
+            ).map { it.asPaymentMethod() },
         )
     }
 }
