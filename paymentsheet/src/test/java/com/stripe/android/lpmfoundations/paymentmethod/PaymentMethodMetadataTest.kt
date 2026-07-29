@@ -2384,6 +2384,45 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `paymentMethodOrientation(layout) overrides the metadata's own layout`() {
+        // Metadata is built with Vertical (as the embedded flow forces), but the explicit argument wins.
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        )
+
+        assertThat(metadata.paymentMethodOrientation(PaymentSheet.PaymentMethodLayout.Horizontal))
+            .isEqualTo(PaymentMethodOrientation.Horizontal)
+        assertThat(metadata.paymentMethodOrientation(PaymentSheet.PaymentMethodLayout.Vertical))
+            .isEqualTo(PaymentMethodOrientation.Vertical)
+    }
+
+    @Test
+    fun `paymentMethodOrientation(layout) resolves Automatic to Vertical with three payment methods`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna", "affirm"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        )
+
+        assertThat(metadata.paymentMethodOrientation(PaymentSheet.PaymentMethodLayout.Automatic))
+            .isEqualTo(PaymentMethodOrientation.Vertical)
+    }
+
+    @Test
+    fun `paymentMethodOrientation(layout) resolves Automatic to Horizontal with two payment methods`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        )
+
+        assertThat(metadata.paymentMethodOrientation(PaymentSheet.PaymentMethodLayout.Automatic))
+            .isEqualTo(PaymentMethodOrientation.Horizontal)
+    }
+
+    @Test
     fun `effectiveLinkBrand returns account linkBrand when account linkBrand is present`() {
         val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link)
 

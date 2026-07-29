@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInt
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
@@ -41,48 +42,48 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     fun `creates initial screen successfully with Google Pay ready`() = testScenario(
         isGooglePayReady = true,
     ) {
-        val screens = factory.createInitialScreen()
+        val screens = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Vertical)
         assertThat(screens).hasSize(1)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
     }
 
     @Test
     fun `creates initial screen successfully without wallets`() = testScenario(
         isGooglePayReady = false,
     ) {
-        val screens = factory.createInitialScreen()
+        val screens = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Vertical)
         assertThat(screens).hasSize(1)
     }
 
     @Test
     fun `screen is created with correct isLiveMode`() = testScenario {
-        val screen = factory.createInitialScreen().first()
+        val screen = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Vertical).first()
         val topBarState = screen.topBarState().value!!
         assertThat(topBarState.showTestModeLabel).isTrue()
     }
 
     @Test
     fun `screen isPerformingNetworkOperation returns false`() = testScenario {
-        val screen = factory.createInitialScreen().first()
+        val screen = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Vertical).first()
         assertThat(screen.isPerformingNetworkOperation().value).isFalse()
     }
 
     @Test
     fun `no payment selection creates a single payment options screen`() = testScenario {
-        val screens = factory.createInitialScreen()
+        val screens = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Vertical)
 
         assertThat(screens).hasSize(1)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
     }
 
     @Test
     fun `new selection requiring a form starts with the form on top of the back stack`() = testScenario {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
-        val screens = factory.createInitialScreen()
+        val screens = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Vertical)
 
         assertThat(screens).hasSize(2)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.Form>()
     }
 
@@ -96,10 +97,56 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     ) {
         selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
 
-        val screens = factory.createInitialScreen()
+        val screens = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Vertical)
 
         assertThat(screens).hasSize(1)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+    }
+
+    @Test
+    fun `horizontal layout creates a single horizontal payment options screen`() = testScenario {
+        val screens = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Horizontal)
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+    }
+
+    @Test
+    fun `horizontal layout with a new selection requiring a form does not add a form screen`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        val screens = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Horizontal)
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+    }
+
+    @Test
+    fun `automatic layout with two payment methods creates a horizontal screen`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+            ),
+        ),
+    ) {
+        val screens = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Automatic)
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+    }
+
+    @Test
+    fun `automatic layout with three payment methods creates a vertical screen`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna", "affirm"),
+            ),
+        ),
+    ) {
+        val screens = factory.createInitialScreen(PaymentSheet.PaymentMethodLayout.Automatic)
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
     }
 
     @Suppress("LongMethod")
@@ -155,7 +202,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
         val fakeInteractor =
             com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor.create()
-        val initialScreen = EmbeddedNavigator.Screen.PaymentOptions(
+        val initialScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = fakeInteractor,
             isLiveMode = true,
             sheetActivityState = sheetActivityStateHolder.state,
@@ -167,6 +214,18 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             initialScreen = initialScreen,
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+
+        val addPaymentMethodInteractorFactory = EmbeddedAddPaymentMethodInteractorFactory(
+            paymentMethodMetadata = paymentMethodMetadata,
+            embeddedSelectionHolder = selectionHolder,
+            embeddedFormHelperFactory = formHelperFactory,
+            viewModelScope = testScope,
+            sheetActivityStateHolder = sheetActivityStateHolder,
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+            eventReporter = FakeEventReporter(),
+            customerStateHolder = customerStateHolder,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+        )
 
         val factory = InitialPaymentOptionsScreenFactory(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -182,6 +241,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             sheetActivityStateHolder = sheetActivityStateHolder,
             formScreenFactory = formScreenFactory,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
         )
 
         Scenario(

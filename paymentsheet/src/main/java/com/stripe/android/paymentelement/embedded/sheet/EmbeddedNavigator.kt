@@ -9,20 +9,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.form.FormActivityError
 import com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
+import com.stripe.android.paymentelement.embedded.form.USBankAccountMandate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
+import com.stripe.android.paymentsheet.ui.AddPaymentMethod
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
+import com.stripe.android.paymentsheet.utils.isOnlyOneNonCardPaymentMethod
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
@@ -41,6 +48,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.io.Closeable
 import javax.inject.Inject
+import com.stripe.android.R as PaymentsCoreR
 
 internal class EmbeddedNavigator private constructor(
     private val eventReporter: EventReporter,
@@ -108,7 +116,8 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageAll -> eventReporter.onShowManageSavedPaymentMethods()
             is Screen.ManageUpdate -> eventReporter.onShowEditablePaymentOption()
             is Screen.Form -> Unit
-            is Screen.PaymentOptions -> eventReporter.onShowNewPaymentOptions()
+            is Screen.VerticalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
+            is Screen.HorizontalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
         }
     }
 
@@ -117,7 +126,8 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageAll -> Unit
             is Screen.ManageUpdate -> eventReporter.onHideEditablePaymentOption()
             is Screen.Form -> Unit
-            is Screen.PaymentOptions -> Unit
+            is Screen.VerticalPaymentOptions -> Unit
+            is Screen.HorizontalPaymentOptions -> Unit
         }
     }
 
@@ -271,7 +281,7 @@ internal class EmbeddedNavigator private constructor(
             }
         }
 
-        class PaymentOptions(
+        class VerticalPaymentOptions(
             private val interactor: PaymentMethodVerticalLayoutInteractor,
             private val isLiveMode: Boolean,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
@@ -305,6 +315,56 @@ internal class EmbeddedNavigator private constructor(
                     onClick = onContinueClick,
                 )
                 PaymentSheetContentPadding()
+            }
+
+            override fun close() {
+                interactor.close()
+            }
+        }
+
+        class HorizontalPaymentOptions(
+            private val interactor: AddPaymentMethodInteractor,
+            private val eventReporter: EventReporter,
+            private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
+            private val onContinueClick: () -> Unit,
+        ) : Screen(), Closeable {
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
+                PaymentSheetTopBarState(
+                    showTestModeLabel = !interactor.isLiveMode,
+                    showEditMenu = false,
+                    isEditing = false,
+                    onEditIconPressed = {},
+                )
+            )
+
+            override fun title(): StateFlow<ResolvableString?> {
+                return interactor.state.mapAsStateFlow { state ->
+                    if (state.supportedPaymentMethods.isOnlyOneNonCardPaymentMethod()) {
+                        null
+                    } else if (state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
+                        PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
+                    } else {
+                        R.string.stripe_paymentsheet_choose_payment_method.resolvableString
+                    }
+                }
+            }
+
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> = stateFlowOf(false)
+
+            @Composable
+            override fun Content() {
+                val state by sheetActivityState.collectAsState()
+                EventReporterProvider(eventReporter) {
+                    AddPaymentMethod(interactor = interactor)
+                    USBankAccountMandate(state)
+                    FormActivityError(state)
+                    Spacer(Modifier.height(40.dp))
+                    FormActivityPrimaryButton(
+                        state = state,
+                        onClick = onContinueClick,
+                    )
+                    PaymentSheetContentPadding()
+                }
             }
 
             override fun close() {

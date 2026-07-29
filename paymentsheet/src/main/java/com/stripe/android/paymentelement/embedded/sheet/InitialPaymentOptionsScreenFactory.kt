@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -50,27 +51,26 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val sheetActivityStateHolder: SheetActivityStateHolder,
     private val formScreenFactory: EmbeddedFormScreenFactory,
     private val linkAccountHolder: LinkAccountHolder,
+    private val addPaymentMethodInteractorFactory: EmbeddedAddPaymentMethodInteractorFactory,
 ) {
-    fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
+    fun createInitialScreen(
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout
+    ): List<EmbeddedNavigator.Screen> {
+        return when (paymentMethodMetadata.paymentMethodOrientation(paymentMethodLayout)) {
+            PaymentMethodOrientation.Vertical -> createVerticalInitialScreens(paymentMethodLayout)
+            PaymentMethodOrientation.Horizontal -> listOf(createHorizontalScreen(paymentMethodLayout))
+        }
+    }
+
+    private fun createVerticalInitialScreens(
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout
+    ): List<EmbeddedNavigator.Screen> {
         val formHelper = createFormHelper()
-        val paymentOptionsScreen = EmbeddedNavigator.Screen.PaymentOptions(
+        val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = createInteractor(formHelper),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
-            onContinueClick = {
-                sheetActivityStateHolder.setResult(
-                    EmbeddedActivityResult.Complete(
-                        selection = selectionHolder.selection.value,
-                        previousNewSelections = selectionHolder.previousNewSelections,
-                        hasBeenConfirmed = false,
-                        customerState = customerStateHolder.customer.value,
-                        shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.PaymentOptions(
-                            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-                        ),
-                    )
-                )
-            },
+            onContinueClick = { setPaymentOptionsResult(paymentMethodLayout) },
         )
         return buildList {
             add(paymentOptionsScreen)
@@ -83,6 +83,34 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 add(formScreenFactory.createFormScreen(selection.paymentMethodType))
             }
         }
+    }
+
+    // Horizontal mode renders the payment method tabs and the selected method's form inline on a single screen, so
+    // there is no separate form screen to pre-push.
+    private fun createHorizontalScreen(
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout
+    ): EmbeddedNavigator.Screen {
+        return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
+            interactor = addPaymentMethodInteractorFactory.create(),
+            eventReporter = eventReporter,
+            sheetActivityState = sheetActivityStateHolder.state,
+            onContinueClick = { setPaymentOptionsResult(paymentMethodLayout) },
+        )
+    }
+
+    private fun setPaymentOptionsResult(paymentMethodLayout: PaymentSheet.PaymentMethodLayout) {
+        sheetActivityStateHolder.setResult(
+            EmbeddedActivityResult.Complete(
+                selection = selectionHolder.selection.value,
+                previousNewSelections = selectionHolder.previousNewSelections,
+                hasBeenConfirmed = false,
+                customerState = customerStateHolder.customer.value,
+                shouldInvokeSelectionCallback = false,
+                launchMode = EmbeddedLaunchMode.PaymentOptions(
+                    paymentMethodLayout = paymentMethodLayout,
+                ),
+            )
+        )
     }
 
     private fun createFormHelper(): FormHelper {
@@ -158,7 +186,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private fun isCurrentScreen(): StateFlow<Boolean> = flow {
         emitAll(embeddedNavigatorProvider.get().screen)
     }.map { screen ->
-        screen is EmbeddedNavigator.Screen.PaymentOptions
+        screen is EmbeddedNavigator.Screen.VerticalPaymentOptions
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,

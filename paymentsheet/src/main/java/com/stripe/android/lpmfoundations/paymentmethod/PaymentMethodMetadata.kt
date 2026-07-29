@@ -105,6 +105,12 @@ internal data class PaymentMethodMetadata(
 ) : Parcelable {
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
+        return paymentMethodOrientation(paymentMethodLayout)
+    }
+
+    fun paymentMethodOrientation(
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout
+    ): PaymentMethodOrientation {
         return when (paymentMethodLayout) {
             PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
             PaymentSheet.PaymentMethodLayout.Vertical -> PaymentMethodOrientation.Vertical

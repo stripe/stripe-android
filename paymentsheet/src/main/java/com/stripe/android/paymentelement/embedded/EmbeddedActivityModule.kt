@@ -145,7 +145,8 @@ internal interface EmbeddedActivityModule {
             val initialBackStack = when (launchMode) {
                 is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
                 is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
-                is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
+                is EmbeddedLaunchMode.PaymentOptions ->
+                    initialPaymentOptionsScreenFactory.createInitialScreen(launchMode.paymentMethodLayout)
             }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,

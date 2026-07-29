@@ -23,6 +23,7 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
@@ -340,11 +341,23 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `initial screen HorizontalPaymentOptions calls onShowNewPaymentOptions`() = runTest {
+        val eventReporter = FakeEventReporter()
+        EmbeddedNavigator(
+            coroutineScope = this,
+            eventReporter = eventReporter,
+            initialScreen = createHorizontalPaymentOptionsScreen(),
+        )
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        eventReporter.validate()
+    }
+
+    @Test
     fun `initial back stack with a form on top starts on the form and can go back`() = runTest {
         val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
         val eventReporter = FakeEventReporter()
         val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
-        val paymentOptionsScreen = EmbeddedNavigator.Screen.PaymentOptions(
+        val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = paymentOptionsInteractor,
             isLiveMode = true,
             sheetActivityState = stateFlowOf(
@@ -593,10 +606,30 @@ internal class EmbeddedNavigatorTest {
 
     private fun createPaymentOptionsScreen(
         isLiveMode: Boolean = true,
-    ): EmbeddedNavigator.Screen.PaymentOptions {
-        return EmbeddedNavigator.Screen.PaymentOptions(
+    ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
+        return EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = FakePaymentMethodVerticalLayoutInteractor.create(),
             isLiveMode = isLiveMode,
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "".resolvableString,
+                    isEnabled = false,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = false,
+                    shouldDisplayLockIcon = true,
+                    savedPaymentSelectionToConfirm = null,
+                )
+            ),
+            onContinueClick = {},
+        )
+    }
+
+    private fun createHorizontalPaymentOptionsScreen(): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
+        return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState(),
+            ),
+            eventReporter = FakeEventReporter(),
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
