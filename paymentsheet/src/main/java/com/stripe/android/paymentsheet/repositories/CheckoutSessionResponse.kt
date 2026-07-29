@@ -31,6 +31,7 @@ internal data class CheckoutSessionResponse(
     val allowedShippingCountries: List<String>?,
     val requiresBillingAddress: Boolean,
     val merchantCountry: String?,
+    val businessName: String?,
 ) : StripeModel {
 
     val shouldDisableWalletsForAutomaticTaxBilling: Boolean

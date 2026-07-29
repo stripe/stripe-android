@@ -382,6 +382,11 @@ class CheckoutController @Inject internal constructor(
          */
         val liveMode: Boolean,
         /**
+         * The business name configured in the Business Public Details settings of your Stripe account,
+         * or `null` if unavailable.
+         */
+        val businessName: String?,
+        /**
          * The three-letter ISO currency code (e.g., "usd").
          */
         val currency: String,
@@ -423,6 +428,10 @@ class CheckoutController @Inject internal constructor(
          * The customer's currently selected payment option, or `null` if none has been selected yet.
          */
         val paymentOptionDisplayData: PaymentOptionDisplayData?,
+        /**
+         * The error encountered the last time this checkout session was confirmed, or `null` if none.
+         */
+        val lastPaymentError: Throwable?,
         internal val currencySelectorOptions: CurrencySelectorOptions?,
         internal val availableExpressButtonTypes: List<ExpressButtonType>,
     ) {
@@ -433,30 +442,60 @@ class CheckoutController @Inject internal constructor(
         val isExpressCheckoutElementAvailable: Boolean = availableExpressButtonTypes.isNotEmpty()
 
         /**
-         * The status of a checkout session.
+         * The lifecycle status of a checkout session.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        enum class Status {
+        sealed interface Status {
             /**
              * The checkout session is still in progress. Payment processing has not started.
              */
-            Open,
-
-            /**
-             * The checkout session is complete. Payment processing may still be in progress.
-             */
-            Complete,
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            data object Open : Status
 
             /**
              * The checkout session has expired. No further processing will occur.
              */
-            Expired,
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            data object Expired : Status
 
             /**
-             * A status not recognized by this version of the SDK.
+             * The checkout session is complete. Payment processing may still be in progress; inspect
+             * [paymentStatus] to determine whether the payment has been collected.
              */
-            Unknown,
+            @Poko
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Complete internal constructor(
+                /**
+                 * Whether the payment for this completed session has been collected.
+                 */
+                val paymentStatus: PaymentStatus,
+            ) : Status
+
+            /**
+             * Whether the payment for a completed checkout session has been collected.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class PaymentStatus {
+                /**
+                 * The payment has been collected.
+                 */
+                Paid,
+
+                /**
+                 * The payment has not been collected (it may still be processing or may have failed).
+                 */
+                Unpaid,
+
+                /**
+                 * No payment was required for this session (e.g. a setup-mode session or a zero-amount order).
+                 */
+                NoPaymentRequired,
+            }
         }
 
         /**
@@ -491,11 +530,6 @@ class CheckoutController @Inject internal constructor(
                  * A billing address must be provided to calculate tax.
                  */
                 RequiresBillingAddress,
-
-                /**
-                 * A tax status not recognized by this version of the SDK.
-                 */
-                Unknown,
             }
         }
 

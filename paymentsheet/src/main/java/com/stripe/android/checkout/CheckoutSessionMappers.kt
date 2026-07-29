@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.checkout.ece.ExpressButtonType
+import com.stripe.android.core.exception.LocalStripeException
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFactory
@@ -12,6 +14,7 @@ import java.util.Currency
 import kotlin.math.pow
 
 private const val MAJOR_UNIT_BASE = 10.0
+private const val LAST_PAYMENT_ERROR_ANALYTICS_VALUE = "checkoutSessionLastPaymentError"
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutSessionResponse.asCheckoutSession(
@@ -22,8 +25,9 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
 ): Session {
     return Session(
         id = id,
-        status = status.asStatus(),
+        status = asStatus(),
         liveMode = liveMode,
+        businessName = businessName,
         currency = currency,
         minorUnitsAmountDivisor = minorUnitsAmountDivisor(currency),
         presentmentDetails = adaptivePricingInfo?.let {
@@ -36,6 +40,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         lineItems = lineItems.map { it.asLineItem(currency) },
         shippingOptions = shippingOptions.map { it.asShippingRate(currency) },
         paymentOptionDisplayData = paymentOptionDisplayData,
+        lastPaymentError = lastPaymentError(),
         currencySelectorOptions = CurrencySelectorOptionsFactory.create(
             adaptivePricingInfo = adaptivePricingInfo,
             flagImages = flagImages,
@@ -84,16 +89,70 @@ private fun CheckoutCollectedDetails.asShippingAddress(): Session.ShippingAddres
     )
 }
 
+/**
+ * Maps the session lifecycle status. The public [Session.Status] intentionally has no `Unknown` case
+ * (per the API design), so an unrecognized server status is treated as [Session.Status.Open] — the
+ * conservative, non-terminal state. When the session is complete, the payment status is derived from
+ * [paymentStatus].
+ */
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.Status.asStatus(): Session.Status {
-    return when (this) {
+private fun CheckoutSessionResponse.asStatus(): Session.Status {
+    return when (status) {
         CheckoutSessionResponse.Status.OPEN -> Session.Status.Open
-        CheckoutSessionResponse.Status.COMPLETE -> Session.Status.Complete
         CheckoutSessionResponse.Status.EXPIRED -> Session.Status.Expired
-        CheckoutSessionResponse.Status.UNKNOWN -> Session.Status.Unknown
+        CheckoutSessionResponse.Status.COMPLETE -> Session.Status.Complete(paymentStatus())
+        CheckoutSessionResponse.Status.UNKNOWN -> Session.Status.Open
     }
 }
 
+/**
+ * Best-guess derivation of the payment status for a completed session (the `/init` contract doesn't
+ * expose it directly): setup-mode sessions and zero-amount orders require no payment; otherwise the
+ * payment is considered collected only when the PaymentIntent has succeeded or is awaiting capture.
+ */
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.paymentStatus(): Session.Status.PaymentStatus {
+    return when {
+        mode == CheckoutSessionResponse.Mode.SETUP -> Session.Status.PaymentStatus.NoPaymentRequired
+        amount == 0L -> Session.Status.PaymentStatus.NoPaymentRequired
+        paymentIntent?.status == StripeIntent.Status.Succeeded ||
+            paymentIntent?.status == StripeIntent.Status.RequiresCapture ->
+            Session.Status.PaymentStatus.Paid
+        else -> Session.Status.PaymentStatus.Unpaid
+    }
+}
+
+/**
+ * Surfaces the error from the last confirmation attempt, wrapped as a [Throwable]. Best guess: the
+ * `/init` contract doesn't confirm which intent carries it, so we prefer the PaymentIntent's error
+ * and fall back to the SetupIntent's.
+ */
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.lastPaymentError(): Throwable? {
+    paymentIntent?.lastPaymentError?.let { error ->
+        return LocalStripeException(
+            displayMessage = error.message,
+            analyticsValue = LAST_PAYMENT_ERROR_ANALYTICS_VALUE,
+            errorCode = error.code,
+            declineCode = error.declineCode,
+        )
+    }
+    setupIntent?.lastSetupError?.let { error ->
+        return LocalStripeException(
+            displayMessage = error.message,
+            analyticsValue = LAST_PAYMENT_ERROR_ANALYTICS_VALUE,
+            errorCode = error.code,
+            declineCode = error.declineCode,
+        )
+    }
+    return null
+}
+
+/**
+ * Maps the tax computation status. The public [Session.Tax.Status] intentionally has no `Unknown`
+ * case, so an unrecognized server status is treated as [Session.Tax.Status.RequiresShippingAddress]
+ * — the conservative "not ready to confirm" state.
+ */
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.TaxStatus.asTax(): Session.Tax {
     val status = when (this) {
@@ -107,7 +166,7 @@ private fun CheckoutSessionResponse.TaxStatus.asTax(): Session.Tax {
             Session.Tax.Status.RequiresBillingAddress
         }
         CheckoutSessionResponse.TaxStatus.UNKNOWN -> {
-            Session.Tax.Status.Unknown
+            Session.Tax.Status.RequiresShippingAddress
         }
     }
     return Session.Tax(status = status)

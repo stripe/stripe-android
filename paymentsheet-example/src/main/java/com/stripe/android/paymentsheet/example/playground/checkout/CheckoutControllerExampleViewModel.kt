@@ -50,7 +50,7 @@ internal class CheckoutControllerExampleViewModel(
         viewModelScope.launch {
             controller.checkoutSession.collect { session ->
                 updateConfiguredState { it.copy(checkoutSession = session) }
-                if (session?.status == Session.Status.Complete) {
+                if (session?.status is Session.Status.Complete) {
                     _sessionComplete.tryEmit(Unit)
                 }
             }

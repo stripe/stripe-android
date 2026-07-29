@@ -41,6 +41,11 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val merchantCountry = accountSettings?.let {
             StripeJsonUtils.optCountryCode(it, FIELD_ACCOUNT_SETTINGS_COUNTRY)
         }
+        // Best-guess key: the /init contract for the business name is unconfirmed. Reads
+        // account_settings.business_name and degrades to null if the key is absent or renamed.
+        val businessName = accountSettings?.let {
+            StripeJsonUtils.optString(it, FIELD_ACCOUNT_SETTINGS_BUSINESS_NAME)
+        }
         val mode = parseMode(json.optString(FIELD_MODE))
         val status = parseStatus(json.optString(FIELD_STATUS))
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
@@ -112,6 +117,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             allowedShippingCountries = allowedShippingCountries,
             requiresBillingAddress = requiresBillingAddress,
             merchantCountry = merchantCountry,
+            businessName = businessName,
         )
     }
 
@@ -533,6 +539,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_SESSION_ID = "session_id"
     private const val FIELD_ACCOUNT_SETTINGS = "account_settings"
     private const val FIELD_ACCOUNT_SETTINGS_COUNTRY = "country"
+    private const val FIELD_ACCOUNT_SETTINGS_BUSINESS_NAME = "business_name"
     private const val FIELD_UI_MODE = "ui_mode"
     private const val UI_MODE_CUSTOM = "custom"
     private const val FIELD_MODE = "mode"

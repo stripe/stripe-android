@@ -3,6 +3,8 @@ package com.stripe.android.checkout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -27,7 +29,7 @@ class CheckoutSessionMappersTest {
     @Test
     fun `maps status complete`() {
         val session = createSession(status = CheckoutSessionResponse.Status.COMPLETE)
-        assertThat(session.status).isEqualTo(Session.Status.Complete)
+        assertThat(session.status).isInstanceOf(Session.Status.Complete::class.java)
     }
 
     @Test
@@ -37,9 +39,71 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
-    fun `maps status unknown`() {
+    fun `unknown status maps to open`() {
         val session = createSession(status = CheckoutSessionResponse.Status.UNKNOWN)
-        assertThat(session.status).isEqualTo(Session.Status.Unknown)
+        assertThat(session.status).isEqualTo(Session.Status.Open)
+    }
+
+    @Test
+    fun `complete setup-mode session has NoPaymentRequired payment status`() {
+        val session = createSession(
+            status = CheckoutSessionResponse.Status.COMPLETE,
+            mode = CheckoutSessionResponse.Mode.SETUP,
+        )
+        val complete = session.status as Session.Status.Complete
+        assertThat(complete.paymentStatus).isEqualTo(Session.Status.PaymentStatus.NoPaymentRequired)
+    }
+
+    @Test
+    fun `complete zero-amount session has NoPaymentRequired payment status`() {
+        val session = createSession(status = CheckoutSessionResponse.Status.COMPLETE, amount = 0L)
+        val complete = session.status as Session.Status.Complete
+        assertThat(complete.paymentStatus).isEqualTo(Session.Status.PaymentStatus.NoPaymentRequired)
+    }
+
+    @Test
+    fun `complete session with a succeeded PaymentIntent has Paid payment status`() {
+        val session = createSession(
+            status = CheckoutSessionResponse.Status.COMPLETE,
+            paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+        )
+        val complete = session.status as Session.Status.Complete
+        assertThat(complete.paymentStatus).isEqualTo(Session.Status.PaymentStatus.Paid)
+    }
+
+    @Test
+    fun `complete session without a collected payment has Unpaid payment status`() {
+        val session = createSession(
+            status = CheckoutSessionResponse.Status.COMPLETE,
+            paymentIntent = null,
+        )
+        val complete = session.status as Session.Status.Complete
+        assertThat(complete.paymentStatus).isEqualTo(Session.Status.PaymentStatus.Unpaid)
+    }
+
+    @Test
+    fun `maps businessName`() {
+        val session = createSession(businessName = "Example, Inc.")
+        assertThat(session.businessName).isEqualTo("Example, Inc.")
+    }
+
+    @Test
+    fun `null businessName maps to null`() {
+        val session = createSession(businessName = null)
+        assertThat(session.businessName).isNull()
+    }
+
+    @Test
+    fun `maps lastPaymentError from the PaymentIntent`() {
+        val session = createSession(paymentIntent = PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR)
+        assertThat(session.lastPaymentError?.message)
+            .isEqualTo(PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR?.lastPaymentError?.message)
+    }
+
+    @Test
+    fun `no last payment error maps to null`() {
+        val session = createSession(paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED)
+        assertThat(session.lastPaymentError).isNull()
     }
 
     @Test
@@ -146,9 +210,9 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
-    fun `maps tax status unknown`() {
+    fun `unknown tax status maps to requires shipping address`() {
         val session = createSession(taxStatus = CheckoutSessionResponse.TaxStatus.UNKNOWN)
-        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.Unknown)
+        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.RequiresShippingAddress)
     }
 
     @Test
@@ -365,6 +429,10 @@ class CheckoutSessionMappersTest {
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
         adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
         collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(),
+        mode: CheckoutSessionResponse.Mode = CheckoutSessionResponse.Mode.PAYMENT,
+        amount: Long = 1000L,
+        paymentIntent: PaymentIntent? = null,
+        businessName: String? = null,
     ): Session {
         return CheckoutSessionResponseFactory.create(
             id = id,
@@ -377,6 +445,10 @@ class CheckoutSessionMappersTest {
             lineItems = lineItems,
             shippingOptions = shippingOptions,
             adaptivePricingInfo = adaptivePricingInfo,
+            mode = mode,
+            amount = amount,
+            paymentIntent = paymentIntent,
+            businessName = businessName,
         ).asCheckoutSession(
             flagImages = null,
             collectedDetails = collectedDetails,
