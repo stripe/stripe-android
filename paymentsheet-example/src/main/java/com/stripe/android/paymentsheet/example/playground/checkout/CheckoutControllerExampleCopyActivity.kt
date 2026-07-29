@@ -3,6 +3,7 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.os.Bundle
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -80,9 +81,9 @@ internal class CheckoutControllerExampleCopyActivity : AppCompatActivity() {
                         composable(CheckoutControllerExampleCopyScreen.Summary.route) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 when (val currentStatus = status) {
-                                    is CheckoutControllerExampleCopyViewModel.Status.Loading -> LoadingContent()
+                                    is CheckoutControllerExampleCopyViewModel.Status.Loading -> CopyLoadingContent()
                                     is CheckoutControllerExampleCopyViewModel.Status.Error -> {
-                                        ErrorContent(currentStatus.message)
+                                        CopyErrorContent(currentStatus.message)
                                     }
                                     is CheckoutControllerExampleCopyViewModel.Status.Configured -> {
                                         currentStatus.checkoutSession?.let { session ->
@@ -92,7 +93,7 @@ internal class CheckoutControllerExampleCopyActivity : AppCompatActivity() {
                                                 selectedExample = currentStatus.expressCheckoutExample,
                                                 onSelected = viewModel::selectExpressCheckoutExample,
                                             )
-                                            ExpressCheckoutSection(
+                                            CopyExpressCheckoutSection(
                                                 session = session,
                                                 content = { presenter.expressCheckoutElement().Content() },
                                             )
@@ -104,13 +105,13 @@ internal class CheckoutControllerExampleCopyActivity : AppCompatActivity() {
                         composable(CheckoutControllerExampleCopyScreen.Payment.route) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 when (val currentStatus = status) {
-                                    is CheckoutControllerExampleCopyViewModel.Status.Loading -> LoadingContent()
+                                    is CheckoutControllerExampleCopyViewModel.Status.Loading -> CopyLoadingContent()
                                     is CheckoutControllerExampleCopyViewModel.Status.Error -> {
-                                        ErrorContent(currentStatus.message)
+                                        CopyErrorContent(currentStatus.message)
                                     }
                                     is CheckoutControllerExampleCopyViewModel.Status.Configured -> {
                                         currentStatus.checkoutSession?.let { session ->
-                                            ExpressCheckoutSection(
+                                            CopyExpressCheckoutSection(
                                                 session = session,
                                                 content = { presenter.expressCheckoutElement().Content() },
                                             )
@@ -126,14 +127,21 @@ internal class CheckoutControllerExampleCopyActivity : AppCompatActivity() {
                     val configured = status as? CheckoutControllerExampleCopyViewModel.Status.Configured
                     when (currentRoute) {
                         CheckoutControllerExampleCopyScreen.Summary.route -> Button(
-                            onClick = { navController.navigate(CheckoutControllerExampleCopyScreen.Payment.route) },
+                            onClick = {
+                                startActivity(
+                                    Intent(
+                                        this@CheckoutControllerExampleCopyActivity,
+                                        CheckoutControllerExampleCopyPaymentActivity::class.java,
+                                    )
+                                )
+                            },
                             enabled = configured != null,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text("Continue to payment")
                         }
                         CheckoutControllerExampleCopyScreen.Payment.route -> {
-                            PaymentOptionRow(configured?.checkoutSession?.paymentOptionDisplayData)
+                            CopyPaymentOptionRow(configured?.checkoutSession?.paymentOptionDisplayData)
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
                                 onClick = { paymentElement.presentPaymentOptions() },
@@ -191,7 +199,7 @@ private fun ExpressCheckoutExamplePicker(
 }
 
 @Composable
-private fun ExpressCheckoutSection(
+internal fun CopyExpressCheckoutSection(
     session: CheckoutSession,
     content: @Composable () -> Unit,
 ) {
@@ -215,7 +223,7 @@ private fun ExpressCheckoutSection(
 }
 
 @Composable
-private fun LoadingContent() {
+internal fun CopyLoadingContent() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -225,7 +233,7 @@ private fun LoadingContent() {
 }
 
 @Composable
-private fun ErrorContent(message: String) {
+internal fun CopyErrorContent(message: String) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -242,7 +250,7 @@ private fun ErrorContent(message: String) {
 }
 
 @Composable
-private fun PaymentOptionRow(paymentOption: PaymentOptionDisplayData?) {
+internal fun CopyPaymentOptionRow(paymentOption: PaymentOptionDisplayData?) {
     if (paymentOption != null) {
         Row(
             modifier = Modifier.fillMaxWidth(),

@@ -39,6 +39,8 @@ internal class CheckoutControllerExampleCopyViewModel(
     val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
 
     private var checkoutSessionClientSecret: String? = null
+    val configuredCheckoutSessionClientSecret: String?
+        get() = checkoutSessionClientSecret
 
     val controller = CheckoutController.Builder(
         application = application,
