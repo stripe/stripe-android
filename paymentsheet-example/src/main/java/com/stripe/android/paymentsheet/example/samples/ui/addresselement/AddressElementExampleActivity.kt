@@ -97,7 +97,6 @@ private fun AddressElementExampleScreen(viewModel: AddressElementExampleViewMode
                             .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
                             .build()
                         addressLauncher.present(
-                            publishableKey = state.publishableKey,
                             configuration = config,
                         )
                     },

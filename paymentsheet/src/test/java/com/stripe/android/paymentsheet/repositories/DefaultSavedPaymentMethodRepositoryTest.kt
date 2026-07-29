@@ -24,7 +24,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
+
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultSavedPaymentMethodRepositoryTest {
@@ -330,12 +330,10 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            apiConfigProvider = Provider {
-                ApiConfiguration.State(
-                    publishableKey = "pk_test_123",
-                    stripeAccountId = null,
-                )
-            },
+            apiConfigurationState = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,

@@ -48,7 +48,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
+
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -362,12 +362,10 @@ class CheckoutSessionConfirmationInterceptorTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            apiConfigProvider = Provider {
-                ApiConfiguration.State(
-                    publishableKey = "pk_test_123",
-                    stripeAccountId = null,
-                )
-            },
+            apiConfigurationState = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(

@@ -175,6 +175,6 @@ class WebLinkActivityContractTest {
         stripeRepository: StripeRepository = FakeStripeRepository(),
         errorReporter: FakeErrorReporter = FakeErrorReporter()
     ): WebLinkActivityContract {
-        return WebLinkActivityContract(stripeRepository, errorReporter, testApiConfiguration)
+        return WebLinkActivityContract(stripeRepository, errorReporter, { testApiConfiguration })
     }
 }

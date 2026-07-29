@@ -40,7 +40,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private val errorReporter: ErrorReporter by lazy {
         ErrorReporter.createFallbackInstance(
             context = this,
-            publishableKey = args.publishableKey.orEmpty(),
+            publishableKeyProvider = { args.publishableKey.orEmpty() },
         )
     }
 

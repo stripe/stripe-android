@@ -9,8 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.ApiConfiguration
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -70,12 +68,10 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     private val savedStateHandle: SavedStateHandle,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) : ViewModel() {
@@ -557,15 +553,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithPaymentIntent(
-                publishableKey = apiConfigProvider.get().publishableKey,
-                stripeAccountId = apiConfigProvider.get().stripeAccountId,
+                publishableKey = args.publishableKey,
+                stripeAccountId = args.stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
             )
         } else {
             collectBankAccountLauncher?.presentWithSetupIntent(
-                publishableKey = apiConfigProvider.get().publishableKey,
-                stripeAccountId = apiConfigProvider.get().stripeAccountId,
+                publishableKey = args.publishableKey,
+                stripeAccountId = args.stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
             )
@@ -676,8 +672,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithDeferredPayment(
-                publishableKey = apiConfigProvider.get().publishableKey,
-                stripeAccountId = apiConfigProvider.get().stripeAccountId,
+                publishableKey = args.publishableKey,
+                stripeAccountId = args.stripeAccountId,
                 configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -687,8 +683,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         } else {
             collectBankAccountLauncher?.presentWithDeferredSetup(
-                publishableKey = apiConfigProvider.get().publishableKey,
-                stripeAccountId = apiConfigProvider.get().stripeAccountId,
+                publishableKey = args.publishableKey,
+                stripeAccountId = args.stripeAccountId,
                 configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -839,17 +835,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val application = extras.requireApplication()
             return DaggerUSBankAccountFormComponent
                 .factory()
                 .create(
-                    application = application,
-                    apiConfigurationState = PaymentConfiguration.getInstance(application).let {
-                        ApiConfiguration.State(
-                            publishableKey = it.publishableKey,
-                            stripeAccountId = it.stripeAccountId,
-                        )
-                    },
+                    application = extras.requireApplication(),
                 )
                 .subComponentFactoryProvider.get()
                 .create(
@@ -870,6 +859,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val isPaymentFlow: Boolean,
         val stripeIntentId: String?,
         val clientSecret: String?,
+        val publishableKey: String,
+        val stripeAccountId: String?,
         val onBehalfOf: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,

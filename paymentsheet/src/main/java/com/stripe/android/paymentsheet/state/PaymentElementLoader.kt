@@ -315,11 +315,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         val configuration = integrationConfiguration.commonConfiguration
+        val apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration)
         // Validate configuration before loading
         initializationMode.validate()
         configuration.validate(
             initializationMode = initializationMode,
-            isLiveMode = apiConfigurationResolver.resolve(configuration.apiConfiguration).isLiveMode(),
+            isLiveMode = apiConfiguration.isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
             isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
@@ -342,13 +343,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
         }
 
-        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration)
+        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration, apiConfiguration)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = loadSession(
             initializationMode = initializationMode,
             configuration = configuration,
             savedPaymentMethodSelection = savedPaymentMethodSelection,
+            apiConfiguration = apiConfiguration,
         )
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
@@ -357,7 +359,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             launch { integrityRequestManager.prepare() }
         }
 
-        fetchPaymentMethodMessaging(elementsSession)
+        fetchPaymentMethodMessaging(elementsSession, apiConfiguration)
 
         val isGooglePayReady = isGooglePayReady(
             configuration = configuration,
@@ -415,6 +417,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -487,6 +490,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
         configuration: CommonConfiguration,
+        apiConfiguration: ApiConfiguration.State,
     ): PrefetchedPaymentMethods? {
         val customer = configuration.customer ?: return null
         val accessType = customer.accessType
@@ -502,7 +506,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         PaymentMethod.Type.SepaDebit,
                         PaymentMethod.Type.USBankAccount,
                     ), // These are the only payment method types we support as saved payment methods.
-                    silentlyFail = apiConfigurationResolver.resolve(configuration.apiConfiguration).isLiveMode(),
+                    silentlyFail = apiConfiguration.isLiveMode(),
                 )
             }
         }
@@ -512,6 +516,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
+        apiConfiguration: ApiConfiguration.State,
     ): ElementsSession {
         return durationProvider.measureDuration(
             DurationProvider.Key.PaymentSheetLoadSessionLoad
@@ -523,6 +528,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     configuration = configuration,
                     savedPaymentMethodSelection = savedPaymentMethodSelection,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -563,6 +569,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
@@ -620,7 +627,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
             paymentMethodLayout = paymentMethodLayout,
-            apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration),
+            apiConfiguration = apiConfiguration,
         )
 
         return paymentMethodMetadata
@@ -910,13 +917,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
     }
 
-    private fun fetchPaymentMethodMessaging(elementsSession: ElementsSession) {
+    private fun fetchPaymentMethodMessaging(
+        elementsSession: ElementsSession,
+        apiConfiguration: ApiConfiguration.State,
+    ) {
         val variant = elementsSession.experimentsData?.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
         ] ?: return
 
         if (variant == "treatment") {
-            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent, apiConfiguration)
         }
     }
 

@@ -6,8 +6,6 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
@@ -95,6 +93,8 @@ class USBankAccountFormViewModelTest {
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        publishableKey = "pk_test_123",
+        stripeAccountId = null,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -2124,14 +2124,9 @@ class USBankAccountFormViewModelTest {
         args: USBankAccountFormViewModel.Args = defaultArgs,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): USBankAccountFormViewModel {
-        val apiConfig = ApiConfiguration.State(
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID
-        )
         return USBankAccountFormViewModel(
             args = args,
             application = ApplicationProvider.getApplicationContext(),
-            apiConfigProvider = { apiConfig },
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         ).also { viewModelStoreRule.track(it) }
@@ -2194,7 +2189,6 @@ class USBankAccountFormViewModelTest {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
-        const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         const val CUSTOMER_COUNTRY = "US"
         const val CUSTOMER_PHONE = "+13105551234"
         val CUSTOMER_ADDRESS = PaymentSheet.Address(

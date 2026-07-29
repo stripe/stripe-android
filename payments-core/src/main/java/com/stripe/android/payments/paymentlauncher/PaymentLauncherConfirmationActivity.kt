@@ -48,7 +48,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             finishWithResult(InternalPaymentResult.Failed(it))
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                publishableKey = PaymentConfiguration.getInstance(applicationContext).publishableKey,
+                publishableKeyProvider = { PaymentConfiguration.getInstance(applicationContext).publishableKey },
             ).report(
                 errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS,
                 stripeException = StripeException.create(it),
@@ -59,7 +59,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         args.validate().onFailure {
             finishWithResult(InternalPaymentResult.Failed(it))
 
-            ErrorReporter.createFallbackInstance(applicationContext, publishableKey = args.publishableKey)
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { args.publishableKey })
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_INVALID_ARGS,
                     stripeException = StripeException.create(it),

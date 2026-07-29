@@ -49,14 +49,14 @@ interface ErrorReporter : FraudDetectionErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
-            publishableKey: String,
+            publishableKeyProvider: () -> String,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .factory()
                 .create(
                     context = context.applicationContext,
-                    publishableKey = publishableKey,
+                    publishableKeyProvider = publishableKeyProvider,
                     productUsage = productUsage,
                 )
                 .errorReporter
@@ -435,7 +435,7 @@ internal interface DefaultErrorReporterComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
-            publishableKey: String,
+            publishableKeyProvider: () -> String,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
@@ -473,9 +473,9 @@ internal interface DefaultErrorReporterModule {
         }
 
         @Provides
-        fun provideApiConfigurationState(publishableKey: String): ApiConfiguration.State {
+        fun provideApiConfigurationState(publishableKeyProvider: () -> String): ApiConfiguration.State {
             return ApiConfiguration.State(
-                publishableKey = publishableKey,
+                publishableKey = publishableKeyProvider(),
                 stripeAccountId = null,
             )
         }

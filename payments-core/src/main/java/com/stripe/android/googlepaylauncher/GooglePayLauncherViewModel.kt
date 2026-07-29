@@ -303,7 +303,7 @@ internal class GooglePayLauncherViewModel(
 
             val errorReporter = ErrorReporter.createFallbackInstance(
                 context = application,
-                publishableKey = publishableKey,
+                publishableKeyProvider = { publishableKey },
                 productUsage = productUsageTokens,
             )
 

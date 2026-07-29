@@ -22,12 +22,11 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 internal interface PaymentMethodMessagePromotionsHelper {
-    fun fetchPromotionsAsync(intent: StripeIntent)
+    fun fetchPromotionsAsync(intent: StripeIntent, apiConfiguration: ApiConfiguration.State)
 
     fun getPromotionIfAvailableForCode(
         code: PaymentMethodCode,
@@ -50,14 +49,13 @@ internal interface PaymentMethodMessagePromotionsHelper {
 @Singleton
 internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
     private val eventReporter: EventReporter
 ) : PaymentMethodMessagePromotionsHelper {
     private var promotionsDeferred: Deferred<Result<PaymentMethodMessagePromotionList>>? = null
 
-    override fun fetchPromotionsAsync(intent: StripeIntent) {
+    override fun fetchPromotionsAsync(intent: StripeIntent, apiConfiguration: ApiConfiguration.State) {
         eventReporter.onPaymentMethodMessagePromotionsFetchBegin()
         promotionsDeferred?.cancel()
         promotionsDeferred = null
@@ -68,8 +66,8 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
                 country = intent.countryCode,
                 locale = Locale.getDefault().language,
                 requestOptions = ApiRequest.Options(
-                    apiKey = apiConfigProvider.get().publishableKey,
-                    stripeAccount = apiConfigProvider.get().stripeAccountId
+                    apiKey = apiConfiguration.publishableKey,
+                    stripeAccount = apiConfiguration.stripeAccountId
                 )
             )
         }
@@ -124,7 +122,7 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
     private val promotions: List<PaymentMethodMessagePromotion>?,
     private val eventReporter: EventReporter
 ) : PaymentMethodMessagePromotionsHelper {
-    override fun fetchPromotionsAsync(intent: StripeIntent) {
+    override fun fetchPromotionsAsync(intent: StripeIntent, apiConfiguration: ApiConfiguration.State) {
         // NO-OP
     }
 
@@ -164,7 +162,7 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
 }
 
 internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessagePromotionsHelper {
-    override fun fetchPromotionsAsync(intent: StripeIntent) {
+    override fun fetchPromotionsAsync(intent: StripeIntent, apiConfiguration: ApiConfiguration.State) {
         // NO-OP
     }
 

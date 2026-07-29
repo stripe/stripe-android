@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.state
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
@@ -455,6 +456,7 @@ internal class DefaultCustomerSheetLoaderTest {
                 workContext = coroutineContext,
                 customerAdapter = FakeCustomerAdapter(),
                 errorReporter = FakeErrorReporter(),
+                apiConfigurationState = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             )
         )
 

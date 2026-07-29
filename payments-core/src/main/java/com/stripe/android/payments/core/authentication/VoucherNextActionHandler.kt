@@ -27,7 +27,7 @@ internal class VoucherNextActionHandler @Inject constructor(
     ) {
         val detailsData = actionable.nextActionData as NextActionData.DisplayVoucherDetails
         if (detailsData.hostedVoucherUrl == null) {
-            ErrorReporter.createFallbackInstance(context, publishableKey = requestOptions.apiKey).report(
+            ErrorReporter.createFallbackInstance(context, publishableKeyProvider = { requestOptions.apiKey }).report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
                 additionalNonPiiParams = mapOf("next_action_type" to (actionable.nextActionType?.code ?: ""))
             )

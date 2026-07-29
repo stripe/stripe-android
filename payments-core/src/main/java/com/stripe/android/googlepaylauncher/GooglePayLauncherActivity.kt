@@ -46,7 +46,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     private val errorReporter: ErrorReporter by lazy {
         ErrorReporter.createFallbackInstance(
             context = this,
-            publishableKey = PaymentConfiguration.getInstance(this).publishableKey,
+            publishableKeyProvider = { PaymentConfiguration.getInstance(this).publishableKey },
         )
     }
 

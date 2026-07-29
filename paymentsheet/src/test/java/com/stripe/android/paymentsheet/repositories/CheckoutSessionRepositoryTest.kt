@@ -18,7 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
+
 
 @RunWith(RobolectricTestRunner::class)
 class CheckoutSessionRepositoryTest {
@@ -41,12 +41,10 @@ class CheckoutSessionRepositoryTest {
             context = ApplicationProvider.getApplicationContext(),
             publishableKey = "pk_test_123",
         ),
-        apiConfigProvider = Provider {
-            ApiConfiguration.State(
-                publishableKey = "pk_test_123",
-                stripeAccountId = null,
-            )
-        },
+        apiConfigurationState = ApiConfiguration.State(
+            publishableKey = "pk_test_123",
+            stripeAccountId = null,
+        ),
     )
 
     @Test

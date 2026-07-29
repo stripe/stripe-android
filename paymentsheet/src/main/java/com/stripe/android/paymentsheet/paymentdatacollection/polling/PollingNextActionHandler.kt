@@ -40,7 +40,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
 
         val localPollingAuthenticator = pollingLauncher
         if (localPollingAuthenticator == null) {
-            ErrorReporter.createFallbackInstance(host.application, publishableKey = requestOptions.apiKey)
+            ErrorReporter.createFallbackInstance(host.application, publishableKeyProvider = { requestOptions.apiKey })
                 .report(ErrorReporter.UnexpectedErrorEvent.MISSING_POLLING_AUTHENTICATOR)
         } else {
             localPollingAuthenticator.launch(args, options)

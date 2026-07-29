@@ -107,7 +107,7 @@ constructor(
                     stripeAccountId = stripeAccountId
                 )
 
-            DefaultFraudDetectionDataRepository(context, publishableKey).refresh()
+            DefaultFraudDetectionDataRepository(context, { publishableKey }).refresh()
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

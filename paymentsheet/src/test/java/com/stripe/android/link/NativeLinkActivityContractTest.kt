@@ -27,7 +27,7 @@ class NativeLinkActivityContractTest {
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
             requestSurface = REQUEST_SURFACE,
-            apiConfiguration = testApiConfiguration,
+            apiConfigurationProvider = { testApiConfiguration },
         )
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
@@ -70,7 +70,7 @@ class NativeLinkActivityContractTest {
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
             requestSurface = REQUEST_SURFACE,
-            apiConfiguration = testApiConfiguration,
+            apiConfigurationProvider = { testApiConfiguration },
         )
 
         val result = contract.parseResult(
@@ -86,7 +86,7 @@ class NativeLinkActivityContractTest {
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
             requestSurface = REQUEST_SURFACE,
-            apiConfiguration = testApiConfiguration,
+            apiConfigurationProvider = { testApiConfiguration },
         )
 
         val result = contract.parseResult(
@@ -107,7 +107,7 @@ class NativeLinkActivityContractTest {
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
             requestSurface = REQUEST_SURFACE,
-            apiConfiguration = testApiConfiguration,
+            apiConfigurationProvider = { testApiConfiguration },
         )
 
         val result = contract.parseResult(42, Intent())
@@ -125,7 +125,7 @@ class NativeLinkActivityContractTest {
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
             requestSurface = REQUEST_SURFACE,
-            apiConfiguration = testApiConfiguration,
+            apiConfigurationProvider = { testApiConfiguration },
         )
 
         val result = contract.parseResult(Activity.RESULT_CANCELED, Intent())

@@ -166,12 +166,10 @@ internal suspend fun createIntentConfirmationInterceptor(
                             context = ApplicationProvider.getApplicationContext(),
                             publishableKey = "pk",
                         ),
-                        apiConfigProvider = Provider {
-                            ApiConfiguration.State(
-                                publishableKey = "pk",
-                                stripeAccountId = null,
-                            )
-                        },
+                        apiConfigurationState = ApiConfiguration.State(
+                            publishableKey = "pk",
+                            stripeAccountId = null,
+                        ),
                     ),
                     requestOptions = requestOptions,
                 )

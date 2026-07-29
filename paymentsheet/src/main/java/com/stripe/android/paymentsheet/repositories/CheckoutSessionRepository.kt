@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
-import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
@@ -25,7 +24,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    private val apiConfigurationState: ApiConfiguration.State,
 ) {
 
     private val apiRequestFactory = ApiRequest.Factory(
@@ -35,19 +34,17 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
-    private fun createOptions(): ApiRequest.Options {
-        val config = apiConfigProvider.get()
-        return ApiRequest.Options(
-            apiKey = config.publishableKey,
-            stripeAccount = config.stripeAccountId,
+    private val requestOptions: ApiRequest.Options
+        get() = ApiRequest.Options(
+            apiKey = apiConfigurationState.publishableKey,
+            stripeAccount = apiConfigurationState.stripeAccountId,
         )
-    }
 
     private suspend fun executePost(
         url: String,
         params: Map<String, *>,
     ): Result<CheckoutSessionResponse> {
-        val options = createOptions()
+        val options = requestOptions
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,

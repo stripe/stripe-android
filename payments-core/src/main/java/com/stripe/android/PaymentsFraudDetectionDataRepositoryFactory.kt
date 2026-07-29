@@ -16,7 +16,7 @@ import kotlin.coroutines.CoroutineContext
 @JvmOverloads
 fun DefaultFraudDetectionDataRepository(
     context: Context,
-    publishableKey: String,
+    publishableKeyProvider: () -> String,
     workContext: CoroutineContext = Dispatchers.IO,
 ): DefaultFraudDetectionDataRepository {
     return DefaultFraudDetectionDataRepository(
@@ -25,7 +25,7 @@ fun DefaultFraudDetectionDataRepository(
         stripeNetworkClient = DefaultStripeNetworkClient(workContext = workContext),
         errorReporter = ErrorReporter.createFallbackInstance(
             context,
-            publishableKey = publishableKey,
+            publishableKeyProvider = publishableKeyProvider,
             productUsage = emptySet(),
         ),
         workContext = workContext,

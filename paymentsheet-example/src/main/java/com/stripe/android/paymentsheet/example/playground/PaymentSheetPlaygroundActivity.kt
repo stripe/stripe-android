@@ -692,7 +692,7 @@ internal class PaymentSheetPlaygroundActivity :
                     .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
                     .appearance(AppearanceStore.state.toPaymentSheetAppearance())
                     .build()
-                addressLauncher.present(PaymentConfiguration.getInstance(context).publishableKey, configuration)
+                addressLauncher.present(configuration)
             },
             modifier = Modifier.fillMaxWidth(),
         ) {

@@ -103,7 +103,7 @@ internal class CustomerSheetViewModel(
     private val logger: Logger,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
-    apiConfiguration: ApiConfiguration.State,
+    private val apiConfiguration: ApiConfiguration.State,
     private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
@@ -904,6 +904,8 @@ internal class CustomerSheetViewModel(
             sellerBusinessName = null,
             forceSetupFutureUseBehavior = false,
             clientAttributionMetadata = clientAttributionMetadata,
+            publishableKey = apiConfiguration.publishableKey,
+            stripeAccountId = apiConfiguration.stripeAccountId,
         )
     }
 

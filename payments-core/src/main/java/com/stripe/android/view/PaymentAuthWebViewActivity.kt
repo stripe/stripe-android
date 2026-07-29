@@ -68,7 +68,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 context = applicationContext,
-                publishableKey = PaymentConfiguration.getInstance(applicationContext).publishableKey
+                publishableKeyProvider = { PaymentConfiguration.getInstance(applicationContext).publishableKey }
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
@@ -98,7 +98,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext, publishableKey = args.publishableKey)
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { args.publishableKey })
                 .report(
                     errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
                 )
@@ -142,7 +142,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         error: Throwable?
     ) {
         if (error != null) {
-            ErrorReporter.createFallbackInstance(applicationContext, publishableKey = requireNotNull(_args).publishableKey)
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { requireNotNull(_args).publishableKey })
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
                     stripeException = StripeException.create(error),

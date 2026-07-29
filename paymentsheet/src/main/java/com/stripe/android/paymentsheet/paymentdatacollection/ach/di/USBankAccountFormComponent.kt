@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach.di
 
 import android.app.Application
-import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import dagger.BindsInstance
@@ -24,7 +23,6 @@ internal interface USBankAccountFormComponent {
     interface Factory {
         fun create(
             @BindsInstance application: Application,
-            @BindsInstance apiConfigurationState: ApiConfiguration.State,
         ): USBankAccountFormComponent
     }
 }

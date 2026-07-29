@@ -3,6 +3,7 @@
 package com.stripe.android.checkout.injection
 
 import android.app.Application
+import com.stripe.android.ApiConfiguration
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
@@ -123,6 +124,7 @@ internal interface CheckoutControllerComponent {
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
+            @BindsInstance apiConfigurationState: ApiConfiguration.State,
         ): CheckoutControllerComponent
     }
 }

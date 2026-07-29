@@ -163,7 +163,7 @@ private fun paymentSheetNextActionHandlers(
             emptyMap()
         }
     } catch (e: Exception) {
-        ErrorReporter.createFallbackInstance(applicationContext, publishableKey = publishableKey)
+        ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { publishableKey })
             .report(
                 // [PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND] will not be changed to avoid skewed metrics
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND,
