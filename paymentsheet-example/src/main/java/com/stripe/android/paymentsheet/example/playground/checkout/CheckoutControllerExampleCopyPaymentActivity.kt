@@ -49,7 +49,6 @@ internal class CheckoutControllerExampleCopyPaymentActivity : AppCompatActivity(
                     session?.let { checkoutSession ->
                         Column(modifier = Modifier.fillMaxWidth()) {
                             CopyExpressCheckoutSection(
-                                session = checkoutSession,
                                 availableMethods = availableExpressCheckoutPaymentMethods,
                                 content = { presenter.expressCheckoutElement().Content() },
                             )

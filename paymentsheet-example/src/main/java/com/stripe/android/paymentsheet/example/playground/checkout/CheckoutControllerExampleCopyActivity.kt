@@ -97,7 +97,6 @@ internal class CheckoutControllerExampleCopyActivity : AppCompatActivity() {
                                                 onSelected = viewModel::selectExpressCheckoutExample,
                                             )
                                             CopyExpressCheckoutSection(
-                                                session = session,
                                                 availableMethods = availableExpressCheckoutPaymentMethods,
                                                 content = { presenter.expressCheckoutElement().Content() },
                                             )
@@ -116,7 +115,6 @@ internal class CheckoutControllerExampleCopyActivity : AppCompatActivity() {
                                     is CheckoutControllerExampleCopyViewModel.Status.Configured -> {
                                         currentStatus.checkoutSession?.let { session ->
                                             CopyExpressCheckoutSection(
-                                                session = session,
                                                 availableMethods = availableExpressCheckoutPaymentMethods,
                                                 content = { presenter.expressCheckoutElement().Content() },
                                             )
@@ -205,7 +203,6 @@ private fun ExpressCheckoutExamplePicker(
 
 @Composable
 internal fun CopyExpressCheckoutSection(
-    session: CheckoutSession,
     availableMethods: List<ExpressCheckoutElement.PaymentMethod>,
     content: @Composable () -> Unit,
 ) {

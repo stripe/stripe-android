@@ -96,7 +96,6 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                                 onSelected = viewModel::selectExpressCheckoutExample,
                                             )
                                             ExpressCheckoutSection(
-                                                session = session,
                                                 availableMethods = availableExpressCheckoutPaymentMethods,
                                                 content = { presenter.expressCheckoutElement().Content() },
                                             )
@@ -115,7 +114,6 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                     is CheckoutControllerExampleViewModel.Status.Configured -> {
                                         currentStatus.checkoutSession?.let { session ->
                                             ExpressCheckoutSection(
-                                                session = session,
                                                 availableMethods = availableExpressCheckoutPaymentMethods,
                                                 content = { presenter.expressCheckoutElement().Content() },
                                             )
@@ -197,7 +195,6 @@ private fun ExpressCheckoutExamplePicker(
 
 @Composable
 private fun ExpressCheckoutSection(
-    session: CheckoutSession,
     availableMethods: List<ExpressCheckoutElement.PaymentMethod>,
     content: @Composable () -> Unit,
 ) {
