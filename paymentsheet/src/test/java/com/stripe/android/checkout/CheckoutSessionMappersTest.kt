@@ -434,6 +434,37 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
+    fun `maps lineItems into a single orderSummaryItems group`() {
+        val session = createSession(
+            lineItems = listOf(
+                CheckoutSessionResponse.LineItem(
+                    id = "li_1",
+                    name = "Llama Figure",
+                    quantity = 2,
+                    unitAmount = 999L,
+                    subtotal = 1998L,
+                    total = 1998L,
+                ),
+            ),
+            totalSummary = TotalSummaryResponseFactory.create(subtotal = 1998L, totalAmountDue = 2100L),
+        )
+
+        val group = session.orderSummaryItems.single() as Session.OrderSummaryItem.OneTimePrice
+        assertThat(group.subtotal?.minorUnitsAmount).isEqualTo(1998L)
+        assertThat(group.total?.minorUnitsAmount).isEqualTo(2100L)
+        val item = group.items.single()
+        assertThat(item.displayName).isEqualTo("Llama Figure")
+        assertThat(item.quantity).isEqualTo(2)
+        assertThat(item.unitAmount?.minorUnitsAmount).isEqualTo(999L)
+    }
+
+    @Test
+    fun `empty lineItems maps orderSummaryItems to empty list`() {
+        val session = createSession(lineItems = emptyList())
+        assertThat(session.orderSummaryItems).isEmpty()
+    }
+
+    @Test
     fun `maps shippingOptions`() {
         val session = createSession(
             shippingOptions = listOf(

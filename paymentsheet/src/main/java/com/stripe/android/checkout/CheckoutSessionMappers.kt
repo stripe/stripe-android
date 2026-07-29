@@ -39,6 +39,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         totalSummary = totalSummary?.asTotalSummary(currency),
         totals = totalSummary?.asTotal(currency),
         lineItems = lineItems.map { it.asLineItem(currency) },
+        orderSummaryItems = asOrderSummaryItems(currency),
         shippingOptions = shippingOptions.map { it.asShippingRate(currency) },
         paymentOptionDisplayData = paymentOptionDisplayData,
         lastPaymentError = lastPaymentError(),
@@ -245,5 +246,33 @@ private fun CheckoutSessionResponse.LineItem.asLineItem(currency: String): Sessi
         unitAmount = unitAmount?.asAmount(currency),
         subtotal = subtotal.asAmount(currency),
         total = total.asAmount(currency),
+    )
+}
+
+/**
+ * Projects the flat line items into the iOS-aligned [Session.OrderSummaryItem] shape as a single
+ * [Session.OrderSummaryItem.OneTimePrice] group. Best guess: mobile_elements only offers one-time
+ * pricing today, and the `/init` line items don't yet carry images, unit labels, per-item taxes, or
+ * adjustable-quantity bounds, so those are empty/null until the contract provides them.
+ */
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.asOrderSummaryItems(currency: String): List<Session.OrderSummaryItem> {
+    if (lineItems.isEmpty()) return emptyList()
+    val items = lineItems.map { lineItem ->
+        Session.OrderSummaryItem.OneTimePrice.Item(
+            displayName = lineItem.name,
+            images = emptyList(),
+            unitAmount = lineItem.unitAmount?.asAmount(currency),
+            unitLabel = null,
+            quantity = lineItem.quantity,
+            adjustableQuantity = null,
+        )
+    }
+    return listOf(
+        Session.OrderSummaryItem.OneTimePrice(
+            items = items,
+            subtotal = totalSummary?.subtotal?.asAmount(currency),
+            total = totalSummary?.totalAmountDue?.asAmount(currency),
+        )
     )
 }

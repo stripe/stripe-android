@@ -429,6 +429,10 @@ class CheckoutController @Inject internal constructor(
          */
         val lineItems: List<LineItem>,
         /**
+         * The items the customer is purchasing, in the iOS-aligned order-summary shape.
+         */
+        val orderSummaryItems: List<OrderSummaryItem>,
+        /**
          * Available shipping options for this checkout session.
          */
         val shippingOptions: List<ShippingRate>,
@@ -794,6 +798,85 @@ class CheckoutController @Inject internal constructor(
              */
             val total: Amount,
         )
+
+        /**
+         * An item (or group of items) the customer is purchasing, mirroring the iOS
+         * `OrderSummaryItem` shape.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        sealed interface OrderSummaryItem {
+            /**
+             * A group of one-time-priced items with their subtotal and total.
+             */
+            @Poko
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class OneTimePrice internal constructor(
+                /**
+                 * The individual items in this group.
+                 */
+                val items: List<Item>,
+                /**
+                 * The subtotal for this group, if available.
+                 */
+                val subtotal: Amount?,
+                /**
+                 * The total for this group, if available.
+                 */
+                val total: Amount?,
+            ) : OrderSummaryItem {
+                /**
+                 * A single line in a [OneTimePrice] group.
+                 */
+                @Poko
+                @CheckoutSessionPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class Item internal constructor(
+                    /**
+                     * The display name of the item.
+                     */
+                    val displayName: String,
+                    /**
+                     * Image URLs for the item. May be empty.
+                     */
+                    val images: List<String>,
+                    /**
+                     * The unit price, if available.
+                     */
+                    val unitAmount: Amount?,
+                    /**
+                     * A label describing the unit (e.g. "per seat"), if any.
+                     */
+                    val unitLabel: String?,
+                    /**
+                     * The quantity of this item.
+                     */
+                    val quantity: Int,
+                    /**
+                     * The quantity adjustment bounds, if the quantity is adjustable.
+                     */
+                    val adjustableQuantity: AdjustableQuantity?,
+                )
+
+                /**
+                 * The bounds within which an item's quantity may be adjusted.
+                 */
+                @Poko
+                @CheckoutSessionPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class AdjustableQuantity internal constructor(
+                    /**
+                     * The minimum allowed quantity.
+                     */
+                    val minimum: Int,
+                    /**
+                     * The maximum allowed quantity.
+                     */
+                    val maximum: Int,
+                )
+            }
+        }
 
         /**
          * Display data for the customer's currently selected payment option.
