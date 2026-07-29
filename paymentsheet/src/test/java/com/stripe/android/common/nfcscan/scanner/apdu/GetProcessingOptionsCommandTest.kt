@@ -78,7 +78,7 @@ internal class GetProcessingOptionsCommandTest {
     }
 
     @Test
-    fun `transceiveWith parses AFL from response template format 1`() = test(
+    fun `transceiveWith extracts AIP and AFL from response template format 1 into records`() = test(
         transceiveResult = apduSuccessResponse(
             tlv(
                 tag = 0x80.toByte(),
@@ -96,13 +96,58 @@ internal class GetProcessingOptionsCommandTest {
         val result = GetProcessingOptionsCommand(pdolData = byteArrayOf()).transceiveWith(transceiver)
 
         assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()?.aflEntries).containsExactly(
+
+        val processingOptionsInfo = result.getOrNull()
+
+        assertThat(processingOptionsInfo?.aflEntries).isEmpty()
+
+        val records = processingOptionsInfo?.records
+
+        assertThat(records?.getValue("82")?.contentEquals(byteArrayOf(0x00, 0x00))).isTrue()
+        assertThat(records?.getValue("94")?.contentEquals(byteArrayOf(0x08, 0x01, 0x01, 0x00)))
+            .isTrue()
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `transceiveWith does not overwrite AIP and AFL when both are already present`() = test(
+        transceiveResult = apduSuccessResponse(
+            tlv(
+                tag = 0x80.toByte(),
+                value = byteArrayOf(
+                    0x00,
+                    0x00,
+                    0x08,
+                    0x01,
+                    0x01,
+                    0x00,
+                ),
+            ) +
+                tlv(tag = 0x82.toByte(), value = byteArrayOf(0x01, 0x02)) +
+                tlv(tag = 0x94.toByte(), value = byteArrayOf(0x10, 0x02, 0x02, 0x01)),
+        ),
+    ) {
+        val result = GetProcessingOptionsCommand(pdolData = byteArrayOf()).transceiveWith(transceiver)
+
+        assertThat(result.isSuccess).isTrue()
+
+        val processingOptionsInfo = result.getOrNull()
+
+        assertThat(processingOptionsInfo?.aflEntries).containsExactly(
             ProcessingOptionsInfo.AflEntry(
-                shortFileIdentifier = 1,
-                firstRecord = 1,
-                lastRecord = 1,
+                shortFileIdentifier = 2,
+                firstRecord = 2,
+                lastRecord = 2,
             ),
         )
+
+        val records = processingOptionsInfo?.records
+
+        assertThat(records?.getValue("82")?.contentEquals(byteArrayOf(0x01, 0x02))).isTrue()
+        assertThat(records?.getValue("94")?.contentEquals(byteArrayOf(0x10, 0x02, 0x02, 0x01)))
+            .isTrue()
+
         assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
     }
 

@@ -21,16 +21,27 @@ internal class GetProcessingOptionsCommand(
             return null
         }
 
+        val records = tlv.toMutableMap()
+
+        parseFromRecords(records)
+
         return ProcessingOptionsInfo(
-            aflEntries = extractAfl(tlv)?.let(::parseAflEntries).orEmpty(),
-            records = tlv,
+            aflEntries = tlv[TAG_AFL]?.let(::parseAflEntries).orEmpty(),
+            records = records.toMap(),
         )
     }
 
-    private fun extractAfl(tlv: Map<String, ByteArray>): ByteArray? {
-        return tlv[TAG_AFL] ?: tlv[TAG_RESPONSE_TEMPLATE_FORMAT_1]?.let { format1Value ->
-            format1Value.takeIf { it.size > AIP_LENGTH }
-                ?.copyOfRange(AIP_LENGTH, format1Value.size)
+    private fun parseFromRecords(records: MutableMap<String, ByteArray>) {
+        val format1Value = records[TAG_RESPONSE_TEMPLATE_FORMAT_1] ?: return
+
+        if (records.containsKey(TAG_AIP) && records.containsKey(TAG_AFL)) {
+            return
+        }
+
+        records[TAG_AIP] = format1Value.copyOfRange(0, AIP_LENGTH)
+
+        if (format1Value.size > AIP_LENGTH) {
+            records[TAG_AFL] = format1Value.copyOfRange(AIP_LENGTH, format1Value.size)
         }
     }
 
@@ -48,6 +59,7 @@ internal class GetProcessingOptionsCommand(
 
     private companion object {
         const val TAG_RESPONSE_TEMPLATE_FORMAT_1 = "80"
+        const val TAG_AIP = "82"
         const val TAG_AFL = "94"
         const val AIP_LENGTH = 2
 
