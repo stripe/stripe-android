@@ -33,8 +33,13 @@ internal class DefaultPdolBuilder @Inject constructor(
             return byteArrayOf()
         }
 
+        // Get all available terminal values from provided producers
         val terminalValues = buildTerminalValues(paymentMethodMetadata)
+
+        // Build the PDOL data response from the template and precalculated values
         val pdolResponse = buildPdolResponse(template, terminalValues)
+
+        // Wrap the PDOL data in a command template tag that `GetProcessingOptions` understands
         val wrappedData = withCommandDataTag(pdolResponse)
 
         return wrappedData
@@ -63,18 +68,23 @@ internal class DefaultPdolBuilder @Inject constructor(
     ): ByteArray {
         val response = mutableListOf<Byte>()
 
+        // For each DOL entry in the template, append a terminal value that was precalculated
         for ((tag, length) in parseDolEntries(pdolTemplate)) {
+            // Get value from the list of precalculated values
             val value = terminalValues[tag]
 
-            if (value != null) {
-                response.addAll(value.copyOf(length.coerceAtMost(value.size)).toList())
-
-                if (value.size < length) {
-                    repeat(length - value.size) {
-                        response.add(0x00)
-                    }
-                }
+            /*
+             * The tag-value producers should produce values of the expected length. If not, we should skip it.
+             */
+            if (value != null && value.size == length) {
+                // Add all the bytes from the byte array into the response
+                response.addAll(value.toList())
             } else {
+                /*
+                 * If we have no value, zero it out so that we at least provide some value of the expected length for
+                 * the tag. Ideally all required tags are filled in properly so the `GetProcessingOptions` command
+                 * does not fail.
+                 */
                 repeat(length) {
                     response.add(0x00)
                 }
@@ -92,8 +102,11 @@ internal class DefaultPdolBuilder @Inject constructor(
         var offset = 0
 
         while (offset < template.size) {
+            // Read the tag in the template then skip past the tag in the offset
             val (tag, tagLength) = readTag(template, offset)
             offset += tagLength
+
+            // Read the length the data should be
             val length = template[offset++].toInt() and BYTE_MASK
             entries.add(tag to length)
         }
@@ -101,12 +114,18 @@ internal class DefaultPdolBuilder @Inject constructor(
         return entries
     }
 
+    /*
+     * PDOL tags are always 1 to 2 byte tags.
+     */
     private fun readTag(data: ByteArray, offset: Int): Pair<String, Int> {
+        // Isolate the first byte
         val firstByte = data[offset].toInt() and BYTE_MASK
         var tag = formatAsMinimumTwoCharacters(firstByte)
         var tagLength = 1
 
+        // If all 5 lower bits in the first byte are set to 1, this tells us the tag is a multi-byte tag
         if ((firstByte and TAG_CONTINUATION_MASK) == TAG_CONTINUATION_MASK) {
+            // Isolate the second byte
             val secondByte = data[offset + 1].toInt() and BYTE_MASK
             tag += formatAsMinimumTwoCharacters(secondByte)
             tagLength = 2
@@ -126,8 +145,13 @@ internal class DefaultPdolBuilder @Inject constructor(
 
     private fun encodeLength(length: Int): ByteArray {
         return when {
+            // Short form: length fits in one byte (0–127).
             length < MULTI_BYTE_LENGTH_THRESHOLD -> byteArrayOf(length.toByte())
+
+            // Long form, one byte: 0x81 prefix followed by the length (128–255).
             length <= SINGLE_BYTE_MAX_LENGTH -> byteArrayOf(MULTI_BYTE_LENGTH_INDICATOR_ONE, length.toByte())
+
+            // Long form, multiple bytes: 0x82 prefix followed by the length (256-65535).
             else -> {
                 byteArrayOf(
                     MULTI_BYTE_LENGTH_INDICATOR_TWO,
