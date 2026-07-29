@@ -38,6 +38,8 @@ internal class CheckoutControllerExampleViewModel(
     private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
 
+    private var checkoutSessionClientSecret: String? = null
+
     val controller = CheckoutController.Builder(
         application = application,
         savedStateHandle = savedStateHandle,
@@ -69,47 +71,42 @@ internal class CheckoutControllerExampleViewModel(
     private suspend fun fetchAndConfigure() {
         repository.fetchCheckoutSessionClientSecret().fold(
             onSuccess = { clientSecret ->
-                controller.configure(
-                    checkoutSessionClientSecret = clientSecret,
-                    configuration = CheckoutController.Configuration()
-                        .googlePayConfiguration(
-                            GooglePayConfiguration(
-                                environment = Environment.Test
-                            )
-                        )
-                        .expressCheckoutElement(
-                            ExpressCheckoutElement.Configuration()
-                                .paymentMethods(
-                                    ExpressCheckoutElement.Configuration.PaymentMethods()
-                                        .link(
-                                            ExpressCheckoutElement.Configuration.PaymentMethods
-                                                .LinkVisibility.Auto
-                                        )
-                                        .googlePay(
-                                            ExpressCheckoutElement.Configuration.PaymentMethods
-                                                .GooglePayVisibility.Auto
-                                        )
-                                )
-                                .buttonHeight(52.dp)
-                                .buttonOrientation(
-                                    ExpressCheckoutElement.Configuration.ButtonOrientation.Horizontal
-                                )
-                        )
-                ).fold(
-                    onSuccess = {
-                        _status.value = Status.Configured(
-                            checkoutSession = controller.checkoutSession.value,
-                        )
-                    },
-                    onFailure = { error ->
-                        Log.e(TAG, "Failed to configure", error)
-                        _status.value = Status.Error(error.message ?: "Configure failed")
-                    },
-                )
+                checkoutSessionClientSecret = clientSecret
+                configure(clientSecret, ExpressCheckoutExample.BothWalletsHorizontal)
             },
             onFailure = { error ->
                 Log.e(TAG, "Failed to fetch checkout session", error)
                 _status.value = Status.Error(error.message ?: "Unknown error")
+            },
+        )
+    }
+
+    fun selectExpressCheckoutExample(example: ExpressCheckoutExample) {
+        val clientSecret = checkoutSessionClientSecret ?: return
+        viewModelScope.launch {
+            configure(clientSecret, example)
+        }
+    }
+
+    private suspend fun configure(
+        clientSecret: String,
+        example: ExpressCheckoutExample,
+    ) {
+        controller.configure(
+            checkoutSessionClientSecret = clientSecret,
+            configuration = CheckoutController.Configuration()
+                .googlePayConfiguration(GooglePayConfiguration(environment = Environment.Test))
+                .expressCheckoutElement(example.configuration()),
+        ).fold(
+            onSuccess = {
+                _status.value = Status.Configured(
+                    checkoutSession = controller.checkoutSession.value,
+                    expressCheckoutExample = example,
+                )
+            },
+            onFailure = { error ->
+                Log.e(TAG, "Failed to configure", error)
+                _status.value = Status.Error(error.message ?: "Configure failed")
             },
         )
     }
@@ -123,8 +120,48 @@ internal class CheckoutControllerExampleViewModel(
         data object Loading : Status
         data class Configured(
             val checkoutSession: CheckoutSession?,
+            val expressCheckoutExample: ExpressCheckoutExample,
         ) : Status
         data class Error(val message: String) : Status
+    }
+
+    enum class ExpressCheckoutExample(val label: String) {
+        BothWalletsHorizontal("Both wallets / horizontal"),
+        LinkOnlyVertical("Link only / vertical"),
+        GooglePayOnlyVertical("Google Pay only / vertical"),
+        ;
+
+        fun configuration(): ExpressCheckoutElement.Configuration {
+            val paymentMethods = ExpressCheckoutElement.Configuration.PaymentMethods()
+            val configuration = ExpressCheckoutElement.Configuration().paymentMethods(paymentMethods)
+
+            when (this) {
+                BothWalletsHorizontal -> {
+                    paymentMethods
+                        .link(ExpressCheckoutElement.Configuration.PaymentMethods.LinkVisibility.Auto)
+                        .googlePay(ExpressCheckoutElement.Configuration.PaymentMethods.GooglePayVisibility.Auto)
+                    return configuration
+                        .buttonHeight(52.dp)
+                        .buttonOrientation(ExpressCheckoutElement.Configuration.ButtonOrientation.Horizontal)
+                }
+                LinkOnlyVertical -> {
+                    paymentMethods
+                        .link(ExpressCheckoutElement.Configuration.PaymentMethods.LinkVisibility.Auto)
+                        .googlePay(ExpressCheckoutElement.Configuration.PaymentMethods.GooglePayVisibility.Never)
+                    return configuration
+                        .buttonHeight(48.dp)
+                        .buttonOrientation(ExpressCheckoutElement.Configuration.ButtonOrientation.Vertical)
+                }
+                GooglePayOnlyVertical -> {
+                    paymentMethods
+                        .link(ExpressCheckoutElement.Configuration.PaymentMethods.LinkVisibility.Never)
+                        .googlePay(ExpressCheckoutElement.Configuration.PaymentMethods.GooglePayVisibility.Auto)
+                    return configuration
+                        .buttonHeight(56.dp)
+                        .buttonOrientation(ExpressCheckoutElement.Configuration.ButtonOrientation.Vertical)
+                }
+            }
+        }
     }
 
     companion object {

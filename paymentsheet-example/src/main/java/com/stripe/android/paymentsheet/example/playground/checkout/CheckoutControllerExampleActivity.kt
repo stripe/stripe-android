@@ -78,6 +78,10 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
+                                ExpressCheckoutExamplePicker(
+                                    selectedExample = currentStatus.expressCheckoutExample,
+                                    onSelected = viewModel::selectExpressCheckoutExample,
+                                )
                                 ExpressCheckoutSection(
                                     session = session,
                                     content = { presenter.expressCheckoutElement().Content() },
@@ -108,6 +112,26 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun ExpressCheckoutExamplePicker(
+    selectedExample: CheckoutControllerExampleViewModel.ExpressCheckoutExample,
+    onSelected: (CheckoutControllerExampleViewModel.ExpressCheckoutExample) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(text = "Express Checkout examples", style = MaterialTheme.typography.h6)
+        CheckoutControllerExampleViewModel.ExpressCheckoutExample.entries.forEach { example ->
+            Button(
+                onClick = { onSelected(example) },
+                enabled = example != selectedExample,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(example.label)
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
