@@ -4,16 +4,16 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import org.junit.Test
 
-internal class TerminalTransactionQualifiersProducerTest {
+internal class TerminalTypeProducerTest {
     @Test
-    fun `produce returns terminal transaction qualifiers for online-only mobile reader`() {
-        val result = TerminalTransactionQualifiersProducer.produce(
+    fun `produce returns terminal type for online-only cardholder-controlled device`() {
+        val result = TerminalTypeProducer.produce(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         )
 
-        assertThat(result.tag).isEqualTo("9F66")
+        assertThat(result.tag).isEqualTo("9F35")
         assertThat(result.value).isEqualTo(
-            byteArrayOf(0x20, 0x00, 0x40, 0x00),
+            byteArrayOf(0x34),
         )
     }
 }

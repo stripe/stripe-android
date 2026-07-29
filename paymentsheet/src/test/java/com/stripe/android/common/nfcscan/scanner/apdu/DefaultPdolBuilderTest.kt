@@ -40,7 +40,7 @@ internal class DefaultPdolBuilderTest {
             template = template,
         )
 
-        assertThat(result).isEqualTo(byteArrayOf(0x83.toByte(), 0x04, 0x26, 0x00, 0x00, 0x00))
+        assertThat(result).isEqualTo(byteArrayOf(0x83.toByte(), 0x04, 0x20, 0x00, 0x40, 0x00))
     }
 
     @Test
@@ -107,7 +107,7 @@ internal class DefaultPdolBuilderTest {
         )
 
         assertThat(result)
-            .isEqualTo(byteArrayOf(0x83.toByte(), 0x08, 0x26, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04))
+            .isEqualTo(byteArrayOf(0x83.toByte(), 0x08, 0x20, 0x00, 0x40, 0x00, 0x01, 0x02, 0x03, 0x04))
     }
 
     @Test
@@ -159,7 +159,7 @@ internal class DefaultPdolBuilderTest {
     )
 
     private companion object {
-        val TERMINAL_TRANSACTION_QUALIFIERS = byteArrayOf(0x26, 0x00, 0x00, 0x00)
+        val TERMINAL_TRANSACTION_QUALIFIERS = byteArrayOf(0x20, 0x00, 0x40, 0x00)
         val UNPREDICTABLE_NUMBER = byteArrayOf(0x01, 0x02, 0x03, 0x04)
     }
 }
