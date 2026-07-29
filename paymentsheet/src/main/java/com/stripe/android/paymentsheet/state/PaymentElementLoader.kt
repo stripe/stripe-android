@@ -58,6 +58,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.json.Json.Default.configuration
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -95,6 +96,10 @@ internal interface PaymentElementLoader {
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
+
+        data class Checkout(
+            override val commonConfiguration: CommonConfiguration
+        ) : Configuration
 
         data class CryptoOnramp(
             val configuration: LinkController.Configuration.State
@@ -637,6 +642,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
             is PaymentElementLoader.Configuration.StandaloneLink,
+            is PaymentElementLoader.Configuration.Checkout,
             is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
             is PaymentElementLoader.Configuration.PaymentSheet ->
                 if (

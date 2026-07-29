@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
@@ -56,6 +58,20 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
     }
+
+    @Test
+    fun `loadInitial invokes the loader with a Checkout configuration derived from the checkout config`() =
+        runScenario(merchantDisplayName = "Acme Corp") {
+            loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+            val integrationConfiguration = paymentElementLoader.loadedIntegrationConfiguration
+            assertThat(integrationConfiguration)
+                .isInstanceOf(PaymentElementLoader.Configuration.Checkout::class.java)
+            val commonConfiguration = integrationConfiguration?.commonConfiguration
+            assertThat(commonConfiguration?.merchantDisplayName).isEqualTo("Acme Corp")
+            // The customer is provided by the checkout session, never client-side configuration.
+            assertThat(commonConfiguration?.customer).isNull()
+        }
 
     @Test
     fun `loadInitial populates the customer state holder from the loaded customer`() = runScenario(
@@ -239,7 +255,7 @@ internal class CheckoutStateLoaderTest {
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        commonConfiguration = CommonConfigurationFactory.create(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
@@ -301,7 +317,7 @@ internal class CheckoutStateLoaderTest {
             customer = customer,
         )
         val loader = CheckoutStateLoader(
-            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(merchantDisplayName),
+            commonConfigurationFactory = CheckoutCommonConfigurationFactory(merchantDisplayName),
             flagImageResolver = flagImageResolver,
             paymentElementLoader = paymentElementLoader,
             selectionChooser = chooser,

@@ -152,7 +152,7 @@ internal class CheckoutControllerTest {
     fun `configure uses app name as merchant display name, not checkout session data`() =
         runConfigureScenario {
             result.getOrThrow()
-            assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
+            assertThat(committedState?.commonConfiguration?.merchantDisplayName)
                 .isEqualTo(expectedMerchantDisplayName)
         }
 
@@ -164,8 +164,9 @@ internal class CheckoutControllerTest {
             ),
         ) {
             result.getOrThrow()
-            assertThat(committedState?.embeddedConfiguration?.embeddedViewDisplaysMandateText)
-                .isFalse()
+            assertThat(
+                committedState?.configuration?.paymentElementConfiguration?.embeddedViewDisplaysMandateText
+            ).isFalse()
         }
 
     @Test
@@ -186,7 +187,7 @@ internal class CheckoutControllerTest {
             },
         ) {
             result.getOrThrow()
-            assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
+            assertThat(committedState?.commonConfiguration?.billingDetailsCollectionConfiguration?.address)
                 .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
         }
 
@@ -265,7 +266,7 @@ internal class CheckoutControllerTest {
         // death: the committed state is read back from the restored namespaced child.
         val state = committedStateFor(savedStateHandle.simulateProcessDeath())
         assertThat(state).isNotNull()
-        assertThat(state!!.embeddedConfiguration.merchantDisplayName)
+        assertThat(state!!.commonConfiguration.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
     }
 

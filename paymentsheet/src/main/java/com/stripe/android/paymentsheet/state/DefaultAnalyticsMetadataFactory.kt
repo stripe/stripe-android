@@ -131,7 +131,8 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
             is PaymentElementLoader.Configuration.PaymentSheet -> putAll(analyticsMap())
             is PaymentElementLoader.Configuration.Embedded -> putAll(analyticsMap())
             is PaymentElementLoader.Configuration.CryptoOnramp,
-            is PaymentElementLoader.Configuration.StandaloneLink -> Unit
+            is PaymentElementLoader.Configuration.StandaloneLink,
+            is PaymentElementLoader.Configuration.Checkout -> Unit
         }
     }
 

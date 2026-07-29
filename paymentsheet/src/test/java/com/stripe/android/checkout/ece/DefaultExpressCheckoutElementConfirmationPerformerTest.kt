@@ -6,6 +6,7 @@ import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -13,7 +14,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -146,14 +146,12 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     private fun googlePayState(): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
-            embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "US",
-                    )
-                )
-                .build(),
+            commonConfiguration = CommonConfigurationFactory.create(
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "US",
+                ),
+            ),
         )
     }
 

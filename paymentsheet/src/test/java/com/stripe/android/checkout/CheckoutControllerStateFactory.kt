@@ -5,10 +5,10 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -23,8 +23,13 @@ internal object CheckoutControllerStateFactory {
         flagImages: Map<String, Bitmap>? = null,
         collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        embeddedConfiguration: EmbeddedPaymentElement.Configuration =
-            EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        commonConfiguration: CommonConfiguration = CheckoutCommonConfigurationFactory(
+            merchantDisplayName = "Example, Inc.",
+        ).create(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
+        ),
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
@@ -35,7 +40,7 @@ internal object CheckoutControllerStateFactory {
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = paymentMethodMetadata,
-            embeddedConfiguration = embeddedConfiguration,
+            commonConfiguration = commonConfiguration,
             paymentSelection = paymentSelection,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,

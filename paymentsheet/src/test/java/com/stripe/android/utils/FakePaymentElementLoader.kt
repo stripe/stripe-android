@@ -39,6 +39,10 @@ internal class FakePaymentElementLoader(
     private val integrationMetadata: IntegrationMetadata? = null,
 ) : PaymentElementLoader {
 
+    /** The [PaymentElementLoader.Configuration] passed to the most recent [load] call. */
+    var loadedIntegrationConfiguration: PaymentElementLoader.Configuration? = null
+        private set
+
     fun updateStripeIntent(intent: StripeIntent) {
         this.stripeIntent = intent
     }
@@ -77,6 +81,7 @@ internal class FakePaymentElementLoader(
             paymentMethodLayout = when (integrationConfiguration) {
                 is PaymentElementLoader.Configuration.CryptoOnramp,
                 is PaymentElementLoader.Configuration.StandaloneLink,
+                is PaymentElementLoader.Configuration.Checkout,
                 is PaymentElementLoader.Configuration.Embedded -> PaymentSheet.PaymentMethodLayout.Vertical
                 is PaymentElementLoader.Configuration.PaymentSheet ->
                     integrationConfiguration.configuration.paymentMethodLayout
@@ -89,6 +94,7 @@ internal class FakePaymentElementLoader(
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
+        loadedIntegrationConfiguration = integrationConfiguration
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("oh no"))

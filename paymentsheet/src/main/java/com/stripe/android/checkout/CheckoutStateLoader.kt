@@ -2,8 +2,8 @@ package com.stripe.android.checkout
 
 import android.graphics.Bitmap
 import android.os.Bundle
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutStateLoader @Inject constructor(
-    private val embeddedConfigurationFactory: CheckoutEmbeddedConfigurationFactory,
+    private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
     private val flagImageResolver: FlagImageResolver,
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
@@ -51,7 +51,7 @@ internal class CheckoutStateLoader @Inject constructor(
         // reused when the currencies haven't changed.
         val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
 
-        val embeddedConfig = embeddedConfigurationFactory.create(
+        val commonConfig = commonConfigurationFactory.create(
             configuration = configuration,
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
@@ -62,9 +62,8 @@ internal class CheckoutStateLoader @Inject constructor(
                 instancesKey = response.id,
                 checkoutSessionResponse = response,
             ),
-            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
-                isRowSelectionImmediateAction = false,
-                configuration = embeddedConfig,
+            integrationConfiguration = PaymentElementLoader.Configuration.Checkout(
+                commonConfiguration = commonConfig,
             ),
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = false,
@@ -80,8 +79,10 @@ internal class CheckoutStateLoader @Inject constructor(
             paymentMethods = loaderState.customer?.paymentMethods,
             previousSelection = carryForward.previousSelection,
             newSelection = loaderState.paymentSelection,
-            newConfiguration = embeddedConfig.asCommonConfiguration(),
-            formSheetAction = embeddedConfig.formSheetAction,
+            newConfiguration = commonConfig,
+            // Checkout never surfaces a form sheet action; it reuses the embedded selection logic with
+            // the default so the chooser treats selections as non-confirming.
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
 
         stateHolder.state = CheckoutControllerState(
@@ -90,7 +91,7 @@ internal class CheckoutStateLoader @Inject constructor(
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
-            embeddedConfiguration = embeddedConfig,
+            commonConfiguration = commonConfig,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,

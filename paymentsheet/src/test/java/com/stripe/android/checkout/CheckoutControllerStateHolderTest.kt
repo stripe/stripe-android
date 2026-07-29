@@ -6,10 +6,10 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
+import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -199,7 +199,7 @@ internal class CheckoutControllerStateHolderTest {
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        commonConfiguration = CommonConfigurationFactory.create(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
