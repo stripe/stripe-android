@@ -63,12 +63,13 @@ class CheckoutController @Inject internal constructor(
     private val mutex = Mutex()
     private val pendingMutations = AtomicInteger(0)
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isUpdating = MutableStateFlow(false)
 
     /**
-     * Whether a mutation is currently in progress.
+     * `true` while the checkout session is being updated. Use this to disable interactive UI (e.g.
+     * your buy button) so the customer can't confirm while an update is in flight.
      */
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
 
     suspend fun configure(
         checkoutSessionClientSecret: String,
@@ -304,14 +305,14 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Serializes [block] behind [mutex] so configuration and mutations run in sequence, and toggles
-     * [isLoading] while any serialized work is in flight (tracked via [pendingMutations] so
+     * [isUpdating] while any serialized work is in flight (tracked via [pendingMutations] so
      * concurrent callers share a single loading window).
      */
     private suspend fun <T> runSerialized(
         block: suspend () -> kotlin.Result<T>,
     ): kotlin.Result<T> {
         if (pendingMutations.incrementAndGet() == 1) {
-            _isLoading.value = true
+            _isUpdating.value = true
         }
         return try {
             // Run network requests with a mutex to ensure events are processed in order.
@@ -320,7 +321,7 @@ class CheckoutController @Inject internal constructor(
             }
         } finally {
             if (pendingMutations.decrementAndGet() == 0) {
-                _isLoading.value = false
+                _isUpdating.value = false
             }
         }
     }
@@ -964,9 +965,15 @@ class CheckoutController @Inject internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface Result {
+        @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Completed internal constructor() : Result
+        class Completed internal constructor(
+            /**
+             * Whether the payment for the now-completed session was collected.
+             */
+            val paymentStatus: Session.Status.PaymentStatus,
+        ) : Result
 
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
