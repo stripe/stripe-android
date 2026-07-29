@@ -45,6 +45,7 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
@@ -112,6 +113,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     placesClient: PlacesClientProxy?,
     linkAccountHolder: LinkAccountHolder,
     stripeAutocompleteRepository: StripeAutocompleteRepository,
+    addressLauncherEventReporter: AddressLauncherEventReporter,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -127,6 +129,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     placesClient = placesClient,
     linkAccountHolder = linkAccountHolder,
     stripeAutocompleteRepository = stripeAutocompleteRepository,
+    addressLauncherEventReporter = addressLauncherEventReporter,
 ) {
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,

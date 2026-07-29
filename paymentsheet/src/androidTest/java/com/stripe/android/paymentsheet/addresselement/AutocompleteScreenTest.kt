@@ -12,7 +12,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.model.Address
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.NoOpAddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
@@ -29,7 +29,7 @@ class AutocompleteScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val eventReporter = FakeEventReporter()
+    private val eventReporter = NoOpAddressLauncherEventReporter
 
     @Test
     fun ensure_elements_exist() {
@@ -105,17 +105,4 @@ class AutocompleteScreenTest {
         }
     }
 
-    private class FakeEventReporter : AddressLauncherEventReporter {
-        override fun onShow(country: String) {
-            // no-op
-        }
-
-        override fun onCompleted(
-            country: String,
-            autocompleteResultSelected: Boolean,
-            editDistance: Int?
-        ) {
-            // no-op
-        }
-    }
 }

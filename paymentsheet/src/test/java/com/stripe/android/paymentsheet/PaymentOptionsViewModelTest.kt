@@ -50,6 +50,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -1481,6 +1482,7 @@ internal class PaymentOptionsViewModelTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+            addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
         )
     }.also { viewModelStoreRule.track(it) }
 

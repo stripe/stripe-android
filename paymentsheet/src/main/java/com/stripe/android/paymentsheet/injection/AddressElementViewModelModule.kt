@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavig
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Binds
@@ -69,10 +68,14 @@ internal class AddressElementViewModelModule {
         args: AddressElementActivityContract.Args,
         stripeAutocompleteRepository: StripeAutocompleteRepository,
         googlePlacesClient: PlacesClientProxy?,
+        addressLauncherEventReporter: AddressLauncherEventReporter,
     ): PlacesClientProxy? {
         val config = args.config ?: return null
         return if (config.useStripeHostedAutocomplete) {
-            StripeHostedPlacesClientProxy(repository = stripeAutocompleteRepository)
+            StripeHostedPlacesClientProxy(
+                repository = stripeAutocompleteRepository,
+                eventReporter = addressLauncherEventReporter,
+            )
         } else {
             googlePlacesClient
         }
@@ -93,12 +96,6 @@ internal class AddressElementViewModelModule {
             )
         }
     }
-
-    @Provides
-    @Singleton
-    fun provideEventReporter(
-        defaultAddressLauncherEventReporter: DefaultAddressLauncherEventReporter
-    ): AddressLauncherEventReporter = defaultAddressLauncherEventReporter
 
     @Module
     interface Bindings {
