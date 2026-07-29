@@ -86,6 +86,7 @@ internal class CurrencySelectorViewModelTest {
             checkoutSessionFlow.value = CheckoutSessionResponseFactory.create(currency = "eur")
                 .asCheckoutSession(
                     flagImages = null,
+                    collectedDetails = CheckoutCollectedDetails(),
                     paymentOptionDisplayData = null,
                     availableExpressButtonTypes = emptyList(),
                 )
@@ -128,6 +129,7 @@ internal class CurrencySelectorViewModelTest {
         val checkoutSessionFlow = MutableStateFlow(
             CheckoutSessionResponseFactory.create().asCheckoutSession(
                 flagImages = null,
+                collectedDetails = CheckoutCollectedDetails(),
                 paymentOptionDisplayData = null,
                 availableExpressButtonTypes = emptyList(),
             )

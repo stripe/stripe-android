@@ -391,9 +391,18 @@ class CheckoutController @Inject internal constructor(
          */
         val minorUnitsAmountDivisor: Int?,
         /**
+         * Details about the currency presented to the customer, or `null` if the session is not using
+         * adaptive pricing.
+         */
+        val presentmentDetails: PresentmentDetails?,
+        /**
          * The customer's email address from the checkout session.
          */
-        val customerEmail: String?,
+        val email: String?,
+        /**
+         * The customer's shipping contact details and postal address, if one has been collected.
+         */
+        val shippingAddress: ShippingAddress?,
         /**
          * The tax computation status for this checkout session.
          */
@@ -505,6 +514,69 @@ class CheckoutController @Inject internal constructor(
              * A localized, currency-formatted string representing the amount (e.g., "$9.99").
              */
             val formatted: String,
+        )
+
+        /**
+         * Information about the currency presented to the customer during payment.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class PresentmentDetails internal constructor(
+            /**
+             * The three-letter ISO currency code presented to the customer (e.g., "eur").
+             */
+            val presentmentCurrency: String,
+        )
+
+        /**
+         * The customer's shipping contact details and postal address.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class ShippingAddress internal constructor(
+            /**
+             * The recipient's name, if collected.
+             */
+            val name: String?,
+            /**
+             * The shipping postal address.
+             */
+            val address: Address,
+        )
+
+        /**
+         * A postal address on the checkout session.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Address internal constructor(
+            /**
+             * The two-letter ISO country code (e.g., "US").
+             */
+            val country: String,
+            /**
+             * The first line of the address (e.g., street, PO box).
+             */
+            val line1: String?,
+            /**
+             * The second line of the address (e.g., apartment, suite, unit).
+             */
+            val line2: String?,
+            /**
+             * The city, district, suburb, town, or village.
+             */
+            val city: String?,
+            /**
+             * The postal or ZIP code.
+             */
+            val postalCode: String?,
+            /**
+             * The state, county, province, or region.
+             */
+            val state: String?,
         )
 
         /**

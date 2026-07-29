@@ -61,15 +61,66 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
-    fun `maps customerEmail`() {
+    fun `maps email`() {
         val session = createSession(customerEmail = "test@example.com")
-        assertThat(session.customerEmail).isEqualTo("test@example.com")
+        assertThat(session.email).isEqualTo("test@example.com")
     }
 
     @Test
-    fun `null customerEmail maps to null`() {
+    fun `null email maps to null`() {
         val session = createSession(customerEmail = null)
-        assertThat(session.customerEmail).isNull()
+        assertThat(session.email).isNull()
+    }
+
+    @Test
+    fun `maps presentmentDetails from adaptive pricing info`() {
+        val session = createSession(
+            adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+                activePresentmentCurrency = "eur",
+                integrationAmount = 1000L,
+                integrationCurrency = "usd",
+                localCurrencyOptions = emptyList(),
+            ),
+        )
+        assertThat(session.presentmentDetails?.presentmentCurrency).isEqualTo("eur")
+    }
+
+    @Test
+    fun `null adaptive pricing info maps presentmentDetails to null`() {
+        val session = createSession(adaptivePricingInfo = null)
+        assertThat(session.presentmentDetails).isNull()
+    }
+
+    @Test
+    fun `maps shippingAddress from collected details`() {
+        val session = createSession(
+            collectedDetails = CheckoutCollectedDetails(
+                shippingName = "Jane Doe",
+                shippingAddress = CheckoutController.Address.State(
+                    city = "Denver",
+                    country = "US",
+                    line1 = "123 Main St",
+                    line2 = "Apt 4",
+                    postalCode = "80202",
+                    state = "CO",
+                ),
+            ),
+        )
+
+        val shippingAddress = requireNotNull(session.shippingAddress)
+        assertThat(shippingAddress.name).isEqualTo("Jane Doe")
+        assertThat(shippingAddress.address.country).isEqualTo("US")
+        assertThat(shippingAddress.address.line1).isEqualTo("123 Main St")
+        assertThat(shippingAddress.address.line2).isEqualTo("Apt 4")
+        assertThat(shippingAddress.address.city).isEqualTo("Denver")
+        assertThat(shippingAddress.address.postalCode).isEqualTo("80202")
+        assertThat(shippingAddress.address.state).isEqualTo("CO")
+    }
+
+    @Test
+    fun `no collected shipping address maps shippingAddress to null`() {
+        val session = createSession(collectedDetails = CheckoutCollectedDetails())
+        assertThat(session.shippingAddress).isNull()
     }
 
     @Test
@@ -301,6 +352,7 @@ class CheckoutSessionMappersTest {
         assertThat(session.shippingOptions).isEmpty()
     }
 
+    @Suppress("LongParameterList")
     private fun createSession(
         id: String = DEFAULT_CHECKOUT_SESSION_ID,
         status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
@@ -311,6 +363,8 @@ class CheckoutSessionMappersTest {
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
+        adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
+        collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(),
     ): Session {
         return CheckoutSessionResponseFactory.create(
             id = id,
@@ -322,8 +376,10 @@ class CheckoutSessionMappersTest {
             totalSummary = totalSummary,
             lineItems = lineItems,
             shippingOptions = shippingOptions,
+            adaptivePricingInfo = adaptivePricingInfo,
         ).asCheckoutSession(
             flagImages = null,
+            collectedDetails = collectedDetails,
             paymentOptionDisplayData = null,
             availableExpressButtonTypes = emptyList(),
         )

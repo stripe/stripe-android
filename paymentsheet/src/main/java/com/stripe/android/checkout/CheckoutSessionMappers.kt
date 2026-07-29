@@ -16,6 +16,7 @@ private const val MAJOR_UNIT_BASE = 10.0
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutSessionResponse.asCheckoutSession(
     flagImages: Map<String, Bitmap>?,
+    collectedDetails: CheckoutCollectedDetails,
     paymentOptionDisplayData: PaymentOptionDisplayData?,
     availableExpressButtonTypes: List<ExpressButtonType>,
 ): Session {
@@ -25,7 +26,11 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         liveMode = liveMode,
         currency = currency,
         minorUnitsAmountDivisor = minorUnitsAmountDivisor(currency),
-        customerEmail = customerEmail,
+        presentmentDetails = adaptivePricingInfo?.let {
+            Session.PresentmentDetails(presentmentCurrency = it.activePresentmentCurrency)
+        },
+        email = customerEmail,
+        shippingAddress = collectedDetails.asShippingAddress(),
         tax = taxStatus.asTax(),
         totalSummary = totalSummary?.asTotalSummary(currency),
         lineItems = lineItems.map { it.asLineItem(currency) },
@@ -58,6 +63,26 @@ private fun minorUnitsAmountDivisor(currency: String): Int? = runCatching {
     val decimalDigits = CurrencyFormatter.getDefaultDecimalDigits(Currency.getInstance(currency.uppercase()))
     MAJOR_UNIT_BASE.pow(decimalDigits).toInt()
 }.getOrNull()
+
+/**
+ * Projects the locally collected shipping details onto the public [Session.ShippingAddress]. Returns
+ * `null` until a shipping address has been collected (a name alone isn't enough to form an address).
+ */
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutCollectedDetails.asShippingAddress(): Session.ShippingAddress? {
+    val address = shippingAddress ?: return null
+    return Session.ShippingAddress(
+        name = shippingName,
+        address = Session.Address(
+            country = address.country,
+            line1 = address.line1,
+            line2 = address.line2,
+            city = address.city,
+            postalCode = address.postalCode,
+            state = address.state,
+        ),
+    )
+}
 
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.Status.asStatus(): Session.Status {
