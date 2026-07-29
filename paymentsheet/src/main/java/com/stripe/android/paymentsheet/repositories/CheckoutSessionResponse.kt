@@ -75,6 +75,8 @@ internal data class CheckoutSessionResponse(
     data class DiscountAmount(
         val amount: Long,
         val displayName: String,
+        val promotionCode: String? = null,
+        val percentOff: Int? = null,
     ) : StripeModel
 
     @Parcelize

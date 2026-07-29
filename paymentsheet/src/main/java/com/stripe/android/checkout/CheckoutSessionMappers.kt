@@ -37,6 +37,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         shippingAddress = collectedDetails.asShippingAddress(),
         tax = taxStatus.asTax(),
         totalSummary = totalSummary?.asTotalSummary(currency),
+        totals = totalSummary?.asTotal(currency),
         lineItems = lineItems.map { it.asLineItem(currency) },
         shippingOptions = shippingOptions.map { it.asShippingRate(currency) },
         paymentOptionDisplayData = paymentOptionDisplayData,
@@ -185,11 +186,33 @@ private fun CheckoutSessionResponse.TotalSummaryResponse.asTotalSummary(currency
     )
 }
 
+/**
+ * Derives the iOS-aligned [Session.Total] breakdown from the server total summary. Best guess (the
+ * `/init` contract doesn't send these split out): tax is split into inclusive/exclusive by summing
+ * the per-rate [taxAmounts], `discount` sums the [discountAmounts], and `total` is the total amount
+ * due.
+ */
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.TotalSummaryResponse.asTotal(currency: String): Session.Total {
+    val taxExclusive = taxAmounts.filterNot { it.inclusive }.sumOf { it.amount }
+    val taxInclusive = taxAmounts.filter { it.inclusive }.sumOf { it.amount }
+    val discount = discountAmounts.sumOf { it.amount }
+    return Session.Total(
+        subtotal = subtotal.asAmount(currency),
+        taxExclusive = taxExclusive.asAmount(currency),
+        taxInclusive = taxInclusive.asAmount(currency),
+        discount = discount.asAmount(currency),
+        total = totalAmountDue.asAmount(currency),
+    )
+}
+
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.DiscountAmount.asDiscountAmount(currency: String): Session.DiscountAmount {
     return Session.DiscountAmount(
         amount = amount.asAmount(currency),
         displayName = displayName,
+        promotionCode = promotionCode,
+        percentOff = percentOff,
     )
 }
 

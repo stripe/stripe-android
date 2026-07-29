@@ -415,8 +415,15 @@ class CheckoutController @Inject internal constructor(
         val tax: Tax,
         /**
          * Summary of totals including subtotal, discounts, taxes, and shipping.
+         *
+         * @see totals for the iOS-aligned tax/discount breakdown.
          */
         val totalSummary: TotalSummary?,
+        /**
+         * The tax and discount breakdown for the computed session total. `null` until totals are
+         * available.
+         */
+        val totals: Total?,
         /**
          * The products or services being purchased in this checkout session.
          */
@@ -652,6 +659,35 @@ class CheckoutController @Inject internal constructor(
         )
 
         /**
+         * Tax and discount breakdown for the computed session total, mirroring the iOS `Total` shape.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Total internal constructor(
+            /**
+             * The subtotal before discounts and taxes.
+             */
+            val subtotal: Amount,
+            /**
+             * The total of tax that is added on top of the subtotal (exclusive tax).
+             */
+            val taxExclusive: Amount,
+            /**
+             * The total of tax that is already included in the subtotal (inclusive tax).
+             */
+            val taxInclusive: Amount,
+            /**
+             * The total of all discounts applied.
+             */
+            val discount: Amount,
+            /**
+             * The grand total for the session.
+             */
+            val total: Amount,
+        )
+
+        /**
          * A discount applied to the checkout session.
          */
         @Poko
@@ -666,6 +702,14 @@ class CheckoutController @Inject internal constructor(
              * The display name of the discount.
              */
             val displayName: String,
+            /**
+             * The promotion code that produced this discount, if any.
+             */
+            val promotionCode: String?,
+            /**
+             * The percentage off applied by this discount, if the discount is percentage-based.
+             */
+            val percentOff: Int?,
         )
 
         /**

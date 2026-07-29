@@ -366,9 +366,18 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         return (0 until array.length()).mapNotNull { i ->
             val obj = array.optJSONObject(i) ?: return@mapNotNull null
             val amount = obj.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return@mapNotNull null
-            val displayName = obj.optJSONObject(FIELD_COUPON)?.optString(FIELD_NAME)
+            val coupon = obj.optJSONObject(FIELD_COUPON)
+            val displayName = coupon?.optString(FIELD_NAME)
                 ?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null
-            CheckoutSessionResponse.DiscountAmount(amount = amount, displayName = displayName)
+            // Best-guess keys: the /init contract for promotion code / percent off is unconfirmed.
+            val promotionCode = StripeJsonUtils.optString(obj, FIELD_PROMOTION_CODE)
+            val percentOff = coupon.optInt(FIELD_PERCENT_OFF, -1).takeIf { it >= 0 }
+            CheckoutSessionResponse.DiscountAmount(
+                amount = amount,
+                displayName = displayName,
+                promotionCode = promotionCode,
+                percentOff = percentOff,
+            )
         }
     }
 
@@ -572,6 +581,8 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_APPLIED_BALANCE = "applied_balance"
     private const val FIELD_DISCOUNT_AMOUNTS = "discount_amounts"
     private const val FIELD_COUPON = "coupon"
+    private const val FIELD_PROMOTION_CODE = "promotion_code"
+    private const val FIELD_PERCENT_OFF = "percent_off"
     private const val FIELD_NAME = "name"
     private const val FIELD_TAX_AMOUNTS = "tax_amounts"
     private const val FIELD_INCLUSIVE = "inclusive"

@@ -222,6 +222,59 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
+    fun `null totalSummary maps totals to null`() {
+        val session = createSession(totalSummary = null)
+        assertThat(session.totals).isNull()
+    }
+
+    @Test
+    fun `derives totals breakdown from the total summary`() {
+        val session = createSession(
+            totalSummary = TotalSummaryResponseFactory.create(
+                subtotal = 5000L,
+                totalAmountDue = 5400L,
+                discountAmounts = listOf(
+                    CheckoutSessionResponse.DiscountAmount(amount = 200L, displayName = "SUMMER10"),
+                ),
+                taxAmounts = listOf(
+                    CheckoutSessionResponse.TaxAmount(
+                        amount = 400L, inclusive = false, displayName = "Sales Tax", percentage = 8.0,
+                    ),
+                    CheckoutSessionResponse.TaxAmount(
+                        amount = 100L, inclusive = true, displayName = "VAT", percentage = 2.0,
+                    ),
+                ),
+            ),
+        )
+
+        val totals = requireNotNull(session.totals)
+        assertThat(totals.subtotal.minorUnitsAmount).isEqualTo(5000L)
+        assertThat(totals.taxExclusive.minorUnitsAmount).isEqualTo(400L)
+        assertThat(totals.taxInclusive.minorUnitsAmount).isEqualTo(100L)
+        assertThat(totals.discount.minorUnitsAmount).isEqualTo(200L)
+        assertThat(totals.total.minorUnitsAmount).isEqualTo(5400L)
+    }
+
+    @Test
+    fun `maps discount promotion code and percent off`() {
+        val session = createSession(
+            totalSummary = TotalSummaryResponseFactory.create(
+                discountAmounts = listOf(
+                    CheckoutSessionResponse.DiscountAmount(
+                        amount = 500L,
+                        displayName = "SUMMER10",
+                        promotionCode = "SUMMER",
+                        percentOff = 10,
+                    ),
+                ),
+            ),
+        )
+        val discount = session.totalSummary!!.discountAmounts.single()
+        assertThat(discount.promotionCode).isEqualTo("SUMMER")
+        assertThat(discount.percentOff).isEqualTo(10)
+    }
+
+    @Test
     fun `maps totalSummary subtotal`() {
         val session = createSession(
             totalSummary = TotalSummaryResponseFactory.create(subtotal = 5000L),
