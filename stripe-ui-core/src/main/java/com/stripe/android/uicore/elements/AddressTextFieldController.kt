@@ -87,11 +87,12 @@ class AddressTextFieldController(
                     .onSizeChanged { size ->
                         val newWidth = with(density) { size.width.toDp() }
                         if (newWidth != fieldWidthDp) fieldWidthDp = newWidth
-                    }
+                    },
             ) {
                 AddressTextFieldUI(
                     controller = this@AddressTextFieldController,
                     enabled = enabled,
+                    modifier = modifier,
                 )
                 val predictionsState by
                     inlineAutocompleteHandler.predictionsState.collectAsState()
@@ -101,6 +102,7 @@ class AddressTextFieldController(
                     attributionDrawable = inlineAutocompleteHandler
                         .getAttributionDrawable(isDarkTheme),
                     fieldWidthDp = fieldWidthDp,
+                    maxVisiblePredictions = inlineAutocompleteHandler.maxVisiblePredictions,
                     onPredictionSelected = inlineAutocompleteHandler::onPredictionSelected,
                     onDismiss = inlineAutocompleteHandler::onDismissed,
                     onClear = onClear,

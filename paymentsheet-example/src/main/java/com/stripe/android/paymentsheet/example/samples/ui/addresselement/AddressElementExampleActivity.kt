@@ -89,12 +89,27 @@ private fun AddressElementExampleScreen(viewModel: AddressElementExampleViewMode
                         },
                     )
                 }
+                var useStripeHostedAutocomplete by remember {
+                    mutableStateOf(FeatureFlags.forceStripeHostedAutocomplete.isEnabled)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Use Stripe-hosted endpoints")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Switch(
+                        checked = useStripeHostedAutocomplete,
+                        onCheckedChange = { enabled ->
+                            useStripeHostedAutocomplete = enabled
+                            FeatureFlags.forceStripeHostedAutocomplete.setEnabled(enabled)
+                        },
+                    )
+                }
                 val context = LocalContext.current
                 Button(
                     onClick = {
                         val config = AddressLauncher.Configuration.Builder()
                             // Provide your Google Places API key to enable autocomplete
                             .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
+                            .useStripeHostedAutocomplete(useStripeHostedAutocomplete)
                             .build()
                         addressLauncher.present(
                             publishableKey = state.publishableKey,

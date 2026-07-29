@@ -25,6 +25,7 @@ object FeatureFlags {
     val disablePassiveCaptchaWarmup = FeatureFlag("Disable Passive Captcha Warm-Up")
     val forceTapToAddWithTerminal = FeatureFlag("Tap to Add: Force Terminal integration to be available")
     val inlineAddressAutocompleteEnabled = FeatureFlag("Address Element: inline autocomplete suggestions")
+    val forceStripeHostedAutocomplete = FeatureFlag("Use Stripe-hosted endpoints")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
