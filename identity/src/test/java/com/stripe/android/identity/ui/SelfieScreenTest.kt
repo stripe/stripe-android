@@ -7,13 +7,10 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.MediatorLiveData
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.camera.IdentityAggregator
@@ -59,8 +56,6 @@ class SelfieScreenTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private val mockNavController = mock<NavController>()
-    private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
-
     private val scannerStateFlow =
         MutableStateFlow<IdentityScanViewModel.State>(IdentityScanViewModel.State.Initializing)
 
@@ -71,7 +66,6 @@ class SelfieScreenTest {
     }
     private val verificationPage = mock<VerificationPage> {
         on { it.selfieCapture } doReturn selfieCapturePage
-        on { fallbackUrl } doReturn FALLBACK_URL
         on { experiments } doReturn emptyList()
     }
 
@@ -116,7 +110,6 @@ class SelfieScreenTest {
             onNodeWithTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG).assertDoesNotExist()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
-            onNodeWithTag(SELFIE_HAVING_TROUBLE_TAG).assertExists()
         }
     }
 
@@ -137,7 +130,6 @@ class SelfieScreenTest {
             onNodeWithTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG).assertDoesNotExist()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
-            onNodeWithTag(SELFIE_HAVING_TROUBLE_TAG).assertExists()
         }
     }
 
@@ -159,9 +151,6 @@ class SelfieScreenTest {
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
 
-            onNodeWithTag(SELFIE_HAVING_TROUBLE_TAG).performScrollTo().performClick()
-            waitForIdle()
-            verify(mockFallbackUrlLauncher).launchFallbackUrl(eq(FALLBACK_URL))
         }
     }
 
@@ -185,7 +174,6 @@ class SelfieScreenTest {
             onNodeWithTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG).assertDoesNotExist()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
-            onNodeWithTag(SELFIE_HAVING_TROUBLE_TAG).assertExists()
         }
     }
 
@@ -225,7 +213,6 @@ class SelfieScreenTest {
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
             onNodeWithTag(CONSENT_CHECKBOX_TAG).assertDoesNotExist()
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).assertDoesNotExist()
-            onNodeWithTag(SELFIE_HAVING_TROUBLE_TAG).assertDoesNotExist()
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertDoesNotExist()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG).assertDoesNotExist()
@@ -259,8 +246,7 @@ class SelfieScreenTest {
             SelfieScanScreen(
                 navController = mockNavController,
                 identityViewModel = mockIdentityViewModel,
-                selfieScanViewModel = mockSelfieScanViewModel,
-                fallbackUrlLauncher = mockFallbackUrlLauncher
+                selfieScanViewModel = mockSelfieScanViewModel
             )
         }
         with(composeTestRule, testBlock)
@@ -268,6 +254,5 @@ class SelfieScreenTest {
 
     private companion object {
         const val SELFIE_CONSENT_TEXT = "selfie consent"
-        const val FALLBACK_URL = "https://verify.stripe.test/fallback"
     }
 }

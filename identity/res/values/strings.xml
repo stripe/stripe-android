@@ -146,8 +146,6 @@
   <string name="stripe_government_id">Government-issued photo ID</string>
   <!-- Text displayed when requesting camera permissions -->
   <string name="stripe_grant_camera_permission_text">We need permission to use your camera. Please allow camera access in app settings.</string>
-  <!-- Link text displayed under the selfie viewfinder -->
-  <string name="stripe_having_trouble">Having Trouble?</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Hold still, scanning</string>
   <!-- Status text displayed over the selfie viewfinder while capturing selfies -->

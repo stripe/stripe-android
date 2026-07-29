@@ -24,7 +24,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,8 +76,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -87,7 +84,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.stripe.android.camera.framework.image.mirrorHorizontally
 import com.stripe.android.camera.scanui.CameraView
-import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.CameraSource
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
@@ -123,7 +119,6 @@ internal const val RESULT_VIEW_TAG = "SelfieResultViewTag"
 internal const val RETAKE_SELFIE_BUTTON_TAG = "RetakeSelfieButtonTag"
 internal const val CONSENT_CHECKBOX_TAG = "ConsentCheckboxTag"
 internal const val SELFIE_SCAN_STATUS_TAG = "SelfieScanStatusTag"
-internal const val SELFIE_HAVING_TROUBLE_TAG = "SelfieHavingTroubleTag"
 internal const val SELFIE_CAPTURE_GUIDE_TAG = "SelfieCaptureGuideTag"
 internal const val SELFIE_CAPTURE_GUIDE_SHADOW_TAG = "SelfieCaptureGuideShadowTag"
 internal const val SELFIE_SCAN_ACTIVITY_INDICATOR_TAG = "SelfieScanActivityIndicatorTag"
@@ -174,8 +169,7 @@ private val TWO_PI_RADIANS = (PI * 2.0).toFloat()
 internal fun SelfieScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    selfieScanViewModel: SelfieScanViewModel,
-    fallbackUrlLauncher: FallbackUrlLauncher
+    selfieScanViewModel: SelfieScanViewModel
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -235,12 +229,10 @@ internal fun SelfieScanScreen(
                 SelfieCaptureScreen(
                     selfieScannerState = selfieScannerState,
                     feedback = feedback,
-                    fallbackUrl = pageAndModelFiles.page.fallbackUrl,
                     identityViewModel = identityViewModel,
                     identityScanViewModel = selfieScanViewModel,
                     lifecycleOwner = lifecycleOwner,
-                    cameraManager = cameraManager,
-                    fallbackUrlLauncher = fallbackUrlLauncher
+                    cameraManager = cameraManager
                 )
             }
         }
@@ -251,12 +243,10 @@ internal fun SelfieScanScreen(
 private fun SelfieCaptureScreen(
     selfieScannerState: IdentityScanViewModel.State,
     feedback: Int?,
-    fallbackUrl: String,
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel,
     lifecycleOwner: LifecycleOwner,
-    cameraManager: SelfieCameraManager,
-    fallbackUrlLauncher: FallbackUrlLauncher
+    cameraManager: SelfieCameraManager
 ) {
     if (selfieScannerState is IdentityScanViewModel.State.Scanning) {
         LaunchedEffect(Unit) {
@@ -341,24 +331,6 @@ private fun SelfieCaptureScreen(
                 capturedSelfie = faceDetectorTransitioner?.lastCapturedSelfie(),
                 isShowingSideCapturePrompt = isShowingSideCapturePrompt
             )
-            if (!isCheckingImages) {
-                Text(
-                    text = stringResource(id = R.string.stripe_having_trouble),
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 12.dp)
-                        .testTag(SELFIE_HAVING_TROUBLE_TAG)
-                        .clickable {
-                            identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_SELFIE)
-                            fallbackUrlLauncher.launchFallbackUrl(fallbackUrl)
-                        },
-                    color = MaterialTheme.colors.onBackground.copy(alpha = 0.7f),
-                    fontSize = 12.sp,
-                    lineHeight = 16.sp,
-                    textAlign = TextAlign.Center,
-                    textDecoration = TextDecoration.Underline
-                )
-            }
         }
     }
 }

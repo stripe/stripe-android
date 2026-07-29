@@ -155,8 +155,7 @@ internal fun IdentityNavGraph(
                 SelfieScanScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    selfieScanViewModel = selfieScanViewModel,
-                    fallbackUrlLauncher = fallbackUrlLauncher
+                    selfieScanViewModel = selfieScanViewModel
                 )
             }
             screen(DocumentUploadDestination.ROUTE) {
