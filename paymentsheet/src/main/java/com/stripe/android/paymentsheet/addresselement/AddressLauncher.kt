@@ -178,6 +178,7 @@ class AddressLauncher internal constructor(
             private var googlePlacesApiKey: String? = null
             private var autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
             private var billingAddress: PaymentSheet.BillingDetails? = null
+            private var useStripeHostedAutocomplete: Boolean = false
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
@@ -207,6 +208,12 @@ class AddressLauncher internal constructor(
             fun billingAddress(billingAddress: PaymentSheet.BillingDetails?) =
                 apply { this.billingAddress = billingAddress }
 
+            /**
+             * Enable using Stripe-hosted autocomplete endpoints instead of Google Places.
+             * This is intended as a debug/testing helper.
+             */
+            fun useStripeHostedAutocomplete(use: Boolean) =
+                apply { this.useStripeHostedAutocomplete = use }
             fun build() = Configuration(
                 appearance = appearance,
                 address = address,
@@ -217,6 +224,7 @@ class AddressLauncher internal constructor(
                 googlePlacesApiKey = googlePlacesApiKey,
                 autocompleteCountries = autocompleteCountries,
                 billingAddress = billingAddress,
+                useStripeHostedAutocomplete = useStripeHostedAutocomplete,
             )
         }
     }
