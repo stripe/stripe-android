@@ -451,7 +451,8 @@ internal class CheckoutControllerTest {
         val result = controller.updateLineItemQuantity("li_1", 3)
 
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(7000)
+        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday?.minorUnitsAmount)
+            .isEqualTo(7000)
     }
 
     @Test
@@ -480,7 +481,8 @@ internal class CheckoutControllerTest {
         val result = controller.updateCurrency("usd")
 
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(5099)
+        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday?.minorUnitsAmount)
+            .isEqualTo(5099)
     }
 
     @Test
@@ -714,7 +716,8 @@ internal class CheckoutControllerTest {
         val result = controller.runServerUpdate { Result.success(Unit) }
 
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(8000)
+        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday?.minorUnitsAmount)
+            .isEqualTo(8000)
     }
 
     @Test

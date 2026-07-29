@@ -111,7 +111,17 @@ class CheckoutSessionMappersTest {
         val session = createSession(
             totalSummary = TotalSummaryResponseFactory.create(subtotal = 5000L),
         )
-        assertThat(session.totalSummary?.subtotal).isEqualTo(5000L)
+        assertThat(session.totalSummary?.subtotal?.minorUnitsAmount).isEqualTo(5000L)
+    }
+
+    @Test
+    fun `formats totalSummary subtotal`() {
+        val session = createSession(
+            currency = "usd",
+            totalSummary = TotalSummaryResponseFactory.create(subtotal = 5000L),
+        )
+        // The formatted string is locale-dependent, but the major-unit value is always present.
+        assertThat(session.totalSummary?.subtotal?.formatted).contains("50")
     }
 
     @Test
@@ -119,7 +129,7 @@ class CheckoutSessionMappersTest {
         val session = createSession(
             totalSummary = TotalSummaryResponseFactory.create(totalDueToday = 4044L),
         )
-        assertThat(session.totalSummary?.totalDueToday).isEqualTo(4044L)
+        assertThat(session.totalSummary?.totalDueToday?.minorUnitsAmount).isEqualTo(4044L)
     }
 
     @Test
@@ -127,7 +137,19 @@ class CheckoutSessionMappersTest {
         val session = createSession(
             totalSummary = TotalSummaryResponseFactory.create(totalAmountDue = 3000L),
         )
-        assertThat(session.totalSummary?.totalAmountDue).isEqualTo(3000L)
+        assertThat(session.totalSummary?.totalAmountDue?.minorUnitsAmount).isEqualTo(3000L)
+    }
+
+    @Test
+    fun `maps minorUnitsAmountDivisor for a two-decimal currency`() {
+        val session = createSession(currency = "usd")
+        assertThat(session.minorUnitsAmountDivisor).isEqualTo(100)
+    }
+
+    @Test
+    fun `maps minorUnitsAmountDivisor for a zero-decimal currency`() {
+        val session = createSession(currency = "jpy")
+        assertThat(session.minorUnitsAmountDivisor).isEqualTo(1)
     }
 
     @Test
@@ -142,9 +164,9 @@ class CheckoutSessionMappersTest {
         )
         val discounts = session.totalSummary!!.discountAmounts
         assertThat(discounts).hasSize(2)
-        assertThat(discounts[0].amount).isEqualTo(500L)
+        assertThat(discounts[0].amount.minorUnitsAmount).isEqualTo(500L)
         assertThat(discounts[0].displayName).isEqualTo("SUMMER10")
-        assertThat(discounts[1].amount).isEqualTo(250L)
+        assertThat(discounts[1].amount.minorUnitsAmount).isEqualTo(250L)
         assertThat(discounts[1].displayName).isEqualTo("LOYALTY5")
     }
 
@@ -164,7 +186,7 @@ class CheckoutSessionMappersTest {
         )
         val taxes = session.totalSummary!!.taxAmounts
         assertThat(taxes).hasSize(1)
-        assertThat(taxes[0].amount).isEqualTo(294L)
+        assertThat(taxes[0].amount.minorUnitsAmount).isEqualTo(294L)
         assertThat(taxes[0].inclusive).isFalse()
         assertThat(taxes[0].displayName).isEqualTo("Sales Tax")
         assertThat(taxes[0].percentage).isEqualTo(6.875)
@@ -184,7 +206,7 @@ class CheckoutSessionMappersTest {
         )
         val shipping = session.totalSummary!!.shippingRate!!
         assertThat(shipping.id).isEqualTo("shr_standard")
-        assertThat(shipping.amount).isEqualTo(500L)
+        assertThat(shipping.amount.minorUnitsAmount).isEqualTo(500L)
         assertThat(shipping.displayName).isEqualTo("Standard Shipping")
         assertThat(shipping.deliveryEstimate).isEqualTo("5-7 business days")
     }
@@ -202,7 +224,7 @@ class CheckoutSessionMappersTest {
         val session = createSession(
             totalSummary = TotalSummaryResponseFactory.create(appliedBalance = -200L),
         )
-        assertThat(session.totalSummary!!.appliedBalance).isEqualTo(-200L)
+        assertThat(session.totalSummary!!.appliedBalance?.minorUnitsAmount).isEqualTo(-200L)
     }
 
     @Test
@@ -232,9 +254,9 @@ class CheckoutSessionMappersTest {
         assertThat(items[0].id).isEqualTo("li_1")
         assertThat(items[0].name).isEqualTo("Llama Figure")
         assertThat(items[0].quantity).isEqualTo(2)
-        assertThat(items[0].unitAmount).isEqualTo(999L)
-        assertThat(items[0].subtotal).isEqualTo(1998L)
-        assertThat(items[0].total).isEqualTo(1998L)
+        assertThat(items[0].unitAmount?.minorUnitsAmount).isEqualTo(999L)
+        assertThat(items[0].subtotal.minorUnitsAmount).isEqualTo(1998L)
+        assertThat(items[0].total.minorUnitsAmount).isEqualTo(1998L)
     }
 
     @Test
@@ -264,11 +286,11 @@ class CheckoutSessionMappersTest {
         val options = session.shippingOptions
         assertThat(options).hasSize(2)
         assertThat(options[0].id).isEqualTo("shr_standard")
-        assertThat(options[0].amount).isEqualTo(500L)
+        assertThat(options[0].amount.minorUnitsAmount).isEqualTo(500L)
         assertThat(options[0].displayName).isEqualTo("Standard Shipping")
         assertThat(options[0].deliveryEstimate).isNull()
         assertThat(options[1].id).isEqualTo("shr_express")
-        assertThat(options[1].amount).isEqualTo(1500L)
+        assertThat(options[1].amount.minorUnitsAmount).isEqualTo(1500L)
         assertThat(options[1].displayName).isEqualTo("Express Shipping")
         assertThat(options[1].deliveryEstimate).isEqualTo("1-3 business days")
     }

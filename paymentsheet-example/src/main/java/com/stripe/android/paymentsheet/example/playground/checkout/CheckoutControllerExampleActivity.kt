@@ -35,7 +35,6 @@ import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
-import com.stripe.android.uicore.format.CurrencyFormatter
 import kotlinx.coroutines.launch
 
 internal class CheckoutControllerExampleActivity : AppCompatActivity() {
@@ -175,7 +174,7 @@ private fun LineItemsSection(session: Session) {
                     style = MaterialTheme.typography.body2,
                 )
                 Text(
-                    text = formatAmount(item.total, session.currency),
+                    text = item.total.formatted,
                     style = MaterialTheme.typography.body2,
                 )
             }
@@ -190,23 +189,23 @@ private fun TotalSummarySection(session: Session) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-        SummaryRow(label = "Subtotal", amount = formatAmount(summary.subtotal, session.currency))
+        SummaryRow(label = "Subtotal", amount = summary.subtotal.formatted)
 
         for (discount in summary.discountAmounts) {
             SummaryRow(
                 label = discount.displayName,
-                amount = "-${formatAmount(discount.amount, session.currency)}",
+                amount = "-${discount.amount.formatted}",
             )
         }
 
         summary.shippingRate?.let { shipping ->
-            val amountText = if (shipping.amount == 0L) "Free" else formatAmount(shipping.amount, session.currency)
+            val amountText = if (shipping.amount.minorUnitsAmount == 0L) "Free" else shipping.amount.formatted
             SummaryRow(label = "Shipping", amount = amountText)
         }
 
         for (tax in summary.taxAmounts) {
             val label = if (tax.inclusive) "${tax.displayName} (included)" else tax.displayName
-            SummaryRow(label = label, amount = formatAmount(tax.amount, session.currency))
+            SummaryRow(label = label, amount = tax.amount.formatted)
         }
 
         Divider(modifier = Modifier.padding(vertical = 8.dp))
@@ -217,7 +216,7 @@ private fun TotalSummarySection(session: Session) {
         ) {
             Text(text = "Total", style = MaterialTheme.typography.subtitle1)
             Text(
-                text = formatAmount(summary.totalDueToday, session.currency),
+                text = summary.totalDueToday.formatted,
                 style = MaterialTheme.typography.subtitle1,
             )
         }
@@ -233,8 +232,4 @@ private fun SummaryRow(label: String, amount: String) {
         Text(text = label, style = MaterialTheme.typography.body2)
         Text(text = amount, style = MaterialTheme.typography.body2)
     }
-}
-
-private fun formatAmount(amount: Long, currency: String): String {
-    return CurrencyFormatter.format(amount, currency)
 }

@@ -386,6 +386,11 @@ class CheckoutController @Inject internal constructor(
          */
         val currency: String,
         /**
+         * The factor used to convert amounts in the smallest currency unit to the major currency unit
+         * (e.g., `100` for USD, `1` for JPY). `null` if the currency is not recognized.
+         */
+        val minorUnitsAmountDivisor: Int?,
+        /**
          * The customer's email address from the checkout session.
          */
         val customerEmail: String?,
@@ -486,6 +491,23 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
+         * A monetary amount, expressed both in the smallest currency unit and as a display string.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Amount internal constructor(
+            /**
+             * The amount in the smallest currency unit (e.g., cents for USD).
+             */
+            val minorUnitsAmount: Long,
+            /**
+             * A localized, currency-formatted string representing the amount (e.g., "$9.99").
+             */
+            val formatted: String,
+        )
+
+        /**
          * Summary of all totals for the checkout session.
          */
         @Poko
@@ -495,15 +517,15 @@ class CheckoutController @Inject internal constructor(
             /**
              * The subtotal before discounts, taxes, and shipping.
              */
-            val subtotal: Long,
+            val subtotal: Amount,
             /**
              * The amount due today, accounting for applied balances.
              */
-            val totalDueToday: Long,
+            val totalDueToday: Amount,
             /**
              * The total amount due including all charges.
              */
-            val totalAmountDue: Long,
+            val totalAmountDue: Amount,
             /**
              * Discounts applied to the checkout session.
              */
@@ -519,7 +541,7 @@ class CheckoutController @Inject internal constructor(
             /**
              * The customer's account balance applied to this session, if any.
              */
-            val appliedBalance: Long?,
+            val appliedBalance: Amount?,
         )
 
         /**
@@ -530,9 +552,9 @@ class CheckoutController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class DiscountAmount internal constructor(
             /**
-             * The discount amount in the smallest currency unit.
+             * The discount amount.
              */
-            val amount: Long,
+            val amount: Amount,
             /**
              * The display name of the discount.
              */
@@ -547,9 +569,9 @@ class CheckoutController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class TaxAmount internal constructor(
             /**
-             * The tax amount in the smallest currency unit.
+             * The tax amount.
              */
-            val amount: Long,
+            val amount: Amount,
             /**
              * Whether this tax is inclusive (already included in the price).
              */
@@ -576,9 +598,9 @@ class CheckoutController @Inject internal constructor(
              */
             val id: String,
             /**
-             * The shipping amount in the smallest currency unit.
+             * The shipping amount.
              */
-            val amount: Long,
+            val amount: Amount,
             /**
              * The display name of the shipping option (e.g., "Standard Shipping").
              */
@@ -609,17 +631,17 @@ class CheckoutController @Inject internal constructor(
              */
             val quantity: Int,
             /**
-             * The unit price in the smallest currency unit, if available.
+             * The unit price, if available.
              */
-            val unitAmount: Long?,
+            val unitAmount: Amount?,
             /**
              * The subtotal before discounts and taxes.
              */
-            val subtotal: Long,
+            val subtotal: Amount,
             /**
              * The total after discounts and taxes.
              */
-            val total: Long,
+            val total: Amount,
         )
 
         /**
