@@ -17,7 +17,9 @@ internal interface PdolModule {
             TerminalCountryCodeProducer,
             TransactionDateProducer,
             TerminalTransactionQualifiersProducer,
-            UnpredictableNumberProducer
+            UnpredictableNumberProducer,
+            TerminalTypeProducer,
+            EnhancedContactlessReaderCapabilitiesProducer
         )
     }
 }

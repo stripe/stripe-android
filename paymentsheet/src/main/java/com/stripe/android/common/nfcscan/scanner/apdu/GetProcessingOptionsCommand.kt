@@ -26,7 +26,9 @@ internal class GetProcessingOptionsCommand(
         parseFromRecords(records)
 
         return ProcessingOptionsInfo(
-            aflEntries = tlv[TAG_AFL]?.let(::parseAflEntries).orEmpty(),
+            // Read the AFL from `records`, not the original `tlv`: for a format 1 (tag `80`) response the AFL is
+            // embedded in tag `80` and only extracted into `records["94"]` by `parseFromRecords` above.
+            aflEntries = records[TAG_AFL]?.let(::parseAflEntries).orEmpty(),
             records = records.toMap(),
         )
     }
