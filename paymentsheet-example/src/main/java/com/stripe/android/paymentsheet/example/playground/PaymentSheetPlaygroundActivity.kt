@@ -1,5 +1,5 @@
 package com.stripe.android.paymentsheet.example.playground
-
+import com.stripe.android.PaymentConfiguration
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -694,7 +694,7 @@ internal class PaymentSheetPlaygroundActivity :
         address: () -> AddressDetails?,
     ) {
         val context = LocalContext.current
-        Button(
+            Button(
             onClick = {
                 val configuration = AddressLauncher.Configuration.Builder()
                     .address(address())
@@ -702,7 +702,8 @@ internal class PaymentSheetPlaygroundActivity :
                     .useStripeHostedAutocomplete(FeatureFlags.forceStripeHostedAutocomplete.isEnabled)
                     .appearance(AppearanceStore.state.toPaymentSheetAppearance())
                     .build()
-                addressLauncher.present(playgroundState.clientSecret, configuration)
+                val publishableKey = PaymentConfiguration.getInstance(context).publishableKey
+                addressLauncher.present(publishableKey, configuration)
             },
             modifier = Modifier.fillMaxWidth(),
         ) {
