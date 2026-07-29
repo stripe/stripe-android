@@ -8,7 +8,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -25,14 +25,16 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
-    private val eventReporter = FakeAddressLauncherEventReporter()
+    private val eventReporter = mock<AddressLauncherEventReporter>()
 
     private fun createViewModel(
         address: AddressDetails? = null,
@@ -160,10 +162,11 @@ class InputAddressViewModelTest {
                 )
             )
         )
-        val completedCall = eventReporter.completedCalls.awaitItem()
-        assertThat(completedCall.country).isEqualTo("US")
-        assertThat(completedCall.autocompleteResultSelected).isTrue()
-        assertThat(completedCall.editDistance).isEqualTo(0)
+        verify(eventReporter).onCompleted(
+            country = eq("US"),
+            autocompleteResultSelected = eq(true),
+            editDistance = eq(0)
+        )
     }
 
     @Test

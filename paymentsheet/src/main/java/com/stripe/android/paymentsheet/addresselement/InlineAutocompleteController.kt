@@ -158,12 +158,13 @@ internal class InlineAutocompleteController(
     }
 
     private fun emitExpandForm(query: String?, country: String?) {
-        val listener = eventListenerProvider() ?: return
         val values = buildMap<IdentifierSpec, String?> {
             query?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Line1, it) }
             country?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Country, it) }
         }.takeIf { it.isNotEmpty() }
 
-        listener(AutocompleteAddressInteractor.Event.OnExpandForm(values))
+        eventListenerProvider()?.invoke(
+            AutocompleteAddressInteractor.Event.OnExpandForm(values)
+        )
     }
 }
