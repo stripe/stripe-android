@@ -30,6 +30,10 @@ internal class InlineAutocompleteController(
     private var latestQuery: String? = null
     private var latestCountry: String? = null
     private var observeJob: Job? = null
+    private var pendingQueryJob: Job? = null
+    private var pendingCountryJob: Job? = null
+    private var pendingQueryForManualEntry: String? = null
+    private var pendingCountryForManualEntry: String? = null
     private var selectionJob: Job? = null
 
     private val _inlinePredictionsState = MutableStateFlow<AutocompleteAddressInteractor.InlinePredictionsState>(
@@ -41,6 +45,19 @@ internal class InlineAutocompleteController(
     @OptIn(FlowPreview::class)
     fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
         observeJob?.cancel()
+        pendingQueryJob?.cancel()
+        pendingCountryJob?.cancel()
+        // keep a non-debounced copy of the latest typing so manual expansion can use it immediately
+        pendingQueryJob = coroutineScope.launch {
+            query.collect { q ->
+                pendingQueryForManualEntry = q
+            }
+        }
+        pendingCountryJob = coroutineScope.launch {
+            country.collect { c ->
+                pendingCountryForManualEntry = c ?: ""
+            }
+        }
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
@@ -100,12 +117,34 @@ internal class InlineAutocompleteController(
         selectionJob?.cancel()
         lastPredictionLine1 = null
         latestQuery = null
+        pendingQueryForManualEntry = null
         latestCountry = null
+        pendingCountryForManualEntry = null
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+    }
+
+    /**
+     * When the user chooses "Enter address manually" from the inline predictions UI,
+     * pre-populate the expanded form with the current inline query/country if present.
+     */
+    fun expandFormFromInline() {
+        val queryToUse = pendingQueryForManualEntry?.takeIf { it.isNotBlank() } ?: latestQuery
+        val countryToUse = pendingCountryForManualEntry?.takeIf { it.isNotBlank() } ?: latestCountry
+
+        val values = buildMap<IdentifierSpec, String?> {
+            queryToUse?.let { put(IdentifierSpec.Line1, it) }
+            countryToUse?.let { put(IdentifierSpec.Country, it) }
+        }.takeIf { it.isNotEmpty() }
+
+        eventListenerProvider()?.invoke(
+            AutocompleteAddressInteractor.Event.OnExpandForm(values)
+        )
     }
 
     fun dispose() {
         observeJob?.cancel()
+        pendingQueryJob?.cancel()
+        pendingCountryJob?.cancel()
         selectionJob?.cancel()
     }
 
