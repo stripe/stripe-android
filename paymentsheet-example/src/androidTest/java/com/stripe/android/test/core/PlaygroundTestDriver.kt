@@ -1624,7 +1624,7 @@ internal class PlaygroundTestDriver(
 
         // Verifies bank in web view so Compose hierarchy can detach. Button should be available
         // after web view verification.
-        clickButtonWithTag("connect_account_button", composeCanDetach = true)
+        clickButtonWithTagAfterDismissingChromeFirstRun("connect_account_button")
 
         clickButtonWithTag("skip_cta")
         clickButtonWithTag("done_button")
@@ -1722,7 +1722,22 @@ internal class PlaygroundTestDriver(
     }
 
     private fun clickButtonWithTag(tag: String, composeCanDetach: Boolean = false) {
+        clickButtonWithTag(tag, composeCanDetach) {}
+    }
+
+    private fun clickButtonWithTagAfterDismissingChromeFirstRun(tag: String) {
+        clickButtonWithTag(tag, composeCanDetach = true) {
+            selectors.dismissChromeFirstRunIfPresent()
+        }
+    }
+
+    private fun clickButtonWithTag(
+        tag: String,
+        composeCanDetach: Boolean,
+        beforeCheckingTag: () -> Unit,
+    ) {
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            beforeCheckingTag()
             composeTestRule
                 .onAllNodesWithTag(tag)
                 .fetchSemanticsNodes(atLeastOneRootRequired = !composeCanDetach)
