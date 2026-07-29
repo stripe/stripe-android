@@ -17,13 +17,27 @@ internal class SelectApplicationCommandTest {
     }
 
     @Test
-    fun `transceiveWith returns success when status word is 9000`() = test(
+    fun `transceiveWith returns empty PDOL template when tag is absent`() = test(
         transceiveResult = apduSuccessResponse(byteArrayOf()),
     ) {
         val result = SelectApplicationCommand(ApplicationIdentifier(VISA_AID.toHexString()))
             .transceiveWith(transceiver)
 
+        assertThat(result.isFailure).isTrue()
+        assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `transceiveWith extracts PDOL template from FCI response`() = test(
+        transceiveResult = apduSuccessResponse(
+            tlv(tag = 0x9F.toByte(), tagContinuation = 0x38, value = PDOL_TEMPLATE),
+        ),
+    ) {
+        val result = SelectApplicationCommand(ApplicationIdentifier(VISA_AID.toHexString()))
+            .transceiveWith(transceiver)
+
         assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.contentEquals(PDOL_TEMPLATE)).isTrue()
         assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
     }
 
@@ -79,6 +93,9 @@ internal class SelectApplicationCommandTest {
             0x10,
             0x10,
             0x00,
+        )
+        val PDOL_TEMPLATE = byteArrayOf(
+            0x9F.toByte(), 0x66, 0x04,
         )
     }
 }

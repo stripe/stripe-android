@@ -86,9 +86,11 @@ internal object NfcScanningActivityTestFixtures {
         return tag to isoDep
     }
 
+    val EMPTY_PDOL_TEMPLATE = tlv(tag = 0x9F.toByte(), tagContinuation = 0x38, value = byteArrayOf())
+
     fun successResponses(): List<ByteArray> = listOf(
         apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
-        apduSuccessResponse(byteArrayOf()),
+        apduSuccessResponse(EMPTY_PDOL_TEMPLATE),
         apduSuccessResponse(
             tlv(tag = 0x77, value = tlv(tag = 0x57, value = VALID_TRACK_2_DATA)),
         ),
@@ -104,7 +106,7 @@ internal object NfcScanningActivityTestFixtures {
 
     fun expiredCardResponses(): List<ByteArray> = listOf(
         apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
-        apduSuccessResponse(byteArrayOf()),
+        apduSuccessResponse(EMPTY_PDOL_TEMPLATE),
         apduSuccessResponse(
             tlv(tag = 0x77, value = tlv(tag = 0x57, value = EXPIRED_TRACK_2_DATA)),
         ),
