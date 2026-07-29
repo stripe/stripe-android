@@ -15,54 +15,49 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import kotlinx.coroutines.launch
 
 /** The payment step for the copied Checkout Controller integration. */
 internal class CheckoutControllerExampleCopyPaymentActivity : AppCompatActivity() {
-    private val viewModel: CheckoutControllerExampleCopyViewModel by viewModels {
-        CheckoutControllerExampleCopyViewModel.factory
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val presenter = viewModel.controller.createPresenter(this)
+        val controller = requireNotNull(CheckoutControllerExampleCopyControllerStore.controller) {
+            "Checkout Controller must be configured before opening the payment activity."
+        }
+        val presenter = controller.createPresenter(this)
         val paymentElement = presenter.paymentElement()
 
         lifecycleScope.launch {
-            viewModel.sessionComplete.collect {
-                Toast.makeText(this@CheckoutControllerExampleCopyPaymentActivity, "Payment complete!", Toast.LENGTH_LONG).show()
-                finish()
+            controller.checkoutSession.collect { session ->
+                if (session?.status == CheckoutSession.Status.Complete) {
+                    Toast.makeText(this@CheckoutControllerExampleCopyPaymentActivity, "Payment complete!", Toast.LENGTH_LONG).show()
+                    finish()
+                }
             }
         }
 
         setContent {
-            val status by viewModel.status.collectAsState()
+            val session by controller.checkoutSession.collectAsState()
             PlaygroundTheme(
                 content = {
-                    when (val currentStatus = status) {
-                        is CheckoutControllerExampleCopyViewModel.Status.Loading -> CopyLoadingContent()
-                        is CheckoutControllerExampleCopyViewModel.Status.Error -> CopyErrorContent(currentStatus.message)
-                        is CheckoutControllerExampleCopyViewModel.Status.Configured -> {
-                            currentStatus.checkoutSession?.let { session ->
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    CopyExpressCheckoutSection(
-                                        session = session,
-                                        content = { presenter.expressCheckoutElement().Content() },
-                                    )
-                                    paymentElement.PaymentOptionsContent()
-                                }
-                            }
+                    session?.let { checkoutSession ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            CopyExpressCheckoutSection(
+                                session = checkoutSession,
+                                content = { presenter.expressCheckoutElement().Content() },
+                            )
+                            paymentElement.PaymentOptionsContent()
                         }
                     }
                 },
                 bottomBarContent = {
-                    val configured = status as? CheckoutControllerExampleCopyViewModel.Status.Configured
-                    CopyPaymentOptionRow(configured?.checkoutSession?.paymentOptionDisplayData)
+                    CopyPaymentOptionRow(session?.paymentOptionDisplayData)
                     Button(
                         onClick = { paymentElement.presentPaymentOptions() },
-                        enabled = configured != null,
+                        enabled = session != null,
                         modifier = Modifier.fillMaxWidth(),
                     ) { Text("Select Payment Method") }
                     Button(

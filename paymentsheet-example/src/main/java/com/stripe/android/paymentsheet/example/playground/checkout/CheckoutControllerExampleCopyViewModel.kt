@@ -50,6 +50,7 @@ internal class CheckoutControllerExampleCopyViewModel(
     }.build()
 
     init {
+        CheckoutControllerExampleCopyControllerStore.controller = controller
         viewModelScope.launch {
             fetchAndConfigure()
         }
@@ -115,6 +116,9 @@ internal class CheckoutControllerExampleCopyViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        if (CheckoutControllerExampleCopyControllerStore.controller === controller) {
+            CheckoutControllerExampleCopyControllerStore.controller = null
+        }
         controller.destroy()
     }
 
@@ -180,4 +184,9 @@ internal class CheckoutControllerExampleCopyViewModel(
             }
         }
     }
+}
+
+/** Retains the configured controller while the copied example moves between its activities. */
+internal object CheckoutControllerExampleCopyControllerStore {
+    var controller: CheckoutController? = null
 }
