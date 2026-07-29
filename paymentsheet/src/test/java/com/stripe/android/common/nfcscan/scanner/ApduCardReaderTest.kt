@@ -29,7 +29,7 @@ internal class ApduCardReaderTest {
             ),
             apduSuccessResponse(tlv(tag = 0x57, value = TRACK_2_DATA)),
         ),
-        parseResult = SCANNED_CARD_DATA,
+        parseResult = NfcCardDataParser.Result.Success(SCANNED_CARD_DATA),
     ) {
         val result = cardReader.readCard(transceiver)
 
@@ -57,7 +57,7 @@ internal class ApduCardReaderTest {
                 tlv(tag = 0x77, value = tlv(tag = 0x57, value = TRACK_2_DATA)),
             ),
         ),
-        parseResult = SCANNED_CARD_DATA,
+        parseResult = NfcCardDataParser.Result.Success(SCANNED_CARD_DATA),
     ) {
         val result = cardReader.readCard(transceiver)
 
@@ -86,7 +86,7 @@ internal class ApduCardReaderTest {
             apduSuccessResponse(tlv(tag = 0x5A, value = PAN_DATA)),
             apduSuccessResponse(tlv(tag = 0x5F, tagContinuation = 0x24, value = EXPIRY_DATA)),
         ),
-        parseResult = SCANNED_CARD_DATA,
+        parseResult = NfcCardDataParser.Result.Success(SCANNED_CARD_DATA),
     ) {
         val result = cardReader.readCard(transceiver)
 
@@ -109,19 +109,25 @@ internal class ApduCardReaderTest {
     }
 
     @Test
-    fun `readCard returns parse failure when card data cannot be parsed`() = runScenario(
+    fun `readCard returns parser error when card data cannot be parsed`() = runScenario(
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(EMPTY_PDOL_SELECT_RESPONSE),
             apduSuccessResponse(tlv(tag = 0x77, value = byteArrayOf())),
         ),
-        parseResult = null,
-        errorResult = PARSE_FAILURE_ERROR,
+        parseResult = NfcCardDataParser.Result.Error(
+            errorCode = "cardUnsupportedByNfc",
+            userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+        ),
     ) {
         val result = cardReader.readCard(transceiver)
 
-        assertThat(result).isEqualTo(PARSE_FAILURE_ERROR)
-        assertThat(errorCreator.createCalls.awaitItem()).isInstanceOf<IllegalStateException>()
+        assertThat(result).isEqualTo(
+            NfcCardReader.Result.Error(
+                errorCode = "cardUnsupportedByNfc",
+                userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+            ),
+        )
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
@@ -233,7 +239,7 @@ internal class ApduCardReaderTest {
         ),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         pdolData: ByteArray = byteArrayOf(),
-        parseResult: ScannedCardData? = null,
+        parseResult: NfcCardDataParser.Result = NfcCardDataParser.Result.Success(SCANNED_CARD_DATA),
         openException: Throwable? = null,
         errorResult: NfcCardReader.Result.Error = PARSE_FAILURE_ERROR,
         block: suspend Scenario.() -> Unit,
