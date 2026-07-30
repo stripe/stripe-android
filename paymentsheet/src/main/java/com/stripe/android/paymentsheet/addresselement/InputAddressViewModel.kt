@@ -209,16 +209,16 @@ internal class InputAddressViewModel @Inject constructor(
         _formEnabled.value = false
         dismissWithAddress(
             AddressDetails(
-                name = completedFormValues[IdentifierSpec.Name]?.value,
+                name = completedFormValues?.get(IdentifierSpec.Name)?.value,
                 address = PaymentSheet.Address(
-                    city = completedFormValues[IdentifierSpec.City]?.value,
-                    country = completedFormValues[IdentifierSpec.Country]?.value,
-                    line1 = completedFormValues[IdentifierSpec.Line1]?.value,
-                    line2 = completedFormValues[IdentifierSpec.Line2]?.value,
-                    postalCode = completedFormValues[IdentifierSpec.PostalCode]?.value,
-                    state = completedFormValues[IdentifierSpec.State]?.value
+                    city = completedFormValues?.get(IdentifierSpec.City)?.value,
+                    country = completedFormValues?.get(IdentifierSpec.Country)?.value,
+                    line1 = completedFormValues?.get(IdentifierSpec.Line1)?.value,
+                    line2 = completedFormValues?.get(IdentifierSpec.Line2)?.value,
+                    postalCode = completedFormValues?.get(IdentifierSpec.PostalCode)?.value,
+                    state = completedFormValues?.get(IdentifierSpec.State)?.value
                 ),
-                phoneNumber = completedFormValues[IdentifierSpec.Phone]?.value,
+                phoneNumber = completedFormValues?.get(IdentifierSpec.Phone)?.value,
                 isCheckboxSelected = checkboxChecked
             )
         )
