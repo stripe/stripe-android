@@ -84,7 +84,38 @@ internal class NfcScanningViewModelTest {
                 ),
             ),
         )
-        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("expiredCard")
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(
+            FakeNfcScanningEventReporter.NfcScanAttemptFailedCall(
+                errorCode = "expiredCard",
+                parameters = emptyMap(),
+            ),
+        )
+    }
+
+    @Test
+    fun `card scanner failed reports attempt failed with error parameters`() = runScenario {
+        scannerState.emit(
+            NfcCardScanner.State.Failed(
+                error = NfcCardScanner.Error(
+                    code = "nfcCardReadFailed",
+                    userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+                    parameters = mapOf(
+                        "sw1" to "64",
+                        "sw2" to "00",
+                    ),
+                ),
+            ),
+        )
+
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(
+            FakeNfcScanningEventReporter.NfcScanAttemptFailedCall(
+                errorCode = "nfcCardReadFailed",
+                parameters = mapOf(
+                    "sw1" to "64",
+                    "sw2" to "00",
+                ),
+            ),
+        )
     }
 
     @Test
@@ -147,7 +178,12 @@ internal class NfcScanningViewModelTest {
             )
 
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
-            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("unknown")
+            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(
+                FakeNfcScanningEventReporter.NfcScanAttemptFailedCall(
+                    errorCode = "unknown",
+                    parameters = emptyMap(),
+                ),
+            )
             assertThat(fakeTimeoutManager.resetCalls.awaitItem()).isNotNull()
         }
     }
@@ -168,7 +204,12 @@ internal class NfcScanningViewModelTest {
                 ),
             )
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
-            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("unknown")
+            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(
+                FakeNfcScanningEventReporter.NfcScanAttemptFailedCall(
+                    errorCode = "unknown",
+                    parameters = emptyMap(),
+                ),
+            )
 
             scannerState.emit(NfcCardScanner.State.Scanning)
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanning)
@@ -231,7 +272,12 @@ internal class NfcScanningViewModelTest {
             )
         }
 
-        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("expiredCard")
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(
+            FakeNfcScanningEventReporter.NfcScanAttemptFailedCall(
+                errorCode = "expiredCard",
+                parameters = emptyMap(),
+            ),
+        )
     }
 
     @Test

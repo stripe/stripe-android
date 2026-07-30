@@ -2,6 +2,7 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.scanner.NfcCardReader
+import com.stripe.android.common.nfcscan.scanner.apdu.pdol.PdolParsingException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import org.junit.Test
@@ -23,6 +24,12 @@ internal class ApduErrorCreatorTest {
         assertThat(result.errorCode).isEqualTo("cardUnsupportedByNfc")
         assertThat(result.userMessage).isEqualTo(
             R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+        )
+        assertThat(result.parameters).isEqualTo(
+            mapOf(
+                "sw1" to "6A",
+                "sw2" to "82",
+            ),
         )
     }
 
@@ -83,6 +90,26 @@ internal class ApduErrorCreatorTest {
         assertThat(result.errorCode).isEqualTo("nfcCardReadFailed")
         assertThat(result.userMessage).isEqualTo(
             R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+        )
+        assertThat(result.parameters).isEqualTo(
+            mapOf(
+                "sw1" to "64",
+                "sw2" to "00",
+            ),
+        )
+    }
+
+    @Test
+    fun `create returns pdol parsing error for PdolParsingException`() {
+        val result = errorMapper.create(
+            PdolParsingException(cause = IndexOutOfBoundsException("invalid template")),
+        )
+
+        assertThat(result).isEqualTo(
+            NfcCardReader.Result.Error(
+                errorCode = "pdolParsingError",
+                userMessage = R.string.stripe_something_went_wrong.resolvableString,
+            ),
         )
     }
 

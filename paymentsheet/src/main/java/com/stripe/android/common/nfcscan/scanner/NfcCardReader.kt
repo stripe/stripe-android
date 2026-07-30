@@ -25,6 +25,7 @@ internal interface NfcCardReader {
         data class Error(
             val errorCode: String,
             val userMessage: ResolvableString,
+            val parameters: Map<String, String> = emptyMap(),
         ) : Result
     }
 }
