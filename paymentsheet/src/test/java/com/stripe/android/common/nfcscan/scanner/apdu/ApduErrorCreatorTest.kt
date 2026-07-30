@@ -117,7 +117,7 @@ internal class ApduErrorCreatorTest {
         assertThat(result).isEqualTo(
             NfcCardReader.Result.Error(
                 errorCode = "apduResponseTooShort",
-                userMessage = R.string.stripe_something_went_wrong.resolvableString,
+                userMessage = R.string.stripe_nfc_scan_internal_error_message.resolvableString,
             ),
         )
     }
@@ -134,7 +134,7 @@ internal class ApduErrorCreatorTest {
         assertThat(result).isEqualTo(
             NfcCardReader.Result.Error(
                 errorCode = "apduParsingCode",
-                userMessage = R.string.stripe_something_went_wrong.resolvableString,
+                userMessage = R.string.stripe_nfc_scan_internal_error_message.resolvableString,
             ),
         )
     }

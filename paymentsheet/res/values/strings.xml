@@ -104,6 +104,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Card expired. Try another card.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">Something went wrong. Try again later</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Card declined. Try another card.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
