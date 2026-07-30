@@ -1,6 +1,7 @@
 package com.stripe.android.common.nfcscan.scanner
 
 import com.stripe.android.common.nfcscan.scanner.apdu.GetProcessingOptionsCommand
+import com.stripe.android.common.nfcscan.scanner.apdu.PdolTemplate
 import com.stripe.android.common.nfcscan.scanner.apdu.ReadRecordCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
@@ -58,10 +59,13 @@ internal class ApduCardReader @Inject constructor(
                 .transceiveWith(transceiver)
                 .getOrThrow()
 
-            val pdolData = pdolBuilder.fromTemplate(
-                paymentMethodMetadata = paymentMethodMetadata,
-                template = pdolTemplate,
-            )
+            val pdolData = when (pdolTemplate) {
+                is PdolTemplate.Available -> pdolBuilder.fromTemplate(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    template = pdolTemplate.data,
+                )
+                else -> byteArrayOf()
+            }
 
             val processingOptionsInfo = GetProcessingOptionsCommand(pdolData)
                 .transceiveWith(transceiver)
