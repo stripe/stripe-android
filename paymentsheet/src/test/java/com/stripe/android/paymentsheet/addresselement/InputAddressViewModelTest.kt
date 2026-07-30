@@ -947,43 +947,21 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `clickPrimaryButton with null triggers validation on form elements`() = runTest {
+    fun `clickPrimaryButton with null triggers validation errors without dismissing`() = runTest {
         val viewModel = createViewModel()
+
+        val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
+        val autocompleteElement = sectionElement.fields[0] as AutocompleteAddressElement
+        val controller = autocompleteElement.sectionFieldErrorController()
+
+        assertThat(controller.validationMessage.value).isNull()
 
         viewModel.clickPrimaryButton(
             completedFormValues = null,
             checkboxChecked = false
         )
 
-        val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
-        val autocompleteElement = sectionElement.fields[0] as AutocompleteAddressElement
-        val addressController = autocompleteElement.sectionFieldErrorController()
-            .addressElementFlow
-            .value
-            .addressController
-            .value
-        val fields = addressController.fieldsFlowable.value
-        fields.forEach { field ->
-            field.getFormFieldValueFlow().value.forEach { (_, entry) ->
-                if (!entry.isComplete) {
-                    assertThat(entry.isComplete).isFalse()
-                }
-            }
-        }
-
-        assertThat(viewModel.formEnabled.value).isTrue()
-        verify(navigator, never()).dismiss(any())
-    }
-
-    @Test
-    fun `clickPrimaryButton with null does not disable form or dismiss`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.clickPrimaryButton(
-            completedFormValues = null,
-            checkboxChecked = true
-        )
-
+        assertThat(controller.validationMessage.value).isNotNull()
         assertThat(viewModel.formEnabled.value).isTrue()
         verify(navigator, never()).dismiss(any())
     }
