@@ -34,6 +34,8 @@ import com.stripe.android.crypto.onramp.example.SESSION_STATUS_TAG
 import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_INSTANT_TAG
 import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_STANDARD_TAG
 import com.stripe.android.crypto.onramp.example.USER_ATTESTATION_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.WALLET_ADDRESS_TAG
+import com.stripe.android.crypto.onramp.example.WALLET_NETWORK_DROPDOWN_TAG
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.ui.components.GooglePayButton
@@ -200,7 +202,10 @@ internal fun WalletAddressSection(
             readOnly = true,
             label = { Text("Network") },
             trailingIcon = {
-                TextButton(onClick = { onDropdownExpandedChange(true) }) {
+                TextButton(
+                    onClick = { onDropdownExpandedChange(true) },
+                    modifier = Modifier.testTag(WALLET_NETWORK_DROPDOWN_TAG),
+                ) {
                     Text("▼")
                 }
             },
@@ -232,6 +237,7 @@ internal fun WalletAddressSection(
         label = { Text("Wallet Address") },
         placeholder = { Text("0x1234567890abcdef...") },
         modifier = Modifier
+            .testTag(WALLET_ADDRESS_TAG)
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     )

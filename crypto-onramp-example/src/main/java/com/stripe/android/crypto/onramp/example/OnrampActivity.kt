@@ -21,6 +21,9 @@ internal class OnrampActivity : ComponentActivity() {
         OnrampViewModel.Factory()
     }
 
+    internal val onrampCoordinator: OnrampCoordinator
+        get() = viewModel.onrampCoordinator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)

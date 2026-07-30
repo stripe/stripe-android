@@ -27,9 +27,15 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.store.ONRAMP_PREFS_NAME
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.testing.FeatureFlagTestRule
+import kotlinx.coroutines.runBlocking
 import org.junit.rules.ExternalResource
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -68,6 +74,37 @@ internal class OnrampE2ETestRule : TestRule {
 
     fun recreateHostActivity() {
         activityRule.scenario.recreate()
+    }
+
+    fun verifySolanaWalletOwnership() = runBlocking {
+        val coordinator = onrampCoordinator()
+
+        val challengeResult = coordinator.getWalletOwnershipChallenge(
+            walletAddress = TEST_SOLANA_WALLET_ADDRESS,
+            network = CryptoNetwork.Solana,
+        )
+        assertThat(challengeResult)
+            .isInstanceOf(OnrampGetWalletOwnershipChallengeResult.Completed::class.java)
+        val challenge = (challengeResult as OnrampGetWalletOwnershipChallengeResult.Completed).challenge
+
+        val verificationResult = coordinator.submitWalletOwnershipSignature(
+            challengeId = challenge.challengeId,
+            signature = TEST_MODE_WALLET_OWNERSHIP_SIGNATURE,
+        )
+        assertThat(verificationResult)
+            .isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Completed::class.java)
+        val wallet = (verificationResult as OnrampSubmitWalletOwnershipSignatureResult.Completed).consumerWallet
+        assertThat(wallet.walletAddress).isEqualTo(TEST_SOLANA_WALLET_ADDRESS)
+        assertThat(wallet.network).isEqualTo(CryptoNetwork.Solana)
+        assertThat(wallet.verifiedOwnership).isTrue()
+    }
+
+    private fun onrampCoordinator(): OnrampCoordinator {
+        lateinit var coordinator: OnrampCoordinator
+        activityRule.scenario.onActivity { activity ->
+            coordinator = activity.onrampCoordinator
+        }
+        return coordinator
     }
 }
 
@@ -201,6 +238,15 @@ internal class OnrampE2EPage(
     }
 
     fun registerDefaultWallet() {
+        clickTag(REGISTER_WALLET_BUTTON_TAG)
+        waitForSnackbar("Wallet address registered successfully!")
+    }
+
+    fun registerSolanaWallet() {
+        clickTag(WALLET_NETWORK_DROPDOWN_TAG)
+        clickText("Solana")
+        replaceTag(WALLET_ADDRESS_TAG, TEST_SOLANA_WALLET_ADDRESS)
+        hideKeyboard()
         clickTag(REGISTER_WALLET_BUTTON_TAG)
         waitForSnackbar("Wallet address registered successfully!")
     }
@@ -500,5 +546,7 @@ private const val USER_ATTESTATION_CANCEL_BUTTON_TAG = "UserAttestationCancelBut
 private const val USER_ATTESTATION_ACCEPT_TEXT = "Accept"
 private const val OAUTH_ALLOW_TEXT = "Allow"
 private const val TEST_MALTA_NATIONAL_ID = "1234567M"
+private const val TEST_SOLANA_WALLET_ADDRESS = "bufoH37MTiMTNAfBS4VEZ94dCEwMsmeSijD2vZRShuV"
+private const val TEST_MODE_WALLET_OWNERSHIP_SIGNATURE = "abcd"
 private const val EXTRA_SCROLL_DISTANCE = 72f
 private const val EXTRA_SCROLL_DURATION_MILLIS = 50L

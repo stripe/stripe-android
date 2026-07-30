@@ -90,4 +90,12 @@ internal class OnrampFlowTest {
         page.verifyEmptyTaxIdentifierIsRejected()
         page.submitMaltaTaxIdentifier()
     }
+
+    @Test
+    fun freshUserSolanaWalletOwnershipCanBeVerified() {
+        page.registerAndAuthenticateFreshUser(country = "US")
+
+        page.registerSolanaWallet()
+        onrampRule.verifySolanaWalletOwnership()
+    }
 }
