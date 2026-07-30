@@ -10,6 +10,7 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [ADDED] `LinkController` now supports appearance customization via `LinkAppearance` (private preview).
+* [FIXED][13671](https://github.com/stripe/stripe-android/pull/13671) PaymentSheet now scrolls its primary button into view when a payment-method form or CVC recollection becomes complete while the keyboard is visible.
 
 ## 23.13.1 - 2026-07-23
 

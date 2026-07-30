@@ -25,6 +25,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
@@ -66,6 +68,17 @@ internal class PaymentSheetPage(
         if (fillOutZipCode) {
             replaceText("ZIP Code", "12345")
         }
+    }
+
+    fun focusZipCode() {
+        composeTestRule.onNode(hasText("ZIP Code"))
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun enterZipCode() {
+        composeTestRule.onNode(hasText("ZIP Code"))
+            .performTextInput("12345")
     }
 
     fun fillOutBillingCollectionDetails(
@@ -238,6 +251,46 @@ internal class PaymentSheetPage(
                 assertThat(nodeInfo.isEnabled).isTrue()
             } else {
                 assertThat(nodeInfo.isEnabled).isFalse()
+            }
+        }
+    }
+
+    fun assertPrimaryButtonEnabled(enabled: Boolean) {
+        onView(withId(R.id.primary_button)).check { view, _ ->
+            assertThat(view.isEnabled).isEqualTo(enabled)
+        }
+    }
+
+    fun assertPrimaryButtonVisibleAboveKeyboard(activity: PaymentSheetActivity) {
+        assertPrimaryButtonPosition(activity = activity, expectedAboveKeyboard = true)
+    }
+
+    fun assertPrimaryButtonBelowKeyboard(activity: PaymentSheetActivity) {
+        assertPrimaryButtonPosition(activity = activity, expectedAboveKeyboard = false)
+    }
+
+    private fun assertPrimaryButtonPosition(
+        activity: PaymentSheetActivity,
+        expectedAboveKeyboard: Boolean,
+    ) {
+        onView(withId(R.id.primary_button)).check { view, _ ->
+            val rootView = activity.window.decorView
+            val imeBottomInset = requireNotNull(ViewCompat.getRootWindowInsets(rootView))
+                .getInsets(WindowInsetsCompat.Type.ime())
+                .bottom
+            assertThat(imeBottomInset).isGreaterThan(0)
+
+            val rootLocation = IntArray(2)
+            rootView.getLocationOnScreen(rootLocation)
+            val buttonLocation = IntArray(2)
+            view.getLocationOnScreen(buttonLocation)
+            val keyboardTop = rootLocation[1] + rootView.height - imeBottomInset
+            val buttonBottom = buttonLocation[1] + view.height
+
+            if (expectedAboveKeyboard) {
+                assertThat(buttonBottom).isAtMost(keyboardTop)
+            } else {
+                assertThat(buttonBottom).isGreaterThan(keyboardTop)
             }
         }
     }

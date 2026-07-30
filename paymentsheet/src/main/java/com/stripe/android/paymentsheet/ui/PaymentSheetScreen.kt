@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -337,6 +339,17 @@ private fun PaymentSheetContent(
     modifier: Modifier
 ) {
     val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val primaryButtonBringIntoViewRequester = remember { BringIntoViewRequester() }
+    val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
+
+    if (currentScreen.supportsPrimaryButtonReveal()) {
+        RevealPrimaryButtonWhenEnabled(
+            isEnabled = primaryButtonUiState?.enabled == true,
+            bringIntoViewRequester = primaryButtonBringIntoViewRequester,
+            resetKey = currentScreen,
+        )
+    }
+
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
@@ -393,7 +406,10 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel)
+    PrimaryButton(
+        viewModel = viewModel,
+        bringIntoViewRequester = primaryButtonBringIntoViewRequester,
+    )
 
     Box(modifier = modifier) {
         if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsPaymentConfirmationMandates) {
@@ -406,6 +422,13 @@ private fun PaymentSheetContent(
             )
         }
     }
+}
+
+private fun PaymentSheetScreen.supportsPrimaryButtonReveal(): Boolean {
+    return this is PaymentSheetScreen.AddAnotherPaymentMethod ||
+        this is PaymentSheetScreen.AddFirstPaymentMethod ||
+        this is PaymentSheetScreen.VerticalModeForm ||
+        this is PaymentSheetScreen.CvcRecollection
 }
 
 @Composable
@@ -494,11 +517,15 @@ private fun WalletHeader(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel) {
+private fun PrimaryButton(
+    viewModel: BaseSheetViewModel,
+    bringIntoViewRequester: BringIntoViewRequester,
+) {
     val uiState by viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
         .padding(StripeTheme.getOuterFormInsets())
+        .bringIntoViewRequester(bringIntoViewRequester)
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button
