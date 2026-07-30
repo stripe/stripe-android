@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -11,6 +13,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
@@ -69,11 +72,25 @@ internal class CustomerSheetPage(
 
     fun fillOutCardDetails(
         cardNumber: String = CARD_NUMBER,
+        fillOutZipCode: Boolean = true,
     ) {
         replaceText("Card number", cardNumber)
         fillExpirationDate("$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
         replaceText("CVC", CVC)
-        replaceText("ZIP Code", ZIP_CODE)
+        if (fillOutZipCode) {
+            replaceText("ZIP Code", ZIP_CODE)
+        }
+    }
+
+    fun focusZipCode() {
+        composeTestRule.onNode(hasText("ZIP Code"))
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun enterZipCode() {
+        composeTestRule.onNode(hasText("ZIP Code"))
+            .performTextInput(ZIP_CODE)
     }
 
     fun changeCardBrandChoice() {
@@ -92,6 +109,16 @@ internal class CustomerSheetPage(
 
     fun clickSaveButton() {
         clickPrimaryButton(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG)
+    }
+
+    fun assertSaveButtonEnabled() {
+        composeTestRule.onNode(hasTestTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG))
+            .assertIsEnabled()
+    }
+
+    fun assertSaveButtonDisabled() {
+        composeTestRule.onNode(hasTestTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG))
+            .assertIsNotEnabled()
     }
 
     fun clickConfirmButton() {

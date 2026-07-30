@@ -19,18 +19,54 @@ internal class CustomerSheetTestRunnerContext(
     private val customerSheet: CustomerSheet,
     private val countDownLatch: CountDownLatch,
 ) {
-    fun presentCustomerSheet() {
+    fun presentCustomerSheet(): CustomerSheetActivity {
         val activityLaunchObserver = ActivityLaunchObserver(CustomerSheetActivity::class.java)
         scenario.onActivity {
             activityLaunchObserver.prepareForLaunch(it)
             customerSheet.present()
         }
-        activityLaunchObserver.awaitLaunch()
+        return activityLaunchObserver.awaitLaunch() as CustomerSheetActivity
     }
 
     fun markTestSucceeded() {
         countDownLatch.countDown()
     }
+}
+
+/**
+ * Runs CustomerSheet against an activity that is already owned by an Android Compose test rule.
+ *
+ * Keeping the SDK host and Compose rule in the same activity is required for tests that observe
+ * window state, such as IME insets.
+ */
+internal fun runCustomerSheetTest(
+    scenario: ActivityScenario<MainActivity>,
+    networkRule: NetworkRule,
+    integrationType: IntegrationType,
+    customerSheetTestType: CustomerSheetTestType,
+    configuration: CustomerSheet.Configuration,
+    resultCallback: CustomerSheetResultCallback,
+    block: (CustomerSheetTestRunnerContext) -> Unit,
+) {
+    val countDownLatch = CountDownLatch(1)
+
+    val factory = CustomerSheetTestFactory(
+        integrationType = integrationType,
+        customerSheetTestType = customerSheetTestType,
+        configuration = configuration,
+        resultCallback = {
+            resultCallback.onCustomerSheetResult(it)
+            countDownLatch.countDown()
+        },
+    )
+
+    runCustomerSheetTest(
+        scenario = scenario,
+        networkRule = networkRule,
+        countDownLatch = countDownLatch,
+        makeCustomerSheet = factory::make,
+        block = block,
+    )
 }
 
 internal fun runCustomerSheetTest(
@@ -70,32 +106,48 @@ private fun runCustomerSheetTest(
     block: (CustomerSheetTestRunnerContext) -> Unit,
 ) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-        scenario.moveToState(Lifecycle.State.CREATED)
-
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            DefaultLinkStore(it.applicationContext).clear()
-        }
-
-        var customerSheet: CustomerSheet? = null
-
-        scenario.onActivity { activity ->
-            customerSheet = makeCustomerSheet(activity)
-        }
-
-        scenario.moveToState(Lifecycle.State.RESUMED)
-
-        val testContext = CustomerSheetTestRunnerContext(
+        runCustomerSheetTest(
             scenario = scenario,
-            customerSheet = customerSheet ?: throw IllegalStateException(
-                "CustomerSheet should have been created!"
-            ),
+            networkRule = networkRule,
             countDownLatch = countDownLatch,
+            makeCustomerSheet = makeCustomerSheet,
+            block = block,
         )
-        block(testContext)
-
-        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
-        networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
     }
+}
+
+private fun runCustomerSheetTest(
+    scenario: ActivityScenario<MainActivity>,
+    networkRule: NetworkRule,
+    countDownLatch: CountDownLatch,
+    makeCustomerSheet: (ComponentActivity) -> CustomerSheet,
+    block: (CustomerSheetTestRunnerContext) -> Unit,
+) {
+    scenario.moveToState(Lifecycle.State.CREATED)
+
+    scenario.onActivity {
+        PaymentConfiguration.init(it, "pk_test_123")
+        DefaultLinkStore(it.applicationContext).clear()
+    }
+
+    var customerSheet: CustomerSheet? = null
+
+    scenario.onActivity { activity ->
+        customerSheet = makeCustomerSheet(activity)
+    }
+
+    scenario.moveToState(Lifecycle.State.RESUMED)
+
+    val testContext = CustomerSheetTestRunnerContext(
+        scenario = scenario,
+        customerSheet = customerSheet ?: throw IllegalStateException(
+            "CustomerSheet should have been created!"
+        ),
+        countDownLatch = countDownLatch,
+    )
+    block(testContext)
+
+    val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+    networkRule.validate()
+    assertThat(didCompleteSuccessfully).isTrue()
 }
