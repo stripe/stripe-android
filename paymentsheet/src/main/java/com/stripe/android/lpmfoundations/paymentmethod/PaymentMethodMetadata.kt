@@ -74,7 +74,7 @@ internal data class PaymentMethodMetadata(
     val isGooglePayReady: Boolean,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
     val linkMode: LinkMode?,
-    val linkBrand: LinkBrand,
+    private val linkBrand: LinkBrand,
     val linkStateResult: LinkStateResult?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
