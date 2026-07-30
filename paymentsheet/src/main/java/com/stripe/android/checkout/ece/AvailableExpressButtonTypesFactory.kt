@@ -29,13 +29,13 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
                     ExpressButtonType.GooglePay(
                         googlePayConfiguration = it,
                     ).takeIf {
-                        expressCheckoutElementConfiguration.googlePayVisibility !=
-                            ExpressCheckoutElement.Configuration.GooglePayVisibility.Never
+                        expressCheckoutElementConfiguration.paymentMethods.googlePay !=
+                            ExpressCheckoutElement.Configuration.PaymentMethods.GooglePayVisibility.Never
                     }
                 }
                 WalletType.Link -> ExpressButtonType.Link.takeIf {
-                    expressCheckoutElementConfiguration.linkVisibility !=
-                        ExpressCheckoutElement.Configuration.LinkVisibility.Never
+                    expressCheckoutElementConfiguration.paymentMethods.link !=
+                        ExpressCheckoutElement.Configuration.PaymentMethods.LinkVisibility.Never
                 }
             }
         }

@@ -1,6 +1,66 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
+public final class com/stripe/android/checkout/ExpressCheckoutElement {
+	public static final field $stable I
+	public final fun Content (Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class com/stripe/android/checkout/ExpressCheckoutElement$Configuration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun appearance (Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration;
+	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/checkout/BillingDetailsCollectionConfiguration;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration;
+	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration;
+	public final fun paymentMethods (Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration;
+	public final fun shippingAddressRequired (Z)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration;
+}
+
+public final class com/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun buttonHeight-0680j_4 (F)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance;
+	public final fun buttonLayout (Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$ButtonLayout;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance;
+}
+
+public final class com/stripe/android/checkout/ExpressCheckoutElement$Configuration$ButtonLayout {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun maxColumns (Ljava/lang/Integer;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$ButtonLayout;
+	public final fun maxRows (Ljava/lang/Integer;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$ButtonLayout;
+}
+
+public final class com/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun googlePay (Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$GooglePayVisibility;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods;
+	public final fun link (Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$LinkVisibility;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods;
+}
+
+public final class com/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$GooglePayVisibility : java/lang/Enum {
+	public static final field Auto Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$GooglePayVisibility;
+	public static final field Never Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$GooglePayVisibility;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$GooglePayVisibility;
+	public static fun values ()[Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$GooglePayVisibility;
+}
+
+public final class com/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$LinkVisibility : java/lang/Enum {
+	public static final field Auto Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$LinkVisibility;
+	public static final field Never Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$LinkVisibility;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$LinkVisibility;
+	public static fun values ()[Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods$LinkVisibility;
+}
+
+public final class com/stripe/android/checkout/ExpressCheckoutElement$PaymentMethod : java/lang/Enum {
+	public static final field GooglePay Lcom/stripe/android/checkout/ExpressCheckoutElement$PaymentMethod;
+	public static final field Link Lcom/stripe/android/checkout/ExpressCheckoutElement$PaymentMethod;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/checkout/ExpressCheckoutElement$PaymentMethod;
+	public static fun values ()[Lcom/stripe/android/checkout/ExpressCheckoutElement$PaymentMethod;
+}
+
 public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt {
 	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt;
 	public fun <init> ()V
