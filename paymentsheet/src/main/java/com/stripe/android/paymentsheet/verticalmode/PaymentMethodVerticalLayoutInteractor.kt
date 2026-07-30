@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.ui.layout.LayoutCoordinates
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -118,6 +119,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
     private val updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)?,
+    private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
@@ -204,7 +206,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     )
                 },
                 updateMandateText = viewModel.mandateHandler::updateMandateText,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
             )
         }
     }
@@ -276,8 +279,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         displayedSavedPaymentMethod,
         availableSavedPaymentMethodAction,
         temporarySelection,
+        linkAccount,
     ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
-        temporarySelectionCode ->
+        temporarySelectionCode, linkAccount ->
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
@@ -299,7 +303,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
-            linkBrand = paymentMethodMetadata.linkBrand,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
         )
     }
 
