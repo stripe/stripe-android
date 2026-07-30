@@ -226,7 +226,7 @@ internal class InputAddressViewModel @Inject constructor(
             eventReporter.onCompleted(
                 country = country,
                 autocompleteResultSelected = collectedAddress.value?.address?.line1 != null,
-                editDistance = addressDetails.editDistance(collectedAddress.value),
+                editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
         navigator.dismiss(
@@ -262,7 +262,7 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     override fun onEnterManuallyFromInline() {
-        onEnterManually()
+        inlineAutocompleteController?.expandFormFromInline() ?: onEnterManually()
     }
 
     private fun canUseShippingSameAsBilling(): Boolean {

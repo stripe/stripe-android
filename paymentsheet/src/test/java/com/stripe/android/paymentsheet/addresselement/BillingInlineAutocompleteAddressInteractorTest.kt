@@ -25,7 +25,7 @@ class BillingInlineAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `onEnterManuallyFromInline emits OnExpandForm with null values`() = runScenario {
+    fun `onEnterManuallyFromInline emits OnExpandForm with null values when query is empty`() = runScenario {
         interactor.onEnterManuallyFromInline()
 
         assertThat(eventCalls.awaitItem())

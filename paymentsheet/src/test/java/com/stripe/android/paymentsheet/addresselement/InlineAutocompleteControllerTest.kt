@@ -665,6 +665,31 @@ class InlineAutocompleteControllerTest {
         eventCalls.awaitItem()
     }
 
+    @Test
+    fun `expandFormFromInline emits OnExpandForm with null values when query is empty`() = runScenario {
+        delegate.expandFormFromInline()
+
+        assertThat(eventCalls.awaitItem())
+            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+    }
+
+    @Test
+    fun `expandFormFromInline pre-fills Line1 from current query before debounce completes`() = runScenario {
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main St"
+        delegate.expandFormFromInline()
+
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main St",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun runScenario(
         autocompleteCountries: Set<String> = emptySet(),
