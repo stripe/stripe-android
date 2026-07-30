@@ -1027,7 +1027,8 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `createLinkAccountSession falls back to elements session ID when intent client secret is null`() = runSuspendTest {
+    fun `createLinkAccountSession falls back to elements session ID when intent client secret is null`() =
+        runSuspendTest {
         var capturedIntentToken: String? = null
         val linkRepository = object : FakeLinkRepository() {
             override suspend fun createLinkAccountSession(
