@@ -96,12 +96,14 @@ internal abstract class BaseSheetViewModel(
                 googlePlacesApiKey = config.googlePlacesApiKey,
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+                inlineMaxVisiblePredictions = 3,
             ),
             placesClient = placesClient,
             stripeAutocompleteRepository = stripeAutocompleteRepository,
             coroutineScope = viewModelScope,
             shouldUseAutocompleteProxyEndpointsProvider = {
-                _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
+                FeatureFlags.forceStripeHostedAutocomplete.isEnabled ||
+                    (_paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false)
             },
             eventReporter = addressLauncherEventReporter,
         )

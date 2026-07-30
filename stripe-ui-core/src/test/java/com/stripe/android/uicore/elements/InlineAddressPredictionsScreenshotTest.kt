@@ -76,4 +76,41 @@ class InlineAddressPredictionsScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testResultsWithMultiplePredictions() {
+        paparazziRule.snapshot {
+            InlineAddressPredictionsContent(
+                state = AutocompleteAddressInteractor.InlinePredictionsState.Results(
+                    query = "123 Main",
+                    predictions = listOf(
+                        AutocompleteAddressInteractor.InlineAddressPrediction(
+                            id = "1",
+                            primaryText = "123 Main Street",
+                            secondaryText = "San Francisco, CA, USA",
+                        ),
+                        AutocompleteAddressInteractor.InlineAddressPrediction(
+                            id = "2",
+                            primaryText = "123 Main Avenue",
+                            secondaryText = "Oakland, CA, USA",
+                        ),
+                        AutocompleteAddressInteractor.InlineAddressPrediction(
+                            id = "3",
+                            primaryText = "123 Main Boulevard",
+                            secondaryText = "Berkeley, CA, USA",
+                        ),
+                        AutocompleteAddressInteractor.InlineAddressPrediction(
+                            id = "4",
+                            primaryText = "123 Main Road",
+                            secondaryText = "San Jose, CA, USA",
+                        ),
+                    ),
+                ),
+                attributionDrawable = R.drawable.stripe_google_maps_logo,
+                onPredictionSelected = {},
+                onClear = {},
+                onEnterManually = {},
+            )
+        }
+    }
 }

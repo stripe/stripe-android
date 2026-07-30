@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -25,35 +28,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
+
+internal val PredictionListItemDefaultMinHeight = 56.dp
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun InlineAddressPredictionsUI(
     state: AutocompleteAddressInteractor.InlinePredictionsState,
     attributionDrawable: Int?,
-    fieldWidthDp: Dp,
     onPredictionSelected: (String) -> Unit,
-    onDismiss: () -> Unit,
     onClear: () -> Unit,
-    onEnterManually: (() -> Unit)? = null,
+    onEnterManually: (() -> Unit)?,
 ) {
-    DropdownMenu(
-        expanded = shouldShowPredictionsDropdown(state),
-        onDismissRequest = onDismiss,
-        offset = DpOffset(x = (-1).dp, y = 0.dp),
-        modifier = if (fieldWidthDp > 0.dp) {
-            Modifier.width(fieldWidthDp + 2.dp)
-        } else {
-            Modifier.fillMaxWidth()
-        },
-        properties = PopupProperties(focusable = false),
+    if (!shouldShowPredictionsDropdown(state)) {
+        return
+    }
+
+    Card(
+        elevation = 4.dp,
+        modifier = Modifier.fillMaxWidth(),
     ) {
         InlineAddressPredictionsContent(
             state = state,
@@ -165,8 +162,42 @@ private fun PredictionsList(
     onPredictionSelected: (String) -> Unit,
     onEnterManually: (() -> Unit)?,
 ) {
-    val queryRegex = remember(results.query) { buildQueryRegex(results.query) }
     Divider()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        PredictionsListItems(
+            results = results,
+            onPredictionSelected = onPredictionSelected,
+        )
+    }
+
+    onEnterManually?.let {
+        Box(
+            contentAlignment = Alignment.TopStart,
+            modifier = Modifier
+                .fillMaxWidth()
+                .requiredSizeIn(minHeight = 32.dp)
+                .clickable(onClick = it)
+                .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_address_enter_manually),
+                color = MaterialTheme.colors.primary,
+                style = MaterialTheme.typography.body1,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PredictionsListItems(
+    results: AutocompleteAddressInteractor.InlinePredictionsState.Results,
+    onPredictionSelected: (String) -> Unit,
+) {
+    val queryRegex = remember(results.query) { buildQueryRegex(results.query) }
     results.predictions.forEach { prediction ->
         Column(
             modifier = Modifier
@@ -189,24 +220,6 @@ private fun PredictionsList(
             )
         }
         Divider()
-    }
-
-    onEnterManually?.let {
-        Box(
-            contentAlignment = Alignment.CenterStart,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp)
-                .clickable(onClick = it)
-                .padding(horizontal = 16.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.stripe_address_enter_manually),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.body1,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-        }
     }
 }
 

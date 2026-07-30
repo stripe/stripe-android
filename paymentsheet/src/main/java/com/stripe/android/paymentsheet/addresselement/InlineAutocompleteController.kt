@@ -28,9 +28,13 @@ internal class InlineAutocompleteController(
 ) {
     private var lastPredictionLine1: String? = null
     private var lastObservedCountry: String? = null
-    private var queryFlow: StateFlow<String>? = null
-    private var countryFlow: StateFlow<String?>? = null
+    private var latestQuery: String? = null
+    private var latestCountry: String? = null
     private var observeJob: Job? = null
+    private var pendingQueryJob: Job? = null
+    private var pendingCountryJob: Job? = null
+    private var pendingQueryForManualEntry: String? = null
+    private var pendingCountryForManualEntry: String? = null
     private var selectionJob: Job? = null
 
     private val _inlinePredictionsState = MutableStateFlow<AutocompleteAddressInteractor.InlinePredictionsState>(
@@ -42,9 +46,19 @@ internal class InlineAutocompleteController(
     @OptIn(FlowPreview::class)
     fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
         observeJob?.cancel()
-        queryFlow = query
-        countryFlow = country
+        pendingQueryJob?.cancel()
+        pendingCountryJob?.cancel()
         lastObservedCountry = country.value ?: ""
+        pendingQueryJob = coroutineScope.launch {
+            query.collect { q ->
+                pendingQueryForManualEntry = q
+            }
+        }
+        pendingCountryJob = coroutineScope.launch {
+            country.collect { c ->
+                pendingCountryForManualEntry = c ?: ""
+            }
+        }
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
@@ -70,6 +84,8 @@ internal class InlineAutocompleteController(
                         }
                         return@collectLatest
                     }
+                    latestQuery = q
+                    latestCountry = c
                     fetchPredictions(q, c)
                 }
         }
@@ -84,7 +100,7 @@ internal class InlineAutocompleteController(
                 ensureActive()
                 result.fold(
                     onSuccess = { handleFetchPlaceSuccess(it) },
-                    onFailure = { handleFailure(queryFlow?.value, countryFlow?.value) }
+                    onFailure = { handleFailure(latestQuery, latestCountry) }
                 )
             } finally {
                 placesClient.resetSession()
@@ -112,18 +128,24 @@ internal class InlineAutocompleteController(
     fun onDismissed() {
         selectionJob?.cancel()
         lastPredictionLine1 = null
+        latestQuery = null
+        pendingQueryForManualEntry = null
+        latestCountry = null
+        pendingCountryForManualEntry = null
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
     fun expandFormFromInline() {
         emitExpandForm(
-            query = queryFlow?.value,
-            country = countryFlow?.value,
+            query = pendingQueryForManualEntry?.takeIf { it.isNotBlank() } ?: latestQuery,
+            country = pendingCountryForManualEntry?.takeIf { it.isNotBlank() } ?: latestCountry,
         )
     }
 
     fun dispose() {
         observeJob?.cancel()
+        pendingQueryJob?.cancel()
+        pendingCountryJob?.cancel()
         selectionJob?.cancel()
     }
 
@@ -134,7 +156,11 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
+        // Keep prior Results visible while refetching so the spinner doesn't
+        // flash on every keystroke.
+        if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
+            _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
+        }
         val result = placesClient.findAutocompletePredictions(
             query = query,
             country = country,

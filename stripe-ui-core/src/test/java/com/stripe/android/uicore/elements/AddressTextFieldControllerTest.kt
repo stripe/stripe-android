@@ -99,6 +99,15 @@ class AddressTextFieldControllerTest {
     }
 
     @Test
+    fun `predictions dropdown is hidden while loading`() {
+        assertThat(
+            shouldShowPredictionsDropdown(
+                AutocompleteAddressInteractor.InlinePredictionsState.Loading
+            )
+        ).isFalse()
+    }
+
+    @Test
     fun `predictions dropdown remains shown when results are empty`() {
         assertThat(
             shouldShowPredictionsDropdown(
