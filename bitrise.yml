@@ -331,7 +331,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet instrumentation test results
           inputs:
@@ -350,7 +350,7 @@ workflows:
           title: Execute PaymentSheet IME instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.paymentsheet.example.ManagedDeviceImeSmokeTest :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33imeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet IME instrumentation test results
           inputs:

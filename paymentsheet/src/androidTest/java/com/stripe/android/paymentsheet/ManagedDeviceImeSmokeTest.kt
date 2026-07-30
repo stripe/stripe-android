@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example
+package com.stripe.android.paymentsheet
 
 import androidx.activity.compose.setContent
 import androidx.compose.material.TextField
@@ -18,20 +18,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Verifies that the managed device used for keyboard-dependent tests has a working IME.
- *
- * This test lives in `paymentsheet-example` so the regular PaymentSheet instrumentation workflow
- * does not run it on the `aosp-atd` image, which intentionally omits an input method. The E2E
- * sharder also excludes this class; the dedicated IME workflow is its only CI entry point.
- */
+/** Verifies that the managed device used for keyboard-dependent tests has a working IME. */
+@RequiresIme
 @RunWith(AndroidJUnit4::class)
 internal class ManagedDeviceImeSmokeTest {
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ManagedDeviceImeTestActivity>()
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun focused_text_field_exposes_a_nonzero_ime_inset() {
+    fun focusedTextFieldExposesNonzeroImeInset() {
         composeTestRule.activityRule.scenario.onActivity { activity ->
             activity.setContent {
                 var value by mutableStateOf("")
@@ -44,17 +39,11 @@ internal class ManagedDeviceImeSmokeTest {
         }
 
         composeTestRule.onNodeWithTag(TEXT_FIELD_TAG).performClick()
+        composeTestRule.waitForKeyboardToBeVisible(composeTestRule.activity)
 
-        var imeBottomInset = 0
-        composeTestRule.waitUntil(timeoutMillis = 10_000) {
-            composeTestRule.activityRule.scenario.onActivity { activity ->
-                imeBottomInset = ViewCompat.getRootWindowInsets(
-                    activity.window.decorView,
-                )?.getInsets(WindowInsetsCompat.Type.ime())?.bottom ?: 0
-            }
-            imeBottomInset > 0
-        }
-
+        val imeBottomInset = ViewCompat.getRootWindowInsets(
+            composeTestRule.activity.window.decorView,
+        )?.getInsets(WindowInsetsCompat.Type.ime())?.bottom ?: 0
         assertThat(imeBottomInset).isGreaterThan(0)
     }
 

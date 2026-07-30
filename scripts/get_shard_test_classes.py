@@ -41,7 +41,6 @@ def class_names_from_test_files(test_directory, test_file_names):
 
 EXCLUDED_TEST_CLASSES = {
     'com.stripe.android.lpm.TestGooglePay',
-    'com.stripe.android.paymentsheet.example.ManagedDeviceImeSmokeTest',
 }
 
 def get_all_test_class_names():
