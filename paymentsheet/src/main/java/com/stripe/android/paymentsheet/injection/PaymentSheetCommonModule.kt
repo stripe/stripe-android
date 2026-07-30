@@ -41,6 +41,8 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
@@ -185,6 +187,11 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
+
+    @Binds
+    abstract fun bindsAddressLauncherEventReporter(
+        impl: DefaultAddressLauncherEventReporter
+    ): AddressLauncherEventReporter
 
     @Suppress("TooManyFunctions")
     companion object {

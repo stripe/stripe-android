@@ -65,6 +65,7 @@ internal class LinkControllerCoordinatorTest {
 
         return LinkControllerCoordinator(
             application = ApplicationProvider.getApplicationContext(),
+            activity = mock(),
             interactor = viewModel,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
@@ -161,6 +162,7 @@ internal class LinkControllerCoordinatorTest {
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
+                statusBarColor = null,
             )
         )
         verify(viewModel).onLinkActivityResult(

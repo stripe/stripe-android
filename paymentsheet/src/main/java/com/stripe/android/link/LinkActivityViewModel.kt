@@ -581,6 +581,7 @@ internal class LinkActivityViewModel @Inject constructor(
                         linkLaunchMode = args.launchMode,
                         linkAccountUpdate = args.linkAccountInfo,
                         requestSurface = args.requestSurface,
+                        statusBarColor = args.statusBarColor,
                     )
                     .viewModel
             }

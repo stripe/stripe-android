@@ -80,6 +80,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         linkAccountInfo: LinkAccountUpdate.Value,
         launchMode: LinkLaunchMode,
         linkExpressMode: LinkExpressMode,
+        statusBarColor: Int?,
     ) {
         val args = LinkActivityContract.Args(
             configuration = configuration,
@@ -87,6 +88,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             linkExpressMode = linkExpressMode,
             linkAccountInfo = linkAccountInfo,
             launchMode = launchMode,
+            statusBarColor = statusBarColor,
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()

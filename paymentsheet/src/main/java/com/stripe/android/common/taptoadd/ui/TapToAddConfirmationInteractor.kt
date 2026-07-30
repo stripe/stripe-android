@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
@@ -90,6 +92,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val confirmationHandler: ConfirmationHandler,
     private val cvcFormHelper: CvcFormHelper,
     private val eventReporter: EventReporter,
+    private val statusBarColor: Int?,
     private val onComplete: () -> Unit,
 ) : TapToAddConfirmationInteractor {
     private val coroutineScope = CoroutineScope(coroutineContext + SupervisorJob())
@@ -175,7 +178,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 arguments = ConfirmationHandler.Args(
                     confirmationOption = confirmationOption,
                     paymentMethodMetadata = paymentMethodMetadata,
-                    statusBarColor = null,
+                    statusBarColor = statusBarColor,
                 )
             )
         }
@@ -280,6 +283,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         private val cvcFormHelperFactory: CvcFormHelper.Factory,
         private val confirmationHandler: ConfirmationHandler,
         private val eventReporter: EventReporter,
+        @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
     ) : TapToAddConfirmationInteractor.Factory {
         override fun create(
@@ -296,6 +300,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 eventReporter = eventReporter,
                 coroutineContext = coroutineContext,
                 cvcFormHelper = cvcFormHelperFactory.create(paymentMethod),
+                statusBarColor = statusBarColor,
                 onComplete = {
                     tapToAddNavigator.get().performAction(
                         action = TapToAddNavigator.Action.Complete,

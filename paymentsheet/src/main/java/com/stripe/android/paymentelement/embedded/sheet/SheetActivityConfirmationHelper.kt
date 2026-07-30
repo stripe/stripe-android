@@ -51,6 +51,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
                     stateHelper.setResult(
                         EmbeddedActivityResult.Complete(
                             selection = selectionHolder.selection.value,
+                            previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,

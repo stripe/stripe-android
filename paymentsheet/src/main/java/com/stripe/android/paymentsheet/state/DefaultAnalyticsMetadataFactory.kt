@@ -130,7 +130,8 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         when (this@analyticsMap) {
             is PaymentElementLoader.Configuration.PaymentSheet -> putAll(analyticsMap())
             is PaymentElementLoader.Configuration.Embedded -> putAll(analyticsMap())
-            is PaymentElementLoader.Configuration.CryptoOnramp -> Unit
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.StandaloneLink -> Unit
         }
     }
 
@@ -245,6 +246,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
 private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: String
     get() = when (this) {
         is PaymentElementLoader.InitializationMode.CryptoOnramp -> "crypto_onramp"
+        is PaymentElementLoader.InitializationMode.StandaloneLink -> "standalone_link"
         is PaymentElementLoader.InitializationMode.CheckoutSession -> "checkout_session"
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             when (this.intentConfiguration.mode) {
@@ -258,7 +260,8 @@ private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: Strin
 
 private fun IntegrationMetadata.isDeferred(): Boolean = when (this) {
     is IntegrationMetadata.IntentFirst -> false
-    IntegrationMetadata.CryptoOnramp -> true
+    IntegrationMetadata.CryptoOnramp,
+    IntegrationMetadata.StandaloneLink -> true
     is IntegrationMetadata.CustomerSheet -> true
     is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> true
     is IntegrationMetadata.DeferredIntent.WithPaymentMethod -> true

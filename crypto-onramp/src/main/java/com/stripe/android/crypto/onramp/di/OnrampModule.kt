@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
 import com.stripe.android.Stripe
 import com.stripe.android.common.di.MobileSessionIdModule
-import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -20,6 +19,7 @@ import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsServiceImpl
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository.Companion.CRYPTO_ONRAMP_API_VERSION
 import com.stripe.android.link.LinkController
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeRepository
@@ -65,7 +65,7 @@ internal class OnrampModule {
             stripeRepository = stripeRepository,
             publishableKeyProvider = publishableKeyProvider,
             stripeAccountIdProvider = stripeAccountIdProvider,
-            apiVersion = ApiVersion.get().code,
+            apiVersion = CRYPTO_ONRAMP_API_VERSION,
             linkController = linkController,
             appInfo = Stripe.appInfo
         )

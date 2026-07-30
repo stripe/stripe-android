@@ -40,6 +40,7 @@ import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScr
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -59,6 +60,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Suppress("TooManyFunctions")
@@ -140,15 +142,15 @@ internal interface EmbeddedActivityModule {
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
-            val initialScreen = when (launchMode) {
-                is EmbeddedLaunchMode.Form -> formScreenFactory.create(launchMode)
-                is EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
+            val initialBackStack = when (launchMode) {
+                is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
+                is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
                 is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
             }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialScreen = initialScreen,
+                initialBackStack = initialBackStack,
             )
         }
 
@@ -184,6 +186,7 @@ internal interface EmbeddedActivityModule {
             embeddedSelectionHolder: EmbeddedSelectionHolder,
             customerStateHolder: CustomerStateHolder,
             paymentMethodMetadata: PaymentMethodMetadata,
+            @Named(STATUS_BAR_COLOR) statusBarColor: Int?,
         ): TapToAddHelper {
             return tapToAddHelperFactory.create(
                 coroutineScope = coroutineScope,
@@ -194,6 +197,7 @@ internal interface EmbeddedActivityModule {
                 updateSelection = embeddedSelectionHolder::setSelection,
                 customerStateHolder = customerStateHolder,
                 linkSignupMode = stateFlowOf(paymentMethodMetadata.linkState?.signupMode),
+                statusBarColor = statusBarColor,
             )
         }
 
@@ -224,6 +228,7 @@ internal interface EmbeddedActivityModule {
             @ViewModelScope coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
             sheetActivityStateHolder: SheetActivityStateHolder,
+            linkAccountHolder: LinkAccountHolder,
             savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
         ): SavedPaymentMethodConfirmInteractor.Factory {
             return DefaultSavedPaymentMethodConfirmInteractor.Factory(
@@ -232,6 +237,7 @@ internal interface EmbeddedActivityModule {
                 processing = sheetActivityStateHolder.state.mapAsStateFlow {
                     it.isProcessing
                 },
+                linkAccountHolder = linkAccountHolder,
                 coroutineScope = coroutineScope,
             )
         }

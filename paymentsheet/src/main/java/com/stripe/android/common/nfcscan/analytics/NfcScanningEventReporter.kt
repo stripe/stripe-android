@@ -31,8 +31,12 @@ internal interface NfcScanningEventReporter {
      * details from the NFC card held against the device.
      *
      * @param errorCode code generated from NFC scanning flow indicating the error
+     * @param parameters additional context about the failure, such as APDU status words
      */
-    fun onNfcScanAttemptFailed(errorCode: String)
+    fun onNfcScanAttemptFailed(
+        errorCode: String,
+        parameters: Map<String, String> = emptyMap(),
+    )
 
     /**
      * NFC scan flow completed successfully meaning the user is being returned to the calling payment flow after
@@ -42,8 +46,10 @@ internal interface NfcScanningEventReporter {
 
     /**
      * The user has chosen to exit the NFC scanning flow without scanning valid card details.
+     *
+     * @param reason why there was an NFC flow cancellation
      */
-    fun onNfcScanCancelled()
+    fun onNfcScanCancelled(reason: NfcScanCancellationReason)
 }
 
 internal class DefaultNfcScanningEventReporter @Inject constructor(
@@ -72,18 +78,26 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         fireEvent(eventName = SCAN_ATTEMPT_SUCCEEDED_EVENT_NAME, additionalParams = duration.mapOfDurationInSeconds())
     }
 
-    override fun onNfcScanAttemptFailed(errorCode: String) {
+    override fun onNfcScanAttemptFailed(
+        errorCode: String,
+        parameters: Map<String, String>,
+    ) {
         val duration = durationProvider.end(DurationProvider.Key.NfcScanAttempt)
         fireEvent(
             eventName = SCAN_ATTEMPT_FAILED_EVENT_NAME,
             additionalParams = duration.mapOfDurationInSeconds() +
-                mapOf(FIELD_ERROR_CODE to errorCode)
+                mapOf(FIELD_ERROR_CODE to errorCode) +
+                parameters
         )
     }
 
-    override fun onNfcScanCancelled() {
-        durationProvider.end(DurationProvider.Key.NfcScan)
-        fireEvent(eventName = SCAN_CANCELED_EVENT_NAME)
+    override fun onNfcScanCancelled(reason: NfcScanCancellationReason) {
+        val duration = durationProvider.end(DurationProvider.Key.NfcScan)
+        fireEvent(
+            eventName = SCAN_CANCELED_EVENT_NAME,
+            additionalParams = duration.mapOfDurationInSeconds() +
+                mapOf(FIELD_CANCELLATION_REASON to reason.analyticsValue)
+        )
     }
 
     private fun fireEvent(
@@ -103,6 +117,7 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
 
     private companion object {
         const val FIELD_ERROR_CODE = "error_code"
+        const val FIELD_CANCELLATION_REASON = "cancellation_reason"
 
         const val SCAN_STARTED_EVENT_NAME = "nfc_scan_started"
         const val SCAN_SUCCESS_EVENT_NAME = "nfc_scan_success"

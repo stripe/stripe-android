@@ -28,11 +28,10 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkExpressMode
-import com.stripe.android.link.effectiveLinkBrand
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
@@ -45,6 +44,8 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
@@ -87,6 +88,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("LargeClass")
 @Singleton
 internal class PaymentSheetViewModel @Inject internal constructor(
     internal val args: PaymentSheetContract.Args,
@@ -109,6 +111,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     placesClient: PlacesClientProxy?,
+    linkAccountHolder: LinkAccountHolder,
+    stripeAutocompleteRepository: StripeAutocompleteRepository,
+    addressLauncherEventReporter: AddressLauncherEventReporter,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -122,6 +127,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
     placesClient = placesClient,
+    linkAccountHolder = linkAccountHolder,
+    stripeAutocompleteRepository = stripeAutocompleteRepository,
+    addressLauncherEventReporter = addressLauncherEventReporter,
 ) {
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -146,6 +154,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         updateSelection = ::updateSelection,
         customerStateHolder = customerStateHolder,
         linkSignupMode = paymentMethodMetadata.mapAsStateFlow { it?.linkState?.signupMode },
+        statusBarColor = args.statusBarColor,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)

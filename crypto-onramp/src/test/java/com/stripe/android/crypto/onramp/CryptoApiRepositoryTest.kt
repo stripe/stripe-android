@@ -1,10 +1,10 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.HEADER_STRIPE_VERSION
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
@@ -18,6 +18,7 @@ import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierTyp
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceRegulation
 import com.stripe.android.crypto.onramp.model.compliance.SubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository.Companion.CRYPTO_ONRAMP_API_VERSION
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.networking.StripeRepository
@@ -45,7 +46,7 @@ class CryptoApiRepositoryTest {
         stripeRepository = stripeRepository,
         publishableKeyProvider = { "pk_test_vOo1umqsYxSrP5UXfOeL3ecm" },
         stripeAccountIdProvider = { "TestAccountId" },
-        apiVersion = ApiVersion(betas = emptySet()).code,
+        apiVersion = CRYPTO_ONRAMP_API_VERSION,
         sdkVersion = StripeSdkVersion.VERSION,
         appInfo = null,
         linkController = linkController
@@ -258,6 +259,8 @@ class CryptoApiRepositoryTest {
 
             assertThat(apiRequest.baseUrl)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/identifier_requirements")
+            assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
+                .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
             assertThat(apiRequest.params)
                 .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
 
@@ -732,6 +735,8 @@ class CryptoApiRepositoryTest {
 
             assertThat(apiRequest.baseUrl)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/wallet")
+            assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
+                .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
 
             val params = apiRequest.params!!
             assertThat(params["wallet_address"]).isEqualTo("0x1234567890abcdef")

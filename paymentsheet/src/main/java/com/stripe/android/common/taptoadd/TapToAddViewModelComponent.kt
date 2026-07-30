@@ -60,6 +60,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -116,6 +117,9 @@ internal interface TapToAddViewModelComponent {
             productUsage: Set<String>,
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
+            @Named(STATUS_BAR_COLOR)
+            @BindsInstance
+            statusBarColor: Int?,
         ): TapToAddViewModelComponent
     }
 }

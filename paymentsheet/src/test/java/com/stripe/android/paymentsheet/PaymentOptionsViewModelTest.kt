@@ -49,6 +49,8 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -88,6 +90,7 @@ import org.junit.After
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -264,6 +267,7 @@ internal class PaymentOptionsViewModelTest {
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
             linkExpressMode = eq(LinkExpressMode.ENABLED),
+            statusBarColor = anyOrNull(),
         )
     }
 
@@ -303,6 +307,7 @@ internal class PaymentOptionsViewModelTest {
             linkAccountInfo = any(),
             launchMode = any(),
             linkExpressMode = any(),
+            statusBarColor = anyOrNull(),
         )
     }
 
@@ -1476,6 +1481,8 @@ internal class PaymentOptionsViewModelTest {
             customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             placesClient = null,
+            stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+            addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
         )
     }.also { viewModelStoreRule.track(it) }
 

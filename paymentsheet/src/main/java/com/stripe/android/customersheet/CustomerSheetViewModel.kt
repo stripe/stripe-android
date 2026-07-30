@@ -288,6 +288,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
             is CustomerSheetViewAction.OnAnalyticsEvent -> onAnalyticsEvent(viewAction.event)
             is CustomerSheetViewAction.OnCardScanEvent -> onCardScanEvent(viewAction.event)
+            is CustomerSheetViewAction.OnNfcScanButtonShown -> onNfcScanButtonShown()
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
@@ -958,6 +959,10 @@ internal class CustomerSheetViewModel(
 
     private fun onCardScanEvent(event: CardScanEvent) {
         eventReporter.onCardScanEvent(event)
+    }
+
+    private fun onNfcScanButtonShown() {
+        eventReporter.onNfcScanButtonShown()
     }
 
     private fun onDisallowedCardBrandEntered(brand: CardBrand) {

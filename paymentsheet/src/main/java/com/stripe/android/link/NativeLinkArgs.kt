@@ -16,4 +16,5 @@ internal data class NativeLinkArgs(
     val linkAccountInfo: LinkAccountUpdate.Value,
     val paymentElementCallbackIdentifier: String,
     val launchMode: LinkLaunchMode,
+    val statusBarColor: Int?,
 ) : Parcelable

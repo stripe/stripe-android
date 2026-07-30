@@ -48,5 +48,8 @@ enum class CryptoNetwork(val value: String) {
     Sui("sui"),
 
     @SerialName("arbitrum")
-    Arbitrum("arbitrum")
+    Arbitrum("arbitrum"),
+
+    @SerialName("tempo")
+    Tempo("tempo")
 }

@@ -119,6 +119,9 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                     linkAccountInfo = accountManager.linkAccountInfo.value,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(null),
                     linkExpressMode = LinkExpressMode.ENABLED,
+                    // Selection-only launch; Link returns a selection here and never confirms, so
+                    // there is no auth surface to color.
+                    statusBarColor = null,
                 )
                 // No UI changes - keep the 2FA until we get a result from the Link payment selection flow.
             }.onFailure { error ->

@@ -256,7 +256,7 @@ class LinkController @Inject internal constructor(
             this.supportedPaymentMethodTypes = types
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @LinkControllerPreview
         fun appearance(appearance: LinkAppearance) = apply { this.appearance = appearance }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -269,7 +269,6 @@ class LinkController @Inject internal constructor(
             this.defaultBillingDetails = defaultBillingDetails
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun billingDetailsCollectionConfiguration(
             billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration
         ) = apply {
@@ -429,12 +428,14 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun presentPaymentMethodsForOnramp(
             email: String?,
-            paymentMethodTypes: List<PaymentMethodType>?
+            paymentMethodTypes: List<PaymentMethodType>?,
+            collectName: Boolean = false,
         ) {
             interactor.presentPaymentMethods(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
                 paymentMethodTypes = paymentMethodTypes,
+                collectName = collectName,
             )
         }
 
@@ -951,7 +952,7 @@ class LinkController @Inject internal constructor(
             return create(
                 application = application,
                 savedStateHandle = savedStateHandle,
-                requestSurface = RequestSurface.PaymentElement,
+                requestSurface = RequestSurface.StandaloneLink,
             )
         }
     }

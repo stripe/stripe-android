@@ -5,7 +5,11 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -330,6 +334,22 @@ class DefaultManageScreenInteractorTest {
         }
     }
 
+    @Test
+    fun `updating link account updates linkBrand in state`() {
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(initialPaymentMethods, currentSelection = null) {
+            interactor.state.test {
+                assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Link)
+
+                linkAccountSource.value = LinkAccountUpdate.Value(
+                    LinkAccount(TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink))
+                )
+
+                assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Onelink)
+            }
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -337,6 +357,7 @@ class DefaultManageScreenInteractorTest {
         currentSelection: PaymentSelection?,
         isLiveMode: Boolean = false,
         isEditing: Boolean = false,
+        configuredLinkBrand: LinkBrand = LinkBrand.Link,
         handleBackPressed: (withDelay: Boolean) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -347,6 +368,7 @@ class DefaultManageScreenInteractorTest {
         val canRemove = MutableStateFlow(true)
         val dispatcher = UnconfinedTestDispatcher()
         val defaultPaymentMethodId: MutableStateFlow<String?> = MutableStateFlow(null)
+        val linkAccount = MutableStateFlow(LinkAccountUpdate.Value(account = null))
 
         val toggleEditTurbine = Turbine<Unit>()
         val onSelectPaymentMethodTurbine = Turbine<DisplayableSavedPaymentMethod>()
@@ -356,6 +378,7 @@ class DefaultManageScreenInteractorTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = isLiveMode),
                 cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
+                linkBrand = configuredLinkBrand,
             ),
             selection = selection,
             editing = editing,
@@ -369,6 +392,7 @@ class DefaultManageScreenInteractorTest {
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,
+            linkAccount = linkAccount,
             dispatcher = dispatcher
         )
         closeInteractorRule.track(interactor)
@@ -380,6 +404,7 @@ class DefaultManageScreenInteractorTest {
             canEditSource = canEdit,
             canRemoveSource = canRemove,
             defaultPaymentMethodSource = defaultPaymentMethodId,
+            linkAccountSource = linkAccount,
             toggleEditTurbine = toggleEditTurbine,
             onSelectPaymentMethodTurbine = onSelectPaymentMethodTurbine,
         ).apply {
@@ -397,6 +422,7 @@ class DefaultManageScreenInteractorTest {
         val canEditSource: MutableStateFlow<Boolean>,
         val canRemoveSource: MutableStateFlow<Boolean>,
         val defaultPaymentMethodSource: MutableStateFlow<String?>,
+        val linkAccountSource: MutableStateFlow<LinkAccountUpdate.Value>,
         val toggleEditTurbine: ReceiveTurbine<Unit>,
         val onSelectPaymentMethodTurbine: ReceiveTurbine<DisplayableSavedPaymentMethod>,
     ) {

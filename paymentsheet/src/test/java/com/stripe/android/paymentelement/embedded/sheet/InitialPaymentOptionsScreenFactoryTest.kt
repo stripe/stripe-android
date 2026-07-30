@@ -2,18 +2,24 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
@@ -35,42 +41,75 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     fun `creates initial screen successfully with Google Pay ready`() = testScenario(
         isGooglePayReady = true,
     ) {
-        val screen = factory.createInitialScreen()
-        assertThat(screen).isNotNull()
+        val screens = factory.createInitialScreen()
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
     }
 
     @Test
     fun `creates initial screen successfully without wallets`() = testScenario(
         isGooglePayReady = false,
     ) {
-        val screen = factory.createInitialScreen()
-        assertThat(screen).isNotNull()
+        val screens = factory.createInitialScreen()
+        assertThat(screens).hasSize(1)
     }
 
     @Test
     fun `screen is created with correct isLiveMode`() = testScenario {
-        val screen = factory.createInitialScreen()
+        val screen = factory.createInitialScreen().first()
         val topBarState = screen.topBarState().value!!
         assertThat(topBarState.showTestModeLabel).isTrue()
     }
 
     @Test
     fun `screen isPerformingNetworkOperation returns false`() = testScenario {
-        val screen = factory.createInitialScreen()
+        val screen = factory.createInitialScreen().first()
         assertThat(screen.isPerformingNetworkOperation().value).isFalse()
+    }
+
+    @Test
+    fun `no payment selection creates a single payment options screen`() = testScenario {
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+    }
+
+    @Test
+    fun `new selection requiring a form starts with the form on top of the back stack`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(2)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+    }
+
+    @Test
+    fun `new selection without a required form does not add a form screen`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
+        ),
+    ) {
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
     }
 
     @Suppress("LongMethod")
     private fun testScenario(
         isGooglePayReady: Boolean = true,
-        configuration: EmbeddedPaymentElement.Configuration = EmbeddedPaymentElement.Configuration
-            .Builder("Example, Inc.")
-            .build(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            isGooglePayReady = isGooglePayReady,
+        ),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            isGooglePayReady = isGooglePayReady,
-        )
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val customerStateHolder = DefaultCustomerStateHolder(
@@ -93,9 +132,26 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val manageInteractorFactory = EmbeddedManageScreenInteractorFactory {
             FakeManageScreenInteractor()
         }
-        val formScreenFactory = EmbeddedFormScreenFactory { code ->
-            error("Form screen creation not expected in this test for code: $code")
-        }
+        val formScreenFactory = DefaultEmbeddedFormScreenFactory(
+            formFactory = EmbeddedNavigator.Screen.Form.Factory(
+                interactorFactory = EmbeddedFormInteractorFactory(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    embeddedSelectionHolder = selectionHolder,
+                    embeddedFormHelperFactory = formHelperFactory,
+                    viewModelScope = testScope,
+                    sheetActivityStateHolder = sheetActivityStateHolder,
+                    tapToAddHelper = FakeTapToAddHelper.noOp(),
+                    eventReporter = FakeEventReporter(),
+                    paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                ),
+                eventReporter = FakeEventReporter(),
+                sheetActivityStateHolder = sheetActivityStateHolder,
+                confirmationHelper = FakeSheetActivityConfirmationHelper(),
+                embeddedSelectionHolder = selectionHolder,
+                savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
+                customerStateHolder = customerStateHolder,
+            ),
+        )
 
         val fakeInteractor =
             com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor.create()
@@ -120,7 +176,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             embeddedNavigatorProvider = Provider { navigator },
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = testScope,
-            configuration = configuration,
             manageInteractorFactory = manageInteractorFactory,
             updateScreenInteractorFactory = updateScreenInteractorFactory,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),

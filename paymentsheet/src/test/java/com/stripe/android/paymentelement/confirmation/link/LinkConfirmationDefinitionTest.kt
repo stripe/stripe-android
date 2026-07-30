@@ -126,6 +126,20 @@ internal class LinkConfirmationDefinitionTest {
     }
 
     @Test
+    fun `'launch' should forward statusBarColor from confirmation args`() = test {
+        val definition = createLinkConfirmationDefinition()
+
+        definition.launch(
+            confirmationOption = LINK_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(statusBarColor = 0x00FF00),
+            launcher = launcherScenario.launcher,
+            arguments = EmptyConfirmationLauncherArgs,
+        )
+
+        assertThat(launcherScenario.presentCalls.awaitItem().statusBarColor).isEqualTo(0x00FF00)
+    }
+
+    @Test
     fun `'launch', when linkAccount is provided, should launch properly with provided parameters`() = test {
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))

@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -39,7 +40,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     val stateFlow: StateFlow<CheckoutControllerState?> =
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
-    val checkoutSession: StateFlow<CheckoutSession?> =
+    val checkoutSession: StateFlow<Session?> =
         stateFlow.mapAsStateFlow {
             it?.asCheckoutSession(
                 paymentOptionFactory,
@@ -82,6 +83,15 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New? {
         return previousNewSelections.previousNewSelection(code)
+    }
+
+    fun clearSelection() {
+        val current = requireState(operation = "clearSelection") ?: return
+        state = current.copy(
+            paymentSelection = null,
+            temporarySelection = null,
+            previousNewSelections = Bundle(),
+        )
     }
 
     /**

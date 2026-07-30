@@ -21,8 +21,14 @@ internal class FakeStripeAutocompleteRepository : StripeAutocompleteRepository {
     private val _findPredictionsCalls = Turbine<FindPredictionsCall>()
     val findPredictionsCalls: ReceiveTurbine<FindPredictionsCall> = _findPredictionsCalls
 
-    private val _fetchPlaceDetailsCalls = Turbine<String>()
-    val fetchPlaceDetailsCalls: ReceiveTurbine<String> = _fetchPlaceDetailsCalls
+    data class FetchPlaceDetailsCall(
+        val placeId: String,
+        val sessionToken: String,
+        val locale: String?,
+    )
+
+    private val _fetchPlaceDetailsCalls = Turbine<FetchPlaceDetailsCall>()
+    val fetchPlaceDetailsCalls: ReceiveTurbine<FetchPlaceDetailsCall> = _fetchPlaceDetailsCalls
 
     override suspend fun findAutocompletePredictions(
         query: String,
@@ -37,9 +43,10 @@ internal class FakeStripeAutocompleteRepository : StripeAutocompleteRepository {
 
     override suspend fun fetchPlaceDetails(
         placeId: String,
-        sessionToken: String
+        sessionToken: String,
+        locale: String?
     ): Result<PlaceDetailsResult> {
-        _fetchPlaceDetailsCalls.add(placeId)
+        _fetchPlaceDetailsCalls.add(FetchPlaceDetailsCall(placeId, sessionToken, locale))
         onBeforeFetchPlaceDetails?.invoke()
         return detailsResult
     }
