@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.example
 
 import androidx.activity.compose.setContent
 import androidx.compose.material.TextField
@@ -21,13 +21,14 @@ import org.junit.runner.RunWith
 /**
  * Verifies that the managed device used for keyboard-dependent tests has a working IME.
  *
- * The regular `aosp-atd` image intentionally omits an input method, so it cannot exercise IME
- * inset behavior even when a text field is focused.
+ * This test lives in `paymentsheet-example` so the regular PaymentSheet instrumentation workflow
+ * does not run it on the `aosp-atd` image, which intentionally omits an input method. The E2E
+ * sharder also excludes this class; the dedicated IME workflow is its only CI entry point.
  */
 @RunWith(AndroidJUnit4::class)
 internal class ManagedDeviceImeSmokeTest {
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    val composeTestRule = createAndroidComposeRule<ManagedDeviceImeTestActivity>()
 
     @Test
     fun focused_text_field_exposes_a_nonzero_ime_inset() {

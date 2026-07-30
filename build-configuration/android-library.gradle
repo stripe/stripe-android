@@ -56,12 +56,6 @@ android {
                     apiLevel = 33
                     systemImageSource = "aosp-atd"
                 }
-                // google_apis includes an IME, unlike the aosp-atd test image.
-                register("pixel2api33chrome") {
-                    device = "Pixel 2"
-                    apiLevel = 33
-                    systemImageSource = "google_apis"
-                }
             }
         }
     }
