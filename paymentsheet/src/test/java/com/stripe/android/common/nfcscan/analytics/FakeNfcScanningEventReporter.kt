@@ -6,9 +6,14 @@ internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
     val onNfcScanStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptSucceededCalls = Turbine<Unit>()
-    val onNfcScanAttemptFailedCalls = Turbine<String>()
+    val onNfcScanAttemptFailedCalls = Turbine<NfcScanAttemptFailedCall>()
     val onNfcScanSucceededCalls = Turbine<Unit>()
     val onNfcScanCancelledCalls = Turbine<NfcScanCancellationReason>()
+
+    data class NfcScanAttemptFailedCall(
+        val errorCode: String,
+        val parameters: Map<String, String>,
+    )
 
     override fun onNfcScanStarted() {
         onNfcScanStartedCalls.add(Unit)
@@ -22,8 +27,16 @@ internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
         onNfcScanAttemptSucceededCalls.add(Unit)
     }
 
-    override fun onNfcScanAttemptFailed(errorCode: String) {
-        onNfcScanAttemptFailedCalls.add(errorCode)
+    override fun onNfcScanAttemptFailed(
+        errorCode: String,
+        parameters: Map<String, String>,
+    ) {
+        onNfcScanAttemptFailedCalls.add(
+            NfcScanAttemptFailedCall(
+                errorCode = errorCode,
+                parameters = parameters,
+            ),
+        )
     }
 
     override fun onNfcScanSucceeded() {

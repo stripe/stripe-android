@@ -31,8 +31,12 @@ internal interface NfcScanningEventReporter {
      * details from the NFC card held against the device.
      *
      * @param errorCode code generated from NFC scanning flow indicating the error
+     * @param parameters additional context about the failure, such as APDU status words
      */
-    fun onNfcScanAttemptFailed(errorCode: String)
+    fun onNfcScanAttemptFailed(
+        errorCode: String,
+        parameters: Map<String, String> = emptyMap(),
+    )
 
     /**
      * NFC scan flow completed successfully meaning the user is being returned to the calling payment flow after
@@ -74,12 +78,16 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         fireEvent(eventName = SCAN_ATTEMPT_SUCCEEDED_EVENT_NAME, additionalParams = duration.mapOfDurationInSeconds())
     }
 
-    override fun onNfcScanAttemptFailed(errorCode: String) {
+    override fun onNfcScanAttemptFailed(
+        errorCode: String,
+        parameters: Map<String, String>,
+    ) {
         val duration = durationProvider.end(DurationProvider.Key.NfcScanAttempt)
         fireEvent(
             eventName = SCAN_ATTEMPT_FAILED_EVENT_NAME,
             additionalParams = duration.mapOfDurationInSeconds() +
-                mapOf(FIELD_ERROR_CODE to errorCode)
+                mapOf(FIELD_ERROR_CODE to errorCode) +
+                parameters
         )
     }
 

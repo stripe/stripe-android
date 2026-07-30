@@ -82,7 +82,10 @@ internal class NfcScanningViewModel @Inject constructor(
                             )
                         )
 
-                        eventReporter.onNfcScanAttemptFailed(errorCode = error.code)
+                        eventReporter.onNfcScanAttemptFailed(
+                            errorCode = error.code,
+                            parameters = error.parameters,
+                        )
                     }
                     is NfcCardScanner.State.Complete -> {
                         timeoutManager.cancel()

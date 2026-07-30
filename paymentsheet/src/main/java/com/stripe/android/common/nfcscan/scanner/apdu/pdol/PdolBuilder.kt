@@ -29,6 +29,20 @@ internal class DefaultPdolBuilder @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         template: ByteArray,
     ): ByteArray {
+        return runCatching {
+            buildFromTemplate(
+                paymentMethodMetadata = paymentMethodMetadata,
+                template = template,
+            )
+        }.getOrElse { cause ->
+            throw PdolParsingException(cause)
+        }
+    }
+
+    private fun buildFromTemplate(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        template: ByteArray,
+    ): ByteArray {
         if (template.isEmpty()) {
             return byteArrayOf()
         }

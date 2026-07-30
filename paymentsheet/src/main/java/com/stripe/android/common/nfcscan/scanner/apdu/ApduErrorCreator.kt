@@ -1,6 +1,7 @@
 package com.stripe.android.common.nfcscan.scanner.apdu
 
 import com.stripe.android.common.nfcscan.scanner.NfcCardReader
+import com.stripe.android.common.nfcscan.scanner.apdu.pdol.PdolParsingException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import java.io.IOException
@@ -29,6 +30,10 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
             )
             is ApduResponseError.Invalid -> unsupportedCard()
             is ApduResponseError.Command -> mapCommandError(error)
+            is PdolParsingException -> NfcCardReader.Result.Error(
+                errorCode = PDOL_PARSING_ERROR_CODE,
+                userMessage = R.string.stripe_something_went_wrong.resolvableString,
+            )
             is IllegalStateException -> generalFailure()
             else -> NfcCardReader.Result.Error(
                 errorCode = UNKNOWN_ERROR_CODE,
@@ -38,11 +43,24 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
     }
 
     private fun mapCommandError(error: ApduResponseError.Command): NfcCardReader.Result.Error {
+        val parameters = commandErrorParameters(error)
+
         return when {
-            isDeclined(error) -> declined()
-            isUnsupported(error) -> unsupportedCard()
-            else -> generalFailure()
+            isDeclined(error) -> declined(parameters)
+            isUnsupported(error) -> unsupportedCard(parameters)
+            else -> generalFailure(parameters)
         }
+    }
+
+    private fun commandErrorParameters(error: ApduResponseError.Command): Map<String, String> {
+        return mapOf(
+            SW1_PARAMETER to formatStatusWord(error.sw1),
+            SW2_PARAMETER to formatStatusWord(error.sw2),
+        )
+    }
+
+    private fun formatStatusWord(statusWord: Byte): String {
+        return String.format(STATUS_WORD_FORMAT, statusWord.toInt() and STATUS_WORD_MASK)
     }
 
     private fun isDeclined(error: ApduResponseError.Command): Boolean {
@@ -59,24 +77,33 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
         }
     }
 
-    private fun unsupportedCard(): NfcCardReader.Result.Error {
+    private fun unsupportedCard(
+        parameters: Map<String, String> = emptyMap(),
+    ): NfcCardReader.Result.Error {
         return NfcCardReader.Result.Error(
             errorCode = UNSUPPORTED_CARD_ERROR_CODE,
             userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+            parameters = parameters,
         )
     }
 
-    private fun declined(): NfcCardReader.Result.Error {
+    private fun declined(
+        parameters: Map<String, String> = emptyMap(),
+    ): NfcCardReader.Result.Error {
         return NfcCardReader.Result.Error(
             errorCode = CARD_DECLINED_ERROR_CODE,
             userMessage = R.string.stripe_nfc_scan_error_declined_card.resolvableString,
+            parameters = parameters,
         )
     }
 
-    private fun generalFailure(): NfcCardReader.Result.Error {
+    private fun generalFailure(
+        parameters: Map<String, String> = emptyMap(),
+    ): NfcCardReader.Result.Error {
         return NfcCardReader.Result.Error(
             errorCode = GENERAL_READ_ERROR_CODE,
             userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+            parameters = parameters,
         )
     }
 
@@ -87,6 +114,12 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
 
         const val APDU_RESPONSE_TOO_SHORT_ERROR_CODE = "apduResponseTooShort"
         const val APDU_RESPONSE_PARSING_ERROR_CODE = "apduParsingCode"
+        const val PDOL_PARSING_ERROR_CODE = "pdolParsingError"
+
+        const val SW1_PARAMETER = "sw1"
+        const val SW2_PARAMETER = "sw2"
+        const val STATUS_WORD_FORMAT = "%02X"
+        const val STATUS_WORD_MASK = 0xFF
 
         const val UNSUPPORTED_CARD_ERROR_CODE = "cardUnsupportedByNfc"
         const val CARD_DECLINED_ERROR_CODE = "cardDeclinedByNfc"
