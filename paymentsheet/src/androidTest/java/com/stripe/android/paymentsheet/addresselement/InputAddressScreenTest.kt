@@ -53,6 +53,7 @@ class InputAddressScreenTest {
                     primaryButtonText = "Save Address",
                     title = "Address",
                     onPrimaryButtonClick = primaryButtonCallback,
+                    onDisabledButtonClick = {},
                     onCloseClick = onCloseCallback,
                     topContent = {},
                     formContent = {},
