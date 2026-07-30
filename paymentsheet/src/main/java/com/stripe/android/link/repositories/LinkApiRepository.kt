@@ -507,12 +507,12 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
-        stripeIntent: StripeIntent,
+        intentToken: String?,
         linkMode: LinkMode?,
     ): Result<LinkAccountSession> {
         return consumersApiService.createLinkAccountSession(
             consumerSessionClientSecret = consumerSessionClientSecret,
-            intentToken = stripeIntent.clientSecret,
+            intentToken = intentToken,
             linkMode = linkMode,
             requestSurface = requestSurface.value,
             requestOptions = apiRequestOptions,
