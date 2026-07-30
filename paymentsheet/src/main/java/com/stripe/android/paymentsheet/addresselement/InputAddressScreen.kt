@@ -114,7 +114,7 @@ internal fun InputAddressScreen(
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
     InputAddressScreen(
-        primaryButtonEnabled = completeValues != null && formEnabled,
+        primaryButtonEnabled = completeValues != null,
         primaryButtonText = buttonText,
         title = titleText,
         onPrimaryButtonClick = {

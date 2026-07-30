@@ -27,6 +27,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -943,6 +944,48 @@ class InputAddressViewModelTest {
         addressFields.forEach {
             it.setRawValue(values)
         }
+    }
+
+    @Test
+    fun `clickPrimaryButton with null triggers validation on form elements`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.clickPrimaryButton(
+            completedFormValues = null,
+            checkboxChecked = false
+        )
+
+        val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
+        val autocompleteElement = sectionElement.fields[0] as AutocompleteAddressElement
+        val addressController = autocompleteElement.sectionFieldErrorController()
+            .addressElementFlow
+            .value
+            .addressController
+            .value
+        val fields = addressController.fieldsFlowable.value
+        fields.forEach { field ->
+            field.getFormFieldValueFlow().value.forEach { (_, entry) ->
+                if (!entry.isComplete) {
+                    assertThat(entry.isComplete).isFalse()
+                }
+            }
+        }
+
+        assertThat(viewModel.formEnabled.value).isTrue()
+        verify(navigator, never()).dismiss(any())
+    }
+
+    @Test
+    fun `clickPrimaryButton with null does not disable form or dismiss`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.clickPrimaryButton(
+            completedFormValues = null,
+            checkboxChecked = true
+        )
+
+        assertThat(viewModel.formEnabled.value).isTrue()
+        verify(navigator, never()).dismiss(any())
     }
 
     @Test
