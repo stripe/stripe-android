@@ -6,12 +6,15 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
@@ -27,6 +30,7 @@ import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -40,6 +44,20 @@ class SavedPaymentMethodMutatorTest {
 
     @get:Rule
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @Test
+    fun `paymentOptionsItems uses the Link account brand`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkBrand = LinkBrand.Link,
+        ),
+        isLinkEnabled = stateFlowOf(true),
+        linkAccount = stateFlowOf(
+            LinkAccount(TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink))
+        ),
+    ) {
+        assertThat(savedPaymentMethodMutator.paymentOptionsItems.value)
+            .contains(PaymentOptionsItem.Link(LinkBrand.Onelink))
+    }
 
     @Test
     fun `canEdit is correct when no payment methods`() = runScenario {
@@ -956,6 +974,8 @@ class SavedPaymentMethodMutatorTest {
         paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
         ),
+        isLinkEnabled: StateFlow<Boolean?> = stateFlowOf(false),
+        linkAccount: StateFlow<LinkAccount?> = stateFlowOf(null),
         customerStateHolder: CustomerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = selection,
@@ -1003,9 +1023,9 @@ class SavedPaymentMethodMutatorTest {
                         )
                     )
                 },
-                isLinkEnabled = stateFlowOf(false),
+                isLinkEnabled = isLinkEnabled,
                 isNotPaymentFlow = true,
-                accountLinkBrandFlow = stateFlowOf(null),
+                linkAccount = linkAccount,
             )
             Scenario(
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
