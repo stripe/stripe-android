@@ -26,6 +26,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.model.AccountStatus
@@ -81,6 +82,8 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBA
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -3505,6 +3508,9 @@ internal class PaymentSheetViewModelTest {
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 placesClient = null,
+                linkAccountHolder = LinkAccountHolder(thisSavedStateHandle),
+                stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )
         }
         return viewModelStoreRule.track(viewModel)

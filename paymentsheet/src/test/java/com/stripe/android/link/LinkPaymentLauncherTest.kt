@@ -93,6 +93,7 @@ internal class LinkPaymentLauncherTest {
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.ENABLED,
                 launchMode = LinkLaunchMode.Full,
+                statusBarColor = 0x00FF00,
             )
 
             val launchCall = awaitLaunchCall()
@@ -105,6 +106,7 @@ internal class LinkPaymentLauncherTest {
                         linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                         launchMode = LinkLaunchMode.Full,
+                        statusBarColor = 0x00FF00,
                     )
                 )
 
@@ -128,6 +130,7 @@ internal class LinkPaymentLauncherTest {
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.DISABLED,
                 launchMode = LinkLaunchMode.Full,
+                statusBarColor = null,
             )
 
             val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
@@ -163,6 +166,7 @@ internal class LinkPaymentLauncherTest {
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.ENABLED,
                 launchMode = LinkLaunchMode.Full,
+                statusBarColor = null,
             )
 
             val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
@@ -274,6 +278,7 @@ internal class LinkPaymentLauncherTest {
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.ENABLED,
                 launchMode = LinkLaunchMode.Full,
+                statusBarColor = null,
             )
 
             verifyActivityResultCallback(
@@ -306,6 +311,7 @@ internal class LinkPaymentLauncherTest {
                     linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     linkExpressMode = LinkExpressMode.ENABLED,
                     launchMode = LinkLaunchMode.Full,
+                    statusBarColor = null,
                 )
 
                 val registerCall = awaitRegisterCall()

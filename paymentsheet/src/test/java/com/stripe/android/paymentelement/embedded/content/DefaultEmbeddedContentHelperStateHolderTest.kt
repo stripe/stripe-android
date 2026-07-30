@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -17,16 +18,42 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
             assertThat(awaitItem()).isNull()
             val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
             val appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default)
+            val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
             stateHolder.dataLoaded(
                 paymentMethodMetadata = paymentMethodMetadata,
                 appearance = appearance,
                 embeddedViewDisplaysMandateText = true,
+                configuration = configuration,
             )
             val state = awaitItem()
             assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
             assertThat(state?.appearance).isEqualTo(appearance)
             assertThat(state?.embeddedViewDisplaysMandateText).isTrue()
+            assertThat(state?.configuration).isEqualTo(configuration)
         }
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `dataLoaded with identical args does not re-emit`() = testScenario {
+        val args = EmbeddedContentHelperStateFactory.create()
+        stateHolder.state.test {
+            assertThat(awaitItem()).isNull()
+            repeat(2) {
+                stateHolder.dataLoaded(
+                    paymentMethodMetadata = args.paymentMethodMetadata,
+                    appearance = args.appearance,
+                    embeddedViewDisplaysMandateText = args.embeddedViewDisplaysMandateText,
+                    configuration = args.configuration,
+                )
+            }
+            assertThat(awaitItem()).isEqualTo(args)
+            // A broken State.equals would cause the SavedStateHandle-backed StateFlow to re-emit
+            // identical data, rebuilding the embedded content and recomposing the UI unnecessarily.
+            expectNoEvents()
+        }
+        // onShowNewPaymentOptions is reported unconditionally per dataLoaded call, so twice here.
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -36,6 +63,7 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
             embeddedViewDisplaysMandateText = true,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
         assertThat(stateHolder.state.value).isNotNull()
@@ -50,8 +78,7 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
         setup = {
             set(
                 EmbeddedContentHelperStateHolder.STATE_KEY_EMBEDDED_CONTENT,
-                EmbeddedContentHelperStateHolder.State(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                EmbeddedContentHelperStateFactory.create(
                     appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
                     embeddedViewDisplaysMandateText = false,
                 )

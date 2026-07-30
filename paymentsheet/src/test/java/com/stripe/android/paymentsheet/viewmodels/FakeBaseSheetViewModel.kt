@@ -8,11 +8,14 @@ import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -56,6 +59,9 @@ internal class FakeBaseSheetViewModel private constructor(
     customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
     customViewModelScope = customViewModelScope,
     placesClient = null,
+    linkAccountHolder = LinkAccountHolder(savedStateHandle),
+    stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+    addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
 ) {
     companion object {
         fun create(

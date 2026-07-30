@@ -217,7 +217,7 @@ internal interface LinkRepository {
 
     suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
-        stripeIntent: StripeIntent,
+        intentToken: String?,
         linkMode: LinkMode?,
     ): Result<LinkAccountSession>
 

@@ -149,7 +149,8 @@ internal class WebIntentNextActionHandler @Inject constructor(
 
         return WebAuthParams(
             authUrl = webViewUrl.toString(),
-            returnUrl = returnUrl,
+            returnUrl = defaultReturnUrl.value,
+            shouldCancelIntentOnUserNavigation = false,
         )
     }
 

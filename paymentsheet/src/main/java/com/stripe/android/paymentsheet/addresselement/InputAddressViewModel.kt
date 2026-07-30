@@ -8,6 +8,7 @@ import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -19,12 +20,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
     private val eventReporter: AddressLauncherEventReporter,
+    @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
@@ -71,7 +74,19 @@ internal class InputAddressViewModel @Inject constructor(
 
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
-        autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
+        // If merchant is opting into Stripe-hosted autocomplete and the caller did not
+        // override the launcher default countries, use the extended Stripe-hosted list.
+        // Otherwise, honor the caller-provided set (or empty set if explicitly set).
+        autocompleteCountries = run {
+            val provided = args.config?.autocompleteCountries
+            if (args.config?.useStripeHostedAutocomplete == true &&
+                provided == AUTOCOMPLETE_DEFAULT_COUNTRIES
+            ) {
+                AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES
+            } else {
+                provided ?: emptySet()
+            }
+        },
         isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
         shouldUseStripeHostedAutocomplete = args.config?.useStripeHostedAutocomplete == true,
     )
@@ -247,7 +262,7 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     override fun onEnterManuallyFromInline() {
-        onEnterManually()
+        inlineAutocompleteController?.expandFormFromInline() ?: onEnterManually()
     }
 
     private fun canUseShippingSameAsBilling(): Boolean {

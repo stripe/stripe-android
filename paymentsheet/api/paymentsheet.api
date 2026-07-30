@@ -231,6 +231,43 @@ public abstract interface class com/stripe/android/customersheet/SetupIntentClie
 	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/stripe/android/link/LinkAppearance {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun darkColors (Lcom/stripe/android/link/LinkAppearance$Colors;)Lcom/stripe/android/link/LinkAppearance;
+	public final fun lightColors (Lcom/stripe/android/link/LinkAppearance$Colors;)Lcom/stripe/android/link/LinkAppearance;
+	public final fun primaryButton (Lcom/stripe/android/link/LinkAppearance$PrimaryButton;)Lcom/stripe/android/link/LinkAppearance;
+	public final fun reduceLinkBranding (Z)Lcom/stripe/android/link/LinkAppearance;
+	public final fun style (Lcom/stripe/android/link/LinkAppearance$Style;)Lcom/stripe/android/link/LinkAppearance;
+}
+
+public final class com/stripe/android/link/LinkAppearance$Colors {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun borderSelected-8_81llA (J)Lcom/stripe/android/link/LinkAppearance$Colors;
+	public final fun contentOnPrimary-8_81llA (J)Lcom/stripe/android/link/LinkAppearance$Colors;
+	public final fun primary-8_81llA (J)Lcom/stripe/android/link/LinkAppearance$Colors;
+}
+
+public final class com/stripe/android/link/LinkAppearance$PrimaryButton {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun cornerRadiusDp (Ljava/lang/Float;)Lcom/stripe/android/link/LinkAppearance$PrimaryButton;
+	public final fun heightDp (Ljava/lang/Float;)Lcom/stripe/android/link/LinkAppearance$PrimaryButton;
+}
+
+public final class com/stripe/android/link/LinkAppearance$Style : java/lang/Enum, android/os/Parcelable {
+	public static final field ALWAYS_DARK Lcom/stripe/android/link/LinkAppearance$Style;
+	public static final field ALWAYS_LIGHT Lcom/stripe/android/link/LinkAppearance$Style;
+	public static final field AUTOMATIC Lcom/stripe/android/link/LinkAppearance$Style;
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final fun describeContents ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/link/LinkAppearance$Style;
+	public static fun values ()[Lcom/stripe/android/link/LinkAppearance$Style;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/link/LinkController {
 	public static final field $stable I
 	public final fun configure-gIAlu-s (Lcom/stripe/android/link/LinkController$Configuration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -249,6 +286,8 @@ public final class com/stripe/android/link/LinkController$Configuration {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun allowLogout (Z)Lcom/stripe/android/link/LinkController$Configuration;
+	public final fun appearance (Lcom/stripe/android/link/LinkAppearance;)Lcom/stripe/android/link/LinkController$Configuration;
+	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun email (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun paymentMethodTypes (Ljava/util/List;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun phoneNumber (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
@@ -626,7 +665,6 @@ public final class com/stripe/android/paymentelement/CustomPaymentMethodResultHa
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement {
 	public static final field $stable I
 	public final fun Content (Landroidx/compose/runtime/Composer;I)V
-	public final fun WalletButtons (Landroidx/compose/runtime/Composer;I)V
 	public final fun clearPaymentOption ()V
 	public final fun configure (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun confirm ()V

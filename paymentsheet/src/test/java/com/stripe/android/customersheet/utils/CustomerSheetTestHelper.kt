@@ -127,6 +127,7 @@ internal interface CustomerSheetTestHelper {
             savedSelectionDataSourceProvider = CompletableSingle(savedSelectionDataSource),
             configuration = configuration,
             integrationType = integrationType,
+            statusBarColor = null,
             paymentConfiguration = PaymentConfiguration(if (isLiveMode) "pk_live" else "pk_test"),
             logger = Logger.noop(),
             productUsage = emptySet(),

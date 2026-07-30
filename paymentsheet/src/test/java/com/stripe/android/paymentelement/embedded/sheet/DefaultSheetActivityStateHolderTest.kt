@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.form.confirmationStateComplete
 import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirming
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -108,7 +109,9 @@ class DefaultSheetActivityStateHolderTest {
     @Test
     fun `PaymentOptions mode always uses continue label regardless of formSheetAction`() {
         testScenario(
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         ) {
             stateHolder.state.test {
                 val state = awaitItem()
@@ -345,11 +348,15 @@ class DefaultSheetActivityStateHolderTest {
 
                 assertThat(awaitItem()).isEqualTo(
                     EmbeddedActivityResult.Complete(
+                        previousNewSelections = selectionHolder.previousNewSelections,
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                        launchMode = EmbeddedLaunchMode.Form(
+                            selectedPaymentMethodCode = "card",
+                            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                        ),
                     )
                 )
             }
@@ -369,11 +376,15 @@ class DefaultSheetActivityStateHolderTest {
 
                 assertThat(awaitItem()).isEqualTo(
                     EmbeddedActivityResult.Complete(
+                        previousNewSelections = selectionHolder.previousNewSelections,
                         selection = null,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                        launchMode = EmbeddedLaunchMode.Form(
+                            selectedPaymentMethodCode = "card",
+                            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                        ),
                     )
                 )
             }
@@ -399,11 +410,15 @@ class DefaultSheetActivityStateHolderTest {
 
                 assertThat(awaitItem()).isEqualTo(
                     EmbeddedActivityResult.Complete(
+                        previousNewSelections = selectionHolder.previousNewSelections,
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                        launchMode = EmbeddedLaunchMode.Form(
+                            selectedPaymentMethodCode = "card",
+                            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                        ),
                     )
                 )
             }
@@ -450,7 +465,10 @@ class DefaultSheetActivityStateHolderTest {
         config: EmbeddedPaymentElement.Configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
         tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
         customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.Form(
+            selectedPaymentMethodCode = "card",
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)

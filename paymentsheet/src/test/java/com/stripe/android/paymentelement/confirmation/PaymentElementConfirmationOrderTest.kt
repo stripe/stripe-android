@@ -33,7 +33,6 @@ class PaymentElementConfirmationOrderTest {
                 .create(
                     application = application,
                     savedStateHandle = SavedStateHandle(),
-                    statusBarColor = null,
                     allowsManualConfirmation = false,
                 ).viewModel
 

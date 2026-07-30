@@ -101,6 +101,12 @@ internal interface PaymentElementLoader {
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
+
+        data class StandaloneLink(
+            val configuration: LinkController.Configuration.State
+        ) : Configuration {
+            override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
+        }
     }
 
     sealed class InitializationMode : Parcelable {
@@ -213,6 +219,19 @@ internal interface PaymentElementLoader {
         }
 
         @Parcelize
+        data class StandaloneLink(
+            val paymentMethodTypes: List<String>? = null,
+        ) : InitializationMode() {
+            override fun validate() {
+                // Nothing to validate.
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.StandaloneLink
+            }
+        }
+
+        @Parcelize
         data class CheckoutSession(
             val instancesKey: String,
             val checkoutSessionResponse: CheckoutSessionResponse,
@@ -307,6 +326,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             isLiveMode = paymentConfiguration.get().isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
@@ -616,6 +636,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): PaymentMethodLayout {
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.StandaloneLink,
             is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
             is PaymentElementLoader.Configuration.PaymentSheet ->
                 if (

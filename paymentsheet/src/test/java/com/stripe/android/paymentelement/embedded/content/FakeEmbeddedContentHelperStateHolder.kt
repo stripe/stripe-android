@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,12 +22,14 @@ internal class FakeEmbeddedContentHelperStateHolder(
         paymentMethodMetadata: PaymentMethodMetadata,
         appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
+        configuration: EmbeddedPaymentElement.Configuration,
     ) {
         _dataLoadedTurbine.add(
             EmbeddedContentHelperStateHolder.State(
                 paymentMethodMetadata = paymentMethodMetadata,
                 appearance = appearance,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                configuration = configuration,
             )
         )
     }

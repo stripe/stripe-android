@@ -33,6 +33,7 @@ internal class TapToAddViewModel @Inject constructor(
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 eventMode = args.eventMode,
                 productUsage = args.productUsage,
+                statusBarColor = args.statusBarColor,
             )
 
             return component.viewModel as T

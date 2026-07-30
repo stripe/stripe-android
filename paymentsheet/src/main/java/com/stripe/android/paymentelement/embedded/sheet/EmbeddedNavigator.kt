@@ -51,10 +51,20 @@ internal class EmbeddedNavigator private constructor(
         initialScreen: Screen,
         eventReporter: EventReporter,
     ) : this(
+        coroutineScope = coroutineScope,
+        initialBackStack = listOf(initialScreen),
+        eventReporter = eventReporter,
+    )
+
+    constructor(
+        coroutineScope: CoroutineScope,
+        initialBackStack: List<Screen>,
+        eventReporter: EventReporter,
+    ) : this(
         eventReporter = eventReporter,
         navigationHandler = NavigationHandler(
             coroutineScope = coroutineScope,
-            initialScreen = initialScreen,
+            initialBackStack = initialBackStack,
             shouldRemoveInitialScreenOnTransition = false,
             poppedScreenHandler = {},
         )
@@ -213,6 +223,7 @@ internal class EmbeddedNavigator private constructor(
                         sheetActivityStateHolder.setResult(
                             EmbeddedActivityResult.Complete(
                                 selection = null,
+                                previousNewSelections = embeddedSelectionHolder.previousNewSelections,
                                 hasBeenConfirmed = true,
                                 customerState = customerStateHolder.customer.value,
                                 shouldInvokeSelectionCallback = false,

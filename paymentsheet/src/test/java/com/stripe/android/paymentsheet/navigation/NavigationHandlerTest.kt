@@ -15,6 +15,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import java.io.Closeable
+import kotlin.test.assertFailsWith
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class NavigationHandlerTest {
@@ -28,6 +29,61 @@ internal class NavigationHandlerTest {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             assertThat(navigationHandler.canGoBack).isFalse()
         }
+    }
+
+    @Test
+    fun `currentScreen is initialized to last screen in initial back stack`() = runTest {
+        val screenOne = mock<PaymentSheetScreen>()
+        val screenTwo = mock<PaymentSheetScreen>()
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = this,
+            initialBackStack = listOf(screenOne, screenTwo),
+            shouldRemoveInitialScreenOnTransition = true,
+        ) {}
+
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(screenTwo)
+            assertThat(navigationHandler.canGoBack).isTrue()
+        }
+    }
+
+    @Test
+    fun `pop from initial back stack returns to previous screen and closes popped screen`() = runTest {
+        val screenOne = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+        val screenTwo = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+        var poppedScreen: PaymentSheetScreen? = null
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = this,
+            initialBackStack = listOf(screenOne, screenTwo),
+            shouldRemoveInitialScreenOnTransition = true,
+        ) {
+            poppedScreen = it
+        }
+
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(screenTwo)
+
+            navigationHandler.pop()
+
+            assertThat(awaitItem()).isEqualTo(screenOne)
+            assertThat(navigationHandler.canGoBack).isFalse()
+            assertThat(poppedScreen).isEqualTo(screenTwo)
+            verify(screenTwo as Closeable).close()
+            verify(screenOne as Closeable, never()).close()
+        }
+    }
+
+    @Test
+    fun `initial back stack cannot be empty`() = runTest {
+        val error = assertFailsWith<IllegalArgumentException> {
+            NavigationHandler<PaymentSheetScreen>(
+                coroutineScope = this,
+                initialBackStack = emptyList(),
+                shouldRemoveInitialScreenOnTransition = true,
+            ) {}
+        }
+
+        assertThat(error).hasMessageThat().isEqualTo("Initial back stack cannot be empty.")
     }
 
     @Test

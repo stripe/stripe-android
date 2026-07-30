@@ -21,12 +21,15 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
+import javax.inject.Named
 
 internal class DefaultLinkConfirmationHandler @Inject constructor(
     private val configuration: LinkConfiguration,
     private val paymentMethodMetadata: PaymentMethodMetadata,
+    private val statusBarColor: Int?,
     private val logger: Logger,
     private val confirmationHandler: ConfirmationHandler,
 ) : LinkConfirmationHandler {
@@ -182,6 +185,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,
+            statusBarColor = statusBarColor,
         )
     }
 
@@ -216,12 +220,14 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 newPMTransformedForConfirmation = newPMTransformedForConfirmation
             ),
             paymentMethodMetadata = paymentMethodMetadata,
+            statusBarColor = statusBarColor,
         )
     }
 
     class Factory @Inject constructor(
         private val configuration: LinkConfiguration,
         private val paymentMethodMetadata: PaymentMethodMetadata,
+        @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
         private val logger: Logger,
     ) : LinkConfirmationHandler.Factory {
         override fun create(confirmationHandler: ConfirmationHandler): LinkConfirmationHandler {
@@ -229,7 +235,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 confirmationHandler = confirmationHandler,
                 logger = logger,
                 configuration = configuration,
-                paymentMethodMetadata = paymentMethodMetadata
+                paymentMethodMetadata = paymentMethodMetadata,
+                statusBarColor = statusBarColor,
             )
         }
     }

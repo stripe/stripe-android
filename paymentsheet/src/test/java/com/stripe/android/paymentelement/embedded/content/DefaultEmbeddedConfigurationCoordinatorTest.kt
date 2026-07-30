@@ -220,6 +220,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             },
             stateHelper = stateHelper,
             viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
+            statusBarColor = null,
         )
 
         Scenario(

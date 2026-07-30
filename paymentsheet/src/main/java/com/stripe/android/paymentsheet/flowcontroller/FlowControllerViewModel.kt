@@ -22,14 +22,13 @@ internal class FlowControllerViewModel(
     application: Application,
     val handle: SavedStateHandle,
     paymentElementCallbackIdentifier: String,
-    @ColorInt statusBarColor: Int?,
+    @ColorInt val statusBarColor: Int?,
 ) : AndroidViewModel(application) {
 
     val flowControllerStateComponent: FlowControllerStateComponent =
         DaggerFlowControllerStateComponent
             .factory()
             .create(
-                statusBarColor = statusBarColor,
                 application = application,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 flowControllerViewModel = this,

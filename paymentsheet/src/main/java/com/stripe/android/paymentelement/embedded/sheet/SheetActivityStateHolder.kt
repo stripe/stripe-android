@@ -77,7 +77,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             isEnabled = false,
             processingState = PrimaryButtonProcessingState.Idle(null),
             isProcessing = false,
-            shouldDisplayLockIcon = launchMode != EmbeddedLaunchMode.PaymentOptions &&
+            shouldDisplayLockIcon = launchMode !is EmbeddedLaunchMode.PaymentOptions &&
                 configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
             savedPaymentSelectionToConfirm = null,
         )
@@ -102,6 +102,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                     is TapToAddNextStep.ShowSavedPaymentMethods -> {
                         EmbeddedActivityResult.Complete(
                             selection = result.paymentSelection,
+                            previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
@@ -111,6 +112,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                     TapToAddNextStep.Complete -> {
                         EmbeddedActivityResult.Complete(
                             selection = null,
+                            previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = true,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
@@ -121,6 +123,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         EmbeddedActivityResult.Complete(
                             selection = result.paymentSelection,
+                            previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
@@ -250,7 +253,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
         val amount = amount(stripeIntent.amount, stripeIntent.currency)
         val label = configuration.primaryButtonLabel
         val isForPaymentIntent = stripeIntent is PaymentIntent
-        if (launchMode == EmbeddedLaunchMode.PaymentOptions) {
+        if (launchMode is EmbeddedLaunchMode.PaymentOptions) {
             return continueButtonLabel(label)
         }
         return when (configuration.formSheetAction) {

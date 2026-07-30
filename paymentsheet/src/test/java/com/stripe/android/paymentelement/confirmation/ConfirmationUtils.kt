@@ -198,7 +198,7 @@ internal fun createTestConfirmationHandlerFactory(
             confirmationDefinitions = listOf(
                 IntentConfirmationDefinition(
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                    paymentLauncherFactory = { launcher ->
+                    paymentLauncherFactory = { launcher, _ ->
                         stripePaymentLauncherAssistedFactory.create(
                             publishableKey = { paymentConfiguration.publishableKey },
                             stripeAccountId = { paymentConfiguration.stripeAccountId },

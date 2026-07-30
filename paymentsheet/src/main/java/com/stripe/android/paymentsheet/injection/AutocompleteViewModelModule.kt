@@ -5,6 +5,8 @@ import android.content.Context
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -68,5 +70,11 @@ internal interface AutocompleteViewModelModule {
         fun provideEventReporter(
             defaultAddressLauncherEventReporter: DefaultAddressLauncherEventReporter
         ): AddressLauncherEventReporter = defaultAddressLauncherEventReporter
+
+        @Provides
+        @Singleton
+        fun provideDurationProvider(): DurationProvider {
+            return DefaultDurationProvider.instance
+        }
     }
 }

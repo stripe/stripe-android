@@ -183,11 +183,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
     ): EmbeddedPaymentMethodVerticalLayoutInteractorFactory
 
     @Binds
-    fun bindsEmbeddedWalletButtonsInteractorFactory(
-        factory: DefaultEmbeddedWalletButtonsInteractorFactory
-    ): EmbeddedWalletButtonsInteractorFactory
-
-    @Binds
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
         handler: DefaultEmbeddedRowSelectionImmediateActionHandler
     ): EmbeddedRowSelectionImmediateActionHandler
@@ -251,6 +246,13 @@ internal interface EmbeddedPaymentElementViewModelModule {
             return confirmationStateHolder.stateFlow.mapAsStateFlow {
                 it?.paymentMethodMetadata
             }
+        }
+
+        @Provides
+        fun provideEmbeddedContentState(
+            stateHolder: EmbeddedContentHelperStateHolder,
+        ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
+            return stateHolder.state
         }
 
         @Provides

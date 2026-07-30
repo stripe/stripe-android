@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -24,17 +25,15 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -65,10 +64,11 @@ internal class EmbeddedContentUiTest {
         runScenario(internalRowSelectionCallback = {}) {
             embeddedContentHelper.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
-                stateHolder.dataLoaded(
-                    PaymentMethodMetadataFactory.create(),
-                    Embedded(Embedded.RowStyle.FlatWithRadio.default),
+                state.value = EmbeddedContentHelperStateHolder.State(
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                    appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
+                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 )
                 val content = awaitItem()
                 assertThat(content).isNotNull()
@@ -88,10 +88,11 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
+            state.value = EmbeddedContentHelperStateHolder.State(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
@@ -111,10 +112,11 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
+            state.value = EmbeddedContentHelperStateHolder.State(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                appearance = Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 embeddedViewDisplaysMandateText = true,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
@@ -132,7 +134,7 @@ internal class EmbeddedContentUiTest {
 
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
-        val stateHolder: EmbeddedContentHelperStateHolder,
+        val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -167,18 +169,10 @@ internal class EmbeddedContentUiTest {
             ),
             paymentMethodMetadataFlow = stateFlowOf(null),
         )
-        val confirmationStateHolder = EmbeddedConfirmationStateHolder(
-            savedStateHandle = savedStateHandle,
-            selectionHolder = selectionHolder,
-            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
-        )
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        val sheetLauncherHolder = EmbeddedSheetLauncherHolder()
+        val sheetStateHolder = SheetStateHolder(savedStateHandle)
 
-        val stateHolder = DefaultEmbeddedContentHelperStateHolder(
-            savedStateHandle = savedStateHandle,
-            eventReporter = eventReporter,
-        )
+        val state = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(null)
         val savedPaymentMethodMutatorFactory = EmbeddedContentSavedPaymentMethodMutatorFactory(
             eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
@@ -186,55 +180,38 @@ internal class EmbeddedContentUiTest {
             savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
-            confirmationStateHolder = confirmationStateHolder,
             linkAccountHolder = linkAccountHolder,
             coroutineScope = viewModelScope,
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
         )
         val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
             eventReporter = eventReporter,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,
-            confirmationStateHolder = confirmationStateHolder,
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             rowSelectionImmediateActionHandler = immediateActionHandler,
             coroutineScope = viewModelScope,
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
-        )
-        val walletButtonsInteractorFactory = DefaultEmbeddedWalletButtonsInteractorFactory(
-            embeddedLinkHelper = object : EmbeddedLinkHelper {
-                override val linkEmail: StateFlow<String?> = stateFlowOf(null)
-            },
-            confirmationStateHolder = confirmationStateHolder,
-            confirmationHandler = confirmationHandler,
-            errorReporter = errorReporter,
-            eventReporter = eventReporter,
-            linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
-            linkAccountHolder = linkAccountHolder,
-            analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-            coroutineScope = viewModelScope,
         )
 
         val embeddedContentHelper =
             DefaultEmbeddedContentHelper(
                 coroutineScope = viewModelScope,
-                stateHolder = stateHolder,
+                state = state,
                 verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
-                walletButtonsInteractorFactory = walletButtonsInteractorFactory,
-                sheetLauncherHolder = sheetLauncherHolder,
+                sheetStateHolder = sheetStateHolder,
                 embeddedWalletsHelper = { stateFlowOf(null) },
                 internalRowSelectionCallback = { internalRowSelectionCallback },
                 customerStateHolder = customerStateHolder,
                 selectionHolder = selectionHolder,
-                confirmationStateHolder = confirmationStateHolder,
                 errorReporter = errorReporter,
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
-            stateHolder = stateHolder,
+            state = state,
         ).block()
     }
 }

@@ -283,6 +283,7 @@ internal class GooglePayConfirmationActivityTest {
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
+            statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),

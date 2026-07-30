@@ -55,7 +55,8 @@ internal fun DefaultLinkTheme(
                 textBrand = overrides.primary,
                 onButtonBrand = overrides.contentOnPrimary,
                 buttonBrand = overrides.primary,
-                borderSelected = overrides.borderSelected
+                borderSelected = overrides.borderSelected,
+                iconBrand = overrides.primary,
             )
         }
         ?: defaultColors

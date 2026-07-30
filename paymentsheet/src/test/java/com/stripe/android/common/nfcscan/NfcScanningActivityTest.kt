@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Looper
+import android.os.VibrationEffect
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -12,14 +13,20 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.nfcscan.NfcScanningActivityTestHelpers.configureNfc
+import com.stripe.android.common.nfcscan.NfcScanningActivityTestHelpers.getShadowVibrator
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.uicore.utils.AnimationConstants
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowActivity
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -87,11 +94,13 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `successful card scan returns complete result`() = test {
+    fun `successful card scan perform haptic feedback & returns complete result`() = test {
         NfcScanningActivityTestHelpers.completeSuccessfulScan(
             scenario = this,
             responses = NfcScanningActivityTestFixtures.successResponses(),
         )
+
+        assertThat(context.getShadowVibrator().effectId).isEqualTo(VibrationEffect.EFFECT_CLICK)
 
         waitForActivityFinish()
 
@@ -105,12 +114,14 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `declined card shows error and keeps activity open`() = test {
+    fun `declined card shows error, performs haptic feedback, and keeps activity open`() = test {
         NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
             scenario = this,
             responses = NfcScanningActivityTestFixtures.declinedCardResponses(),
             errorText = context.getString(R.string.stripe_nfc_scan_error_declined_card),
         )
+
+        assertThat(context.getShadowVibrator().effectId).isEqualTo(VibrationEffect.EFFECT_HEAVY_CLICK)
 
         assertThat(isActivityDestroyed()).isFalse()
     }
@@ -135,6 +146,42 @@ internal class NfcScanningActivityTest {
         )
 
         assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
+    fun `inactivity timeout returns canceled result`() = test {
+        NfcScanningActivityTestHelpers.waitForInitialScanningUi(this)
+
+        NfcScanningActivityTestHelpers.advanceInactivityTimeout(this)
+
+        waitForActivityFinish()
+
+        assertThat(getResult()).isEqualTo(NfcScanningContract.Result.Canceled)
+    }
+
+    @Test
+    fun `finish applies fade out transition`() {
+        configureNfc(context)
+
+        val intent = NfcScanningContract.createIntent(
+            context = context,
+            input = NfcScanningContract.Args(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            ),
+        )
+        val controller = Robolectric.buildActivity(NfcScanningActivity::class.java, intent)
+            .create()
+            .start()
+            .resume()
+
+        val activity = controller.get()
+        activity.finish()
+
+        val shadowActivity = shadowOf(activity) as ShadowActivity
+        assertThat(shadowActivity.pendingTransitionEnterAnimationResourceId)
+            .isEqualTo(AnimationConstants.FADE_IN)
+        assertThat(shadowActivity.pendingTransitionExitAnimationResourceId)
+            .isEqualTo(AnimationConstants.FADE_OUT)
     }
 
     private fun test(

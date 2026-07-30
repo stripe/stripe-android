@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
@@ -83,11 +84,15 @@ internal class DefaultSheetActivityConfirmationHelperTest {
 
         assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
             EmbeddedActivityResult.Complete(
+                previousNewSelections = selectionHolder.previousNewSelections,
                 selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
                 hasBeenConfirmed = false,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
-                launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                launchMode = EmbeddedLaunchMode.Form(
+                    selectedPaymentMethodCode = "card",
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                ),
             )
         )
 
@@ -124,7 +129,11 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             eventReporter = eventReporter,
             customerStateHolder = customerStateHolder,
             coroutineScope = backgroundScope,
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
+            statusBarColor = null,
         )
 
         Scenario(

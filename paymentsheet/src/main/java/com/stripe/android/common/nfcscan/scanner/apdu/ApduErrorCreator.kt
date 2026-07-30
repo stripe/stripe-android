@@ -46,14 +46,14 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
     }
 
     private fun isDeclined(error: ApduResponseError.Command): Boolean {
-        return error.sw1 == CONDITIONS_OF_USE_NOT_SATISFIED_SW1 &&
+        return error.sw1 == COMMAND_NOT_ALLOWED_SW1 &&
             error.sw2 == CONDITIONS_OF_USE_NOT_SATISFIED_SW2
     }
 
     private fun isUnsupported(error: ApduResponseError.Command): Boolean {
         return when (error.apduCommand) {
             is SelectPpseCommand,
-            is SelectApplicationCommand -> error.sw1 == FILE_NOT_FOUND_SW1 && error.sw2 == FILE_NOT_FOUND_SW2
+            is SelectApplicationCommand -> error.sw1 == PARAMETER_ERROR_SW1 && error.sw2 == FILE_NOT_FOUND_SW2
             is ReadRecordCommand -> false
             else -> false
         }
@@ -92,9 +92,9 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
         const val CARD_DECLINED_ERROR_CODE = "cardDeclinedByNfc"
         const val GENERAL_READ_ERROR_CODE = "nfcCardReadFailed"
 
-        const val FILE_NOT_FOUND_SW1 = 0x6A.toByte()
+        const val PARAMETER_ERROR_SW1 = 0x6A.toByte()
         const val FILE_NOT_FOUND_SW2 = 0x82.toByte()
-        const val CONDITIONS_OF_USE_NOT_SATISFIED_SW1 = 0x69.toByte()
+        const val COMMAND_NOT_ALLOWED_SW1 = 0x69.toByte()
         const val CONDITIONS_OF_USE_NOT_SATISFIED_SW2 = 0x85.toByte()
     }
 }

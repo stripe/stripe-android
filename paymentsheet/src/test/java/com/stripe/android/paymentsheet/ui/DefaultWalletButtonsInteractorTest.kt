@@ -936,6 +936,7 @@ class DefaultWalletButtonsInteractorTest {
             ),
             appearance = appearance,
             paymentSelection = null,
+            statusBarColor = null,
         )
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation
 
+import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -25,33 +26,29 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakePaymentLauncher
+import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
 
 class IntentConfirmationDefinitionTest {
     @Test
-    fun `'createLauncher' should call factory when creating launcher`() {
-        val launcher = FakePaymentLauncher()
+    fun `'createLauncher' should register and return the activity result launcher`() = runTest {
+        val definition = createIntentConfirmationDefinition()
 
-        val definition = createIntentConfirmationDefinition(
-            paymentLauncher = launcher,
-        )
+        DummyActivityResultCaller.test {
+            val createdLauncher = definition.createLauncher(
+                activityResultCaller = activityResultCaller,
+                onResult = {},
+            )
 
-        val createdLauncher = definition.createLauncher(
-            activityResultCaller = mock {
-                on {
-                    registerForActivityResult<PaymentLauncherContract.Args, InternalPaymentResult>(any(), any())
-                } doReturn mock()
-            },
-            onResult = {}
-        )
+            awaitRegisterCall()
+            val registeredLauncher = awaitNextRegisteredLauncher()
 
-        assertThat(createdLauncher).isEqualTo(launcher)
+            assertThat(createdLauncher).isEqualTo(registeredLauncher)
+        }
     }
 
     @Test
@@ -263,7 +260,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
@@ -287,7 +284,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
@@ -315,7 +312,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
@@ -339,7 +336,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
@@ -364,7 +361,7 @@ class IntentConfirmationDefinitionTest {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         definition.launch(
-            launcher = launcher,
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
@@ -389,7 +386,7 @@ class IntentConfirmationDefinitionTest {
         val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
 
         definition.launch(
-            launcher = launcher,
+            launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
@@ -401,6 +398,30 @@ class IntentConfirmationDefinitionTest {
         assertThat(launcher.calls.awaitItem()).isEqualTo(
             FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(setupIntent)
         )
+    }
+
+    @Test
+    fun `On 'launch', should build payment launcher using 'statusBarColor' from confirmation args`() {
+        var capturedStatusBarColor: Int? = null
+
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncherFactory = { _, statusBarColor ->
+                capturedStatusBarColor = statusBarColor
+                FakePaymentLauncher()
+            },
+        )
+
+        definition.launch(
+            launcher = FakeActivityResultLauncher(),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                deferredIntentConfirmationType = null,
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(statusBarColor = 0x00FF00),
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        assertThat(capturedStatusBarColor).isEqualTo(0x00FF00)
     }
 
     @Test
@@ -493,11 +514,13 @@ class IntentConfirmationDefinitionTest {
                     return FakeIntentConfirmationInterceptor()
                 }
             },
-        paymentLauncher: PaymentLauncher = FakePaymentLauncher()
+        paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
+        paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?) -> PaymentLauncher =
+            { _, _ -> paymentLauncher },
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-            paymentLauncherFactory = { paymentLauncher }
+            paymentLauncherFactory = paymentLauncherFactory,
         )
     }
 

@@ -38,7 +38,7 @@ internal class DefaultFormHelper(
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val newPaymentSelectionProvider: () -> NewPaymentOptionSelection?,
+    private val newPaymentSelectionProvider: (PaymentMethodCode) -> NewPaymentOptionSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     private val setAsDefaultMatchesSaveForFutureUse: Boolean,
@@ -227,7 +227,7 @@ internal class DefaultFormHelper(
     }
 
     private fun createArgumentsFactory(code: String): UiDefinitionFactory.Arguments.Factory {
-        val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
+        val currentSelection = newPaymentSelectionProvider(code)?.takeIf { it.getType() == code }
 
         return UiDefinitionFactory.Arguments.Factory.Default(
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,

@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirm
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
@@ -339,6 +340,48 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `initial back stack with a form on top starts on the form and can go back`() = runTest {
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
+        val eventReporter = FakeEventReporter()
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = EmbeddedNavigator.Screen.PaymentOptions(
+            interactor = paymentOptionsInteractor,
+            isLiveMode = true,
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "".resolvableString,
+                    isEnabled = false,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = false,
+                    shouldDisplayLockIcon = true,
+                    savedPaymentSelectionToConfirm = null,
+                )
+            ),
+            onContinueClick = {},
+        )
+        val (formScreen, formInteractor) = createFormScreen()
+
+        val navigator = EmbeddedNavigator(
+            coroutineScope = scope,
+            eventReporter = eventReporter,
+            initialBackStack = listOf(paymentOptionsScreen, formScreen),
+        )
+
+        // Only the visible top screen is considered shown during initialization.
+        assertThat(navigator.canGoBack).isTrue()
+        assertThat(navigator.screen.value).isEqualTo(formScreen)
+
+        scope.cancel()
+
+        // Both seeded screens are tracked and closed on scope cancellation.
+        assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(paymentOptionsInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        paymentOptionsInteractor.validate()
+        formInteractor.validate()
+        eventReporter.validate()
+    }
+
+    @Test
     fun `PaymentOptions topBarState returns correct state for live mode`() {
         val screen = createPaymentOptionsScreen(isLiveMode = true)
         val topBarState = screen.topBarState().value!!
@@ -439,7 +482,12 @@ internal class EmbeddedNavigatorTest {
             savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
 
-        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            )
+        )
 
         // "Add new card" is only used when the customer has a saved card, so this proves the per-code
         // derivation resolved to hasSavedPaymentMethods = true and flowed into the created interactor.
@@ -453,7 +501,12 @@ internal class EmbeddedNavigatorTest {
             savedPaymentMethods = listOf(PaymentMethodFixtures.US_BANK_ACCOUNT),
         )
 
-        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            )
+        )
 
         // The saved payment method is not a card, so the derivation resolves to false and the interactor
         // uses the "Add card" header instead of "Add new card".
@@ -474,7 +527,12 @@ internal class EmbeddedNavigatorTest {
             ),
         )
 
-        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"))
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "cashapp",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            )
+        )
 
         // setAsDefaultMatchesSaveForFutureUse is !hasSavedPaymentMethods, so true confirms the per-code
         // derivation resolved to false for cashapp despite the saved card.
@@ -488,7 +546,12 @@ internal class EmbeddedNavigatorTest {
             savedPaymentMethods = emptyList(),
         )
 
-        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            )
+        )
 
         // With no saved payment methods the derivation resolves to false, so the interactor uses the
         // "Add card" header rather than "Add new card".
@@ -558,7 +621,10 @@ internal class EmbeddedNavigatorTest {
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
             customerStateHolder = FakeCustomerStateHolder(),
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
         return screen to formInteractor
     }

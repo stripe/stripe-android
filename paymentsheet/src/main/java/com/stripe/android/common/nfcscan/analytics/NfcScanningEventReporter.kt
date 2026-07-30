@@ -42,8 +42,10 @@ internal interface NfcScanningEventReporter {
 
     /**
      * The user has chosen to exit the NFC scanning flow without scanning valid card details.
+     *
+     * @param reason why there was an NFC flow cancellation
      */
-    fun onNfcScanCancelled()
+    fun onNfcScanCancelled(reason: NfcScanCancellationReason)
 }
 
 internal class DefaultNfcScanningEventReporter @Inject constructor(
@@ -81,9 +83,13 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         )
     }
 
-    override fun onNfcScanCancelled() {
-        durationProvider.end(DurationProvider.Key.NfcScan)
-        fireEvent(eventName = SCAN_CANCELED_EVENT_NAME)
+    override fun onNfcScanCancelled(reason: NfcScanCancellationReason) {
+        val duration = durationProvider.end(DurationProvider.Key.NfcScan)
+        fireEvent(
+            eventName = SCAN_CANCELED_EVENT_NAME,
+            additionalParams = duration.mapOfDurationInSeconds() +
+                mapOf(FIELD_CANCELLATION_REASON to reason.analyticsValue)
+        )
     }
 
     private fun fireEvent(
@@ -103,6 +109,7 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
 
     private companion object {
         const val FIELD_ERROR_CODE = "error_code"
+        const val FIELD_CANCELLATION_REASON = "cancellation_reason"
 
         const val SCAN_STARTED_EVENT_NAME = "nfc_scan_started"
         const val SCAN_SUCCESS_EVENT_NAME = "nfc_scan_success"

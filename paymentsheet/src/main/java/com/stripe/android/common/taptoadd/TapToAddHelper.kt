@@ -48,6 +48,7 @@ internal interface TapToAddHelper {
             updateSelection: (PaymentSelection.Saved) -> Unit,
             customerStateHolder: CustomerStateHolder,
             linkSignupMode: StateFlow<LinkSignupMode?>,
+            statusBarColor: Int?,
         ): TapToAddHelper
     }
 }
@@ -64,6 +65,7 @@ internal class DefaultTapToAddHelper(
     private val updateSelection: (PaymentSelection.Saved) -> Unit,
     private val customerStateHolder: CustomerStateHolder,
     private val linkSignupMode: StateFlow<LinkSignupMode?>,
+    private val statusBarColor: Int?,
 ) : TapToAddHelper {
     override val isTapToAddEnabled: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(IS_TAP_TO_ADD_ENABLED_KEY, true)
@@ -157,6 +159,7 @@ internal class DefaultTapToAddHelper(
                     paymentMethodMetadata = paymentMethodMetadata,
                     paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                     productUsage = productUsage,
+                    statusBarColor = statusBarColor,
                 ),
                 options = ActivityOptionsCompat.makeCustomAnimation(
                     context,
@@ -181,6 +184,7 @@ internal class DefaultTapToAddHelper(
             updateSelection: (PaymentSelection.Saved) -> Unit,
             customerStateHolder: CustomerStateHolder,
             linkSignupMode: StateFlow<LinkSignupMode?>,
+            statusBarColor: Int?,
         ): TapToAddHelper {
             return DefaultTapToAddHelper(
                 context = context,
@@ -194,6 +198,7 @@ internal class DefaultTapToAddHelper(
                 eventReporter = eventReporter,
                 customerStateHolder = customerStateHolder,
                 linkSignupMode = linkSignupMode,
+                statusBarColor = statusBarColor,
             )
         }
     }

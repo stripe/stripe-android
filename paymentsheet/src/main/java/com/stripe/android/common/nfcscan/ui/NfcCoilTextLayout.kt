@@ -33,7 +33,7 @@ import com.stripe.android.uicore.strings.resolve
 import kotlin.math.roundToInt
 import com.stripe.payments.model.R as PaymentsModelR
 
-private val TopTextOffset = (-55).dp
+private val TextAboveCoilBottomMargin = 22.5.dp
 private val BottomTextOffset = 30.dp
 private val InstructionTextEdgePadding = 20.dp
 private val ErrorTextTopSpacing = 8.dp
@@ -104,7 +104,9 @@ private fun MeasureScope.placeCoilTextElements(
     val coilCenterX = coilBoxLeft + coilSizePx / 2
 
     val instructionY = if (shouldRenderTextAboveCoil) {
-        coilBoxTop + TopTextOffset.roundToPx()
+        val textBlockHeight = instructionPlaceable.height +
+            (errorPlaceable?.let { it.height + ErrorTextTopSpacing.roundToPx() } ?: 0)
+        coilBoxTop - TextAboveCoilBottomMargin.roundToPx() - textBlockHeight
     } else {
         coilBoxTop + coilSizePx + BottomTextOffset.roundToPx()
     }

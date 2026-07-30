@@ -39,6 +39,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -192,6 +193,7 @@ class DefaultLinkInlineInteractorTest {
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
                 linkExpressMode = any(),
+                statusBarColor = anyOrNull(),
             )
         }
 
@@ -225,6 +227,7 @@ class DefaultLinkInlineInteractorTest {
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
                 linkExpressMode = any(),
+                statusBarColor = anyOrNull(),
             )
 
             assertThat(pmmCaptor.firstValue.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
@@ -527,6 +530,7 @@ class DefaultLinkInlineInteractorTest {
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
                 linkExpressMode = any(),
+                statusBarColor = anyOrNull(),
             )
 
             assertThat(pmmCaptor.firstValue.attestOnIntentConfirmation).isTrue()

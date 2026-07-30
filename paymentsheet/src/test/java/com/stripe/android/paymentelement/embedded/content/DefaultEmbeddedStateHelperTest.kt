@@ -269,6 +269,7 @@ internal class DefaultEmbeddedStateHelperTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     selection = selection,
                     configuration = configuration,
+                    statusBarColor = null,
                 ),
                 customer = customer,
                 previousNewSelections = Bundle(),

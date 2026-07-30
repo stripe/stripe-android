@@ -98,6 +98,7 @@ internal class CustomerSheetViewModel(
     private val savedSelectionDataSourceProvider: Single<CustomerSheetSavedSelectionDataSource>,
     private val configuration: CustomerSheet.Configuration,
     private val integrationType: CustomerSheetIntegration.Type,
+    private val statusBarColor: Int?,
     private val logger: Logger,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -117,6 +118,7 @@ internal class CustomerSheetViewModel(
         originalPaymentSelection: PaymentSelection?,
         configuration: CustomerSheet.Configuration,
         integrationType: CustomerSheetIntegration.Type,
+        args: CustomerSheetContract.Args,
         logger: Logger,
         eventReporter: CustomerSheetEventReporter,
         @IOContext workContext: CoroutineContext = Dispatchers.IO,
@@ -135,6 +137,7 @@ internal class CustomerSheetViewModel(
         savedSelectionDataSourceProvider = CustomerSheetHacks.savedSelectionDataSource,
         configuration = configuration,
         integrationType = integrationType,
+        statusBarColor = args.statusBarColor,
         logger = logger,
         eventReporter = eventReporter,
         workContext = workContext,
@@ -285,6 +288,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
             is CustomerSheetViewAction.OnAnalyticsEvent -> onAnalyticsEvent(viewAction.event)
             is CustomerSheetViewAction.OnCardScanEvent -> onCardScanEvent(viewAction.event)
+            is CustomerSheetViewAction.OnNfcScanButtonShown -> onNfcScanButtonShown()
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
@@ -957,6 +961,10 @@ internal class CustomerSheetViewModel(
         eventReporter.onCardScanEvent(event)
     }
 
+    private fun onNfcScanButtonShown() {
+        eventReporter.onNfcScanButtonShown()
+    }
+
     private fun onDisallowedCardBrandEntered(brand: CardBrand) {
         eventReporter.onDisallowedCardBrandEntered(brand)
     }
@@ -1000,6 +1008,7 @@ internal class CustomerSheetViewModel(
                         shouldSave = true,
                     ),
                     paymentMethodMetadata = metadata,
+                    statusBarColor = statusBarColor,
                 )
             )
 
@@ -1318,7 +1327,7 @@ internal class CustomerSheetViewModel(
                 .create(
                     application = extras.requireApplication(),
                     configuration = args.configuration,
-                    statusBarColor = args.statusBarColor,
+                    args = args,
                     integrationType = args.integrationType,
                     savedStateHandle = extras.createSavedStateHandle(),
                 )
