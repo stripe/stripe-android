@@ -12,8 +12,14 @@ internal interface PdolModule {
     companion object {
         @Provides
         fun providesProducers(): Set<TagValueProducer> = setOf(
+            AmountAuthorizedProducer,
+            TransactionCurrencyCodeProducer,
+            TerminalCountryCodeProducer,
+            TerminalTypeProducer,
+            TransactionDateProducer,
+            EnhancedContactlessReaderCapabilitiesProducer,
             TerminalTransactionQualifiersProducer,
-            UnpredictableNumberProducer
+            UnpredictableNumberProducer,
         )
     }
 }
