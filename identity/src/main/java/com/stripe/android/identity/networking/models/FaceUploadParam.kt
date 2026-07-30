@@ -2,6 +2,8 @@ package com.stripe.android.identity.networking.models
 
 import android.os.Parcelable
 import android.util.Base64
+import androidx.annotation.VisibleForTesting
+import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import kotlinx.parcelize.Parcelize
@@ -9,6 +11,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.round
 
@@ -120,17 +123,33 @@ internal data class FaceFrameDataParam(
                 yaw = pose?.yaw?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
                 pitch = pose?.pitch?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
                 roll = pose?.roll?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
-                bbox = listOf(
-                    (boundingBox.left * image.width).toInt(),
-                    (boundingBox.top * image.height).toInt(),
-                    (boundingBox.width * image.width).toInt(),
-                    (boundingBox.height * image.height).toInt()
+                bbox = boundingBoxInFullFrame(
+                    boundingBox = boundingBox,
+                    inputWidth = image.width,
+                    inputHeight = image.height
                 ),
                 inputSize = listOf(image.width, image.height),
                 faceLandmarkResult = compactedFaceLandmarkResult(selfieFrame.output.faceLandmarkResult),
                 capturedAt = selfieFrame.capturedAt,
                 captureOrder = captureOrder,
                 cameraInfo = encodedCameraInfo(cameraLensModel)
+            )
+        }
+
+        @VisibleForTesting
+        internal fun boundingBoxInFullFrame(
+            boundingBox: BoundingBox,
+            inputWidth: Int,
+            inputHeight: Int
+        ): List<Int> {
+            val modelInputSide = min(inputWidth, inputHeight)
+            val cropOffsetX = (inputWidth - modelInputSide) / 2
+            val cropOffsetY = (inputHeight - modelInputSide) / 2
+            return listOf(
+                cropOffsetX + (boundingBox.left * modelInputSide).toInt(),
+                cropOffsetY + (boundingBox.top * modelInputSide).toInt(),
+                (boundingBox.width * modelInputSide).toInt(),
+                (boundingBox.height * modelInputSide).toInt()
             )
         }
 

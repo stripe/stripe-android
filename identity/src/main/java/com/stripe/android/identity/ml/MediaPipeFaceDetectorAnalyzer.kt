@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Base64
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.components.containers.Category
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
@@ -172,6 +173,11 @@ internal class MediaPipeFaceDetectorAnalyzer(
                 .orElse(emptyList())
                 .firstOrNull()
                 ?: return null
+            return rotationMatrixToFacePose(matrix)
+        }
+
+        @VisibleForTesting
+        internal fun rotationMatrixToFacePose(matrix: FloatArray): FacePose? {
             if (matrix.size < MATRIX_SIZE) {
                 return null
             }
@@ -184,11 +190,13 @@ internal class MediaPipeFaceDetectorAnalyzer(
             val sy = sqrt(r00 * r00 + r10 * r10)
 
             return FacePose(
-                yaw = atan2(-r20, sy).roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS),
-                pitch = atan2(r21, r22).roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS),
-                roll = atan2(r10, r00).roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS)
+                yaw = atan2(-r20, sy).toDegrees().roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS),
+                pitch = atan2(r21, r22).toDegrees().roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS),
+                roll = atan2(r10, r00).toDegrees().roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS)
             )
         }
+
+        private fun Float.toDegrees(): Float = Math.toDegrees(toDouble()).toFloat()
 
         private fun FaceLandmarkerResult.encodedFaceLandmarkResult(): String {
             val payload = JSONObject()

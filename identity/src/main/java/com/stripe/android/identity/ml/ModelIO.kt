@@ -55,10 +55,7 @@ internal data class FaceDetectorOutput(
 ) : AnalyzerOutput
 
 /**
- * Optional pose metadata for a detected face.
- *
- * The current TFLite face detector does not produce pose. MediaPipe face-landmarker output can
- * populate this later, and the selfie capture state machine will use it to validate side captures.
+ * Optional face pose metadata in degrees. The legacy detector does not populate this.
  */
 internal data class FacePose(
     val yaw: Float,
