@@ -3,15 +3,11 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Build
 import android.os.Parcel
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.isEnabled
-import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -101,7 +97,7 @@ class UpdatePaymentMethodUITest {
         isSaveButtonEnabled = true,
     ) {
         composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChildren().assertAll(isEnabled())
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsEnabled()
     }
 
     @Test
@@ -110,7 +106,7 @@ class UpdatePaymentMethodUITest {
         isSaveButtonEnabled = false,
     ) {
         composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChildren().assertAll(isNotEnabled())
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsNotEnabled()
     }
 
     @Test

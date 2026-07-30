@@ -85,11 +85,14 @@ internal fun InputAddressScreen(
                         onDisabledButtonClick()
                     },
                     modifier = Modifier.padding(vertical = 16.dp),
+                    testTag = ADDRESS_ELEMENT_PRIMARY_BUTTON_TEST_TAG,
                 )
             }
         }
     }
 }
+
+internal const val ADDRESS_ELEMENT_PRIMARY_BUTTON_TEST_TAG = "ADDRESS_ELEMENT_PRIMARY_BUTTON_TEST_TAG"
 
 @Composable
 internal fun InputAddressScreen(

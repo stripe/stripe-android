@@ -2,7 +2,6 @@ package com.stripe.android.common.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -29,14 +28,22 @@ class PrimaryButtonScreenshotTest {
     @Test
     fun testEnabled() {
         paparazziRule.snapshot {
-            PrimaryButton(isEnabled = true, label = BUTTON_TEXT, onButtonClick = {})
+            PrimaryButton(
+                isEnabled = true,
+                label = BUTTON_TEXT,
+                onButtonClick = {},
+            )
         }
     }
 
     @Test
     fun testDisabled() {
         paparazziRule.snapshot {
-            PrimaryButton(isEnabled = false, label = BUTTON_TEXT, onButtonClick = {})
+            PrimaryButton(
+                isEnabled = false,
+                label = BUTTON_TEXT,
+                onButtonClick = {},
+            )
         }
     }
 
@@ -47,7 +54,7 @@ class PrimaryButtonScreenshotTest {
                 isEnabled = true,
                 label = BUTTON_TEXT,
                 onButtonClick = {},
-                displayLockIcon = true
+                displayLockIcon = true,
             )
         }
     }

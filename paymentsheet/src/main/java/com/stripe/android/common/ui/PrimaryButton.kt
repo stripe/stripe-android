@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -39,6 +40,7 @@ internal fun PrimaryButton(
     label: String,
     isEnabled: Boolean,
     onButtonClick: () -> Unit,
+    testTag: String? = null,
     modifier: Modifier = Modifier,
     canClickWhileDisabled: Boolean = false,
     isLoading: Boolean = false,
@@ -68,7 +70,7 @@ internal fun PrimaryButton(
         ) {
             TextButton(
                 onClick = onButtonClick,
-                modifier = Modifier
+                modifier = (if (testTag != null) Modifier.testTag(testTag) else Modifier)
                     .fillMaxWidth()
                     .defaultMinSize(
                         minHeight = StripeTheme.primaryButtonStyle.shape.height.dp

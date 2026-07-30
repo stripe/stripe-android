@@ -18,7 +18,7 @@ internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onCli
         BacsMandateButtonType.Primary -> PrimaryButton(
             label = label,
             isEnabled = true,
-            onButtonClick = onClick
+            onButtonClick = onClick,
         )
         BacsMandateButtonType.Secondary -> {
             // Use the same text style as the primary button but a different color.
