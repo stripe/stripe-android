@@ -2,9 +2,13 @@ package com.stripe.android.paymentsheet.addresselement
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -12,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -21,6 +26,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
+import com.stripe.android.paymentsheet.ui.RevealPrimaryButtonWhenEnabled
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.CheckboxElementUI
@@ -43,6 +49,15 @@ internal fun InputAddressScreen(
     bottomContent: @Composable ColumnScope.() -> Unit
 ) {
     val focusManager = LocalFocusManager.current
+    val primaryButtonBringIntoViewRequester = remember { BringIntoViewRequester() }
+    val isImeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+
+    RevealPrimaryButtonWhenEnabled(
+        isEnabled = primaryButtonEnabled,
+        isImeVisible = isImeVisible,
+        bringIntoViewRequester = primaryButtonBringIntoViewRequester,
+    )
+
     Scaffold(
         modifier = Modifier
             .fillMaxHeight()
@@ -84,7 +99,9 @@ internal fun InputAddressScreen(
                         focusManager.clearFocus()
                         onDisabledButtonClick()
                     },
-                    modifier = Modifier.padding(vertical = 16.dp),
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .bringIntoViewRequester(primaryButtonBringIntoViewRequester),
                     testTag = ADDRESS_ELEMENT_PRIMARY_BUTTON_TEST_TAG,
                 )
             }

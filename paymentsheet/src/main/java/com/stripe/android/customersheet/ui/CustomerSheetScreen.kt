@@ -4,13 +4,18 @@ import androidx.annotation.RestrictTo
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.nfcscan.LocalNfcScanEventShownReporter
@@ -34,6 +39,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentElement
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.RevealPrimaryButtonWhenEnabled
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
@@ -214,6 +220,14 @@ internal fun AddPaymentMethod(
     displayForm: Boolean,
 ) {
     val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val primaryButtonBringIntoViewRequester = remember { BringIntoViewRequester() }
+    val isImeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+
+    RevealPrimaryButtonWhenEnabled(
+        isEnabled = viewState.primaryButtonEnabled,
+        isImeVisible = isImeVisible,
+        bringIntoViewRequester = primaryButtonBringIntoViewRequester,
+    )
 
     if (viewState.displayDismissConfirmationModal) {
         SimpleDialogElementUI(
@@ -317,7 +331,8 @@ internal fun AddPaymentMethod(
         },
         modifier = Modifier
             .padding(top = 10.dp)
-            .padding(horizontalPadding),
+            .padding(horizontalPadding)
+            .bringIntoViewRequester(primaryButtonBringIntoViewRequester),
         testTag = CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG,
     )
 
