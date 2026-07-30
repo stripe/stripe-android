@@ -67,11 +67,16 @@ internal class PaymentElementAutocompleteAddressInteractor(
                 }
                 if (resolvedClient != null) {
                     activeInlineInteractor?.dispose()
+                    val effectiveCountries = if (useStripeHosted) {
+                        AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES
+                    } else {
+                        autocompleteConfig.autocompleteCountries
+                    }
                     return BillingInlineAutocompleteAddressInteractor(
                         placesClient = resolvedClient,
                         autocompleteConfig = AutocompleteAddressInteractor.Config(
                             googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
-                            autocompleteCountries = autocompleteConfig.autocompleteCountries,
+                            autocompleteCountries = effectiveCountries,
                             isPlacesAvailable = autocompleteConfig.isPlacesAvailable,
                             isInlineAutocompleteEnabled = autocompleteConfig.isInlineAutocompleteEnabled,
                             shouldUseStripeHostedAutocomplete = useStripeHosted ||

@@ -214,6 +214,7 @@ class AddressLauncher internal constructor(
              */
             fun useStripeHostedAutocomplete(use: Boolean) =
                 apply { this.useStripeHostedAutocomplete = use }
+
             fun build() = Configuration(
                 appearance = appearance,
                 address = address,

@@ -55,7 +55,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `query with unsupported country stays Idle`() = runScenario(
+    fun `query with unsupported country stays Idle and emits country event`() = runScenario(
         autocompleteCountries = setOf("US")
     ) {
         countryFlow.value = "CA"
@@ -65,6 +65,12 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(500)
 
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        val event = eventCalls.awaitItem()
+        assertThat(event).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnValues(
+                mapOf(IdentifierSpec.Country to "CA")
+            )
+        )
     }
 
     @Test
@@ -225,7 +231,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `onPredictionSelected fetches place and emits OnValues event`() = runScenario {
+    fun `onPredictionSelected fetches place and emits OnExpandForm event`() = runScenario {
         fakePlacesClient.fetchPlaceResult = Result.success(
             Address(
                 line1 = "123 Main Street",
@@ -244,14 +250,14 @@ class InlineAutocompleteControllerTest {
         fakePlacesClient.resetSessionCalls.awaitItem()
         val event = eventCalls.awaitItem()
         assertThat(event)
-            .isInstanceOf<AutocompleteAddressInteractor.Event.OnValues>()
+            .isInstanceOf<AutocompleteAddressInteractor.Event.OnExpandForm>()
         val values =
-            (event as AutocompleteAddressInteractor.Event.OnValues).values
-        assertThat(values[IdentifierSpec.Line1]).isEqualTo("123 Main Street")
-        assertThat(values[IdentifierSpec.City]).isEqualTo("San Francisco")
-        assertThat(values[IdentifierSpec.State]).isEqualTo("CA")
-        assertThat(values[IdentifierSpec.Country]).isEqualTo("US")
-        assertThat(values[IdentifierSpec.PostalCode]).isEqualTo("94105")
+            (event as AutocompleteAddressInteractor.Event.OnExpandForm).values
+        assertThat(values?.get(IdentifierSpec.Line1)).isEqualTo("123 Main Street")
+        assertThat(values?.get(IdentifierSpec.City)).isEqualTo("San Francisco")
+        assertThat(values?.get(IdentifierSpec.State)).isEqualTo("CA")
+        assertThat(values?.get(IdentifierSpec.Country)).isEqualTo("US")
+        assertThat(values?.get(IdentifierSpec.PostalCode)).isEqualTo("94105")
     }
 
     @Test
@@ -514,6 +520,7 @@ class InlineAutocompleteControllerTest {
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
+        eventCalls.awaitItem()
 
         countryFlow.value = "US"
         advanceTimeBy(500)

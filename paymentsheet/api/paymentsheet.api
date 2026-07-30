@@ -2140,6 +2140,7 @@ public final class com/stripe/android/paymentsheet/addresselement/AddressLaunche
 	public final fun buttonTitle (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
 	public final fun googlePlacesApiKey (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
 	public final fun title (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+	public final fun useStripeHostedAutocomplete (Z)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/addresselement/AddressLauncherKt {

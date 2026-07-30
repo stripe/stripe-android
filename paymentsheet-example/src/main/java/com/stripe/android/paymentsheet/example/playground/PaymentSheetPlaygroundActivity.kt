@@ -1,5 +1,5 @@
 package com.stripe.android.paymentsheet.example.playground
-import com.stripe.android.PaymentConfiguration
+
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -48,6 +48,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
@@ -60,7 +62,6 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
@@ -462,7 +463,6 @@ internal class PaymentSheetPlaygroundActivity :
                 if (playgroundState.displaysShippingAddressButton()) {
                     ShippingAddressButton(
                         addressLauncher = addressLauncher,
-                        playgroundState = playgroundState,
                         address = { flowController.shippingDetails },
                     )
                 }
@@ -690,11 +690,10 @@ internal class PaymentSheetPlaygroundActivity :
     @Composable
     private fun ShippingAddressButton(
         addressLauncher: AddressLauncher,
-        playgroundState: PlaygroundState.Payment,
         address: () -> AddressDetails?,
     ) {
         val context = LocalContext.current
-            Button(
+        Button(
             onClick = {
                 val configuration = AddressLauncher.Configuration.Builder()
                     .address(address())

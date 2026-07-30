@@ -8,11 +8,8 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AutocompleteAddressController(
@@ -34,7 +31,6 @@ class AutocompleteAddressController(
     private val interactor = interactorFactory.create()
 
     private val config = interactor.autocompleteConfig
-    private val coroutineScope = MainScope()
 
     private val inlineAutocompleteActive =
         config.isInlineAutocompleteEnabled && (
@@ -114,29 +110,6 @@ class AutocompleteAddressController(
             interactor.observeQueryChanges(inlineQuery, countryDropdownFieldController.rawFieldValue)
         }
 
-        // Toggle between condensed/expanded input modes when the country changes to one
-        // that is not supported by autocomplete (or back when it becomes supported).
-        coroutineScope.launch {
-            countryDropdownFieldController.rawFieldValue.collectLatest { country ->
-                val supported = config.autocompleteCountries.isEmpty() ||
-                    config.autocompleteCountries.any { it.equals(country ?: "", ignoreCase = true) }
-
-                if (!supported && !expandForm) {
-                    expandForm = true
-                    val newValues = getCurrentValues().toMutableMap()
-                    newValues[IdentifierSpec.Country] = country
-                    val newAddressInputMode = toAddressInputMode(expandForm, newValues)
-                    _addressElementFlow.value = createAddressElement(newValues, newAddressInputMode)
-                } else if (supported && expandForm) {
-                    expandForm = false
-                    val newValues = getCurrentValues().toMutableMap()
-                    newValues[IdentifierSpec.Country] = country
-                    val newAddressInputMode = toAddressInputMode(expandForm, newValues)
-                    _addressElementFlow.value = createAddressElement(newValues, newAddressInputMode)
-                }
-            }
-        }
-
         interactor.register { event ->
             val currentValues = getCurrentValues()
 
@@ -199,7 +172,7 @@ class AutocompleteAddressController(
         val countrySupported = isCountrySupported(values[IdentifierSpec.Country])
 
         val showInline = inlineAutocompleteActive && !expandForm &&
-            countrySupported && values[IdentifierSpec.Line1].isNullOrEmpty()
+            countrySupported && values[IdentifierSpec.Line1] == null
         return if (showInline) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,
