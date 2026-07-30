@@ -154,6 +154,7 @@ class ExpressCheckoutElement @Inject internal constructor(
 
             // TODO: add a button type here? No -- but call out in API review.
             // TODO: also note that we're going to skip button theme.
+            // TODO: we need to add button theme just for light and dark modes.
 
             /** Sets the height of express buttons. */
             fun buttonHeight(buttonHeight: Dp): Appearance = apply {
