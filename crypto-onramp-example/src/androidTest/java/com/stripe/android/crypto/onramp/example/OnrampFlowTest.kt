@@ -60,4 +60,34 @@ internal class OnrampFlowTest {
         page.performCheckout()
         page.waitForCheckoutCompleted()
     }
+
+    @Test
+    fun freshUserKycCanBeCollectedAndVerifiedAfterCancellation() {
+        val user = page.registerAndAuthenticateFreshUser(country = "US")
+
+        page.collectKycInfo(user)
+        page.cancelKycVerification()
+        page.confirmKycVerification()
+    }
+
+    @Test
+    fun freshUserAttestationCanBeCanceledAndConfirmed() {
+        val user = page.registerAndAuthenticateFreshUser(country = "MT")
+
+        page.collectKycInfo(user)
+        page.retrieveMissingTaxIdentifiers()
+        page.submitMaltaTaxIdentifier()
+        page.cancelUserAttestation()
+        page.confirmUserAttestation()
+    }
+
+    @Test
+    fun freshUserTaxIdentifiersCanBeValidatedAndSubmitted() {
+        val user = page.registerAndAuthenticateFreshUser(country = "MT")
+
+        page.collectKycInfo(user)
+        page.retrieveMissingTaxIdentifiers()
+        page.verifyEmptyTaxIdentifierIsRejected()
+        page.submitMaltaTaxIdentifier()
+    }
 }

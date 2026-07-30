@@ -22,6 +22,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextDecoration
@@ -74,7 +75,10 @@ fun UserAttestationScreen(
                             style = LinkTheme.typography.title,
                             color = LinkTheme.colors.textPrimary
                         )
-                        TextButton(onClick = onClose) {
+                        TextButton(
+                            onClick = onClose,
+                            modifier = Modifier.testTag(USER_ATTESTATION_CANCEL_BUTTON_TAG),
+                        ) {
                             Text(
                                 text = stringResource(R.string.stripe_link_onramp_carf_declaration_cancel_button_text),
                                 style = LinkTheme.typography.detailEmphasized,
@@ -112,3 +116,5 @@ fun UserAttestationScreen(
         }
     }
 }
+
+internal const val USER_ATTESTATION_CANCEL_BUTTON_TAG = "UserAttestationCancelButtonTag"

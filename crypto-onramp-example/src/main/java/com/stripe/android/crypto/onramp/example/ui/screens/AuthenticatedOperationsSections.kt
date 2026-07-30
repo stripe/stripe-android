@@ -33,6 +33,7 @@ import com.stripe.android.crypto.onramp.example.SELECTED_PAYMENT_TYPE_TAG
 import com.stripe.android.crypto.onramp.example.SESSION_STATUS_TAG
 import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_INSTANT_TAG
 import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_STANDARD_TAG
+import com.stripe.android.crypto.onramp.example.USER_ATTESTATION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.ui.components.GooglePayButton
@@ -269,6 +270,7 @@ internal fun VerificationSection(
     Button(
         onClick = onShowUserAttestation,
         modifier = Modifier
+            .testTag(USER_ATTESTATION_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
