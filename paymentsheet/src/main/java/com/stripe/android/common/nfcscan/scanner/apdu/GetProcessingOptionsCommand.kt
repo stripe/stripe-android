@@ -26,7 +26,7 @@ internal class GetProcessingOptionsCommand(
         parseFromRecords(records)
 
         return ProcessingOptionsInfo(
-            aflEntries = tlv[TAG_AFL]?.let(::parseAflEntries).orEmpty(),
+            aflEntries = records[TAG_AFL]?.let(::parseAflEntries).orEmpty(),
             records = records.toMap(),
         )
     }
