@@ -38,12 +38,29 @@ internal class ApduCardReaderTest {
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GPO_REQUEST)
-
-        val call = pdolBuilder.fromTemplateCalls.awaitItem()
-        assertThat(call.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        assertThat(call.template).isEmpty()
-
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_SFI_1_RECORD_1_REQUEST)
+
+        assertThat(cardDataParser.parseCalls.awaitItem()).containsKey("57")
+    }
+
+    @Test
+    fun `readCard skips pdol builder when PDOL tag is absent`() = runScenario(
+        transceiveResults = listOf(
+            apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+            apduSuccessResponse(byteArrayOf()),
+            apduSuccessResponse(
+                tlv(tag = 0x77, value = tlv(tag = 0x57, value = TRACK_2_DATA)),
+            ),
+        ),
+        parseResult = NfcCardDataParser.Result.Success(SCANNED_CARD_DATA),
+    ) {
+        val result = cardReader.readCard(transceiver)
+
+        assertThat(result).isEqualTo(NfcCardReader.Result.Found(SCANNED_CARD_DATA))
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GPO_REQUEST)
 
         assertThat(cardDataParser.parseCalls.awaitItem()).containsKey("57")
     }
@@ -65,10 +82,34 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GPO_REQUEST)
+
+        assertThat(cardDataParser.parseCalls.awaitItem()).containsKey("57")
+    }
+
+    @Test
+    fun `readCard builds pdol data when PDOL template is available`() = runScenario(
+        transceiveResults = listOf(
+            apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+            apduSuccessResponse(
+                tlv(tag = 0x9F.toByte(), tagContinuation = 0x38, value = PDOL_TEMPLATE),
+            ),
+            apduSuccessResponse(
+                tlv(tag = 0x77, value = tlv(tag = 0x57, value = TRACK_2_DATA)),
+            ),
+        ),
+        parseResult = NfcCardDataParser.Result.Success(SCANNED_CARD_DATA),
+    ) {
+        val result = cardReader.readCard(transceiver)
+
+        assertThat(result).isEqualTo(NfcCardReader.Result.Found(SCANNED_CARD_DATA))
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
 
         val call = pdolBuilder.fromTemplateCalls.awaitItem()
         assertThat(call.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        assertThat(call.template).isEmpty()
+        assertThat(call.template.contentEquals(PDOL_TEMPLATE)).isTrue()
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GPO_REQUEST)
 
@@ -94,11 +135,6 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
-
-        val call = pdolBuilder.fromTemplateCalls.awaitItem()
-        assertThat(call.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        assertThat(call.template).isEmpty()
-
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GPO_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_SFI_1_RECORD_1_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_SFI_1_RECORD_2_REQUEST)
@@ -131,11 +167,6 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
-
-        val call = pdolBuilder.fromTemplateCalls.awaitItem()
-        assertThat(call.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        assertThat(call.template).isEmpty()
-
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GPO_REQUEST)
 
         assertThat(cardDataParser.parseCalls.awaitItem()).isNotNull()
