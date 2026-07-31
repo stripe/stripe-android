@@ -53,6 +53,8 @@ internal class PaymentSheetKeyboardTest {
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Example, Inc.",
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    defaultBillingDetails = defaultBillingDetailsWithoutPostalCode,
+                    billingDetailsCollectionConfiguration = fullAddressCollection,
                 ),
             )
         }
@@ -93,6 +95,8 @@ internal class PaymentSheetKeyboardTest {
                         )
                     )
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .defaultBillingDetails(defaultBillingDetailsWithoutPostalCode)
+                    .billingDetailsCollectionConfiguration(fullAddressCollection)
                     .link(
                         PaymentSheet.LinkConfiguration.Builder()
                             .display(PaymentSheet.LinkConfiguration.Display.Never)
@@ -124,6 +128,8 @@ internal class PaymentSheetKeyboardTest {
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Example, Inc.",
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    defaultBillingDetails = defaultBillingDetailsWithoutPostalCode,
+                    billingDetailsCollectionConfiguration = fullAddressCollection,
                 ),
             )
         }
@@ -189,5 +195,19 @@ internal class PaymentSheetKeyboardTest {
         page.enterZipCode()
         page.assertPrimaryButtonEnabled(enabled = true)
         page.assertPrimaryButtonVisibleAboveKeyboard()
+    }
+
+    private companion object {
+        val defaultBillingDetailsWithoutPostalCode = PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(
+                line1 = "123 Main Street",
+                city = "San Francisco",
+                state = "CA",
+                country = "US",
+            ),
+        )
+        val fullAddressCollection = PaymentSheet.BillingDetailsCollectionConfiguration(
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        )
     }
 }

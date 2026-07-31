@@ -342,13 +342,11 @@ private fun PaymentSheetContent(
     val primaryButtonBringIntoViewRequester = remember { BringIntoViewRequester() }
     val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
 
-    if (currentScreen.revealsPrimaryButtonWhenEnabled) {
-        RevealPrimaryButtonWhenEnabled(
-            isEnabled = primaryButtonUiState?.enabled == true,
-            bringIntoViewRequester = primaryButtonBringIntoViewRequester,
-            resetKey = currentScreen,
-        )
-    }
+    RevealPrimaryButtonWhenEnabled(
+        isEnabled = primaryButtonUiState?.enabled == true,
+        bringIntoViewRequester = primaryButtonBringIntoViewRequester,
+        resetKey = currentScreen,
+    )
 
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
