@@ -710,6 +710,7 @@ class CheckoutController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var adaptivePricingAllowed: Boolean = false
+        private var defaultBillingAddress: Address? = null
         private var googlePayConfiguration: GooglePayConfiguration? = null
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
@@ -723,6 +724,18 @@ class CheckoutController @Inject internal constructor(
             adaptivePricingAllowed: Boolean
         ): Configuration = apply {
             this.adaptivePricingAllowed = adaptivePricingAllowed
+        }
+
+        /**
+         * Sets the customer's known billing address.
+         *
+         * The address is used to prefill payment method forms. When automatic tax uses the billing
+         * address, Checkout can also use it to calculate an initial tax estimate.
+         */
+        fun defaultBillingAddress(
+            defaultBillingAddress: Address,
+        ): Configuration = apply {
+            this.defaultBillingAddress = defaultBillingAddress
         }
 
         fun paymentElement(
@@ -758,6 +771,7 @@ class CheckoutController @Inject internal constructor(
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
+            val defaultBillingAddress: Address.State?,
             val googlePayConfiguration: GooglePayConfiguration.State?,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
@@ -767,6 +781,7 @@ class CheckoutController @Inject internal constructor(
 
         internal fun build(): State = State(
             adaptivePricingAllowed = adaptivePricingAllowed,
+            defaultBillingAddress = defaultBillingAddress?.build(),
             paymentElementConfiguration = paymentElementConfiguration.build(),
             currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
             shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),

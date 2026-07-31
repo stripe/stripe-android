@@ -58,6 +58,32 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `loadInitial seeds collected details with default billing address`() = runScenario {
+        val address = CheckoutController.Address()
+            .city(" San Francisco ")
+            .country(" US ")
+            .line1(" 510 Townsend St ")
+            .postalCode(" 94103 ")
+            .state(" CA ")
+
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .defaultBillingAddress(address)
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        val billingAddress = requireNotNull(stateHolder.state?.collectedDetails?.billingAddress)
+        assertThat(billingAddress.city).isEqualTo("San Francisco")
+        assertThat(billingAddress.country).isEqualTo("US")
+        assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
+        assertThat(billingAddress.postalCode).isEqualTo("94103")
+        assertThat(billingAddress.state).isEqualTo("CA")
+        assertThat(stateHolder.state?.embeddedConfiguration?.defaultBillingDetails?.address?.postalCode)
+            .isEqualTo("94103")
+    }
+
+    @Test
     fun `loadInitial populates the customer state holder from the loaded customer`() = runScenario(
         customer = savedCustomer(),
     ) {
