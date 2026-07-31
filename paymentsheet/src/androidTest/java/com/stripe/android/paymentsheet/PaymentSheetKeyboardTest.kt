@@ -85,14 +85,20 @@ internal class PaymentSheetKeyboardTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                ),
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .customer(
+                        PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "ek_123",
+                        )
+                    )
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .link(
+                        PaymentSheet.LinkConfiguration.Builder()
+                            .display(PaymentSheet.LinkConfiguration.Display.Never)
+                            .build()
+                    )
+                    .build(),
             )
         }
 
