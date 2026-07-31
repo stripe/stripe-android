@@ -27,6 +27,7 @@ internal class InlineAutocompleteController(
     private val eventListenerProvider: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
 ) {
     private var lastPredictionLine1: String? = null
+    private var lastObservedCountry: String? = null
     private var queryFlow: StateFlow<String>? = null
     private var countryFlow: StateFlow<String?>? = null
     private var observeJob: Job? = null
@@ -43,6 +44,7 @@ internal class InlineAutocompleteController(
         observeJob?.cancel()
         queryFlow = query
         countryFlow = country
+        lastObservedCountry = country.value ?: ""
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
@@ -52,9 +54,20 @@ internal class InlineAutocompleteController(
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         return@collectLatest
                     }
-                    if (q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE || !isCountrySupported(c)) {
+                    val countryChanged = c != lastObservedCountry
+                    if (countryChanged) {
+                        lastObservedCountry = c
+                    }
+                    if (!isCountrySupported(c) || q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE) {
                         lastPredictionLine1 = null
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+                        if (countryChanged) {
+                            eventListenerProvider()?.invoke(
+                                AutocompleteAddressInteractor.Event.OnValues(
+                                    mapOf(IdentifierSpec.Country to c)
+                                )
+                            )
+                        }
                         return@collectLatest
                     }
                     fetchPredictions(q, c)
