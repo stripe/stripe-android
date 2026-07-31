@@ -33,8 +33,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CardBrandFilter
-import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
@@ -42,7 +40,8 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
@@ -167,8 +166,7 @@ internal class PaymentSheetActivityTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val googlePayPaymentMethodLauncherFactory =
-        createGooglePayPaymentMethodLauncherFactory()
+    private val googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory()
 
     private val paymentLauncherFactory = PaymentLauncherFactory(
         hostActivityLauncher = mock(),
@@ -1378,19 +1376,11 @@ internal class PaymentSheetActivityTest {
     }
 
     private fun createGooglePayPaymentMethodLauncherFactory() =
-        object : GooglePayPaymentMethodLauncherFactory {
+        object : InternalGooglePayPaymentMethodLauncherFactory {
             override fun create(
-                lifecycleScope: CoroutineScope,
-                config: GooglePayPaymentMethodLauncher.Config,
-                readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
                 activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                skipReadyCheck: Boolean,
-                cardBrandFilter: CardBrandFilter,
-                cardFundingFilter: CardFundingFilter
-            ): GooglePayPaymentMethodLauncher {
-                val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
-                readyCallback.onReady(true)
-                return googlePayPaymentMethodLauncher
+            ): InternalGooglePayPaymentMethodLauncher {
+                return mock<InternalGooglePayPaymentMethodLauncher>()
             }
         }
 

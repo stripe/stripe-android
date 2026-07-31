@@ -4,7 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -15,7 +17,7 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.runResultTest
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
+import com.stripe.android.paymentsheet.utils.RecordingInternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
@@ -27,9 +29,9 @@ import org.mockito.kotlin.verify
 class GooglePayConfirmationFlowTest {
     @Test
     fun `on launch, should persist parameters & launch using launcher as expected`() = runTest {
-        val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
+        val internalGooglePayPaymentMethodLauncher = mock<InternalGooglePayPaymentMethodLauncher>()
 
-        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayPaymentMethodLauncher) {
+        RecordingInternalGooglePayPaymentMethodLauncherFactory.test(internalGooglePayPaymentMethodLauncher) {
             DummyActivityResultCaller.test {
                 val savedStateHandle = SavedStateHandle()
                 val mediator = ConfirmationMediator(
@@ -46,7 +48,12 @@ class GooglePayConfirmationFlowTest {
                 )
 
                 assertThat(awaitRegisterCall()).isNotNull()
-                assertThat(awaitNextRegisteredLauncher()).isNotNull()
+
+                val activityResultLauncher = awaitNextRegisteredLauncher()
+
+                assertThat(activityResultLauncher).isNotNull()
+                assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem().activityResultLauncher)
+                    .isEqualTo(activityResultLauncher)
 
                 val action = mediator.action(
                     option = GOOGLE_PAY_CONFIRMATION_OPTION,
@@ -59,21 +66,25 @@ class GooglePayConfirmationFlowTest {
 
                 launchAction.launch()
 
-                assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
-
                 val parameters = savedStateHandle
                     .get<Parameters<GooglePayConfirmationOption, EmptyConfirmationLauncherArgs>>("GooglePayParameters")
 
                 assertThat(parameters?.confirmationOption).isEqualTo(GOOGLE_PAY_CONFIRMATION_OPTION)
                 assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
-                verify(googlePayPaymentMethodLauncher, times(1)).present(
+                verify(internalGooglePayPaymentMethodLauncher, times(1)).present(
                     currencyCode = "usd",
                     amount = 1000L,
+                    config = EXPECTED_LAUNCHER_CONFIG,
+                    cardBrandFilter = DefaultCardBrandFilter,
+                    cardFundingFilter = DefaultCardFundingFilter,
+                    clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                     transactionId = "pi_12345",
                     label = null,
-                    clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                     isElements = true,
+                    publishableKey = null,
+                    displayItems = emptyList(),
+                    billingEmailOverride = null,
                 )
             }
         }
@@ -84,7 +95,8 @@ class GooglePayConfirmationFlowTest {
         confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = GooglePayConfirmationDefinition(
-            googlePayPaymentMethodLauncherFactory = RecordingGooglePayPaymentMethodLauncherFactory.noOp(mock()),
+            googlePayPaymentMethodLauncherFactory =
+                RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(mock()),
             userFacingLogger = null,
         ),
         launcherResult = GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHOD),
@@ -114,6 +126,20 @@ class GooglePayConfirmationFlowTest {
                 cardBrandFilter = DefaultCardBrandFilter,
                 cardFundingFilter = DefaultCardFundingFilter,
             ),
+        )
+
+        private val EXPECTED_LAUNCHER_CONFIG = GooglePayPaymentMethodLauncher.Config(
+            environment = GooglePayEnvironment.Test,
+            merchantCountryCode = "US",
+            merchantName = "Test merchant Inc.",
+            isEmailRequired = false,
+            billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                isRequired = true,
+                format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+                isPhoneNumberRequired = false,
+            ),
+            existingPaymentMethodRequired = true,
+            additionalEnabledNetworks = emptyList(),
         )
 
         private val PAYMENT_METHOD = PaymentMethodFactory.card()
