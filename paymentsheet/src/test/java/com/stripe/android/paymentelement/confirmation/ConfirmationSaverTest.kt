@@ -261,6 +261,8 @@ class ConfirmationSaverTest {
                 billingDetailsCollectionConfiguration = mock(),
                 cardBrandFilter = mock(),
                 cardFundingFilter = DefaultCardFundingFilter,
+                totalPriceStatus = null,
+                forceBillingAddressCollection = false,
             )
         )
 
@@ -330,6 +332,8 @@ class ConfirmationSaverTest {
                 billingDetailsCollectionConfiguration = mock(),
                 cardBrandFilter = mock(),
                 cardFundingFilter = DefaultCardFundingFilter,
+                totalPriceStatus = null,
+                forceBillingAddressCollection = false,
             )
         )
 

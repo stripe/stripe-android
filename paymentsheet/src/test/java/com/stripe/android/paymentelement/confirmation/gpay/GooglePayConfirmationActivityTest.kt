@@ -278,6 +278,8 @@ internal class GooglePayConfirmationActivityTest {
                     .BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
                 cardFundingFilter = DefaultCardFundingFilter,
+                totalPriceStatus = null,
+                forceBillingAddressCollection = false,
             ),
         )
 

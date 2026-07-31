@@ -2543,6 +2543,8 @@ internal class PaymentSheetViewModelTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                     cardFundingFilter = DefaultCardFundingFilter,
+                    totalPriceStatus = null,
+                    forceBillingAddressCollection = false,
                 ),
             )
         )
@@ -2586,6 +2588,8 @@ internal class PaymentSheetViewModelTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                     cardFundingFilter = DefaultCardFundingFilter,
+                    totalPriceStatus = null,
+                    forceBillingAddressCollection = false,
                 ),
             )
         )

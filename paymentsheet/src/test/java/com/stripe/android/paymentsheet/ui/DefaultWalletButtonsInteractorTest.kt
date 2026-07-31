@@ -616,6 +616,8 @@ class DefaultWalletButtonsInteractorTest {
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                         cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
                         cardFundingFilter = DefaultCardFundingFilter,
+                        totalPriceStatus = null,
+                        forceBillingAddressCollection = false,
                     ),
                 )
             )

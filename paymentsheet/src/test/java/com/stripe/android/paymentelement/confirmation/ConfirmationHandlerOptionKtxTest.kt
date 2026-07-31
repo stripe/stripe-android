@@ -300,6 +300,8 @@ class ConfirmationHandlerOptionKtxTest {
                     ),
                     cardFundingFilter = DefaultCardFundingFilter,
                     additionalEnabledNetworks = emptyList(),
+                    totalPriceStatus = null,
+                    forceBillingAddressCollection = false,
                 ),
             )
         )

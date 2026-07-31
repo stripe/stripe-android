@@ -167,6 +167,32 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createTransactionInfo honors final total price status override`() {
+        val transactionInfo = viewModel.createTransactionInfo(
+            ARGS.copy(
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            )
+        )
+
+        assertThat(transactionInfo.totalPriceStatus)
+            .isEqualTo(GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final)
+    }
+
+    @Test
+    fun `createTransactionInfo hides zero amount despite final total price status override`() {
+        val transactionInfo = viewModel.createTransactionInfo(
+            ARGS.copy(
+                amount = 0,
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            )
+        )
+
+        assertThat(transactionInfo.totalPriceStatus)
+            .isEqualTo(GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown)
+        assertThat(transactionInfo.totalPrice).isNull()
+    }
+
+    @Test
     fun `createTransactionInfo() with 0 amount in US and CA should expect TotalPriceStatus NOT_CURRENTLY_KNOWN`() {
         for (countryCode in listOf("us", "ca")) {
             val transactionInfo = viewModel.createTransactionInfo(
@@ -177,7 +203,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         merchantName = "Widget, Inc."
                     ),
                     currencyCode = "usd",
-                    amount = 0
+                    amount = 0,
+                    totalPriceStatus = null,
                 )
             )
             assertThat(transactionInfo)
@@ -205,7 +232,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         merchantName = "Widget, Inc."
                     ),
                     currencyCode = "usd",
-                    amount = 0
+                    amount = 0,
+                    totalPriceStatus = null,
                 )
             )
             assertThat(transactionInfo)
@@ -302,6 +330,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     amount = 1099,
                     label = null,
                     transactionId = null,
+                    totalPriceStatus = null,
                 )
             )
 
@@ -352,7 +381,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
                 checkoutSessionId = null,
-            )
+            ),
+            totalPriceStatus = null,
         )
         val REQUEST_OPTIONS = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

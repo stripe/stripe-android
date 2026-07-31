@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
@@ -51,6 +52,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import com.stripe.android.R as PaymentsCoreR
 
+@Suppress("LargeClass")
 class GooglePayConfirmationDefinitionTest {
     @get:Rule
     val allowNoExistingPaymentMethodForGooglePayRule = FeatureFlagTestRule(
@@ -305,6 +307,34 @@ class GooglePayConfirmationDefinitionTest {
     }
 
     @Test
+    fun `On launch force billing address collection requires minimum address`() = runTest {
+        RecordingGooglePayPaymentMethodLauncherFactory.test(mock()) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+
+            definition.launch(
+                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                        billingDetailsCollectionConfiguration =
+                        PaymentSheet.BillingDetailsCollectionConfiguration(),
+                        forceBillingAddressCollection = true,
+                    ),
+                ),
+                confirmationArgs = CONFIRMATION_PARAMETERS,
+                arguments = EmptyConfirmationLauncherArgs,
+                launcher = FakeActivityResultLauncher(),
+            )
+
+            val billingAddressConfig = createGooglePayPaymentMethodLauncherCalls
+                .awaitItem()
+                .config
+                .billingAddressConfig
+            assertThat(billingAddressConfig.isRequired).isTrue()
+            assertThat(billingAddressConfig.format)
+                .isEqualTo(GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min)
+        }
+    }
+
+    @Test
     fun `when allowNoExistingPaymentMethodForGooglePay is disabled, existingPaymentMethodRequired should be true`() =
         runExistingPaymentMethodRequiredTest(
             allowNoExistingPaymentMethodForGooglePay = false,
@@ -434,6 +464,7 @@ class GooglePayConfirmationDefinitionTest {
                 label = null,
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 isElements = true,
+                totalPriceStatus = null,
             )
         }
     }
@@ -471,6 +502,7 @@ class GooglePayConfirmationDefinitionTest {
                 label = "Merchant Inc.",
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 isElements = true,
+                totalPriceStatus = null,
             )
         }
     }
@@ -509,6 +541,7 @@ class GooglePayConfirmationDefinitionTest {
                 label = "Merchant Inc.",
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 isElements = true,
+                totalPriceStatus = null,
             )
         }
     }
@@ -560,6 +593,38 @@ class GooglePayConfirmationDefinitionTest {
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 isElements = true,
                 displayItems = displayItems,
+                totalPriceStatus = null,
+            )
+        }
+    }
+
+    @Test
+    fun `On launch passes total price status to present`() = runTest {
+        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+
+        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+
+            definition.launch(
+                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                        totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+                    ),
+                ),
+                confirmationArgs = CONFIRMATION_PARAMETERS,
+                arguments = EmptyConfirmationLauncherArgs,
+                launcher = FakeActivityResultLauncher(),
+            )
+
+            assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
+            verify(googlePayLauncher).present(
+                currencyCode = "usd",
+                amount = 1000L,
+                transactionId = "pi_12345",
+                label = null,
+                clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
             )
         }
     }
@@ -736,6 +801,8 @@ class GooglePayConfirmationDefinitionTest {
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
                 cardFundingFilter = DefaultCardFundingFilter,
+                totalPriceStatus = null,
+                forceBillingAddressCollection = false,
             ),
         )
 

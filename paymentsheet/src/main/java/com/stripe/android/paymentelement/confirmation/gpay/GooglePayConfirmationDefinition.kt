@@ -102,6 +102,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             isElements = true,
             displayItems = config.displayItems,
             billingEmailOverride = config.billingEmailOverride,
+            totalPriceStatus = config.totalPriceStatus,
         )
     }
 
@@ -160,7 +161,9 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 merchantName = confirmationArgs.paymentMethodMetadata.sellerBusinessName
                     ?: config.merchantName,
                 isEmailRequired = config.isEmailRequired,
-                billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                billingAddressConfig = config.billingDetailsCollectionConfiguration
+                    .toBillingAddressConfig()
+                    .withRequiredAddress(config.forceBillingAddressCollection),
                 existingPaymentMethodRequired = !FeatureFlags.allowNoExistingPaymentMethodForGooglePay.isEnabled,
                 additionalEnabledNetworks = config.additionalEnabledNetworks
             ),
@@ -176,5 +179,19 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
 
     private fun StripeIntent.asPaymentIntent(): PaymentIntent? {
         return this as? PaymentIntent
+    }
+
+    private fun GooglePayPaymentMethodLauncher.BillingAddressConfig.withRequiredAddress(
+        forceBillingAddressCollection: Boolean,
+    ): GooglePayPaymentMethodLauncher.BillingAddressConfig {
+        return if (forceBillingAddressCollection && !isRequired) {
+            GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                isRequired = true,
+                format = format,
+                isPhoneNumberRequired = isPhoneNumberRequired,
+            )
+        } else {
+            this
+        }
     }
 }

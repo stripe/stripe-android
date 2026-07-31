@@ -372,6 +372,8 @@ internal class DefaultFlowControllerTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                     cardFundingFilter = DefaultCardFundingFilter,
+                    totalPriceStatus = null,
+                    forceBillingAddressCollection = false,
                 ),
             )
         )
@@ -1409,7 +1411,9 @@ internal class DefaultFlowControllerTest {
                     merchantName = config.merchantDisplayName,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
-                    cardFundingFilter = DefaultCardFundingFilter
+                    cardFundingFilter = DefaultCardFundingFilter,
+                    totalPriceStatus = null,
+                    forceBillingAddressCollection = false,
                 ),
             )
         )
@@ -2073,6 +2077,8 @@ internal class DefaultFlowControllerTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                     cardFundingFilter = DefaultCardFundingFilter,
+                    totalPriceStatus = null,
+                    forceBillingAddressCollection = false,
                 ),
             )
         )

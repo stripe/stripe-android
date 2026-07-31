@@ -74,6 +74,7 @@ class GooglePayConfirmationFlowTest {
                     label = null,
                     clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                     isElements = true,
+                    totalPriceStatus = null,
                 )
             }
         }
@@ -113,6 +114,8 @@ class GooglePayConfirmationFlowTest {
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
                 cardFundingFilter = DefaultCardFundingFilter,
+                totalPriceStatus = null,
+                forceBillingAddressCollection = false,
             ),
         )
 
