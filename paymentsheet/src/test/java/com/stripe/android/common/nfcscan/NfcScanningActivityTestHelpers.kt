@@ -12,7 +12,6 @@ import kotlinx.coroutines.runBlocking
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mockStatic
 import org.robolectric.Shadows.shadowOf
-import org.robolectric.shadows.ShadowNfcAdapter
 
 internal object NfcScanningActivityTestHelpers {
     fun launchScenario(
@@ -21,7 +20,11 @@ internal object NfcScanningActivityTestHelpers {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         block: suspend NfcScanningActivityScenario.() -> Unit,
     ) {
-        val nfcAdapter = getEnabledNfcAdapter(context)
+        shadowOf(context.packageManager).setSystemFeature(PackageManager.FEATURE_NFC, true)
+
+        val nfcAdapter = NfcAdapter.getDefaultAdapter(context)
+            ?.let { shadowOf(it) }
+            ?.also { it.setEnabled(true) }
 
         val fakeIsoDep = FakeIsoDep()
         val intent = NfcScanningContract.createIntent(
@@ -51,11 +54,5 @@ internal object NfcScanningActivityTestHelpers {
                 }
             }
         }
-    }
-
-    fun getEnabledNfcAdapter(context: Context): ShadowNfcAdapter? {
-        shadowOf(context.packageManager).setSystemFeature(PackageManager.FEATURE_NFC, true)
-
-        return NfcAdapter.getDefaultAdapter(context)?.let { shadowOf(it) }?.also { it.setEnabled(true) }
     }
 }
