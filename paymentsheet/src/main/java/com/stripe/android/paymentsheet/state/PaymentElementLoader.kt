@@ -113,20 +113,25 @@ internal interface PaymentElementLoader {
         abstract fun validate()
         abstract fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata
 
-        fun walletsDisabledReason(): WalletsDisabledReason? {
-            val shouldDisable = (this as? CheckoutSession)
-                ?.checkoutSessionResponse
-                ?.shouldDisableWalletsForAutomaticTaxBilling == true
+        fun googlePayDisabledReason(): GooglePayDisabledReason? {
+            val checkoutSession = this as? CheckoutSession ?: return null
+            val shouldDisable = checkoutSession
+                .checkoutSessionResponse
+                .shouldDisableWalletsForAutomaticTaxBilling &&
+                (
+                    !checkoutSession.hasQualifiedDefaultBillingTaxEstimate ||
+                        checkoutSession.checkoutSessionResponse.taxStatus != CheckoutSessionResponse.TaxStatus.READY
+                )
 
             return if (shouldDisable) {
-                WalletsDisabledReason.AutomaticTaxBillingAddress
+                GooglePayDisabledReason.AutomaticTaxBillingAddress
             } else {
                 null
             }
         }
 
         /**
-         * Deliberately narrower than [walletsDisabledReason]: true only while an address is
+         * True only while an address is
          * still needed, not for the rest of the session once tax is satisfied.
          */
         fun requiresBillingAddressForAutomaticTax(): Boolean {
@@ -135,7 +140,7 @@ internal interface PaymentElementLoader {
                 CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
         }
 
-        enum class WalletsDisabledReason {
+        enum class GooglePayDisabledReason {
             AutomaticTaxBillingAddress;
 
             val googlePayWarning: String
@@ -235,6 +240,7 @@ internal interface PaymentElementLoader {
         data class CheckoutSession(
             val instancesKey: String,
             val checkoutSessionResponse: CheckoutSessionResponse,
+            val hasQualifiedDefaultBillingTaxEstimate: Boolean,
         ) : InitializationMode() {
             override fun validate() {
                 // Nothing to validate — the response was already loaded successfully.
@@ -656,7 +662,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
-        val walletsDisabledReason = initializationMode.walletsDisabledReason()
+        val googlePayDisabledReason = initializationMode.googlePayDisabledReason()
 
         if (!elementsSession.isGooglePayEnabled) {
             userFacingLogger.logWarningWithoutPii(
@@ -666,8 +672,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             userFacingLogger.logWarningWithoutPii(
                 "GooglePayConfiguration is not set."
             )
-        } else if (walletsDisabledReason != null) {
-            userFacingLogger.logWarningWithoutPii(walletsDisabledReason.googlePayWarning)
+        } else if (googlePayDisabledReason != null) {
+            userFacingLogger.logWarningWithoutPii(googlePayDisabledReason.googlePayWarning)
             return false
         } else if (!isGooglePaySupportedByConfiguration.await()) {
             @Suppress("MaxLineLength")

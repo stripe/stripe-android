@@ -171,6 +171,7 @@ internal class CheckoutControllerStateHolderTest {
         // freshly constructed holder, and every selection projection must reflect it.
         val restored = committedState(
             paymentSelection = PaymentSelection.GooglePay,
+            hasQualifiedDefaultBillingTaxEstimate = true,
             temporarySelection = "card",
             previousNewSelections = Bundle().apply {
                 putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
@@ -184,6 +185,7 @@ internal class CheckoutControllerStateHolderTest {
         )
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.state?.hasQualifiedDefaultBillingTaxEstimate).isTrue()
         assertThat(stateHolder.temporarySelection.value).isEqualTo("card")
         assertThat(stateHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
@@ -191,11 +193,13 @@ internal class CheckoutControllerStateHolderTest {
 
     private fun committedState(
         paymentSelection: PaymentSelection? = null,
+        hasQualifiedDefaultBillingTaxEstimate: Boolean = false,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        hasQualifiedDefaultBillingTaxEstimate = hasQualifiedDefaultBillingTaxEstimate,
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),

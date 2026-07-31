@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import android.content.res.Resources
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -15,6 +16,7 @@ import javax.inject.Named
 internal class CheckoutConfirmationPerformer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val resources: Resources,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
@@ -32,7 +34,12 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-            googlePayDisplayItems = GooglePayDisplayItemsFactory.create(state.paymentMethodMetadata),
+            googlePayPresentation = GooglePayDisplayItemsFactory.createCheckoutPresentation(
+                resources = resources,
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                hasQualifiedDefaultBillingTaxEstimate = state.hasQualifiedDefaultBillingTaxEstimate,
+            ),
+            googlePayIsEmailRequired = configuration.billingDetailsCollectionConfiguration.collectsEmail,
             googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                 configuration = configuration,
                 paymentMethodMetadata = state.paymentMethodMetadata,

@@ -1,12 +1,17 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class GooglePayDisplayItemsFactoryTest {
 
     @Test
@@ -175,6 +180,84 @@ class GooglePayDisplayItemsFactoryTest {
         ).inOrder()
     }
 
+    @Test
+    fun `qualified automatic tax billing combines exclusive taxes into estimated presentation`() {
+        val presentation = createCheckoutPresentation(
+            amount = 1300L,
+            taxAmounts = listOf(
+                taxAmount(amount = 100L, displayName = "State tax", percentage = 10.0),
+                taxAmount(amount = 50L, displayName = "Local tax", percentage = 5.0),
+            ),
+        )
+
+        assertThat(presentation.displayItems).containsExactly(
+            displayItem(
+                label = "Cost excluding tax",
+                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+                price = 1150L,
+            ),
+            displayItem(
+                label = "Estimated tax",
+                type = GooglePayJsonFactory.DisplayItem.Type.TAX,
+                price = 150L,
+            ),
+        ).inOrder()
+        assertThat(presentation.customLabel).isEqualTo("Estimated total (final tax may vary)")
+        assertThat(presentation.totalPriceStatus)
+            .isEqualTo(GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated)
+        assertThat(presentation.forceBillingAddressCollection).isTrue()
+    }
+
+    @Test
+    fun `estimated presentation subtracts only exclusive tax in mixed tax summary`() {
+        val presentation = createCheckoutPresentation(
+            amount = 1200L,
+            taxAmounts = listOf(
+                taxAmount(amount = 200L, displayName = "VAT", percentage = 20.0, inclusive = true),
+                taxAmount(amount = 50L, displayName = "Local tax", percentage = 5.0),
+            ),
+        )
+
+        assertThat(presentation.displayItems).containsExactly(
+            displayItem("Cost excluding tax", GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL, 1150L),
+            displayItem("Estimated tax", GooglePayJsonFactory.DisplayItem.Type.TAX, 50L),
+        ).inOrder()
+        assertThat(presentation.totalPriceStatus)
+            .isEqualTo(GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated)
+    }
+
+    @Test
+    fun `zero exclusive tax entry still uses estimated presentation`() {
+        val presentation = createCheckoutPresentation(
+            amount = 1000L,
+            taxAmounts = listOf(
+                taxAmount(amount = 0L, displayName = "Sales tax", percentage = 0.0),
+            ),
+        )
+
+        assertThat(presentation.displayItems).containsExactly(
+            displayItem("Cost excluding tax", GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL, 1000L),
+            displayItem("Estimated tax", GooglePayJsonFactory.DisplayItem.Type.TAX, 0L),
+        ).inOrder()
+        assertThat(presentation.totalPriceStatus)
+            .isEqualTo(GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated)
+    }
+
+    @Test
+    fun `all inclusive or empty tax summary uses final presentation`() {
+        listOf(
+            listOf(taxAmount(amount = 200L, displayName = "VAT", percentage = 20.0, inclusive = true)),
+            emptyList(),
+        ).forEach { taxAmounts ->
+            val presentation = createCheckoutPresentation(amount = 1000L, taxAmounts = taxAmounts)
+
+            assertThat(presentation.totalPriceStatus)
+                .isEqualTo(GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final)
+            assertThat(presentation.customLabel).isNull()
+            assertThat(presentation.forceBillingAddressCollection).isTrue()
+        }
+    }
+
     private fun createAndGetDisplayItems(
         lineItems: List<CheckoutSessionResponse.LineItem>,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
@@ -187,6 +270,31 @@ class GooglePayDisplayItemsFactoryTest {
         )
 
         return GooglePayDisplayItemsFactory.create(metadata)
+    }
+
+    private fun createCheckoutPresentation(
+        amount: Long,
+        taxAmounts: List<CheckoutSessionResponse.TaxAmount>,
+    ): GooglePayDisplayItemsFactory.Presentation {
+        val metadata = PaymentMethodMetadataFactory.create(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                amount = amount,
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                taxStatus = CheckoutSessionResponse.TaxStatus.READY,
+                totalSummary = totalSummary(
+                    subtotal = amount,
+                    totalDueToday = amount,
+                    totalAmountDue = amount,
+                    taxAmounts = taxAmounts,
+                ),
+            ),
+        )
+        return GooglePayDisplayItemsFactory.createCheckoutPresentation(
+            resources = ApplicationProvider.getApplicationContext<Context>().resources,
+            paymentMethodMetadata = metadata,
+            hasQualifiedDefaultBillingTaxEstimate = true,
+        )
     }
 
     private companion object {

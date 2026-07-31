@@ -58,6 +58,19 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `loadInitial and reload preserve qualified default billing tax estimate`() = runScenario {
+        loader.loadInitial(
+            configuration = defaultConfiguration(),
+            checkoutSessionResponse = response(),
+            hasQualifiedDefaultBillingTaxEstimate = true,
+        )
+
+        assertThat(stateHolder.state?.hasQualifiedDefaultBillingTaxEstimate).isTrue()
+        loader.reload(requireNotNull(stateHolder.state))
+        assertThat(stateHolder.state?.hasQualifiedDefaultBillingTaxEstimate).isTrue()
+    }
+
+    @Test
     fun `loadInitial seeds collected details with default billing address`() = runScenario {
         val address = CheckoutController.Address()
             .city(" San Francisco ")
@@ -243,6 +256,17 @@ internal class CheckoutStateLoaderTest {
 
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
 
+    private suspend fun CheckoutStateLoader.loadInitial(
+        configuration: CheckoutController.Configuration.State,
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ) {
+        loadInitial(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            hasQualifiedDefaultBillingTaxEstimate = false,
+        )
+    }
+
     private fun response(
         merchantCountry: String? = "US",
     ) = CheckoutSessionResponseFactory.create(merchantCountry = merchantCountry)
@@ -262,6 +286,7 @@ internal class CheckoutStateLoaderTest {
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
+        hasQualifiedDefaultBillingTaxEstimate = false,
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),

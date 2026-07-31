@@ -41,6 +41,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         val googlePayButton = ExpressButton.GooglePay.create(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             googlePayConfiguration = googlePayConfiguration,
+            forceBillingAddressCollection = false,
         )
         reporter.onEceWalletTapped(googlePayButton)
 

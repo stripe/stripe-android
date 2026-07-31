@@ -1,7 +1,9 @@
 package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -12,6 +14,8 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import kotlinx.coroutines.test.runTest
@@ -60,6 +64,49 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm applies qualified automatic tax Google Pay presentation`() {
+        val response = CheckoutSessionResponseFactory.create(
+            amount = 1100L,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            taxStatus = CheckoutSessionResponse.TaxStatus.READY,
+            totalSummary = CheckoutSessionResponse.TotalSummaryResponse(
+                subtotal = 1000L,
+                totalDueToday = 1100L,
+                totalAmountDue = 1100L,
+                discountAmounts = emptyList(),
+                taxAmounts = listOf(
+                    CheckoutSessionResponse.TaxAmount(
+                        amount = 100L,
+                        inclusive = false,
+                        displayName = "Sales tax",
+                        percentage = 10.0,
+                    )
+                ),
+                shippingRate = null,
+                appliedBalance = null,
+            ),
+        )
+        val state = googlePayState(paymentSelection = PaymentSelection.GooglePay).copy(
+            checkoutSessionResponse = response,
+            hasQualifiedDefaultBillingTaxEstimate = true,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(checkoutSessionResponse = response),
+        )
+
+        runScenario(state = state) {
+            performer.confirm()
+
+            val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+                as GooglePayConfirmationOption
+            assertThat(option.config.customLabel).isEqualTo("Estimated total (final tax may vary)")
+            assertThat(option.config.totalPriceStatus)
+                .isEqualTo(GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated)
+            assertThat(option.config.forceBillingAddressCollection).isTrue()
+            assertThat(option.config.displayItems).hasSize(2)
+        }
+    }
+
+    @Test
     fun `confirm starts confirmation with a Link option`() = runScenario(
         state = CheckoutControllerStateFactory.create(
             paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
@@ -105,6 +152,7 @@ internal class CheckoutConfirmationPerformerTest {
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
             stateHolder = stateHolder,
+            resources = ApplicationProvider.getApplicationContext<android.content.Context>().resources,
             statusBarColor = statusBarColor,
             viewModelScope = backgroundScope,
         )

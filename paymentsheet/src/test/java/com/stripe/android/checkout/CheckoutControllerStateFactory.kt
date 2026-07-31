@@ -20,6 +20,7 @@ internal object CheckoutControllerStateFactory {
     fun create(
         configuration: CheckoutController.Configuration.State = CheckoutController.Configuration().build(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        hasQualifiedDefaultBillingTaxEstimate: Boolean = false,
         flagImages: Map<String, Bitmap>? = null,
         collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -32,6 +33,7 @@ internal object CheckoutControllerStateFactory {
         return CheckoutControllerState(
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
+            hasQualifiedDefaultBillingTaxEstimate = hasQualifiedDefaultBillingTaxEstimate,
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = paymentMethodMetadata,

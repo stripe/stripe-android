@@ -23,6 +23,7 @@ internal object ExpressCheckoutElementInteractorStateFactory {
                 googlePayConfiguration = GooglePayConfiguration(
                     GooglePayConfiguration.Environment.Test,
                 ).build(),
+                forceBillingAddressCollection = false,
             ),
         ),
     ): ExpressCheckoutElementInteractor.State {

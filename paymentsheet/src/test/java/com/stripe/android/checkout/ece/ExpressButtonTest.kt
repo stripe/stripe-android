@@ -3,6 +3,7 @@
 package com.stripe.android.checkout.ece
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -131,6 +132,41 @@ internal class ExpressButtonTest {
     }
 
     @Test
+    fun `GooglePay create forces minimum billing address collection for tax estimate`() {
+        val button = createGooglePayExpressButton(forceBillingAddressCollection = true)
+
+        assertThat(button.billingAddressParameters).isEqualTo(
+            GooglePayJsonFactory.BillingAddressParameters(
+                isRequired = true,
+                format = GooglePayJsonFactory.BillingAddressParameters.Format.Min,
+                isPhoneNumberRequired = false,
+            )
+        )
+    }
+
+    @Test
+    fun `GooglePay create preserves full address and phone when forcing billing collection`() {
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        )
+        val button = createGooglePayExpressButton(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = configuration,
+            ),
+            forceBillingAddressCollection = true,
+        )
+
+        assertThat(button.billingAddressParameters).isEqualTo(
+            GooglePayJsonFactory.BillingAddressParameters(
+                isRequired = true,
+                format = GooglePayJsonFactory.BillingAddressParameters.Format.Full,
+                isPhoneNumberRequired = true,
+            )
+        )
+    }
+
+    @Test
     fun `GooglePay create uses button type from google pay configuration`() {
         val button = createGooglePayExpressButton(
             googlePayConfiguration = createGooglePayConfiguration(
@@ -225,11 +261,13 @@ internal class ExpressButtonTest {
 
     private fun createGooglePayExpressButton(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration()
+        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration(),
+        forceBillingAddressCollection: Boolean = false,
     ): ExpressButton.GooglePay {
         return ExpressButton.GooglePay.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            googlePayConfiguration = googlePayConfiguration
+            googlePayConfiguration = googlePayConfiguration,
+            forceBillingAddressCollection = forceBillingAddressCollection,
         )
     }
 

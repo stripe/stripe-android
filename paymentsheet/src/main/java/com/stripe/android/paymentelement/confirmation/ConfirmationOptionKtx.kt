@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -23,6 +24,29 @@ internal fun PaymentSelection.toConfirmationOption(
     googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
     googlePayBillingEmailOverride: String? = null,
 ): ConfirmationHandler.Option? {
+    return toConfirmationOption(
+        configuration = configuration,
+        linkConfiguration = linkConfiguration,
+        cardFundingFilter = cardFundingFilter,
+        googlePayPresentation = GooglePayDisplayItemsFactory.Presentation(
+            displayItems = googlePayDisplayItems,
+            customLabel = null,
+            totalPriceStatus = null,
+            forceBillingAddressCollection = false,
+        ),
+        googlePayIsEmailRequired = googlePayIsEmailRequired,
+        googlePayBillingEmailOverride = googlePayBillingEmailOverride,
+    )
+}
+
+internal fun PaymentSelection.toConfirmationOption(
+    configuration: CommonConfiguration,
+    linkConfiguration: LinkConfiguration?,
+    cardFundingFilter: CardFundingFilter,
+    googlePayPresentation: GooglePayDisplayItemsFactory.Presentation,
+    googlePayIsEmailRequired: Boolean,
+    googlePayBillingEmailOverride: String?,
+): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
@@ -33,7 +57,7 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.GooglePay -> toConfirmationOption(
             configuration,
             cardFundingFilter,
-            googlePayDisplayItems,
+            googlePayPresentation,
             isEmailRequired = googlePayIsEmailRequired,
             billingEmailOverride = googlePayBillingEmailOverride,
         )
@@ -127,7 +151,7 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
     cardFundingFilter: CardFundingFilter,
-    displayItems: List<GooglePayJsonFactory.DisplayItem>,
+    presentation: GooglePayDisplayItemsFactory.Presentation,
     isEmailRequired: Boolean,
     billingEmailOverride: String?,
 ): GooglePayConfirmationOption? {
@@ -139,16 +163,16 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 merchantCountryCode = googlePay.countryCode,
                 merchantCurrencyCode = googlePay.currencyCode,
                 customAmount = googlePay.amount,
-                customLabel = googlePay.label,
+                customLabel = presentation.customLabel ?: googlePay.label,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 additionalEnabledNetworks = googlePay.additionalEnabledNetworks,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 cardFundingFilter = cardFundingFilter,
-                displayItems = displayItems,
+                displayItems = presentation.displayItems,
                 isEmailRequired = isEmailRequired,
                 billingEmailOverride = billingEmailOverride,
-                totalPriceStatus = null,
-                forceBillingAddressCollection = false,
+                totalPriceStatus = presentation.totalPriceStatus,
+                forceBillingAddressCollection = presentation.forceBillingAddressCollection,
             ),
         )
     }

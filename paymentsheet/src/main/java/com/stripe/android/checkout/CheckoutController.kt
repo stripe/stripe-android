@@ -20,6 +20,7 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
@@ -52,6 +53,7 @@ class CheckoutController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
+    private val errorReporter: ErrorReporter,
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
@@ -86,13 +88,55 @@ class CheckoutController @Inject internal constructor(
             checkoutSessionRepository.init(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
-            ).mapCatching { response ->
+            ).mapCatching { initialResponse ->
+                val estimateResult = estimateTaxFromDefaultBillingAddress(
+                    sessionId = sessionId,
+                    configuration = configurationState,
+                    initialResponse = initialResponse,
+                )
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
-                    checkoutSessionResponse = response,
+                    checkoutSessionResponse = estimateResult.response,
+                    hasQualifiedDefaultBillingTaxEstimate = estimateResult.isQualified,
                 )
             }
         }
+    }
+
+    private suspend fun estimateTaxFromDefaultBillingAddress(
+        sessionId: String,
+        configuration: Configuration.State,
+        initialResponse: CheckoutSessionResponse,
+    ): DefaultBillingTaxEstimateResult {
+        val defaultBillingAddress = configuration.defaultBillingAddress
+        val shouldEstimate = initialResponse.automaticTaxEnabled &&
+            initialResponse.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING &&
+            defaultBillingAddress != null
+        if (!shouldEstimate) {
+            return DefaultBillingTaxEstimateResult(
+                response = initialResponse,
+                isQualified = false,
+            )
+        }
+
+        return checkoutSessionRepository.updateTaxRegion(sessionId, defaultBillingAddress).fold(
+            onSuccess = { response ->
+                DefaultBillingTaxEstimateResult(
+                    response = response,
+                    isQualified = response.taxStatus == CheckoutSessionResponse.TaxStatus.READY,
+                )
+            },
+            onFailure = { error ->
+                errorReporter.report(
+                    errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_DEFAULT_BILLING_TAX_ESTIMATE_FAILURE,
+                    additionalNonPiiParams = ErrorReporter.getAdditionalParamsFromError(error),
+                )
+                DefaultBillingTaxEstimateResult(
+                    response = initialResponse,
+                    isQualified = false,
+                )
+            },
+        )
     }
 
     /**
@@ -300,6 +344,11 @@ class CheckoutController @Inject internal constructor(
 
     private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
         IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
+    )
+
+    private data class DefaultBillingTaxEstimateResult(
+        val response: CheckoutSessionResponse,
+        val isQualified: Boolean,
     )
 
     /**

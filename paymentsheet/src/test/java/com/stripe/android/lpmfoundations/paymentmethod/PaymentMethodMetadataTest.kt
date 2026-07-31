@@ -2179,6 +2179,7 @@ internal class PaymentMethodMetadataTest {
     fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax true when checkout session requires it`() {
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                hasQualifiedDefaultBillingTaxEstimate = false,
                 instancesKey = "key",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
@@ -2194,6 +2195,7 @@ internal class PaymentMethodMetadataTest {
     fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax false when tax status is ready`() {
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                hasQualifiedDefaultBillingTaxEstimate = false,
                 instancesKey = "key",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     taxStatus = CheckoutSessionResponse.TaxStatus.READY,

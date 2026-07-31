@@ -1,6 +1,7 @@
 package com.stripe.android.checkout.ece
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
@@ -165,6 +166,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             googlePayConfiguration = GooglePayConfiguration(
                 GooglePayConfiguration.Environment.Test,
             ).build(),
+            forceBillingAddressCollection = false,
         )
     }
 
@@ -183,6 +185,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
+            resources = ApplicationProvider.getApplicationContext<android.content.Context>().resources,
             statusBarColor = null,
             viewModelScope = backgroundScope,
         )

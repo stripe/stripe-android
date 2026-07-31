@@ -32,6 +32,7 @@ internal class CreateCustomerStateTest {
             customer = customer,
         )
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
         )
@@ -60,6 +61,7 @@ internal class CreateCustomerStateTest {
         )
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(customer = customer)
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
         )

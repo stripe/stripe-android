@@ -51,7 +51,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             ),
             ExpressButton.GooglePay.create(
                 paymentMethodMetadata = paymentMethodMetadata,
-                googlePayConfiguration = googlePayConfiguration
+                googlePayConfiguration = googlePayConfiguration,
+                forceBillingAddressCollection = false,
             ),
         )
     }
@@ -131,6 +132,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 ExpressButton.GooglePay.create(
                     paymentMethodMetadata = paymentMethodMetadata,
                     googlePayConfiguration = googlePayConfiguration,
+                    forceBillingAddressCollection = false,
                 ),
             )
         }

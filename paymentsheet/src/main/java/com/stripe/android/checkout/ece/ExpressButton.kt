@@ -75,14 +75,30 @@ internal sealed interface ExpressButton {
             fun create(
                 paymentMethodMetadata: PaymentMethodMetadata,
                 googlePayConfiguration: GooglePayConfiguration.State,
+                forceBillingAddressCollection: Boolean,
             ): GooglePay {
                 return GooglePay(
                     allowCreditCards = paymentMethodMetadata.cardFundingFilter.isAccepted(CardFunding.Credit),
                     googlePayButtonType = googlePayConfiguration.buttonType.asGooglePayButtonType(),
                     cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
                     cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-                    billingAddressParameters = paymentMethodMetadata.billingDetailsCollectionConfiguration
-                        .toBillingAddressParameters(),
+                    billingAddressParameters = paymentMethodMetadata.billingDetailsCollectionConfiguration.let {
+                        if (forceBillingAddressCollection) {
+                            GooglePayJsonFactory.BillingAddressParameters(
+                                isRequired = true,
+                                format = when (it.address) {
+                                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full ->
+                                        GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never ->
+                                        GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                                },
+                                isPhoneNumberRequired = it.collectsPhone,
+                            )
+                        } else {
+                            it.toBillingAddressParameters()
+                        }
+                    },
                     additionalEnabledNetworks = googlePayConfiguration.additionalEnabledNetworks,
                 )
             }

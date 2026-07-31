@@ -29,6 +29,7 @@ import kotlinx.parcelize.Parcelize
 internal data class CheckoutControllerState(
     val configuration: CheckoutController.Configuration.State,
     val checkoutSessionResponse: CheckoutSessionResponse,
+    val hasQualifiedDefaultBillingTaxEstimate: Boolean,
     val flagImages: Map<String, Bitmap>?,
     val collectedDetails: CheckoutCollectedDetails,
     val paymentMethodMetadata: PaymentMethodMetadata,

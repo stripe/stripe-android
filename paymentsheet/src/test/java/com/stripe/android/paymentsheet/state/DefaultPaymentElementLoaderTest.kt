@@ -280,6 +280,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `load with CheckoutSession mode and non-null customer returns failure`() = runScenario {
         val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                hasQualifiedDefaultBillingTaxEstimate = false,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
             ),
@@ -373,6 +374,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    hasQualifiedDefaultBillingTaxEstimate = false,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
@@ -397,6 +399,70 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `load with qualified ready automatic tax billing enables google pay`() = runScenario {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+        )
+        val response = createCheckoutSessionResponse(
+            canDetachPaymentMethod = true,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            taxStatus = CheckoutSessionResponse.TaxStatus.READY,
+        )
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                hasQualifiedDefaultBillingTaxEstimate = true,
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = response,
+            ),
+            PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
+                .build(),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
+        consumeLoadingEvents()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `load with qualified non-ready automatic tax billing disables google pay`() = runScenario {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+        )
+        val response = createCheckoutSessionResponse(
+            canDetachPaymentMethod = true,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
+        )
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                hasQualifiedDefaultBillingTaxEstimate = true,
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = response,
+            ),
+            PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
+                .build(),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isFalse()
+        consumeLoadingEvents()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `load with checkout session automatic tax billing and no google pay config logs missing config`() = runScenario {
         val userFacingLogger = FakeUserFacingLogger()
         val loader = createPaymentElementLoader(
@@ -414,6 +480,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    hasQualifiedDefaultBillingTaxEstimate = false,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
@@ -1805,6 +1872,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession validate is a no-op`() = runScenario {
         PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         ).validate()
@@ -1813,6 +1881,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession id property returns id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
@@ -1822,6 +1891,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `integrationMetadata returns checkout session with id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
@@ -3115,6 +3185,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             val state = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    hasQualifiedDefaultBillingTaxEstimate = false,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
@@ -5048,6 +5119,7 @@ internal class DefaultPaymentElementLoaderTest {
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         automaticTaxEnabled: Boolean = false,
         taxAddressSource: CheckoutSessionResponse.TaxAddressSource? = null,
+        taxStatus: CheckoutSessionResponse.TaxStatus = CheckoutSessionResponse.TaxStatus.READY,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
             id = DEFAULT_CHECKOUT_SESSION_ID,
@@ -5080,6 +5152,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             automaticTaxEnabled = automaticTaxEnabled,
             taxAddressSource = taxAddressSource,
+            taxStatus = taxStatus,
         )
     }
 

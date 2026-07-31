@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -62,6 +63,11 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
                         googlePayConfiguration = expressButtonType.googlePayConfiguration,
+                        forceBillingAddressCollection = state.hasQualifiedDefaultBillingTaxEstimate &&
+                            state.checkoutSessionResponse.automaticTaxEnabled &&
+                            state.checkoutSessionResponse.taxAddressSource ==
+                            CheckoutSessionResponse.TaxAddressSource.BILLING &&
+                            state.checkoutSessionResponse.taxStatus == CheckoutSessionResponse.TaxStatus.READY,
                     )
                 }
             },

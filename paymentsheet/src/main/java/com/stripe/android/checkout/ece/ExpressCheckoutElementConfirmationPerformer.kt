@@ -1,5 +1,6 @@
 package com.stripe.android.checkout.ece
 
+import android.content.res.Resources
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.common.model.asCommonConfiguration
@@ -25,6 +26,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     private val confirmationHandler: ConfirmationHandler,
     private val eventReporter: ExpressCheckoutElementEventReporter,
     private val errorReporter: ErrorReporter,
+    private val resources: Resources,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : ExpressCheckoutElementConfirmationPerformer {
@@ -68,7 +70,12 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-            googlePayDisplayItems = GooglePayDisplayItemsFactory.create(state.paymentMethodMetadata),
+            googlePayPresentation = GooglePayDisplayItemsFactory.createCheckoutPresentation(
+                resources = resources,
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                hasQualifiedDefaultBillingTaxEstimate = state.hasQualifiedDefaultBillingTaxEstimate,
+            ),
+            googlePayIsEmailRequired = configuration.billingDetailsCollectionConfiguration.collectsEmail,
             googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                 configuration = configuration,
                 paymentMethodMetadata = state.paymentMethodMetadata,

@@ -23,10 +23,12 @@ internal class CheckoutStateLoader @Inject constructor(
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
+        hasQualifiedDefaultBillingTaxEstimate: Boolean,
     ) {
         commit(
             configuration = configuration,
             response = checkoutSessionResponse,
+            hasQualifiedDefaultBillingTaxEstimate = hasQualifiedDefaultBillingTaxEstimate,
             collectedDetails = CheckoutCollectedDetails(
                 billingAddress = configuration.defaultBillingAddress,
             ),
@@ -38,6 +40,7 @@ internal class CheckoutStateLoader @Inject constructor(
         commit(
             configuration = state.configuration,
             response = state.checkoutSessionResponse,
+            hasQualifiedDefaultBillingTaxEstimate = state.hasQualifiedDefaultBillingTaxEstimate,
             collectedDetails = state.collectedDetails,
             carryForward = CarryForward.from(state),
         )
@@ -46,6 +49,7 @@ internal class CheckoutStateLoader @Inject constructor(
     private suspend fun commit(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
+        hasQualifiedDefaultBillingTaxEstimate: Boolean,
         collectedDetails: CheckoutCollectedDetails,
         carryForward: CarryForward,
     ) {
@@ -63,6 +67,7 @@ internal class CheckoutStateLoader @Inject constructor(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = response.id,
                 checkoutSessionResponse = response,
+                hasQualifiedDefaultBillingTaxEstimate = hasQualifiedDefaultBillingTaxEstimate,
             ),
             integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
                 isRowSelectionImmediateAction = false,
@@ -89,6 +94,7 @@ internal class CheckoutStateLoader @Inject constructor(
         stateHolder.state = CheckoutControllerState(
             configuration = configuration,
             checkoutSessionResponse = response,
+            hasQualifiedDefaultBillingTaxEstimate = hasQualifiedDefaultBillingTaxEstimate,
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,

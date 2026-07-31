@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.CoroutineScope
@@ -169,6 +170,117 @@ internal class CheckoutControllerTest {
         assertThat(billingAddress.postalCode).isEqualTo("94103")
         assertThat(billingAddress.state).isEqualTo("CA")
     }
+
+    @Test
+    fun `configure estimates tax from default billing address and qualifies ready response`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().defaultBillingAddress(
+                Address()
+                    .country("US")
+                    .line1("510 Townsend St")
+                    .line2("Floor 2")
+                    .city("San Francisco")
+                    .state("CA")
+                    .postalCode("94103")
+            ),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(automaticTaxFor("billing")),
+                )
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "US"),
+                    bodyPart("tax_region[line1]", "510 Townsend St"),
+                    bodyPart("tax_region[line2]", "Floor 2"),
+                    bodyPart("tax_region[city]", "San Francisco"),
+                    bodyPart("tax_region[state]", "CA"),
+                    bodyPart("tax_region[postal_code]", "94103"),
+                    bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                    responseFactory = successResponseFactory(
+                        combine(automaticTaxFor("billing"), taxStatus("complete")),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+            assertThat(committedState?.hasQualifiedDefaultBillingTaxEstimate).isTrue()
+            assertThat(committedState?.checkoutSessionResponse?.taxStatus)
+                .isEqualTo(CheckoutSessionResponse.TaxStatus.READY)
+        }
+
+    @Test
+    fun `configure does not estimate tax without a default billing address`() = runConfigureScenario(
+        networkSetup = {
+            networkRule.checkoutInit(
+                responseFactory = successResponseFactory(
+                    combine(automaticTaxFor("billing"), taxStatus("complete")),
+                ),
+            )
+        },
+    ) {
+        result.getOrThrow()
+        assertThat(committedState?.hasQualifiedDefaultBillingTaxEstimate).isFalse()
+    }
+
+    @Test
+    fun `configure does not estimate tax when automatic tax uses shipping`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaultBillingAddress(Address().country("US")),
+        networkSetup = {
+            networkRule.checkoutInit(
+                responseFactory = successResponseFactory(automaticTaxFor("shipping")),
+            )
+        },
+    ) {
+        result.getOrThrow()
+        assertThat(committedState?.hasQualifiedDefaultBillingTaxEstimate).isFalse()
+    }
+
+    @Test
+    fun `configure does not estimate tax when automatic tax is disabled`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaultBillingAddress(Address().country("US")),
+    ) {
+        result.getOrThrow()
+        assertThat(committedState?.hasQualifiedDefaultBillingTaxEstimate).isFalse()
+    }
+
+    @Test
+    fun `configure does not qualify a non-ready tax estimate`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaultBillingAddress(Address().country("US")),
+        networkSetup = {
+            networkRule.checkoutInit(
+                responseFactory = successResponseFactory(automaticTaxFor("billing")),
+            )
+            networkRule.checkoutUpdate(
+                responseFactory = successResponseFactory(
+                    combine(automaticTaxFor("billing"), taxStatus("requires_location_inputs")),
+                ),
+            )
+        },
+    ) {
+        result.getOrThrow()
+        assertThat(committedState?.hasQualifiedDefaultBillingTaxEstimate).isFalse()
+        assertThat(committedState?.checkoutSessionResponse?.taxStatus)
+            .isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS)
+    }
+
+    @Test
+    fun `configure succeeds with original response when default billing tax estimate fails`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().defaultBillingAddress(Address().country("US")),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(automaticTaxFor("billing")),
+                )
+                networkRule.checkoutUpdate { response ->
+                    response.setResponseCode(500)
+                    response.setBody("""{"error":{"message":"Internal server error"}}""")
+                }
+            },
+        ) {
+            result.getOrThrow()
+            assertThat(committedState?.hasQualifiedDefaultBillingTaxEstimate).isFalse()
+            assertThat(committedState?.checkoutSessionResponse?.taxStatus)
+                .isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
+        }
 
     @Test
     fun `configure uses app name as merchant display name, not checkout session data`() =
@@ -668,7 +780,9 @@ internal class CheckoutControllerTest {
                 bodyPart("tax_region[city]", "Denver"),
                 bodyPart("tax_region[postal_code]", "80202"),
                 bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-                responseFactory = successResponseFactory(automaticTaxFor("billing")),
+                responseFactory = successResponseFactory(
+                    combine(automaticTaxFor("billing"), taxStatus("complete")),
+                ),
             )
 
             val result = controller.updateBillingAddress(
@@ -682,6 +796,7 @@ internal class CheckoutControllerTest {
             assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
             assertThat(state.collectedDetails.billingPhoneNumber).isEqualTo("5559876543")
             assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
+            assertThat(state.hasQualifiedDefaultBillingTaxEstimate).isFalse()
         }
 
     @Test
@@ -1210,6 +1325,10 @@ internal class CheckoutControllerTest {
                 .put("automatic_tax_enabled", true)
                 .put("automatic_tax_address_source", source),
         )
+    }
+
+    private fun taxStatus(status: String): (JSONObject) -> Unit = { json ->
+        json.put("tax_meta", JSONObject().put("status", status))
     }
 
     // Simulates process death by persisting the handle's registered providers into a bundle and

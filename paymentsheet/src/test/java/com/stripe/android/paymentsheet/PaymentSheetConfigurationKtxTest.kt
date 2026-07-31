@@ -360,6 +360,7 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when using CheckoutSession mode with non-null customer`() {
         val configWithCustomer = configuration.asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = DEFAULT_CHECKOUT_SESSION_ID,
@@ -388,6 +389,7 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = DEFAULT_CHECKOUT_SESSION_ID,
@@ -411,6 +413,7 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = DEFAULT_CHECKOUT_SESSION_ID,
@@ -440,6 +443,7 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = DEFAULT_CHECKOUT_SESSION_ID,
@@ -477,6 +481,7 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = DEFAULT_CHECKOUT_SESSION_ID,

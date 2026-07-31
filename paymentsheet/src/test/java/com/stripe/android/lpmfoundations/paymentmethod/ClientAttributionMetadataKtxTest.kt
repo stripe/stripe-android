@@ -92,6 +92,7 @@ class ClientAttributionMetadataKtxTest {
     @Test
     fun `payment intent creation flow is null for checkout session`() {
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "instances_key",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
         )
@@ -106,6 +107,7 @@ class ClientAttributionMetadataKtxTest {
     @Test
     fun `checkout session ID is set for checkout session`() {
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "instances_key",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
         )

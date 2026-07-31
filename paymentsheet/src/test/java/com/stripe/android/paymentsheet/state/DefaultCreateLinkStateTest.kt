@@ -88,6 +88,7 @@ internal class DefaultCreateLinkStateTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = true,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 elementsSession = elementsSession,

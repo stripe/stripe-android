@@ -34,6 +34,7 @@ internal class CheckoutSessionLoaderTest {
         response: CheckoutSessionResponse,
     ): PaymentElementLoader.InitializationMode.CheckoutSession {
         return PaymentElementLoader.InitializationMode.CheckoutSession(
+            hasQualifiedDefaultBillingTaxEstimate = false,
             instancesKey = "CheckoutSessionLoaderTest",
             checkoutSessionResponse = response,
         )

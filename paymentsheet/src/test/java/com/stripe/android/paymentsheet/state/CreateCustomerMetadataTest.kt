@@ -259,6 +259,7 @@ internal class CreateCustomerMetadataTest {
             savedPaymentMethodsOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
         ): PaymentElementLoader.InitializationMode.CheckoutSession {
             return PaymentElementLoader.InitializationMode.CheckoutSession(
+                hasQualifiedDefaultBillingTaxEstimate = false,
                 instancesKey = "instances_test",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     id = "cs_test_123",
