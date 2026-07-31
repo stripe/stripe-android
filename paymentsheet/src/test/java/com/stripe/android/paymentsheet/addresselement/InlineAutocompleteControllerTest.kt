@@ -65,6 +65,8 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(500)
 
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        val event = eventCalls.awaitItem()
+        assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnValues::class.java)
     }
 
     @Test
@@ -472,6 +474,7 @@ class InlineAutocompleteControllerTest {
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
+        eventCalls.awaitItem()
 
         countryFlow.value = "US"
         advanceTimeBy(500)
