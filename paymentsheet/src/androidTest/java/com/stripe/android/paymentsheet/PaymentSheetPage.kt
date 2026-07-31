@@ -261,24 +261,42 @@ internal class PaymentSheetPage(
         }
     }
 
-    fun assertPrimaryButtonVisibleAboveKeyboard(activity: PaymentSheetActivity) {
-        assertPrimaryButtonPosition(activity = activity, expectedAboveKeyboard = true)
+    fun waitForKeyboardToBeVisible() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            primaryButtonPosition().imeBottomInset > 0
+        }
     }
 
-    fun assertPrimaryButtonBelowKeyboard(activity: PaymentSheetActivity) {
-        assertPrimaryButtonPosition(activity = activity, expectedAboveKeyboard = false)
+    fun assertPrimaryButtonVisibleAboveKeyboard() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            primaryButtonPosition().isAboveKeyboard
+        }
+        assertPrimaryButtonPosition(expectedAboveKeyboard = true)
     }
 
-    private fun assertPrimaryButtonPosition(
-        activity: PaymentSheetActivity,
-        expectedAboveKeyboard: Boolean,
-    ) {
+    fun assertPrimaryButtonBelowKeyboard() {
+        assertPrimaryButtonPosition(expectedAboveKeyboard = false)
+    }
+
+    private fun assertPrimaryButtonPosition(expectedAboveKeyboard: Boolean) {
+        val position = primaryButtonPosition()
+        assertThat(position.imeBottomInset).isGreaterThan(0)
+
+        if (expectedAboveKeyboard) {
+            assertThat(position.buttonBottom).isAtMost(position.keyboardTop)
+        } else {
+            assertThat(position.buttonBottom).isGreaterThan(position.keyboardTop)
+        }
+    }
+
+    private fun primaryButtonPosition(): PrimaryButtonPosition {
+        var position: PrimaryButtonPosition? = null
         onView(withId(R.id.primary_button)).check { view, _ ->
-            val rootView = activity.window.decorView
-            val imeBottomInset = requireNotNull(ViewCompat.getRootWindowInsets(rootView))
-                .getInsets(WindowInsetsCompat.Type.ime())
-                .bottom
-            assertThat(imeBottomInset).isGreaterThan(0)
+            val rootView = view.rootView
+            val imeBottomInset = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(WindowInsetsCompat.Type.ime())
+                ?.bottom
+                ?: 0
 
             val rootLocation = IntArray(2)
             rootView.getLocationOnScreen(rootLocation)
@@ -287,12 +305,14 @@ internal class PaymentSheetPage(
             val keyboardTop = rootLocation[1] + rootView.height - imeBottomInset
             val buttonBottom = buttonLocation[1] + view.height
 
-            if (expectedAboveKeyboard) {
-                assertThat(buttonBottom).isAtMost(keyboardTop)
-            } else {
-                assertThat(buttonBottom).isGreaterThan(keyboardTop)
-            }
+            position = PrimaryButtonPosition(
+                imeBottomInset = imeBottomInset,
+                keyboardTop = keyboardTop,
+                buttonBottom = buttonBottom,
+            )
         }
+
+        return requireNotNull(position)
     }
 
     fun assertErrorMessageShown() {
@@ -308,6 +328,20 @@ internal class PaymentSheetPage(
 
     fun fillCvcRecollection(cvc: String) {
         waitForText("Confirm your CVC")
+        composeTestRule
+            .onNodeWithText("CVC")
+            .performTextInput(cvc)
+    }
+
+    fun focusCvcRecollection() {
+        waitForText("Confirm your CVC")
+        composeTestRule
+            .onNodeWithText("CVC")
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun enterCvcRecollection(cvc: String) {
         composeTestRule
             .onNodeWithText("CVC")
             .performTextInput(cvc)
@@ -593,5 +627,14 @@ internal class PaymentSheetPage(
             ).fetchSemanticsNodes()
                 .isNotEmpty()
         }
+    }
+
+    private data class PrimaryButtonPosition(
+        val imeBottomInset: Int,
+        val keyboardTop: Int,
+        val buttonBottom: Int,
+    ) {
+        val isAboveKeyboard: Boolean
+            get() = imeBottomInset > 0 && buttonBottom <= keyboardTop
     }
 }

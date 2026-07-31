@@ -342,7 +342,7 @@ private fun PaymentSheetContent(
     val primaryButtonBringIntoViewRequester = remember { BringIntoViewRequester() }
     val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
 
-    if (currentScreen.supportsPrimaryButtonReveal()) {
+    if (currentScreen.revealsPrimaryButtonWhenEnabled) {
         RevealPrimaryButtonWhenEnabled(
             isEnabled = primaryButtonUiState?.enabled == true,
             bringIntoViewRequester = primaryButtonBringIntoViewRequester,
@@ -422,13 +422,6 @@ private fun PaymentSheetContent(
             )
         }
     }
-}
-
-private fun PaymentSheetScreen.supportsPrimaryButtonReveal(): Boolean {
-    return this is PaymentSheetScreen.AddAnotherPaymentMethod ||
-        this is PaymentSheetScreen.AddFirstPaymentMethod ||
-        this is PaymentSheetScreen.VerticalModeForm ||
-        this is PaymentSheetScreen.CvcRecollection
 }
 
 @Composable

@@ -24,13 +24,13 @@ internal class PaymentSheetTestRunnerContext(
 
     fun presentPaymentSheet(
         block: PaymentSheet.() -> Unit,
-    ): PaymentSheetActivity {
+    ) {
         val activityLaunchObserver = ActivityLaunchObserver(PaymentSheetActivity::class.java)
         scenario.onActivity {
             activityLaunchObserver.prepareForLaunch(it)
             paymentSheet.block()
         }
-        return activityLaunchObserver.awaitLaunch() as PaymentSheetActivity
+        activityLaunchObserver.awaitLaunch()
     }
 
     /**

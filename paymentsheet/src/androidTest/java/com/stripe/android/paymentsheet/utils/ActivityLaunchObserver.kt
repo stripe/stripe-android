@@ -12,9 +12,6 @@ internal class ActivityLaunchObserver(
     @Volatile
     private var unregisterer: (() -> Unit) = { }
 
-    @Volatile
-    private var launchedActivity: Activity? = null
-
     private val launchedCountDownLatch = CountDownLatch(1)
 
     fun prepareForLaunch(host: Activity) {
@@ -27,7 +24,6 @@ internal class ActivityLaunchObserver(
 
             override fun onActivityResumed(activity: Activity) {
                 if (expectedActivityType.isInstance(activity)) {
-                    launchedActivity = activity
                     launchedCountDownLatch.countDown()
                 }
             }
@@ -51,13 +47,10 @@ internal class ActivityLaunchObserver(
         }
     }
 
-    fun awaitLaunch(): Activity {
+    fun awaitLaunch() {
         try {
             if (!launchedCountDownLatch.await(5, TimeUnit.SECONDS)) {
                 throw IllegalStateException("Failed to launch.")
-            }
-            return requireNotNull(launchedActivity) {
-                "Expected ${expectedActivityType.simpleName} to launch."
             }
         } finally {
             unregisterer()

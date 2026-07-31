@@ -83,6 +83,8 @@ internal sealed interface PaymentSheetScreen {
     val animationStyle: AnimationStyle
         get() = AnimationStyle.FullPage
     val showsPaymentConfirmationMandates: Boolean
+    val revealsPrimaryButtonWhenEnabled: Boolean
+        get() = false
 
     fun topBarState(): StateFlow<PaymentSheetTopBarState?>
 
@@ -198,6 +200,7 @@ internal sealed interface PaymentSheetScreen {
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
         override val animationStyle: AnimationStyle = AnimationStyle.PrimaryButtonAnchored
         override val showsPaymentConfirmationMandates: Boolean = true
+        override val revealsPrimaryButtonWhenEnabled: Boolean = true
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -248,6 +251,7 @@ internal sealed interface PaymentSheetScreen {
         override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
         override val showsPaymentConfirmationMandates: Boolean = true
+        override val revealsPrimaryButtonWhenEnabled: Boolean = true
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -350,6 +354,7 @@ internal sealed interface PaymentSheetScreen {
         override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsPaymentConfirmationMandates: Boolean = true
+        override val revealsPrimaryButtonWhenEnabled: Boolean = true
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -428,6 +433,7 @@ internal sealed interface PaymentSheetScreen {
         override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsPaymentConfirmationMandates: Boolean = false
+        override val revealsPrimaryButtonWhenEnabled: Boolean = true
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.cvcCompletionState.mapAsStateFlow { complete ->
