@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowNfcAdapter
 
@@ -16,6 +17,7 @@ internal class NfcScanningActivityScenario(
     val composeRule: ComposeTestRule,
     val isoDep: FakeIsoDep,
     val nfcAdapter: ShadowNfcAdapter?,
+    val paymentMethodMetadata: PaymentMethodMetadata,
 ) {
     fun waitForIdle() {
         shadowOf(Looper.getMainLooper()).idle()

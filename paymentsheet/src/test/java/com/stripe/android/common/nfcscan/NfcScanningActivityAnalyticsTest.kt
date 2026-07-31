@@ -71,6 +71,7 @@ internal class NfcScanningActivityAnalyticsTest {
         launchScenario {
             dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
             waitForCompleteUi()
+            isoDep.assertSuccess()
             waitForIdle()
         }
     }
@@ -84,6 +85,7 @@ internal class NfcScanningActivityAnalyticsTest {
         launchScenario {
             dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
             assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
+            isoDep.assertUntilPpseSelectionCommand()
         }
     }
 
@@ -96,6 +98,7 @@ internal class NfcScanningActivityAnalyticsTest {
         launchScenario {
             dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
             assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+            isoDep.assertUntilPpseSelectionCommand()
         }
     }
 
@@ -108,6 +111,7 @@ internal class NfcScanningActivityAnalyticsTest {
         launchScenario {
             dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
             assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
+            isoDep.assertSuccess()
         }
     }
 
