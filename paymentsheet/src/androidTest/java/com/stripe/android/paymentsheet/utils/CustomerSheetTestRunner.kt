@@ -19,13 +19,13 @@ internal class CustomerSheetTestRunnerContext(
     private val customerSheet: CustomerSheet,
     private val countDownLatch: CountDownLatch,
 ) {
-    fun presentCustomerSheet(): CustomerSheetActivity {
+    fun presentCustomerSheet() {
         val activityLaunchObserver = ActivityLaunchObserver(CustomerSheetActivity::class.java)
         scenario.onActivity {
             activityLaunchObserver.prepareForLaunch(it)
             customerSheet.present()
         }
-        return activityLaunchObserver.awaitLaunch() as CustomerSheetActivity
+        activityLaunchObserver.awaitLaunch()
     }
 
     fun markTestSucceeded() {
