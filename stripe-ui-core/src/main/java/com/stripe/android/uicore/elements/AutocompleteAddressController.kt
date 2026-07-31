@@ -158,22 +158,13 @@ class AutocompleteAddressController(
         )
     }
 
-    private fun isCountrySupported(country: String?): Boolean {
-        if (country.isNullOrBlank()) return true
-        val supported = config.autocompleteCountries
-        return supported.isEmpty() || supported.any { it.equals(country, ignoreCase = true) }
-    }
-
     private fun toAddressInputMode(
         expandForm: Boolean,
         values: Map<IdentifierSpec, String?>
     ): AddressInputMode {
         val googlePlacesApiKey = config.googlePlacesApiKey
-        val countrySupported = isCountrySupported(values[IdentifierSpec.Country])
 
-        val showInline = inlineAutocompleteActive && !expandForm &&
-            countrySupported && values[IdentifierSpec.Line1].isNullOrEmpty()
-        return if (showInline) {
+        return if (inlineAutocompleteActive && !expandForm && values[IdentifierSpec.Line1].isNullOrEmpty()) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,

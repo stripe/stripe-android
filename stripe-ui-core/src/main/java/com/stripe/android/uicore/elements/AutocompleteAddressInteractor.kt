@@ -33,7 +33,6 @@ interface AutocompleteAddressInteractor {
         val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
         val isInlineAutocompleteEnabled: Boolean = false,
         val shouldUseStripeHostedAutocomplete: Boolean = false,
-        val inlineMaxVisiblePredictions: Int? = null,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

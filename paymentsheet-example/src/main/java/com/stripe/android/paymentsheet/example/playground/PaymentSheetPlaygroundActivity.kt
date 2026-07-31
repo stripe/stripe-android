@@ -48,8 +48,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
@@ -186,13 +184,6 @@ internal class PaymentSheetPlaygroundActivity :
                 flowControllerBuilder(canUseTapToAdd, playgroundState)
             }
                 .build()
-
-            // Keep the FlowController's shippingDetails in sync with the ViewModel state so
-            // relaunching "Set Shipping Address" pre-populates the most recently saved address.
-            val playgroundFlowControllerState by viewModel.flowControllerState.collectAsState()
-            LaunchedEffect(playgroundFlowControllerState) {
-                flowController.shippingDetails = playgroundFlowControllerState?.addressDetails
-            }
             val embeddedPaymentElementBuilder = remember(playgroundState) {
                 if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
                     EmbeddedPaymentElement.Builder(
@@ -463,6 +454,7 @@ internal class PaymentSheetPlaygroundActivity :
                 if (playgroundState.displaysShippingAddressButton()) {
                     ShippingAddressButton(
                         addressLauncher = addressLauncher,
+                        playgroundState = playgroundState,
                         address = { flowController.shippingDetails },
                     )
                 }
@@ -690,6 +682,7 @@ internal class PaymentSheetPlaygroundActivity :
     @Composable
     private fun ShippingAddressButton(
         addressLauncher: AddressLauncher,
+        playgroundState: PlaygroundState.Payment,
         address: () -> AddressDetails?,
     ) {
         val context = LocalContext.current
@@ -698,11 +691,9 @@ internal class PaymentSheetPlaygroundActivity :
                 val configuration = AddressLauncher.Configuration.Builder()
                     .address(address())
                     .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
-                    .useStripeHostedAutocomplete(FeatureFlags.forceStripeHostedAutocomplete.isEnabled)
                     .appearance(AppearanceStore.state.toPaymentSheetAppearance())
                     .build()
-                val publishableKey = PaymentConfiguration.getInstance(context).publishableKey
-                addressLauncher.present(publishableKey, configuration)
+                addressLauncher.present(playgroundState.clientSecret, configuration)
             },
             modifier = Modifier.fillMaxWidth(),
         ) {

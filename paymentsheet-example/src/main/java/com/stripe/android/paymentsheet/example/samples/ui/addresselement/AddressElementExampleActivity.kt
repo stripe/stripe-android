@@ -72,66 +72,44 @@ private fun AddressElementExampleScreen(viewModel: AddressElementExampleViewMode
                 CircularProgressIndicator()
             }
             is AddressElementExampleViewState.Content -> {
-                AddressElementContent(state = state, addressLauncher = addressLauncher)
+                state.address?.let { address ->
+                    Address(address)
+                }
+                var inlineAutocompleteEnabled by remember {
+                    mutableStateOf(FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Inline autocomplete")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Switch(
+                        checked = inlineAutocompleteEnabled,
+                        onCheckedChange = { enabled ->
+                            inlineAutocompleteEnabled = enabled
+                            FeatureFlags.inlineAddressAutocompleteEnabled.setEnabled(enabled)
+                        },
+                    )
+                }
+                val context = LocalContext.current
+                Button(
+                    onClick = {
+                        val config = AddressLauncher.Configuration.Builder()
+                            // Provide your Google Places API key to enable autocomplete
+                            .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
+                            .build()
+                        addressLauncher.present(
+                            publishableKey = state.publishableKey,
+                            configuration = config,
+                        )
+                    },
+                    modifier = Modifier.testTag(SELECT_ADDRESS_BUTTON)
+                ) {
+                    Text("Select address")
+                }
             }
             is AddressElementExampleViewState.Error -> {
                 Text(state.message)
             }
         }
-    }
-}
-
-@Composable
-private fun AddressElementContent(
-    state: AddressElementExampleViewState.Content,
-    addressLauncher: AddressLauncher,
-) {
-    state.address?.let { address ->
-        Address(address)
-    }
-    var inlineAutocompleteEnabled by remember {
-        mutableStateOf(FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled)
-    }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("Inline autocomplete")
-        Spacer(modifier = Modifier.width(8.dp))
-        Switch(
-            checked = inlineAutocompleteEnabled,
-            onCheckedChange = { enabled ->
-                inlineAutocompleteEnabled = enabled
-                FeatureFlags.inlineAddressAutocompleteEnabled.setEnabled(enabled)
-            },
-        )
-    }
-    var useStripeHostedAutocomplete by remember {
-        mutableStateOf(FeatureFlags.forceStripeHostedAutocomplete.isEnabled)
-    }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("Use Stripe-hosted endpoints")
-        Spacer(modifier = Modifier.width(8.dp))
-        Switch(
-            checked = useStripeHostedAutocomplete,
-            onCheckedChange = { enabled ->
-                useStripeHostedAutocomplete = enabled
-                FeatureFlags.forceStripeHostedAutocomplete.setEnabled(enabled)
-            },
-        )
-    }
-    val context = LocalContext.current
-    Button(
-        onClick = {
-            val config = AddressLauncher.Configuration.Builder()
-                .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
-                .useStripeHostedAutocomplete(useStripeHostedAutocomplete)
-                .build()
-            addressLauncher.present(
-                publishableKey = state.publishableKey,
-                configuration = config,
-            )
-        },
-        modifier = Modifier.testTag(SELECT_ADDRESS_BUTTON)
-    ) {
-        Text("Select address")
     }
 }
 

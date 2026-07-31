@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
-import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
@@ -95,20 +94,14 @@ internal abstract class BaseSheetViewModel(
             launcher = autocompleteLauncher,
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = config.googlePlacesApiKey,
-                autocompleteCountries = if (FeatureFlags.forceStripeHostedAutocomplete.isEnabled) {
-                    AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES
-                } else {
-                    AUTOCOMPLETE_DEFAULT_COUNTRIES
-                },
+                autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
-                inlineMaxVisiblePredictions = 3,
             ),
             placesClient = placesClient,
             stripeAutocompleteRepository = stripeAutocompleteRepository,
             coroutineScope = viewModelScope,
             shouldUseAutocompleteProxyEndpointsProvider = {
-                FeatureFlags.forceStripeHostedAutocomplete.isEnabled ||
-                    (_paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false)
+                _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
             },
             eventReporter = addressLauncherEventReporter,
         )
