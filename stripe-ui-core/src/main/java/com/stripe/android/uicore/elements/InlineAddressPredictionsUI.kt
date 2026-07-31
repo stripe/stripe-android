@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Card
 import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -25,10 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
@@ -38,22 +33,19 @@ import com.stripe.android.uicore.text.annotatedStringResource
 fun InlineAddressPredictionsUI(
     state: AutocompleteAddressInteractor.InlinePredictionsState,
     attributionDrawable: Int?,
-    fieldWidthDp: Dp,
     onPredictionSelected: (String) -> Unit,
-    onDismiss: () -> Unit,
     onClear: () -> Unit,
-    onEnterManually: (() -> Unit)? = null,
+    onEnterManually: (() -> Unit)?,
 ) {
-    DropdownMenu(
-        expanded = shouldShowPredictionsDropdown(state),
-        onDismissRequest = onDismiss,
-        offset = DpOffset(x = (-1).dp, y = 0.dp),
-        modifier = if (fieldWidthDp > 0.dp) {
-            Modifier.width(fieldWidthDp + 2.dp)
-        } else {
-            Modifier.fillMaxWidth()
-        },
-        properties = PopupProperties(focusable = false),
+    if (!shouldShowPredictionsDropdown(state)) {
+        return
+    }
+
+    Card(
+        elevation = 4.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
     ) {
         InlineAddressPredictionsContent(
             state = state,
@@ -74,29 +66,27 @@ internal fun InlineAddressPredictionsContent(
     onClear: () -> Unit,
     onEnterManually: (() -> Unit)?,
 ) {
-    val loading = state is AutocompleteAddressInteractor.InlinePredictionsState.Loading
     val results = state as? AutocompleteAddressInteractor.InlinePredictionsState.Results
 
     Column(modifier = Modifier.fillMaxWidth()) {
         PredictionsHeader(
-            loading = loading,
-            attributionDrawable = attributionDrawable,
+            onEnterManually = onEnterManually,
             onClear = onClear,
         )
         if (results != null) {
-            PredictionsList(
+            Divider()
+            PredictionsListItems(
                 results = results,
                 onPredictionSelected = onPredictionSelected,
-                onEnterManually = onEnterManually,
             )
         }
+        PredictionsFooter(attributionDrawable = attributionDrawable)
     }
 }
 
 @Composable
 private fun PredictionsHeader(
-    loading: Boolean,
-    attributionDrawable: Int?,
+    onEnterManually: (() -> Unit)?,
     onClear: () -> Unit,
 ) {
     val closeIcon = remember(onClear) {
@@ -111,37 +101,21 @@ private fun PredictionsHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(36.dp)
-            .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+            .height(40.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
     ) {
-        if (loading) {
+        if (onEnterManually != null) {
             Box(
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.CenterStart,
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight(),
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colors.primary,
-                    strokeWidth = 2.dp,
-                )
-            }
-        } else if (attributionDrawable != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f),
+                    .fillMaxHeight()
+                    .clickable(onClick = onEnterManually),
             ) {
                 Text(
-                    text = stringResource(R.string.stripe_address_suggestions),
-                    color = MaterialTheme.stripeColors.subtitle,
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier.padding(end = 4.dp),
-                )
-                Image(
-                    painter = painterResource(id = attributionDrawable),
-                    contentDescription = stringResource(R.string.stripe_address_google_maps),
-                    modifier = Modifier.height(18.dp).padding(top = 3.dp),
+                    text = stringResource(R.string.stripe_address_enter_manually),
+                    color = MaterialTheme.colors.primary,
+                    style = MaterialTheme.typography.body1,
                 )
             }
         } else {
@@ -160,13 +134,34 @@ private fun PredictionsHeader(
 }
 
 @Composable
-private fun PredictionsList(
+private fun PredictionsFooter(attributionDrawable: Int?) {
+    if (attributionDrawable == null) return
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.stripe_address_suggestions),
+            color = MaterialTheme.stripeColors.subtitle,
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.padding(end = 4.dp),
+        )
+        Image(
+            painter = painterResource(id = attributionDrawable),
+            contentDescription = stringResource(R.string.stripe_address_google_maps),
+            modifier = Modifier.height(18.dp).padding(top = 3.dp),
+        )
+    }
+}
+
+@Composable
+private fun PredictionsListItems(
     results: AutocompleteAddressInteractor.InlinePredictionsState.Results,
     onPredictionSelected: (String) -> Unit,
-    onEnterManually: (() -> Unit)?,
 ) {
     val queryRegex = remember(results.query) { buildQueryRegex(results.query) }
-    Divider()
     results.predictions.forEach { prediction ->
         Column(
             modifier = Modifier
@@ -190,24 +185,6 @@ private fun PredictionsList(
         }
         Divider()
     }
-
-    onEnterManually?.let {
-        Box(
-            contentAlignment = Alignment.CenterStart,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp)
-                .clickable(onClick = it)
-                .padding(horizontal = 16.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.stripe_address_enter_manually),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.body1,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-        }
-    }
 }
 
 private fun buildQueryRegex(query: String): Regex? {
@@ -230,7 +207,7 @@ internal fun shouldShowPredictionsDropdown(
 ): Boolean {
     return when (state) {
         AutocompleteAddressInteractor.InlinePredictionsState.Idle -> false
-        AutocompleteAddressInteractor.InlinePredictionsState.Loading -> true
+        AutocompleteAddressInteractor.InlinePredictionsState.Loading -> false
         is AutocompleteAddressInteractor.InlinePredictionsState.Results -> true
     }
 }

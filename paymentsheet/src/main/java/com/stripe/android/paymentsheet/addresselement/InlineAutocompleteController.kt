@@ -136,7 +136,9 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
+        val wasShowingResults =
+            _inlinePredictionsState.value is AutocompleteAddressInteractor.InlinePredictionsState.Results
+        if (!wasShowingResults) {
             _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
         }
         val result = placesClient.findAutocompletePredictions(
