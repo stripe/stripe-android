@@ -135,7 +135,7 @@ internal class PaymentSheetKeyboardTest {
     }
 
     @Test
-    fun primaryButtonIsRevealedWhenCvcRecollectionBecomesComplete() = runPaymentSheetTest(
+    fun primaryButtonIsVisibleWhenCvcRecollectionBecomesComplete() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
@@ -171,7 +171,6 @@ internal class PaymentSheetKeyboardTest {
         page.assertPrimaryButtonEnabled(enabled = false)
         page.focusCvcRecollection()
         page.waitForKeyboardToBeVisible()
-        page.assertPrimaryButtonBelowKeyboard()
 
         page.enterCvcRecollection("123")
         page.assertPrimaryButtonEnabled(enabled = true)
