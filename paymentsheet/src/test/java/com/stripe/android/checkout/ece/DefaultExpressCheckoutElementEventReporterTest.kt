@@ -9,6 +9,7 @@ import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -119,7 +120,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val durationProvider = FakeDurationProvider()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+            availableWallets = listOf(WalletType.GooglePay, WalletType.Link),
             analyticsMetadata = AnalyticsMetadata(
                 mapOf("example_from_test" to AnalyticsMetadata.Value.SimpleBoolean(true))
             ),
@@ -127,7 +128,15 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         val googlePayConfiguration = GooglePayConfiguration(
             environment = GooglePayConfiguration.Environment.Test,
         ).build()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = SavedStateHandle(),
+            availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
+                availableExpressButtonTypes = listOf(
+                    ExpressButtonType.Link,
+                    ExpressButtonType.GooglePay(googlePayConfiguration),
+                ),
+            ),
+        )
         stateHolder.state = CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
                 .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
@@ -147,7 +156,6 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             ),
             durationProvider = durationProvider,
             stateHolder = stateHolder,
-            availableExpressButtonTypesFactory = DefaultAvailableExpressButtonTypesFactory(),
         )
 
         block(

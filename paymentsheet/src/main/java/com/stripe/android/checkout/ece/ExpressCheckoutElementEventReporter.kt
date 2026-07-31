@@ -1,3 +1,5 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout.ece
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -6,6 +8,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.mapOfDurationInSeconds
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.analytics.linkContext
@@ -36,7 +39,6 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val stateHolder: CheckoutControllerStateHolder,
-    private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : ExpressCheckoutElementEventReporter {
     override fun onEceDisplayed() {
         durationProvider.start(DurationProvider.Key.ExpressCheckoutElement)
@@ -92,11 +94,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     private fun defaultParams(): Map<String, Any> {
         val state = stateHolder.state ?: return emptyMap()
         val expressCheckoutElementConfiguration = state.configuration.expressCheckoutElementConfiguration
-        val orderedLpms = availableExpressButtonTypesFactory.create(
-            paymentMethodMetadata = state.paymentMethodMetadata,
-            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
-            googlePayConfiguration = state.configuration.googlePayConfiguration,
-        ).map {
+        val orderedLpms = stateHolder.checkoutSession.value?.availableExpressButtonTypes.orEmpty().map {
             when (it) {
                 is ExpressButtonType.GooglePay -> "google_pay"
                 ExpressButtonType.Link -> "link"
