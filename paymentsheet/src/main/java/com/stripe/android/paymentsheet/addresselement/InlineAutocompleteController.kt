@@ -112,8 +112,9 @@ internal class InlineAutocompleteController(
     }
 
     fun onDismissed() {
-        selectionJob?.cancel()
-        lastPredictionLine1 = null
+        if (selectionJob?.isActive != true) {
+            lastPredictionLine1 = null
+        }
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
