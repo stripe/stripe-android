@@ -48,6 +48,7 @@ internal class NfcScanningViewModel @Inject constructor(
     private var pendingValidCardData: ScannedCardData? = null
     private var successShownDispatched = false
     private var isFlowClosed = false
+    private var numberOfAttempts = 0
 
     init {
         eventReporter.onNfcScanStarted()
@@ -66,6 +67,7 @@ internal class NfcScanningViewModel @Inject constructor(
                             )
                         )
 
+                        numberOfAttempts++
                         eventReporter.onNfcScanAttemptStarted()
                     }
                     is NfcCardScanner.State.Failed -> {
@@ -132,7 +134,7 @@ internal class NfcScanningViewModel @Inject constructor(
                     return
                 }
                 successShownDispatched = true
-                eventReporter.onNfcScanSucceeded()
+                eventReporter.onNfcScanSucceeded(numberOfAttempts)
                 viewModelScope.launch {
                     pendingValidCardData?.let { cardData ->
                         _event.emit(
@@ -163,7 +165,10 @@ internal class NfcScanningViewModel @Inject constructor(
 
         isFlowClosed = true
         timeoutManager.cancel()
-        eventReporter.onNfcScanCancelled(reason)
+        eventReporter.onNfcScanCancelled(
+            reason = reason,
+            numberOfAttempts = numberOfAttempts,
+        )
         _event.emit(NfcScanningEvent.CloseWithResult(NfcScanningContract.Result.Canceled))
     }
 
