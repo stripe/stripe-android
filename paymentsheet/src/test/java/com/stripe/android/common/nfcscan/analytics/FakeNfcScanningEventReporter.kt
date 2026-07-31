@@ -7,8 +7,13 @@ internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
     val onNfcScanAttemptStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptSucceededCalls = Turbine<Unit>()
     val onNfcScanAttemptFailedCalls = Turbine<NfcScanAttemptFailedCall>()
-    val onNfcScanSucceededCalls = Turbine<Unit>()
-    val onNfcScanCancelledCalls = Turbine<NfcScanCancellationReason>()
+    val onNfcScanSucceededCalls = Turbine<Int>()
+    val onNfcScanCancelledCalls = Turbine<NfcScanCancelledCall>()
+
+    data class NfcScanCancelledCall(
+        val reason: NfcScanCancellationReason,
+        val numberOfAttempts: Int,
+    )
 
     data class NfcScanAttemptFailedCall(
         val errorCode: String,
@@ -39,12 +44,20 @@ internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
         )
     }
 
-    override fun onNfcScanSucceeded() {
-        onNfcScanSucceededCalls.add(Unit)
+    override fun onNfcScanSucceeded(numberOfAttempts: Int) {
+        onNfcScanSucceededCalls.add(numberOfAttempts)
     }
 
-    override fun onNfcScanCancelled(reason: NfcScanCancellationReason) {
-        onNfcScanCancelledCalls.add(reason)
+    override fun onNfcScanCancelled(
+        reason: NfcScanCancellationReason,
+        numberOfAttempts: Int,
+    ) {
+        onNfcScanCancelledCalls.add(
+            NfcScanCancelledCall(
+                reason = reason,
+                numberOfAttempts = numberOfAttempts,
+            ),
+        )
     }
 
     fun ensureAllEventsConsumed() {
