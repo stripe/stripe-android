@@ -46,6 +46,7 @@ internal object NfcScanningActivityTestHelpers {
                                 activityScenario = scenario,
                                 isoDep = fakeIsoDep,
                                 nfcAdapter = nfcAdapter,
+                                paymentMethodMetadata = paymentMethodMetadata,
                             ).apply {
                                 waitForUi()
                             }
@@ -53,6 +54,8 @@ internal object NfcScanningActivityTestHelpers {
                     }
                 }
             }
+
+            fakeIsoDep.ensureAllEventsConsumed()
         }
     }
 }

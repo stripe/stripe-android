@@ -14,7 +14,9 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.AnimationConstants
 import org.junit.Rule
@@ -28,6 +30,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowActivity
 import org.robolectric.shadows.ShadowSystemClock
 import org.robolectric.shadows.ShadowVibrator
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 import kotlin.use
@@ -44,6 +47,7 @@ internal class NfcScanningActivityTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(composeCleanupRule)
         .around(composeRule)
+        .around(LocaleTestRule(Locale.US))
 
     @Test
     fun `close button returns canceled result`() = test {
@@ -104,6 +108,8 @@ internal class NfcScanningActivityTest {
         dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
         waitForCompleteUi()
 
+        isoDep.assertSuccess()
+
         assertThat(getShadowVibrator(context).effectId).isEqualTo(VibrationEffect.EFFECT_CLICK)
 
         waitForIdle()
@@ -118,9 +124,35 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
+    fun `successful card scan with full PDOL template returns proper values in GPO command`() {
+        test(
+            paymentMethodMetadata = NfcScanningActivityTestFixtures.paymentMethodMetadataWithPdolData(),
+        ) {
+            dispatchCardRead(NfcScanningActivityTestFixtures.fullPdolSuccessResponses())
+            waitForCompleteUi()
+
+            isoDep.assertSuccess(
+                gpoCommand = NfcScanningActivityTestFixtures.ApduCommands.GPO_FULL_PDOL,
+            )
+
+            waitForIdle()
+
+            assertThat(getResult()).isEqualTo(
+                NfcScanningContract.Result.Complete(
+                    cardNumber = "4242424242424242",
+                    expirationMonth = 12,
+                    expirationYear = 2030,
+                ),
+            )
+        }
+    }
+
+    @Test
     fun `declined card shows error, performs haptic feedback, and keeps activity open`() = test {
         dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
         assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
+
+        isoDep.assertUntilPpseSelectionCommand()
 
         assertThat(getShadowVibrator(context).effectId).isEqualTo(VibrationEffect.EFFECT_HEAVY_CLICK)
 
@@ -132,6 +164,8 @@ internal class NfcScanningActivityTest {
         dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
         assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
 
+        isoDep.assertUntilPpseSelectionCommand()
+
         assertThat(isActivityDestroyed()).isFalse()
     }
 
@@ -139,6 +173,8 @@ internal class NfcScanningActivityTest {
     fun `expired card shows error and keeps activity open`() = test {
         dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
         assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
+
+        isoDep.assertSuccess()
 
         assertThat(isActivityDestroyed()).isFalse()
     }
@@ -175,11 +211,13 @@ internal class NfcScanningActivityTest {
     }
 
     private fun test(
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         block: suspend NfcScanningActivityScenario.() -> Unit,
     ) {
         NfcScanningActivityTestHelpers.launchScenario(
             context = context,
             composeRule = composeRule,
+            paymentMethodMetadata = paymentMethodMetadata,
             block = block,
         )
     }
