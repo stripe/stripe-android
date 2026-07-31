@@ -58,19 +58,7 @@ internal class InlineAutocompleteController(
                     if (countryChanged) {
                         lastObservedCountry = c
                     }
-                    if (!isCountrySupported(c)) {
-                        lastPredictionLine1 = null
-                        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                        if (countryChanged) {
-                            eventListenerProvider()?.invoke(
-                                AutocompleteAddressInteractor.Event.OnValues(
-                                    mapOf(IdentifierSpec.Country to c)
-                                )
-                            )
-                        }
-                        return@collectLatest
-                    }
-                    if (q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE) {
+                    if (!isCountrySupported(c) || q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE) {
                         lastPredictionLine1 = null
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         if (countryChanged) {
