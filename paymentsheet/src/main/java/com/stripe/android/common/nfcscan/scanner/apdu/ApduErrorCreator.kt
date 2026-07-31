@@ -22,11 +22,11 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
             )
             is ApduResponseError.TooShort -> NfcCardReader.Result.Error(
                 errorCode = APDU_RESPONSE_TOO_SHORT_ERROR_CODE,
-                userMessage = R.string.stripe_something_went_wrong.resolvableString,
+                userMessage = R.string.stripe_nfc_scan_internal_error_message.resolvableString,
             )
             is ApduResponseError.Parsing -> NfcCardReader.Result.Error(
                 errorCode = APDU_RESPONSE_PARSING_ERROR_CODE,
-                userMessage = R.string.stripe_something_went_wrong.resolvableString,
+                userMessage = R.string.stripe_nfc_scan_internal_error_message.resolvableString,
             )
             is ApduResponseError.Invalid -> unsupportedCard()
             is ApduResponseError.Command -> mapCommandError(error)
