@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Looper
 import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -13,37 +14,42 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.nfcscan.NfcScanningActivityTestHelpers.configureNfc
-import com.stripe.android.common.nfcscan.NfcScanningActivityTestHelpers.getShadowVibrator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.AnimationConstants
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowActivity
+import org.robolectric.shadows.ShadowSystemClock
+import org.robolectric.shadows.ShadowVibrator
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
+import kotlin.use
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class NfcScanningActivityTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    @get:Rule
-    val composeRule = createEmptyComposeRule()
+    private val composeRule = createEmptyComposeRule()
+    private val composeCleanupRule = createComposeCleanupRule()
 
     @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
+    val ruleChain: RuleChain = RuleChain
+        .outerRule(composeCleanupRule)
+        .around(composeRule)
 
     @Test
     fun `close button returns canceled result`() = test {
         composeRule.onNodeWithContentDescription("Cancel").performClick()
 
-        waitForActivityFinish()
+        waitForIdle()
 
         assertThat(getResult()).isEqualTo(NfcScanningContract.Result.Canceled)
     }
@@ -52,7 +58,7 @@ internal class NfcScanningActivityTest {
     fun `activity returns canceled result when moved to background`() = test {
         moveToState(Lifecycle.State.CREATED)
 
-        waitForActivityFinish()
+        waitForIdle()
 
         assertThat(getResult()).isEqualTo(NfcScanningContract.Result.Canceled)
     }
@@ -95,14 +101,12 @@ internal class NfcScanningActivityTest {
 
     @Test
     fun `successful card scan perform haptic feedback & returns complete result`() = test {
-        NfcScanningActivityTestHelpers.completeSuccessfulScan(
-            scenario = this,
-            responses = NfcScanningActivityTestFixtures.successResponses(),
-        )
+        dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
+        waitForCompleteUi()
 
-        assertThat(context.getShadowVibrator().effectId).isEqualTo(VibrationEffect.EFFECT_CLICK)
+        assertThat(getShadowVibrator(context).effectId).isEqualTo(VibrationEffect.EFFECT_CLICK)
 
-        waitForActivityFinish()
+        waitForIdle()
 
         assertThat(getResult()).isEqualTo(
             NfcScanningContract.Result.Complete(
@@ -115,54 +119,40 @@ internal class NfcScanningActivityTest {
 
     @Test
     fun `declined card shows error, performs haptic feedback, and keeps activity open`() = test {
-        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
-            scenario = this,
-            responses = NfcScanningActivityTestFixtures.declinedCardResponses(),
-            errorText = context.getString(R.string.stripe_nfc_scan_error_declined_card),
-        )
+        dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
+        assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
 
-        assertThat(context.getShadowVibrator().effectId).isEqualTo(VibrationEffect.EFFECT_HEAVY_CLICK)
+        assertThat(getShadowVibrator(context).effectId).isEqualTo(VibrationEffect.EFFECT_HEAVY_CLICK)
 
         assertThat(isActivityDestroyed()).isFalse()
     }
 
     @Test
     fun `unsupported card shows error and keeps activity open`() = test {
-        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
-            scenario = this,
-            responses = NfcScanningActivityTestFixtures.unsupportedCardResponses(),
-            errorText = context.getString(R.string.stripe_nfc_scan_unsupported_card),
-        )
+        dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
+        assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
 
         assertThat(isActivityDestroyed()).isFalse()
     }
 
     @Test
     fun `expired card shows error and keeps activity open`() = test {
-        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
-            scenario = this,
-            responses = NfcScanningActivityTestFixtures.expiredCardResponses(),
-            errorText = context.getString(R.string.stripe_nfc_scan_error_expired_card),
-        )
+        dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
+        assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
 
         assertThat(isActivityDestroyed()).isFalse()
     }
 
     @Test
     fun `inactivity timeout returns canceled result`() = test {
-        NfcScanningActivityTestHelpers.waitForInitialScanningUi(this)
-
-        NfcScanningActivityTestHelpers.advanceInactivityTimeout(this)
-
-        waitForActivityFinish()
+        ShadowSystemClock.advanceBy(20.seconds.inWholeSeconds, TimeUnit.SECONDS)
+        waitForIdle()
 
         assertThat(getResult()).isEqualTo(NfcScanningContract.Result.Canceled)
     }
 
     @Test
     fun `finish applies fade out transition`() {
-        configureNfc(context)
-
         val intent = NfcScanningContract.createIntent(
             context = context,
             input = NfcScanningContract.Args(
@@ -185,12 +175,18 @@ internal class NfcScanningActivityTest {
     }
 
     private fun test(
-        block: NfcScanningActivityTestHelpers.Scenario.() -> Unit,
+        block: suspend NfcScanningActivityScenario.() -> Unit,
     ) {
         NfcScanningActivityTestHelpers.launchScenario(
             context = context,
             composeRule = composeRule,
             block = block,
         )
+    }
+
+    private fun getShadowVibrator(context: Context): ShadowVibrator {
+        @Suppress("DEPRECATION")
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        return shadowOf(vibrator)
     }
 }

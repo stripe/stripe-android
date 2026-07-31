@@ -10,7 +10,6 @@ import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
@@ -58,7 +57,7 @@ internal class NfcScanningActivityAnalyticsTest {
         launchScenario {
             composeRule.onNodeWithContentDescription("Cancel").performClick()
 
-            waitForActivityFinish()
+            waitForIdle()
         }
     }
 
@@ -70,12 +69,9 @@ internal class NfcScanningActivityAnalyticsTest {
         networkRule.expectNfcScanSuccess()
 
         launchScenario {
-            NfcScanningActivityTestHelpers.completeSuccessfulScan(
-                scenario = this,
-                responses = NfcScanningActivityTestFixtures.successResponses(),
-            )
-
-            waitForActivityFinish()
+            dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
+            waitForCompleteUi()
+            waitForIdle()
         }
     }
 
@@ -86,11 +82,8 @@ internal class NfcScanningActivityAnalyticsTest {
         networkRule.expectNfcScanAttemptFailed(errorCode = "cardDeclinedByNfc")
 
         launchScenario {
-            NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
-                scenario = this,
-                responses = NfcScanningActivityTestFixtures.declinedCardResponses(),
-                errorText = context.getString(R.string.stripe_nfc_scan_error_declined_card),
-            )
+            dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
+            assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
         }
     }
 
@@ -101,11 +94,8 @@ internal class NfcScanningActivityAnalyticsTest {
         networkRule.expectNfcScanAttemptFailed(errorCode = "cardUnsupportedByNfc")
 
         launchScenario {
-            NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
-                scenario = this,
-                responses = NfcScanningActivityTestFixtures.unsupportedCardResponses(),
-                errorText = context.getString(R.string.stripe_nfc_scan_unsupported_card),
-            )
+            dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
+            assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
         }
     }
 
@@ -116,16 +106,13 @@ internal class NfcScanningActivityAnalyticsTest {
         networkRule.expectNfcScanAttemptFailed(errorCode = "expiredCard")
 
         launchScenario {
-            NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
-                scenario = this,
-                responses = NfcScanningActivityTestFixtures.expiredCardResponses(),
-                errorText = context.getString(R.string.stripe_nfc_scan_error_expired_card),
-            )
+            dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
+            assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
         }
     }
 
     private fun launchScenario(
-        block: NfcScanningActivityTestHelpers.Scenario.() -> Unit,
+        block: suspend NfcScanningActivityScenario.() -> Unit,
     ) {
         NfcScanningActivityTestHelpers.launchScenario(
             context = context,
