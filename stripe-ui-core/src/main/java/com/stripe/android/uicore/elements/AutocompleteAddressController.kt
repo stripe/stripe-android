@@ -172,7 +172,7 @@ class AutocompleteAddressController(
         val countrySupported = isCountrySupported(values[IdentifierSpec.Country])
 
         val showInline = inlineAutocompleteActive && !expandForm &&
-            countrySupported && values[IdentifierSpec.Line1] == null
+            countrySupported && values[IdentifierSpec.Line1].isNullOrEmpty()
         return if (showInline) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,

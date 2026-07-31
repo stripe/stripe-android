@@ -55,25 +55,6 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `query with unsupported country stays Idle and emits country event`() = runScenario(
-        autocompleteCountries = setOf("US")
-    ) {
-        countryFlow.value = "CA"
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        val event = eventCalls.awaitItem()
-        assertThat(event).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnValues(
-                mapOf(IdentifierSpec.Country to "CA")
-            )
-        )
-    }
-
-    @Test
     fun `switching to unsupported country emits OnValues event`() = runScenario(
         autocompleteCountries = setOf("US")
     ) {
@@ -515,10 +496,10 @@ class InlineAutocompleteControllerTest {
         fakePlacesClient.findPredictionsResult = Result.success(
             FindAutocompletePredictionsResponse(emptyList())
         )
-        countryFlow.value = "CA"
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
         queryFlow.value = "123 Main"
+        countryFlow.value = "CA"
         advanceTimeBy(500)
         eventCalls.awaitItem()
 
