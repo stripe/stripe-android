@@ -94,6 +94,10 @@ def validate_version_matches_changelog(version)
 
   if version != expected_version
     rputs "Warning: CHANGELOG.md specifies a #{bump_type} bump (expected #{expected_version}), but you specified #{version}."
+    if @is_headless
+      abort("Headless propose release cannot prompt for version mismatch confirmation. Update CHANGELOG.md's NEXT_VERSION_BUMP or use --version #{expected_version}.")
+    end
+
     rputs "Do you want to proceed with #{version} anyway? (y/n)"
     response = STDIN.gets.strip.downcase
     unless response == 'y' || response == 'yes'

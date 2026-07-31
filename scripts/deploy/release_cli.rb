@@ -5,10 +5,11 @@ require 'optparse'
 require_relative 'common'
 require_relative 'validate_version_number'
 
-def parse_release_options!(flow_name:, version_required: false)
+def parse_release_options!(flow_name:, version_required: false, allow_headless: false)
     @flow_name = flow_name
     @step_index = 1
     @is_dry_run = false
+    @is_headless = false
     @deploy_branch = 'master'
     @is_older_version = false
 
@@ -27,6 +28,12 @@ def parse_release_options!(flow_name:, version_required: false)
             @is_dry_run = t
         end
 
+        if allow_headless
+            opts.on('--headless', "Create and push the version bump branch, then print PR handoff details without creating a PR") do |t|
+                @is_headless = t
+            end
+        end
+
         opts.on('--branch BRANCH', "Branch to deploy from") do |t|
             @deploy_branch = t
         end
@@ -36,12 +43,25 @@ def parse_release_options!(flow_name:, version_required: false)
         end
     end.parse!
 
+    if @is_headless && @is_dry_run
+        raise ArgumentError, "--headless cannot be combined with --dry-run"
+    end
+
     if @version.nil?
         if version_required
             raise ArgumentError, "--version is required for #{flow_name}"
         end
         @version = infer_version_from_changelog()
     end
+end
+
+def release_command
+    command = "./scripts/deploy/#{File.basename($PROGRAM_NAME)}"
+    command += " --headless" if @is_headless
+    command += " --dry-run" if @is_dry_run
+    command += " --branch #{@deploy_branch}" if @deploy_branch != 'master'
+    command += " --release-older-version" if @is_older_version
+    command
 end
 
 def execute_steps(steps, before_resume: nil)
@@ -67,8 +87,7 @@ def execute_steps(steps, before_resume: nil)
     rescue SystemExit, Interrupt
         raise
     rescue Exception
-        command = "./scripts/deploy/#{File.basename($PROGRAM_NAME)}"
-        rputs "Restart #{@flow_name} with `#{command} --continue-from #{step_index} --version #{@version}` to re-run from this step."
+        rputs "Restart #{@flow_name} with `#{release_command} --continue-from #{step_index} --version #{@version}` to re-run from this step."
         raise
     end
 end

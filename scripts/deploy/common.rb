@@ -129,12 +129,23 @@ end
 
 private def octokit_client
   @octokit_client ||= begin
-    token = fetch_password("bindings/gh-tokens/#{ENV['USER']}")
-    if token.nil? || token == ""
-      raise "Got empty Github token from password-vault"
-    end
+    if @is_headless
+      token = ENV['GITHUB_TOKEN'] || ENV['GH_TOKEN']
 
-    Octokit::Client.new(access_token: token)
+      if token.nil? || token == ""
+        rputs "Headless mode: using unauthenticated GitHub API access for read-only checks."
+        Octokit::Client.new
+      else
+        Octokit::Client.new(access_token: token)
+      end
+    else
+      token = fetch_password("bindings/gh-tokens/#{ENV['USER']}")
+      if token.nil? || token == ""
+        raise "Got empty Github token from password-vault"
+      end
+
+      Octokit::Client.new(access_token: token)
+    end
   end
 end
 

@@ -55,19 +55,29 @@ def cleanup_propose_release_dry_run
     delete_git_branch(release_branch, @deploy_branch)
 end
 
-parse_release_options!(flow_name: 'propose release')
+parse_release_options!(flow_name: 'propose release', allow_headless: true)
 
-steps = [
-    method(:check_permissions),
-    method(:validate_translations_merged),
-    method(:validate_version_number),
-    method(:ensure_clean_repo),
-    method(:pull_latest),
-    method(:create_version_bump_pr),
-    method(:pause_for_pr_merge),
-    method(:create_release_tag),
-    method(:print_propose_release_handoff),
-]
+if @is_headless
+    steps = [
+        method(:validate_translations_merged),
+        method(:validate_version_number),
+        method(:ensure_clean_repo),
+        method(:pull_latest),
+        method(:create_version_bump_pr),
+    ]
+else
+    steps = [
+        method(:check_permissions),
+        method(:validate_translations_merged),
+        method(:validate_version_number),
+        method(:ensure_clean_repo),
+        method(:pull_latest),
+        method(:create_version_bump_pr),
+        method(:pause_for_pr_merge),
+        method(:create_release_tag),
+        method(:print_propose_release_handoff),
+    ]
+end
 
 @propose_release_succeeded = false
 
