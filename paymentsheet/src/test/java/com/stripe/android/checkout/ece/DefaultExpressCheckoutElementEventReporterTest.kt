@@ -28,7 +28,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_ece_init")
-        assertThat(loggedParams).containsEntry("example_from_test", true)
+        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("ordered_lpms", "link,google_pay")
         assertThat(loggedParams).containsEntry(
             "ece_config",
@@ -55,6 +55,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_ece_wallet_tapped")
+        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("duration", 1.0f)
         assertThat(loggedParams).containsEntry("selected_lpm", "link")
         assertThat(loggedParams).containsKey("link_context")
@@ -66,6 +67,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_ece_wallet_tapped")
+        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("duration", 1.0f)
         assertThat(loggedParams).containsEntry("selected_lpm", "google_pay")
         assertThat(loggedParams).doesNotContainKey("link_context")
@@ -82,6 +84,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_ece_payment_success")
+        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("duration", 1.0f)
         assertThat(loggedParams).containsEntry("selected_lpm", "link")
         assertThat(loggedParams).containsKey("link_context")
@@ -100,6 +103,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_ece_payment_failure")
+        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("duration", 1.0f)
         assertThat(loggedParams).containsEntry("selected_lpm", "google_pay")
         assertThat(loggedParams).containsEntry("error_message", "googlePay_10")
@@ -122,7 +126,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.GooglePay, WalletType.Link),
             analyticsMetadata = AnalyticsMetadata(
-                mapOf("example_from_test" to AnalyticsMetadata.Value.SimpleBoolean(true))
+                mapOf("example_analytics_metadata" to AnalyticsMetadata.Value.SimpleBoolean(true))
             ),
         )
         val googlePayConfiguration = GooglePayConfiguration(
