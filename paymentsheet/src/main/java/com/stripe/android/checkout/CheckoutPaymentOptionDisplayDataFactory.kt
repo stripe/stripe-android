@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
+import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview

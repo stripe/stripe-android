@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.checkout.injection.MerchantDisplayName
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement

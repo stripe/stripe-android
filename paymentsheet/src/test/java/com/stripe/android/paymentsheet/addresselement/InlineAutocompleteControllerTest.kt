@@ -68,6 +68,25 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
+    fun `switching to unsupported country emits OnValues event`() = runScenario(
+        autocompleteCountries = setOf("US")
+    ) {
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        countryFlow.value = "CA"
+        advanceTimeBy(500)
+
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        val event = eventCalls.awaitItem()
+        assertThat(event).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnValues(
+                mapOf(IdentifierSpec.Country to "CA")
+            )
+        )
+    }
+
+    @Test
     fun `empty autocompleteCountries allows all countries`() = runScenario(
         autocompleteCountries = emptySet()
     ) {
@@ -663,6 +682,31 @@ class InlineAutocompleteControllerTest {
         fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(call.placeId).isEqualTo("place-id-123")
         eventCalls.awaitItem()
+    }
+
+    @Test
+    fun `expandFormFromInline emits OnExpandForm with null values when query is empty`() = runScenario {
+        delegate.expandFormFromInline()
+
+        assertThat(eventCalls.awaitItem())
+            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+    }
+
+    @Test
+    fun `expandFormFromInline pre-fills Line1 from current query before debounce completes`() = runScenario {
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main St"
+        delegate.expandFormFromInline()
+
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main St",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

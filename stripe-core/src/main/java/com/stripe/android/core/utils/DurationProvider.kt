@@ -49,7 +49,10 @@ interface DurationProvider {
         IntentConfirmationChallenge,
         IntentConfirmationChallengeWebViewLoaded,
         PaymentMethodMessaging,
-        ExpressCheckoutElement
+        ExpressCheckoutElement,
+        AddressAutocompleteSession,
+        AddressAutocompleteFetch,
+        AddressElementCompletion
     }
 }
 

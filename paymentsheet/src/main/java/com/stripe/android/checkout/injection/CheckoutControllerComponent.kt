@@ -87,7 +87,6 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
-import java.util.UUID
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -122,6 +121,7 @@ internal interface CheckoutControllerComponent {
         fun create(
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
         ): CheckoutControllerComponent
     }
@@ -208,16 +208,6 @@ internal interface CheckoutControllerModule {
     ): AvailableExpressButtonTypesFactory
 
     companion object {
-        private const val CALLBACK_IDENTIFIER_KEY = "CheckoutController_CallbackIdentifier"
-
-        @Provides
-        @Singleton
-        @PaymentElementCallbackIdentifier
-        fun providePaymentElementCallbackIdentifier(savedStateHandle: SavedStateHandle): String {
-            return savedStateHandle.get<String>(CALLBACK_IDENTIFIER_KEY)
-                ?: UUID.randomUUID().toString().also { savedStateHandle[CALLBACK_IDENTIFIER_KEY] = it }
-        }
-
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

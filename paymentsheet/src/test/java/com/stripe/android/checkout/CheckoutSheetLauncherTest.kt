@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -70,7 +71,10 @@ internal class CheckoutSheetLauncherTest {
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = promotion,
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = code),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = code,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -190,7 +194,10 @@ internal class CheckoutSheetLauncherTest {
             hasBeenConfirmed = false,
             customerState = customerState,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -209,7 +216,10 @@ internal class CheckoutSheetLauncherTest {
         val customerState = createCustomerState()
         val result = EmbeddedActivityResult.Cancelled(
             customerState = customerState,
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -226,7 +236,10 @@ internal class CheckoutSheetLauncherTest {
         launchForm("card")
 
         val result = EmbeddedActivityResult.Error(
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -244,7 +257,10 @@ internal class CheckoutSheetLauncherTest {
             hasBeenConfirmed = true,
             customerState = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -376,7 +392,9 @@ internal class CheckoutSheetLauncherTest {
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = null,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
 
         sheetLauncher.launchPaymentOptions(
@@ -392,17 +410,20 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions forwards previously entered new selections`() = testScenario {
+    fun `launchPaymentOptions forwards previously entered new selections into the sheet`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
 
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-            selection = PaymentSelection.GooglePay,
+            customerState = createCustomerState(),
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             configuration = EmbeddedConfigurationFactory.create(),
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
 
+        assertThat(launchCall.previousNewSelections.previousNewSelection("card"))
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(launchCall.previousNewSelections.previousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
@@ -444,7 +465,9 @@ internal class CheckoutSheetLauncherTest {
             selection = selection,
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -461,7 +484,9 @@ internal class CheckoutSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val result = EmbeddedActivityResult.Cancelled(
             customerState = customerState,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -480,7 +505,9 @@ internal class CheckoutSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = emptyList()),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
@@ -499,7 +526,9 @@ internal class CheckoutSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = listOf(paymentMethod)),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
@@ -512,7 +541,11 @@ internal class CheckoutSheetLauncherTest {
     fun `paymentOptionsResult does not update state on error result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-        val result = EmbeddedActivityResult.Error(launchMode = EmbeddedLaunchMode.PaymentOptions)
+        val result = EmbeddedActivityResult.Error(
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
+        )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)

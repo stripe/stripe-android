@@ -8,9 +8,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -50,6 +52,7 @@ import com.stripe.android.utils.shouldAutomaticallyLaunchCardScan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -244,54 +247,33 @@ internal class DefaultVerticalModeFormInteractorTest {
         }
     }
 
+    @Test
+    fun `closing embedded form interactor does not cancel parent scope`() {
+        val parentScope = TestScope(UnconfinedTestDispatcher())
+        val interactor = createEmbeddedFormInteractor(viewModelScope = parentScope)
+
+        interactor.close()
+
+        assertThat(parentScope.isActive).isTrue()
+    }
+
     private fun testSetAsDefaultElements(
         hasSavedPaymentMethods: Boolean,
         block: (SaveForFutureUseElement?, SetAsDefaultPaymentMethodElement?) -> Unit
     ) {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+        val interactor = createEmbeddedFormInteractor(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
+                hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = true,
             ),
-            saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-            hasCustomerConfiguration = true,
-            isPaymentMethodSetAsDefaultEnabled = true,
-        )
-        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        val stateHolder = DefaultSheetActivityStateHolder(
-            paymentMethodMetadata = paymentMethodMetadata,
-            selectionHolder = selectionHolder,
-            configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
-            coroutineScope = TestScope(UnconfinedTestDispatcher()),
-            onClickDelegate = OnClickDelegateOverrideImpl(),
-            eventReporter = FakeEventReporter(),
-            confirmationHandler = FakeConfirmationHandler(),
-            tapToAddHelper = FakeTapToAddHelper.noOp(),
-            customerStateHolder = FakeCustomerStateHolder(),
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
-        )
-        val formHelperFactory = EmbeddedFormHelperFactory(
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = selectionHolder,
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            savedStateHandle = SavedStateHandle(),
-            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
-        )
-        val eventReporter = FakeEventReporter()
-        val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
-            paymentMethodMetadata = paymentMethodMetadata,
-            embeddedSelectionHolder = selectionHolder,
-            embeddedFormHelperFactory = formHelperFactory,
-            viewModelScope = TestScope(UnconfinedTestDispatcher()),
-            sheetActivityStateHolder = stateHolder,
-            tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = eventReporter,
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
-        ).create(
-            paymentMethodCode = "card",
             hasSavedPaymentMethods = hasSavedPaymentMethods,
         )
 
-        val formElements = setAsDefaultInteractor.state.value.formUiElements
+        val formElements = interactor.state.value.formUiElements
 
         val saveForFutureUseElement = formElements.firstOrNull {
             it.identifier == IdentifierSpec.SaveForFutureUse
@@ -308,22 +290,43 @@ internal class DefaultVerticalModeFormInteractorTest {
         paymentSelection: PaymentSelection?,
         block: (List<FormElement>) -> Unit
     ) {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            openCardScanAutomatically = true,
+        val interactor = createEmbeddedFormInteractor(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                openCardScanAutomatically = true,
+            ),
+            configuration = EmbeddedConfirmationStateFixtures
+                .defaultStateWithOpenCardScanAutomatically().configuration,
+            paymentSelection = paymentSelection,
+            paymentMethodCode = selectedPaymentMethodCode,
         )
+        block(interactor.state.value.formUiElements)
+    }
+
+    private fun createEmbeddedFormInteractor(
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        configuration: EmbeddedPaymentElement.Configuration =
+            EmbeddedConfirmationStateFixtures.defaultState().configuration,
+        viewModelScope: CoroutineScope = TestScope(UnconfinedTestDispatcher()),
+        paymentSelection: PaymentSelection? = null,
+        paymentMethodCode: String = "card",
+        hasSavedPaymentMethods: Boolean = false,
+    ): DefaultVerticalModeFormInteractor {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         selectionHolder.setSelection(paymentSelection)
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
-            configuration = EmbeddedConfirmationStateFixtures.defaultStateWithOpenCardScanAutomatically().configuration,
+            configuration = configuration,
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = selectedPaymentMethodCode),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = paymentMethodCode,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -332,21 +335,19 @@ internal class DefaultVerticalModeFormInteractorTest {
             savedStateHandle = SavedStateHandle(),
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
-        val eventReporter = FakeEventReporter()
-        val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
+        return EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
-            viewModelScope = TestScope(UnconfinedTestDispatcher()),
+            viewModelScope = viewModelScope,
             sheetActivityStateHolder = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = eventReporter,
+            eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
         ).create(
-            paymentMethodCode = selectedPaymentMethodCode,
-            hasSavedPaymentMethods = false,
+            paymentMethodCode = paymentMethodCode,
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
         )
-        block(setAsDefaultInteractor.state.value.formUiElements)
     }
 
     private fun runScenario(

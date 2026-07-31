@@ -19,7 +19,9 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
     private val mode: EventReporter.Mode,
 ) : IsNfcScanningAvailable {
     override fun get(metadata: PaymentMethodMetadata): Boolean {
-        val hasRequirements = metadata.isNfcScanningEnabled && !metadata.isTapToAddSupported
+        val hasRequirements = metadata.isNfcScanningEnabled &&
+            !metadata.isTapToAddSupported &&
+            !metadata.isStripeCardScanAllowed
 
         if (!hasRequirements) {
             return false

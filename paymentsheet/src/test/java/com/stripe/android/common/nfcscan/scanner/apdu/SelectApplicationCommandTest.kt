@@ -17,13 +17,39 @@ internal class SelectApplicationCommandTest {
     }
 
     @Test
-    fun `transceiveWith returns success when status word is 9000`() = test(
+    fun `transceiveWith returns None when PDOL tag is absent`() = test(
         transceiveResult = apduSuccessResponse(byteArrayOf()),
     ) {
         val result = SelectApplicationCommand(ApplicationIdentifier(VISA_AID.toHexString()))
             .transceiveWith(transceiver)
 
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(PdolTemplate.None)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `transceiveWith returns None when PDOL tag is available but empty`() = test(
+        transceiveResult = apduSuccessResponse(
+            tlv(tag = 0x9F.toByte(), tagContinuation = 0x38, value = byteArrayOf()),
+        ),
+    ) {
+        val result = SelectApplicationCommand(ApplicationIdentifier(VISA_AID.toHexString()))
+            .transceiveWith(transceiver)
+
+        assertThat(result.getOrNull()).isEqualTo(PdolTemplate.None)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `transceiveWith returns Available with PDOL data from FCI response`() = test(
+        transceiveResult = apduSuccessResponse(
+            tlv(tag = 0x9F.toByte(), tagContinuation = 0x38, value = PDOL_TEMPLATE),
+        ),
+    ) {
+        val result = SelectApplicationCommand(ApplicationIdentifier(VISA_AID.toHexString()))
+            .transceiveWith(transceiver)
+
+        assertThat(result.getOrNull()).isEqualTo(PdolTemplate.Available(PDOL_TEMPLATE))
         assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
     }
 
@@ -79,6 +105,9 @@ internal class SelectApplicationCommandTest {
             0x10,
             0x10,
             0x00,
+        )
+        val PDOL_TEMPLATE = byteArrayOf(
+            0x9F.toByte(), 0x66, 0x04,
         )
     }
 }

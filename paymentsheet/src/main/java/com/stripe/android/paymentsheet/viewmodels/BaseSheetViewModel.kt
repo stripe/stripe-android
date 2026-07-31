@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceCont
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -72,6 +73,7 @@ internal abstract class BaseSheetViewModel(
     val placesClient: PlacesClientProxy?,
     val linkAccountHolder: LinkAccountHolder,
     stripeAutocompleteRepository: StripeAutocompleteRepository,
+    addressLauncherEventReporter: AddressLauncherEventReporter,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -101,6 +103,7 @@ internal abstract class BaseSheetViewModel(
             shouldUseAutocompleteProxyEndpointsProvider = {
                 _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
             },
+            eventReporter = addressLauncherEventReporter,
         )
 
     internal val validationRequested = MutableSharedFlow<Unit>()

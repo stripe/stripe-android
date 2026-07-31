@@ -8,6 +8,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -18,6 +19,8 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -35,6 +38,7 @@ import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -67,6 +71,13 @@ internal class CheckoutControllerTest {
         .around(destroyControllerRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+
+    // The controller resolves callbacks from the process-global PaymentElementCallbackReferences,
+    // keyed by integration name. Clear it between tests so registrations don't leak across cases.
+    @After
+    fun clearCallbackReferences() {
+        PaymentElementCallbackReferences.clear()
+    }
 
     @Test
     fun `configure returns success`() = runConfigureScenario {
@@ -227,7 +238,7 @@ internal class CheckoutControllerTest {
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
         assertThat(controller.checkoutSession.value).isNull()
-        assertThat(CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state).isNull()
+        assertThat(committedStateFor(savedStateHandle)).isNull()
     }
 
     @Test
@@ -237,8 +248,8 @@ internal class CheckoutControllerTest {
         val controller = createController(savedStateHandle)
         controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
 
-        // Simulate process death: a new controller built from the same saved state.
-        val recreated = createController(savedStateHandle)
+        // Simulate process death: persist the handle and build a new controller from the restored copy.
+        val recreated = createController(savedStateHandle.simulateProcessDeath())
 
         assertThat(recreated.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
@@ -250,9 +261,9 @@ internal class CheckoutControllerTest {
         val controller = createController(savedStateHandle)
         controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
 
-        // A fresh state holder over the same SavedStateHandle simulates the controller being
-        // rebuilt after process death: the committed state is read back from persisted storage.
-        val state = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state
+        // Persisting and restoring the handle simulates the controller being rebuilt after process
+        // death: the committed state is read back from the restored namespaced child.
+        val state = committedStateFor(savedStateHandle.simulateProcessDeath())
         assertThat(state).isNotNull()
         assertThat(state!!.embeddedConfiguration.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
@@ -272,17 +283,16 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `clearPaymentOption clears paymentOptionDisplayData`() = runTest {
-        val savedStateHandle = SavedStateHandle(
-            mapOf(
-                CheckoutControllerStateHolder.STATE_KEY to CheckoutControllerStateFactory.create(
-                    paymentSelection = PaymentSelection.GooglePay,
-                    temporarySelection = "card",
-                    previousNewSelections = Bundle().apply {
-                        putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-                    },
-                ),
-            ),
-        )
+        val savedStateHandle = SavedStateHandle()
+        // Seed the controller's namespaced child before building; the controller reuses that child.
+        savedStateHandle.checkoutSubHandle(DEFAULT_INTEGRATION_NAME)[CheckoutControllerStateHolder.STATE_KEY] =
+            CheckoutControllerStateFactory.create(
+                paymentSelection = PaymentSelection.GooglePay,
+                temporarySelection = "card",
+                previousNewSelections = Bundle().apply {
+                    putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+                },
+            )
 
         val controller = createController(savedStateHandle)
         controller.checkoutSession.test {
@@ -323,22 +333,57 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `callback identifier is generated and stored when absent`() = runTest {
-        val savedStateHandle = SavedStateHandle()
-        createController(savedStateHandle)
+    fun `default integration name is used as the payment element callback identifier`() = runTest {
+        val controller = createController()
 
-        assertThat(savedStateHandle.get<String>(CALLBACK_IDENTIFIER_KEY)).isNotNull()
+        assertThat(controller.paymentElementCallbackIdentifier).isEqualTo(DEFAULT_INTEGRATION_NAME)
     }
 
     @Test
-    fun `callback identifier is reused from savedStateHandle when present`() = runTest {
+    fun `custom integration name is used as the payment element callback identifier`() = runTest {
+        val controller = createController(integrationName = "merchant_checkout")
+
+        assertThat(controller.paymentElementCallbackIdentifier).isEqualTo("merchant_checkout")
+    }
+
+    @Test
+    fun `integration name keys the controller into its own global callback references entry`() = runTest {
+        val callbacks = PaymentElementCallbacks.Builder().build()
+        PaymentElementCallbackReferences["merchant_checkout"] = callbacks
+
+        val controller = createController(integrationName = "merchant_checkout")
+
+        assertThat(PaymentElementCallbackReferences[controller.paymentElementCallbackIdentifier])
+            .isSameInstanceAs(callbacks)
+    }
+
+    @Test
+    fun `controllers with different integration names keep separate state on one saved state handle`() =
+        runTest {
+            networkRule.defaultInit()
+            val savedStateHandle = SavedStateHandle()
+            val first = createController(savedStateHandle, integrationName = "first")
+            val second = createController(savedStateHandle, integrationName = "second")
+
+            first.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+
+            // Both controllers share the parent handle, but each persists under its own namespace, so
+            // configuring the first leaves the second's state untouched.
+            assertThat(first.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(second.checkoutSession.value).isNull()
+        }
+
+    @Test
+    fun `state does not leak across process death to a different integration name`() = runTest {
+        networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
-        savedStateHandle[CALLBACK_IDENTIFIER_KEY] = "existing_identifier"
+        val controller = createController(savedStateHandle, integrationName = "first")
+        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
 
-        createController(savedStateHandle)
+        // After process death, a controller under a different name starts from empty state.
+        val recreated = createController(savedStateHandle.simulateProcessDeath(), integrationName = "second")
 
-        assertThat(savedStateHandle.get<String>(CALLBACK_IDENTIFIER_KEY))
-            .isEqualTo("existing_identifier")
+        assertThat(recreated.checkoutSession.value).isNull()
     }
 
     @Test
@@ -1145,14 +1190,31 @@ internal class CheckoutControllerTest {
         )
     }
 
+    // Simulates process death by persisting the handle's registered providers into a bundle and
+    // rebuilding a fresh handle from it, the way SavedStateRegistry does across a real restart. The
+    // controller's namespaced child is then restored from that serialized state.
+    // Persisting a handle can only be done through the restricted savedStateProvider(); the same
+    // suppression the production code uses applies here.
+    @Suppress("RestrictedApi")
+    private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
+        SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
+
+    // Reads the CheckoutControllerState the controller committed into its namespaced child of [parent].
+    private fun committedStateFor(
+        parent: SavedStateHandle,
+        integrationName: String = DEFAULT_INTEGRATION_NAME,
+    ): CheckoutControllerState? =
+        CheckoutControllerStateFactory.createStateHolder(parent.checkoutSubHandle(integrationName)).state
+
     private fun createController(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        integrationName: String = DEFAULT_INTEGRATION_NAME,
     ): CheckoutController {
         return destroyControllerRule.track(
             CheckoutController.Builder(
                 application = applicationContext,
                 savedStateHandle = savedStateHandle,
-            ).build()
+            ).integrationName(integrationName).build()
         )
     }
 
@@ -1174,10 +1236,11 @@ internal class CheckoutControllerTest {
         val result: Result<Unit>,
         private val savedStateHandle: SavedStateHandle,
     ) {
-        // Reads the state the controller committed via its state holder, which shares this
-        // SavedStateHandle in the production graph.
+        // Reads the state the controller committed by re-deriving its namespaced child of the handle.
         val committedState: CheckoutControllerState?
-            get() = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state
+            get() = CheckoutControllerStateFactory
+                .createStateHolder(savedStateHandle.checkoutSubHandle(DEFAULT_INTEGRATION_NAME))
+                .state
     }
 
     // Configures a controller from a fresh init, then hands it to [block] alongside the shared
@@ -1199,11 +1262,14 @@ internal class CheckoutControllerTest {
 
         turbineScope {
             val isLoadingTurbine = controller.isLoading.testIn(backgroundScope)
+            // Re-derive the controller's own child handle so writes made here (selection, sheet-open)
+            // are observed by the controller and vice versa.
+            val childHandle = savedStateHandle.checkoutSubHandle(DEFAULT_INTEGRATION_NAME)
             block(
                 MutationScenario(
                     controller = controller,
-                    stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
-                    sheetStateHolder = SheetStateHolder(savedStateHandle),
+                    stateHolder = CheckoutControllerStateFactory.createStateHolder(childHandle),
+                    sheetStateHolder = SheetStateHolder(childHandle),
                     testScope = this@runTest,
                     isLoadingTurbine = isLoadingTurbine,
                 )
@@ -1252,6 +1318,6 @@ internal class CheckoutControllerTest {
 
     private companion object {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
-        const val CALLBACK_IDENTIFIER_KEY = "CheckoutController_CallbackIdentifier"
+        const val DEFAULT_INTEGRATION_NAME = "stripe_checkout"
     }
 }

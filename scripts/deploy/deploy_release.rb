@@ -10,13 +10,15 @@ require_relative 'version_bump_pr_steps'
 
 def cleanup_deploy_release(success:)
     delete_github_release if @is_dry_run
-    execute("git checkout #{@deploy_branch}") if success && @checked_out_release_tag
+    delete_release_tag if @is_dry_run && @created_local_release_tag
+    execute("git checkout #{@deploy_branch}") if success && @checked_out_release_source
 end
 
 def prepare_deploy_release_resume(step_index)
     return if step_index < 4
 
     checkout_release_source
+    verify_release_tag_matches_release_source if step_index > 4 && !@skip_release_tag
 end
 
 parse_release_options!(flow_name: 'deploy release', version_required: true)
@@ -25,6 +27,7 @@ steps = [
     method(:check_permissions),
     method(:ensure_clean_repo),
     method(:checkout_release_source),
+    method(:create_release_tag),
     method(:publish_to_sonatype),
     method(:create_github_release),
     method(:update_pay_server_docs),

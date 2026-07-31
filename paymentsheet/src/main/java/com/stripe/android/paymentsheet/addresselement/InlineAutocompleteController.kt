@@ -27,8 +27,9 @@ internal class InlineAutocompleteController(
     private val eventListenerProvider: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
 ) {
     private var lastPredictionLine1: String? = null
-    private var latestQuery: String? = null
-    private var latestCountry: String? = null
+    private var lastObservedCountry: String? = null
+    private var queryFlow: StateFlow<String>? = null
+    private var countryFlow: StateFlow<String?>? = null
     private var observeJob: Job? = null
     private var selectionJob: Job? = null
 
@@ -41,6 +42,9 @@ internal class InlineAutocompleteController(
     @OptIn(FlowPreview::class)
     fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
         observeJob?.cancel()
+        queryFlow = query
+        countryFlow = country
+        lastObservedCountry = country.value ?: ""
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
@@ -50,13 +54,22 @@ internal class InlineAutocompleteController(
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         return@collectLatest
                     }
-                    if (q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE || !isCountrySupported(c)) {
+                    val countryChanged = c != lastObservedCountry
+                    if (countryChanged) {
+                        lastObservedCountry = c
+                    }
+                    if (!isCountrySupported(c) || q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE) {
                         lastPredictionLine1 = null
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+                        if (countryChanged) {
+                            eventListenerProvider()?.invoke(
+                                AutocompleteAddressInteractor.Event.OnValues(
+                                    mapOf(IdentifierSpec.Country to c)
+                                )
+                            )
+                        }
                         return@collectLatest
                     }
-                    latestQuery = q
-                    latestCountry = c
                     fetchPredictions(q, c)
                 }
         }
@@ -71,7 +84,7 @@ internal class InlineAutocompleteController(
                 ensureActive()
                 result.fold(
                     onSuccess = { handleFetchPlaceSuccess(it) },
-                    onFailure = { handleFailure() }
+                    onFailure = { handleFailure(queryFlow?.value, countryFlow?.value) }
                 )
             } finally {
                 placesClient.resetSession()
@@ -99,9 +112,14 @@ internal class InlineAutocompleteController(
     fun onDismissed() {
         selectionJob?.cancel()
         lastPredictionLine1 = null
-        latestQuery = null
-        latestCountry = null
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+    }
+
+    fun expandFormFromInline() {
+        emitExpandForm(
+            query = queryFlow?.value,
+            country = countryFlow?.value,
+        )
     }
 
     fun dispose() {
@@ -125,7 +143,7 @@ internal class InlineAutocompleteController(
         currentCoroutineContext().ensureActive()
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
-            onFailure = { handleFailure() }
+            onFailure = { handleFailure(query, country) }
         )
     }
 
@@ -145,17 +163,17 @@ internal class InlineAutocompleteController(
         )
     }
 
-    private fun handleFailure() {
+    private fun handleFailure(query: String?, country: String?) {
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         if (config.shouldUseStripeHostedAutocomplete) {
-            expandFormForHostedFailure()
+            emitExpandForm(query = query, country = country)
         }
     }
 
-    private fun expandFormForHostedFailure() {
+    private fun emitExpandForm(query: String?, country: String?) {
         val values = buildMap<IdentifierSpec, String?> {
-            latestQuery?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Line1, it) }
-            latestCountry?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Country, it) }
+            query?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Line1, it) }
+            country?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Country, it) }
         }.takeIf { it.isNotEmpty() }
 
         eventListenerProvider()?.invoke(

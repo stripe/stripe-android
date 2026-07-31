@@ -28,6 +28,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -95,7 +96,10 @@ internal class EmbeddedSheetActivityTest {
                     hasBeenConfirmed = true,
                     customerState = null,
                     shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                    launchMode = EmbeddedLaunchMode.Form(
+                        selectedPaymentMethodCode = "card",
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    ),
                 )
             )
         }
@@ -117,7 +121,12 @@ internal class EmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         assertThat((result as EmbeddedActivityResult.Cancelled).launchMode)
-            .isEqualTo(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+            .isEqualTo(
+                EmbeddedLaunchMode.Form(
+                    selectedPaymentMethodCode = "card",
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                )
+            )
     }
 
     @Test
@@ -135,7 +144,12 @@ internal class EmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         assertThat((result as EmbeddedActivityResult.Cancelled).launchMode)
-            .isEqualTo(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"))
+            .isEqualTo(
+                EmbeddedLaunchMode.Form(
+                    selectedPaymentMethodCode = "cashapp",
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                )
+            )
     }
 
     private fun launch(
@@ -157,7 +171,10 @@ internal class EmbeddedSheetActivityTest {
                     previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),
                     promotion = null,
-                    launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = selectedPaymentMethodCode),
+                    launchMode = EmbeddedLaunchMode.Form(
+                        selectedPaymentMethodCode = selectedPaymentMethodCode,
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    ),
                 ),
             )
         ).use { scenario ->

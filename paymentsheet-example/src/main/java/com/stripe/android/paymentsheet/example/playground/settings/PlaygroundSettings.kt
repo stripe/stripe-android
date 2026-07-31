@@ -562,6 +562,7 @@ internal class PlaygroundSettings private constructor(
                     PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
             ),
             LinkControllerAllowUserEmailEditsSettingsDefinition,
+            LinkControllerCustomAppearanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.forceLinkWebAuth),
             FeatureFlagSettingsDefinition(
                 FeatureFlags.forceEnableLinkPaymentSelectionHint,

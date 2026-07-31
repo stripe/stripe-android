@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -69,6 +70,30 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             tapToAddHelper = tapToAddHelper,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             isNfcScanningAvailable = isNfcScanningAvailable,
+        )
+    }
+
+    /**
+     * Creates a [FormHelper] for the vertical-layout payment method list rather than the form screen. Card scan
+     * auto-launch and tap-to-add apply only to the form screen, and [setAsDefaultMatchesSaveForFutureUse] does not
+     * affect form-type determination, so the default value is used.
+     */
+    fun createForVerticalLayout(
+        coroutineScope: CoroutineScope,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        eventReporter: EventReporter,
+        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+        selectionUpdater: (PaymentSelection?) -> Unit,
+    ): FormHelper {
+        return create(
+            coroutineScope = coroutineScope,
+            paymentMethodMetadata = paymentMethodMetadata,
+            eventReporter = eventReporter,
+            automaticallyLaunchedCardScanFormDataHelper = null,
+            tapToAddHelper = null,
+            selectionUpdater = selectionUpdater,
+            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
 
