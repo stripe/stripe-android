@@ -55,6 +55,19 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
+    fun `query with unsupported country stays Idle`() = runScenario(
+        autocompleteCountries = setOf("US")
+    ) {
+        countryFlow.value = "CA"
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+    }
+
+    @Test
     fun `empty autocompleteCountries allows all countries`() = runScenario(
         autocompleteCountries = emptySet()
     ) {
@@ -468,6 +481,24 @@ class InlineAutocompleteControllerTest {
 
         assertThat(delegate.inlinePredictionsState.value)
             .isEqualTo(InlinePredictionsState.Idle)
+    }
+
+    @Test
+    fun `country change triggers re-evaluation`() = runScenario(
+        autocompleteCountries = setOf("US")
+    ) {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        countryFlow.value = "CA"
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        countryFlow.value = "US"
+        advanceTimeBy(500)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
     }
 
     @Test

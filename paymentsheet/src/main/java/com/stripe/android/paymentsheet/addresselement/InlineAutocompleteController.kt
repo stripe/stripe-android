@@ -156,9 +156,9 @@ internal class InlineAutocompleteController(
         )
     }
 
-    private fun handleFailure(query: String?, country: String?, wasRefetch: Boolean) {
+    private fun handleFailure(query: String?, country: String?, wasShowingResults: Boolean) {
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-        if (config.shouldUseStripeHostedAutocomplete && !wasRefetch) {
+        if (config.shouldUseStripeHostedAutocomplete && !wasShowingResults) {
             emitExpandForm(query = query, country = country)
         }
     }
