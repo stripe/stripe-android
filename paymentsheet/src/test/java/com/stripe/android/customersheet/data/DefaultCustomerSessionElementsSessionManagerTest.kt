@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.data
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
@@ -17,8 +18,11 @@ import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.coroutineContext
 
+@RunWith(RobolectricTestRunner::class)
 class DefaultCustomerSessionElementsSessionManagerTest {
     @Test
     fun `on fetch elements session, should set parameters properly & report successful load`() = runTest {
@@ -500,6 +504,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         }
     ): CustomerSessionElementsSessionManager {
         return DefaultCustomerSessionElementsSessionManager(
+            application = ApplicationProvider.getApplicationContext(),
             elementsSessionRepository = elementsSessionRepository,
             errorReporter = errorReporter,
             prefsRepositoryFactory = {

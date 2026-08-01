@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.state
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -27,7 +26,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `fetchPromotionsAsync calls repository`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         val request = fakeRepository.calls.awaitItem()
         assertThat(request.amount).isEqualTo(1099)
@@ -38,7 +37,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `getPromotionIfAvailableForCode returns promotion if available and in treatment`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("treatment")
@@ -52,7 +51,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `getPromotionIfAvailableForCode returns null if not available`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         val metadata = getMetadata("treatment")
         val result = helper.getPromotionIfAvailableForCode(
@@ -65,7 +64,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `reportPromotionDisplayed fires event with true when promotion available`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("treatment")
@@ -76,7 +75,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `reportPromotionDisplayed fires event with false when promotion not available`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         val metadata = getMetadata("treatment")
         helper.reportPromotionDisplayed("afterpay_clearpay", metadata)
@@ -86,7 +85,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `reportPromotionDisplayed does not fire event when not in treatment`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("control")
@@ -96,7 +95,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `reportPromotionDisplayed does not fire event for unsupported PM`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("treatment")
@@ -106,7 +105,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `getPromotionIfAvailableForCode does not return promotion if variant is control`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("control")
@@ -115,7 +114,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `getPromotionProvider returns null for control`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("control")
@@ -124,7 +123,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `getPromotionProvider returns null for unsupported PMs`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("control")
@@ -133,7 +132,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
     @Test
     fun `returns promotion provider for treatment group supported pm`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD, TEST_OPTIONS)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("treatment")
@@ -159,9 +158,6 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
         val helper = DefaultPaymentMethodMessagePromotionsHelper(
             stripeRepository = fakeRepository,
-            lazyPaymentConfig = {
-                PaymentConfiguration("pk_123")
-            },
             viewModelScope = this,
             workContext = testDispatcher,
             eventReporter = eventReporter
@@ -233,6 +229,8 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     private companion object {
+        val TEST_OPTIONS = ApiRequest.Options(apiKey = "pk_test_123")
+
         val AFTERPAY_PROMOTION = PaymentMethodMessagePromotion(
             paymentMethodType = "Afterpay_Clearpay",
             message = "Pay in 4 interest-free payments",

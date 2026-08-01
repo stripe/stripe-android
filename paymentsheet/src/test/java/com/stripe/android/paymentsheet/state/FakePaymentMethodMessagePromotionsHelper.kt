@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 
@@ -19,7 +20,7 @@ internal class FakePaymentMethodMessagePromotionsHelper(
     val reportPromotionDisplayedCalls: ReceiveTurbine<Pair<PaymentMethodCode, Boolean>> =
         _reportPromotionDisplayedCalls
 
-    override fun fetchPromotionsAsync(intent: StripeIntent) {
+    override fun fetchPromotionsAsync(intent: StripeIntent, requestOptions: ApiRequest.Options) {
         _calls.add(Unit)
     }
 
