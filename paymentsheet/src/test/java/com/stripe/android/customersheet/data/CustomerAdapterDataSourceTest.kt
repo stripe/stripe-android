@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.data
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -21,9 +22,12 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 
+@RunWith(RobolectricTestRunner::class)
 @SuppressWarnings("LargeClass")
 class CustomerAdapterDataSourceTest {
 
@@ -718,6 +722,7 @@ class CustomerAdapterDataSourceTest {
         elementsSessionRepository: ElementsSessionRepository = createElementsSessionRepository(),
     ): CustomerAdapterDataSource {
         return CustomerAdapterDataSource(
+            application = ApplicationProvider.getApplicationContext(),
             customerAdapter = adapter,
             elementsSessionRepository = elementsSessionRepository,
             errorReporter = errorReporter,
