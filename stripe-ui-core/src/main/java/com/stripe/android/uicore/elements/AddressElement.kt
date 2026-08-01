@@ -32,7 +32,7 @@ class AddressElement(
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
     private val hideCountry: Boolean = false,
-    inlineAutocompleteHandler: InlineAutocompleteHandler? = null,
+    private val inlineAutocompleteHandler: InlineAutocompleteHandler? = null,
 ) : SectionMultiFieldElement(_identifier), AddressFieldsElement {
 
     override val allowsUserInteraction: Boolean = true
@@ -205,7 +205,7 @@ class AddressElement(
             }
         }
 
-        arrangeFieldsForInputMode(baseElements).apply {
+        arrangeFieldsForInputMode(baseElements, country).apply {
             onEach {
                 it.onValidationStateChanged(isValidating)
             }
@@ -254,6 +254,7 @@ class AddressElement(
 
     private fun arrangeFieldsForInputMode(
         baseElements: List<SectionFieldElement>,
+        country: String?,
     ): List<SectionFieldElement> {
         val emailField = when {
             addressInputMode.emailConfig != AddressFieldConfiguration.HIDDEN -> emailElement
@@ -263,9 +264,12 @@ class AddressElement(
             addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN -> phoneNumberElement
             else -> null
         }
-        val contactFieldsFirst =
-            addressInputMode is AddressInputMode.AutocompleteCondensed ||
-                addressInputMode is AddressInputMode.AutocompleteExpanded
+        val contactFieldsFirst = inlineAutocompleteHandler != null ||
+            addressInputMode is AddressInputMode.AutocompleteExpanded ||
+            (
+                addressInputMode is AddressInputMode.AutocompleteCondensed &&
+                    addressInputMode.supportsAutoComplete(country, isPlacesAvailable)
+                )
         return if (contactFieldsFirst) {
             buildList {
                 emailField?.let { add(it) }

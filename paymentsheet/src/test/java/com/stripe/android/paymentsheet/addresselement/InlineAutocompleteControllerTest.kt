@@ -68,6 +68,25 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
+    fun `switching to unsupported country emits OnValues event`() = runScenario(
+        autocompleteCountries = setOf("US")
+    ) {
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        countryFlow.value = "CA"
+        advanceTimeBy(500)
+
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        val event = eventCalls.awaitItem()
+        assertThat(event).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnValues(
+                mapOf(IdentifierSpec.Country to "CA")
+            )
+        )
+    }
+
+    @Test
     fun `empty autocompleteCountries allows all countries`() = runScenario(
         autocompleteCountries = emptySet()
     ) {
@@ -153,7 +172,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `failed fetch resets to Idle`() = runScenario {
+    fun `failed fetch keeps dropdown open with empty results`() = runScenario {
         fakePlacesClient.findPredictionsResult = Result.failure(RuntimeException("Network error"))
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
@@ -161,7 +180,9 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(500)
 
         fakePlacesClient.findPredictionsCalls.awaitItem()
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(
+            InlinePredictionsState.Results(query = "123 Main", predictions = emptyList())
+        )
     }
 
     @Test
@@ -555,7 +576,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `stripe-hosted config expands form on prediction failure`() = runScenario(
+    fun `prediction failure keeps dropdown open with empty results`() = runScenario(
         shouldUseStripeHostedAutocomplete = true,
     ) {
         fakePlacesClient.findPredictionsResult = Result.failure(
@@ -569,15 +590,37 @@ class InlineAutocompleteControllerTest {
         val call = fakePlacesClient.findPredictionsCalls.awaitItem()
         assertThat(call.query).isEqualTo("123 Main")
         assertThat(call.country).isEqualTo("US")
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem()).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnExpandForm(
-                values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main",
-                    IdentifierSpec.Country to "US",
-                )
-            )
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(
+            InlinePredictionsState.Results(query = "123 Main", predictions = emptyList())
         )
+        eventCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `refetch failure keeps dropdown open with empty results`() = runScenario(
+        shouldUseStripeHostedAutocomplete = true,
+    ) {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123"
+        advanceTimeBy(500)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(delegate.inlinePredictionsState.value)
+            .isInstanceOf<InlinePredictionsState.Results>()
+
+        fakePlacesClient.findPredictionsResult = Result.failure(RuntimeException("Network error"))
+
+        queryFlow.value = "1234"
+        advanceTimeBy(500)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(
+            InlinePredictionsState.Results(query = "1234", predictions = emptyList())
+        )
+        eventCalls.expectNoEvents()
     }
 
     @Test
@@ -637,7 +680,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `stripe-hosted prediction failure with null country only includes Line1`() = runScenario(
+    fun `prediction failure with null country keeps dropdown open with empty results`() = runScenario(
         shouldUseStripeHostedAutocomplete = true,
     ) {
         fakePlacesClient.findPredictionsResult = Result.failure(
@@ -650,14 +693,10 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(500)
 
         fakePlacesClient.findPredictionsCalls.awaitItem()
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem()).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnExpandForm(
-                values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main",
-                )
-            )
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(
+            InlinePredictionsState.Results(query = "123 Main", predictions = emptyList())
         )
+        eventCalls.expectNoEvents()
     }
 
     @Test

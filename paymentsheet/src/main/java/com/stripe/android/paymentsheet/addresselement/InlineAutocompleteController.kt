@@ -27,6 +27,7 @@ internal class InlineAutocompleteController(
     private val eventListenerProvider: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
 ) {
     private var lastPredictionLine1: String? = null
+    private var lastObservedCountry: String? = null
     private var queryFlow: StateFlow<String>? = null
     private var countryFlow: StateFlow<String?>? = null
     private var observeJob: Job? = null
@@ -43,6 +44,7 @@ internal class InlineAutocompleteController(
         observeJob?.cancel()
         queryFlow = query
         countryFlow = country
+        lastObservedCountry = country.value ?: ""
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
@@ -52,9 +54,20 @@ internal class InlineAutocompleteController(
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         return@collectLatest
                     }
-                    if (q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE || !isCountrySupported(c)) {
+                    val countryChanged = c != lastObservedCountry
+                    if (countryChanged) {
+                        lastObservedCountry = c
+                    }
+                    if (!isCountrySupported(c) || q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE) {
                         lastPredictionLine1 = null
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+                        if (countryChanged) {
+                            eventListenerProvider()?.invoke(
+                                AutocompleteAddressInteractor.Event.OnValues(
+                                    mapOf(IdentifierSpec.Country to c)
+                                )
+                            )
+                        }
                         return@collectLatest
                     }
                     fetchPredictions(q, c)
@@ -73,7 +86,7 @@ internal class InlineAutocompleteController(
                 ensureActive()
                 result.fold(
                     onSuccess = { handleFetchPlaceSuccess(it) },
-                    onFailure = { handleFailure(queryAtSelection, countryAtSelection, false) }
+                    onFailure = { handleFailure(queryAtSelection, countryAtSelection) }
                 )
             } finally {
                 placesClient.resetSession()
@@ -123,9 +136,7 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        val wasShowingResults =
-            _inlinePredictionsState.value is AutocompleteAddressInteractor.InlinePredictionsState.Results
-        if (!wasShowingResults) {
+        if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
             _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
         }
         val result = placesClient.findAutocompletePredictions(
@@ -136,7 +147,12 @@ internal class InlineAutocompleteController(
         currentCoroutineContext().ensureActive()
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
-            onFailure = { handleFailure(query, country, wasShowingResults) }
+            onFailure = {
+                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Results(
+                    query = query,
+                    predictions = emptyList(),
+                )
+            }
         )
     }
 
@@ -156,9 +172,9 @@ internal class InlineAutocompleteController(
         )
     }
 
-    private fun handleFailure(query: String?, country: String?, wasShowingResults: Boolean) {
+    private fun handleFailure(query: String?, country: String?) {
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-        if (config.shouldUseStripeHostedAutocomplete && !wasShowingResults) {
+        if (config.shouldUseStripeHostedAutocomplete) {
             emitExpandForm(query = query, country = country)
         }
     }
