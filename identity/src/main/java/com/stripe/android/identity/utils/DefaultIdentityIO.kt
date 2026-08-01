@@ -106,7 +106,9 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
     override fun cropAndPadBitmap(
         original: Bitmap,
         boundingBox: BoundingBox,
-        paddingSize: Float
+        paddingSize: Float,
+        fallbackIfMostlyOutOfBounds: Boolean,
+        onFallback: ((Float) -> Unit)?
     ): Bitmap {
         val modelInput = original.cropCenter(
             maxAspectRatioInSize(
@@ -115,14 +117,28 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
             )
         )
 
-        return modelInput.cropWithFill(
-            Rect(
-                (modelInput.width * boundingBox.left - paddingSize).toInt(),
-                (modelInput.height * boundingBox.top - paddingSize).toInt(),
-                (modelInput.width * (boundingBox.left + boundingBox.width) + paddingSize).toInt(),
-                (modelInput.height * (boundingBox.top + boundingBox.height) + paddingSize).toInt()
-            )
-        )
+        val cropLeft = (modelInput.width * boundingBox.left - paddingSize).toInt()
+        val cropTop = (modelInput.height * boundingBox.top - paddingSize).toInt()
+        val cropRight = (modelInput.width * (boundingBox.left + boundingBox.width) + paddingSize).toInt()
+        val cropBottom = (modelInput.height * (boundingBox.top + boundingBox.height) + paddingSize).toInt()
+
+        val cropRect = Rect(cropLeft, cropTop, cropRight, cropBottom)
+        if (fallbackIfMostlyOutOfBounds) {
+            val imageRect = Rect(0, 0, modelInput.width, modelInput.height)
+            val intersectionRatio = cropRect.intersectionRatioWith(imageRect)
+            if (intersectionRatio < DOCUMENT_CROP_MIN_INTERSECTION_RATIO) {
+                android.util.Log.w(
+                    TAG,
+                    "Bounding box crop is mostly out of bounds (intersection=$intersectionRatio). " +
+                        "cropRect=$cropRect, image=$imageRect. " +
+                        "Falling back to full center-cropped image."
+                )
+                onFallback?.invoke(intersectionRatio)
+                return modelInput
+            }
+        }
+
+        return modelInput.cropWithFill(cropRect)
     }
 
     override fun createTFLiteFile(modelUrl: String): File {
@@ -157,5 +173,27 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
     // TODO(ccen): Add name and versioning of the model, calculate MD5 and build a more descriptive caching machanism.
     private fun generateTFLiteFileNameWithGitHash(modelUrl: String): String {
         return "${modelUrl.split('/')[5]}.tflite"
+    }
+
+    private fun Rect.intersectionRatioWith(other: Rect): Float {
+        if (width() <= 0 || height() <= 0) {
+            return 0f
+        }
+
+        val interLeft = maxOf(left, other.left)
+        val interTop = maxOf(top, other.top)
+        val interRight = minOf(right, other.right)
+        val interBottom = minOf(bottom, other.bottom)
+        val interWidth = maxOf(0, interRight - interLeft)
+        val interHeight = maxOf(0, interBottom - interTop)
+        val intersectionArea = interWidth.toLong() * interHeight.toLong()
+        val cropArea = width().toLong() * height().toLong()
+
+        return intersectionArea.toFloat() / cropArea
+    }
+
+    private companion object {
+        const val TAG = "DefaultIdentityIO"
+        const val DOCUMENT_CROP_MIN_INTERSECTION_RATIO = 0.5f
     }
 }

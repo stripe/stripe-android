@@ -599,11 +599,14 @@ internal class IdentityViewModel(
 
         // upload high res
         runCatching {
+            // Use detectorOutput.croppedImage to ensure the crop is applied to the exact image
+            // the model ran on, avoiding any potential mismatch with the full camera frame.
             processAndUploadBitmap(
                 bitmapToUpload = cropBitmapToUpload(
-                    originalBitmap,
+                    detectorOutput.croppedImage,
                     detectorOutput.boundingBox,
-                    verificationPage
+                    verificationPage,
+                    targetScanType
                 ),
                 docCapturePage = verificationPage.documentCapture,
                 isHighRes = true,
@@ -695,12 +698,17 @@ internal class IdentityViewModel(
     private fun cropBitmapToUpload(
         originalBitmap: Bitmap,
         boundingBox: BoundingBox,
-        verificationPage: VerificationPage
+        verificationPage: VerificationPage,
+        scanType: IdentityScanState.ScanType
     ) =
         identityIO.cropAndPadBitmap(
             originalBitmap,
             boundingBox,
-            originalBitmap.longerEdge() * verificationPage.documentCapture.highResImageCropPadding
+            originalBitmap.longerEdge() * verificationPage.documentCapture.highResImageCropPadding,
+            fallbackIfMostlyOutOfBounds = true,
+            onFallback = { intersectionRatio ->
+                identityAnalyticsRequestFactory.documentCropFallback(scanType, intersectionRatio)
+            }
         )
 
     /**
