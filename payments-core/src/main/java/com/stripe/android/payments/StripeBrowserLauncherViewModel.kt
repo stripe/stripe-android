@@ -82,11 +82,10 @@ internal class StripeBrowserLauncherViewModel(
     }
 
     fun getResultIntent(args: PaymentBrowserAuthContract.Args): Intent {
-        val url = Uri.parse(args.url)
         return Intent().putExtras(
             PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
-                sourceId = url.lastPathSegment.orEmpty(),
+                sourceId = args.sourceId ?: Uri.parse(args.url).lastPathSegment.orEmpty(),
                 stripeAccountId = args.stripeAccountId,
                 canCancelSource = args.shouldCancelSource
             ).toBundle()
@@ -94,7 +93,6 @@ internal class StripeBrowserLauncherViewModel(
     }
 
     fun getFailureIntent(args: PaymentBrowserAuthContract.Args): Intent {
-        val url = Uri.parse(args.url)
         val exception = LocalStripeException(
             displayMessage = resolveErrorMessage,
             analyticsValue = "failedBrowserLaunchError",
@@ -103,7 +101,7 @@ internal class StripeBrowserLauncherViewModel(
         return Intent().putExtras(
             PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
-                sourceId = url.lastPathSegment.orEmpty(),
+                sourceId = args.sourceId ?: Uri.parse(args.url).lastPathSegment.orEmpty(),
                 stripeAccountId = args.stripeAccountId,
                 canCancelSource = args.shouldCancelSource,
                 flowOutcome = StripeIntentResult.Outcome.FAILED,

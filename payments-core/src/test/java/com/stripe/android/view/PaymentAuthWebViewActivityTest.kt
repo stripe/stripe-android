@@ -11,8 +11,14 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.SourceCancellationHandler
+import com.stripe.android.testing.AbsFakeStripeRepository
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -75,6 +81,35 @@ internal class PaymentAuthWebViewActivityTest {
         }
     }
 
+    @Test
+    fun `onAuthComplete cancels the explicit source before returning`() {
+        val sourceId = "src_123"
+        val args = ARGS.copy(
+            url = "https://hooks.stripe.com/3d_secure_2/hosted/complete",
+            clientSecret = "seti_xyz_secret_123",
+            shouldCancelSource = true,
+            sourceId = sourceId,
+        )
+        ActivityScenario.launchActivityForResult<PaymentAuthWebViewActivity>(
+            contract.createIntent(context, args)
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.sourceCancellationHandlerFactory = { activityArgs, _ ->
+                    SourceCancellationHandler(
+                        args = activityArgs,
+                        stripeRepository = SourceCancellationRepository,
+                        logger = Logger.noop(),
+                    )
+                }
+                activity.onAuthComplete(null)
+            }
+
+            val result = contract.parseResult(REQUEST_CODE, activityScenario.result.resultData)
+            assertThat(result.canCancelSource).isFalse()
+            assertThat(result.sourceId).isEqualTo(sourceId)
+        }
+    }
+
     private fun runOnActivityScenario(
         onActivityScenario: (ActivityScenario<PaymentAuthWebViewActivity>) -> Unit
     ) {
@@ -99,7 +134,22 @@ internal class PaymentAuthWebViewActivityTest {
             url = "https://example.com",
             statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            isInstantApp = false
+            isInstantApp = false,
+            sourceId = null,
         )
+
+        private object SourceCancellationRepository : AbsFakeStripeRepository() {
+            override suspend fun retrieveSetupIntent(
+                clientSecret: String,
+                options: ApiRequest.Options,
+                expandFields: List<String>,
+            ): Result<SetupIntent> = Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
+
+            override suspend fun cancelSetupIntentSource(
+                setupIntentId: String,
+                sourceId: String,
+                options: ApiRequest.Options,
+            ): Result<SetupIntent> = Result.success(SetupIntentFixtures.CANCELLED)
+        }
     }
 }

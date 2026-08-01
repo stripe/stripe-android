@@ -110,6 +110,8 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 isInstantApp = isInstantApp,
                 referrer = referrer,
                 forceInAppWebView = forceInAppWebView,
+                sourceId = (stripeIntent.nextActionData as? StripeIntent.NextActionData.SdkData.Use3DS2)
+                    ?.source,
             )
         )
     }

@@ -114,7 +114,8 @@ class PaymentBrowserAuthContractTest {
             returnUrl = "myapp://custom",
             statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            isInstantApp = false
+            isInstantApp = false,
+            sourceId = null,
         )
     }
 

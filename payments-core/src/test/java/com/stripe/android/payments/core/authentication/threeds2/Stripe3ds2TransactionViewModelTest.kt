@@ -10,10 +10,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.copy
 import com.stripe.android.networking.StripeRepository
@@ -21,8 +24,10 @@ import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
+import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.testing.fakeCreationExtras
+import com.stripe.android.view.PaymentAuthWebViewActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -80,6 +85,30 @@ class Stripe3ds2TransactionViewModelTest {
                 eq(ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
             )
         }
+
+    @Test
+    fun `3DS2 fallback launches the in-app WebView with source cancellation enabled`() = runTest {
+        val result = createViewModel().on3ds2AuthSuccess(
+            result = Stripe3ds2AuthResult(
+                id = "threeds2_123",
+                created = 0,
+                source = "src_123",
+                fallbackRedirectUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin/src_123",
+            ),
+            transaction = mock<Transaction>(),
+            sourceId = "src_123",
+            timeout = 5,
+        )
+
+        val args = (result as NextStep.StartFallback).args
+        val intent = PaymentBrowserAuthContract().createIntent(context, args)
+
+        assertThat(args.returnUrl).isNull()
+        assertThat(args.shouldCancelSource).isTrue()
+        assertThat(args.sourceId).isEqualTo("src_123")
+        assertThat(intent.component?.className)
+            .isEqualTo(PaymentAuthWebViewActivity::class.java.name)
+    }
 
     @Test
     fun `Stripe3ds2TransactionViewModel gets initialized`() {

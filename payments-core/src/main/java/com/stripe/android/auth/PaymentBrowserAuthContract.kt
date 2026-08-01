@@ -75,6 +75,8 @@ internal class PaymentBrowserAuthContract :
         val isInstantApp: Boolean,
         val referrer: String? = null,
         val forceInAppWebView: Boolean = false,
+        /** The source to cancel, when it cannot be derived from the authentication URL. */
+        val sourceId: String?,
     ) : Parcelable {
 
         /**
@@ -98,6 +100,7 @@ internal class PaymentBrowserAuthContract :
             parcel.readByte() != 0.toByte(),
             parcel.readString(),
             parcel.readByte() != 0.toByte(),
+            parcel.readString(),
         )
 
         /**
@@ -128,6 +131,7 @@ internal class PaymentBrowserAuthContract :
             parcel.writeByte(if (isInstantApp) 1 else 0)
             parcel.writeString(referrer)
             parcel.writeByte(if (forceInAppWebView) 1 else 0)
+            parcel.writeString(sourceId)
         }
 
         override fun describeContents(): Int {

@@ -71,7 +71,10 @@ class StripeBrowserLauncherViewModelTest {
     fun `getResultIntent() with shouldCancelSource=true should include expected PaymentFlowResult`() {
         val viewModel = createViewModel()
         val intent = viewModel.getResultIntent(
-            ARGS.copy(shouldCancelSource = true)
+            ARGS.copy(
+                shouldCancelSource = true,
+                sourceId = "src_123",
+            )
         )
         val result = intent.getParcelableExtra<PaymentFlowResult.Unvalidated>("extra_args")
         assertThat(result)
@@ -79,7 +82,7 @@ class StripeBrowserLauncherViewModelTest {
                 PaymentFlowResult.Unvalidated(
                     clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
                     canCancelSource = true,
-                    sourceId = ""
+                    sourceId = "src_123"
                 )
             )
     }
@@ -119,7 +122,8 @@ class StripeBrowserLauncherViewModelTest {
             url = "https://bank.com",
             statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            isInstantApp = false
+            isInstantApp = false,
+            sourceId = null,
         )
     }
 }

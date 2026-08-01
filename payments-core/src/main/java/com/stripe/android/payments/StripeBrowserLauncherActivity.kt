@@ -10,10 +10,13 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePaddingRelative
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.view.PaymentAuthWebViewActivity
+import kotlinx.coroutines.launch
 
 /**
  * A transparent activity that launches [PaymentBrowserAuthContract.Args.url] in either
@@ -87,18 +90,28 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     }
 
     private fun finishWithSuccess(args: PaymentBrowserAuthContract.Args) {
-        setResult(
-            Activity.RESULT_OK,
-            viewModel.getResultIntent(args)
-        )
-        finish()
+        finishWithSourceCancellation(args, viewModel::getResultIntent)
     }
 
     private fun finishWithFailure(args: PaymentBrowserAuthContract.Args) {
-        setResult(
-            Activity.RESULT_OK,
-            viewModel.getFailureIntent(args)
-        )
-        finish()
+        finishWithSourceCancellation(args, viewModel::getFailureIntent)
+    }
+
+    private fun finishWithSourceCancellation(
+        args: PaymentBrowserAuthContract.Args,
+        resultIntentFactory: (PaymentBrowserAuthContract.Args) -> android.content.Intent,
+    ) {
+        lifecycleScope.launch {
+            val sourceWasCanceled = SourceCancellationHandler.create(
+                context = applicationContext,
+                args = args,
+                logger = Logger.getInstance(args.enableLogging),
+            ).cancel()
+            val resultArgs = args.copy(
+                shouldCancelSource = args.shouldCancelSource && !sourceWasCanceled,
+            )
+            setResult(Activity.RESULT_OK, resultIntentFactory(resultArgs))
+            finish()
+        }
     }
 }
