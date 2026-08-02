@@ -21,6 +21,19 @@ class InlineAddressPredictionsScreenshotTest {
     )
 
     @Test
+    fun testLoading() {
+        paparazziRule.snapshot {
+            InlineAddressPredictionsContent(
+                state = AutocompleteAddressInteractor.InlinePredictionsState.Loading,
+                attributionDrawable = R.drawable.stripe_google_maps_logo,
+                onPredictionSelected = {},
+                onClear = {},
+                onEnterManually = {},
+            )
+        }
+    }
+
+    @Test
     fun testResultsWithMultiplePredictions() {
         paparazziRule.snapshot {
             InlineAddressPredictionsContent(

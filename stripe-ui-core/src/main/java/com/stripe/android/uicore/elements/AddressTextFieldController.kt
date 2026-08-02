@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -81,11 +80,6 @@ class AddressTextFieldController(
                 AddressTextFieldUI(
                     controller = this@AddressTextFieldController,
                     enabled = enabled,
-                    modifier = Modifier.onFocusChanged { state ->
-                        if (!state.isFocused) {
-                            inlineAutocompleteHandler.onDismissed()
-                        }
-                    },
                 )
                 val predictionsState by
                     inlineAutocompleteHandler.predictionsState.collectAsState()
