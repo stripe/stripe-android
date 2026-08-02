@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
@@ -66,27 +68,29 @@ internal fun InlineAddressPredictionsContent(
     onClear: () -> Unit,
     onEnterManually: (() -> Unit)?,
 ) {
+    val loading = state is AutocompleteAddressInteractor.InlinePredictionsState.Loading
     val results = state as? AutocompleteAddressInteractor.InlinePredictionsState.Results
 
     Column(modifier = Modifier.fillMaxWidth()) {
         PredictionsHeader(
-            onEnterManually = onEnterManually,
+            loading = loading,
+            attributionDrawable = attributionDrawable,
             onClear = onClear,
         )
         if (results != null) {
-            Divider()
-            PredictionsListItems(
+            PredictionsList(
                 results = results,
                 onPredictionSelected = onPredictionSelected,
+                onEnterManually = onEnterManually,
             )
         }
-        PredictionsFooter(attributionDrawable = attributionDrawable)
     }
 }
 
 @Composable
 private fun PredictionsHeader(
-    onEnterManually: (() -> Unit)?,
+    loading: Boolean,
+    attributionDrawable: Int?,
     onClear: () -> Unit,
 ) {
     val closeIcon = remember(onClear) {
@@ -101,21 +105,37 @@ private fun PredictionsHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(40.dp)
-            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+            .height(36.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
     ) {
-        if (onEnterManually != null) {
+        if (loading) {
             Box(
-                contentAlignment = Alignment.CenterStart,
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
-                    .clickable(onClick = onEnterManually),
+                    .fillMaxHeight(),
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colors.primary,
+                    strokeWidth = 2.dp,
+                )
+            }
+        } else if (attributionDrawable != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
             ) {
                 Text(
-                    text = stringResource(R.string.stripe_address_enter_manually),
-                    color = MaterialTheme.colors.primary,
-                    style = MaterialTheme.typography.body1,
+                    text = stringResource(R.string.stripe_address_suggestions),
+                    color = MaterialTheme.stripeColors.subtitle,
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier.padding(end = 4.dp),
+                )
+                Image(
+                    painter = painterResource(id = attributionDrawable),
+                    contentDescription = stringResource(R.string.stripe_address_google_maps),
+                    modifier = Modifier.height(18.dp).padding(top = 3.dp),
                 )
             }
         } else {
@@ -134,34 +154,13 @@ private fun PredictionsHeader(
 }
 
 @Composable
-private fun PredictionsFooter(attributionDrawable: Int?) {
-    if (attributionDrawable == null) return
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.stripe_address_suggestions),
-            color = MaterialTheme.stripeColors.subtitle,
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.padding(end = 4.dp),
-        )
-        Image(
-            painter = painterResource(id = attributionDrawable),
-            contentDescription = stringResource(R.string.stripe_address_google_maps),
-            modifier = Modifier.height(18.dp).padding(top = 3.dp),
-        )
-    }
-}
-
-@Composable
-private fun PredictionsListItems(
+private fun PredictionsList(
     results: AutocompleteAddressInteractor.InlinePredictionsState.Results,
     onPredictionSelected: (String) -> Unit,
+    onEnterManually: (() -> Unit)?,
 ) {
     val queryRegex = remember(results.query) { buildQueryRegex(results.query) }
+    Divider()
     results.predictions.forEach { prediction ->
         Column(
             modifier = Modifier
@@ -185,6 +184,24 @@ private fun PredictionsListItems(
         }
         Divider()
     }
+
+    onEnterManually?.let {
+        Box(
+            contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(32.dp)
+                .clickable(onClick = it)
+                .padding(horizontal = 16.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_address_enter_manually),
+                color = MaterialTheme.colors.primary,
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+    }
 }
 
 private fun buildQueryRegex(query: String): Regex? {
@@ -207,7 +224,7 @@ internal fun shouldShowPredictionsDropdown(
 ): Boolean {
     return when (state) {
         AutocompleteAddressInteractor.InlinePredictionsState.Idle -> false
-        AutocompleteAddressInteractor.InlinePredictionsState.Loading -> false
+        AutocompleteAddressInteractor.InlinePredictionsState.Loading -> true
         is AutocompleteAddressInteractor.InlinePredictionsState.Results -> true
     }
 }

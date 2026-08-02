@@ -112,9 +112,8 @@ internal class InlineAutocompleteController(
     }
 
     fun onDismissed() {
-        if (selectionJob?.isActive != true) {
-            lastPredictionLine1 = null
-        }
+        selectionJob?.cancel()
+        lastPredictionLine1 = null
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
@@ -137,9 +136,7 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
-            _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
-        }
+        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
         val result = placesClient.findAutocompletePredictions(
             query = query,
             country = country,
