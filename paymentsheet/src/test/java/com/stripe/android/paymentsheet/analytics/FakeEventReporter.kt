@@ -13,6 +13,9 @@ import com.stripe.android.paymentsheet.state.WalletsState
 
 @Suppress("EmptyFunctionBlock")
 internal class FakeEventReporter : EventReporter {
+    private val _analyticsEventCalls = Turbine<AnalyticsEvent>()
+    val analyticsEventCalls: ReceiveTurbine<AnalyticsEvent> = _analyticsEventCalls
+
     private val _paymentFailureCalls = Turbine<PaymentFailureCall>()
     val paymentFailureCalls: ReceiveTurbine<PaymentFailureCall> = _paymentFailureCalls
 
@@ -106,6 +109,7 @@ internal class FakeEventReporter : EventReporter {
         _pmmPromotionsDisplayed
 
     fun validate() {
+        _analyticsEventCalls.ensureAllEventsConsumed()
         _paymentFailureCalls.ensureAllEventsConsumed()
         _paymentSuccessCalls.ensureAllEventsConsumed()
         _updatePaymentMethodSucceededCalls.ensureAllEventsConsumed()
@@ -278,6 +282,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        _analyticsEventCalls.add(event)
     }
 
     override fun onPaymentMethodMessagePromotionsFetchBegin() {

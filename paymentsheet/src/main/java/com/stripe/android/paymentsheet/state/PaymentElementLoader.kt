@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.forms.toLpmSpecJson
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -571,7 +572,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
+            serverLpmSpecs = elementsSession.mobilePaymentElement?.formSpecs
+                ?.takeIf { it.isNotEmpty() }
+                ?.toLpmSpecJson()
+                ?: elementsSession.paymentMethodSpecs,
         )
 
         if (sharedDataSpecsResult.failedToParseServerResponse) {

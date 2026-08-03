@@ -39,6 +39,9 @@ import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImp
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import org.junit.Test
 import javax.inject.Provider
+import com.stripe.android.paymentsheet.forms.generated.ContractMetadataV1 as ContractMetadata
+import com.stripe.android.paymentsheet.forms.generated.MobilePaymentElementV1 as MobilePaymentElement
+import com.stripe.android.paymentsheet.forms.generated.MobileSessionContractV1 as MobileSessionContract
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 @Suppress("LargeClass")
@@ -74,6 +77,28 @@ class DefaultAnalyticsMetadataFactoryTest {
         val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
         val appearance = mpeConfig?.get("appearance") as? Map<*, *>
         assertThat(appearance).doesNotContainKey("embedded_payment_element")
+    }
+
+    @Test
+    fun `create includes successful mobile session contract metadata`() = runScenario {
+        val mobilePaymentElement = MobilePaymentElement(
+            contract = ContractMetadata(
+                major = MobileSessionContract.CONTRACT_MAJOR,
+                revision = MobileSessionContract.CONTRACT_REVISION,
+            ),
+            paymentMethodAvailability = emptyList(),
+        )
+
+        val resultMap = createAnalyticsMetadata(
+            elementsSession = createElementsSession(mobilePaymentElement = mobilePaymentElement)
+        )
+
+        assertThat(resultMap["mobile_session_requested_contract_major"])
+            .isEqualTo(MobileSessionContract.CONTRACT_MAJOR)
+        assertThat(resultMap["mobile_session_served_contract_major"])
+            .isEqualTo(MobileSessionContract.CONTRACT_MAJOR)
+        assertThat(resultMap["mobile_session_contract_revision_matches"]).isEqualTo(true)
+        assertThat(resultMap["mobile_session_decode_outcome"]).isEqualTo("success")
     }
 
     @Test
@@ -806,6 +831,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         cardBrandChoice: ElementsSession.CardBrandChoice? = null,
         isGooglePayEnabled: Boolean = false,
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
+        mobilePaymentElement: MobilePaymentElement? = null,
     ): ElementsSession {
         return ElementsSession(
             linkSettings = linkSettings,
@@ -826,6 +852,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             elementsSessionConfigId = null,
             accountId = null,
             merchantId = null,
+            mobilePaymentElement = mobilePaymentElement,
         )
     }
 

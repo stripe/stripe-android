@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -24,6 +25,32 @@ import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.filterNotNull
 
 internal object PlaceholderHelper {
+    /**
+     * Resolves placeholders selected by Mint without consulting the local PaymentSheet configuration.
+     */
+    internal fun specsFromServer(specs: List<FormItemSpec>): List<FormItemSpec> {
+        return specs.mapNotNull { spec ->
+            if (spec !is PlaceholderSpec) {
+                return@mapNotNull spec
+            }
+
+            when (spec.field) {
+                PlaceholderField.Name -> NameSpec()
+                PlaceholderField.Email -> EmailSpec()
+                PlaceholderField.Phone -> PhoneSpec()
+                PlaceholderField.BillingAddress -> AddressSpec(
+                    allowedCountryCodes = spec.allowedCountryCodes ?: CountryUtils.supportedBillingCountries
+                )
+                PlaceholderField.BillingAddressWithoutCountry -> AddressSpec(
+                    allowedCountryCodes = spec.allowedCountryCodes ?: CountryUtils.supportedBillingCountries,
+                    hideCountry = true,
+                )
+                PlaceholderField.SepaMandate -> SepaMandateTextSpec()
+                PlaceholderField.Unknown -> null
+            }
+        }
+    }
+
     /**
      * Returns the list of specs by adding or removing billing details fields.
      */

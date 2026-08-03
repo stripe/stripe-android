@@ -17,11 +17,13 @@ data class MandateTextElement(
     override val identifier: IdentifierSpec = IdentifierSpec.Generic("mandate"),
     val stringResId: Int,
     val args: List<String>,
+    val rawText: String? = null,
     val topPadding: Dp = 8.dp,
     override val controller: InputController? = null
 ) : FormElement {
     override val allowsUserInteraction: Boolean = false
-    override val mandateText: ResolvableString = resolvableString(stringResId, *args.toTypedArray())
+    override val mandateText: ResolvableString = rawText?.resolvableString
+        ?: resolvableString(stringResId, *args.toTypedArray())
 
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         stateFlowOf(emptyList())

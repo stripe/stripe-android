@@ -46,6 +46,8 @@ class RequestHeadersFactoriesTest {
         assertThat(headers[HEADER_AUTHORIZATION])
             .isEqualTo("Bearer ${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}")
         assertThat(headers[HEADER_STRIPE_VERSION]).isEqualTo(ApiVersion.get().code)
+        assertThat(headers[HEADER_STRIPE_MOBILE_SDK_VERSION])
+            .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME}")
         assertThat(headers[HEADER_STRIPE_ACCOUNT]).isEqualTo(stripeAccount)
         assertThat(headers[HEADER_ACCEPT_LANGUAGE]).isEqualTo("en-US")
     }

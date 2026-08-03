@@ -179,6 +179,41 @@ internal class RequestExecutorTest {
     }
 
     @Test
+    fun `executeRequestWithResultParser should preserve parser failure when validating response`() = runTest {
+        val parserException = IllegalArgumentException("invalid negotiated payload")
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(successResponse)
+        whenever(mockModelParser.parse(any())).thenThrow(parserException)
+
+        val result = executeRequestWithResultParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = mockErrorParser,
+            request = testRequest,
+            responseJsonParser = mockModelParser,
+            responseValidator = { _, _ -> },
+        )
+
+        assertEquals(parserException, result.exceptionOrNull())
+    }
+
+    @Test
+    fun `executeRequestWithResultParser should preserve response validation failure`() = runTest {
+        val expectedModel = TestStripeModel("test_data")
+        val validationException = IllegalArgumentException("header mismatch")
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(successResponse)
+        whenever(mockModelParser.parse(any())).thenReturn(expectedModel)
+
+        val result = executeRequestWithResultParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = mockErrorParser,
+            request = testRequest,
+            responseJsonParser = mockModelParser,
+            responseValidator = { _, _ -> throw validationException },
+        )
+
+        assertEquals(validationException, result.exceptionOrNull())
+    }
+
+    @Test
     fun `executeRequestWithResultParser should return failure result on network failure`() = runTest {
         val networkException = RuntimeException("Network error")
         whenever(mockNetworkClient.executeRequest(testRequest)).thenThrow(networkException)

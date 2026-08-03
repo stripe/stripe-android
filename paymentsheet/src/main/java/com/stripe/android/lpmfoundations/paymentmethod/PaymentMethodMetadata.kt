@@ -7,6 +7,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.model.LinkAccount
@@ -31,6 +32,8 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.forms.ServerDrivenFormRenderException
+import com.stripe.android.paymentsheet.forms.createFormElements
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
@@ -46,6 +49,8 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodAssetV1 as PaymentMethodAsset
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodFormSpecV1 as PaymentMethodFormSpec
 
 internal const val IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE = false
 
@@ -68,6 +73,9 @@ internal data class PaymentMethodMetadata(
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
+    val serverDrivenPaymentMethodTypes: List<String>?,
+    val serverDrivenPaymentMethodAssets: List<PaymentMethodAsset>,
+    val serverDrivenFormSpecs: List<PaymentMethodFormSpec>?,
     val displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
@@ -151,10 +159,18 @@ internal data class PaymentMethodMetadata(
     }
 
     fun requiresMandate(paymentMethodCode: String): Boolean {
+        serverDrivenFormSpecs?.firstOrNull { it.type == paymentMethodCode }?.let { formSpec ->
+            return formSpec.fields.any { field ->
+                field.type == "mandate_text" ||
+                    field.type == "sepa_mandate" ||
+                    field.type == "au_becs_mandate"
+            }
+        }
         return PaymentMethodRegistry.definitionsByCode[paymentMethodCode]?.requiresMandate(this) ?: false
     }
 
     fun supportedPaymentMethodTypes(): List<String> {
+        serverDrivenPaymentMethodTypes?.let { return it }
         return supportedPaymentMethodDefinitions().map { paymentMethodDefinition ->
             paymentMethodDefinition.type.code
         }.plus(externalPaymentMethodTypes()).plus(customPaymentMethodIds()).run {
@@ -171,6 +187,9 @@ internal data class PaymentMethodMetadata(
     }
 
     fun supportedSavedPaymentMethodTypes(): List<PaymentMethod.Type> {
+        serverDrivenPaymentMethodTypes?.let { paymentMethodTypes ->
+            return paymentMethodTypes.mapNotNull(PaymentMethod.Type::fromCode)
+        }
         val supportedTypes = supportedPaymentMethodDefinitions().filter { paymentMethodDefinition ->
             paymentMethodDefinition.supportedAsSavedPaymentMethod
         }.map {
@@ -187,7 +206,10 @@ internal data class PaymentMethodMetadata(
     fun supportedPaymentMethodForCode(
         code: String,
     ): SupportedPaymentMethod? {
-        return if (isExternalPaymentMethod(code)) {
+        if (serverDrivenPaymentMethodTypes != null) {
+            return serverDrivenSupportedPaymentMethod(code)
+        }
+        val supportedPaymentMethod = if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)
                 ?.createSupportedPaymentMethod(metadata = this)
         } else if (isCustomPaymentMethod(code)) {
@@ -196,6 +218,20 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
             definition.uiDefinitionFactory(this).supportedPaymentMethod(this, definition, sharedDataSpecs)
+        }
+        val serverAsset = supportedPaymentMethod?.let { supported ->
+            serverDrivenPaymentMethodAssets.firstOrNull { asset ->
+                asset.paymentMethodType == code || asset.paymentMethodType == supported.syntheticCode
+            }
+        }
+        return if (supportedPaymentMethod != null && serverAsset != null) {
+            supportedPaymentMethod.copy(
+                displayName = serverAsset.displayName.resolvableString,
+                lightThemeIconUrl = serverAsset.selectorIcon?.lightThemePng,
+                darkThemeIconUrl = serverAsset.selectorIcon?.darkThemePng,
+            )
+        } else {
+            supportedPaymentMethod
         }
     }
 
@@ -264,6 +300,20 @@ internal data class PaymentMethodMetadata(
         return ExternalPaymentMethodUiDefinitionFactory(externalPaymentMethodSpecForCode)
     }
 
+    internal fun createServerSelectedExternalFormElements(
+        code: String,
+        arguments: UiDefinitionFactory.Arguments,
+    ): List<FormElement> {
+        val factory = when {
+            isExternalPaymentMethod(code) -> getUiDefinitionFactoryForExternalPaymentMethod(code)
+            isCustomPaymentMethod(code) -> getUiDefinitionFactoryForCustomPaymentMethod(code)
+            else -> null
+        }
+        return requireNotNull(factory) {
+            "Server selected an external form primitive for unsupported payment method '$code'"
+        }.createFormElements(metadata = this, arguments = arguments)
+    }
+
     private fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
         val supportedPaymentMethodTypes = stripeIntent.paymentMethodTypes.mapNotNull {
             PaymentMethodRegistry.definitionsByCode[it]
@@ -300,6 +350,9 @@ internal data class PaymentMethodMetadata(
         code: String,
         customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation? {
+        if (serverDrivenFormSpecs != null) {
+            return supportedPaymentMethodForCode(code)?.asFormHeaderInformation(paymentMethodIncentive)
+        }
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation(
                 metadata = this,
@@ -328,6 +381,17 @@ internal data class PaymentMethodMetadata(
         code: String,
         uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
     ): List<FormElement>? {
+        serverDrivenFormSpecs?.let { formSpecs ->
+            val formSpec = formSpecs.firstOrNull { it.type == code }
+                ?: throw ServerDrivenFormRenderException(
+                    ServerDrivenFormRenderException.ErrorCode.MissingFormSpec
+                )
+            return formSpec.createFormElements(
+                metadata = this,
+                sharedDataSpecs = sharedDataSpecs,
+                argumentsFactory = uiDefinitionFactoryArgumentsFactory,
+            )
+        }
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormElements(
                 metadata = this,
@@ -351,6 +415,27 @@ internal data class PaymentMethodMetadata(
                 ),
             )
         }
+    }
+
+    private fun serverDrivenSupportedPaymentMethod(code: String): SupportedPaymentMethod? {
+        if (code !in serverDrivenPaymentMethodTypes.orEmpty()) {
+            return null
+        }
+        val asset = serverDrivenPaymentMethodAssets.firstOrNull { it.paymentMethodType == code } ?: return null
+        val effectiveCode = serverDrivenFormSpecs
+            ?.firstOrNull { it.type == code }
+            ?.paymentMethodCode
+            ?: code
+        return SupportedPaymentMethod(
+            code = effectiveCode,
+            syntheticCode = code,
+            displayName = asset.displayName.resolvableString,
+            iconResource = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_bank,
+            iconResourceNight = null,
+            lightThemeIconUrl = asset.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = asset.selectorIcon?.darkThemePng,
+            iconRequiresTinting = false,
+        )
     }
 
     fun allowRedisplay(
@@ -406,6 +491,15 @@ internal data class PaymentMethodMetadata(
                 shippingDetails = configuration.shippingDetails,
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
+                serverDrivenPaymentMethodTypes = elementsSession
+                    .mobilePaymentElement
+                    ?.paymentMethodAvailability,
+                serverDrivenPaymentMethodAssets = elementsSession
+                    .mobilePaymentElement
+                    ?.assets
+                    ?.paymentMethods
+                    .orEmpty(),
+                serverDrivenFormSpecs = elementsSession.mobilePaymentElement?.formSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
@@ -480,6 +574,15 @@ internal data class PaymentMethodMetadata(
                 shippingDetails = null,
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
+                serverDrivenPaymentMethodTypes = elementsSession
+                    .mobilePaymentElement
+                    ?.paymentMethodAvailability,
+                serverDrivenPaymentMethodAssets = elementsSession
+                    .mobilePaymentElement
+                    ?.assets
+                    ?.paymentMethods
+                    .orEmpty(),
+                serverDrivenFormSpecs = elementsSession.mobilePaymentElement?.formSpecs,
                 isGooglePayReady = isGooglePayReady,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,

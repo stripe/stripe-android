@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
+import com.stripe.android.paymentsheet.forms.toLpmSpecJson
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
@@ -140,7 +141,10 @@ internal class DefaultCustomerSheetLoader(
         val elementsSession = customerSheetSession.elementsSession
         val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
+            serverLpmSpecs = elementsSession.mobilePaymentElement?.formSpecs
+                ?.takeIf { it.isNotEmpty() }
+                ?.toLpmSpecJson()
+                ?: elementsSession.paymentMethodSpecs,
         ).sharedDataSpecs
         val cardFundingFilter = DefaultCardFundingFilter
         val cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)

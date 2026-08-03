@@ -132,6 +132,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
             customPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         ).onSuccess {
             errorReporter.report(
                 errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS,

@@ -28,7 +28,8 @@ data class ApiRequest internal constructor(
     private val appInfo: AppInfo? = null,
     private val apiVersion: String = ApiVersion.get().code,
     private val sdkVersion: String = StripeSdkVersion.VERSION,
-    override val shouldCache: Boolean = false
+    override val shouldCache: Boolean = false,
+    private val additionalHeaders: Map<String, String> = emptyMap(),
 ) : StripeRequest() {
     private val query: String = QueryStringFactory.createFromParamsWithEmptyValues(params)
 
@@ -79,7 +80,7 @@ data class ApiRequest internal constructor(
             baseUrl
         }
 
-    override val headers: Map<String, String> = headersFactory.create()
+    override val headers: Map<String, String> = headersFactory.create() + additionalHeaders
 
     override var postHeaders: Map<String, String>? = headersFactory.createPostHeader()
 
@@ -152,6 +153,7 @@ data class ApiRequest internal constructor(
             options: Options,
             params: Map<String, *>? = null,
             shouldCache: Boolean = false,
+            additionalHeaders: Map<String, String> = emptyMap(),
         ): ApiRequest {
             return ApiRequest(
                 method = Method.GET,
@@ -161,7 +163,8 @@ data class ApiRequest internal constructor(
                 appInfo = appInfo,
                 apiVersion = apiVersion,
                 sdkVersion = sdkVersion,
-                shouldCache = shouldCache
+                shouldCache = shouldCache,
+                additionalHeaders = additionalHeaders,
             )
         }
 
@@ -170,6 +173,7 @@ data class ApiRequest internal constructor(
             options: Options,
             params: Map<String, *>? = null,
             shouldCache: Boolean = false,
+            additionalHeaders: Map<String, String> = emptyMap(),
         ): ApiRequest {
             return ApiRequest(
                 method = Method.POST,
@@ -179,14 +183,16 @@ data class ApiRequest internal constructor(
                 appInfo = appInfo,
                 apiVersion = apiVersion,
                 sdkVersion = sdkVersion,
-                shouldCache = shouldCache
+                shouldCache = shouldCache,
+                additionalHeaders = additionalHeaders,
             )
         }
 
         fun createDelete(
             url: String,
             options: Options,
-            params: Map<String, *>? = null
+            params: Map<String, *>? = null,
+            additionalHeaders: Map<String, String> = emptyMap(),
         ): ApiRequest {
             return ApiRequest(
                 Method.DELETE,
@@ -195,7 +201,8 @@ data class ApiRequest internal constructor(
                 options = options,
                 appInfo = appInfo,
                 apiVersion = apiVersion,
-                sdkVersion = sdkVersion
+                sdkVersion = sdkVersion,
+                additionalHeaders = additionalHeaders,
             )
         }
     }

@@ -173,6 +173,30 @@ class LpmSerializerTest {
     }
 
     @Test
+    fun `Verify server driven payment method atoms parse correctly`() {
+        val serializedString = """
+            [
+              {
+                "type": "server_selected_type",
+                "fields": [
+                  { "type": "bacs_debit_bank_account" },
+                  { "type": "bacs_debit_mandate" },
+                  { "type": "boleto_tax_id" },
+                  { "type": "konbini_confirmation_number" }
+                ]
+              }
+            ]
+        """.trimIndent()
+
+        val fields = LpmSerializer.deserializeList(serializedString).getOrThrow().single().fields
+
+        assertThat(fields[0]).isInstanceOf(BacsDebitBankAccountSpec::class.java)
+        assertThat(fields[1]).isInstanceOf(BacsDebitConfirmSpec::class.java)
+        assertThat(fields[2]).isInstanceOf(BoletoTaxIdSpec::class.java)
+        assertThat(fields[3]).isInstanceOf(KonbiniConfirmationNumberSpec::class.java)
+    }
+
+    @Test
     fun `Verify all types api_path parsed correctly`() {
         val types = listOf(
             "billing_address",
@@ -454,7 +478,8 @@ class LpmSerializerTest {
                 "fields": [
                   {
                     "type": "placeholder",
-                    "for": "name"
+                    "for": "name",
+                    "allowed_country_codes": ["CA"]
                   }
                 ]
               }
@@ -464,7 +489,10 @@ class LpmSerializerTest {
         val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
 
         assertThat(result.fields.first()).isEqualTo(
-            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name)
+            PlaceholderSpec(
+                field = PlaceholderSpec.PlaceholderField.Name,
+                allowedCountryCodes = setOf("CA"),
+            )
         )
     }
 }

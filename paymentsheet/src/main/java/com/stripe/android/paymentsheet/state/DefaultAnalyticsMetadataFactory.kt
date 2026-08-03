@@ -5,6 +5,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.Nested
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.SimpleBoolean
+import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.SimpleInt
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.SimpleString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -26,6 +27,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.uicore.StripeThemeDefaults
 import javax.inject.Inject
 import javax.inject.Provider
+import com.stripe.android.paymentsheet.forms.generated.MobileSessionContractV1 as MobileSessionContract
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultAnalyticsMetadataFactory @Inject constructor(
@@ -68,6 +70,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
                 customerMetadata = customerMetadata
             )
         )
+        putAll(mobileSession(elementsSession))
 
         put("google_pay_enabled", SimpleBoolean(isGooglePaySupported))
 
@@ -122,6 +125,20 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
     ) = buildMap<String, AnalyticsMetadata.Value> {
         put("set_as_default_enabled", SimpleBoolean(customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true))
         put("has_default_payment_method", SimpleBoolean(elementsSession.customer?.defaultPaymentMethod != null))
+    }
+
+    private fun mobileSession(
+        elementsSession: ElementsSession,
+    ) = buildMap<String, AnalyticsMetadata.Value> {
+        elementsSession.mobilePaymentElement?.let { mobilePaymentElement ->
+            put("mobile_session_requested_contract_major", SimpleInt(MobileSessionContract.CONTRACT_MAJOR))
+            put("mobile_session_served_contract_major", SimpleInt(mobilePaymentElement.contract.major))
+            put(
+                "mobile_session_contract_revision_matches",
+                SimpleBoolean(mobilePaymentElement.contract.revision == MobileSessionContract.CONTRACT_REVISION)
+            )
+            put("mobile_session_decode_outcome", SimpleString("success"))
+        }
     }
 
     private fun PaymentElementLoader.Configuration.analyticsMap() = buildMap<String, AnalyticsMetadata.Value> {

@@ -14,6 +14,8 @@ data class PlaceholderSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("placeholder"),
     @SerialName("for")
     val field: PlaceholderField = PlaceholderField.Unknown,
+    @SerialName("allowed_country_codes")
+    val allowedCountryCodes: Set<String>? = null,
 ) : FormItemSpec() {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Serializable

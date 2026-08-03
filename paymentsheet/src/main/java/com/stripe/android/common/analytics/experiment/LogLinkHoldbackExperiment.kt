@@ -13,7 +13,6 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
-import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
@@ -71,7 +70,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
         experimentAssignments: List<ExperimentAssignment>
     ) {
         // Don't log if the lookup kill-switch is disabled.
-        if (elementsSession.flags[ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP] == true) {
+        if (!elementsSession.enableLinkGlobalHoldbackLookup) {
             return
         }
 

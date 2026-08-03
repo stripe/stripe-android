@@ -24,6 +24,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.parsers.MobileSessionContractException
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -162,6 +163,27 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("event", "mc_load_failed")
         assertThat(request.params).containsEntry("duration", 2.0f)
         assertThat(request.params).containsEntry("error_message", "java.lang.RuntimeException")
+    }
+
+    @Test
+    fun `onLoadFailed includes structured mobile session contract error`() = runScenario {
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 2.seconds,
+            )
+        )
+        val error = MobileSessionContractException(
+            MobileSessionContractException.ErrorCode.UnsupportedFormElement
+        )
+
+        eventReporter.onLoadFailed(error = error)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_failed")
+        assertThat(request.params).containsEntry("error_type", "mobile_session_contract_error")
+        assertThat(request.params).containsEntry("error_code", "unsupported_form_element")
+        assertThat(request.params).containsEntry("mobile_session_decode_outcome", "failure")
     }
 
     @Test

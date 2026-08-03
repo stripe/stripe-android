@@ -6,6 +6,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.forms.generated.PaymentSheetConfigV1 as PaymentSheetConfig
 
 internal class FakeElementsSessionRepository(
     private val stripeIntent: StripeIntent,
@@ -32,6 +33,7 @@ internal class FakeElementsSessionRepository(
         val savedPaymentMethodSelectionId: String?,
         val userOverrideCountry: String?,
         val linkDisallowedFundingSourceCreation: Set<String>,
+        val paymentSheetConfig: PaymentSheetConfig?,
     )
 
     var lastParams: Params? = null
@@ -44,6 +46,7 @@ internal class FakeElementsSessionRepository(
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         linkDisallowedFundingSourceCreation: Set<String>,
+        paymentSheetConfig: PaymentSheetConfig?,
     ): Result<ElementsSession> {
         lastParams = Params(
             initializationMode = initializationMode,
@@ -53,6 +56,7 @@ internal class FakeElementsSessionRepository(
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             userOverrideCountry = countryOverride,
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
+            paymentSheetConfig = paymentSheetConfig,
         )
         return if (error != null) {
             Result.failure(error)

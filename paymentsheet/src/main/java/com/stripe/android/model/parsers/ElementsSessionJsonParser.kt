@@ -12,9 +12,40 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
+import java.net.URI
 import java.util.UUID
+import com.stripe.android.paymentsheet.forms.generated.FormElementSpecV1 as FormElementSpec
+import com.stripe.android.paymentsheet.forms.generated.MobilePaymentElementV1 as ServerDrivenMobilePaymentElement
+import com.stripe.android.paymentsheet.forms.generated.MobileSessionContractV1 as MobileSessionContract
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodAssetV1 as PaymentMethodAsset
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodFormSpecV1 as PaymentMethodFormSpec
+import com.stripe.android.paymentsheet.forms.generated.SelectorIconV1 as SelectorIcon
+
+internal class MobileSessionContractException(
+    val errorCode: ErrorCode,
+    cause: Throwable? = null,
+) : IllegalArgumentException("Invalid Mobile Session response: ${errorCode.analyticsValue}", cause) {
+    internal enum class ErrorCode(val analyticsValue: String) {
+        DecodeFailure("decode_failure"),
+        UnsupportedContractMajor("unsupported_contract_major"),
+        InvalidContractRevision("invalid_contract_revision"),
+        UnsupportedFeatureValue("unsupported_feature_value"),
+        CollectionBounds("collection_bounds"),
+        InconsistentPaymentMethodCatalog("inconsistent_payment_method_catalog"),
+        InvalidAsset("invalid_asset"),
+        UnsupportedFormElement("unsupported_form_element"),
+        MalformedFormElement("malformed_form_element"),
+        MissingResponseHeader("missing_response_header"),
+        MalformedResponseHeader("malformed_response_header"),
+        ResponseHeaderBodyMismatch("response_header_body_mismatch"),
+        MissingPayload("missing_payload"),
+    }
+}
 
 internal class ElementsSessionJsonParser(
     private val params: ElementsSessionParams,
@@ -93,6 +124,24 @@ internal class ElementsSessionJsonParser(
 
         val accountId = json.optString("account_id")
         val merchantId = json.optString("merchant_id")
+        val mobilePaymentElement = json.opt(FIELD_MOBILE_PAYMENT_ELEMENT)?.let { value ->
+            val mobilePaymentElementJson = value as? JSONObject
+                ?: throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.DecodeFailure
+                )
+            val decoded = try {
+                MOBILE_SESSION_JSON.decodeFromString<ServerDrivenMobilePaymentElement>(
+                    mobilePaymentElementJson.toString()
+                )
+            } catch (exception: SerializationException) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.DecodeFailure,
+                    exception,
+                )
+            }
+            decoded.validateOrThrow()
+            decoded
+        }
 
         return if (stripeIntent != null) {
             ElementsSession(
@@ -114,6 +163,7 @@ internal class ElementsSessionJsonParser(
                 elementsSessionConfigId = elementsSessionConfigId,
                 accountId = accountId,
                 merchantId = merchantId,
+                mobilePaymentElement = mobilePaymentElement,
             )
         } else {
             null
@@ -542,6 +592,10 @@ internal class ElementsSessionJsonParser(
     }
 
     internal companion object {
+        private val MOBILE_SESSION_JSON = Json {
+            ignoreUnknownKeys = true
+        }
+
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
         private const val FIELD_ELEMENTS_SESSION_CONFIG_ID = "config_id"
@@ -611,5 +665,230 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_CARD_ART_PAYMENT_METHOD = "payment_method"
 
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()
+
+        private val CONTRACT_REVISION_PATTERN = Regex("^[0-9a-f]{16}$")
+        private val SUPPORTED_FINANCIAL_CONNECTIONS_LITE_VALUES = setOf("automatic", "disabled", "preferred")
+        private val SUPPORTED_NATIVE_COMPONENTS = setOf(
+            "card_details",
+            "card_billing_details",
+            "card_save_payment_method",
+            "card_link_inline_signup",
+            "card_mandate",
+            "us_bank_account_collection",
+            "instant_debits_collection",
+            "link_card_collection",
+            "external_confirmation",
+            "blik_confirmation",
+        )
+        private val SUPPORTED_MANDATE_TEXT_KEYS = setOf(
+            "cash_app_pay",
+            "paypal",
+            "revolut_pay",
+            "amazon_pay",
+            "satispay",
+            "twint",
+            "sepa",
+            "klarna",
+        )
+        private val SUPPORTED_FORM_ELEMENT_TYPES = setOf(
+            "name",
+            "email",
+            "selector",
+            "billing_address",
+            "country",
+            "affirm_header",
+            "klarna_header",
+            "klarna_country",
+            "au_becs_bsb_number",
+            "au_becs_account_number",
+            "au_becs_mandate",
+            "afterpay_header",
+            "iban",
+            "sepa_mandate",
+            "bacs_debit_bank_account",
+            "bacs_debit_mandate",
+            "boleto_tax_id",
+            "konbini_confirmation_number",
+            "placeholder",
+            "native_component",
+            "mandate_text",
+        )
+
+        private fun ServerDrivenMobilePaymentElement.validateOrThrow() {
+            validateContractOrThrow()
+            validateCatalogOrThrow()
+            if (assets.paymentMethods.any { !it.isValid() }) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.InvalidAsset
+                )
+            }
+            formSpecs.forEach { it.validateOrThrow() }
+        }
+
+        @Suppress("ThrowsCount")
+        private fun ServerDrivenMobilePaymentElement.validateContractOrThrow() {
+            if (contract.major != MobileSessionContract.CONTRACT_MAJOR) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.UnsupportedContractMajor
+                )
+            }
+            if (!CONTRACT_REVISION_PATTERN.matches(contract.revision)) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.InvalidContractRevision
+                )
+            }
+            if (features.financialConnectionsLite !in SUPPORTED_FINANCIAL_CONNECTIONS_LITE_VALUES) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.UnsupportedFeatureValue
+                )
+            }
+        }
+
+        @Suppress("ThrowsCount")
+        private fun ServerDrivenMobilePaymentElement.validateCatalogOrThrow() {
+            if (paymentMethodAvailability.size > MAX_SERVER_DRIVEN_ITEMS ||
+                assets.paymentMethods.size > MAX_SERVER_DRIVEN_ITEMS ||
+                formSpecs.size > MAX_SERVER_DRIVEN_ITEMS ||
+                paymentMethodAvailability.any { !it.isWithin(MAX_PAYMENT_METHOD_CODE_LENGTH) }
+            ) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.CollectionBounds
+                )
+            }
+            val availablePaymentMethods = paymentMethodAvailability.toSet()
+            if (availablePaymentMethods.size != paymentMethodAvailability.size ||
+                availablePaymentMethods.any(String::isBlank)
+            ) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.InconsistentPaymentMethodCatalog
+                )
+            }
+            val assetPaymentMethods = assets.paymentMethods.map { it.paymentMethodType }.toSet()
+            val formPaymentMethods = formSpecs.map { it.type }.toSet()
+            if (assetPaymentMethods.size != assets.paymentMethods.size || formPaymentMethods.size != formSpecs.size) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.InconsistentPaymentMethodCatalog
+                )
+            }
+            if (assetPaymentMethods != availablePaymentMethods || formPaymentMethods != availablePaymentMethods) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.InconsistentPaymentMethodCatalog
+                )
+            }
+        }
+
+        private fun PaymentMethodAsset.isValid(): Boolean {
+            return paymentMethodType.isWithin(MAX_PAYMENT_METHOD_CODE_LENGTH) &&
+                locale.isWithin(MAX_LOCALE_LENGTH) &&
+                displayName.isNotBlank() &&
+                displayName.isWithin(MAX_DISPLAY_TEXT_LENGTH) &&
+                selectorIcon?.isValid() != false
+        }
+
+        private fun PaymentMethodFormSpec.validateOrThrow() {
+            if (
+                !type.isWithin(MAX_PAYMENT_METHOD_CODE_LENGTH) ||
+                paymentMethodCode?.isWithin(MAX_PAYMENT_METHOD_CODE_LENGTH) == false ||
+                fields.size > MAX_SERVER_DRIVEN_ITEMS ||
+                selectorIcon?.isValid() == false
+            ) {
+                throw MobileSessionContractException(
+                    if (
+                        !type.isWithin(MAX_PAYMENT_METHOD_CODE_LENGTH) ||
+                        paymentMethodCode?.isWithin(MAX_PAYMENT_METHOD_CODE_LENGTH) == false ||
+                        fields.size > MAX_SERVER_DRIVEN_ITEMS
+                    ) {
+                        MobileSessionContractException.ErrorCode.CollectionBounds
+                    } else {
+                        MobileSessionContractException.ErrorCode.InvalidAsset
+                    }
+                )
+            }
+            fields.forEach { it.validateOrThrow() }
+        }
+
+        @Suppress("ThrowsCount")
+        private fun FormElementSpec.validateOrThrow() {
+            if (type !in SUPPORTED_FORM_ELEMENT_TYPES) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.UnsupportedFormElement
+                )
+            }
+            if (hasOversizedCollection() || hasOversizedText() || hasOversizedOption()) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.CollectionBounds
+                )
+            }
+            if (!isWellFormed()) {
+                throw MobileSessionContractException(
+                    MobileSessionContractException.ErrorCode.MalformedFormElement
+                )
+            }
+        }
+
+        private fun FormElementSpec.hasOversizedCollection(): Boolean {
+            return items.size > MAX_SERVER_DRIVEN_ITEMS ||
+                allowedCountryCodes?.size?.let { it > MAX_COUNTRIES } == true
+        }
+
+        private fun FormElementSpec.hasOversizedText(): Boolean {
+            return apiPath?.isWithin(MAX_API_PATH_LENGTH) == false ||
+                translationId?.isWithin(MAX_DISPLAY_TEXT_LENGTH) == false ||
+                subtitle?.isWithin(MAX_SUBTITLE_LENGTH) == false ||
+                localizedTextTemplate?.isWithin(MAX_LOCALIZED_TEXT_LENGTH) == false
+        }
+
+        private fun FormElementSpec.hasOversizedOption(): Boolean {
+            return items.any { option ->
+                !option.displayText.isWithin(MAX_DISPLAY_TEXT_LENGTH) ||
+                    option.apiValue?.isWithin(MAX_DISPLAY_TEXT_LENGTH) == false
+            }
+        }
+
+        private fun FormElementSpec.isWellFormed(): Boolean {
+            return when (type) {
+                "placeholder" -> placeholderFor != null
+                "native_component" -> component in SUPPORTED_NATIVE_COMPONENTS
+                "mandate_text" -> localizedTextTemplate?.isValidMandateTemplate() == true ||
+                    textKey in SUPPORTED_MANDATE_TEXT_KEYS
+                else -> true
+            }
+        }
+
+        private fun SelectorIcon.isValid(): Boolean {
+            return lightThemePng.isWithin(MAX_ASSET_URL_LENGTH) &&
+                darkThemePng?.isWithin(MAX_ASSET_URL_LENGTH) != false &&
+                isApprovedAssetUrl(lightThemePng) &&
+                darkThemePng?.let(::isApprovedAssetUrl) != false
+        }
+
+        private fun String.isWithin(maxLength: Int): Boolean = isNotEmpty() && length <= maxLength
+
+        private fun String.isValidMandateTemplate(): Boolean {
+            val withoutMerchantPlaceholder = replace(MERCHANT_DISPLAY_NAME_PLACEHOLDER, "")
+            return contains(MERCHANT_DISPLAY_NAME_PLACEHOLDER) &&
+                "{{" !in withoutMerchantPlaceholder &&
+                "}}" !in withoutMerchantPlaceholder &&
+                '<' !in this &&
+                '>' !in this
+        }
+
+        private fun isApprovedAssetUrl(value: String): Boolean {
+            return runCatching { URI(value) }.getOrNull()?.let { uri ->
+                uri.scheme == "https" && uri.host?.lowercase() in approvedAssetHosts
+            } == true
+        }
+
+        private val approvedAssetHosts = setOf("js.stripe.com", "files.stripe.com")
+        private const val MAX_SERVER_DRIVEN_ITEMS = 100
+        private const val MAX_COUNTRIES = 249
+        private const val MAX_PAYMENT_METHOD_CODE_LENGTH = 100
+        private const val MAX_LOCALE_LENGTH = 35
+        private const val MAX_DISPLAY_TEXT_LENGTH = 200
+        private const val MAX_API_PATH_LENGTH = 500
+        private const val MAX_SUBTITLE_LENGTH = 500
+        private const val MAX_LOCALIZED_TEXT_LENGTH = 5000
+        private const val MAX_ASSET_URL_LENGTH = 2048
+        private const val MERCHANT_DISPLAY_NAME_PLACEHOLDER = "{{merchant_display_name}}"
     }
 }

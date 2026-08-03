@@ -89,6 +89,7 @@ sealed class RequestHeadersFactory {
                 return mapOf(
                     HEADER_ACCEPT to "application/json",
                     HEADER_STRIPE_VERSION to apiVersion,
+                    HEADER_STRIPE_MOBILE_SDK_VERSION to "stripe-android/${StripeSdkVersion.VERSION_NAME}",
                     HEADER_AUTHORIZATION to "Bearer ${apiRequestOptions.apiKey}"
                 ).plus(
                     stripeClientUserAgentHeaderFactory.create(appInfo)

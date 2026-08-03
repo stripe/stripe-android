@@ -22,6 +22,17 @@ internal class ApiRequestTest {
     }
 
     @Test
+    fun getIncludesAdditionalHeaders() {
+        val request = FACTORY.createGet(
+            SOURCES_URL,
+            OPTIONS,
+            additionalHeaders = mapOf("Stripe-Mobile-Session-Contract" to "major=1; revision=abc")
+        )
+
+        assertEquals("major=1; revision=abc", request.headers["Stripe-Mobile-Session-Contract"])
+    }
+
+    @Test
     fun writeBody_withEmptyBody_shouldHaveZeroLength() {
         ByteArrayOutputStream().use {
             FACTORY.createPost(

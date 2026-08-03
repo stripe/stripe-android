@@ -16,6 +16,14 @@ import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
+import com.stripe.android.paymentsheet.forms.generated.BillingDetailsCollectionConfigV1 as BillingDetailsCollectionConfig
+import com.stripe.android.paymentsheet.forms.generated.BillingDetailsPresenceV1 as BillingDetailsPresence
+import com.stripe.android.paymentsheet.forms.generated.CardBrandAcceptanceV1 as CardBrandAcceptance
+import com.stripe.android.paymentsheet.forms.generated.CustomPaymentMethodConfigV1 as CustomPaymentMethodConfig
+import com.stripe.android.paymentsheet.forms.generated.GooglePayConfigV1 as GooglePayConfig
+import com.stripe.android.paymentsheet.forms.generated.LinkConfigV1 as LinkConfig
+import com.stripe.android.paymentsheet.forms.generated.PaymentSheetConfigV1 as PaymentSheetConfig
+import com.stripe.android.paymentsheet.forms.generated.WalletButtonsConfigV1 as WalletButtonsConfig
 
 @Parcelize
 internal data class CommonConfiguration(
@@ -32,6 +40,7 @@ internal data class CommonConfiguration(
     val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
+    val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
     internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
@@ -42,6 +51,7 @@ internal data class CommonConfiguration(
     val opensCardScannerAutomatically: Boolean,
     val userOverrideCountry: String?,
     val appearance: PaymentSheet.Appearance,
+    val primaryButtonLabel: String? = null,
 ) : Parcelable {
 
     fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
@@ -241,6 +251,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
     paymentMethodOrder = paymentMethodOrder,
     externalPaymentMethods = externalPaymentMethods,
+    paymentMethodLayout = paymentMethodLayout,
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
@@ -251,6 +262,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    primaryButtonLabel = primaryButtonLabel,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -266,6 +278,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
     paymentMethodOrder = paymentMethodOrder,
     externalPaymentMethods = externalPaymentMethods,
+    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
@@ -291,6 +304,7 @@ internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonC
     allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
     paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
     externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
+    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
     link = PaymentSheet.LinkConfiguration(
@@ -309,6 +323,135 @@ internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonC
     appearance = PaymentSheet.Appearance(),
     allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
 )
+
+internal fun CommonConfiguration.toMobileSessionConfig(): PaymentSheetConfig = PaymentSheetConfig(
+    merchantCountryCode = googlePay?.countryCode,
+    allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+    allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+    googlePay = googlePay?.toMobileSessionConfig(),
+    link = link.toMobileSessionConfig(),
+    returnUrlProvided = false,
+    merchantDisplayNameProvided = merchantDisplayName.isNotEmpty(),
+    customerConfigured = customer != null,
+    customerAccessType = customer?.accessType?.analyticsValue,
+    customApiClient = false,
+    defaultBillingDetails = defaultBillingDetails.toMobileSessionPresence(),
+    shippingDetailsProvided = shippingDetails != null,
+    savePaymentMethodOptInBehavior = "automatic",
+    primaryButtonLabelProvided = primaryButtonLabel != null,
+    appearanceCustomized = appearance != PaymentSheet.Appearance(),
+    userInterfaceStyle = "automatic",
+    preferredNetworks = preferredNetworks.map { it.code },
+    billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.toMobileSessionConfig(),
+    externalPaymentMethods = externalPaymentMethods,
+    customPaymentMethodIds = customPaymentMethods.map { it.id },
+    customPaymentMethods = customPaymentMethods.map { it.toMobileSessionConfig() },
+    externalPaymentMethodHandlerProvided = externalPaymentMethods.isNotEmpty(),
+    customPaymentMethodHandlerProvided = customPaymentMethods.isNotEmpty(),
+    paymentMethodOrder = paymentMethodOrder,
+    paymentMethodLayout = paymentMethodLayout.name.lowercase(),
+    cardBrandAcceptance = cardBrandAcceptance.toMobileSessionValue(),
+    allowedCardFundingTypes = allowedCardFundingTypes.map { it.name.lowercase() },
+    termsDisplay = termsDisplay.mapKeys { it.key.code }.mapValues { it.value.name.lowercase() },
+    allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+    removeSavedPaymentMethodMessageProvided = false,
+    opensCardScannerAutomatically = opensCardScannerAutomatically,
+    disableWalletPaymentMethodFiltering = false,
+    linkPaymentMethodsOnly = false,
+    walletButtons = walletButtons.toMobileSessionConfig(),
+    googlePlacesApiKeyProvided = googlePlacesApiKey != null,
+    userOverrideCountry = userOverrideCountry,
+)
+
+private fun PaymentSheet.GooglePayConfiguration.toMobileSessionConfig(): GooglePayConfig = GooglePayConfig(
+    merchantCountryCode = countryCode,
+    environment = environment.name.lowercase(),
+    currencyCode = currencyCode,
+    amountProvided = amount != null,
+    labelProvided = label != null,
+    buttonType = buttonType.name.lowercase(),
+    additionalEnabledNetworks = additionalEnabledNetworks,
+)
+
+private fun PaymentSheet.LinkConfiguration.toMobileSessionConfig(): LinkConfig = LinkConfig(
+    display = display.analyticsValue,
+    disabledFundingSources = disallowFundingSourceCreation.sorted(),
+    collectMissingBillingDetailsForExistingPaymentMethods = collectMissingBillingDetailsForExistingPaymentMethods,
+    allowUserEmailEdits = allowUserEmailEdits,
+    allowLogout = allowLogOut,
+)
+
+private fun PaymentSheet.BillingDetails?.toMobileSessionPresence(): BillingDetailsPresence = BillingDetailsPresence(
+    name = this?.name != null,
+    email = this?.email != null,
+    phone = this?.phone != null,
+    address = this?.address != null,
+    addressCity = this?.address?.city != null,
+    addressLine1 = this?.address?.line1 != null,
+    addressLine2 = this?.address?.line2 != null,
+    addressPostalCode = this?.address?.postalCode != null,
+    addressState = this?.address?.state != null,
+    addressCountryCode = this?.address?.country,
+)
+
+private fun PaymentSheet.BillingDetailsCollectionConfiguration.toMobileSessionConfig():
+    BillingDetailsCollectionConfig = BillingDetailsCollectionConfig(
+        name = name.name.lowercase(),
+        phone = phone.name.lowercase(),
+        email = email.name.lowercase(),
+        address = address.name.lowercase(),
+        attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+        allowedCountries = allowedBillingCountries.sorted(),
+    )
+
+private fun PaymentSheet.CustomPaymentMethod.toMobileSessionConfig(): CustomPaymentMethodConfig =
+    CustomPaymentMethodConfig(
+        id = id,
+        subtitleProvided = subtitle != null,
+        disableBillingDetailCollection = disableBillingDetailCollection,
+    )
+
+private fun PaymentSheet.WalletButtonsConfiguration?.toMobileSessionConfig(): WalletButtonsConfig = WalletButtonsConfig(
+    willDisplayExternally = this?.willDisplayExternally == true,
+    paymentElement = this?.visibility?.paymentElement.toMobileSessionPaymentElementConfig(),
+    walletButtonsView = this?.visibility?.walletButtonsView.toMobileSessionWalletButtonsViewConfig(),
+)
+
+private fun Map<
+    PaymentSheet.WalletButtonsConfiguration.Wallet,
+    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility,
+>?.toMobileSessionPaymentElementConfig(): Map<String, String> = toMobileSessionConfig { it.name.lowercase() }
+
+private fun Map<
+    PaymentSheet.WalletButtonsConfiguration.Wallet,
+    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility,
+>?.toMobileSessionWalletButtonsViewConfig(): Map<String, String> = toMobileSessionConfig { it.name.lowercase() }
+
+private fun <T> Map<PaymentSheet.WalletButtonsConfiguration.Wallet, T>?.toMobileSessionConfig(
+    value: (T) -> String,
+): Map<String, String> = orEmpty().mapKeys {
+    it.key.mobileSessionValue
+}.mapValues {
+    value(it.value)
+}
+
+private val PaymentSheet.WalletButtonsConfiguration.Wallet.mobileSessionValue: String
+    get() = when (this) {
+        PaymentSheet.WalletButtonsConfiguration.Wallet.Link -> "link"
+        PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay -> "google_pay"
+    }
+
+private fun PaymentSheet.CardBrandAcceptance.toMobileSessionValue(): CardBrandAcceptance = when (this) {
+    PaymentSheet.CardBrandAcceptance.All -> CardBrandAcceptance()
+    is PaymentSheet.CardBrandAcceptance.Allowed -> CardBrandAcceptance(
+        filter = "allowed",
+        brands = brands.map { it.name.lowercase() },
+    )
+    is PaymentSheet.CardBrandAcceptance.Disallowed -> CardBrandAcceptance(
+        filter = "disallowed",
+        brands = brands.map { it.name.lowercase() },
+    )
+}
 
 private fun String.isEKClientSecretValid(): Boolean {
     return Regex(EK_CLIENT_SECRET_VALID_REGEX_PATTERN).matches(this)

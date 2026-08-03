@@ -10,6 +10,17 @@ internal object GetFinancialConnectionsAvailability {
         elementsSession: ElementsSession?,
         isFullSdkAvailable: IsFinancialConnectionsSdkAvailable = DefaultIsFinancialConnectionsAvailable,
     ): FinancialConnectionsAvailability? {
+        elementsSession?.mobilePaymentElement?.features?.financialConnectionsLite?.let { decision ->
+            return when {
+                decision == "preferred" -> FinancialConnectionsAvailability.Lite
+                isFullSdkAvailable() && financialConnectionsFullSdkUnavailable.isEnabled.not() -> {
+                    FinancialConnectionsAvailability.Full
+                }
+                decision == "automatic" -> FinancialConnectionsAvailability.Lite
+                else -> null
+            }
+        }
+
         return when {
             elementsSession.preferLite() && elementsSession.fcLiteKillSwitchEnabled().not() -> {
                 FinancialConnectionsAvailability.Lite

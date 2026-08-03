@@ -14,8 +14,10 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.forms.ServerDrivenFormRenderException
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -155,10 +157,24 @@ internal class DefaultFormHelper(
     }
 
     override fun formElementsForCode(code: String): List<FormElement> {
-        return paymentMethodMetadata.formElementsForCode(
-            code = code,
-            uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(code),
-        ) ?: emptyList()
+        if (paymentMethodMetadata.serverDrivenFormSpecs == null) {
+            return paymentMethodMetadata.formElementsForCode(
+                code = code,
+                uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(code),
+            ) ?: emptyList()
+        }
+
+        return try {
+            val formElements = paymentMethodMetadata.formElementsForCode(
+                code = code,
+                uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(code),
+            ) ?: emptyList()
+            eventReporter.onAnalyticsEvent(PaymentSheetEvent.MobileSessionFormRender())
+            formElements
+        } catch (error: ServerDrivenFormRenderException) {
+            eventReporter.onAnalyticsEvent(PaymentSheetEvent.MobileSessionFormRender(error))
+            throw error
+        }
     }
 
     override fun createFormArguments(
@@ -188,6 +204,10 @@ internal class DefaultFormHelper(
 
     private fun requiresFormScreen(paymentMethodCode: String, formElements: List<FormElement>): Boolean {
         val userInteractionAllowed = formElements.any { it.allowsUserInteraction }
+        paymentMethodMetadata.serverDrivenFormSpecs?.let { formSpecs ->
+            return userInteractionAllowed ||
+                formSpecs.firstOrNull { it.type == paymentMethodCode }?.requiresFormScreen == true
+        }
         return userInteractionAllowed ||
             paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
             paymentMethodCode == PaymentMethod.Type.Link.code

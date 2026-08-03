@@ -13,15 +13,19 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.parsers.MobileSessionContractException
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -33,6 +37,11 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import java.util.UUID
 import kotlin.test.Test
+import com.stripe.android.paymentsheet.forms.generated.BillingDetailsCollectionConfigV1 as BillingDetailsCollectionConfig
+import com.stripe.android.paymentsheet.forms.generated.CardBrandAcceptanceV1 as CardBrandAcceptance
+import com.stripe.android.paymentsheet.forms.generated.LinkConfigV1 as LinkConfig
+import com.stripe.android.paymentsheet.forms.generated.MobileSessionContractV1 as MobileSessionContract
+import com.stripe.android.paymentsheet.forms.generated.PaymentSheetConfigV1 as PaymentSheetConfig
 
 @RunWith(RobolectricTestRunner::class)
 internal class ElementsSessionRepositoryTest {
@@ -58,6 +67,7 @@ internal class ElementsSessionRepositoryTest {
                 customPaymentMethods = emptyList(),
                 savedPaymentMethodSelectionId = null,
                 countryOverride = null,
+                paymentSheetConfig = null,
             ).getOrThrow()
         }
 
@@ -67,8 +77,152 @@ internal class ElementsSessionRepositoryTest {
 
         val request = requestCaptor.firstValue as ApiRequest
         val params = requireNotNull(request.params)
+        assertThat(request.headers).doesNotContainKey(MOBILE_SESSION_CONTRACT_HEADER)
         assertThat(params["mobile_app_id"]).isEqualTo(APP_ID)
         assertThat(params["locale"]).isEqualTo(locale.toLanguageTag())
+    }
+
+    @Test
+    fun `get sends generated PaymentSheet config`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            negotiatedElementsSessionResponse()
+        )
+        val paymentSheetConfig = PaymentSheetConfig(
+            merchantCountryCode = "GB",
+            allowsDelayedPaymentMethods = true,
+            allowsPaymentMethodsRequiringShippingAddress = true,
+            link = LinkConfig(display = "never", disabledFundingSources = listOf("card")),
+            preferredNetworks = listOf("visa"),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfig(
+                name = "always",
+                allowedCountries = listOf("GB"),
+            ),
+            externalPaymentMethods = listOf("external_paypal"),
+            customPaymentMethodIds = listOf("cpmt_123"),
+            paymentMethodOrder = listOf("card", "link"),
+            paymentMethodLayout = "vertical",
+            cardBrandAcceptance = CardBrandAcceptance(filter = "allowed", brands = listOf("visa")),
+            allowedCardFundingTypes = listOf("credit"),
+            termsDisplay = mapOf("card" to "never"),
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+            paymentSheetConfig = paymentSheetConfig,
+        ).getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        assertThat(request.headers["Stripe-Mobile-Session-Contract"]).isEqualTo(
+            "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=${MobileSessionContract.CONTRACT_REVISION}"
+        )
+
+        @Suppress("UNCHECKED_CAST")
+        val config = requireNotNull(request.params?.get("payment_sheet_config")) as Map<String, Any?>
+        assertThat(config["merchant_country_code"]).isEqualTo("GB")
+        assertThat(config["allows_delayed_payment_methods"]).isEqualTo("true")
+        assertThat(config["allows_payment_methods_requiring_shipping_address"]).isEqualTo("true")
+        assertThat(config["payment_method_order"]).isEqualTo(listOf("card", "link"))
+        assertThat(config["payment_method_layout"]).isEqualTo("vertical")
+        assertThat(config["terms_display"]).isEqualTo(mapOf("card" to "never"))
+    }
+
+    @Test
+    fun `negotiated response accepts a same-major server revision`() = runTest {
+        val serverRevision = "0000000000000000"
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            negotiatedElementsSessionResponse(
+                bodyRevision = serverRevision,
+                responseHeaderValue = "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=$serverRevision",
+            )
+        )
+
+        val result = getNegotiatedElementsSession()
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().mobilePaymentElement?.contract?.revision).isEqualTo(serverRevision)
+    }
+
+    @Test
+    fun `negotiated response fails when response header is missing without fallback`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            negotiatedElementsSessionResponse(responseHeaderValue = null)
+        )
+
+        val result = getNegotiatedElementsSession()
+
+        assertMobileSessionContractFailure(
+            result,
+            MobileSessionContractException.ErrorCode.MissingResponseHeader,
+        )
+        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
+    }
+
+    @Test
+    fun `negotiated response fails when response header is malformed without fallback`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            negotiatedElementsSessionResponse(responseHeaderValue = "major=1, revision=bad")
+        )
+
+        val result = getNegotiatedElementsSession()
+
+        assertMobileSessionContractFailure(
+            result,
+            MobileSessionContractException.ErrorCode.MalformedResponseHeader,
+        )
+        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
+    }
+
+    @Test
+    fun `negotiated response fails when response header and body metadata differ without fallback`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            negotiatedElementsSessionResponse(
+                responseHeaderValue =
+                    "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=0000000000000000"
+            )
+        )
+
+        val result = getNegotiatedElementsSession()
+
+        assertMobileSessionContractFailure(
+            result,
+            MobileSessionContractException.ErrorCode.ResponseHeaderBodyMismatch,
+        )
+        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
+    }
+
+    @Test
+    fun `negotiated response fails when mobile payment element is missing without fallback`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            negotiatedElementsSessionResponse(includeMobilePaymentElement = false)
+        )
+
+        val result = getNegotiatedElementsSession()
+
+        assertMobileSessionContractFailure(
+            result,
+            MobileSessionContractException.ErrorCode.MissingPayload,
+        )
+        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
+    }
+
+    @Test
+    fun `negotiated server failure does not enter legacy fallback`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(500, """{"error":{"message":"Server error"}}""", emptyMap())
+        )
+
+        val result = getNegotiatedElementsSession()
+
+        assertThat(result.isFailure).isTrue()
+        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
     }
 
     @Test
@@ -91,6 +245,7 @@ internal class ElementsSessionRepositoryTest {
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
+                    paymentSheetConfig = null,
                 ).getOrThrow()
             }
 
@@ -119,6 +274,7 @@ internal class ElementsSessionRepositoryTest {
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
+                    paymentSheetConfig = null,
                 ).getOrThrow()
             }
 
@@ -149,6 +305,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -189,6 +346,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -210,6 +368,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -231,6 +390,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -266,6 +426,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -299,6 +460,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -334,6 +496,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -366,6 +529,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -414,6 +578,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -455,6 +620,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -506,6 +672,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -546,6 +713,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -593,6 +761,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -629,6 +798,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -657,6 +827,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
             linkDisallowedFundingSourceCreation = setOf("somethingThatsNotAllowed"),
         )
 
@@ -681,6 +852,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -703,6 +875,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -730,6 +903,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -763,6 +937,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -793,6 +968,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -816,6 +992,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -839,6 +1016,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -862,6 +1040,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -890,6 +1069,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -914,6 +1094,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -937,6 +1118,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -963,6 +1145,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -995,6 +1178,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            paymentSheetConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -1016,6 +1200,55 @@ internal class ElementsSessionRepositoryTest {
         clientParams = TEST_CLIENT_PARAMS,
     )
 
+    private suspend fun getNegotiatedElementsSession(): Result<ElementsSession> {
+        return createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+            paymentSheetConfig = PaymentSheetConfig(),
+        )
+    }
+
+    private fun negotiatedElementsSessionResponse(
+        bodyMajor: Int = MobileSessionContract.CONTRACT_MAJOR,
+        bodyRevision: String = MobileSessionContract.CONTRACT_REVISION,
+        responseHeaderValue: String? = MOBILE_SESSION_CONTRACT_HEADER_VALUE,
+        includeMobilePaymentElement: Boolean = true,
+    ): StripeResponse<String> {
+        val responseBody = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString())
+        if (includeMobilePaymentElement) {
+            responseBody.put(
+                "mobile_payment_element",
+                JSONObject()
+                    .put(
+                        "contract",
+                        JSONObject()
+                            .put("major", bodyMajor)
+                            .put("revision", bodyRevision)
+                    )
+                    .put("payment_method_availability", JSONArray())
+            )
+        }
+        val responseHeaders = responseHeaderValue?.let {
+            mapOf(MOBILE_SESSION_CONTRACT_HEADER to listOf(it))
+        }.orEmpty()
+        return StripeResponse(200, responseBody.toString(), responseHeaders)
+    }
+
+    private fun assertMobileSessionContractFailure(
+        result: Result<ElementsSession>,
+        expectedErrorCode: MobileSessionContractException.ErrorCode,
+    ) {
+        assertThat(result.isFailure).isTrue()
+        val error = result.exceptionOrNull() as MobileSessionContractException
+        assertThat(error.errorCode).isEqualTo(expectedErrorCode)
+    }
+
     private inline fun <T> withLocale(locale: Locale, block: () -> T): T {
         val original = Locale.getDefault()
         Locale.setDefault(locale)
@@ -1027,6 +1260,9 @@ internal class ElementsSessionRepositoryTest {
     companion object {
         private const val APP_ID = "com.app.id"
         private const val MOBILE_SESSION_ID = "session_123"
+        private const val MOBILE_SESSION_CONTRACT_HEADER = "Stripe-Mobile-Session-Contract"
+        private val MOBILE_SESSION_CONTRACT_HEADER_VALUE =
+            "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=${MobileSessionContract.CONTRACT_REVISION}"
         private val TEST_CLIENT_PARAMS = ElementsSessionClientParams(
             mobileAppId = APP_ID,
             mobileSessionIdProvider = { MOBILE_SESSION_ID },

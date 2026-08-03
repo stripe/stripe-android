@@ -11,7 +11,9 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HTTP_INTERNAL_SERVER_ERROR
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.executeRequestWithResultParser
+import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
@@ -21,15 +23,21 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
+import com.stripe.android.model.parsers.MobileSessionContractException
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.paymentsheet.forms.generated.MobileSessionContractV1 as MobileSessionContract
+import com.stripe.android.paymentsheet.forms.generated.PaymentSheetConfigV1 as PaymentSheetConfig
 
 internal interface ElementsSessionRepository {
     suspend fun get(
@@ -40,6 +48,7 @@ internal interface ElementsSessionRepository {
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         linkDisallowedFundingSourceCreation: Set<String> = emptySet(),
+        paymentSheetConfig: PaymentSheetConfig?,
     ): Result<ElementsSession>
 }
 
@@ -78,6 +87,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         linkDisallowedFundingSourceCreation: Set<String>,
+        paymentSheetConfig: PaymentSheetConfig?,
     ): Result<ElementsSession> {
         fraudDetectionDataRepository.refresh()
 
@@ -92,10 +102,10 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
         val options = requestOptions
-        val elementsSession = retrieveElementsSession(params, options)
+        val elementsSession = retrieveElementsSession(params, options, paymentSheetConfig)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
-            if (shouldFallback(elementsSession)) {
+            if (shouldFallback(elementsSession, mobileSessionContractRequested = paymentSheetConfig != null)) {
                 fallback(params, elementsSessionFailure)
             } else {
                 elementsSession
@@ -106,6 +116,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
+        paymentSheetConfig: PaymentSheetConfig?,
     ): Result<ElementsSession> {
         val requestParams = buildMap {
             this["type"] = params.type
@@ -121,6 +132,9 @@ internal class RealElementsSessionRepository @Inject constructor(
             params.sellerDetails?.let { this.putAll(it.toQueryParams()) }
             putAll(params.link.toQueryParams())
             params.countryOverride?.let { this["country_override"] = it }
+            paymentSheetConfig?.let {
+                this["payment_sheet_config"] = MOBILE_SESSION_JSON.encodeToJsonElement(it).toMap()
+            }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }
@@ -137,12 +151,14 @@ internal class RealElementsSessionRepository @Inject constructor(
                 url = ELEMENTS_SESSIONS_URL,
                 options = options,
                 params = requestParams + expandParam,
+                additionalHeaders = mobileSessionContractHeaders(paymentSheetConfig),
             ),
             responseJsonParser = ElementsSessionJsonParser(
                 params = params,
                 isLiveMode = options.apiKeyIsLiveMode,
             ),
-        )
+            responseValidator = mobileSessionContractResponseValidator(paymentSheetConfig),
+        ).map { it.withServerDrivenPaymentMethodAvailability() }
     }
 
     private suspend fun fallback(
@@ -176,16 +192,93 @@ internal class RealElementsSessionRepository @Inject constructor(
         }
     }
 
-    private fun shouldFallback(elementsSession: Result<ElementsSession>): Boolean {
+    private fun shouldFallback(
+        elementsSession: Result<ElementsSession>,
+        mobileSessionContractRequested: Boolean,
+    ): Boolean {
+        if (mobileSessionContractRequested) {
+            return false
+        }
         return (elementsSession.exceptionOrNull() as? StripeException)?.let {
             it.statusCode >= HTTP_INTERNAL_SERVER_ERROR
         } ?: false
     }
 
+    private fun validateMobileSessionContractResponse(
+        response: StripeResponse<String>,
+        elementsSession: ElementsSession,
+    ) {
+        val bodyContract = elementsSession.mobilePaymentElement?.contract
+            ?: throw MobileSessionContractException(
+                MobileSessionContractException.ErrorCode.MissingPayload
+            )
+        val headerMatch = mobileSessionContractResponseHeader(response)
+        val headerMajor = headerMatch.groupValues[1].toInt()
+        val headerRevision = headerMatch.groupValues[2]
+        if (headerMajor != bodyContract.major || headerRevision != bodyContract.revision) {
+            throw MobileSessionContractException(
+                MobileSessionContractException.ErrorCode.ResponseHeaderBodyMismatch
+            )
+        }
+    }
+
+    private fun mobileSessionContractResponseHeader(response: StripeResponse<String>): MatchResult {
+        val headerValues = response.getHeaderValue(MOBILE_SESSION_CONTRACT_HEADER)
+            ?: throw MobileSessionContractException(
+                MobileSessionContractException.ErrorCode.MissingResponseHeader
+            )
+        val headerValue = headerValues.singleOrNull()
+            ?: throw MobileSessionContractException(
+                MobileSessionContractException.ErrorCode.MalformedResponseHeader
+            )
+        return parseMobileSessionContractResponseHeader(headerValue)
+    }
+
+    private fun parseMobileSessionContractResponseHeader(headerValue: String): MatchResult {
+        return MOBILE_SESSION_CONTRACT_HEADER_PATTERN.matchEntire(headerValue)
+            ?: throw MobileSessionContractException(
+                MobileSessionContractException.ErrorCode.MalformedResponseHeader
+            )
+    }
+
+    private fun mobileSessionContractHeaders(paymentSheetConfig: PaymentSheetConfig?): Map<String, String> {
+        return paymentSheetConfig?.let {
+            mapOf(MOBILE_SESSION_CONTRACT_HEADER to MOBILE_SESSION_CONTRACT_HEADER_VALUE)
+        }.orEmpty()
+    }
+
+    private fun mobileSessionContractResponseValidator(
+        paymentSheetConfig: PaymentSheetConfig?,
+    ): ((StripeResponse<String>, ElementsSession) -> Unit)? {
+        return paymentSheetConfig?.let { ::validateMobileSessionContractResponse }
+    }
+
     private companion object {
+        @OptIn(ExperimentalSerializationApi::class)
+        val MOBILE_SESSION_JSON = Json {
+            encodeDefaults = true
+            explicitNulls = false
+        }
+
         private val ELEMENTS_SESSIONS_URL: String
             get() = "${ApiRequest.API_HOST}/v1/elements/sessions"
+
+        private const val MOBILE_SESSION_CONTRACT_HEADER = "Stripe-Mobile-Session-Contract"
+        private val MOBILE_SESSION_CONTRACT_HEADER_VALUE =
+            "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=${MobileSessionContract.CONTRACT_REVISION}"
+        private val MOBILE_SESSION_CONTRACT_HEADER_PATTERN = Regex(
+            "^major=(0|[1-9][0-9]*); revision=([0-9a-f]{16})$"
+        )
     }
+}
+
+private fun ElementsSession.withServerDrivenPaymentMethodAvailability(): ElementsSession {
+    val paymentMethodTypes = mobilePaymentElement?.paymentMethodAvailability ?: return this
+    val serverDrivenIntent = when (stripeIntent) {
+        is PaymentIntent -> stripeIntent.copy(paymentMethodTypes = paymentMethodTypes)
+        is SetupIntent -> stripeIntent.copy(paymentMethodTypes = paymentMethodTypes)
+    }
+    return copy(stripeIntent = serverDrivenIntent)
 }
 
 private fun StripeIntent.withoutWeChatPay(): StripeIntent {

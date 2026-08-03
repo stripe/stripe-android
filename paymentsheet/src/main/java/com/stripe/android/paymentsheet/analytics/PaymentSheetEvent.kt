@@ -5,8 +5,10 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.parsers.MobileSessionContractException
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.forms.ServerDrivenFormRenderException
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.model.isSaved
@@ -63,8 +65,21 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             put(FIELD_DURATION, duration?.asSeconds)
             put(FIELD_ERROR_MESSAGE, error.asPaymentSheetLoadingException.type)
             putAll(ErrorReporter.getAdditionalParamsFromError(error))
+            putAll(error.mobileSessionContractErrorParams())
             if (loadTimings.isNotEmpty()) {
                 put(FIELD_LOAD_TIMINGS, loadTimings)
+            }
+        }
+    }
+
+    class MobileSessionFormRender(
+        error: ServerDrivenFormRenderException? = null,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_mobile_session_form_render"
+        override val params: Map<String, Any?> = buildMap {
+            put("mobile_session_render_outcome", if (error == null) "success" else "failure")
+            error?.let {
+                put("mobile_session_render_error_code", it.errorCode.analyticsValue)
             }
         }
     }
@@ -76,6 +91,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val params: Map<String, Any?> = mapOf(
             FIELD_ERROR_MESSAGE to error.asPaymentSheetLoadingException.type,
         ).plus(ErrorReporter.getAdditionalParamsFromError(error))
+            .plus(error.mobileSessionContractErrorParams())
     }
 
     class Init(
@@ -663,6 +679,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         const val MAX_EXTERNAL_PAYMENT_METHODS = 10
     }
+}
+
+private fun Throwable.mobileSessionContractErrorParams(): Map<String, Any> {
+    val contractError = generateSequence(this as Throwable?) { it.cause }
+        .filterIsInstance<MobileSessionContractException>()
+        .firstOrNull()
+        ?: return emptyMap()
+    return mapOf(
+        "error_type" to "mobile_session_contract_error",
+        "error_code" to contractError.errorCode.analyticsValue,
+        "mobile_session_decode_outcome" to "failure",
+    )
 }
 
 private val Duration.asSeconds: Float

@@ -26,6 +26,8 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodAssetV1 as PaymentMethodAsset
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodFormSpecV1 as PaymentMethodFormSpec
 
 internal object PaymentMethodMetadataFactory {
     @Suppress("LongMethod")
@@ -42,6 +44,9 @@ internal object PaymentMethodMetadataFactory {
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         hasCustomerConfiguration: Boolean = false,
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
+        serverDrivenPaymentMethodTypes: List<String>? = null,
+        serverDrivenPaymentMethodAssets: List<PaymentMethodAsset> = emptyList(),
+        serverDrivenFormSpecs: List<PaymentMethodFormSpec>? = null,
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
         isGooglePayReady: Boolean = false,
@@ -126,6 +131,9 @@ internal object PaymentMethodMetadataFactory {
                 null
             },
             sharedDataSpecs = sharedDataSpecs,
+            serverDrivenPaymentMethodTypes = serverDrivenPaymentMethodTypes,
+            serverDrivenPaymentMethodAssets = serverDrivenPaymentMethodAssets,
+            serverDrivenFormSpecs = serverDrivenFormSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,

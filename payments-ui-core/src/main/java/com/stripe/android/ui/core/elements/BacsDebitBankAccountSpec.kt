@@ -45,8 +45,8 @@ class BacsDebitBankAccountSpec : FormItemSpec() {
         resolvableString(R.string.stripe_bacs_bank_account_title)
     )
 
-    private companion object {
-        const val SORT_CODE_API_PATH = "bacs_debit[sort_code]"
-        const val ACCOUNT_NUMBER_API_PATH = "bacs_debit[account_number]"
+    companion object {
+        private const val SORT_CODE_API_PATH = "bacs_debit[sort_code]"
+        private const val ACCOUNT_NUMBER_API_PATH = "bacs_debit[account_number]"
     }
 }

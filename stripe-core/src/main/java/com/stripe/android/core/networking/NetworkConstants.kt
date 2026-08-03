@@ -36,6 +36,9 @@ const val HEADER_ACCEPT = "Accept"
 const val HEADER_STRIPE_VERSION = "Stripe-Version"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val HEADER_STRIPE_MOBILE_SDK_VERSION = "Stripe-Mobile-SDK-Version"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val HEADER_STRIPE_ACCOUNT = "Stripe-Account"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

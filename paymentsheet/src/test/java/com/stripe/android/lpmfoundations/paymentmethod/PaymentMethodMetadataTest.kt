@@ -31,6 +31,7 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.forms.ServerDrivenFormRenderException
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -41,6 +42,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.elements.AddressElement
@@ -57,7 +59,12 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 import com.stripe.android.core.R as CoreR
+import com.stripe.android.paymentsheet.forms.generated.FormElementSpecV1 as FormElementSpec
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodAssetV1 as PaymentMethodAsset
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodFormSpecV1 as PaymentMethodFormSpec
+import com.stripe.android.paymentsheet.forms.generated.SelectorIconV1 as SelectorIcon
 import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
@@ -159,6 +166,37 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `server driven availability preserves server order without client filtering`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card"),
+                unactivatedPaymentMethods = listOf("klarna"),
+                isLiveMode = true,
+            ),
+            paymentMethodOrder = listOf("card"),
+            serverDrivenPaymentMethodTypes = listOf("klarna", "server_payment_method", "card"),
+        )
+
+        assertThat(metadata.supportedPaymentMethodTypes())
+            .containsExactly("klarna", "server_payment_method", "card")
+            .inOrder()
+    }
+
+    @Test
+    fun `server driven availability controls saved payment method types without registry filtering`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card"),
+            ),
+            serverDrivenPaymentMethodTypes = listOf("klarna", "card"),
+        )
+
+        assertThat(metadata.supportedSavedPaymentMethodTypes())
+            .containsExactly(PaymentMethod.Type.Klarna, PaymentMethod.Type.Card)
+            .inOrder()
+    }
+
+    @Test
     fun `filterSupportedPaymentMethods filters unactivated payment methods in live mode`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -198,6 +236,85 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
         assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
+    }
+
+    @Test
+    fun `supportedPaymentMethodForCode uses server driven display assets`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            ),
+            serverDrivenPaymentMethodAssets = listOf(
+                PaymentMethodAsset(
+                    paymentMethodType = "card",
+                    displayName = "Card from server",
+                    selectorIcon = SelectorIcon(
+                        lightThemePng = "https://js.stripe.com/card-light.png",
+                        darkThemePng = "https://js.stripe.com/card-dark.png",
+                    )
+                )
+            ),
+        )
+
+        val paymentMethod = metadata.supportedPaymentMethodForCode("card")
+
+        assertThat(paymentMethod?.displayName).isEqualTo("Card from server".resolvableString)
+        assertThat(paymentMethod?.lightThemeIconUrl).isEqualTo("https://js.stripe.com/card-light.png")
+        assertThat(paymentMethod?.darkThemeIconUrl).isEqualTo("https://js.stripe.com/card-dark.png")
+    }
+
+    @Test
+    fun `server driven payment method does not require a local payment method definition`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            serverDrivenPaymentMethodTypes = listOf("server_payment_method"),
+            serverDrivenPaymentMethodAssets = listOf(
+                PaymentMethodAsset(
+                    paymentMethodType = "server_payment_method",
+                    displayName = "Server payment method",
+                    selectorIcon = SelectorIcon(
+                        lightThemePng = "https://js.stripe.com/server-light.png",
+                    ),
+                )
+            ),
+            serverDrivenFormSpecs = listOf(
+                PaymentMethodFormSpec(type = "server_payment_method")
+            ),
+        )
+
+        val paymentMethod = metadata.supportedPaymentMethodForCode("server_payment_method")
+
+        assertThat(paymentMethod?.code).isEqualTo("server_payment_method")
+        assertThat(paymentMethod?.displayName).isEqualTo("Server payment method".resolvableString)
+    }
+
+    @Test
+    fun `server selected link card brand primitive controls the effective payment method code`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            serverDrivenPaymentMethodTypes = listOf("server_selected_type"),
+            serverDrivenPaymentMethodAssets = listOf(
+                PaymentMethodAsset(
+                    paymentMethodType = "server_selected_type",
+                    displayName = "Instant bank payment",
+                )
+            ),
+            serverDrivenFormSpecs = listOf(
+                PaymentMethodFormSpec(
+                    type = "server_selected_type",
+                    paymentMethodCode = PaymentMethod.Type.Link.code,
+                    fields = listOf(
+                        FormElementSpec(
+                            type = "native_component",
+                            component = "link_card_collection",
+                        )
+                    ),
+                )
+            ),
+        )
+
+        val paymentMethod = metadata.supportedPaymentMethodForCode("server_selected_type")
+
+        assertThat(paymentMethod?.code).isEqualTo(PaymentMethod.Type.Link.code)
+        assertThat(paymentMethod?.syntheticCode).isEqualTo("server_selected_type")
     }
 
     @Test
@@ -517,6 +634,162 @@ internal class PaymentMethodMetadataTest {
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
         assertThat(identifiers).contains(IdentifierSpec.Country)
+    }
+
+    @Test
+    fun `server driven declarative fields bypass the payment method UI factory`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            ),
+            sharedDataSpecs = listOf(
+                SharedDataSpec(type = "card", fields = arrayListOf(NameSpec()))
+            ),
+            serverDrivenPaymentMethodTypes = listOf("card"),
+            serverDrivenPaymentMethodAssets = listOf(
+                PaymentMethodAsset(paymentMethodType = "card", displayName = "Card")
+            ),
+            serverDrivenFormSpecs = listOf(
+                PaymentMethodFormSpec(type = "card", fields = listOf(FormElementSpec(type = "name")))
+            ),
+        )
+
+        val formElements = metadata.formElementsForCode(
+            code = "card",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )
+
+        val nameElement = (formElements?.single() as SectionElement).fields.single() as SimpleTextElement
+        assertThat(nameElement.identifier).isEqualTo(IdentifierSpec.Name)
+    }
+
+    @Test
+    fun `server driven mandate text renders without a payment method factory decision`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("server_selected_type")
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec(type = "server_selected_type")),
+            serverDrivenPaymentMethodTypes = listOf("server_selected_type"),
+            serverDrivenPaymentMethodAssets = listOf(
+                PaymentMethodAsset(paymentMethodType = "server_selected_type", displayName = "Server Pay")
+            ),
+            serverDrivenFormSpecs = listOf(
+                PaymentMethodFormSpec(
+                    type = "server_selected_type",
+                    fields = listOf(
+                        FormElementSpec(
+                            type = "mandate_text",
+                            localizedTextTemplate = "Authorize {{merchant_display_name}}.",
+                            setupFutureUsageRequired = false,
+                        )
+                    ),
+                )
+            ),
+        )
+
+        val formElements = metadata.formElementsForCode(
+            code = "server_selected_type",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )
+
+        val mandate = formElements?.single() as MandateTextElement
+        assertThat(mandate.rawText).isEqualTo("Authorize ${PaymentSheetFixtures.MERCHANT_DISPLAY_NAME}.")
+        assertThat(mandate.identifier.v1).isEqualTo("mandate")
+    }
+
+    @Test
+    fun `server driven forms reject a missing payment method spec instead of falling back`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            serverDrivenFormSpecs = emptyList(),
+        )
+
+        val error = assertFailsWith<ServerDrivenFormRenderException> {
+            metadata.formElementsForCode(
+                code = "card",
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            )
+        }
+
+        assertThat(error.errorCode).isEqualTo(ServerDrivenFormRenderException.ErrorCode.MissingFormSpec)
+    }
+
+    @Test
+    fun `server driven forms reject unsupported native primitives instead of falling back`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            serverDrivenFormSpecs = listOf(
+                PaymentMethodFormSpec(
+                    type = "card",
+                    fields = listOf(
+                        FormElementSpec(
+                            type = "native_component",
+                            component = "unsupported_component",
+                        )
+                    ),
+                )
+            ),
+        )
+
+        val error = assertFailsWith<ServerDrivenFormRenderException> {
+            metadata.formElementsForCode(
+                code = "card",
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            )
+        }
+
+        assertThat(error.errorCode)
+            .isEqualTo(ServerDrivenFormRenderException.ErrorCode.UnsupportedNativeComponent)
+    }
+
+    @Test
+    fun `server driven forms report a known native component rendering failure`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            serverDrivenFormSpecs = listOf(
+                PaymentMethodFormSpec(
+                    type = "server_selected_type",
+                    fields = listOf(
+                        FormElementSpec(
+                            type = "native_component",
+                            component = "external_confirmation",
+                        )
+                    ),
+                )
+            ),
+        )
+
+        val error = assertFailsWith<ServerDrivenFormRenderException> {
+            metadata.formElementsForCode(
+                code = "server_selected_type",
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            )
+        }
+
+        assertThat(error.errorCode)
+            .isEqualTo(ServerDrivenFormRenderException.ErrorCode.NativeComponentFailure)
+    }
+
+    @Test
+    fun `server selected link card brand primitive does not inspect the payment method type`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            serverDrivenFormSpecs = listOf(
+                PaymentMethodFormSpec(
+                    type = "server_selected_type",
+                    fields = listOf(
+                        FormElementSpec(
+                            type = "native_component",
+                            component = "link_card_collection",
+                        )
+                    ),
+                )
+            ),
+        )
+
+        val formElements = metadata.formElementsForCode(
+            code = "server_selected_type",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )
+
+        assertThat(formElements).isEmpty()
     }
 
     @Test
@@ -1169,6 +1442,9 @@ internal class PaymentMethodMetadataTest {
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             sharedDataSpecs = sharedDataSpecs,
+            serverDrivenPaymentMethodTypes = null,
+            serverDrivenPaymentMethodAssets = emptyList(),
+            serverDrivenFormSpecs = null,
             displayableCustomPaymentMethods = listOf(
                 DisplayableCustomPaymentMethod(
                     id = "cpmt_123",
@@ -1343,6 +1619,9 @@ internal class PaymentMethodMetadataTest {
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = null,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
+            serverDrivenPaymentMethodTypes = null,
+            serverDrivenPaymentMethodAssets = emptyList(),
+            serverDrivenFormSpecs = null,
             displayableCustomPaymentMethods = emptyList(),
             externalPaymentMethodSpecs = listOf(),
             customerMetadata = getDefaultCustomerMetadata(

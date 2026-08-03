@@ -27,7 +27,10 @@ internal fun MandateTextUI(
     element: MandateTextElement,
     modifier: Modifier = Modifier,
 ) {
-    Mandate(stringResource(element.stringResId, *element.args.toTypedArray()), modifier)
+    Mandate(
+        element.rawText ?: stringResource(element.stringResId, *element.args.toTypedArray()),
+        modifier,
+    )
 }
 
 @Composable

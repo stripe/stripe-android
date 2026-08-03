@@ -4,6 +4,7 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
+import com.stripe.android.paymentsheet.forms.generated.MobilePaymentElementV1 as ServerDrivenMobilePaymentElement
 
 private val LinkSupportedFundingSources = setOf("card", "bank_account")
 
@@ -28,6 +29,7 @@ internal data class ElementsSession(
     val elementsSessionConfigId: String?,
     val accountId: String?,
     val merchantId: String?,
+    val mobilePaymentElement: ServerDrivenMobilePaymentElement? = null,
 ) : StripeModel {
 
     val linkBrand: LinkBrand
@@ -85,7 +87,12 @@ internal data class ElementsSession(
         get() = flags[Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION] == true
 
     val enableCardFundFiltering: Boolean
-        get() = flags[Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING] == true
+        get() = mobilePaymentElement?.features?.cardFundingFiltering
+            ?: (flags[Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING] == true)
+
+    val enableLinkGlobalHoldbackLookup: Boolean
+        get() = mobilePaymentElement?.features?.linkGlobalHoldbackLookup
+            ?: (flags[Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP] != true)
 
     val isTapToAddEnabled: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED] == true
@@ -109,7 +116,8 @@ internal data class ElementsSession(
         get() = accountId.takeIf { !it.equals(merchantId) }
 
     val forceVerticalPaymentMethodLayout: Boolean
-        get() = flags[Flag.ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT] == true
+        get() = mobilePaymentElement?.features?.forceVerticalPaymentMethodLayout
+            ?: (flags[Flag.ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT] == true)
 
     val shouldUseAutocompleteProxyEndpoints: Boolean
         get() = flags[Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS] == true

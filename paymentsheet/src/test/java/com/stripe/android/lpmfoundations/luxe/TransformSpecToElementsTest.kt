@@ -179,6 +179,35 @@ internal class TransformSpecToElementsTest {
     }
 
     @Test
+    fun `Server-selected billing specs ignore local billing collection modes`() {
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+        )
+        val formElements = TransformSpecToElementsFactory.create(
+            billingDetailsCollectionConfiguration = configuration,
+        ).transform(
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(
+                NameSpec(),
+                EmailSpec(),
+                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
+                AddressSpec(allowedCountryCodes = setOf("CA")),
+            ),
+            termsDisplay = PaymentSheet.TermsDisplay.NEVER,
+            applyBillingDetailsConfiguration = false,
+        )
+
+        assertThat(formElements).hasSize(4)
+        assertThat((formElements[0] as SectionElement).fields.single()).isInstanceOf<SimpleTextElement>()
+        assertThat((formElements[1] as SectionElement).fields.single()).isInstanceOf<EmailElement>()
+        assertThat((formElements[2] as SectionElement).fields.single()).isInstanceOf<PhoneNumberElement>()
+        assertThat((formElements[3] as SectionElement).fields.single()).isInstanceOf<AddressElement>()
+    }
+
+    @Test
     fun `Add a static text section spec setup of the static element correctly`() {
         val staticText = StaticTextSpec(
             IdentifierSpec.Generic("mandate"),

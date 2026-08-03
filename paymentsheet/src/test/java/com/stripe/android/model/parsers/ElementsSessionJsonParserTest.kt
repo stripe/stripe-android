@@ -26,6 +26,8 @@ import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
+import kotlin.test.assertFailsWith
+import com.stripe.android.paymentsheet.forms.generated.MobileSessionContractV1 as MobileSessionContract
 
 class ElementsSessionJsonParserTest {
 
@@ -61,6 +63,334 @@ class ElementsSessionJsonParserTest {
             .containsExactlyElementsIn(orderedPaymentMethods)
             .inOrder()
         assertThat(elementsSession?.linkSettings?.linkPassthroughModeEnabled).isFalse()
+    }
+
+    @Test
+    @Suppress("LongMethod")
+    fun `parse PaymentIntent decodes root mobile payment element`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).apply {
+            put(
+                "mobile_payment_element",
+                JSONObject()
+                    .put(
+                        "contract",
+                        JSONObject()
+                            .put("major", MobileSessionContract.CONTRACT_MAJOR)
+                            .put("revision", MobileSessionContract.CONTRACT_REVISION)
+                    )
+                    .put("payment_method_availability", JSONArray(listOf("card")))
+                    .put(
+                        "features",
+                        JSONObject()
+                            .put("financial_connections_lite", "preferred")
+                            .put("force_vertical_payment_method_layout", true)
+                    )
+                    .put(
+                        "assets",
+                        JSONObject().put(
+                            "payment_methods",
+                            JSONArray().put(
+                                JSONObject()
+                                    .put("payment_method_type", "card")
+                                    .put("display_name", "Card from server")
+                                    .put(
+                                        "selector_icon",
+                                        JSONObject().put(
+                                            "light_theme_png",
+                                            "https://files.stripe.com/files/custom-logo"
+                                        )
+                                    )
+                            )
+                        )
+                    )
+                    .put(
+                        "form_specs",
+                        JSONArray().put(
+                            JSONObject()
+                                .put("type", "card")
+                                .put(
+                                    "fields",
+                                    JSONArray().put(
+                                        JSONObject()
+                                            .put("type", "native_component")
+                                            .put("component", "card_details")
+                                    ).put(
+                                        JSONObject()
+                                            .put("type", "mandate_text")
+                                            .put(
+                                                "localized_text_template",
+                                                "Authorize {{merchant_display_name}}."
+                                            )
+                                    )
+                                )
+                        )
+                    )
+            )
+        }
+
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false
+        ).parse(json)
+
+        assertThat(elementsSession?.mobilePaymentElement?.contract?.major)
+            .isEqualTo(MobileSessionContract.CONTRACT_MAJOR)
+        assertThat(elementsSession?.mobilePaymentElement?.contract?.revision)
+            .isEqualTo(MobileSessionContract.CONTRACT_REVISION)
+        assertThat(elementsSession?.mobilePaymentElement?.paymentMethodAvailability)
+            .containsExactly("card")
+            .inOrder()
+        assertThat(elementsSession?.mobilePaymentElement?.features?.financialConnectionsLite)
+            .isEqualTo("preferred")
+        assertThat(elementsSession?.mobilePaymentElement?.assets?.paymentMethods?.single()?.displayName)
+            .isEqualTo("Card from server")
+        assertThat(
+            elementsSession?.mobilePaymentElement?.assets?.paymentMethods?.single()?.selectorIcon?.lightThemePng
+        ).isEqualTo("https://files.stripe.com/files/custom-logo")
+        assertThat(elementsSession?.mobilePaymentElement?.formSpecs?.single()?.fields?.first()?.component)
+            .isEqualTo("card_details")
+        assertThat(
+            elementsSession?.mobilePaymentElement?.formSpecs?.single()?.fields?.get(1)?.localizedTextTemplate
+        ).isEqualTo("Authorize {{merchant_display_name}}.")
+    }
+
+    @Test
+    fun `parse PaymentIntent accepts server driven Link card brand form`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).apply {
+            put(
+                "mobile_payment_element",
+                JSONObject()
+                    .put(
+                        "contract",
+                        JSONObject()
+                            .put("major", MobileSessionContract.CONTRACT_MAJOR)
+                            .put("revision", MobileSessionContract.CONTRACT_REVISION)
+                    )
+                    .put("payment_method_availability", JSONArray(listOf("link")))
+                    .put(
+                        "assets",
+                        JSONObject().put(
+                            "payment_methods",
+                            JSONArray().put(
+                                JSONObject()
+                                    .put("payment_method_type", "link")
+                                    .put("display_name", "Link")
+                            )
+                        )
+                    )
+                    .put(
+                        "form_specs",
+                        JSONArray().put(
+                            JSONObject()
+                                .put("type", "link")
+                                .put(
+                                    "fields",
+                                    JSONArray().put(
+                                        JSONObject()
+                                            .put("type", "native_component")
+                                            .put("component", "link_card_collection")
+                                    )
+                                )
+                        )
+                    )
+            )
+        }
+
+        val elementsSession = parseElementsSession(json)
+
+        assertThat(elementsSession?.mobilePaymentElement?.formSpecs?.single()?.fields?.single()?.component)
+            .isEqualTo("link_card_collection")
+    }
+
+    @Test
+    fun `parse PaymentIntent rejects malformed root mobile payment element`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).apply {
+            put(
+                "mobile_payment_element",
+                JSONObject()
+                    .put(
+                        "contract",
+                        JSONObject()
+                            .put("major", MobileSessionContract.CONTRACT_MAJOR)
+                            .put("revision", MobileSessionContract.CONTRACT_REVISION)
+                    )
+                    .put("payment_method_availability", "card")
+            )
+        }
+
+        val error = assertFailsWith<MobileSessionContractException> {
+            ElementsSessionJsonParser(
+                ElementsSessionParams.PaymentIntentType(
+                    clientSecret = "secret",
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = emptyList(),
+                    appId = APP_ID
+                ),
+                isLiveMode = false
+            ).parse(json)
+        }
+
+        assertThat(error.errorCode).isEqualTo(MobileSessionContractException.ErrorCode.DecodeFailure)
+    }
+
+    @Test
+    fun `parse PaymentIntent rejects unsupported mobile session contract major`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).apply {
+            put(
+                "mobile_payment_element",
+                JSONObject()
+                    .put(
+                        "contract",
+                        JSONObject()
+                            .put("major", MobileSessionContract.CONTRACT_MAJOR + 1)
+                            .put("revision", MobileSessionContract.CONTRACT_REVISION)
+                    )
+                    .put("payment_method_availability", JSONArray())
+            )
+        }
+
+        val error = assertFailsWith<MobileSessionContractException> {
+            ElementsSessionJsonParser(
+                ElementsSessionParams.PaymentIntentType(
+                    clientSecret = "secret",
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = emptyList(),
+                    appId = APP_ID
+                ),
+                isLiveMode = false
+            ).parse(json)
+        }
+
+        assertThat(error.errorCode)
+            .isEqualTo(MobileSessionContractException.ErrorCode.UnsupportedContractMajor)
+    }
+
+    @Test
+    fun `parse PaymentIntent rejects overlong mobile session payment method code`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).apply {
+            put(
+                "mobile_payment_element",
+                JSONObject()
+                    .put(
+                        "contract",
+                        JSONObject()
+                            .put("major", MobileSessionContract.CONTRACT_MAJOR)
+                            .put("revision", MobileSessionContract.CONTRACT_REVISION)
+                    )
+                    .put(
+                        "payment_method_availability",
+                        JSONArray().put("x".repeat(101))
+                    )
+            )
+        }
+
+        val error = assertFailsWith<MobileSessionContractException> {
+            parseElementsSession(json)
+        }
+
+        assertThat(error.errorCode).isEqualTo(MobileSessionContractException.ErrorCode.CollectionBounds)
+    }
+
+    @Test
+    fun `parse PaymentIntent rejects unapproved mobile session asset host`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).apply {
+            put(
+                "mobile_payment_element",
+                JSONObject()
+                    .put(
+                        "contract",
+                        JSONObject()
+                            .put("major", MobileSessionContract.CONTRACT_MAJOR)
+                            .put("revision", MobileSessionContract.CONTRACT_REVISION)
+                    )
+                    .put("payment_method_availability", JSONArray(listOf("card")))
+                    .put(
+                        "assets",
+                        JSONObject().put(
+                            "payment_methods",
+                            JSONArray().put(
+                                JSONObject()
+                                    .put("payment_method_type", "card")
+                                    .put("display_name", "Card")
+                                    .put(
+                                        "selector_icon",
+                                        JSONObject().put("light_theme_png", "https://example.com/card.png")
+                                    )
+                            )
+                        )
+                    )
+                    .put(
+                        "form_specs",
+                        JSONArray().put(
+                            JSONObject()
+                                .put("type", "card")
+                                .put(
+                                    "fields",
+                                    JSONArray().put(
+                                        JSONObject()
+                                            .put("type", "native_component")
+                                            .put("component", "card_details")
+                                    )
+                                )
+                        )
+                    )
+            )
+        }
+
+        val error = assertFailsWith<MobileSessionContractException> {
+            ElementsSessionJsonParser(
+                ElementsSessionParams.PaymentIntentType(
+                    clientSecret = "secret",
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = emptyList(),
+                    appId = APP_ID
+                ),
+                isLiveMode = false
+            ).parse(json)
+        }
+
+        assertThat(error.errorCode).isEqualTo(MobileSessionContractException.ErrorCode.InvalidAsset)
+    }
+
+    @Test
+    fun `parse PaymentIntent rejects unknown server driven feature value`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).apply {
+            put(
+                "mobile_payment_element",
+                JSONObject()
+                    .put(
+                        "contract",
+                        JSONObject()
+                            .put("major", MobileSessionContract.CONTRACT_MAJOR)
+                            .put("revision", MobileSessionContract.CONTRACT_REVISION)
+                    )
+                    .put("payment_method_availability", JSONArray())
+                    .put(
+                        "features",
+                        JSONObject().put("financial_connections_lite", "future_value")
+                    )
+            )
+        }
+
+        val error = assertFailsWith<MobileSessionContractException> {
+            ElementsSessionJsonParser(
+                ElementsSessionParams.PaymentIntentType(
+                    clientSecret = "secret",
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = emptyList(),
+                    appId = APP_ID,
+                ),
+                isLiveMode = false,
+            ).parse(json)
+        }
+
+        assertThat(error.errorCode)
+            .isEqualTo(MobileSessionContractException.ErrorCode.UnsupportedFeatureValue)
     }
 
     @Test

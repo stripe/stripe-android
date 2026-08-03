@@ -90,6 +90,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     customPaymentMethods = listOf(),
                     externalPaymentMethods = listOf(),
                     countryOverride = null,
+                    paymentSheetConfig = null,
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()
                 }.onFailure {

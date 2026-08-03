@@ -30,7 +30,9 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.forms.ServerDrivenFormRenderException
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.testing.CleanupTestRule
@@ -38,8 +40,18 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
+import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
+import com.stripe.android.ui.core.elements.BlikElement
+import com.stripe.android.ui.core.elements.BoletoTaxIdSpec
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.KonbiniConfirmationNumberSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
+import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -53,6 +65,9 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
+import com.stripe.android.paymentsheet.forms.generated.FormElementSpecV1 as FormElementSpec
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodFormSpecV1 as PaymentMethodFormSpec
 
 @RunWith(RobolectricTestRunner::class)
 internal class FormHelperTest {
@@ -72,6 +87,233 @@ internal class FormHelperTest {
             newPaymentSelectionProvider = { null },
         )
         assertThat(formHelper.formElementsForCode("blah")).isEmpty()
+    }
+
+    @Test
+    fun `server driven form rendering reports success`() = runScenario {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = "server_selected_type",
+                        fields = listOf(
+                            FormElementSpec(
+                                type = "native_component",
+                                component = "link_card_collection",
+                            )
+                        ),
+                    )
+                ),
+            ),
+            eventReporter = eventReporter,
+            newPaymentSelectionProvider = { null },
+        )
+
+        assertThat(formHelper.formElementsForCode("server_selected_type")).isEmpty()
+        val event = eventReporter.analyticsEventCalls.awaitItem()
+        assertThat(event).isInstanceOf(PaymentSheetEvent.MobileSessionFormRender::class.java)
+        assertThat((event as PaymentSheetEvent.MobileSessionFormRender).params)
+            .containsEntry("mobile_session_render_outcome", "success")
+    }
+
+    @Test
+    fun `server driven form rendering trusts Mint billing fields`() = runTest {
+        val paymentMethodType = "server_selected_type"
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                ),
+                sharedDataSpecs = listOf(
+                    SharedDataSpec(
+                        type = paymentMethodType,
+                        fields = arrayListOf(NameSpec()),
+                    )
+                ),
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = paymentMethodType,
+                        fields = listOf(FormElementSpec(type = "name")),
+                    )
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        assertThat(formHelper.formElementsForCode(paymentMethodType)).hasSize(1)
+    }
+
+    @Test
+    fun `server driven BLIK component renders without a payment method definition lookup`() = runTest {
+        val paymentMethodType = "server_selected_type"
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = paymentMethodType,
+                        fields = listOf(
+                            FormElementSpec(
+                                type = "native_component",
+                                component = "blik_confirmation",
+                            )
+                        ),
+                    )
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        val section = formHelper.formElementsForCode(paymentMethodType).single()
+        assertThat(section).isInstanceOf<SectionElement>()
+        assertThat((section as SectionElement).fields.single())
+            .isInstanceOf<BlikElement>()
+    }
+
+    @Test
+    fun `server driven renderer preserves mixed native and declarative field order`() = runTest {
+        val paymentMethodType = "server_selected_type"
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                sharedDataSpecs = listOf(
+                    SharedDataSpec(
+                        type = paymentMethodType,
+                        fields = arrayListOf(NameSpec()),
+                    )
+                ),
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = paymentMethodType,
+                        fields = listOf(
+                            FormElementSpec(type = "native_component", component = "card_details"),
+                            FormElementSpec(type = "native_component", component = "card_billing_details"),
+                            FormElementSpec(type = "name"),
+                        ),
+                    )
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        val elements = formHelper.formElementsForCode(paymentMethodType)
+
+        assertThat(elements).hasSize(3)
+        assertThat(elements[0]).isInstanceOf<CardDetailsSectionElement>()
+        assertThat(elements[1]).isInstanceOf<SectionElement>()
+        assertThat(elements[2]).isInstanceOf<SectionElement>()
+    }
+
+    @Test
+    fun `server driven Bacs atoms render without a payment method definition lookup`() = runTest {
+        val paymentMethodType = "server_selected_type"
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                sharedDataSpecs = listOf(
+                    SharedDataSpec(
+                        type = paymentMethodType,
+                        fields = arrayListOf(
+                            BacsDebitBankAccountSpec(),
+                            BacsDebitConfirmSpec(),
+                        ),
+                    )
+                ),
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = paymentMethodType,
+                        fields = listOf(
+                            FormElementSpec(type = "bacs_debit_bank_account"),
+                            FormElementSpec(type = "bacs_debit_mandate"),
+                        ),
+                    )
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        val elements = formHelper.formElementsForCode(paymentMethodType)
+        assertThat(elements).hasSize(2)
+        assertThat(elements[0]).isInstanceOf<SectionElement>()
+        assertThat(elements[1]).isInstanceOf<CheckboxFieldElement>()
+    }
+
+    @Test
+    fun `server driven Boleto atom renders without a payment method definition lookup`() = runTest {
+        val paymentMethodType = "server_selected_type"
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                sharedDataSpecs = listOf(
+                    SharedDataSpec(
+                        type = paymentMethodType,
+                        fields = arrayListOf(BoletoTaxIdSpec()),
+                    )
+                ),
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = paymentMethodType,
+                        fields = listOf(FormElementSpec(type = "boleto_tax_id")),
+                    )
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        assertThat(formHelper.formElementsForCode(paymentMethodType).single()).isInstanceOf<SectionElement>()
+    }
+
+    @Test
+    fun `server driven Konbini atom renders without a payment method definition lookup`() = runTest {
+        val paymentMethodType = "server_selected_type"
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                sharedDataSpecs = listOf(
+                    SharedDataSpec(
+                        type = paymentMethodType,
+                        fields = arrayListOf(KonbiniConfirmationNumberSpec()),
+                    )
+                ),
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = paymentMethodType,
+                        fields = listOf(FormElementSpec(type = "konbini_confirmation_number")),
+                    )
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        assertThat(formHelper.formElementsForCode(paymentMethodType).single()).isInstanceOf<SectionElement>()
+    }
+
+    @Test
+    fun `unknown server driven component reports failure and remains developer visible`() = runScenario {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = "server_selected_type",
+                        fields = listOf(
+                            FormElementSpec(
+                                type = "native_component",
+                                component = "future_component",
+                            )
+                        ),
+                    )
+                ),
+            ),
+            eventReporter = eventReporter,
+            newPaymentSelectionProvider = { null },
+        )
+
+        val error = assertFailsWith<ServerDrivenFormRenderException> {
+            formHelper.formElementsForCode("server_selected_type")
+        }
+        assertThat(error.errorCode)
+            .isEqualTo(ServerDrivenFormRenderException.ErrorCode.UnsupportedNativeComponent)
+        val event = eventReporter.analyticsEventCalls.awaitItem()
+        assertThat((event as PaymentSheetEvent.MobileSessionFormRender).params)
+            .containsExactly(
+                "mobile_session_render_outcome", "failure",
+                "mobile_session_render_error_code", "unsupported_native_component",
+            )
     }
 
     @Test
@@ -638,6 +880,54 @@ internal class FormHelperTest {
         )
         assertThat(formHelper.formTypeForCode("us_bank_account")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
         assertThat(formHelper.formTypeForCode("link")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
+
+    @Test
+    fun `server driven form spec can require a form screen for an arbitrary code`() = runTest {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = "server_selected_type",
+                        fields = listOf(
+                            FormElementSpec(
+                                type = "native_component",
+                                component = "link_card_collection",
+                            )
+                        ),
+                        requiresFormScreen = true,
+                    ),
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        assertThat(formHelper.formTypeForCode("server_selected_type"))
+            .isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
+
+    @Test
+    fun `server driven form spec does not infer form screen behavior from link code`() = runTest {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                serverDrivenFormSpecs = listOf(
+                    PaymentMethodFormSpec(
+                        type = PaymentMethod.Type.Link.code,
+                        fields = listOf(
+                            FormElementSpec(
+                                type = "native_component",
+                                component = "link_card_collection",
+                            )
+                        ),
+                        requiresFormScreen = false,
+                    ),
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        assertThat(formHelper.formTypeForCode(PaymentMethod.Type.Link.code))
+            .isEqualTo(FormHelper.FormType.Empty)
     }
 
     @Test
