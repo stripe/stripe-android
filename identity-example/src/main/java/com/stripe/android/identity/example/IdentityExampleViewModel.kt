@@ -32,7 +32,11 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                     VerificationSessionCreationRequest.serializer(),
                     VerificationSessionCreationRequest(
                         type = submissionState.verificationType.value,
-                        threeDFaceCaptureEnabled = submissionState.threeDFaceCaptureEnabled,
+                        threeDFaceCaptureEnabled = if (submissionState.requireSelfie) {
+                            submissionState.threeDFaceCaptureEnabled
+                        } else {
+                            null
+                        },
                         options =
                         when (submissionState.verificationType) {
                             VerificationType.DOCUMENT -> {
@@ -128,7 +132,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
     private fun IdentitySubmissionState.toDocumentOptions() =
         VerificationSessionCreationRequest.Options.Document(
             requireIdNumber = this.requireId,
-            requireMatchingSelfie = this.requireSelfie || this.threeDFaceCaptureEnabled,
+            requireMatchingSelfie = this.requireSelfie,
             requireLiveCapture = this.requireLiveCapture,
             requireAddress = this.requireAddress,
             allowedTypes = mutableListOf<DocumentType>().also {
