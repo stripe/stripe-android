@@ -101,6 +101,7 @@ internal class CheckoutControllerExampleViewModel(
                                 .appearance(
                                     ExpressCheckoutElement.Configuration.Appearance()
                                         .buttonHeight(48.dp)
+                                        .buttonLayout(ExpressCheckoutElement.Configuration.ButtonLayout().maxRows(10))
                                 )
                                 .shippingAddressRequired(true)
                         )

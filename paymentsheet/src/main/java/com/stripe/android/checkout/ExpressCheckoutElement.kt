@@ -23,9 +23,13 @@ class ExpressCheckoutElement @Inject internal constructor(
 
     /** Payment methods supported by the Express Checkout Element. */
     @CheckoutSessionPreview
-    enum class PaymentMethod {
-        GooglePay,
-        Link,
+    abstract class PaymentMethod private constructor() : Parcelable {
+
+        @Parcelize
+        data object GooglePay : PaymentMethod()
+
+        @Parcelize
+        data object Link : PaymentMethod()
     }
 
     @CheckoutSessionPreview
@@ -93,12 +97,18 @@ class ExpressCheckoutElement @Inject internal constructor(
             private var maxColumns: Int? = null
             private var maxRows: Int? = null
 
+            /** Defines the maximum number of columns the Express Checkout Element can use to render.
+             *
+             * Defaults to null, meaning unlimited. */
             fun maxColumns(
                 maxColumns: Int?
             ): ButtonLayout = apply {
                 this.maxColumns = maxColumns
             }
 
+            /** Defines the maximum number of rows the Express Checkout Element can use to render.
+             *
+             * Defaults to null, meaning unlimited. */
             fun maxRows(
                 maxRows: Int?
             ): ButtonLayout = apply {
@@ -115,7 +125,11 @@ class ExpressCheckoutElement @Inject internal constructor(
         }
 
         @CheckoutSessionPreview
+        /** By default, the Express Checkout Element displays all payment methods possible as a result of your Dashboard configuration and device capabilities. This is the auto behavior.
+         *
+         * If you don't want to show a given payment method as a payment option, set its visibility in paymentMethods to never. */
         class PaymentMethods {
+
             enum class LinkVisibility {
                 Auto,
                 Never,

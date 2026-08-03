@@ -65,7 +65,7 @@ class PaymentSheet internal constructor(
 ) {
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity].
-     *
+    \*
      * @param activity The Activity that is presenting [PaymentSheet].
      * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
