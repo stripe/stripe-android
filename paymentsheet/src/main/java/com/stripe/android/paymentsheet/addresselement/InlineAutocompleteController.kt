@@ -77,6 +77,8 @@ internal class InlineAutocompleteController(
 
     fun onPredictionSelected(predictionId: String) {
         selectionJob?.cancel()
+        val queryAtSelection = queryFlow?.value
+        val countryAtSelection = countryFlow?.value
         selectionJob = coroutineScope.launch {
             val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
             val result = placesClient.fetchPlace(predictionId, locale)
@@ -84,7 +86,7 @@ internal class InlineAutocompleteController(
                 ensureActive()
                 result.fold(
                     onSuccess = { handleFetchPlaceSuccess(it) },
-                    onFailure = { handleFailure(queryFlow?.value, countryFlow?.value) }
+                    onFailure = { handleFailure(queryAtSelection, countryAtSelection) }
                 )
             } finally {
                 placesClient.resetSession()
@@ -96,7 +98,7 @@ internal class InlineAutocompleteController(
         lastPredictionLine1 = address.line1
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         eventListenerProvider()?.invoke(
-            AutocompleteAddressInteractor.Event.OnValues(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
                 mapOf(
                     IdentifierSpec.Line1 to address.line1,
                     IdentifierSpec.Line2 to address.line2,
@@ -134,7 +136,9 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
+        if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
+            _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
+        }
         val result = placesClient.findAutocompletePredictions(
             query = query,
             country = country,
@@ -143,7 +147,12 @@ internal class InlineAutocompleteController(
         currentCoroutineContext().ensureActive()
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
-            onFailure = { handleFailure(query, country) }
+            onFailure = {
+                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Results(
+                    query = query,
+                    predictions = emptyList(),
+                )
+            }
         )
     }
 
