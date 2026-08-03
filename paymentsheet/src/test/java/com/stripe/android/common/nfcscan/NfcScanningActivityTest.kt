@@ -170,6 +170,20 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
+    fun `merchant card brand filter rejects visa and keeps activity open`() {
+        test(
+            paymentMethodMetadata = NfcScanningActivityTestFixtures.paymentMethodMetadataWithVisaDisallowed(),
+        ) {
+            dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
+            assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+
+            isoDep.assertSuccess()
+
+            assertThat(isActivityDestroyed()).isFalse()
+        }
+    }
+
+    @Test
     fun `expired card shows error and keeps activity open`() = test {
         dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
         assertErrorIsDisplayed(errorText = "Card expired. Try another card.")

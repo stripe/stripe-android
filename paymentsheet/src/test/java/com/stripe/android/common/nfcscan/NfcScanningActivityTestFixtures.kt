@@ -4,6 +4,8 @@ import com.stripe.android.common.nfcscan.scanner.apdu.apduSuccessResponse
 import com.stripe.android.common.nfcscan.scanner.apdu.tlv
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 
 internal object NfcScanningActivityTestFixtures {
@@ -103,6 +105,16 @@ internal object NfcScanningActivityTestFixtures {
                 amount = FULL_PDOL_AMOUNT,
                 currency = FULL_PDOL_CURRENCY,
             ).copy(created = FULL_PDOL_CREATED),
+        )
+    }
+
+    fun paymentMethodMetadataWithVisaDisallowed(): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            cardBrandFilter = PaymentSheetCardBrandFilter(
+                PaymentSheet.CardBrandAcceptance.disallowed(
+                    listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa),
+                ),
+            ),
         )
     }
 
