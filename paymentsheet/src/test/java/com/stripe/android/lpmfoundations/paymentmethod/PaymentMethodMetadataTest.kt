@@ -40,6 +40,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.IconStyle
@@ -627,7 +628,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
+    fun `formElementsForCode uses one shared full billing address`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -645,15 +646,18 @@ internal class PaymentMethodMetadataTest {
             uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
         )!!
 
-        val countrySection = formElement[4] as SectionElement
-        val countryElement = countrySection.fields[0] as CountryElement
-        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+        val sectionFields = formElement
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+        val addressElements = sectionFields.filterIsInstance<BillingAddressElement>()
 
-        val addressSection = formElement[5] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-        val addressIdentifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element doesn't contain country.
-        assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
+        assertThat(addressElements).hasSize(1)
+        val addressElement = addressElements.single()
+        assertThat(addressElement.identifier).isEqualTo(IdentifierSpec.BillingAddress)
+        assertThat(addressElement.countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+        assertThat(addressElement.hiddenIdentifiers.value).isEmpty()
+        assertThat(sectionFields.filterIsInstance<CountryElement>()).isEmpty()
+        assertThat(sectionFields.filterIsInstance<AddressElement>()).isEmpty()
     }
 
     @Test

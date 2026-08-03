@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
@@ -35,7 +36,6 @@ import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
-import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -78,7 +78,8 @@ internal class TransformSpecToElementsTest {
             )
 
             val countrySectionElement = formElement.first() as SectionElement
-            val countryElement = countrySectionElement.fields[0] as CountryElement
+            val billingAddressElement = countrySectionElement.fields[0] as BillingAddressElement
+            val countryElement = billingAddressElement.countryElement
 
             assertThat(countryElement.controller.displayItems).hasSize(1)
             assertThat(countryElement.controller.displayItems[0]).isEqualTo("🇦🇹 Austria")
@@ -89,7 +90,40 @@ internal class TransformSpecToElementsTest {
             assertThat(countrySectionElement.identifier.v1).isEqualTo("billing_details[address][country]_section")
 
             assertThat(countryElement.identifier.v1).isEqualTo("billing_details[address][country]")
+            assertThat(billingAddressElement.hiddenIdentifiers.value).containsAtLeast(
+                IdentifierSpec.Line1,
+                IdentifierSpec.City,
+                IdentifierSpec.State,
+                IdentifierSpec.PostalCode,
+            )
+            Unit
         }
+
+    @Test
+    fun `Country spec owns full billing address without duplicate placeholder`() = runBlocking {
+        val transform = TransformSpecToElementsFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
+        )
+
+        val formElements = transform.transform(
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(
+                CountrySpec(allowedCountryCodes = setOf("AT")),
+                PlaceholderSpec(
+                    field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry,
+                ),
+            ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        assertThat(formElements).hasSize(1)
+        val section = formElements.single() as SectionElement
+        assertThat(section.identifier.v1).isEqualTo("billing_details[address]_section")
+        val addressElement = section.fields.single() as BillingAddressElement
+        assertThat(addressElement.hiddenIdentifiers.value).isEmpty()
+    }
 
     @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() =

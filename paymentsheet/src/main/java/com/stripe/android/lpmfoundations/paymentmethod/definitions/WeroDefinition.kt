@@ -7,13 +7,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.transformToFormElements
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.CountryConfig
-import com.stripe.android.uicore.elements.CountryElement
-import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionElement
 
 internal object WeroDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Wero
@@ -47,19 +45,15 @@ private object WeroUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         builder
-            .element(
-                formElement = SectionElement.wrap(
-                    sectionFieldElement = CountryElement(
-                        identifier = IdentifierSpec.Country,
-                        controller = DropdownFieldController(
-                            config = CountryConfig(
-                                onlyShowCountryCodes = setOf("DE", "BE", "FR"),
-                            ),
-                            initialValue = arguments.initialValues[IdentifierSpec.Country],
-                        )
-                    )
-                )
-            )
+            .ignoreBillingAddressRequirements()
+            .apply {
+                CountrySpec(
+                    allowedCountryCodes = setOf("DE", "BE", "FR"),
+                ).transformToFormElements(
+                    arguments = arguments,
+                    initialCountry = arguments.initialValues[IdentifierSpec.Country],
+                ).forEach { element(it) }
+            }
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)

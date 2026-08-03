@@ -25,6 +25,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
+import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
@@ -624,7 +625,15 @@ internal class FormViewModelTest {
                     NameSpec().transform(emptyMap()),
                     EmailSpec().transform(emptyMap()),
                     PhoneSpec().transform(emptyMap()),
-                    CountrySpec().transform(emptyMap()),
+                    SectionElement.wrap(
+                        CountryElement(
+                            identifier = IdentifierSpec.Country,
+                            controller = DropdownFieldController(
+                                config = CountryConfig(setOf("US", "CA")),
+                                initialValue = null,
+                            ),
+                        )
+                    ),
                     *addressElements,
                 ),
             )

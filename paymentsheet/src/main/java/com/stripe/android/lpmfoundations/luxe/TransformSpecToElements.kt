@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.transformToFormElements
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.paymentsheet.model.currency
@@ -76,7 +77,10 @@ internal class TransformSpecToElements(
                 is IbanSpec -> listOf(spec.transform(arguments.initialValues))
                 is KlarnaHeaderStaticTextSpec -> listOf(spec.transform())
                 is DropdownSpec -> listOf(spec.transform(arguments.initialValues))
-                is CountrySpec -> listOf(spec.transform(arguments.initialValues))
+                is CountrySpec -> spec.transformToFormElements(
+                    arguments = arguments,
+                    initialCountry = arguments.initialValues[spec.apiPath],
+                )
                 is AddressSpec -> spec.transform(
                     arguments.initialValues,
                     arguments.shippingValues,
