@@ -5,8 +5,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,13 +71,12 @@ class WeroDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(5)
+        assertThat(formElements).hasSize(4)
 
-        checkCountryField(formElements, 0)
+        checkFullAddressField(formElements, 0)
         checkNameField(formElements, 1)
         checkEmailField(formElements, 2)
         checkPhoneField(formElements, 3)
-        checkBillingField(formElements, 4)
     }
 
     @Test
@@ -103,6 +104,24 @@ class WeroDefinitionTest {
 
         val section = element as SectionElement
         assertThat(section.fields).hasSize(1)
-        assertThat(section.fields[0]).isInstanceOf(CountryElement::class.java)
+        val addressElement = section.fields[0] as BillingAddressElement
+        assertThat(addressElement.countryElement.controller.displayItems).hasSize(3)
+        assertThat(addressElement.hiddenIdentifiers.value).containsAtLeast(
+            IdentifierSpec.Line1,
+            IdentifierSpec.City,
+            IdentifierSpec.State,
+            IdentifierSpec.PostalCode,
+        )
+    }
+
+    private fun checkFullAddressField(
+        formElements: List<FormElement>,
+        position: Int,
+    ) {
+        val section = formElements[position] as SectionElement
+        assertThat(section.identifier.v1).isEqualTo("billing_details[address]_section")
+        val addressElement = section.fields.single() as BillingAddressElement
+        assertThat(addressElement.addressElement).isInstanceOf(AddressElement::class.java)
+        assertThat(addressElement.hiddenIdentifiers.value).isEmpty()
     }
 }

@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -89,6 +90,22 @@ class KlarnaDefinitionNoFormTest {
         assertThat(formElements[1].identifier.v1)
             .isEqualTo("billing_details[address][country]_section")
         assertThat(formElements[2].identifier.v1).isEqualTo("mandate")
+    }
+
+    @Test
+    fun `setup intent country initializes shared billing address country`() {
+        val formElements = KlarnaDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFactory.create(
+                    paymentMethodTypes = listOf(PaymentMethod.Type.Klarna.code),
+                    countryCode = "DE",
+                ),
+            )
+        )
+
+        val section = formElements[1] as SectionElement
+        val addressElement = section.fields.single() as BillingAddressElement
+        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("DE")
     }
 
     @Test

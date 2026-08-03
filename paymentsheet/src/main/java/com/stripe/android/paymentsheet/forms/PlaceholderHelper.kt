@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
+import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
@@ -34,6 +35,7 @@ internal object PlaceholderHelper {
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
         termsDisplay: PaymentSheet.TermsDisplay,
     ): List<FormItemSpec> {
+        val countrySpecOwnsBillingAddress = specs.any { it is CountrySpec }
         val billingDetailsPlaceholders = mutableListOf(
             PlaceholderField.Name,
             PlaceholderField.Email,
@@ -60,8 +62,9 @@ internal object PlaceholderHelper {
                     configuration.address == AddressCollectionMode.Never
                 }
 
-                is PlaceholderSpec -> specForPlaceholderField(
-                    field = it.field,
+                is PlaceholderSpec -> configuredPlaceholderSpec(
+                    spec = it,
+                    countrySpecOwnsBillingAddress = countrySpecOwnsBillingAddress,
                     placeholderOverrideList = placeholderOverrideList,
                     requiresMandate = requiresMandate,
                     configuration = configuration,
@@ -102,6 +105,29 @@ internal object PlaceholderHelper {
         }
     }
 
+    private fun configuredPlaceholderSpec(
+        spec: PlaceholderSpec,
+        countrySpecOwnsBillingAddress: Boolean,
+        placeholderOverrideList: List<IdentifierSpec>,
+        requiresMandate: Boolean,
+        configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        termsDisplay: PaymentSheet.TermsDisplay,
+    ): FormItemSpec? {
+        if (
+            countrySpecOwnsBillingAddress &&
+            spec.field == PlaceholderField.BillingAddressWithoutCountry
+        ) {
+            return null
+        }
+        return specForPlaceholderField(
+            field = spec.field,
+            placeholderOverrideList = placeholderOverrideList,
+            requiresMandate = requiresMandate,
+            configuration = configuration,
+            termsDisplay = termsDisplay,
+        )
+    }
+
     @VisibleForTesting
     internal fun removeCorrespondingPlaceholder(
         placeholderFields: MutableList<PlaceholderField>,
@@ -112,6 +138,9 @@ internal object PlaceholderHelper {
             is EmailSpec -> placeholderFields.remove(PlaceholderField.Email)
             is PhoneSpec -> placeholderFields.remove(PlaceholderField.Phone)
             is AddressSpec ->
+                placeholderFields.remove(PlaceholderField.BillingAddress)
+
+            is CountrySpec ->
                 placeholderFields.remove(PlaceholderField.BillingAddress)
 
             is SepaMandateTextSpec -> placeholderFields.remove(PlaceholderField.SepaMandate)
