@@ -145,6 +145,7 @@ internal class InlineAutocompleteController(
             limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
         )
         currentCoroutineContext().ensureActive()
+        if (_inlinePredictionsState.value == AutocompleteAddressInteractor.InlinePredictionsState.Idle) return
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
             onFailure = {
