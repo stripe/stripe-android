@@ -42,6 +42,7 @@ class AutocompleteAddressController(
         if (inlineAutocompleteActive) {
             object : InlineAutocompleteHandler {
                 override val predictionsState = interactor.inlinePredictionsState
+                override val maxVisiblePredictions = config.inlineMaxVisiblePredictions
 
                 override fun onPredictionSelected(predictionId: String) {
                     interactor.onPredictionSelected(predictionId)

@@ -202,6 +202,29 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
+    fun `subsequent fetch keeps Results instead of Loading`() = runScenario {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123"
+        advanceTimeBy(500)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+
+        var stateDuringRefetch: InlinePredictionsState? = null
+        fakePlacesClient.onBeforeFindPredictions = {
+            stateDuringRefetch = delegate.inlinePredictionsState.value
+        }
+
+        queryFlow.value = "1234"
+        advanceTimeBy(500)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+
+        assertThat(stateDuringRefetch).isInstanceOf<InlinePredictionsState.Results>()
+    }
+
+    @Test
     fun `onPredictionSelected fetches place and emits OnValues event`() = runScenario {
         fakePlacesClient.fetchPlaceResult = Result.success(
             Address(

@@ -96,6 +96,7 @@ internal abstract class BaseSheetViewModel(
                 googlePlacesApiKey = config.googlePlacesApiKey,
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+                inlineMaxVisiblePredictions = 3,
             ),
             placesClient = placesClient,
             stripeAutocompleteRepository = stripeAutocompleteRepository,
