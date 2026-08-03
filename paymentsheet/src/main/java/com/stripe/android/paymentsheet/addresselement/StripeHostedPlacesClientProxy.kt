@@ -17,19 +17,16 @@ internal class StripeHostedPlacesClientProxy(
     private val lock = Any()
     private var sessionToken: String = newSessionToken()
     private var lastQueryLength: Int = 0
+    private var sessionStartReported: Boolean = false
     private val predictionCache = mutableMapOf<String, AutocompleteSuggestion>()
-
-    init {
-        eventReporter.onAutocompleteSessionStarted(sessionToken)
-    }
 
     override fun resetSession() {
         synchronized(lock) {
             sessionToken = newSessionToken()
             lastQueryLength = 0
+            sessionStartReported = false
             predictionCache.clear()
         }
-        eventReporter.onAutocompleteSessionStarted(sessionToken)
     }
 
     override suspend fun findAutocompletePredictions(
@@ -39,9 +36,15 @@ internal class StripeHostedPlacesClientProxy(
     ): Result<FindAutocompletePredictionsResponse> {
         val q = query ?: return Result.success(FindAutocompletePredictionsResponse(emptyList()))
         val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+        var isFirstQuery = false
         val token = synchronized(lock) {
+            isFirstQuery = !sessionStartReported
+            sessionStartReported = true
             lastQueryLength = q.length
             sessionToken
+        }
+        if (isFirstQuery) {
+            eventReporter.onAutocompleteSessionStarted(token)
         }
         eventReporter.onAutocompleteFetchStarted(token)
         return repository.findAutocompletePredictions(
@@ -66,6 +69,7 @@ internal class StripeHostedPlacesClientProxy(
         }.onSuccess { response ->
             eventReporter.onAutocompleteSuggestionsReturned(
                 sessionToken = token,
+                queryLength = q.length,
                 resultCount = response.autocompletePredictions.size,
             )
         }.onFailure { error ->

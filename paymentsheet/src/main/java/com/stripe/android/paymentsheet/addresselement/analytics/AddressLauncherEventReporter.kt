@@ -15,6 +15,7 @@ internal interface AddressLauncherEventReporter {
 
     fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
+        queryLength: Int,
         resultCount: Int,
     )
 

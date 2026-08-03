@@ -55,13 +55,13 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
             get() = mapOf(
                 FIELD_ADDRESS_DATA_BLOB to mapOf(
                     FIELD_AUTOCOMPLETE_SESSION_TOKEN to autocompleteSessionToken,
-                    FIELD_ADDRESS_INPUT_MODE to ADDRESS_INPUT_MODE_AUTOCOMPLETE,
                 )
             )
     }
 
     class AutocompleteSuggestions(
         private val autocompleteSessionToken: String,
+        private val queryLength: Int,
         private val timeToFetch: Duration?,
         private val resultCount: Int,
         private val sessionElapsed: Duration?,
@@ -71,6 +71,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
             get() {
                 val data = mutableMapOf<String, Any>(
                     FIELD_AUTOCOMPLETE_SESSION_TOKEN to autocompleteSessionToken,
+                    FIELD_QUERY_LENGTH to queryLength,
                     FIELD_RESULT_COUNT to resultCount,
                 )
                 timeToFetch?.let { data[FIELD_TIME_TO_FETCH] = it.toDouble(DurationUnit.SECONDS) }
@@ -83,16 +84,19 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         private val autocompleteSessionToken: String,
         private val queryLength: Int,
         private val placeId: String,
+        private val sessionElapsed: Duration?,
     ) : AddressLauncherEvent() {
         override val eventName: String = "mc_address_autocomplete_selected"
         override val additionalParams: Map<String, Any>
-            get() = mapOf(
-                FIELD_ADDRESS_DATA_BLOB to mapOf(
+            get() {
+                val data = mutableMapOf<String, Any>(
                     FIELD_AUTOCOMPLETE_SESSION_TOKEN to autocompleteSessionToken,
                     FIELD_QUERY_LENGTH to queryLength,
                     FIELD_PLACE_ID to placeId,
                 )
-            )
+                sessionElapsed?.let { data[FIELD_SESSION_ELAPSED] = it.toDouble(DurationUnit.SECONDS) }
+                return mapOf(FIELD_ADDRESS_DATA_BLOB to data)
+            }
     }
 
     class AutocompleteError(
@@ -117,13 +121,10 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         const val FIELD_EDIT_DISTANCE = "edit_distance"
         const val FIELD_TIME_TO_COMPLETE = "time_to_complete"
         const val FIELD_AUTOCOMPLETE_SESSION_TOKEN = "autocomplete_session_token"
-        const val FIELD_ADDRESS_INPUT_MODE = "address_input_mode"
         const val FIELD_TIME_TO_FETCH = "time_to_fetch"
         const val FIELD_RESULT_COUNT = "result_count"
         const val FIELD_SESSION_ELAPSED = "session_elapsed"
         const val FIELD_QUERY_LENGTH = "query_length"
         const val FIELD_PLACE_ID = "place_id"
-
-        private const val ADDRESS_INPUT_MODE_AUTOCOMPLETE = "autocomplete"
     }
 }

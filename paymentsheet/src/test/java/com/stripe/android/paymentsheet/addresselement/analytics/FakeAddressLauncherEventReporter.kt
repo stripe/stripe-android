@@ -48,9 +48,10 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
 
     override fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
+        queryLength: Int,
         resultCount: Int,
     ) {
-        _autocompleteSuggestionsReturnedCalls.add(SuggestionsReturnedCall(sessionToken, resultCount))
+        _autocompleteSuggestionsReturnedCalls.add(SuggestionsReturnedCall(sessionToken, queryLength, resultCount))
     }
 
     override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String) {
@@ -77,7 +78,7 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         val editDistance: Int?,
     )
 
-    data class SuggestionsReturnedCall(val sessionToken: String, val resultCount: Int)
+    data class SuggestionsReturnedCall(val sessionToken: String, val queryLength: Int, val resultCount: Int)
 
     data class SelectedCall(val sessionToken: String, val queryLength: Int, val placeId: String)
 
