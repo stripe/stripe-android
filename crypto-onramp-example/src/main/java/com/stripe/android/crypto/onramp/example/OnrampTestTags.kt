@@ -35,6 +35,7 @@ internal const val RETRIEVE_MISSING_IDENTIFIERS_BUTTON_TAG = "RetrieveMissingIde
 internal const val SUBMIT_IDENTIFIERS_BUTTON_TAG = "SubmitIdentifiersButtonTag"
 internal const val MISSING_IDENTIFIERS_SUMMARY_TAG = "MissingIdentifiersSummaryTag"
 internal const val SUBMIT_IDENTIFIERS_SUMMARY_TAG = "SubmitIdentifiersSummaryTag"
+internal const val START_IDENTITY_VERIFICATION_BUTTON_TAG = "StartIdentityVerificationButtonTag"
 internal const val USER_ATTESTATION_BUTTON_TAG = "UserAttestationButtonTag"
 internal const val COLLECT_CARD_BUTTON_TAG = "CollectCardButtonTag"
 internal const val COLLECT_BANK_ACCOUNT_BUTTON_TAG = "CollectBankAccountButtonTag"

@@ -33,6 +33,7 @@ import com.stripe.android.crypto.onramp.example.SELECTED_PAYMENT_TYPE_TAG
 import com.stripe.android.crypto.onramp.example.SESSION_STATUS_TAG
 import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_INSTANT_TAG
 import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_STANDARD_TAG
+import com.stripe.android.crypto.onramp.example.START_IDENTITY_VERIFICATION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.USER_ATTESTATION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.WALLET_ADDRESS_TAG
 import com.stripe.android.crypto.onramp.example.WALLET_NETWORK_DROPDOWN_TAG
@@ -267,6 +268,7 @@ internal fun VerificationSection(
     Button(
         onClick = onStartVerification,
         modifier = Modifier
+            .testTag(START_IDENTITY_VERIFICATION_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {

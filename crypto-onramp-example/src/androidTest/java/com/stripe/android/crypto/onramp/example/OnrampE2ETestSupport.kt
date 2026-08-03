@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.AnnotatedString
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.rules.activityScenarioRule
@@ -102,7 +103,7 @@ internal class OnrampE2ETestRule : TestRule {
     private fun onrampCoordinator(): OnrampCoordinator {
         lateinit var coordinator: OnrampCoordinator
         activityRule.scenario.onActivity { activity ->
-            coordinator = activity.onrampCoordinator
+            coordinator = ViewModelProvider(activity)[OnrampViewModel::class.java].onrampCoordinator
         }
         return coordinator
     }
@@ -116,14 +117,20 @@ internal class OnrampE2EPage(
     private val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
     fun loginAndAuthenticateWithOtp() {
+        loginAndAuthenticateWithOtp(E2E_EMAIL, E2E_PASSWORD)
+    }
+
+    fun loginAndAuthenticateWithOtp(email: String, password: String) {
         waitForTag(LOGIN_EMAIL_TAG)
-        composeRule.onNodeWithTag(LOGIN_EMAIL_TAG).performTextInput(E2E_EMAIL)
-        composeRule.onNodeWithTag(LOGIN_PASSWORD_TAG).performTextInput(E2E_PASSWORD)
+        replaceTag(LOGIN_EMAIL_TAG, email)
+        replaceTag(LOGIN_PASSWORD_TAG, password)
+        hideKeyboard()
 
         clickTag(LOGIN_LOGIN_BUTTON_TAG)
         clickTag(AUTHENTICATE_BUTTON_TAG)
         enterLinkOtp()
-        waitForTag(AUTHENTICATED_OPERATIONS_TAG)
+        acceptOAuthConsentIfShown()
+        waitForTag(AUTHENTICATED_OPERATIONS_TAG, timeoutMs = 60.seconds.inWholeMilliseconds)
     }
 
     fun registerAndAuthenticateFreshUser(country: String): FreshOnrampUser {
@@ -181,9 +188,41 @@ internal class OnrampE2EPage(
     }
 
     fun confirmKycVerification() {
+        if (!waitForOptionalNode(hasTestTag(VERIFY_KYC_BUTTON_TAG), timeoutMs = 1.seconds.inWholeMilliseconds)) {
+            clickTag(KYC_SECTION_TAG)
+        }
         clickTag(VERIFY_KYC_BUTTON_TAG)
         clickText(KYC_CONFIRM_BUTTON_TEXT)
         waitForSnackbar("KYC Verification Completed", timeoutMs = 60.seconds.inWholeMilliseconds)
+    }
+
+    fun failIdentityVerification() {
+        clickTag(START_IDENTITY_VERIFICATION_BUTTON_TAG)
+        clickTag(
+            IDENTITY_FAILED_BUTTON_TAG,
+            timeoutMs = 60.seconds.inWholeMilliseconds,
+            scrollRoot = false,
+        )
+        waitForSnackbar("Identity Verification failed: Failure from test mode")
+        waitForTag(LOGIN_EMAIL_TAG)
+    }
+
+    fun completeIdentityVerification() {
+        clickTag(START_IDENTITY_VERIFICATION_BUTTON_TAG)
+        clickTag(
+            IDENTITY_SUCCESS_OPTION_TAG,
+            timeoutMs = 60.seconds.inWholeMilliseconds,
+            scrollRoot = false,
+        )
+        clickTag(IDENTITY_SUBMIT_BUTTON_TAG, scrollRoot = false)
+        if (waitForOptionalNode(hasTestTag(IDENTITY_CONFIRM_BUTTON_TAG), timeoutMs = 5.seconds.inWholeMilliseconds)) {
+            clickTag(IDENTITY_CONFIRM_BUTTON_TAG, scrollRoot = false)
+        }
+        waitForSnackbar("Identity Verification completed", timeoutMs = 60.seconds.inWholeMilliseconds)
+        composeRule.waitUntilDoesNotExist(
+            hasTestTag(SNACKBAR_TAG),
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+        )
     }
 
     fun cancelUserAttestation() {
@@ -238,7 +277,7 @@ internal class OnrampE2EPage(
     }
 
     fun registerDefaultWallet() {
-        clickTag(REGISTER_WALLET_BUTTON_TAG)
+        clickTag(REGISTER_WALLET_BUTTON_TAG, scrollRoot = false)
         waitForSnackbar("Wallet address registered successfully!")
     }
 
@@ -270,6 +309,24 @@ internal class OnrampE2EPage(
 
         clickTag(LINK_PRIMARY_BUTTON_TAG)
         waitForSelectedPayment()
+    }
+
+    fun collectNewCard() {
+        clickTag(COLLECT_CARD_BUTTON_TAG)
+        replaceText(CARD_NUMBER_LABEL, TEST_CARD_NUMBER)
+        replaceContentDescription(EXPIRATION_DATE_DESCRIPTION, TEST_CARD_EXPIRATION)
+        replaceText(CARD_CVC_LABEL, TEST_NEW_CARD_CVC)
+
+        val postalCodeMatcher = hasText(CARD_POSTAL_CODE_LABEL).and(hasSetTextAction())
+        if (waitForOptionalNode(postalCodeMatcher, timeoutMs = 3.seconds.inWholeMilliseconds)) {
+            composeRule.onNode(postalCodeMatcher)
+                .performScrollTo()
+                .performTextReplacement(TEST_CARD_POSTAL_CODE)
+        }
+
+        hideKeyboard()
+        clickTag(LINK_PRIMARY_BUTTON_TAG)
+        waitForSelectedPayment(timeoutMs = 60.seconds.inWholeMilliseconds)
     }
 
     fun collectBankAccount() {
@@ -387,6 +444,24 @@ internal class OnrampE2EPage(
         val node = composeRule.onNodeWithTag(tag)
         runCatching { node.performScrollTo() }
         node.performTextReplacement(text)
+        composeRule.waitForIdle()
+    }
+
+    private fun replaceText(label: String, text: String) {
+        val matcher = hasText(label).and(hasSetTextAction())
+        waitForNode(matcher)
+        composeRule.onNode(matcher)
+            .performScrollTo()
+            .performTextReplacement(text)
+        composeRule.waitForIdle()
+    }
+
+    private fun replaceContentDescription(description: String, text: String) {
+        val matcher = hasContentDescription(description, substring = true).and(hasSetTextAction())
+        waitForNode(matcher)
+        composeRule.onNode(matcher)
+            .performScrollTo()
+            .performTextReplacement(text)
         composeRule.waitForIdle()
     }
 
@@ -542,10 +617,22 @@ private const val TEST_KYC_FIRST_NAME = "Onramp"
 private const val TEST_KYC_ADDRESS_LINE_1 = "address_full_match"
 private const val KYC_CONFIRMATION_TITLE = "Confirm your information"
 private const val KYC_CONFIRM_BUTTON_TEXT = "Confirm"
+private const val IDENTITY_SUCCESS_OPTION_TAG = "success"
+private const val IDENTITY_SUBMIT_BUTTON_TAG = "Submit"
+private const val IDENTITY_CONFIRM_BUTTON_TAG = "ConfirmButton"
+private const val IDENTITY_FAILED_BUTTON_TAG = "Failed"
 private const val USER_ATTESTATION_CANCEL_BUTTON_TAG = "UserAttestationCancelButtonTag"
 private const val USER_ATTESTATION_ACCEPT_TEXT = "Accept"
 private const val OAUTH_ALLOW_TEXT = "Allow"
 private const val TEST_MALTA_NATIONAL_ID = "1234567M"
+private const val CARD_NUMBER_LABEL = "Card number"
+private const val EXPIRATION_DATE_DESCRIPTION = "Expiration date"
+private const val CARD_CVC_LABEL = "CVC"
+private const val CARD_POSTAL_CODE_LABEL = "ZIP Code"
+private const val TEST_CARD_NUMBER = "4242424242424242"
+private const val TEST_CARD_EXPIRATION = "12/49"
+private const val TEST_NEW_CARD_CVC = "123"
+private const val TEST_CARD_POSTAL_CODE = "94111"
 private const val TEST_SOLANA_WALLET_ADDRESS = "bufoH37MTiMTNAfBS4VEZ94dCEwMsmeSijD2vZRShuV"
 private const val TEST_MODE_WALLET_OWNERSHIP_SIGNATURE = "abcd"
 private const val EXTRA_SCROLL_DISTANCE = 72f

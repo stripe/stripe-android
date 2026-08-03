@@ -71,6 +71,29 @@ internal class OnrampFlowTest {
     }
 
     @Test
+    fun freshUserCanCompleteIdentityVerificationAndCreatePaymentToken() {
+        val user = page.registerAndAuthenticateFreshUser(country = "US")
+
+        page.collectKycInfo(user)
+        page.confirmKycVerification()
+        page.completeIdentityVerification()
+        page.registerDefaultWallet()
+        page.collectNewCard()
+        page.createPaymentToken()
+    }
+
+    @Test
+    fun freshUserIdentityVerificationCanFailAndBeRetried() {
+        val user = page.registerAndAuthenticateFreshUser(country = "US")
+
+        page.collectKycInfo(user)
+        page.confirmKycVerification()
+        page.failIdentityVerification()
+        page.loginAndAuthenticateWithOtp(user.email, user.password)
+        page.completeIdentityVerification()
+    }
+
+    @Test
     fun freshUserAttestationCanBeCanceledAndConfirmed() {
         val user = page.registerAndAuthenticateFreshUser(country = "MT")
 
