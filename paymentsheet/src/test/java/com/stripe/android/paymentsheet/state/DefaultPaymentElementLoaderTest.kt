@@ -388,7 +388,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(userFacingLogger.getLoggedMessages())
             .doesNotContain(
-                "Google Pay is disabled because automatic tax is configured to use the billing address."
+                "Google Pay is disabled because automatic tax is configured to use the billing address and" +
+                    " no default billing address was provided."
             )
 
         consumeLoadingEvents()
@@ -423,7 +424,8 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(isGooglePayReady).isFalse()
         assertThat(userFacingLogger.getLoggedMessages())
             .contains(
-                "Google Pay is disabled because automatic tax is configured to use the billing address."
+                "Google Pay is disabled because automatic tax is configured to use the billing address and no " +
+                    "default billing address was provided."
             )
     }
 
@@ -461,7 +463,8 @@ internal class DefaultPaymentElementLoaderTest {
             .contains("GooglePayConfiguration is not set.")
         assertThat(userFacingLogger.getLoggedMessages())
             .doesNotContain(
-                "Google Pay is disabled because automatic tax is configured to use the billing address."
+                "Google Pay is disabled because automatic tax is configured to use the billing address and " +
+                    "no default billing address was provided."
             )
 
         consumeLoadingEvents()

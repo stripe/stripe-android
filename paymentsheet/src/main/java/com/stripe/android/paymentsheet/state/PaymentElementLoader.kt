@@ -138,12 +138,6 @@ internal interface PaymentElementLoader {
 
         enum class WalletsDisabledReason {
             AutomaticTaxBillingAddress;
-
-            val googlePayWarning: String
-                get() = when (this) {
-                    AutomaticTaxBillingAddress ->
-                        "Google Pay is disabled because automatic tax is configured to use the billing address."
-                }
         }
 
         @Parcelize
@@ -677,8 +671,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             )
         } else if (shouldDisableForAutomaticTaxBilling) {
             userFacingLogger.logWarningWithoutPii(
-                PaymentElementLoader.InitializationMode.WalletsDisabledReason
-                    .AutomaticTaxBillingAddress.googlePayWarning
+                "Google Pay is disabled because automatic tax is configured to use the billing address and no " +
+                    "default billing address was provided."
             )
             return false
         } else if (!isGooglePaySupportedByConfiguration.await()) {
