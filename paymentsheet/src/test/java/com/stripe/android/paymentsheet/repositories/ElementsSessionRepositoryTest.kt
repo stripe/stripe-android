@@ -1231,7 +1231,10 @@ internal class ElementsSessionRepositoryTest {
                             .put("major", bodyMajor)
                             .put("revision", bodyRevision)
                     )
-                    .put("payment_method_availability", JSONArray())
+                    .put(
+                        "payment_method_availability",
+                        JSONObject().put("entries", JSONArray())
+                    )
             )
         }
         val responseHeaders = responseHeaderValue?.let {

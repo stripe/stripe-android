@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.forms.generated.ContractMetadataV1
 import com.stripe.android.paymentsheet.forms.generated.MobilePaymentElementFeaturesV1
 import com.stripe.android.paymentsheet.forms.generated.MobilePaymentElementV1
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodAvailabilityV1
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import kotlin.test.Test
@@ -217,7 +218,7 @@ class GetFinancialConnectionsAvailabilityTest {
                     major = 1,
                     revision = "test_revision",
                 ),
-                paymentMethodAvailability = emptyList(),
+                paymentMethodAvailability = PaymentMethodAvailabilityV1(),
                 features = MobilePaymentElementFeaturesV1(financialConnectionsLite = it),
             )
         }

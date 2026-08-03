@@ -273,7 +273,10 @@ internal class RealElementsSessionRepository @Inject constructor(
 }
 
 private fun ElementsSession.withServerDrivenPaymentMethodAvailability(): ElementsSession {
-    val paymentMethodTypes = mobilePaymentElement?.paymentMethodAvailability ?: return this
+    val paymentMethodTypes = mobilePaymentElement?.paymentMethodAvailability?.entries
+        ?.filter { it.available }
+        ?.map { it.paymentMethodType }
+        ?: return this
     val serverDrivenIntent = when (stripeIntent) {
         is PaymentIntent -> stripeIntent.copy(paymentMethodTypes = paymentMethodTypes)
         is SetupIntent -> stripeIntent.copy(paymentMethodTypes = paymentMethodTypes)

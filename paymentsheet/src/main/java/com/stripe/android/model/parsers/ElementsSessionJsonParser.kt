@@ -746,23 +746,32 @@ internal class ElementsSessionJsonParser(
 
         @Suppress("ThrowsCount")
         private fun ServerDrivenMobilePaymentElement.validateCatalogOrThrow() {
-            if (paymentMethodAvailability.size > MAX_SERVER_DRIVEN_ITEMS ||
+            val availabilityEntries = paymentMethodAvailability.entries
+            val exceedsCollectionBounds =
+                availabilityEntries.size > MAX_SERVER_DRIVEN_ITEMS ||
                 assets.paymentMethods.size > MAX_SERVER_DRIVEN_ITEMS ||
-                formSpecs.size > MAX_SERVER_DRIVEN_ITEMS ||
-                paymentMethodAvailability.any { !it.isWithin(MAX_PAYMENT_METHOD_CODE_LENGTH) }
-            ) {
+                    formSpecs.size > MAX_SERVER_DRIVEN_ITEMS
+            val hasInvalidAvailabilityEntry = availabilityEntries.any {
+                !it.paymentMethodType.isWithin(MAX_PAYMENT_METHOD_CODE_LENGTH) ||
+                    it.reason?.isWithin(MAX_DISPLAY_TEXT_LENGTH) == false
+            }
+            if (exceedsCollectionBounds || hasInvalidAvailabilityEntry) {
                 throw MobileSessionContractException(
                     MobileSessionContractException.ErrorCode.CollectionBounds
                 )
             }
-            val availablePaymentMethods = paymentMethodAvailability.toSet()
-            if (availablePaymentMethods.size != paymentMethodAvailability.size ||
-                availablePaymentMethods.any(String::isBlank)
+            val allPaymentMethods = availabilityEntries.map { it.paymentMethodType }
+            if (allPaymentMethods.toSet().size != allPaymentMethods.size ||
+                allPaymentMethods.any(String::isBlank)
             ) {
                 throw MobileSessionContractException(
                     MobileSessionContractException.ErrorCode.InconsistentPaymentMethodCatalog
                 )
             }
+            val availablePaymentMethods = availabilityEntries
+                .filter { it.available }
+                .map { it.paymentMethodType }
+                .toSet()
             val assetPaymentMethods = assets.paymentMethods.map { it.paymentMethodType }.toSet()
             val formPaymentMethods = formSpecs.map { it.type }.toSet()
             if (assetPaymentMethods.size != assets.paymentMethods.size || formPaymentMethods.size != formSpecs.size) {

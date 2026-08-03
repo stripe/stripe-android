@@ -493,7 +493,10 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = sharedDataSpecs,
                 serverDrivenPaymentMethodTypes = elementsSession
                     .mobilePaymentElement
-                    ?.paymentMethodAvailability,
+                    ?.paymentMethodAvailability
+                    ?.entries
+                    ?.filter { it.available }
+                    ?.map { it.paymentMethodType },
                 serverDrivenPaymentMethodAssets = elementsSession
                     .mobilePaymentElement
                     ?.assets
@@ -576,7 +579,10 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = sharedDataSpecs,
                 serverDrivenPaymentMethodTypes = elementsSession
                     .mobilePaymentElement
-                    ?.paymentMethodAvailability,
+                    ?.paymentMethodAvailability
+                    ?.entries
+                    ?.filter { it.available }
+                    ?.map { it.paymentMethodType },
                 serverDrivenPaymentMethodAssets = elementsSession
                     .mobilePaymentElement
                     ?.assets

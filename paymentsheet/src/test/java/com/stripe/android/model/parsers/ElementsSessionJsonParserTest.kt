@@ -78,7 +78,7 @@ class ElementsSessionJsonParserTest {
                             .put("major", MobileSessionContract.CONTRACT_MAJOR)
                             .put("revision", MobileSessionContract.CONTRACT_REVISION)
                     )
-                    .put("payment_method_availability", JSONArray(listOf("card")))
+                    .put("payment_method_availability", availability("card"))
                     .put(
                         "features",
                         JSONObject()
@@ -142,7 +142,10 @@ class ElementsSessionJsonParserTest {
             .isEqualTo(MobileSessionContract.CONTRACT_MAJOR)
         assertThat(elementsSession?.mobilePaymentElement?.contract?.revision)
             .isEqualTo(MobileSessionContract.CONTRACT_REVISION)
-        assertThat(elementsSession?.mobilePaymentElement?.paymentMethodAvailability)
+        val paymentMethodTypes = elementsSession?.mobilePaymentElement?.paymentMethodAvailability
+            ?.entries
+            ?.map { it.paymentMethodType }
+        assertThat(paymentMethodTypes)
             .containsExactly("card")
             .inOrder()
         assertThat(elementsSession?.mobilePaymentElement?.features?.financialConnectionsLite)
@@ -171,7 +174,7 @@ class ElementsSessionJsonParserTest {
                             .put("major", MobileSessionContract.CONTRACT_MAJOR)
                             .put("revision", MobileSessionContract.CONTRACT_REVISION)
                     )
-                    .put("payment_method_availability", JSONArray(listOf("link")))
+                    .put("payment_method_availability", availability("link"))
                     .put(
                         "assets",
                         JSONObject().put(
@@ -250,7 +253,7 @@ class ElementsSessionJsonParserTest {
                             .put("major", MobileSessionContract.CONTRACT_MAJOR + 1)
                             .put("revision", MobileSessionContract.CONTRACT_REVISION)
                     )
-                    .put("payment_method_availability", JSONArray())
+                    .put("payment_method_availability", availability())
             )
         }
 
@@ -284,7 +287,7 @@ class ElementsSessionJsonParserTest {
                     )
                     .put(
                         "payment_method_availability",
-                        JSONArray().put("x".repeat(101))
+                        availability("x".repeat(101))
                     )
             )
         }
@@ -308,7 +311,7 @@ class ElementsSessionJsonParserTest {
                             .put("major", MobileSessionContract.CONTRACT_MAJOR)
                             .put("revision", MobileSessionContract.CONTRACT_REVISION)
                     )
-                    .put("payment_method_availability", JSONArray(listOf("card")))
+                    .put("payment_method_availability", availability("card"))
                     .put(
                         "assets",
                         JSONObject().put(
@@ -369,7 +372,7 @@ class ElementsSessionJsonParserTest {
                             .put("major", MobileSessionContract.CONTRACT_MAJOR)
                             .put("revision", MobileSessionContract.CONTRACT_REVISION)
                     )
-                    .put("payment_method_availability", JSONArray())
+                    .put("payment_method_availability", availability())
                     .put(
                         "features",
                         JSONObject().put("financial_connections_lite", "future_value")
@@ -2529,6 +2532,19 @@ class ElementsSessionJsonParserTest {
               "payment_method_preference": $PAYMENT_METHOD_PREFERENCE_JSON
             }
             """.trimIndent()
+        )
+    }
+
+    private fun availability(vararg paymentMethodTypes: String): JSONObject {
+        return JSONObject().put(
+            "entries",
+            JSONArray(
+                paymentMethodTypes.map { paymentMethodType ->
+                    JSONObject()
+                        .put("payment_method_type", paymentMethodType)
+                        .put("available", true)
+                }
+            )
         )
     }
 

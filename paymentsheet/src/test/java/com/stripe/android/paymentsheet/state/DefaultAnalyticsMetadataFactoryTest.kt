@@ -42,6 +42,7 @@ import javax.inject.Provider
 import com.stripe.android.paymentsheet.forms.generated.ContractMetadataV1 as ContractMetadata
 import com.stripe.android.paymentsheet.forms.generated.MobilePaymentElementV1 as MobilePaymentElement
 import com.stripe.android.paymentsheet.forms.generated.MobileSessionContractV1 as MobileSessionContract
+import com.stripe.android.paymentsheet.forms.generated.PaymentMethodAvailabilityV1 as PaymentMethodAvailability
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 @Suppress("LargeClass")
@@ -86,7 +87,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 major = MobileSessionContract.CONTRACT_MAJOR,
                 revision = MobileSessionContract.CONTRACT_REVISION,
             ),
-            paymentMethodAvailability = emptyList(),
+            paymentMethodAvailability = PaymentMethodAvailability(),
         )
 
         val resultMap = createAnalyticsMetadata(
