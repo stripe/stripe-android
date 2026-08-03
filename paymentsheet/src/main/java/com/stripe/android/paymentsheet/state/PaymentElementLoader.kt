@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
@@ -650,13 +651,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
     }
 
-    private suspend fun isGooglePayReady(
+    @VisibleForTesting
+    internal suspend fun isGooglePayReady(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
         isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
-        val walletsDisabledReason = initializationMode.walletsDisabledReason()
+        val shouldDisableForAutomaticTaxBilling =
+            (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
+            ?.checkoutSessionResponse
+            ?.let { checkoutSessionResponse ->
+                checkoutSessionResponse.automaticTaxEnabled &&
+                    checkoutSessionResponse.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING &&
+                    configuration.defaultBillingDetails == null
+            } == true
 
         if (!elementsSession.isGooglePayEnabled) {
             userFacingLogger.logWarningWithoutPii(
@@ -666,8 +675,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             userFacingLogger.logWarningWithoutPii(
                 "GooglePayConfiguration is not set."
             )
-        } else if (walletsDisabledReason != null) {
-            userFacingLogger.logWarningWithoutPii(walletsDisabledReason.googlePayWarning)
+        } else if (shouldDisableForAutomaticTaxBilling) {
+            userFacingLogger.logWarningWithoutPii(
+                PaymentElementLoader.InitializationMode.WalletsDisabledReason
+                    .AutomaticTaxBillingAddress.googlePayWarning
+            )
             return false
         } else if (!isGooglePaySupportedByConfiguration.await()) {
             @Suppress("MaxLineLength")
