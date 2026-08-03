@@ -105,7 +105,7 @@ class SelfieScreenTest {
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG).assertDoesNotExist()
-            onNodeWithTag(SELFIE_SCAN_STATUS_TAG).assertTextEquals(context.getString(R.string.stripe_position_selfie))
+            onNodeWithTag(SELFIE_SCAN_STATUS_TAG).assertDoesNotExist()
             onNodeWithTag(SELFIE_CAPTURED_CHECK_TAG).assertDoesNotExist()
             onNodeWithTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG).assertDoesNotExist()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
@@ -120,12 +120,13 @@ class SelfieScreenTest {
             messageId = R.string.stripe_position_selfie
         ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_title))
-            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_selfie))
+            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertDoesNotExist()
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG).assertDoesNotExist()
-            onNodeWithTag(SELFIE_SCAN_STATUS_TAG).assertTextEquals(context.getString(R.string.stripe_position_selfie))
+            onNodeWithTag(SELFIE_SCAN_STATUS_TAG)
+                .assertTextEquals(context.getString(R.string.stripe_selfie_place_face))
             onNodeWithTag(SELFIE_CAPTURED_CHECK_TAG).assertDoesNotExist()
             onNodeWithTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG).assertDoesNotExist()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
@@ -140,7 +141,7 @@ class SelfieScreenTest {
             messageId = R.string.stripe_capturing
         ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_title))
-            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_capturing))
+            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertDoesNotExist()
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertExists()
@@ -163,8 +164,7 @@ class SelfieScreenTest {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
                 .assertTextEquals(context.getString(R.string.stripe_selfie_title))
 
-            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG)
-                .assertTextEquals(context.getString(R.string.stripe_captured_front_selfie))
+            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertDoesNotExist()
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertExists()
@@ -206,8 +206,7 @@ class SelfieScreenTest {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
                 .assertTextEquals(context.getString(R.string.stripe_selfie_title))
 
-            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG)
-                .assertTextEquals(context.getString(R.string.stripe_selfie_capture_complete))
+            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertDoesNotExist()
 
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()

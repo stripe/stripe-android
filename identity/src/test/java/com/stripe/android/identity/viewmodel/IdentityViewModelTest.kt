@@ -48,6 +48,7 @@ import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
+import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
@@ -233,7 +234,7 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `uploadScanResult uploads side full frames when local 3D override is enabled`() = runBlocking {
+    fun `uploadScanResult does not upload side frames when 3D is disabled`() = runBlocking {
         mockUploadSuccess()
         viewModel.uploadScanResult(
             FINAL_FACE_DETECTOR_RESULT,
@@ -249,13 +250,7 @@ internal class IdentityViewModelTest {
                 testUploadSelfieScanSuccessResult(selfie, isHighRes)
             }
         }
-        listOf(
-            FaceDetectorTransitioner.Selfie.RIGHT,
-            FaceDetectorTransitioner.Selfie.LEFT
-        ).forEach { selfie ->
-            testUploadSelfieScanSuccessResult(selfie, isHighRes = false)
-        }
-        verify(mockIdentityAnalyticsRequestFactory, times(8)).imageUpload(
+        verify(mockIdentityAnalyticsRequestFactory, times(6)).imageUpload(
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
@@ -263,6 +258,10 @@ internal class IdentityViewModelTest {
             anyOrNull(),
             anyOrNull()
         )
+        assertThat(viewModel.selfieUploadState.value.leftLowResResult.status)
+            .isEqualTo(Status.IDLE)
+        assertThat(viewModel.selfieUploadState.value.rightLowResResult.status)
+            .isEqualTo(Status.IDLE)
     }
 
     @Test
@@ -335,9 +334,7 @@ internal class IdentityViewModelTest {
             (viewModel.selfieUploadState.value.bestHighResResult),
             (viewModel.selfieUploadState.value.bestLowResResult),
             (viewModel.selfieUploadState.value.lastHighResResult),
-            (viewModel.selfieUploadState.value.lastLowResResult),
-            (viewModel.selfieUploadState.value.leftLowResResult),
-            (viewModel.selfieUploadState.value.rightLowResResult)
+            (viewModel.selfieUploadState.value.lastLowResResult)
         ).forEach { uploadedResult ->
             assertThat(uploadedResult).isEqualTo(
                 Resource.error<UploadedResult>(
@@ -346,6 +343,10 @@ internal class IdentityViewModelTest {
                 )
             )
         }
+        assertThat(viewModel.selfieUploadState.value.leftLowResResult.status)
+            .isEqualTo(Status.IDLE)
+        assertThat(viewModel.selfieUploadState.value.rightLowResResult.status)
+            .isEqualTo(Status.IDLE)
     }
 
     @Test
