@@ -71,7 +71,7 @@ internal class OnrampFlowTest {
     }
 
     @Test
-    fun freshUserCanCompleteIdentityVerificationAndCreatePaymentToken() {
+    fun freshUserCanCompleteIdentityVerificationAndCheckout() {
         val user = page.registerAndAuthenticateFreshUser(country = "US")
 
         page.collectKycInfo(user)
@@ -79,7 +79,9 @@ internal class OnrampFlowTest {
         page.completeIdentityVerification()
         page.registerDefaultWallet()
         page.collectNewCard()
-        page.createPaymentToken()
+        page.createPaymentTokenAndSession()
+        page.performCheckout()
+        page.waitForCheckoutCompleted()
     }
 
     @Test

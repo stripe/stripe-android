@@ -164,7 +164,7 @@ internal class OnrampE2EPage(
 
         clickTag(KYC_SECTION_TAG)
         replaceTag(KYC_FIRST_NAME_TAG, TEST_KYC_FIRST_NAME)
-        replaceTag(KYC_LAST_NAME_TAG, user.name)
+        replaceTag(KYC_LAST_NAME_TAG, TEST_KYC_LAST_NAME)
         replaceTag(KYC_BIRTH_COUNTRY_TAG, user.country)
         replaceTag(KYC_BIRTH_CITY_TAG, address.city)
         replaceTag(KYC_NATIONALITIES_TAG, user.country)
@@ -614,6 +614,7 @@ private const val LINK_WALLET_PAY_BUTTON_TAG = "wallet_screen_pay_button"
 private const val TEST_CARD_CVC = "321"
 private const val TEST_BANK_ACCOUNT_NAME = "Success"
 private const val TEST_KYC_FIRST_NAME = "Onramp"
+private const val TEST_KYC_LAST_NAME = "Tester"
 private const val TEST_KYC_ADDRESS_LINE_1 = "address_full_match"
 private const val KYC_CONFIRMATION_TITLE = "Confirm your information"
 private const val KYC_CONFIRM_BUTTON_TEXT = "Confirm"
