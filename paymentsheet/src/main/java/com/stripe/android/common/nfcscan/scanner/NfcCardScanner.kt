@@ -23,6 +23,7 @@ internal interface NfcCardScanner {
     data class Error(
         val code: String,
         val userMessage: ResolvableString,
+        val parameters: Map<String, String> = emptyMap(),
     )
 
     val state: Flow<State>
@@ -61,6 +62,7 @@ internal class DefaultNfcCardScanner @Inject constructor(
                                 error = NfcCardScanner.Error(
                                     code = readerResult.errorCode,
                                     userMessage = readerResult.userMessage,
+                                    parameters = readerResult.parameters,
                                 )
                             )
                         )

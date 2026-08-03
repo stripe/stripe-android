@@ -44,7 +44,7 @@ class BillingInlineAutocompleteAddressInteractorTest {
         assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
         fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(eventCalls.awaitItem())
-            .isInstanceOf(AutocompleteAddressInteractor.Event.OnValues::class.java)
+            .isInstanceOf(AutocompleteAddressInteractor.Event.OnExpandForm::class.java)
     }
 
     private fun runScenario(

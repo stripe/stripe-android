@@ -6,14 +6,14 @@ import org.junit.Test
 
 internal class TerminalTransactionQualifiersProducerTest {
     @Test
-    fun `produce returns terminal transaction qualifiers tag & contactless read only qualifiers`() {
+    fun `produce returns terminal transaction qualifiers for online-only mobile reader`() {
         val result = TerminalTransactionQualifiersProducer.produce(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         )
 
         assertThat(result.tag).isEqualTo("9F66")
         assertThat(result.value).isEqualTo(
-            byteArrayOf(0x26, 0x00, 0x00, 0x00),
+            byteArrayOf(0x20, 0x00, 0x40, 0x00),
         )
     }
 }

@@ -3,6 +3,7 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.scanner.apdu.pdol.DefaultPdolBuilder
 import com.stripe.android.common.nfcscan.scanner.apdu.pdol.FakeTagValueProducer
+import com.stripe.android.common.nfcscan.scanner.apdu.pdol.PdolParsingException
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.testing.PaymentIntentFactory
@@ -10,6 +11,22 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 internal class DefaultPdolBuilderTest {
+    @Test
+    fun `fromTemplate throws PdolParsingException for malformed template`() = runScenario(
+        tagValueProducers = emptySet(),
+    ) {
+        val malformedTemplate = byteArrayOf(0x9F.toByte())
+
+        val exception = runCatching {
+            builder.fromTemplate(
+                paymentMethodMetadata = paymentMethodMetadata,
+                template = malformedTemplate,
+            )
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(PdolParsingException::class.java)
+    }
+
     @Test
     fun `fromTemplate returns empty payload when template is empty`() = runScenario(
         tagValueProducers = emptySet(),
@@ -40,7 +57,7 @@ internal class DefaultPdolBuilderTest {
             template = template,
         )
 
-        assertThat(result).isEqualTo(byteArrayOf(0x83.toByte(), 0x04, 0x26, 0x00, 0x00, 0x00))
+        assertThat(result).isEqualTo(byteArrayOf(0x83.toByte(), 0x04, 0x20, 0x00, 0x40, 0x00))
     }
 
     @Test
@@ -107,7 +124,7 @@ internal class DefaultPdolBuilderTest {
         )
 
         assertThat(result)
-            .isEqualTo(byteArrayOf(0x83.toByte(), 0x08, 0x26, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04))
+            .isEqualTo(byteArrayOf(0x83.toByte(), 0x08, 0x20, 0x00, 0x40, 0x00, 0x01, 0x02, 0x03, 0x04))
     }
 
     @Test
@@ -159,7 +176,7 @@ internal class DefaultPdolBuilderTest {
     )
 
     private companion object {
-        val TERMINAL_TRANSACTION_QUALIFIERS = byteArrayOf(0x26, 0x00, 0x00, 0x00)
+        val TERMINAL_TRANSACTION_QUALIFIERS = byteArrayOf(0x20, 0x00, 0x40, 0x00)
         val UNPREDICTABLE_NUMBER = byteArrayOf(0x01, 0x02, 0x03, 0x04)
     }
 }

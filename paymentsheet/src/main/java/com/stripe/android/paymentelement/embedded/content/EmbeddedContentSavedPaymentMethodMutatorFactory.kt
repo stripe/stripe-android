@@ -54,7 +54,7 @@ internal class EmbeddedContentSavedPaymentMethodMutatorFactory @Inject construct
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
-            accountLinkBrandFlow = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account?.linkBrand },
+            linkAccount = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account },
         )
     }
 }

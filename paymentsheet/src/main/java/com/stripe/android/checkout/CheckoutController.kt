@@ -63,12 +63,12 @@ class CheckoutController @Inject internal constructor(
     private val mutex = Mutex()
     private val pendingMutations = AtomicInteger(0)
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isUpdating = MutableStateFlow(false)
 
     /**
      * Whether a mutation is currently in progress.
      */
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
 
     suspend fun configure(
         checkoutSessionClientSecret: String,
@@ -178,6 +178,18 @@ class CheckoutController @Inject internal constructor(
         value: String,
     ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
         checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
+    }
+
+    /**
+     * Updates the customer's email address.
+     *
+     * @param email The email address to set. Pass `null` to clear the customer's email.
+     * Leading/trailing whitespace is trimmed.
+     */
+    suspend fun updateEmail(
+        email: String?,
+    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
+        checkoutSessionRepository.updateEmail(sessionId, email?.trim().orEmpty())
     }
 
     /**
@@ -304,14 +316,14 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Serializes [block] behind [mutex] so configuration and mutations run in sequence, and toggles
-     * [isLoading] while any serialized work is in flight (tracked via [pendingMutations] so
+     * [isUpdating] while any serialized work is in flight (tracked via [pendingMutations] so
      * concurrent callers share a single loading window).
      */
     private suspend fun <T> runSerialized(
         block: suspend () -> kotlin.Result<T>,
     ): kotlin.Result<T> {
         if (pendingMutations.incrementAndGet() == 1) {
-            _isLoading.value = true
+            _isUpdating.value = true
         }
         return try {
             // Run network requests with a mutex to ensure events are processed in order.
@@ -320,7 +332,7 @@ class CheckoutController @Inject internal constructor(
             }
         } finally {
             if (pendingMutations.decrementAndGet() == 0) {
-                _isLoading.value = false
+                _isUpdating.value = false
             }
         }
     }
@@ -636,6 +648,10 @@ class CheckoutController @Inject internal constructor(
              */
             val label: String,
             /**
+             * The billing details associated with the customer's selected payment method, if any were collected.
+             */
+            val billingDetails: BillingDetails?,
+            /**
              * A string representation of the customer's desired payment method:
              * - If this is a Stripe payment method, see
              *      https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for possible values.
@@ -662,6 +678,64 @@ class CheckoutController @Inject internal constructor(
                 @Composable
                 get() = rememberDrawablePainter(iconDrawable)
         }
+    }
+
+    /**
+     * The billing details collected for a payment method.
+     */
+    @Poko
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class BillingDetails internal constructor(
+        /**
+         * The customer's billing address.
+         */
+        val address: Address?,
+        /**
+         * The customer's email address.
+         */
+        val email: String?,
+        /**
+         * The customer's full name.
+         */
+        val name: String?,
+        /**
+         * The customer's phone number, without formatting (e.g. 5551234567).
+         */
+        val phone: String?,
+    ) {
+        /**
+         * A billing address.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Address internal constructor(
+            /**
+             * City, district, suburb, town, or village.
+             */
+            val city: String?,
+            /**
+             * Two-letter country code (ISO 3166-1 alpha-2).
+             */
+            val country: String?,
+            /**
+             * Address line 1 (e.g., street, PO Box, or company name).
+             */
+            val line1: String?,
+            /**
+             * Address line 2 (e.g., apartment, suite, unit, or building).
+             */
+            val line2: String?,
+            /**
+             * ZIP or postal code.
+             */
+            val postalCode: String?,
+            /**
+             * State, county, province, or region.
+             */
+            val state: String?,
+        )
     }
 
     @CheckoutSessionPreview

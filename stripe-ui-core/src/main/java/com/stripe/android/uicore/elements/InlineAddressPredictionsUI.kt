@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -25,10 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
@@ -38,22 +35,19 @@ import com.stripe.android.uicore.text.annotatedStringResource
 fun InlineAddressPredictionsUI(
     state: AutocompleteAddressInteractor.InlinePredictionsState,
     attributionDrawable: Int?,
-    fieldWidthDp: Dp,
     onPredictionSelected: (String) -> Unit,
-    onDismiss: () -> Unit,
     onClear: () -> Unit,
-    onEnterManually: (() -> Unit)? = null,
+    onEnterManually: (() -> Unit)?,
 ) {
-    DropdownMenu(
-        expanded = shouldShowPredictionsDropdown(state),
-        onDismissRequest = onDismiss,
-        offset = DpOffset(x = (-1).dp, y = 0.dp),
-        modifier = if (fieldWidthDp > 0.dp) {
-            Modifier.width(fieldWidthDp + 2.dp)
-        } else {
-            Modifier.fillMaxWidth()
-        },
-        properties = PopupProperties(focusable = false),
+    if (!shouldShowPredictionsDropdown(state)) {
+        return
+    }
+
+    Card(
+        elevation = 4.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
     ) {
         InlineAddressPredictionsContent(
             state = state,

@@ -35,6 +35,7 @@ internal class CheckoutControllerStateHolderTest {
         val expectedOption = PaymentOptionDisplayData(
             imageLoader = { error("not needed for this test") },
             label = "Google Pay",
+            billingDetails = null,
             paymentMethodType = "google_pay",
             mandateText = null,
         )

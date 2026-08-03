@@ -27,6 +27,7 @@ internal class InlineAutocompleteController(
     private val eventListenerProvider: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
 ) {
     private var lastPredictionLine1: String? = null
+    private var lastObservedCountry: String? = null
     private var queryFlow: StateFlow<String>? = null
     private var countryFlow: StateFlow<String?>? = null
     private var observeJob: Job? = null
@@ -43,6 +44,7 @@ internal class InlineAutocompleteController(
         observeJob?.cancel()
         queryFlow = query
         countryFlow = country
+        lastObservedCountry = country.value ?: ""
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
@@ -52,9 +54,20 @@ internal class InlineAutocompleteController(
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         return@collectLatest
                     }
-                    if (q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE || !isCountrySupported(c)) {
+                    val countryChanged = c != lastObservedCountry
+                    if (countryChanged) {
+                        lastObservedCountry = c
+                    }
+                    if (!isCountrySupported(c) || q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE) {
                         lastPredictionLine1 = null
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+                        if (countryChanged) {
+                            eventListenerProvider()?.invoke(
+                                AutocompleteAddressInteractor.Event.OnValues(
+                                    mapOf(IdentifierSpec.Country to c)
+                                )
+                            )
+                        }
                         return@collectLatest
                     }
                     fetchPredictions(q, c)
@@ -64,6 +77,8 @@ internal class InlineAutocompleteController(
 
     fun onPredictionSelected(predictionId: String) {
         selectionJob?.cancel()
+        val queryAtSelection = queryFlow?.value
+        val countryAtSelection = countryFlow?.value
         selectionJob = coroutineScope.launch {
             val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
             val result = placesClient.fetchPlace(predictionId, locale)
@@ -71,7 +86,7 @@ internal class InlineAutocompleteController(
                 ensureActive()
                 result.fold(
                     onSuccess = { handleFetchPlaceSuccess(it) },
-                    onFailure = { handleFailure(queryFlow?.value, countryFlow?.value) }
+                    onFailure = { handleFailure(queryAtSelection, countryAtSelection) }
                 )
             } finally {
                 placesClient.resetSession()
@@ -83,7 +98,7 @@ internal class InlineAutocompleteController(
         lastPredictionLine1 = address.line1
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         eventListenerProvider()?.invoke(
-            AutocompleteAddressInteractor.Event.OnValues(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
                 mapOf(
                     IdentifierSpec.Line1 to address.line1,
                     IdentifierSpec.Line2 to address.line2,
@@ -121,16 +136,24 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
+        if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
+            _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
+        }
         val result = placesClient.findAutocompletePredictions(
             query = query,
             country = country,
             limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
         )
         currentCoroutineContext().ensureActive()
+        if (_inlinePredictionsState.value == AutocompleteAddressInteractor.InlinePredictionsState.Idle) return
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
-            onFailure = { handleFailure(query, country) }
+            onFailure = {
+                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Results(
+                    query = query,
+                    predictions = emptyList(),
+                )
+            }
         )
     }
 

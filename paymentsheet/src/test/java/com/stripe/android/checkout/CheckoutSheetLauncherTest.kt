@@ -13,6 +13,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -41,6 +42,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutSheetLauncherTest {
 
@@ -73,7 +75,7 @@ internal class CheckoutSheetLauncherTest {
             promotion = promotion,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
             ),
         )
 
@@ -90,6 +92,29 @@ internal class CheckoutSheetLauncherTest {
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(selectionHolder.temporarySelection.value).isEqualTo(code)
+    }
+
+    @Test
+    fun `launchForm uses configured payment method layout`() = testScenario(
+        paymentElementConfiguration = PaymentElement.Configuration()
+            .paymentMethodLayout(PaymentElement.PaymentMethodLayout.Horizontal)
+            .build()
+    ) {
+        sheetLauncher.launchForm(
+            code = "test_code",
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            configuration = EmbeddedConfigurationFactory.create(),
+            customerState = createCustomerState(),
+            promotion = null,
+        )
+
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(launchCall.launchMode).isEqualTo(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "test_code",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            )
+        )
     }
 
     @Test
@@ -393,7 +418,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             promotion = null,
             launchMode = EmbeddedLaunchMode.PaymentOptions(
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
             ),
         )
 
@@ -407,6 +432,27 @@ internal class CheckoutSheetLauncherTest {
 
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `launchPaymentOptions uses configured payment method layout`() = testScenario(
+        paymentElementConfiguration = PaymentElement.Configuration()
+            .paymentMethodLayout(PaymentElement.PaymentMethodLayout.Horizontal)
+            .build()
+    ) {
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+            selection = PaymentSelection.GooglePay,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
+
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(launchCall.launchMode).isEqualTo(
+            EmbeddedLaunchMode.PaymentOptions(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            )
+        )
     }
 
     @Test
@@ -566,6 +612,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     private fun testScenario(
+        paymentElementConfiguration: PaymentElement.Configuration.State = PaymentElement.Configuration().build(),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val lifecycleOwner = TestLifecycleOwner()
@@ -586,6 +633,7 @@ internal class CheckoutSheetLauncherTest {
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
                 selectionHolder = selectionHolder,
+                paymentElementConfigurationProvider = { paymentElementConfiguration },
                 customerStateHolder = customerStateHolder,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,

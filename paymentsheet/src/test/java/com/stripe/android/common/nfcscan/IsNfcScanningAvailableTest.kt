@@ -43,6 +43,20 @@ internal class IsNfcScanningAvailableTest {
     }
 
     @Test
+    fun `returns false when stripe card scan is allowed`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable()
+
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(
+                    isNfcScanningEnabled = true,
+                    isStripeCardScanAllowed = true,
+                ),
+            )
+        ).isFalse()
+    }
+
+    @Test
     fun `returns false when device is not secure`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable(
             isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
@@ -222,10 +236,12 @@ internal class IsNfcScanningAvailableTest {
     private fun createMetadata(
         isNfcScanningEnabled: Boolean,
         isTapToAddSupported: Boolean = false,
+        isStripeCardScanAllowed: Boolean = false,
         experimentVariant: String? = null,
     ) = PaymentMethodMetadataFactory.create(
         isNfcScanningEnabled = isNfcScanningEnabled,
         isTapToAddSupported = isTapToAddSupported,
+        isStripeCardScanAllowed = isStripeCardScanAllowed,
         experimentsData = experimentVariant?.let { variant ->
             ElementsSession.ExperimentsData(
                 arbId = "test_arb_id",

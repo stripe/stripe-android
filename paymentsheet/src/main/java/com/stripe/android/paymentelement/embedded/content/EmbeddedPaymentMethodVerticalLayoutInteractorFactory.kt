@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -42,6 +43,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val sheetStateHolder: SheetStateHolder,
     private val savedPaymentMethodMutatorFactory: EmbeddedContentSavedPaymentMethodMutatorFactory,
+    private val linkAccountHolder: LinkAccountHolder,
 ) : EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
 
     @Suppress("LongMethod")
@@ -136,7 +138,8 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             },
             // Embedded renders mandate text through its own path, not the mandate-above-button handler.
             updateMandateText = null,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            linkAccount = linkAccountHolder.linkAccountInfo,
         )
     }
 }

@@ -99,7 +99,13 @@ internal class GetProcessingOptionsCommandTest {
 
         val processingOptionsInfo = result.getOrNull()
 
-        assertThat(processingOptionsInfo?.aflEntries).isEmpty()
+        assertThat(processingOptionsInfo?.aflEntries).containsExactly(
+            ProcessingOptionsInfo.AflEntry(
+                shortFileIdentifier = 1,
+                firstRecord = 1,
+                lastRecord = 1,
+            ),
+        )
 
         val records = processingOptionsInfo?.records
 

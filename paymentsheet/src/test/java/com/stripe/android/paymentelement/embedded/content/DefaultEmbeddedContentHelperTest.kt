@@ -196,6 +196,7 @@ internal class DefaultEmbeddedContentHelperTest {
             coroutineScope = backgroundScope,
             sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
+            linkAccountHolder = linkAccountHolder,
         )
 
         val embeddedContentHelper = DefaultEmbeddedContentHelper(

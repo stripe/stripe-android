@@ -164,7 +164,10 @@ internal class DefaultTapZoneResolver @Inject constructor(
                 "Pixel 8a".lowercase() to TapZone(0.5f, 0.4f),
                 "Pixel 9".lowercase() to TapZone(0.5f, 0.31f),
                 "Pixel 9 Pro".lowercase() to TapZone(0.5f, 0.31f),
-                "Pixel 9 Pro XL".lowercase() to TapZone(0.5f, 0.3f)
+                "Pixel 9 Pro XL".lowercase() to TapZone(0.5f, 0.3f),
+                "Pixel 10".lowercase() to TapZone(0.61f, 0.31f),
+                "Pixel 10 Pro".lowercase() to TapZone(0.61f, 0.31f),
+                "Pixel 10 Pro XL".lowercase() to TapZone(0.61f, 0.3f)
             ),
             // Mostly estimated from teardown or unboxing videos
             "oneplus" to mapOf(
