@@ -6,6 +6,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -644,6 +646,104 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
+    fun whenRequiresBillingAddressForAutomaticTaxIsTrueThenAutomaticTaxFieldsAreNotHidden() = runTest {
+        // BILLING_DETAILS defaults to a US address, so the US automatic-tax fields apply.
+        val handler = handler(
+            addressCollectionMode = AddressCollectionMode.Automatic,
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        handler.state.test {
+            val state = awaitItem()
+            val billingDetailsForm = requireNotNull(state.billingDetailsForm)
+
+            billingDetailsForm.hiddenElements.test {
+                val hiddenIdentifiers = awaitItem()
+
+                assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Line1)
+                assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.City)
+                assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.State)
+                assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
+            }
+        }
+    }
+
+    @Test
+    fun whenRequiresBillingAddressForAutomaticTaxIsFalseThenAutomaticTaxFieldsAreHidden() = runTest {
+        // BILLING_DETAILS defaults to a US address; without the flag, only postal code
+        // stays visible (AVS), matching today's non-tax behavior.
+        val handler = handler(
+            addressCollectionMode = AddressCollectionMode.Automatic,
+            requiresBillingAddressForAutomaticTax = false,
+        )
+
+        handler.state.test {
+            val state = awaitItem()
+            val billingDetailsForm = requireNotNull(state.billingDetailsForm)
+
+            billingDetailsForm.hiddenElements.test {
+                val hiddenIdentifiers = awaitItem()
+
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
+                assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
+            }
+        }
+    }
+
+    @Test
+    fun whenRequiresBillingAddressForAutomaticTaxIsTrueForInThenOnlyPostalCodeIsRequired() = runTest {
+        // IN is deliberately chosen over CA/US: it is NOT in the AVS postal-code list, so postal
+        // code is only ever shown via the automatic-tax path. That isolates the tax logic from AVS.
+        val handler = handler(
+            billingDetails = inBillingDetails(),
+            addressCollectionMode = AddressCollectionMode.Automatic,
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        handler.state.test {
+            val state = awaitItem()
+            val billingDetailsForm = requireNotNull(state.billingDetailsForm)
+
+            billingDetailsForm.hiddenElements.test {
+                val hiddenIdentifiers = awaitItem()
+
+                // IN only needs postal code in addition to country; line1/city/state stay hidden.
+                assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
+            }
+        }
+    }
+
+    @Test
+    fun whenRequiresBillingAddressForAutomaticTaxIsFalseForInThenPostalCodeIsHidden() = runTest {
+        // Without the flag IN falls back to AVS, which does not include IN, so postal code is hidden.
+        // This is the half of the pair that CA could not prove (CA is in AVS, so it shows postal either way).
+        val handler = handler(
+            billingDetails = inBillingDetails(),
+            addressCollectionMode = AddressCollectionMode.Automatic,
+            requiresBillingAddressForAutomaticTax = false,
+        )
+
+        handler.state.test {
+            val state = awaitItem()
+            val billingDetailsForm = requireNotNull(state.billingDetailsForm)
+
+            billingDetailsForm.hiddenElements.test {
+                val hiddenIdentifiers = awaitItem()
+
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.PostalCode)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
+            }
+        }
+    }
+
+    @Test
     fun whenValidateIsCalled_shouldSetAllFieldsToValidationState() = runTest {
         val handler = handler(
             billingDetails = null,
@@ -682,6 +782,18 @@ internal class DefaultEditCardDetailsInteractorTest {
         }
     }
 
+    private fun inBillingDetails() = PaymentMethod.BillingDetails(
+        address = Address(
+            line1 = "1 MG Road",
+            city = "Bengaluru",
+            country = "IN",
+            postalCode = "560001",
+        ),
+        email = "jenny.rosen@example.com",
+        name = "Jenny Rosen",
+        phone = "123-456-7890",
+    )
+
     private val EditCardDetailsInteractor.uiState
         get() = this.state.value
 
@@ -699,7 +811,8 @@ internal class DefaultEditCardDetailsInteractorTest {
         billingDetails: PaymentMethod.BillingDetails? = PaymentMethodFixtures.BILLING_DETAILS,
         requiresModification: Boolean = true,
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
-        onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {}
+        onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {},
+        requiresBillingAddressForAutomaticTax: Boolean = false,
     ): EditCardDetailsInteractor {
         return DefaultEditCardDetailsInteractor.Factory().create(
             coroutineScope = TestScope(testDispatcher),
@@ -718,6 +831,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             onBrandChoiceChanged = onBrandChoiceChanged,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
             autocompleteAddressInteractorFactory = null,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
     }
 }

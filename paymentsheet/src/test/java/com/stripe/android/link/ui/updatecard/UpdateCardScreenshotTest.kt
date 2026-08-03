@@ -52,6 +52,7 @@ internal class UpdateCardScreenshotTest(
                         onBrandChoiceChanged = {},
                         onCardUpdateParamsChanged = {},
                         autocompleteAddressInteractorFactory = null,
+                        requiresBillingAddressForAutomaticTax = false,
                     ).apply {
                         if (testCase.validate) {
                             handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)

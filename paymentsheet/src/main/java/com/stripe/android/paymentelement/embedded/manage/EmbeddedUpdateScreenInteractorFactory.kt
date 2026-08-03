@@ -85,6 +85,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
             },
             autocompleteAddressInteractorFactory = null,
+            requiresBillingAddressForAutomaticTax = paymentMethodMetadata.requiresBillingAddressForAutomaticTax,
         )
     }
 }
