@@ -3,6 +3,7 @@ package com.stripe.android.googlepaylauncher
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
@@ -56,7 +57,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
         transactionId: String?,
         label: String?,
         isElements: Boolean,
-        publishableKey: String?,
+        apiConfiguration: ApiConfiguration.State,
         displayItems: List<GooglePayJsonFactory.DisplayItem>,
         billingEmailOverride: String?,
     ) {
@@ -71,7 +72,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
                 cardFundingFilter = cardFundingFilter,
                 clientAttributionMetadata = clientAttributionMetadata,
                 isElements = isElements,
-                publishableKey = publishableKey,
+                publishableKey = apiConfiguration.publishableKey,
                 displayItems = displayItems,
                 billingEmailOverride = billingEmailOverride,
             )

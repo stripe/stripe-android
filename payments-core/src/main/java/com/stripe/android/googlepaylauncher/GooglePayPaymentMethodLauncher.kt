@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher
 
 import android.content.Context
 import android.os.Parcelable
+import com.stripe.android.ApiConfiguration
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -63,6 +64,10 @@ class GooglePayPaymentMethodLauncher internal constructor(
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {
+    private val apiConfiguration = ApiConfiguration.State(
+        publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
+        stripeAccountId = PaymentConfiguration.getInstance(context).stripeAccountId,
+    )
     private var isReady = false
     private val internalLauncher = InternalGooglePayPaymentMethodLauncher(
         activityResultLauncher = activityResultLauncher,
@@ -244,6 +249,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             label = label,
             clientAttributionMetadata = null,
             isElements = false,
+            apiConfiguration = apiConfiguration,
         )
     }
 
@@ -255,7 +261,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
         transactionId: String? = null,
         label: String? = null,
         isElements: Boolean = false,
-        publishableKey: String? = null,
+        apiConfiguration: ApiConfiguration.State,
         displayItems: List<com.stripe.android.GooglePayJsonFactory.DisplayItem> = emptyList(),
         billingEmailOverride: String? = null,
     ) {
@@ -273,7 +279,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             transactionId = transactionId,
             label = label,
             isElements = isElements,
-            publishableKey = publishableKey,
+            apiConfiguration = apiConfiguration,
             displayItems = displayItems,
             billingEmailOverride = billingEmailOverride,
         )

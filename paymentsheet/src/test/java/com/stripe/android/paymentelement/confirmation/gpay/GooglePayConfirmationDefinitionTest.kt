@@ -377,7 +377,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
         )
@@ -413,7 +413,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
         )
@@ -450,7 +450,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
         )
@@ -488,7 +488,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
         )
@@ -538,7 +538,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = displayItems,
             billingEmailOverride = null,
         )
@@ -614,7 +614,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
         )
@@ -646,7 +646,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
         )

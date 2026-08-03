@@ -179,11 +179,13 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 .create(
                     context = application,
                     enableLogging = BuildConfig.DEBUG,
-                    apiConfigurationState = ApiConfiguration.State(
-                        publishableKey = args.publishableKey
-                            ?: PaymentConfiguration.getInstance(application).publishableKey,
-                        stripeAccountId = PaymentConfiguration.getInstance(application).stripeAccountId,
-                    ),
+                    apiConfigurationProvider = {
+                        ApiConfiguration.State(
+                            publishableKey = args.publishableKey
+                                ?: PaymentConfiguration.getInstance(application).publishableKey,
+                            stripeAccountId = PaymentConfiguration.getInstance(application).stripeAccountId,
+                        )
+                    },
                     productUsage = setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN),
                     config = args.config,
                     cardBrandFilter = args.cardBrandFilter,

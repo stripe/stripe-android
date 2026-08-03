@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -82,7 +83,7 @@ class GooglePayConfirmationFlowTest {
                     transactionId = "pi_12345",
                     label = null,
                     isElements = true,
-                    publishableKey = null,
+                    apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
                     displayItems = emptyList(),
                     billingEmailOverride = null,
                 )
