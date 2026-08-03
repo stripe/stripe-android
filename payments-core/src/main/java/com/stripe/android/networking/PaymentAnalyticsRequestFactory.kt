@@ -45,13 +45,13 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         context: Context,
-        publishableKey: String,
+        publishableKeyProvider: Provider<String>,
         defaultProductUsageTokens: Set<String> = emptySet()
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider = { publishableKey },
+        publishableKeyProvider = publishableKeyProvider,
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
@@ -71,13 +71,13 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @Inject
     internal constructor(
         context: Context,
-        apiConfigProvider: Provider<ApiConfiguration.State>,
+        apiConfigState: ApiConfiguration.State,
         @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider = { apiConfigProvider.get().publishableKey },
+        publishableKeyProvider = { apiConfigState.publishableKey },
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )

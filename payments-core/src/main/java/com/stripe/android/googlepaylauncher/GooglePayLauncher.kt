@@ -95,9 +95,9 @@ class GooglePayLauncher internal constructor(
             )
         },
         PaymentAnalyticsRequestFactory(
-            activity,
-            PaymentConfiguration.getInstance(activity).publishableKey,
-            setOf(PRODUCT_USAGE)
+            context = activity,
+            publishableKeyProvider = { PaymentConfiguration.getInstance(activity).publishableKey },
+            defaultProductUsageTokens = setOf(PRODUCT_USAGE)
         ),
         DefaultAnalyticsRequestExecutor()
     )
@@ -139,9 +139,9 @@ class GooglePayLauncher internal constructor(
             )
         },
         PaymentAnalyticsRequestFactory(
-            activity,
-            PaymentConfiguration.getInstance(activity).publishableKey,
-            setOf(PRODUCT_USAGE)
+            context = activity,
+            publishableKeyProvider = { PaymentConfiguration.getInstance(activity).publishableKey },
+            defaultProductUsageTokens = setOf(PRODUCT_USAGE)
         ),
         DefaultAnalyticsRequestExecutor()
     )
@@ -190,7 +190,7 @@ class GooglePayLauncher internal constructor(
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = fragment.requireContext(),
-            publishableKey = PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
+            publishableKeyProvider = { PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey },
             defaultProductUsageTokens = setOf(PRODUCT_USAGE),
         ),
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
@@ -429,9 +429,9 @@ fun rememberGooglePayLauncher(
                 )
             },
             PaymentAnalyticsRequestFactory(
-                context,
-                PaymentConfiguration.getInstance(context).publishableKey,
-                setOf(GooglePayLauncher.PRODUCT_USAGE)
+                context = context,
+                publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                defaultProductUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE)
             ),
             DefaultAnalyticsRequestExecutor()
         )

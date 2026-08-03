@@ -29,9 +29,9 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     context: Context,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        PaymentConfiguration.getInstance(context).publishableKey,
-        setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
+        context = context,
+        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+        defaultProductUsageTokens = setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {

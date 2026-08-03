@@ -44,8 +44,8 @@ class WebIntentNextActionHandlerTest {
         mock<(AuthActivityStarterHost) -> PaymentBrowserAuthStarter>()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = context,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
 
     private val testDispatcher = UnconfinedTestDispatcher()
