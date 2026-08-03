@@ -78,9 +78,9 @@ Components that don't have metadata and are created at entry points:
 - `CustomerAdapterDataSourceComponent` — `CustomerSheetHacks.initialize()`
 - `CustomerSessionDataSourceComponent` — `CustomerSheetHacks.initialize()`
 - `StripeCustomerAdapterComponent` — `CustomerAdapter.create()`
-- `AddressElementViewModelFactoryComponent` — `AddressElementViewModel.Factory`
-- `AutocompleteViewModelFactoryComponent` — `AutocompleteViewModel.Isolated`
-- `PollingComponent` — `PollingViewModel.Factory` (from `PollingContract.Args`)
+- `AddressElementViewModelFactoryComponent` — `AddressElementViewModel.Factory` (from `AddressElementActivityContract.Args.publishableKey`)
+- `AutocompleteViewModelFactoryComponent` — `AutocompleteViewModel.Isolated` (from `AutocompleteContract.Args.publishableKey`)
+- `PollingComponent` — `PollingViewModel.Factory` (from `PollingContract.Args.publishableKey`)
 
 ### 4. From method parameters (passed by caller)
 
