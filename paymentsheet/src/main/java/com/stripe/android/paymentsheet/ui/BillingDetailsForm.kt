@@ -6,7 +6,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.ui.core.elements.cardBillingAddressCollectionMode
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
@@ -38,11 +39,12 @@ internal class BillingDetailsForm(
         null
     }
 
-    private val cardBillingAddressElement: CardBillingAddressElement = CardBillingAddressElement(
+    private val cardBillingAddressElement: BillingAddressElement = BillingAddressElement(
         identifier = IdentifierSpec.BillingAddress,
         sameAsShippingElement = null,
         shippingValuesMap = null,
         countryCodes = allowedBillingCountries,
+        countryElementIdentifier = IdentifierSpec.Country,
         collectionConfiguration = BillingDetailsCollectionConfiguration(
             address = when (addressCollectionMode) {
                 AddressCollectionMode.Automatic ->
@@ -53,6 +55,15 @@ internal class BillingDetailsForm(
             collectName = nameCollection == NameCollection.InBillingDetailsForm,
             collectEmail = collectEmail,
             collectPhone = collectPhone,
+        ),
+        addressCollectionMode = cardBillingAddressCollectionMode(
+            addressCollectionMode = when (addressCollectionMode) {
+                AddressCollectionMode.Automatic ->
+                    BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                AddressCollectionMode.Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                AddressCollectionMode.Full -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            },
+            requiresBillingAddressForAutomaticTax = false,
         ),
         rawValuesMap = rawAddressValues(billingDetails),
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,

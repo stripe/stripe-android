@@ -51,7 +51,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.FormElement
@@ -474,7 +474,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
             assertThat(formElements[1]).isInstanceOf<SectionElement>()
             assertThat(formElements[1].asSectionElement().fields[0])
-                .isInstanceOf<CardBillingAddressElement>()
+                .isInstanceOf<BillingAddressElement>()
         }
     }
 

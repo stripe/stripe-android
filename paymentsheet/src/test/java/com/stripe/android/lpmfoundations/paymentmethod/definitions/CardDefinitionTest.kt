@@ -31,7 +31,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
@@ -94,7 +94,7 @@ class CardDefinitionTest {
         val contactElement = formElements[1] as SectionElement
         assertThat(contactElement.fields).hasSize(1)
 
-        val cardBillingElement = contactElement.fields[0] as CardBillingAddressElement
+        val cardBillingElement = contactElement.fields[0] as BillingAddressElement
         val billingElements = cardBillingElement.addressController.value.fieldsFlowable.value
 
         assertThat(billingElements.size).isEqualTo(7)
@@ -133,7 +133,7 @@ class CardDefinitionTest {
         val contactInformationElement = formElements[1] as SectionElement
         val contactInformationFields = contactInformationElement.fields
 
-        val cardBillingElement = contactInformationFields[0] as CardBillingAddressElement
+        val cardBillingElement = contactInformationFields[0] as BillingAddressElement
         val billingElements = cardBillingElement.addressController.value.fieldsFlowable.value
 
         assertThat(billingElements.size).isEqualTo(6)
@@ -416,7 +416,7 @@ class CardDefinitionTest {
         )
 
         val cardBillingAddressElements = formElements.filterIsInstance<SectionElement>().map {
-            it.fields.filterIsInstance<CardBillingAddressElement>().firstOrNull()
+            it.fields.filterIsInstance<BillingAddressElement>().firstOrNull()
         }
 
         assertThat(cardBillingAddressElements).hasSize(1)
@@ -497,9 +497,9 @@ class CardDefinitionTest {
         val sectionFields = sectionElement.fields
 
         assertThat(sectionFields.size).isEqualTo(1)
-        assertThat(sectionFields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-        val addressElement = sectionFields.first() as CardBillingAddressElement
+        val addressElement = sectionFields.first() as BillingAddressElement
 
         assertThat(addressElement.countryElement.controller.displayItems)
             .hasSize(CountryUtils.supportedBillingCountries.size)
@@ -526,9 +526,9 @@ class CardDefinitionTest {
         val sectionFields = sectionElement.fields
 
         assertThat(sectionFields.size).isEqualTo(1)
-        assertThat(sectionFields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-        val addressElement = sectionFields.first() as CardBillingAddressElement
+        val addressElement = sectionFields.first() as BillingAddressElement
 
         assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
             "\uD83C\uDDFA\uD83C\uDDF8 United States",
@@ -797,7 +797,7 @@ class CardDefinitionTest {
 
     private fun createAutomaticCardBillingAddressElement(
         checkoutSessionResponse: CheckoutSessionResponse?,
-    ): CardBillingAddressElement {
+    ): BillingAddressElement {
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -809,7 +809,7 @@ class CardDefinitionTest {
 
         return formElements.filterIsInstance<SectionElement>()
             .flatMap { it.fields }
-            .filterIsInstance<CardBillingAddressElement>()
+            .filterIsInstance<BillingAddressElement>()
             .first()
     }
 
@@ -820,7 +820,7 @@ class CardDefinitionTest {
         )
     }
 
-    private fun CardBillingAddressElement.shownIdentifierParamPaths(): List<String> {
+    private fun BillingAddressElement.shownIdentifierParamPaths(): List<String> {
         return addressController.value.fieldsFlowable.value
             .filterOutHiddenIdentifiers(hiddenIdentifiers.value)
             .flatMap { field ->
