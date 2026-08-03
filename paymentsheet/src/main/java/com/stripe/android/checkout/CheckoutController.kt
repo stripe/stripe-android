@@ -63,12 +63,12 @@ class CheckoutController @Inject internal constructor(
     private val mutex = Mutex()
     private val pendingMutations = AtomicInteger(0)
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isUpdating = MutableStateFlow(false)
 
     /**
      * Whether a mutation is currently in progress.
      */
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
 
     suspend fun configure(
         checkoutSessionClientSecret: String,
@@ -304,14 +304,14 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Serializes [block] behind [mutex] so configuration and mutations run in sequence, and toggles
-     * [isLoading] while any serialized work is in flight (tracked via [pendingMutations] so
+     * [isUpdating] while any serialized work is in flight (tracked via [pendingMutations] so
      * concurrent callers share a single loading window).
      */
     private suspend fun <T> runSerialized(
         block: suspend () -> kotlin.Result<T>,
     ): kotlin.Result<T> {
         if (pendingMutations.incrementAndGet() == 1) {
-            _isLoading.value = true
+            _isUpdating.value = true
         }
         return try {
             // Run network requests with a mutex to ensure events are processed in order.
@@ -320,7 +320,7 @@ class CheckoutController @Inject internal constructor(
             }
         } finally {
             if (pendingMutations.decrementAndGet() == 0) {
-                _isLoading.value = false
+                _isUpdating.value = false
             }
         }
     }

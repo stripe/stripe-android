@@ -816,8 +816,8 @@ internal class CheckoutControllerTest {
         runMutationScenario(assertLoadingConsumed = true) {
             markIntegrationLaunched()
 
-            // The guard fast-fails before runSerialized, so isLoading must never flip to true.
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            // The guard fast-fails before runSerialized, so isUpdating must never flip to true.
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             val result = controller.configure(DEFAULT_CLIENT_SECRET)
 
@@ -825,7 +825,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `isLoading transitions to true then false on a successful mutation`() = runMutationScenario(
+    fun `isUpdating transitions to true then false on a successful mutation`() = runMutationScenario(
         assertLoadingConsumed = true,
     ) {
         networkRule.checkoutUpdate(
@@ -833,16 +833,16 @@ internal class CheckoutControllerTest {
             responseFactory = successResponseFactory(),
         )
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
         controller.applyPromotionCode("10OFF")
 
-        assertThat(isLoadingTurbine.awaitItem()).isTrue()
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
     }
 
     @Test
-    fun `isLoading stays true while queued mutations are pending`() = runMutationScenario(
+    fun `isUpdating stays true while queued mutations are pending`() = runMutationScenario(
         assertLoadingConsumed = true,
     ) {
         val holdFirstResponse = CountDownLatch(1)
@@ -857,24 +857,24 @@ internal class CheckoutControllerTest {
             responseFactory = successResponseFactory(),
         )
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
         val job1 = async { controller.applyPromotionCode("10OFF") }
         val job2 = async { controller.applyPromotionCode("20OFF") }
         testScheduler.advanceUntilIdle()
 
-        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+        assertThat(isUpdatingTurbine.awaitItem()).isTrue()
 
         holdFirstResponse.countDown()
         job1.await()
         job2.await()
 
-        // isLoading should go directly from true to false with no intermediate flicker.
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        // isUpdating should go directly from true to false with no intermediate flicker.
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
     }
 
     @Test
-    fun `isLoading transitions to true then false on a failed mutation`() = runMutationScenario(
+    fun `isUpdating transitions to true then false on a failed mutation`() = runMutationScenario(
         assertLoadingConsumed = true,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -882,17 +882,17 @@ internal class CheckoutControllerTest {
             response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
         }
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
         controller.applyPromotionCode("INVALID")
 
         // The failure path must still release the loading window via the finally block.
-        assertThat(isLoadingTurbine.awaitItem()).isTrue()
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
     }
 
     @Test
-    fun `isLoading returns to false when a queued mutation is cancelled`() = runMutationScenario(
+    fun `isUpdating returns to false when a queued mutation is cancelled`() = runMutationScenario(
         assertLoadingConsumed = true,
     ) {
         val holdFirstResponse = CountDownLatch(1)
@@ -905,27 +905,27 @@ internal class CheckoutControllerTest {
         // No mock for "20OFF": NetworkRule fails unmatched requests, so if the cancelled mutation's
         // network call fires, the test fails.
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
         val job1 = async { controller.applyPromotionCode("10OFF") }
         val job2 = async { controller.applyPromotionCode("20OFF") }
         testScheduler.advanceUntilIdle()
 
-        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+        assertThat(isUpdatingTurbine.awaitItem()).isTrue()
 
         // Prove job2 has started and is suspended waiting for the mutex, not merely unstarted.
         assertThat(job2.isActive).isTrue()
 
         job2.cancelAndJoin()
 
-        // isLoading stays true because job1 is still in-flight (shared loading window).
-        assertThat(controller.isLoading.value).isTrue()
-        isLoadingTurbine.expectNoEvents()
+        // isUpdating stays true because job1 is still in-flight (shared loading window).
+        assertThat(controller.isUpdating.value).isTrue()
+        isUpdatingTurbine.expectNoEvents()
 
         holdFirstResponse.countDown()
         job1.await()
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
     }
 
     @Test
@@ -957,24 +957,24 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `configure toggles isLoading true then false`() = runTest {
+    fun `configure toggles isUpdating true then false`() = runTest {
         networkRule.defaultInit()
         val controller = createController()
 
         turbineScope {
-            val isLoadingTurbine = controller.isLoading.testIn(backgroundScope)
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            val isUpdatingTurbine = controller.isUpdating.testIn(backgroundScope)
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
 
-            assertThat(isLoadingTurbine.awaitItem()).isTrue()
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
-            isLoadingTurbine.cancelAndIgnoreRemainingEvents()
+            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+            isUpdatingTurbine.cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `configure resets isLoading to false when the request fails`() = runTest {
+    fun `configure resets isUpdating to false when the request fails`() = runTest {
         networkRule.checkoutInit { response ->
             response.setResponseCode(500)
             response.setBody("""{"error": {"message": "Internal server error"}}""")
@@ -982,14 +982,14 @@ internal class CheckoutControllerTest {
         val controller = createController()
 
         turbineScope {
-            val isLoadingTurbine = controller.isLoading.testIn(backgroundScope)
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            val isUpdatingTurbine = controller.isUpdating.testIn(backgroundScope)
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             assertThat(controller.configure(DEFAULT_CLIENT_SECRET).isFailure).isTrue()
 
             // The failure path must still release the loading window via the finally block.
-            assertThat(isLoadingTurbine.awaitItem()).isTrue()
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -1005,13 +1005,13 @@ internal class CheckoutControllerTest {
             }
             networkRule.checkoutInit(responseFactory = successResponseFactory())
 
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             val mutation = async { controller.applyPromotionCode("10OFF") }
             val configure = async { controller.configure(DEFAULT_CLIENT_SECRET) }
             testScheduler.advanceUntilIdle()
 
-            assertThat(isLoadingTurbine.awaitItem()).isTrue()
+            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
             // configure cannot complete while the mutation holds the mutex, proving it is serialized.
             assertThat(configure.isCompleted).isFalse()
 
@@ -1020,7 +1020,7 @@ internal class CheckoutControllerTest {
             assertThat(configure.await().isSuccess).isTrue()
 
             // A single loading window spanned both operations, with no flicker to false in between.
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
         }
 
     // region allowedShippingCountries validation
@@ -1055,8 +1055,8 @@ internal class CheckoutControllerTest {
         ) {
             val before = controller.checkoutSession.value
 
-            // Fast-fail returns before runSerialized, so isLoading must never flip to true.
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            // Fast-fail returns before runSerialized, so isUpdating must never flip to true.
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             val result = controller.updateShippingAddress(
                 name = null,
@@ -1246,10 +1246,10 @@ internal class CheckoutControllerTest {
 
     // Configures a controller from a fresh init, then hands it to [block] alongside the shared
     // SavedStateHandle (used to read committed state and simulate a presented payment flow) and an
-    // isLoading Turbine.
+    // isUpdating Turbine.
     //
     // Set [assertLoadingConsumed] for tests that verify loading behavior: the block must consume
-    // every isLoading emission and this asserts none are left over. Tests that don't care about
+    // every isUpdating emission and this asserts none are left over. Tests that don't care about
     // loading leave it false, and any unconsumed emissions are ignored.
     private fun runMutationScenario(
         initModifier: (JSONObject) -> Unit = {},
@@ -1262,7 +1262,7 @@ internal class CheckoutControllerTest {
         controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
 
         turbineScope {
-            val isLoadingTurbine = controller.isLoading.testIn(backgroundScope)
+            val isUpdatingTurbine = controller.isUpdating.testIn(backgroundScope)
             // Re-derive the controller's own child handle so writes made here (selection, sheet-open)
             // are observed by the controller and vice versa.
             val childHandle = savedStateHandle.checkoutSubHandle(DEFAULT_INTEGRATION_NAME)
@@ -1272,13 +1272,13 @@ internal class CheckoutControllerTest {
                     stateHolder = CheckoutControllerStateFactory.createStateHolder(childHandle),
                     sheetStateHolder = SheetStateHolder(childHandle),
                     testScope = this@runTest,
-                    isLoadingTurbine = isLoadingTurbine,
+                    isUpdatingTurbine = isUpdatingTurbine,
                 )
             )
             if (assertLoadingConsumed) {
-                isLoadingTurbine.ensureAllEventsConsumed()
+                isUpdatingTurbine.ensureAllEventsConsumed()
             } else {
-                isLoadingTurbine.cancelAndIgnoreRemainingEvents()
+                isUpdatingTurbine.cancelAndIgnoreRemainingEvents()
             }
         }
     }
@@ -1288,7 +1288,7 @@ internal class CheckoutControllerTest {
         private val stateHolder: CheckoutControllerStateHolder,
         private val sheetStateHolder: SheetStateHolder,
         private val testScope: TestScope,
-        val isLoadingTurbine: ReceiveTurbine<Boolean>,
+        val isUpdatingTurbine: ReceiveTurbine<Boolean>,
     ) : CoroutineScope by testScope {
         val testScheduler: TestCoroutineScheduler get() = testScope.testScheduler
 
