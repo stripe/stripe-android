@@ -5,7 +5,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
@@ -69,11 +68,9 @@ class AddressTextFieldController(
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
         if (inlineAutocompleteHandler != null) {
-            val onClear = remember {
-                {
-                    _inlineQuery.value = ""
-                    inlineAutocompleteHandler.onDismissed()
-                }
+            val onClear = {
+                _inlineQuery.value = ""
+                inlineAutocompleteHandler.onDismissed()
             }
 
             Column(modifier = modifier) {
