@@ -426,9 +426,13 @@ class CheckoutController @Inject internal constructor(
     ) {
 
         /**
-         * Whether Express Checkout Element has any payment methods to display for this checkout session.
+         * The wallet payment methods currently available to the Express Checkout Element.
+         *
+         * This value updates with [CheckoutController.checkoutSession], mirroring the web Express
+         * Checkout Element's available payment methods change event.
          */
-        val isExpressCheckoutElementAvailable: Boolean = availableExpressButtonTypes.isNotEmpty()
+        val availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod> =
+            availableExpressButtonTypes.map { it.paymentMethodType }
 
         /**
          * The status of a checkout session.

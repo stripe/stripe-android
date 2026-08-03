@@ -2,12 +2,20 @@
 
 package com.stripe.android.checkout.ece
 
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 
-internal sealed class ExpressButtonType {
-    data object Link : ExpressButtonType()
+internal sealed interface ExpressButtonType {
+    val paymentMethodType: ExpressCheckoutElement.PaymentMethod
+
+    data object Link : ExpressButtonType {
+        override val paymentMethodType: ExpressCheckoutElement.PaymentMethod = ExpressCheckoutElement.PaymentMethod.Link
+    }
+
     data class GooglePay(
         val googlePayConfiguration: GooglePayConfiguration.State,
-    ) : ExpressButtonType()
+    ) : ExpressButtonType {
+        override val paymentMethodType: ExpressCheckoutElement.PaymentMethod = ExpressCheckoutElement.PaymentMethod.GooglePay
+    }
 }

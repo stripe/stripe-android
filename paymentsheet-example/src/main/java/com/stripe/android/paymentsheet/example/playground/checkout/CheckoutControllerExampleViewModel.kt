@@ -4,6 +4,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -13,6 +14,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.checkout.GooglePayConfiguration.Environment
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -36,11 +38,21 @@ internal class CheckoutControllerExampleViewModel(
     private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
 
+    private var _calledConfirm: Boolean = false
+
     val controller = CheckoutController.Builder(
         application = application,
         savedStateHandle = savedStateHandle,
     ).resultCallback { result ->
-        Log.d(TAG, "Result: $result")
+        if (_calledConfirm) {
+            // TODO: note for analytics that confirm came from PE, not ECE.
+        }
+        when (result) {
+            is CheckoutController.Result.Canceled -> TODO()
+            is CheckoutController.Result.Completed -> TODO()
+            is CheckoutController.Result.Failed -> TODO()
+        }
+        _calledConfirm = false
     }.build()
 
     init {
@@ -55,6 +67,10 @@ internal class CheckoutControllerExampleViewModel(
                 }
             }
         }
+    }
+
+    fun reportConfirm() {
+        _calledConfirm = true
     }
 
     private fun updateConfiguredState(update: (Status.Configured) -> Status.Configured) {
@@ -74,6 +90,20 @@ internal class CheckoutControllerExampleViewModel(
                             GooglePayConfiguration(
                                 environment = Environment.Test
                             )
+                        )
+                        .expressCheckoutElement(
+                            ExpressCheckoutElement.Configuration()
+                                .paymentMethods(
+                                    ExpressCheckoutElement.Configuration.PaymentMethods()
+                                        .link(ExpressCheckoutElement.Configuration.PaymentMethods.LinkVisibility.Never)
+                                        .googlePay(ExpressCheckoutElement.Configuration.PaymentMethods.GooglePayVisibility.Auto)
+                                )
+                                .appearance(
+                                    ExpressCheckoutElement.Configuration.Appearance()
+                                        .buttonHeight(48.dp)
+                                        .buttonLayout(ExpressCheckoutElement.Configuration.ButtonLayout().maxRows(10))
+                                )
+                                .shippingAddressRequired(true)
                         )
                 ).fold(
                     onSuccess = {

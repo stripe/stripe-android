@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
@@ -73,7 +74,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
-                                if (session.isExpressCheckoutElementAvailable) {
+                                if (session.availableExpressCheckoutPaymentMethods.contains(ExpressCheckoutElement.PaymentMethod.GooglePay)) {
                                     presenter.expressCheckoutElement().Content()
                                 }
                                 paymentElement.PaymentOptionsContent()
@@ -94,7 +95,10 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = { presenter.confirm() },
+                        onClick = {
+                            viewModel.reportConfirm()
+                            presenter.confirm()
+                        },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text("Confirm")
@@ -167,7 +171,9 @@ private fun LineItemsSection(session: Session) {
 
         for (item in session.lineItems) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
@@ -227,7 +233,9 @@ private fun TotalSummarySection(session: Session) {
 @Composable
 private fun SummaryRow(label: String, amount: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(text = label, style = MaterialTheme.typography.body2)
