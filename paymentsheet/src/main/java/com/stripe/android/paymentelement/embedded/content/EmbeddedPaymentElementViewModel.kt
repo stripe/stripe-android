@@ -20,7 +20,7 @@ internal class EmbeddedPaymentElementViewModel @Inject constructor(
     eventReporter: EventReporter,
 ) : ViewModel() {
     init {
-        eventReporter.onInit()
+        // eventReporter.onInit()
     }
 
     override fun onCleared() {
