@@ -106,8 +106,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_error_declined_card">Kart reddedildi. Başka bir kart deneyin.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
   <string name="stripe_nfc_scan_error_expired_card">Kartın süresi doldu. Başka bir kart deneyin.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">Mobil cüzdanlar desteklenmiyor. Fiziksel bir kart deneyin.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Kartı telefonun arkasında tutun</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">Bir hata oluştu. Başka bir kart deneyin.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">Kart desteklenmiyor. Başka bir kart deneyin.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
