@@ -137,6 +137,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                     DurationProvider.Key.PaymentLauncher,
                     DurationProvider.Key.PrepareAttestation,
                     DurationProvider.Key.Attest,
+                    DurationProvider.Key.ExpressCheckoutElement,
                     DurationProvider.Key.IntentConfirmationChallenge,
                     DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
                     DurationProvider.Key.PaymentMethodMessaging,
