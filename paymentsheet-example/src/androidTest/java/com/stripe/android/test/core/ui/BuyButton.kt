@@ -26,6 +26,21 @@ class BuyButton(
             .assertIsEnabled()
     }.isSuccess
 
+    /**
+     * Waits until the button is displayed and enabled before returning. Callers should invoke this
+     * before [click] so we never click a button that has not composed or is still disabled (e.g.
+     * while the form is validating or an intent is being created), which otherwise races.
+     */
+    fun waitForEnabled(): BuyButton {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            runCatching {
+                composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                    .assertIsDisplayed()
+            }.isSuccess && checkEnabled()
+        }
+        return this
+    }
+
     fun isEnabled() {
         composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
             .assertIsEnabled()

@@ -905,7 +905,7 @@ internal class PlaygroundTestDriver(
             testParameters = testParameters,
             executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
             afterCollectingBankInfo = {
-                composeTestRule.waitUntil { selectors.buyButton.checkEnabled() }
+                selectors.buyButton.waitForEnabled()
                 selectors.buyButton.click()
                 selectors.playgroundBuyButton.apply {
                     waitFor(isEnabled())
@@ -1124,6 +1124,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun pressBuy() {
+        selectors.buyButton.waitForEnabled()
         selectors.buyButton.click()
     }
 
@@ -1215,13 +1216,40 @@ internal class PlaygroundTestDriver(
     }
 
     /**
+     * Polls [currentActivity] until [predicate] is satisfied, bounded by [timeout]. Fails with a
+     * descriptive message on timeout instead of spinning until the 90s per-test [Timeout] rule fires
+     * with an opaque error. [currentActivity] is updated asynchronously by the activity lifecycle
+     * callbacks, so this must poll rather than read once.
+     */
+    private fun awaitActivity(
+        description: String,
+        timeout: Duration = ACTIVITY_TRANSITION_TIMEOUT,
+        onPoll: () -> Unit = {},
+        predicate: (Activity?) -> Boolean,
+    ) {
+        val deadline = System.currentTimeMillis() + timeout.inWholeMilliseconds
+        while (!predicate(currentActivity)) {
+            check(System.currentTimeMillis() < deadline) {
+                "Timed out after $timeout waiting for $description; " +
+                    "current activity was ${currentActivity?.javaClass?.name}"
+            }
+            onPoll()
+            TimeUnit.MILLISECONDS.sleep(ACTIVITY_POLL_INTERVAL_MS)
+        }
+    }
+
+    private fun awaitActivityClass(className: String) {
+        awaitActivity(description = className) { it?.javaClass?.name == className }
+    }
+
+    /**
      * Here we wait for an activity different from the playground to be in view.  We
      * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
      * that would require exposing the activities publicly.
      */
     private fun waitForNotPlaygroundActivity() {
-        while (currentActivity is PaymentSheetPlaygroundActivity) {
-            TimeUnit.MILLISECONDS.sleep(250)
+        awaitActivity(description = "an activity other than the playground") {
+            it !is PaymentSheetPlaygroundActivity
         }
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -1231,10 +1259,10 @@ internal class PlaygroundTestDriver(
      * Here we wait for the Playground to come back into view.
      */
     private fun waitForPlaygroundActivity() {
-        while (currentActivity !is PaymentSheetPlaygroundActivity) {
-            composeTestRule.waitForIdle()
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivity(
+            description = "the playground activity to return to the foreground",
+            onPoll = { composeTestRule.waitForIdle() },
+        ) { it is PaymentSheetPlaygroundActivity }
         Espresso.onIdle()
         composeTestRule.waitForIdle()
         if (!awaitWindowFocus()) {
@@ -1250,9 +1278,7 @@ internal class PlaygroundTestDriver(
     private fun waitForPollingToFinish(timeout: Duration = 60.seconds) {
         val className =
             "com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
-        while (currentActivity?.componentName?.className != className) {
-            Thread.sleep(10)
-        }
+        awaitActivity(description = className) { it?.componentName?.className == className }
 
         composeTestRule.waitUntil(timeoutMillis = timeout.inWholeMilliseconds) {
             try {
@@ -1569,9 +1595,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun cancelInstantDebitsFlowOnLaunch() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -1580,9 +1604,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun executeUsBankAccountLiteFlow() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_LITE_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_LITE_ACTIVITY)
 
         onWebView()
             .withElementByTestId("institution-default")
@@ -1606,9 +1628,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun executeUsBankAccountFlow() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
@@ -1631,9 +1651,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun executeEntireInstantDebitsFlow() = with(device) {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
@@ -1671,9 +1689,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun cancelAchLiteFlowOnLaunch() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_LITE_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_LITE_ACTIVITY)
 
         onWebView()
             .withElementByTestId("agree-button")
@@ -1689,9 +1705,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun cancelAchFlowOnLaunch() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
@@ -1841,6 +1855,11 @@ internal class PlaygroundTestDriver(
     }
 
     private companion object {
+        // Generous upper bound on activity transitions (activity resume is fast; this only bounds the
+        // failure path). Kept well under the 90s per-test Timeout so a hang surfaces a clear message.
+        val ACTIVITY_TRANSITION_TIMEOUT: Duration = 45.seconds
+        const val ACTIVITY_POLL_INTERVAL_MS = 250L
+
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
             "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
