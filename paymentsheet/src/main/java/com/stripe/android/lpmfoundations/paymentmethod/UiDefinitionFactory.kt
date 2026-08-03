@@ -185,7 +185,10 @@ internal sealed interface UiDefinitionFactory {
 
             buildFormElements(metadata, arguments, builder)
 
-            return builder.build()
+            return builder.build().withAutomaticTaxBillingAddressIfNecessary(
+                paymentMethodCode = createSupportedPaymentMethod(metadata).code,
+                arguments = arguments,
+            )
         }
 
         protected open fun buildFormElements(
@@ -302,6 +305,9 @@ internal sealed interface UiDefinitionFactory {
             createBaseFormElements(
                 metadata = metadata,
                 arguments = arguments,
+            ).withAutomaticTaxBillingAddressIfNecessary(
+                paymentMethodCode = definition.type.code,
+                arguments = arguments,
             )
         }
 
@@ -312,6 +318,9 @@ internal sealed interface UiDefinitionFactory {
                     metadata = metadata,
                     sharedDataSpec = sharedDataSpec,
                     transformSpecToElements = TransformSpecToElements(arguments),
+                    arguments = arguments,
+                ).withAutomaticTaxBillingAddressIfNecessary(
+                    paymentMethodCode = definition.type.code,
                     arguments = arguments,
                 )
             } else {

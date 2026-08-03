@@ -240,4 +240,30 @@ class BillingAddressElement(
     override fun onValidationStateChanged(isValidating: Boolean) {
         addressElement.onValidationStateChanged(isValidating)
     }
+
+    fun withAdditionalFields(
+        additionalFieldsByCountry: Map<String, Set<IdentifierSpec>>,
+        sameAsShippingElement: SameAsShippingElement?,
+    ): BillingAddressElement {
+        val widenedCollectionMode = when (val mode = configuration.addressCollectionMode) {
+            BillingAddressCollectionMode.Never -> mode
+            BillingAddressCollectionMode.Full -> mode
+            is BillingAddressCollectionMode.Country -> BillingAddressCollectionMode.Country(
+                additionalFieldsByCountry = buildMap {
+                    putAll(mode.additionalFieldsByCountry)
+                    additionalFieldsByCountry.forEach { (countryCode, additionalFields) ->
+                        merge(countryCode, additionalFields) { existing, additional -> existing + additional }
+                    }
+                }
+            )
+        }
+
+        return BillingAddressElement(
+            configuration = configuration.copy(
+                addressCollectionMode = widenedCollectionMode,
+            ),
+            countryDropdownFieldController = countryDropdownFieldController,
+            sameAsShippingElement = sameAsShippingElement,
+        )
+    }
 }
