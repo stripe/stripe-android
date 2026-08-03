@@ -6,6 +6,9 @@ NEXT_VERSION_BUMP: MINOR
 ### CryptoOnramp
 * [ADDED] Added Tempo as a supported wallet network and pinned Crypto Onramp internal API calls to the preview API version required by newer networks.
 
+### Payments
+* [FIXED] Fixed an issue where the MOTO flag was not applied to Dashboard payments confirmed through the deferred intent flow (when a `PaymentMethod` is created before confirmation), which could trigger unnecessary 3DS challenges on keyed-in card payments.
+
 ### PaymentSheet
 * [ADDED] `LinkController` now supports appearance customization via `LinkAppearance` (private preview).
 

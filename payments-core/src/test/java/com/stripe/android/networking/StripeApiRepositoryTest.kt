@@ -2726,6 +2726,84 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun `Verify moto is injected for dashboard when a paymentMethodId is already set (deferred flow)`() = runTest {
+        // Deferred intent flow: PaymentSheet has already created the PaymentMethod before
+        // confirming, so paymentMethodId is set and paymentMethodCreateParams is null.
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    PaymentMethodFixtures.CARD_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val confirmPaymentIntentParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                paymentMethodId = "pm_12345",
+                clientSecret = "pi_12345_secret_fake",
+            )
+
+        // Dashboard uses user key
+        create().confirmPaymentIntent(
+            confirmPaymentIntentParams = confirmPaymentIntentParams,
+            options = DEFAULT_OPTIONS.copy(
+                apiKey = "uk_12345"
+            )
+        )
+
+        // The PM already exists, so there is no create-payment-method call — only the confirm.
+        verify(stripeNetworkClient, times(1))
+            .executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_ID]).isEqualTo("pm_12345")
+        with(params) {
+            withNestedParams("payment_method_options") {
+                withNestedParams("card") {
+                    assertThat(this["moto"]).isEqualTo(true)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `Verify moto is not injected for a publishable key when a paymentMethodId is set`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    PaymentMethodFixtures.CARD_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val confirmPaymentIntentParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                paymentMethodId = "pm_12345",
+                clientSecret = "pi_12345_secret_fake",
+            )
+
+        // Non-dashboard caller: publishable key. maybeForDashboard must be a no-op.
+        create().confirmPaymentIntent(
+            confirmPaymentIntentParams = confirmPaymentIntentParams,
+            options = DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient, times(1))
+            .executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_ID]).isEqualTo("pm_12345")
+        // No MOTO injection, so no dashboard-specific payment_method_options are added.
+        assertThat(params).doesNotContainKey("payment_method_options")
+    }
+
+    @Test
     fun `listPaymentDetails() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(

@@ -1972,23 +1972,40 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
         options: ApiRequest.Options
     ): Result<ConfirmPaymentIntentParams> {
-        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+        if (!options.apiKeyIsUserKey) {
             return Result.success(this)
         }
 
-        // For user key auth, we must create the PM first.
-        val paymentMethodResult = createPaymentMethod(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            options = options,
-        )
+        // For user key auth with raw card params, we must create the PM first.
+        if (paymentMethodCreateParams != null) {
+            val paymentMethodResult = createPaymentMethod(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                options = options,
+            )
 
-        return paymentMethodResult.mapCatching { paymentMethod ->
-            ConfirmPaymentIntentParams.createForDashboard(
-                clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id,
-                paymentMethodOptions = paymentMethodOptions,
+            return paymentMethodResult.mapCatching { paymentMethod ->
+                ConfirmPaymentIntentParams.createForDashboard(
+                    clientSecret = clientSecret,
+                    paymentMethodId = paymentMethod.id,
+                    paymentMethodOptions = paymentMethodOptions,
+                )
+            }
+        }
+
+        // For user key auth with a pre-created PM (deferred intent flow), inject
+        // MOTO directly without re-creating the payment method.
+        if (paymentMethodId != null) {
+            return Result.success(
+                ConfirmPaymentIntentParams.createForDashboard(
+                    clientSecret = clientSecret,
+                    paymentMethodId = paymentMethodId,
+                    paymentMethodOptions = paymentMethodOptions,
+                )
             )
         }
+
+        // No PM data at all — pass through unchanged.
+        return Result.success(this)
     }
 
     private suspend fun ConfirmSetupIntentParams.maybeForDashboard(
