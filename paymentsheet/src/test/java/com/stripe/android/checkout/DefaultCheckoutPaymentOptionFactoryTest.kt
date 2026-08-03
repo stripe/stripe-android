@@ -13,6 +13,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -78,6 +79,54 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         assertThat(option).isNotNull()
         assertThat(option?.paymentMethodType).isEqualTo("card")
         assertThat(option?.mandateText).isNull()
+    }
+
+    @Test
+    fun `create populates billing details from a saved payment method`() = runScenario {
+        val option = factory.create(
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            paymentMethodMetadata = metadata,
+        )
+
+        val billingDetails = requireNotNull(option?.billingDetails)
+        assertThat(billingDetails.name).isEqualTo("Jenny Rosen")
+        assertThat(billingDetails.email).isEqualTo("jenny.rosen@example.com")
+        assertThat(billingDetails.phone).isEqualTo("123-456-7890")
+        assertThat(billingDetails.address?.line1).isEqualTo("1234 Main Street")
+        assertThat(billingDetails.address?.city).isEqualTo("San Francisco")
+        assertThat(billingDetails.address?.state).isEqualTo("CA")
+        assertThat(billingDetails.address?.postalCode).isEqualTo("94111")
+        assertThat(billingDetails.address?.country).isEqualTo("US")
+    }
+
+    @Test
+    fun `create leaves billing details null for Google Pay`() = runScenario {
+        val option = factory.create(selection = PaymentSelection.GooglePay, paymentMethodMetadata = metadata)
+
+        assertThat(option?.billingDetails).isNull()
+    }
+
+    @Test
+    fun `create leaves address null when the payment method has billing details but no address`() = runScenario {
+        val option = factory.create(
+            selection = PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = "Jenny Rosen",
+                        email = "jenny.rosen@example.com",
+                        phone = "123-456-7890",
+                        address = null,
+                    ),
+                ),
+            ),
+            paymentMethodMetadata = metadata,
+        )
+
+        val billingDetails = requireNotNull(option?.billingDetails)
+        assertThat(billingDetails.name).isEqualTo("Jenny Rosen")
+        assertThat(billingDetails.email).isEqualTo("jenny.rosen@example.com")
+        assertThat(billingDetails.phone).isEqualTo("123-456-7890")
+        assertThat(billingDetails.address).isNull()
     }
 
     @Test
