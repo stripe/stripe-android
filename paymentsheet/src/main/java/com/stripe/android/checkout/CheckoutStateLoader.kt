@@ -27,7 +27,9 @@ internal class CheckoutStateLoader @Inject constructor(
         commit(
             configuration = configuration,
             response = checkoutSessionResponse,
-            collectedDetails = CheckoutCollectedDetails(),
+            collectedDetails = CheckoutCollectedDetails(
+                billingAddress = configuration.defaultBillingAddress,
+            ),
             carryForward = CarryForward.initial(),
         )
     }

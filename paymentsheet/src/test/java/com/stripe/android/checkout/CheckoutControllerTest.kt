@@ -150,6 +150,27 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure prefills the default billing address`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaultBillingAddress(
+            CheckoutController.Address()
+                .city(" San Francisco ")
+                .country(" US ")
+                .line1(" 510 Townsend St ")
+                .postalCode(" 94103 ")
+                .state(" CA ")
+        ),
+    ) {
+        result.getOrThrow()
+
+        val billingAddress = requireNotNull(committedState?.collectedDetails?.billingAddress)
+        assertThat(billingAddress.city).isEqualTo("San Francisco")
+        assertThat(billingAddress.country).isEqualTo("US")
+        assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
+        assertThat(billingAddress.postalCode).isEqualTo("94103")
+        assertThat(billingAddress.state).isEqualTo("CA")
+    }
+
+    @Test
     fun `configure uses app name as merchant display name, not checkout session data`() =
         runConfigureScenario {
             result.getOrThrow()
