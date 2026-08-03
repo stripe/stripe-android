@@ -7,8 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -146,7 +146,7 @@ class NotificationBannerExampleActivity : BaseActivity() {
         var contentHeight by remember(manager) { mutableIntStateOf(0) }
         val bannerAlpha by animateFloatAsState(
             targetValue = if (initialLoadState == NotificationBannerView.InitialLoadState.LOADED) 1f else 0f,
-            animationSpec = tween(200),
+            animationSpec = tween(BANNER_TRANSITION_DURATION_MILLIS),
             label = "notification banner alpha",
         )
         val listener = remember(manager) {
@@ -248,8 +248,8 @@ class NotificationBannerExampleActivity : BaseActivity() {
     private fun LoadingSkeleton(visible: Boolean, appearance: HostAppearance) {
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200)),
+            enter = fadeIn(tween(BANNER_TRANSITION_DURATION_MILLIS)),
+            exit = fadeOut(tween(BANNER_TRANSITION_DURATION_MILLIS)),
         ) {
             NotificationBannerSkeleton(appearance)
         }
@@ -409,6 +409,7 @@ class NotificationBannerExampleActivity : BaseActivity() {
     )
 
     private companion object {
+        private const val BANNER_TRANSITION_DURATION_MILLIS = 200
         private const val LOG_TAG = "NotificationBanner"
         private val SAMPLE_PAYMENTS = listOf(
             Triple("Acme Coffee Co.", "Today, 9:41 AM", "\$4.50"),
