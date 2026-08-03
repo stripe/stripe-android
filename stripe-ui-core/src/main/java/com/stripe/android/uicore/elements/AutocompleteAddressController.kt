@@ -51,6 +51,14 @@ class AutocompleteAddressController(
                     interactor.onDismissed()
                 }
 
+                override fun onFocusLost() {
+                    interactor.onFocusLost()
+                }
+
+                override fun onFocusGained() {
+                    interactor.onFocusGained()
+                }
+
                 override fun onEnterManually() {
                     interactor.onEnterManuallyFromInline()
                 }

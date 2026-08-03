@@ -11,7 +11,7 @@ internal class FakePlacesClientProxy(
     var findPredictionsResult: Result<FindAutocompletePredictionsResponse>,
     var fetchPlaceResult: Result<Address>,
 ) : PlacesClientProxy {
-    var onBeforeFindPredictions: (() -> Unit)? = null
+    var onBeforeFindPredictions: (suspend () -> Unit)? = null
     var onBeforeFetchPlace: (suspend () -> Unit)? = null
 
     data class FindPredictionsCall(

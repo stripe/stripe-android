@@ -73,24 +73,25 @@ class AddressTextFieldController(
                 _inlineQuery.value = ""
                 inlineAutocompleteHandler.onDismissed()
             }
+            val predictionsState by inlineAutocompleteHandler.predictionsState.collectAsState()
+            val isDarkTheme = isSystemInDarkTheme()
 
-            Column(modifier = modifier) {
+            Column(
+                modifier = modifier.onFocusChanged { state ->
+                    if (state.hasFocus) {
+                        inlineAutocompleteHandler.onFocusGained()
+                    } else {
+                        inlineAutocompleteHandler.onFocusLost()
+                    }
+                }
+            ) {
                 AddressTextFieldUI(
                     controller = this@AddressTextFieldController,
                     enabled = enabled,
-                    modifier = Modifier.onFocusChanged { state ->
-                        if (!state.isFocused) {
-                            inlineAutocompleteHandler.onDismissed()
-                        }
-                    },
                 )
-                val predictionsState by
-                    inlineAutocompleteHandler.predictionsState.collectAsState()
-                val isDarkTheme = isSystemInDarkTheme()
                 InlineAddressPredictionsUI(
                     state = predictionsState,
-                    attributionDrawable = inlineAutocompleteHandler
-                        .getAttributionDrawable(isDarkTheme),
+                    attributionDrawable = inlineAutocompleteHandler.getAttributionDrawable(isDarkTheme),
                     onPredictionSelected = inlineAutocompleteHandler::onPredictionSelected,
                     onClear = onClear,
                     onEnterManually = inlineAutocompleteHandler::onEnterManually,

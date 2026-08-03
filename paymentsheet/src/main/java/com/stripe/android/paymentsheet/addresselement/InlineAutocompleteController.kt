@@ -81,8 +81,8 @@ internal class InlineAutocompleteController(
         val countryAtSelection = countryFlow?.value
         selectionJob = coroutineScope.launch {
             val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-            val result = placesClient.fetchPlace(predictionId, locale)
             try {
+                val result = placesClient.fetchPlace(predictionId, locale)
                 ensureActive()
                 result.fold(
                     onSuccess = { handleFetchPlaceSuccess(it) },
@@ -112,10 +112,22 @@ internal class InlineAutocompleteController(
     }
 
     fun onDismissed() {
-        if (selectionJob?.isActive != true) {
-            lastPredictionLine1 = null
-        }
+        selectionJob?.cancel()
+        lastPredictionLine1 = null
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+    }
+
+    fun onFocusLost() {
+        observeJob?.cancel()
+        selectionJob?.cancel()
+        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+    }
+
+    fun onFocusGained() {
+        if (observeJob?.isActive == true) return
+        val q = queryFlow ?: return
+        val c = countryFlow ?: return
+        observeQueryChanges(q, c)
     }
 
     fun expandFormFromInline() {

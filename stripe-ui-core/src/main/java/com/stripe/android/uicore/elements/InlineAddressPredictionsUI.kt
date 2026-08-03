@@ -79,8 +79,8 @@ internal fun InlineAddressPredictionsContent(
                 results = results,
                 onPredictionSelected = onPredictionSelected,
             )
+            PredictionsFooter(attributionDrawable = attributionDrawable)
         }
-        PredictionsFooter(attributionDrawable = attributionDrawable)
     }
 }
 
@@ -89,13 +89,11 @@ private fun PredictionsHeader(
     onEnterManually: (() -> Unit)?,
     onClear: () -> Unit,
 ) {
-    val closeIcon = remember(onClear) {
-        TextFieldIcon.Trailing(
-            idRes = R.drawable.stripe_ic_material_close,
-            isTintable = true,
-            onClick = onClear,
-        )
-    }
+    val closeIcon = TextFieldIcon.Trailing(
+        idRes = R.drawable.stripe_ic_material_close,
+        isTintable = true,
+        onClick = onClear,
+    )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
