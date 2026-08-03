@@ -553,6 +553,58 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `updateEmail sends customer_email and updates session on success`() = runMutationScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("customer_email", "checkout@example.com"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = successResponseFactory(),
+        )
+
+        val result = controller.updateEmail("checkout@example.com")
+
+        result.getOrThrow()
+        assertThat(controller.checkoutSession.value?.customerEmail).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `updateEmail trims whitespace`() = runMutationScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("customer_email", "checkout@example.com"),
+            responseFactory = successResponseFactory(),
+        )
+
+        val result = controller.updateEmail("  checkout@example.com  ")
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `updateEmail sends empty customer_email when cleared with null`() = runMutationScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("customer_email", ""),
+            responseFactory = successResponseFactory(),
+        )
+
+        val result = controller.updateEmail(null)
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `updateEmail returns failure and preserves session on error`() = runMutationScenario {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "Invalid email"}}""")
+        }
+        val before = controller.checkoutSession.value
+
+        val result = controller.updateEmail("invalid")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(controller.checkoutSession.value).isEqualTo(before)
+    }
+
+    @Test
     fun `updateShippingAddress sends tax_region and stores address when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(

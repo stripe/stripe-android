@@ -181,6 +181,18 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
+     * Updates the customer's email address.
+     *
+     * @param email The email address to set. Pass `null` to clear the customer's email.
+     * Leading/trailing whitespace is trimmed.
+     */
+    suspend fun updateEmail(
+        email: String?,
+    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
+        checkoutSessionRepository.updateEmail(sessionId, email?.trim().orEmpty())
+    }
+
+    /**
      * Sets the billing address for this checkout.
      *
      * The address is stored locally and used when presenting payment UI. If automatic tax is
