@@ -285,24 +285,25 @@ class InlineAutocompleteControllerTest {
         }
 
     @Test
-    fun `onDismissed cancels an in-flight prediction selection`() = runScenario {
+    fun `onDismissed does not cancel an in-flight prediction selection`() = runScenario {
         val fetchGate = CompletableDeferred<Unit>()
-        fakePlacesClient.fetchPlaceResult = Result.success(Address())
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            Address(line1 = "123 Main Street", country = "US")
+        )
         fakePlacesClient.onBeforeFetchPlace = { fetchGate.await() }
 
         delegate.onPredictionSelected("place_1")
         advanceTimeBy(100)
 
-        // The selection is suspended in fetchPlace; dismissing must cancel it.
         delegate.onDismissed()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
 
-        // Releasing the gate must not produce an OnValues event, since the job was cancelled.
         fetchGate.complete(Unit)
         advanceTimeBy(100)
 
         assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        eventCalls.expectNoEvents()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        eventCalls.awaitItem()
     }
 
     @Test
