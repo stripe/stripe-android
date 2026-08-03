@@ -24,6 +24,7 @@ import kotlin.time.ComparableTimeMark
 import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 internal class FaceDetectorTransitionerTest {
     private val mockNeverTimeoutClockMark = mock<ComparableTimeMark>().also {
         whenever(it.hasPassedNow()).thenReturn(false)
@@ -396,6 +397,7 @@ internal class FaceDetectorTransitionerTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `captures front right and left by default using pose when available`() = runBlocking {
         val quickCapturePage = SELFIE_CAPTURE_PAGE.copy(numSamples = 1)
         val transitioner = FaceDetectorTransitioner(
@@ -500,6 +502,7 @@ internal class FaceDetectorTransitionerTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `side capture guide progress follows left and right yaw signs`() = runBlocking {
         val quickCapturePage = SELFIE_CAPTURE_PAGE.copy(numSamples = 1)
         val transitioner = FaceDetectorTransitioner(

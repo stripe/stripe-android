@@ -49,6 +49,7 @@ import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 class DefaultIdentityRepositoryTest {
     private val mockIO = mock<IdentityIO>().also {
         whenever(it.createTFLiteFile(any())).thenReturn(mock())

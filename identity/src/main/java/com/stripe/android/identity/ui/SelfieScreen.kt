@@ -158,6 +158,16 @@ private const val LIVE_PREVIEW_BLUR_OUT_DURATION = 600
 private const val TURN_PROMPT_ARROW_DURATION = 450
 private const val CAPTURE_CHECKMARK_GROW_DURATION = 420
 private const val CAPTURE_CHECKMARK_FADE_DURATION = 340
+private const val CAPTURE_CHECKMARK_BASE_SCALE = 0.72f
+private const val CAPTURE_CHECKMARK_SCALE_GROWTH = 0.28f
+private const val CAPTURE_CHECKMARK_PATH_START_X = 0.31f
+private const val CAPTURE_CHECKMARK_PATH_START_Y = 0.52f
+private const val CAPTURE_CHECKMARK_PATH_MID_X = 0.44f
+private const val CAPTURE_CHECKMARK_PATH_MID_Y = 0.65f
+private const val CAPTURE_CHECKMARK_PATH_END_X = 0.70f
+private const val CAPTURE_CHECKMARK_PATH_END_Y = 0.38f
+private const val CAPTURE_GUIDE_WRONG_SIDE_STRENGTH_EXPONENT = 0.25f
+private const val CAPTURE_GUIDE_WRONG_SIDE_MAX_DIMMING = 0.98f
 private const val CAPTURE_CHECKMARK_TOTAL_DURATION =
     CAPTURE_CHECKMARK_GROW_DURATION + CAPTURE_CHECKMARK_FADE_DURATION
 private val HALF_PI_RADIANS = (PI / 2.0).toFloat()
@@ -335,6 +345,7 @@ private fun SelfieCaptureScreen(
     }
 }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun SelfieCameraViewFinder(
     cameraManager: IdentityCameraManager,
@@ -808,7 +819,7 @@ private fun CapturedSelfieCheckmark(
                 CAPTURE_CHECKMARK_FADE_DURATION
             ).coerceIn(0f, 1f)
     }
-    val scale = 0.72f + (0.28f * growProgress)
+    val scale = CAPTURE_CHECKMARK_BASE_SCALE + (CAPTURE_CHECKMARK_SCALE_GROWTH * growProgress)
 
     Canvas(
         modifier = modifier
@@ -826,9 +837,9 @@ private fun CapturedSelfieCheckmark(
             radius = (size.minDimension / 2f) - 1.dp.toPx()
         )
         val checkPath = Path().apply {
-            moveTo(size.width * 0.31f, size.height * 0.52f)
-            lineTo(size.width * 0.44f, size.height * 0.65f)
-            lineTo(size.width * 0.70f, size.height * 0.38f)
+            moveTo(size.width * CAPTURE_CHECKMARK_PATH_START_X, size.height * CAPTURE_CHECKMARK_PATH_START_Y)
+            lineTo(size.width * CAPTURE_CHECKMARK_PATH_MID_X, size.height * CAPTURE_CHECKMARK_PATH_MID_Y)
+            lineTo(size.width * CAPTURE_CHECKMARK_PATH_END_X, size.height * CAPTURE_CHECKMARK_PATH_END_Y)
         }
         drawPath(
             path = checkPath,
@@ -1115,6 +1126,7 @@ private fun DrawScope.captureGuideGeometry(
     )
 }
 
+@Suppress("LongMethod")
 private fun DrawScope.drawCaptureGuideTicks(
     geometry: CaptureGuideGeometry,
     captureGuideState: CaptureGuideState
@@ -1252,8 +1264,9 @@ private fun CaptureGuideState.baseTickAlpha(angle: Float): Float {
         CaptureGuideTarget.Right -> PI_RADIANS
         CaptureGuideTarget.None -> return CAPTURE_GUIDE_TICK_ALPHA
     }
-    val wrongSideStrength = max(0f, cos(angle - oppositePoleAngle)).pow(0.25f)
-    val dimmingMultiplier = 1f - (0.98f * wrongSideStrength)
+    val wrongSideStrength = max(0f, cos(angle - oppositePoleAngle))
+        .pow(CAPTURE_GUIDE_WRONG_SIDE_STRENGTH_EXPONENT)
+    val dimmingMultiplier = 1f - (CAPTURE_GUIDE_WRONG_SIDE_MAX_DIMMING * wrongSideStrength)
 
     return CAPTURE_GUIDE_TICK_ALPHA *
         dimmingMultiplier.coerceIn(0f, 1f)

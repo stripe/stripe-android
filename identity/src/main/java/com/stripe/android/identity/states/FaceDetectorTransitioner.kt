@@ -49,6 +49,7 @@ import kotlin.time.TimeSource
  * To transition from [Unsatisfied] state -
  * * Directly transitions to [Initial]
  */
+@Suppress("LargeClass")
 internal class FaceDetectorTransitioner(
     private val selfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
     internal val selfieFrameSaver: SelfieFrameSaver = SelfieFrameSaver(),

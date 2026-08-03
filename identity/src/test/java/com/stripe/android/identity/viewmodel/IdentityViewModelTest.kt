@@ -57,9 +57,9 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureModels
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieModels
 import com.stripe.android.identity.states.FaceDetectorTransitioner
@@ -1211,6 +1211,7 @@ internal class IdentityViewModelTest {
         }
     }
 
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     private fun testUploadSelfieScanSuccessResult(
         selfie: FaceDetectorTransitioner.Selfie,
         isHighRes: Boolean

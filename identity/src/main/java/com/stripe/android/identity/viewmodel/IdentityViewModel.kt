@@ -2077,6 +2077,7 @@ internal class IdentityViewModel(
      * Check the upload status of the [selfieUploadState], post it with VerificationPageData and
      * navigate accordingly.
      */
+    @Suppress("LongMethod")
     suspend fun collectDataForSelfieScreen(
         navController: NavController,
         faceDetectorTransitioner: FaceDetectorTransitioner,

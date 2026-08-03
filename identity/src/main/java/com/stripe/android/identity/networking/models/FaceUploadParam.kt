@@ -166,18 +166,17 @@ internal data class FaceFrameDataParam(
                     }
                 val compactCategories = JSONArray()
                 for (index in 0 until categories.length()) {
-                    val category = categories.optJSONObject(index) ?: continue
-                    if (!category.has(SCORE)) {
-                        continue
+                    val category = categories.optJSONObject(index)
+                    if (category != null && category.has(SCORE)) {
+                        val compactCategory = JSONObject()
+                            .put(SCORE, roundedScore(category.optDouble(SCORE)))
+                        val categoryName = category.optString(CATEGORY_NAME).takeIf { it.isNotEmpty() }
+                            ?: category.optString(DISPLAY_NAME).takeIf { it.isNotEmpty() }
+                        categoryName?.let {
+                            compactCategory.put(CATEGORY_NAME, it)
+                        }
+                        compactCategories.put(compactCategory)
                     }
-                    val compactCategory = JSONObject()
-                        .put(SCORE, roundedScore(category.optDouble(SCORE)))
-                    val categoryName = category.optString(CATEGORY_NAME).takeIf { it.isNotEmpty() }
-                        ?: category.optString(DISPLAY_NAME).takeIf { it.isNotEmpty() }
-                    categoryName?.let {
-                        compactCategory.put(CATEGORY_NAME, it)
-                    }
-                    compactCategories.put(compactCategory)
                 }
                 val compactPayload = JSONObject()
                     .put(CATEGORIES, compactCategories)
