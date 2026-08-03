@@ -3,6 +3,7 @@
     <string name="app_name">Connect Example</string>
 
     <string name="beta_all_caps">BETA</string>
+    <string name="experimental_all_caps">EXPERIMENTAL</string>
     <string name="account_onboarding">Account Onboarding</string>
     <string name="onboarding_settings">Onboarding Settings</string>
     <string name="presentation_settings">Presentation Settings</string>
@@ -11,6 +12,8 @@
     <string name="payouts_menu_subtitle">Show payout information and allow your users to perform payouts</string>
     <string name="payments">Payments</string>
     <string name="payments_menu_subtitle">Show payments and allow your users to view payment details and manage disputes</string>
+    <string name="notification_banner">Notification banner</string>
+    <string name="notification_banner_menu_subtitle">Show account notifications inline with your app content</string>
     <string name="connect_sdk_example">Connect SDK Example</string>
     <string name="customize_appearance">Customize Appearance</string>
     <string name="settings">Settings</string>

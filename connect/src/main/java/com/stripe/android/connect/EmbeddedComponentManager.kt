@@ -3,6 +3,7 @@ package com.stripe.android.connect
 import android.content.Context
 import android.view.View
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
@@ -110,6 +111,31 @@ class EmbeddedComponentManager @JvmOverloads constructor(
             embeddedComponentManager = this,
             listener = listener,
             props = props,
+            cacheKey = cacheKey,
+        )
+    }
+
+    /**
+     * Creates an inline notification banner that sizes itself to its rendered content.
+     *
+     * @param context The [Context] used to create the view.
+     * @param listener Optional listener for banner events.
+     * @param collectionOptions Specifies which account requirements Stripe collects.
+     * @param cacheKey Key used to retain the internal WebView across configuration changes.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmOverloads
+    fun createNotificationBannerView(
+        context: Context,
+        listener: NotificationBannerListener? = null,
+        collectionOptions: AccountOnboardingProps.CollectionOptions? = null,
+        cacheKey: String? = null,
+    ): NotificationBannerView {
+        return NotificationBannerView(
+            context = context,
+            notificationBannerManager = this,
+            listener = listener,
+            collectionOptions = collectionOptions,
             cacheKey = cacheKey,
         )
     }
