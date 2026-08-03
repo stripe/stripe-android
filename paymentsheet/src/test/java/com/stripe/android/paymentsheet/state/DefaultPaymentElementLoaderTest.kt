@@ -4960,7 +4960,7 @@ internal class DefaultPaymentElementLoaderTest {
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
             apiConfigurationResolver = ApiConfigurationResolver(
-                { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") }
+                { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test_123") }
             ),
             createCustomerState = CreateCustomerState(
                 paymentMethodFilter = paymentMethodFilter,

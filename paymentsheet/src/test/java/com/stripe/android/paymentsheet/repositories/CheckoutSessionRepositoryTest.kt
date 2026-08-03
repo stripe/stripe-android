@@ -41,10 +41,12 @@ class CheckoutSessionRepositoryTest {
             context = ApplicationProvider.getApplicationContext(),
             publishableKey = "pk_test_123",
         ),
-        apiConfigurationState = ApiConfiguration.State(
-            publishableKey = "pk_test_123",
-            stripeAccountId = null,
-        ),
+        apiConfigurationProvider = {
+            ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            )
+        },
     )
 
     @Test
