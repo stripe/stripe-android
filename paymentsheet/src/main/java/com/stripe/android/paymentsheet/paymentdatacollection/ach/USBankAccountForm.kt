@@ -31,7 +31,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
@@ -56,6 +55,7 @@ import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SameAsShippingElementUI
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.SectionFieldValidationController
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
@@ -102,6 +102,7 @@ internal fun USBankAccountForm(
                 sellerBusinessName = usBankAccountFormArgs.sellerBusinessName,
                 forceSetupFutureUseBehavior = usBankAccountFormArgs.forceSetupFutureUseBehavior,
                 clientAttributionMetadata = usBankAccountFormArgs.clientAttributionMetadata,
+                requiresBillingAddressForAutomaticTax = usBankAccountFormArgs.requiresBillingAddressForAutomaticTax,
             )
         },
     )
@@ -109,6 +110,7 @@ internal fun USBankAccountForm(
     val state by viewModel.currentScreenState.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
     val addressController by viewModel.addressElement.addressController.collectAsState()
+    val addressHiddenIdentifiers by viewModel.addressHiddenIdentifiers.collectAsState()
     val isEnabled = !state.isProcessing && enabled
 
     USBankAccountEmitters(
@@ -127,6 +129,9 @@ internal fun USBankAccountForm(
         emailController = viewModel.emailController,
         phoneController = viewModel.phoneController,
         addressController = addressController,
+        addressValidationController = viewModel.addressElement.sectionFieldErrorController(),
+        addressHiddenIdentifiers = addressHiddenIdentifiers,
+        showAddress = viewModel.collectingAddress,
         lastTextFieldIdentifier = lastTextFieldIdentifier,
         sameAsShippingElement = viewModel.sameAsShippingElement,
         saveForFutureUseElement = viewModel.saveForFutureUseElement,
@@ -148,6 +153,9 @@ internal fun BankAccountForm(
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
     addressController: AddressController,
+    addressValidationController: SectionFieldValidationController,
+    addressHiddenIdentifiers: Set<IdentifierSpec>,
+    showAddress: Boolean,
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
     saveForFutureUseElement: SaveForFutureUseElement,
@@ -165,6 +173,9 @@ internal fun BankAccountForm(
             emailController = emailController,
             phoneController = phoneController,
             addressController = addressController,
+            addressValidationController = addressValidationController,
+            addressHiddenIdentifiers = addressHiddenIdentifiers,
+            showAddress = showAddress,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             sameAsShippingElement = sameAsShippingElement,
             enabled = enabled
@@ -215,6 +226,9 @@ private fun BillingDetailsForm(
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
     addressController: AddressController,
+    addressValidationController: SectionFieldValidationController,
+    addressHiddenIdentifiers: Set<IdentifierSpec>,
+    showAddress: Boolean,
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
 ) {
@@ -292,10 +306,12 @@ private fun BillingDetailsForm(
                 modifier = Modifier.padding(top = 16.dp)
             )
         }
-        if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
+        if (showAddress) {
             AddressSection(
                 enabled = enabled,
                 addressController = addressController,
+                addressValidationController = addressValidationController,
+                hiddenIdentifiers = addressHiddenIdentifiers,
                 lastTextFieldIdentifier = lastTextFieldIdentifier,
                 sameAsShippingElement = sameAsShippingElement,
                 modifier = Modifier.padding(top = 16.dp)
@@ -337,11 +353,13 @@ private fun PhoneSection(
 private fun AddressSection(
     enabled: Boolean,
     addressController: AddressController,
+    addressValidationController: SectionFieldValidationController,
+    hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
     modifier: Modifier = Modifier,
 ) {
-    val validationMessage by addressController.validationMessage.collectAsState()
+    val validationMessage by addressValidationController.validationMessage.collectAsState()
 
     Box(
         modifier = Modifier
@@ -357,7 +375,7 @@ private fun AddressSection(
                 AddressElementUI(
                     enabled = enabled,
                     controller = addressController,
-                    hiddenIdentifiers = emptySet(),
+                    hiddenIdentifiers = hiddenIdentifiers,
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
                 )
             }

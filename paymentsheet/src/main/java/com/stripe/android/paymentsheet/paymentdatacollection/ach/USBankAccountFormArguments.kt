@@ -70,6 +70,7 @@ internal class USBankAccountFormArguments(
     val sellerBusinessName: String?,
     val forceSetupFutureUseBehavior: Boolean,
     val clientAttributionMetadata: ClientAttributionMetadata,
+    val requiresBillingAddressForAutomaticTax: Boolean,
 ) {
     companion object {
         fun create(
@@ -121,6 +122,8 @@ internal class USBankAccountFormArguments(
                 sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
                 forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+                requiresBillingAddressForAutomaticTax = paymentMethodMetadata.requiresBillingAddressForAutomaticTax &&
+                    instantDebits.not(),
             )
         }
 
@@ -182,6 +185,8 @@ internal class USBankAccountFormArguments(
                 sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
                 forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+                requiresBillingAddressForAutomaticTax = paymentMethodMetadata.requiresBillingAddressForAutomaticTax &&
+                    instantDebits.not(),
             )
         }
     }

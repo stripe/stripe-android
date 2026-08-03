@@ -147,6 +147,7 @@ internal class BillingDetailsCollectionScreenshotTest {
         enabled: Boolean = true,
     ) {
         paparazzi.snapshot {
+            val addressController = createAddressController(fillAddress)
             BankAccountForm(
                 state = bankFormScreenState,
                 formArgs = formArgs,
@@ -155,7 +156,11 @@ internal class BillingDetailsCollectionScreenshotTest {
                 nameController = createNameController(nameControllerInitialValue),
                 emailController = createEmailController(emailControllerInitialValue),
                 phoneController = createPhoneNumberController(phoneControllerInitialValue),
-                addressController = createAddressController(fillAddress),
+                addressController = addressController,
+                addressValidationController = addressController,
+                addressHiddenIdentifiers = emptySet(),
+                showAddress = formArgs.billingDetailsCollectionConfiguration.address ==
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 sameAsShippingElement = null,
                 saveForFutureUseElement = saveForFutureUseElement,
                 setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement,
