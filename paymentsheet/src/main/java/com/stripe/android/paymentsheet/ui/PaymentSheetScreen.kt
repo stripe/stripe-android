@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -341,11 +342,12 @@ private fun PaymentSheetContent(
     val horizontalPadding = StripeTheme.getOuterFormInsets()
     val primaryButtonBringIntoViewRequester = remember { BringIntoViewRequester() }
     val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
+    val isImeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
     RevealPrimaryButtonWhenEnabled(
         isEnabled = primaryButtonUiState?.enabled == true,
+        isImeVisible = isImeVisible,
         bringIntoViewRequester = primaryButtonBringIntoViewRequester,
-        resetKey = currentScreen,
     )
 
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
