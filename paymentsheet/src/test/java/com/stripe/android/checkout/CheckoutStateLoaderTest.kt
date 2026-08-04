@@ -58,6 +58,18 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `loadInitial commits common configuration derived from the controller configuration`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
+                .build(),
+            checkoutSessionResponse = response(merchantCountry = "US"),
+        )
+
+        assertThat(stateHolder.state?.commonConfiguration?.googlePay?.countryCode).isEqualTo("US")
+    }
+
+    @Test
     fun `loadInitial seeds collected details with default billing address`() = runScenario {
         val address = CheckoutController.Address()
             .city(" San Francisco ")
@@ -266,6 +278,11 @@ internal class CheckoutStateLoaderTest {
         collectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        commonConfiguration = CheckoutCommonConfigurationFactory("Example, Inc.").create(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = CheckoutCollectedDetails(),
+        ),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
@@ -328,6 +345,7 @@ internal class CheckoutStateLoaderTest {
         )
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(merchantDisplayName),
+            commonConfigurationFactory = CheckoutCommonConfigurationFactory(merchantDisplayName),
             flagImageResolver = flagImageResolver,
             paymentElementLoader = paymentElementLoader,
             selectionChooser = chooser,
