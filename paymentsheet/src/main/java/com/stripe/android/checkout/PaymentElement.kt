@@ -16,12 +16,20 @@ class PaymentElement @Inject internal constructor(
     private val contentHelper: EmbeddedContentHelper,
 ) {
 
+    /**
+     * A composable function that displays payment methods inline.
+     *
+     * It can present a sheet to collect more details or display saved payment methods.
+     */
     @Composable
     fun PaymentOptionsContent() {
         val embeddedContent by contentHelper.embeddedContent.collectAsState()
         embeddedContent?.Content()
     }
 
+    /**
+     * Presents a sheet for the customer to select or manage their payment method.
+     */
     fun presentPaymentOptions() {
         contentHelper.presentPaymentOptions()
     }
@@ -34,12 +42,23 @@ class PaymentElement @Inject internal constructor(
             BillingDetailsCollectionConfiguration()
         private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
 
+        /**
+         * Controls whether [PaymentOptionsContent] displays mandate text below the payment methods.
+         * Defaults to `true`.
+         *
+         * When set to `false`, you must display
+         * [CheckoutController.Session.PaymentOptionDisplayData.mandateText] to the customer yourself,
+         * near your "Buy" button, to comply with regulations.
+         */
         fun embeddedViewDisplaysMandateText(
             embeddedViewDisplaysMandateText: Boolean
         ): Configuration = apply {
             this.embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText
         }
 
+        /**
+         * Sets how billing details are collected when displaying payment methods.
+         */
         fun billingDetailsCollectionConfiguration(
             billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
         ): Configuration = apply {
