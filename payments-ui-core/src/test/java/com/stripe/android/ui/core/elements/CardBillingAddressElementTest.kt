@@ -312,7 +312,6 @@ internal class CardBillingAddressElementTest {
             rawValuesMap = emptyMap(),
             countryCodes = emptySet(),
             countryDropdownFieldController = dropdownFieldController,
-            countryElementIdentifier = IdentifierSpec.Country,
             autocompleteAddressInteractorFactory = null,
             sameAsShippingElement = null,
             shippingValuesMap = null,
@@ -383,7 +382,6 @@ internal class CardBillingAddressElementTest {
                 rawValuesMap = emptyMap(),
                 countryCodes = emptySet(),
                 countryDropdownFieldController = dropdownFieldController,
-                countryElementIdentifier = IdentifierSpec.Country,
                 autocompleteAddressInteractorFactory = {
                     object : AutocompleteAddressInteractor {
                         override val autocompleteConfig: AutocompleteAddressInteractor.Config =

@@ -44,7 +44,6 @@ internal class BillingDetailsForm(
         sameAsShippingElement = null,
         shippingValuesMap = null,
         countryCodes = allowedBillingCountries,
-        countryElementIdentifier = IdentifierSpec.Country,
         collectionConfiguration = BillingDetailsCollectionConfiguration(
             address = when (addressCollectionMode) {
                 AddressCollectionMode.Automatic ->

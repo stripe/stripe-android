@@ -79,7 +79,6 @@ class BillingAddressElement(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
     ),
-    countryElementIdentifier: IdentifierSpec,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
@@ -133,7 +132,7 @@ class BillingAddressElement(
                 emailConfig = emailConfig,
             ),
             countryElement = CountryElement(
-                identifier = countryElementIdentifier,
+                identifier = IdentifierSpec.Country,
                 controller = countryDropdownFieldController,
             ),
             shippingValuesMap = shippingValuesMap,

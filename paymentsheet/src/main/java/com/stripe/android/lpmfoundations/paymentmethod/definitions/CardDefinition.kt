@@ -290,7 +290,6 @@ private fun cardBillingElements(
         IdentifierSpec.Generic("credit_billing"),
         countryCodes = allowedCountries,
         rawValuesMap = initialValues,
-        countryElementIdentifier = IdentifierSpec.Country,
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = shippingValues,
         addressCollectionMode = cardBillingAddressCollectionMode(
