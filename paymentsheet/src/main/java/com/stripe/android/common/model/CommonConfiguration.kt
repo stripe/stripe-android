@@ -310,6 +310,10 @@ internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonC
     userOverrideCountry = null,
     appearance = PaymentSheet.Appearance(),
     allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
+    apiConfiguration = ApiConfiguration.State(
+        publishableKey = publishableKey,
+        stripeAccountId = stripeAccountId,
+    ),
 )
 
 private fun String.isEKClientSecretValid(): Boolean {
