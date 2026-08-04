@@ -63,13 +63,13 @@ class CheckoutSessionMappersTest {
     @Test
     fun `maps customerEmail`() {
         val session = createSession(customerEmail = "test@example.com")
-        assertThat(session.customerEmail).isEqualTo("test@example.com")
+        assertThat(session.email).isEqualTo("test@example.com")
     }
 
     @Test
     fun `null customerEmail maps to null`() {
         val session = createSession(customerEmail = null)
-        assertThat(session.customerEmail).isNull()
+        assertThat(session.email).isNull()
     }
 
     @Test
