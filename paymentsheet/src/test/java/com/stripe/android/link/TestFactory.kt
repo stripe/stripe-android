@@ -344,8 +344,6 @@ internal object TestFactory {
         configuration = LINK_CONFIGURATION,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         requestSurface = RequestSurface.PaymentElement,
-        publishableKey = "",
-        stripeAccountId = "",
         linkExpressMode = LinkExpressMode.DISABLED,
         linkAccountInfo = LinkAccountUpdate.Value(LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",

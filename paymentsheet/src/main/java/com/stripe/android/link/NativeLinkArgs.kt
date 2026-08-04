@@ -10,8 +10,6 @@ internal data class NativeLinkArgs(
     val configuration: LinkConfiguration,
     val paymentMethodMetadata: PaymentMethodMetadata,
     val requestSurface: RequestSurface,
-    val publishableKey: String,
-    val stripeAccountId: String?,
     val linkExpressMode: LinkExpressMode,
     val linkAccountInfo: LinkAccountUpdate.Value,
     val paymentElementCallbackIdentifier: String,

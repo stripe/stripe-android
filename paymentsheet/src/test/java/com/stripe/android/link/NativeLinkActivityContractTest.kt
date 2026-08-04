@@ -59,8 +59,6 @@ class NativeLinkActivityContractTest {
                 configuration = TestFactory.LINK_CONFIGURATION,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 requestSurface = REQUEST_SURFACE,
-                publishableKey = "pk_test_abcdefg",
-                stripeAccountId = null,
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
