@@ -427,7 +427,7 @@ class CheckoutController @Inject internal constructor(
         /**
          * The customer's email address from the checkout session.
          */
-        val customerEmail: String?,
+        val email: String?,
         /**
          * The tax computation status for this checkout session.
          */

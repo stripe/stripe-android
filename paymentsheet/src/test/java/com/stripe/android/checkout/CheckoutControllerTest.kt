@@ -584,7 +584,7 @@ internal class CheckoutControllerTest {
         val result = controller.updateEmail("checkout@example.com")
 
         result.getOrThrow()
-        assertThat(controller.session.value?.customerEmail).isEqualTo("checkout@example.com")
+        assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
     }
 
     @Test
