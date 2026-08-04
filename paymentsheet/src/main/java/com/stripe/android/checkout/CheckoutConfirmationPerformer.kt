@@ -1,6 +1,5 @@
 package com.stripe.android.checkout
 
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
@@ -27,7 +26,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {
         val state = stateHolder.state ?: return null
-        val configuration = state.embeddedConfiguration.asCommonConfiguration()
+        val configuration = state.commonConfiguration
         val confirmationOption = state.paymentSelection?.toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
