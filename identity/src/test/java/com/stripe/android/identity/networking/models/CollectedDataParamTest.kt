@@ -51,8 +51,8 @@ internal class CollectedDataParamTest {
             bestFaceScore = BEST_FACE_SCORE,
             faceScoreVariance = FACE_SCORE_VARIANCE,
             numFrames = NUM_FRAMES,
-            leftHighResResult = uploadedResult("file_left"),
-            rightHighResResult = uploadedResult("file_right")
+            leftFullFrameResult = uploadedResult("file_left"),
+            rightFullFrameResult = uploadedResult("file_right")
         ).face
 
         requireNotNull(face)

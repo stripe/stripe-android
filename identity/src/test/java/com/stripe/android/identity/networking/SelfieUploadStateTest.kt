@@ -52,7 +52,7 @@ internal class SelfieUploadStateTest {
             newResult = UPLOADED_RESULT,
             selfie = FaceDetectorTransitioner.Selfie.LEFT
         )
-        assertThat(leftUpdated.leftLowResResult).isEqualTo(Resource.success(UPLOADED_RESULT))
+        assertThat(leftUpdated.leftFullFrameResult).isEqualTo(Resource.success(UPLOADED_RESULT))
         assertThat(leftUpdated.expectedFrontResultsAreAllIdle()).isTrue()
 
         val rightUpdated = state.update(
@@ -60,7 +60,7 @@ internal class SelfieUploadStateTest {
             newResult = UPLOADED_RESULT,
             selfie = FaceDetectorTransitioner.Selfie.RIGHT
         )
-        assertThat(rightUpdated.rightLowResResult).isEqualTo(Resource.success(UPLOADED_RESULT))
+        assertThat(rightUpdated.rightFullFrameResult).isEqualTo(Resource.success(UPLOADED_RESULT))
         assertThat(rightUpdated.expectedFrontResultsAreAllIdle()).isTrue()
     }
 
@@ -104,7 +104,7 @@ internal class SelfieUploadStateTest {
                 selfie = FaceDetectorTransitioner.Selfie.LEFT,
                 message = ERROR_MESSAGE,
                 throwable = ERROR_THROWABLE
-            ).leftLowResResult
+            ).leftFullFrameResult
         ).isEqualTo(expectedError)
     }
 
@@ -118,12 +118,18 @@ internal class SelfieUploadStateTest {
         assertThat(
             state.updateLoading(isHighRes = false, selfie = FaceDetectorTransitioner.Selfie.LAST).lastLowResResult
         ).isEqualTo(Resource.loading<UploadedResult>())
-        // Side selfies only have low res results, both resolutions map to the same field.
+        // Side selfies have one full-frame result, so both resolution flags map to the same field.
         assertThat(
-            state.updateLoading(isHighRes = true, selfie = FaceDetectorTransitioner.Selfie.LEFT).leftLowResResult
+            state.updateLoading(
+                isHighRes = true,
+                selfie = FaceDetectorTransitioner.Selfie.LEFT
+            ).leftFullFrameResult
         ).isEqualTo(Resource.loading<UploadedResult>())
         assertThat(
-            state.updateLoading(isHighRes = false, selfie = FaceDetectorTransitioner.Selfie.RIGHT).rightLowResResult
+            state.updateLoading(
+                isHighRes = false,
+                selfie = FaceDetectorTransitioner.Selfie.RIGHT
+            ).rightFullFrameResult
         ).isEqualTo(Resource.loading<UploadedResult>())
     }
 

@@ -18,9 +18,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
 import com.stripe.android.uicore.text.HtmlWithCustomOnClick
 
-/**
- * Draw Html with the ability to open a web link or bottomsheet
- */
+/** Renders HTML with links that open a URL or an SDK bottom sheet. */
 @Composable
 @ExperimentalMaterialApi
 internal fun BottomSheetHTML(
@@ -43,9 +41,9 @@ internal fun BottomSheetHTML(
         annotatedStringRanges.firstOrNull()?.item?.let { urlString ->
             val uri = Uri.parse(urlString)
             when {
-                (URLUtil.isNetworkUrl(urlString)) -> {
-                    val openURL = Intent(Intent.ACTION_VIEW, uri)
-                    context.startActivity(openURL)
+                URLUtil.isNetworkUrl(urlString) -> {
+                    val openUrlIntent = Intent(Intent.ACTION_VIEW, uri)
+                    context.startActivity(openUrlIntent)
                 }
                 uri.scheme.equals(MAILTO_SCHEME, ignoreCase = true) -> {
                     val emailIntent = Intent(Intent.ACTION_SENDTO, uri)
@@ -57,19 +55,19 @@ internal fun BottomSheetHTML(
                         bottomSheetViewModel.showBottomSheet(bottomSheetContent)
                     } ?: run {
                         Log.e(
-                            BottomSheetHTMLTAG,
-                            "Fail to present buttomsheet with id $bottomSheetId"
+                            BOTTOM_SHEET_HTML_TAG,
+                            "Failed to present bottom sheet with id $bottomSheetId"
                         )
                     }
                 }
 
                 else -> {
-                    Log.e(BottomSheetHTMLTAG, "unknown url string: $urlString")
+                    Log.e(BOTTOM_SHEET_HTML_TAG, "Unknown URL string: $urlString")
                 }
             }
         }
     }
 }
 
-internal const val BottomSheetHTMLTAG = "BottomSheetHTML"
+private const val BOTTOM_SHEET_HTML_TAG = "BottomSheetHTML"
 private const val MAILTO_SCHEME = "mailto"

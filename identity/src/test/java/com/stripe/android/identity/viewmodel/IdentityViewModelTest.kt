@@ -258,9 +258,9 @@ internal class IdentityViewModelTest {
             anyOrNull(),
             anyOrNull()
         )
-        assertThat(viewModel.selfieUploadState.value.leftLowResResult.status)
+        assertThat(viewModel.selfieUploadState.value.leftFullFrameResult.status)
             .isEqualTo(Status.IDLE)
-        assertThat(viewModel.selfieUploadState.value.rightLowResResult.status)
+        assertThat(viewModel.selfieUploadState.value.rightFullFrameResult.status)
             .isEqualTo(Status.IDLE)
     }
 
@@ -343,9 +343,9 @@ internal class IdentityViewModelTest {
                 )
             )
         }
-        assertThat(viewModel.selfieUploadState.value.leftLowResResult.status)
+        assertThat(viewModel.selfieUploadState.value.leftFullFrameResult.status)
             .isEqualTo(Status.IDLE)
-        assertThat(viewModel.selfieUploadState.value.rightLowResResult.status)
+        assertThat(viewModel.selfieUploadState.value.rightFullFrameResult.status)
             .isEqualTo(Status.IDLE)
     }
 
@@ -1275,8 +1275,8 @@ internal class IdentityViewModelTest {
                     FaceDetectorTransitioner.Selfie.FIRST -> viewModel.selfieUploadState.value.firstLowResResult
                     FaceDetectorTransitioner.Selfie.BEST -> viewModel.selfieUploadState.value.bestLowResResult
                     FaceDetectorTransitioner.Selfie.LAST -> viewModel.selfieUploadState.value.lastLowResResult
-                    FaceDetectorTransitioner.Selfie.LEFT -> viewModel.selfieUploadState.value.leftLowResResult
-                    FaceDetectorTransitioner.Selfie.RIGHT -> viewModel.selfieUploadState.value.rightLowResResult
+                    FaceDetectorTransitioner.Selfie.LEFT -> viewModel.selfieUploadState.value.leftFullFrameResult
+                    FaceDetectorTransitioner.Selfie.RIGHT -> viewModel.selfieUploadState.value.rightFullFrameResult
                 }
             ).isEqualTo(
                 Resource.success(

@@ -682,20 +682,20 @@ internal class IdentityViewModel(
             emptyList()
         }
 
-        selfieUploadSpecs(sideSelfies).forEach { (selfie, isHighRes) ->
-            val selfieFrame = transitioner.frameForSelfie(selfie)
+        selfieUploadSpecs(sideSelfies).forEach { uploadSpec ->
+            val selfieFrame = transitioner.frameForSelfie(uploadSpec.selfie)
             runCatching {
                 processSelfieScanResultAndUpload(
                     originalBitmap = selfieFrame.first.cameraPreviewImage.image,
                     boundingBox = selfieFrame.second.boundingBox,
                     selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
-                    isHighRes = isHighRes,
-                    selfie = selfie
+                    isHighRes = uploadSpec.isHighRes,
+                    selfie = uploadSpec.selfie
                 )
             }.onFailure {
                 postSelfieUploadPrepError(
-                    isHighRes = isHighRes,
-                    selfie = selfie,
+                    isHighRes = uploadSpec.isHighRes,
+                    selfie = uploadSpec.selfie,
                     message = "Failed to prepare selfie image for upload",
                     throwable = it
                 )
@@ -705,21 +705,26 @@ internal class IdentityViewModel(
 
     private fun selfieUploadSpecs(
         sideSelfies: Collection<FaceDetectorTransitioner.Selfie>
-    ): List<Pair<FaceDetectorTransitioner.Selfie, Boolean>> {
+    ): List<SelfieUploadSpec> {
         return buildList {
             listOf(
                 FaceDetectorTransitioner.Selfie.FIRST,
                 FaceDetectorTransitioner.Selfie.BEST,
                 FaceDetectorTransitioner.Selfie.LAST
             ).forEach { selfie ->
-                add(selfie to true)
-                add(selfie to false)
+                add(SelfieUploadSpec(selfie = selfie, isHighRes = true))
+                add(SelfieUploadSpec(selfie = selfie, isHighRes = false))
             }
             sideSelfies.forEach { selfie ->
-                add(selfie to false)
+                add(SelfieUploadSpec(selfie = selfie, isHighRes = false))
             }
         }
     }
+
+    private data class SelfieUploadSpec(
+        val selfie: FaceDetectorTransitioner.Selfie,
+        val isHighRes: Boolean
+    )
 
     private fun cropBitmapToUpload(
         originalBitmap: Bitmap,
@@ -2122,17 +2127,17 @@ internal class IdentityViewModel(
                                 bestFocalLength = selfieBestFocalLength,
                                 bestExposureDuration = selfieBestExposureDuration,
                                 bestIsVirtualCamera = selfieBestIsVirtualCamera,
-                                leftHighResResult = if (
+                                leftFullFrameResult = if (
                                     FaceDetectorTransitioner.Selfie.LEFT in sideSelfies
                                 ) {
-                                    it.leftLowResResult.data
+                                    it.leftFullFrameResult.data
                                 } else {
                                     null
                                 },
-                                rightHighResResult = if (
+                                rightFullFrameResult = if (
                                     FaceDetectorTransitioner.Selfie.RIGHT in sideSelfies
                                 ) {
-                                    it.rightLowResResult.data
+                                    it.rightFullFrameResult.data
                                 } else {
                                     null
                                 },

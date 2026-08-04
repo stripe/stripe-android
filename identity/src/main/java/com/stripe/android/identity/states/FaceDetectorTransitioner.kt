@@ -29,13 +29,13 @@ import kotlin.time.TimeSource
  * [IdentityScanStateTransitioner] for FaceDetector model.
  *
  * To transition from [Initial] state -
- * * Check if it's timeout since the start of the scan.
+ * * Check whether the current capture phase has timed out.
  * * If waiting to capture a side pose, keep the instruction visible before saving frames.
  * * Check if a valid face is present, see [isFaceValid] for details. Save the frame and transition to Found if so.
  * * Otherwise stay in [Initial]
  *
  * To transition from [Found] state -
- * * Check if it's timeout since the start of the scan.
+ * * Check whether the current capture phase has timed out.
  * * Wait for an interval between two Found state, if the interval is not reached, keep waiting.
  * * Check if a valid face is present, save the frame and check if enough frames have been collected
  *  * If so, transition to [Satisfied]
@@ -284,17 +284,27 @@ internal class FaceDetectorTransitioner(
                 }
             }
 
-            else -> {
-                Log.d(TAG, "Valid face not found, stay in Initial")
-                if (shouldRefreshInitialAfterSidePrompt ||
-                    shouldRefreshInitialForCaptureGuideProgress(previousCaptureGuideProgress) ||
-                    initialState.feedbackRes != moveCloserFeedbackRes()
-                ) {
-                    initialState.withFeedback(moveCloserFeedbackRes())
-                } else {
-                    initialState
-                }
-            }
+            else -> refreshInitialStateIfNeeded(
+                initialState = initialState,
+                sidePromptCompleted = shouldRefreshInitialAfterSidePrompt,
+                previousCaptureGuideProgress = previousCaptureGuideProgress
+            )
+        }
+    }
+
+    private fun refreshInitialStateIfNeeded(
+        initialState: Initial,
+        sidePromptCompleted: Boolean,
+        previousCaptureGuideProgress: Float
+    ): Initial {
+        Log.d(TAG, "Valid face not found, stay in Initial")
+        return if (sidePromptCompleted ||
+            shouldRefreshInitialForCaptureGuideProgress(previousCaptureGuideProgress) ||
+            initialState.feedbackRes != moveCloserFeedbackRes()
+        ) {
+            initialState.withFeedback(moveCloserFeedbackRes())
+        } else {
+            initialState
         }
     }
 
@@ -555,7 +565,6 @@ internal class FaceDetectorTransitioner(
     }
 
     private fun updateCaptureGuideProgress(analyzerOutput: FaceDetectorOutput) {
-        val previousProgress = captureGuideProgress
         captureGuideProgress = when (activeCapture) {
             Capture.FRONT -> 0f
             Capture.LEFT,
@@ -568,10 +577,6 @@ internal class FaceDetectorTransitioner(
                 }
             }
         }
-        logCaptureGuideProgress(
-            analyzerOutput = analyzerOutput,
-            previousProgress = previousProgress
-        )
     }
 
     private fun captureGuideProgressForPose(capture: Capture, yaw: Float): Float {
@@ -580,32 +585,6 @@ internal class FaceDetectorTransitioner(
             Capture.RIGHT -> -yaw / SIDE_CAPTURE_YAW_THRESHOLD_DEGREES
             Capture.FRONT -> 0f
         }.coerceIn(0f, 1f)
-    }
-
-    private fun logCaptureGuideProgress(
-        analyzerOutput: FaceDetectorOutput,
-        previousProgress: Float
-    ) {
-        if (activeCapture == Capture.FRONT) {
-            return
-        }
-
-        val pose = analyzerOutput.pose
-        Log.d(
-            TAG,
-            "Selfie side capture pose " +
-                "activeCapture=$activeCapture, " +
-                "score=${analyzerOutput.resultScore}, " +
-                "faceScoreOk=${isFaceScoreOverThreshold(analyzerOutput.resultScore)}, " +
-                "bbox=${analyzerOutput.boundingBox}, " +
-                "fullFrameBBox=${analyzerOutput.fullFrameBoundingBox}, " +
-                "pose=$pose, " +
-                "yaw=${pose?.yaw}, " +
-                "pitch=${pose?.pitch}, " +
-                "roll=${pose?.roll}, " +
-                "progress=$previousProgress->$captureGuideProgress, " +
-                "threshold=$SIDE_CAPTURE_YAW_THRESHOLD_DEGREES"
-        )
     }
 
     private fun rememberSideCaptureFallbackFrame(

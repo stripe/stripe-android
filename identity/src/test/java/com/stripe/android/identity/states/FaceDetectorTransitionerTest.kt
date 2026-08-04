@@ -2,6 +2,7 @@ package com.stripe.android.identity.states
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeFilePurpose
+import com.stripe.android.identity.R
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorOutput
@@ -113,6 +114,87 @@ internal class FaceDetectorTransitionerTest {
         assertThat(
             resultState
         ).isInstanceOf(IdentityScanState.Initial::class.java)
+    }
+
+    @Test
+    fun `Initial shows move closer after three consecutive too-far frames`() = runBlocking {
+        val transitioner = FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
+        var initialState = IdentityScanState.Initial(
+            IdentityScanState.ScanType.SELFIE,
+            transitioner
+        )
+
+        repeat(2) {
+            initialState = transitioner.transitionFromInitial(
+                initialState,
+                mock(),
+                TOO_FAR_OUTPUT
+            ) as IdentityScanState.Initial
+            assertThat(initialState.feedbackRes).isNull()
+        }
+
+        val resultState = transitioner.transitionFromInitial(
+            initialState,
+            mock(),
+            TOO_FAR_OUTPUT
+        ) as IdentityScanState.Initial
+
+        assertThat(resultState.feedbackRes)
+            .isEqualTo(R.string.stripe_selfie_move_closer)
+    }
+
+    @Test
+    fun `Initial resets move closer streak after a non-qualifying frame`() = runBlocking {
+        val transitioner = FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
+        var initialState = IdentityScanState.Initial(
+            IdentityScanState.ScanType.SELFIE,
+            transitioner
+        )
+
+        repeat(2) {
+            initialState = transitioner.transitionFromInitial(
+                initialState,
+                mock(),
+                TOO_FAR_OUTPUT
+            ) as IdentityScanState.Initial
+        }
+        initialState = transitioner.transitionFromInitial(
+            initialState,
+            mock(),
+            OFF_CENTER_OUTPUT
+        ) as IdentityScanState.Initial
+        repeat(2) {
+            initialState = transitioner.transitionFromInitial(
+                initialState,
+                mock(),
+                TOO_FAR_OUTPUT
+            ) as IdentityScanState.Initial
+        }
+
+        assertThat(initialState.feedbackRes).isNull()
+    }
+
+    @Test
+    fun `Initial validates MediaPipe face using full-frame bounding box`() = runBlocking {
+        val transitioner = FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
+        val mediaPipeOutput = VALID_OUTPUT.copy(
+            boundingBox = BoundingBox(0f, 0f, 0.1f, 0.1f),
+            fullFrameBoundingBox = VALID_OUTPUT.boundingBox
+        )
+
+        val resultState = transitioner.transitionFromInitial(
+            IdentityScanState.Initial(
+                IdentityScanState.ScanType.SELFIE,
+                transitioner
+            ),
+            mock(),
+            mediaPipeOutput
+        )
+
+        assertThat(resultState).isInstanceOf(IdentityScanState.Found::class.java)
     }
 
     @Test
@@ -815,6 +897,26 @@ internal class FaceDetectorTransitionerTest {
                 0.6f
             ),
             resultScore = INVALID_SCORE
+        )
+
+        val TOO_FAR_OUTPUT = FaceDetectorOutput(
+            boundingBox = BoundingBox(
+                left = 0.4f,
+                top = 0.4f,
+                width = 0.2f,
+                height = 0.2f
+            ),
+            resultScore = VALID_SCORE
+        )
+
+        val OFF_CENTER_OUTPUT = FaceDetectorOutput(
+            boundingBox = BoundingBox(
+                left = 0f,
+                top = 0f,
+                width = 0.2f,
+                height = 0.2f
+            ),
+            resultScore = VALID_SCORE
         )
     }
 }

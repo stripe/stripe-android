@@ -3,7 +3,6 @@ package com.stripe.android.identity.ml
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Base64
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.components.containers.Category
@@ -57,7 +56,7 @@ internal class MediaPipeFaceDetectorAnalyzer(
         inferenceStat.trackResult()
 
         val landmarks = result.faceLandmarks().firstOrNull()
-        val output = if (landmarks.isNullOrEmpty()) {
+        return if (landmarks.isNullOrEmpty()) {
             FaceDetectorOutput(
                 boundingBox = EMPTY_BOUNDING_BOX,
                 resultScore = 0f,
@@ -76,17 +75,6 @@ internal class MediaPipeFaceDetectorAnalyzer(
                 )
             )
         }
-
-        Log.d(
-            TAG,
-            "MediaPipeFaceDetectorAnalyzer output " +
-                "score=${output.resultScore}, " +
-                "bbox=${output.boundingBox}, " +
-                "fullFrameBBox=${output.fullFrameBoundingBox}, " +
-                "pose=${output.pose}, " +
-                "state=${state::class.simpleName}"
-        )
-        return output
     }
 
     override fun close() {
@@ -122,8 +110,6 @@ internal class MediaPipeFaceDetectorAnalyzer(
         private const val MEDIA_PIPE_FACE_SCORE = 1f
         private const val MAX_LANDMARK_RESULT_DECIMALS = 4
         private val EMPTY_BOUNDING_BOX = BoundingBox(0f, 0f, 0f, 0f)
-        val TAG: String = MediaPipeFaceDetectorAnalyzer::class.java.simpleName
-
         fun assertAvailable(context: Context) {
             createFaceLandmarker(context).close()
         }

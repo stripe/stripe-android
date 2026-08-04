@@ -16,8 +16,8 @@ internal data class SelfieUploadState(
     val lastLowResResult: Resource<UploadedResult> = Resource.idle(),
     val bestHighResResult: Resource<UploadedResult> = Resource.idle(),
     val bestLowResResult: Resource<UploadedResult> = Resource.idle(),
-    val leftLowResResult: Resource<UploadedResult> = Resource.idle(),
-    val rightLowResResult: Resource<UploadedResult> = Resource.idle()
+    val leftFullFrameResult: Resource<UploadedResult> = Resource.idle(),
+    val rightFullFrameResult: Resource<UploadedResult> = Resource.idle()
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -28,8 +28,8 @@ internal data class SelfieUploadState(
         lastLowResResult,
         bestHighResResult,
         bestLowResResult,
-        leftLowResResult,
-        rightLowResResult
+        leftFullFrameResult,
+        rightFullFrameResult
     )
 
     fun update(
@@ -55,12 +55,12 @@ internal data class SelfieUploadState(
             }
             FaceDetectorTransitioner.Selfie.LEFT -> {
                 this.copy(
-                    leftLowResResult = Resource.success(newResult)
+                    leftFullFrameResult = Resource.success(newResult)
                 )
             }
             FaceDetectorTransitioner.Selfie.RIGHT -> {
                 this.copy(
-                    rightLowResResult = Resource.success(newResult)
+                    rightFullFrameResult = Resource.success(newResult)
                 )
             }
         }
@@ -83,12 +83,12 @@ internal data class SelfieUploadState(
             }
             FaceDetectorTransitioner.Selfie.LEFT -> {
                 this.copy(
-                    leftLowResResult = Resource.success(newResult)
+                    leftFullFrameResult = Resource.success(newResult)
                 )
             }
             FaceDetectorTransitioner.Selfie.RIGHT -> {
                 this.copy(
-                    rightLowResResult = Resource.success(newResult)
+                    rightFullFrameResult = Resource.success(newResult)
                 )
             }
         }
@@ -118,12 +118,12 @@ internal data class SelfieUploadState(
             }
             FaceDetectorTransitioner.Selfie.LEFT -> {
                 this.copy(
-                    leftLowResResult = Resource.error(msg = message, throwable = throwable)
+                    leftFullFrameResult = Resource.error(msg = message, throwable = throwable)
                 )
             }
             FaceDetectorTransitioner.Selfie.RIGHT -> {
                 this.copy(
-                    rightLowResResult = Resource.error(msg = message, throwable = throwable)
+                    rightFullFrameResult = Resource.error(msg = message, throwable = throwable)
                 )
             }
         }
@@ -146,12 +146,12 @@ internal data class SelfieUploadState(
             }
             FaceDetectorTransitioner.Selfie.LEFT -> {
                 this.copy(
-                    leftLowResResult = Resource.error(msg = message, throwable = throwable)
+                    leftFullFrameResult = Resource.error(msg = message, throwable = throwable)
                 )
             }
             FaceDetectorTransitioner.Selfie.RIGHT -> {
                 this.copy(
-                    rightLowResResult = Resource.error(msg = message, throwable = throwable)
+                    rightFullFrameResult = Resource.error(msg = message, throwable = throwable)
                 )
             }
         }
@@ -195,37 +195,15 @@ internal data class SelfieUploadState(
             }
         }
         FaceDetectorTransitioner.Selfie.LEFT -> {
-            if (isHighRes) {
-                this.copy(
-                    leftLowResResult = Resource.loading()
-                )
-            } else {
-                this.copy(
-                    leftLowResResult = Resource.loading()
-                )
-            }
+            this.copy(leftFullFrameResult = Resource.loading())
         }
         FaceDetectorTransitioner.Selfie.RIGHT -> {
-            if (isHighRes) {
-                this.copy(
-                    rightLowResResult = Resource.loading()
-                )
-            } else {
-                this.copy(
-                    rightLowResResult = Resource.loading()
-                )
-            }
+            this.copy(rightFullFrameResult = Resource.loading())
         }
     }
 
-    fun hasError(sideSelfies: Collection<FaceDetectorTransitioner.Selfie> = SIDE_SELFIES): Boolean {
-        expectedResults(sideSelfies).forEach { result ->
-            if (result.status == Status.ERROR) {
-                return true
-            }
-        }
-        return false
-    }
+    fun hasError(sideSelfies: Collection<FaceDetectorTransitioner.Selfie> = SIDE_SELFIES): Boolean =
+        expectedResults(sideSelfies).any { it.status == Status.ERROR }
 
     fun getError(sideSelfies: Collection<FaceDetectorTransitioner.Selfie> = SIDE_SELFIES): Throwable {
         StringBuilder().let { errorMessageBuilder ->
@@ -238,23 +216,10 @@ internal data class SelfieUploadState(
         }
     }
 
-    fun isAnyLoading(): Boolean {
-        allResults.forEach { result ->
-            if (result.status == Status.LOADING) {
-                return true
-            }
-        }
-        return false
-    }
+    fun isAnyLoading(): Boolean = allResults.any { it.status == Status.LOADING }
 
-    fun isAllUploaded(sideSelfies: Collection<FaceDetectorTransitioner.Selfie> = SIDE_SELFIES): Boolean {
-        expectedResults(sideSelfies).forEach { result ->
-            if (result.status != Status.SUCCESS) {
-                return false
-            }
-        }
-        return true
-    }
+    fun isAllUploaded(sideSelfies: Collection<FaceDetectorTransitioner.Selfie> = SIDE_SELFIES): Boolean =
+        expectedResults(sideSelfies).all { it.status == Status.SUCCESS }
 
     fun isIdle(sideSelfies: Collection<FaceDetectorTransitioner.Selfie> = SIDE_SELFIES) =
         expectedResults(sideSelfies).all { it.status == Status.IDLE }
@@ -269,10 +234,10 @@ internal data class SelfieUploadState(
         add(bestHighResResult)
         add(bestLowResResult)
         if (FaceDetectorTransitioner.Selfie.LEFT in sideSelfies) {
-            add(leftLowResResult)
+            add(leftFullFrameResult)
         }
         if (FaceDetectorTransitioner.Selfie.RIGHT in sideSelfies) {
-            add(rightLowResResult)
+            add(rightFullFrameResult)
         }
     }
 
