@@ -8,12 +8,15 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.nfcscan.analytics.NfcScanCancellationReason
 import com.stripe.android.common.nfcscan.analytics.NfcScanningEventReporter
 import com.stripe.android.common.nfcscan.scanner.NfcCardScanner
+import com.stripe.android.common.nfcscan.scanner.NfcScanningError
 import com.stripe.android.common.nfcscan.scanner.ScannedCardData
 import com.stripe.android.common.nfcscan.tapzone.TapZoneResolver
 import com.stripe.android.common.nfcscan.ui.HapticFeedbackType
 import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -80,14 +83,17 @@ internal class NfcScanningViewModel @Inject constructor(
                         _viewState.emit(
                             NfcScanningViewState(
                                 tapZone = tapZone,
-                                status = NfcScanningStatus.Idle(error = error.userMessage),
+                                status = NfcScanningStatus.Idle(
+                                    error = if (error is NfcScanningError) {
+                                        error.userMessage
+                                    } else {
+                                        R.string.stripe_tap_to_add_card_default_error_action.resolvableString
+                                    }
+                                ),
                             )
                         )
 
-                        eventReporter.onNfcScanAttemptFailed(
-                            errorCode = error.code,
-                            parameters = error.parameters,
-                        )
+                        eventReporter.onNfcScanAttemptFailed(error)
                     }
                     is NfcCardScanner.State.Complete -> {
                         timeoutManager.cancel()

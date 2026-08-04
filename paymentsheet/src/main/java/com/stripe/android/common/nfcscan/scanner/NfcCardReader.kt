@@ -7,27 +7,19 @@ import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.pdol.PdolBuilder
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import javax.inject.Inject
 import kotlin.collections.plusAssign
 import kotlin.coroutines.CoroutineContext
 
 internal interface NfcCardReader {
-    interface ErrorCreator {
-        fun create(error: Throwable): Result.Error
-    }
-
     suspend fun readCard(transceiver: NfcTagTransceiver): Result
 
     sealed interface Result {
         data class Found(val scannedCardData: ScannedCardData) : Result
-        data class Error(
-            val errorCode: String,
-            val userMessage: ResolvableString,
-            val parameters: Map<String, String> = emptyMap(),
-        ) : Result
+        data class Error(val error: Throwable) : Result
     }
 }
 
@@ -35,21 +27,24 @@ internal class ApduCardReader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val pdolBuilder: PdolBuilder,
-    private val errorMapper: NfcCardReader.ErrorCreator,
     private val cardDataParser: NfcCardDataParser,
 ) : NfcCardReader {
     override suspend fun readCard(transceiver: NfcTagTransceiver): NfcCardReader.Result {
         return runCatching {
             readFromTransceiver(transceiver)
         }.fold(
-            onSuccess = { it },
-            onFailure = errorMapper::create,
+            onSuccess = {
+                NfcCardReader.Result.Found(it)
+            },
+            onFailure = {
+                NfcCardReader.Result.Error(mapError(it))
+            },
         )
     }
 
     private suspend fun readFromTransceiver(
         transceiver: NfcTagTransceiver
-    ): NfcCardReader.Result = withContext(workContext) {
+    ): ScannedCardData = withContext(workContext) {
         try {
             transceiver.open()
 
@@ -83,17 +78,23 @@ internal class ApduCardReader @Inject constructor(
                 }
             }
 
-            when (val parseResult = cardDataParser.parse(records)) {
-                is NfcCardDataParser.Result.Success -> NfcCardReader.Result.Found(
-                    scannedCardData = parseResult.cardData
-                )
-                is NfcCardDataParser.Result.Error -> NfcCardReader.Result.Error(
-                    errorCode = parseResult.errorCode,
-                    userMessage = parseResult.userMessage,
-                )
-            }
+            cardDataParser.parse(records)
         } finally {
             transceiver.close()
         }
+    }
+
+    private fun mapError(error: Throwable): Throwable {
+        return when (error) {
+            is NfcScanningError -> error
+            is SecurityException -> GenericNfcScanningError(TRANSCEIVER_SECURITY_ERROR_CODE)
+            is IOException -> GenericNfcScanningError(TRANSCEIVER_IO_ERROR_CODE)
+            else -> error
+        }
+    }
+
+    private companion object {
+        const val TRANSCEIVER_SECURITY_ERROR_CODE = "nfcTransceiverSecurityError"
+        const val TRANSCEIVER_IO_ERROR_CODE = "nfcTransceiverIoError"
     }
 }
