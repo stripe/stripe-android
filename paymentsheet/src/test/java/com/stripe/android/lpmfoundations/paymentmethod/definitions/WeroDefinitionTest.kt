@@ -105,7 +105,11 @@ class WeroDefinitionTest {
         val section = element as SectionElement
         assertThat(section.fields).hasSize(1)
         val addressElement = section.fields[0] as BillingAddressElement
-        assertThat(addressElement.countryElement.controller.displayItems).hasSize(3)
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "🇧🇪 Belgium",
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
         assertThat(addressElement.hiddenIdentifiers.value).containsAtLeast(
             IdentifierSpec.Line1,
             IdentifierSpec.City,
