@@ -126,11 +126,13 @@ interface CustomerAdapter {
                     customerEphemeralKeyProvider = customerEphemeralKeyProvider,
                     setupIntentClientSecretProvider = setupIntentClientSecretProvider,
                     paymentMethodTypes = paymentMethodTypes,
-                    apiConfigurationState = PaymentConfiguration.getInstance(context).let {
-                        ApiConfiguration.State(
-                            publishableKey = it.publishableKey,
-                            stripeAccountId = it.stripeAccountId,
-                        )
+                    apiConfigurationProvider = {
+                        PaymentConfiguration.getInstance(context).let {
+                            ApiConfiguration.State(
+                                publishableKey = it.publishableKey,
+                                stripeAccountId = it.stripeAccountId,
+                            )
+                        }
                     },
                 )
             return component.stripeCustomerAdapter

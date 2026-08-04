@@ -41,7 +41,7 @@ internal interface StripeCustomerAdapterComponent {
             @BindsInstance customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
             @BindsInstance setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
             @BindsInstance paymentMethodTypes: List<String>?,
-            @BindsInstance apiConfigurationState: ApiConfiguration.State,
+            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
         ): StripeCustomerAdapterComponent
     }
 }
@@ -49,6 +49,11 @@ internal interface StripeCustomerAdapterComponent {
 @Module
 internal interface StripeCustomerAdapterModule {
     companion object {
+        @Provides
+        fun provideApiConfigurationState(
+            apiConfigurationProvider: () -> ApiConfiguration.State
+        ): ApiConfiguration.State = apiConfigurationProvider()
+
         @Provides
         fun providePrefsRepositoryFactory(
             appContext: Context,
