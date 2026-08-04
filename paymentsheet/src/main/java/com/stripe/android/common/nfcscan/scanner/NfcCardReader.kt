@@ -19,7 +19,7 @@ internal interface NfcCardReader {
 
     sealed interface Result {
         data class Found(val scannedCardData: ScannedCardData) : Result
-        data class Error(val error: Throwable) : Result
+        data class Error(val error: NfcScanningError) : Result
     }
 }
 
@@ -33,9 +33,7 @@ internal class ApduCardReader @Inject constructor(
         return runCatching {
             readFromTransceiver(transceiver)
         }.fold(
-            onSuccess = {
-                NfcCardReader.Result.Found(it)
-            },
+            onSuccess = { it },
             onFailure = {
                 NfcCardReader.Result.Error(mapError(it))
             },
@@ -44,7 +42,7 @@ internal class ApduCardReader @Inject constructor(
 
     private suspend fun readFromTransceiver(
         transceiver: NfcTagTransceiver
-    ): ScannedCardData = withContext(workContext) {
+    ): NfcCardReader.Result = withContext(workContext) {
         try {
             transceiver.open()
 
@@ -78,22 +76,30 @@ internal class ApduCardReader @Inject constructor(
                 }
             }
 
-            cardDataParser.parse(records)
+            when (val parseResult = cardDataParser.parse(records)) {
+                is NfcCardDataParser.Result.Success -> NfcCardReader.Result.Found(
+                    scannedCardData = parseResult.cardData
+                )
+                is NfcCardDataParser.Result.Error -> NfcCardReader.Result.Error(
+                    error = parseResult.error
+                )
+            }
         } finally {
             transceiver.close()
         }
     }
 
-    private fun mapError(error: Throwable): Throwable {
+    private fun mapError(error: Throwable): NfcScanningError {
         return when (error) {
             is NfcScanningError -> error
             is SecurityException -> GenericNfcScanningError(TRANSCEIVER_SECURITY_ERROR_CODE)
             is IOException -> GenericNfcScanningError(TRANSCEIVER_IO_ERROR_CODE)
-            else -> error
+            else -> GenericNfcScanningError(UNKNOWN_NFC_ERROR)
         }
     }
 
     private companion object {
+        const val UNKNOWN_NFC_ERROR = "unknownNfcError"
         const val TRANSCEIVER_SECURITY_ERROR_CODE = "nfcTransceiverSecurityError"
         const val TRANSCEIVER_IO_ERROR_CODE = "nfcTransceiverIoError"
     }

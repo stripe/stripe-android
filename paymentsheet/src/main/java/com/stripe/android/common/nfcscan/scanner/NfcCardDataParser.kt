@@ -6,31 +6,32 @@ import javax.inject.Inject
 import kotlin.collections.joinToString
 
 internal interface NfcCardDataParser {
-    fun parse(records: Map<String, ByteArray>): ScannedCardData
+    fun parse(records: Map<String, ByteArray>): Result
+
+    sealed interface Result {
+        data class Success(val cardData: ScannedCardData) : Result
+        data class Error(val error: NfcScanningError) : Result
+    }
 }
 
 internal class DefaultNfcCardDataParser @Inject constructor() : NfcCardDataParser {
-    override fun parse(records: Map<String, ByteArray>): ScannedCardData {
-        val parsingError = if (isMobileWallet(records)) {
-            GenericNfcScanningError(
-                errorCode = MOBILE_WALLET_UNSUPPORTED_ERROR_CODE,
-                userMessage = R.string.stripe_nfc_scan_error_mobile_wallet.resolvableString,
+    override fun parse(records: Map<String, ByteArray>): NfcCardDataParser.Result {
+        if (isMobileWallet(records)) {
+            return NfcCardDataParser.Result.Error(
+                GenericNfcScanningError(
+                    errorCode = MOBILE_WALLET_UNSUPPORTED_ERROR_CODE,
+                    userMessage = R.string.stripe_nfc_scan_error_mobile_wallet.resolvableString,
+                )
             )
-        } else if (isTokenized(records)) {
-            unsupportedCardError()
-        } else {
-            null
         }
 
-        parsingError?.run {
-            throw this
+        if (isTokenized(records)) {
+            return unsupportedCardError()
         }
 
         return when (val cardData = extractCardData(records)) {
-            is ScannedCardData -> cardData
-            null -> {
-                throw unsupportedCardError()
-            }
+            is ScannedCardData -> NfcCardDataParser.Result.Success(cardData)
+            null -> unsupportedCardError()
         }
     }
 
@@ -114,10 +115,12 @@ internal class DefaultNfcCardDataParser @Inject constructor() : NfcCardDataParse
         return month to year
     }
 
-    private fun unsupportedCardError(): NfcScanningError {
-        return GenericNfcScanningError(
-            errorCode = CARD_UNSUPPORTED_ERROR_CODE,
-            userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+    private fun unsupportedCardError(): NfcCardDataParser.Result.Error {
+        return NfcCardDataParser.Result.Error(
+            GenericNfcScanningError(
+                errorCode = CARD_UNSUPPORTED_ERROR_CODE,
+                userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+            )
         )
     }
 

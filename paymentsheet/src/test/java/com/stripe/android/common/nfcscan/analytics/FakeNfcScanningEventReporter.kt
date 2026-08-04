@@ -1,11 +1,13 @@
 package com.stripe.android.common.nfcscan.analytics
 
 import app.cash.turbine.Turbine
+import com.stripe.android.common.nfcscan.scanner.NfcScanningError
+
 internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
     val onNfcScanStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptSucceededCalls = Turbine<Unit>()
-    val onNfcScanAttemptFailedCalls = Turbine<Throwable>()
+    val onNfcScanAttemptFailedCalls = Turbine<NfcScanningError>()
     val onNfcScanSucceededCalls = Turbine<Int>()
     val onNfcScanCancelledCalls = Turbine<NfcScanCancelledCall>()
 
@@ -26,7 +28,7 @@ internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
         onNfcScanAttemptSucceededCalls.add(Unit)
     }
 
-    override fun onNfcScanAttemptFailed(error: Throwable) {
+    override fun onNfcScanAttemptFailed(error: NfcScanningError) {
         onNfcScanAttemptFailedCalls.add(error)
     }
 

@@ -3,14 +3,13 @@ package com.stripe.android.common.nfcscan.scanner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
-import org.junit.Assert.assertThrows
 import org.junit.Test
 
 internal class DefaultNfcCardDataParserTest {
     private val parser = DefaultNfcCardDataParser()
 
     @Test
-    fun `parse throws card data from Track 2 equivalent data when available, preferring it over PAN & expiry tags`() {
+    fun `parse returns card data from Track 2 equivalent data when available, preferring it over PAN & expiry tags`() {
         val result = parser.parse(
             mapOf(
                 TAG_TRACK2 to hexToBytes("4111111111111111D2512101"),
@@ -20,51 +19,47 @@ internal class DefaultNfcCardDataParserTest {
         )
 
         assertThat(result).isEqualTo(
-            ScannedCardData(
-                cardNumber = "4111111111111111",
-                expirationMonth = 12,
-                expirationYear = 2025,
+            NfcCardDataParser.Result.Success(
+                ScannedCardData(
+                    cardNumber = "4111111111111111",
+                    expirationMonth = 12,
+                    expirationYear = 2025,
+                ),
             ),
         )
     }
 
     @Test
-    fun `parse throws unsupported card error when Track 2 is missing field separator`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(
-                mapOf(
-                    TAG_TRACK2 to hexToBytes("4111111111111111"),
-                ),
-            )
-        }
+    fun `parse returns unsupported card error when Track 2 is missing field separator`() {
+        val result = parser.parse(
+            mapOf(
+                TAG_TRACK2 to hexToBytes("4111111111111111"),
+            ),
+        )
 
-        assertUnsupportedCardError(error)
+        assertUnsupportedCardError(result)
     }
 
     @Test
-    fun `parse throws unsupported card error when Track 2 expiry is truncated`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(
-                mapOf(
-                    TAG_TRACK2 to hexToBytes("4111111111111111D25"),
-                ),
-            )
-        }
+    fun `parse returns unsupported card error when Track 2 expiry is truncated`() {
+        val result = parser.parse(
+            mapOf(
+                TAG_TRACK2 to hexToBytes("4111111111111111D25"),
+            ),
+        )
 
-        assertUnsupportedCardError(error)
+        assertUnsupportedCardError(result)
     }
 
     @Test
-    fun `parse throws unsupported card error when Track 2 expiry is not numeric`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(
-                mapOf(
-                    TAG_TRACK2 to hexToBytes("4111111111111111DAA12100"),
-                ),
-            )
-        }
+    fun `parse returns unsupported card error when Track 2 expiry is not numeric`() {
+        val result = parser.parse(
+            mapOf(
+                TAG_TRACK2 to hexToBytes("4111111111111111DAA12100"),
+            ),
+        )
 
-        assertUnsupportedCardError(error)
+        assertUnsupportedCardError(result)
     }
 
     @Test
@@ -77,10 +72,12 @@ internal class DefaultNfcCardDataParserTest {
         )
 
         assertThat(result).isEqualTo(
-            ScannedCardData(
-                cardNumber = "4111111111111111",
-                expirationMonth = 12,
-                expirationYear = 2025,
+            NfcCardDataParser.Result.Success(
+                ScannedCardData(
+                    cardNumber = "4111111111111111",
+                    expirationMonth = 12,
+                    expirationYear = 2025,
+                ),
             ),
         )
     }
@@ -95,88 +92,78 @@ internal class DefaultNfcCardDataParserTest {
         )
 
         assertThat(result).isEqualTo(
-            ScannedCardData(
-                cardNumber = "411111111111111",
-                expirationMonth = 12,
-                expirationYear = 2025,
+            NfcCardDataParser.Result.Success(
+                ScannedCardData(
+                    cardNumber = "411111111111111",
+                    expirationMonth = 12,
+                    expirationYear = 2025,
+                ),
             ),
         )
     }
 
     @Test
-    fun `parse throws unsupported card error when PAN tag is missing`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(
-                mapOf(
-                    TAG_EXPIRY to byteArrayOf(0x25, 0x12, 0x01),
-                ),
-            )
-        }
+    fun `parse returns unsupported card error when PAN tag is missing`() {
+        val result = parser.parse(
+            mapOf(
+                TAG_EXPIRY to byteArrayOf(0x25, 0x12, 0x01),
+            ),
+        )
 
-        assertUnsupportedCardError(error)
+        assertUnsupportedCardError(result)
     }
 
     @Test
-    fun `parse throws unsupported card error when expiry tag is missing`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(
-                mapOf(
-                    TAG_PAN to hexToBytes("4111111111111111"),
-                ),
-            )
-        }
+    fun `parse returns unsupported card error when expiry tag is missing`() {
+        val result = parser.parse(
+            mapOf(
+                TAG_PAN to hexToBytes("4111111111111111"),
+            ),
+        )
 
-        assertUnsupportedCardError(error)
+        assertUnsupportedCardError(result)
     }
 
     @Test
-    fun `parse throws unsupported card error when expiry data is too short`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(
-                mapOf(
-                    TAG_PAN to hexToBytes("4111111111111111"),
-                    TAG_EXPIRY to byteArrayOf(0x25, 0x12),
-                ),
-            )
-        }
+    fun `parse returns unsupported card error when expiry data is too short`() {
+        val result = parser.parse(
+            mapOf(
+                TAG_PAN to hexToBytes("4111111111111111"),
+                TAG_EXPIRY to byteArrayOf(0x25, 0x12),
+            ),
+        )
 
-        assertUnsupportedCardError(error)
+        assertUnsupportedCardError(result)
     }
 
     @Test
     fun `parse returns unsupported card error when no recognized tags are present`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(emptyMap())
-        }
+        val result = parser.parse(emptyMap())
 
-        assertUnsupportedCardError(error)
+        assertUnsupportedCardError(result)
     }
 
     @Test
     fun `parse returns mobile wallet error when AIP byte 2 bit 7 indicates a contactless mobile device`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(
-                mapOf(
-                    TAG_TRACK2 to hexToBytes("4111111111111111D2512101"),
-                    TAG_AIP to byteArrayOf(0x00, AIP_MOBILE_WALLET_BYTE_2),
-                ),
-            )
-        }
+        val result = parser.parse(
+            mapOf(
+                TAG_TRACK2 to hexToBytes("4111111111111111D2512101"),
+                TAG_AIP to byteArrayOf(0x00, AIP_MOBILE_WALLET_BYTE_2),
+            ),
+        )
 
-        assertMobileWalletError(error)
+        assertMobileWalletError(result)
     }
 
     @Test
     fun `parse returns mobile wallet error when AIP indicates a mobile device without card data tags`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(
-                mapOf(
-                    TAG_AIP to byteArrayOf(0x00, AIP_MOBILE_WALLET_BYTE_2),
-                ),
-            )
-        }
+        val result = parser.parse(
+            mapOf(
+                TAG_AIP to byteArrayOf(0x00, AIP_MOBILE_WALLET_BYTE_2),
+            ),
+        )
 
-        assertMobileWalletError(error)
+        assertMobileWalletError(result)
     }
 
     @Test
@@ -189,37 +176,41 @@ internal class DefaultNfcCardDataParserTest {
         )
 
         assertThat(result).isEqualTo(
-            ScannedCardData(
-                cardNumber = "4111111111111111",
-                expirationMonth = 12,
-                expirationYear = 2025,
+            NfcCardDataParser.Result.Success(
+                ScannedCardData(
+                    cardNumber = "4111111111111111",
+                    expirationMonth = 12,
+                    expirationYear = 2025,
+                ),
             ),
         )
     }
 
     @Test
     fun `parse returns unsupported card error for tokenized credential without mobile wallet AIP`() {
-        val error = assertThrows(GenericNfcScanningError::class.java) {
-            parser.parse(
-                mapOf(
-                    TAG_TRACK2 to hexToBytes("4111111111111111D2512101"),
-                    TAG_AIP to byteArrayOf(0x00, 0x00),
-                    TAG_TOKEN_REQUESTOR_ID to hexToBytes("12345678901F"),
-                ),
-            )
-        }
+        val result = parser.parse(
+            mapOf(
+                TAG_TRACK2 to hexToBytes("4111111111111111D2512101"),
+                TAG_AIP to byteArrayOf(0x00, 0x00),
+                TAG_TOKEN_REQUESTOR_ID to hexToBytes("12345678901F"),
+            ),
+        )
 
-        assertUnsupportedCardError(error)
+        assertUnsupportedCardError(result)
     }
 
-    private fun assertUnsupportedCardError(error: GenericNfcScanningError) {
+    private fun assertUnsupportedCardError(result: NfcCardDataParser.Result) {
+        assertThat(result).isInstanceOf(NfcCardDataParser.Result.Error::class.java)
+        val error = (result as NfcCardDataParser.Result.Error).error as GenericNfcScanningError
         assertThat(error.errorCode).isEqualTo("cardUnsupportedByNfc")
         assertThat(error.userMessage).isEqualTo(
             R.string.stripe_nfc_scan_unsupported_card.resolvableString,
         )
     }
 
-    private fun assertMobileWalletError(error: GenericNfcScanningError) {
+    private fun assertMobileWalletError(result: NfcCardDataParser.Result) {
+        assertThat(result).isInstanceOf(NfcCardDataParser.Result.Error::class.java)
+        val error = (result as NfcCardDataParser.Result.Error).error as GenericNfcScanningError
         assertThat(error.errorCode).isEqualTo("mobileWalletUnsupportedByNfc")
         assertThat(error.userMessage).isEqualTo(
             R.string.stripe_nfc_scan_error_mobile_wallet.resolvableString,

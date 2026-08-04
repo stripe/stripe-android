@@ -1,7 +1,6 @@
 package com.stripe.android.common.nfcscan.analytics
 
 import com.stripe.android.common.nfcscan.scanner.NfcScanningError
-import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -34,7 +33,7 @@ internal interface NfcScanningEventReporter {
      *
      * @param error error that occurred within the NFC scanning flow
      */
-    fun onNfcScanAttemptFailed(error: Throwable)
+    fun onNfcScanAttemptFailed(error: NfcScanningError)
 
     /**
      * NFC scan flow completed successfully meaning the user is being returned to the calling payment flow after
@@ -86,23 +85,14 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         fireEvent(eventName = SCAN_ATTEMPT_SUCCEEDED_EVENT_NAME, additionalParams = duration.mapOfDurationInSeconds())
     }
 
-    override fun onNfcScanAttemptFailed(error: Throwable) {
+    override fun onNfcScanAttemptFailed(error: NfcScanningError) {
         val duration = durationProvider.end(DurationProvider.Key.NfcScanAttempt)
-
-        val durationParams = duration.mapOfDurationInSeconds()
-
-        val params = if (error is NfcScanningError) {
-            durationParams + mapOf(FIELD_ERROR_CODE to error.errorCode) + error.parameters
-        } else {
-            durationParams + mapOf(
-                FIELD_ERROR_CODE to FIELD_DEFAULT_ERROR_CODE,
-                FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage,
-            )
-        }
 
         fireEvent(
             eventName = SCAN_ATTEMPT_FAILED_EVENT_NAME,
-            additionalParams = params,
+            additionalParams = duration.mapOfDurationInSeconds() +
+                mapOf(FIELD_ERROR_CODE to error.errorCode) +
+                error.parameters,
         )
     }
 
@@ -138,8 +128,6 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
 
     private companion object {
         const val FIELD_ERROR_CODE = "error_code"
-        const val FIELD_ERROR_MESSAGE = "error_code"
-        const val FIELD_DEFAULT_ERROR_CODE = "unknownNfcError"
 
         const val FIELD_CANCELLATION_REASON = "cancellation_reason"
         const val FIELD_NUMBER_OF_ATTEMPTS = "number_of_attempts"

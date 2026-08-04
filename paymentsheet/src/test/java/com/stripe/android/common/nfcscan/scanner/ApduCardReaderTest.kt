@@ -286,14 +286,18 @@ internal class ApduCardReaderTest {
     }
 
     @Test
-    fun `readCard passes through unrecognized throwable`() = runScenario(
+    fun `readCard returns unknown error for unrecognized throwable`() = runScenario(
         openException = RuntimeException("unexpected"),
     ) {
         val result = cardReader.readCard(transceiver)
 
         assertThat(result).isInstanceOf<NfcCardReader.Result.Error>()
         val readerError = result as NfcCardReader.Result.Error
-        assertThat(readerError.error).isInstanceOf<RuntimeException>()
+        val scanningError = readerError.error as GenericNfcScanningError
+        assertThat(scanningError.errorCode).isEqualTo("unknownNfcError")
+        assertThat(scanningError.userMessage).isEqualTo(
+            R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+        )
     }
 
     private fun runScenario(

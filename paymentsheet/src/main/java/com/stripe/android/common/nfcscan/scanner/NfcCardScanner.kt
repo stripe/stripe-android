@@ -16,7 +16,7 @@ internal interface NfcCardScanner {
     sealed interface State {
         data object Scanning : State
         data class Complete(val cardData: ScannedCardData) : State
-        data class Failed(val error: Throwable) : State
+        data class Failed(val error: NfcScanningError) : State
     }
 
     val state: Flow<State>

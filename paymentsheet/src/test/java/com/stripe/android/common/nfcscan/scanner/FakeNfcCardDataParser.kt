@@ -8,14 +8,14 @@ internal class FakeNfcCardDataParser(
 ) : NfcCardDataParser {
     val parseCalls = Turbine<Map<String, ByteArray>>()
 
-    override fun parse(records: Map<String, ByteArray>): ScannedCardData {
+    override fun parse(records: Map<String, ByteArray>): NfcCardDataParser.Result {
         parseCalls.add(records)
 
         if (parseError != null) {
-            throw parseError
+            return NfcCardDataParser.Result.Error(parseError)
         }
 
-        return parseResult
+        return NfcCardDataParser.Result.Success(parseResult)
     }
 
     fun ensureAllEventsConsumed() {

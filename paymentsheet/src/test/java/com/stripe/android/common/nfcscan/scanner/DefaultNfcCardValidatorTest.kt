@@ -38,9 +38,8 @@ internal class DefaultNfcCardValidatorTest {
 
         assertThat(result).isInstanceOf(NfcCardValidator.Result.Invalid::class.java)
         val invalid = result as NfcCardValidator.Result.Invalid
-        val error = invalid.error as GenericNfcScanningError
-        assertThat(error.errorCode).isEqualTo("cardUnsupportedByMerchant")
-        assertThat(error.userMessage).isEqualTo(
+        assertThat(invalid.error.errorCode).isEqualTo("cardUnsupportedByMerchant")
+        assertThat(invalid.error.userMessage).isEqualTo(
             R.string.stripe_nfc_scan_unsupported_card.resolvableString,
         )
     }
@@ -57,9 +56,8 @@ internal class DefaultNfcCardValidatorTest {
 
         assertThat(result).isInstanceOf(NfcCardValidator.Result.Invalid::class.java)
         val invalid = result as NfcCardValidator.Result.Invalid
-        val error = invalid.error as GenericNfcScanningError
-        assertThat(error.errorCode).isEqualTo("expiredCard")
-        assertThat(error.userMessage).isEqualTo(
+        assertThat(invalid.error.errorCode).isEqualTo("expiredCard")
+        assertThat(invalid.error.userMessage).isEqualTo(
             R.string.stripe_nfc_scan_error_expired_card.resolvableString,
         )
     }

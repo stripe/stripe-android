@@ -84,9 +84,8 @@ internal class DefaultNfcCardScannerTest {
             val failedState = awaitItem()
             assertThat(failedState).isInstanceOf(NfcCardScanner.State.Failed::class.java)
             val failed = failedState as NfcCardScanner.State.Failed
-            val error = failed.error as GenericNfcScanningError
-            assertThat(error.errorCode).isEqualTo("cardUnsupportedByNfc")
-            assertThat(error.userMessage).isEqualTo(
+            assertThat(failed.error.errorCode).isEqualTo("cardUnsupportedByNfc")
+            assertThat(failed.error.userMessage).isEqualTo(
                 R.string.stripe_nfc_scan_unsupported_card.resolvableString,
             )
         }
@@ -121,7 +120,10 @@ internal class DefaultNfcCardScannerTest {
             ),
         ),
         validationResult = NfcCardValidator.Result.Invalid(
-            error = IllegalStateException(),
+            error = GenericNfcScanningError(
+                errorCode = "cardUnsupportedByMerchant",
+                userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+            ),
         ),
     ) {
         scanner.state.test {
@@ -134,7 +136,10 @@ internal class DefaultNfcCardScannerTest {
             val failedState = awaitItem()
             assertThat(failedState).isInstanceOf(NfcCardScanner.State.Failed::class.java)
             val failed = failedState as NfcCardScanner.State.Failed
-            assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(failed.error.errorCode).isEqualTo("cardUnsupportedByMerchant")
+            assertThat(failed.error.userMessage).isEqualTo(
+                R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+            )
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)

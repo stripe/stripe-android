@@ -12,7 +12,7 @@ internal interface NfcCardValidator {
 
     sealed interface Result {
         data object Validated : Result
-        data class Invalid(val error: Throwable) : Result
+        data class Invalid(val error: NfcScanningError) : Result
     }
 }
 
