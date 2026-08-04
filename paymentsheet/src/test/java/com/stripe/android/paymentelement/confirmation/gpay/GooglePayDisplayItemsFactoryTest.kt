@@ -1,12 +1,17 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class GooglePayDisplayItemsFactoryTest {
 
     @Test
@@ -186,7 +191,9 @@ class GooglePayDisplayItemsFactoryTest {
             ),
         )
 
-        return GooglePayDisplayItemsFactory.create(metadata)
+        return GooglePayDisplayItemsFactory.create(metadata).map { displayItem ->
+            displayItem.resolve(ApplicationProvider.getApplicationContext<Context>())
+        }
     }
 
     private companion object {

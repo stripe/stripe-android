@@ -29,6 +29,7 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItem
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -335,13 +336,13 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Google Pay selection with displayItems, should return expected option with displayItems`() {
         val displayItems = listOf(
-            com.stripe.android.GooglePayJsonFactory.DisplayItem(
-                label = "Widget",
+            GooglePayDisplayItem(
+                label = "Widget".resolvableString,
                 type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
                 price = 2000L,
             ),
-            com.stripe.android.GooglePayJsonFactory.DisplayItem(
-                label = "Tax",
+            GooglePayDisplayItem(
+                label = "Tax".resolvableString,
                 type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.TAX,
                 price = 500L,
             ),

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
@@ -22,6 +23,7 @@ import javax.inject.Inject
 import com.stripe.android.R as PaymentsCoreR
 
 internal class GooglePayConfirmationDefinition @Inject constructor(
+    private val context: Context,
     private val googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory,
     private val userFacingLogger: UserFacingLogger?,
 ) : ConfirmationDefinition<
@@ -100,7 +102,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             label = config.customLabel,
             isElements = true,
             publishableKey = null,
-            displayItems = config.displayItems,
+            displayItems = config.displayItems.map { it.resolve(context) },
             billingEmailOverride = config.billingEmailOverride,
         )
     }
