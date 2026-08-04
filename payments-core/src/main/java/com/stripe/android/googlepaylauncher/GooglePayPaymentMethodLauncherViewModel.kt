@@ -181,9 +181,8 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                     enableLogging = BuildConfig.DEBUG,
                     apiConfigurationProvider = {
                         ApiConfiguration.State(
-                            publishableKey = args.publishableKey
-                                ?: PaymentConfiguration.getInstance(application).publishableKey,
-                            stripeAccountId = PaymentConfiguration.getInstance(application).stripeAccountId,
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = args.stripeAccountId,
                         )
                     },
                     productUsage = setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN),

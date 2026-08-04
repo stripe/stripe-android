@@ -177,7 +177,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         merchantName = "Widget, Inc."
                     ),
                     currencyCode = "usd",
-                    amount = 0
+                    amount = 0,
+                    publishableKey = "pk_123"
                 )
             )
             assertThat(transactionInfo)
@@ -205,7 +206,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         merchantName = "Widget, Inc."
                     ),
                     currencyCode = "usd",
-                    amount = 0
+                    amount = 0,
+                    publishableKey = "pk_123",
                 )
             )
             assertThat(transactionInfo)
@@ -302,6 +304,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     amount = 1099,
                     label = null,
                     transactionId = null,
+                    publishableKey = "pk_123"
                 )
             )
 
@@ -352,7 +355,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
                 checkoutSessionId = null,
-            )
+            ),
+            publishableKey = "pk_123"
         )
         val REQUEST_OPTIONS = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

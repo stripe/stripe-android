@@ -64,10 +64,10 @@ class GooglePayPaymentMethodLauncher internal constructor(
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {
-    private val apiConfiguration = ApiConfiguration.State(
+    private val apiConfigurationProvider = { ApiConfiguration.State(
         publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
         stripeAccountId = PaymentConfiguration.getInstance(context).stripeAccountId,
-    )
+    ) }
     private var isReady = false
     private val internalLauncher = InternalGooglePayPaymentMethodLauncher(
         activityResultLauncher = activityResultLauncher,
@@ -249,7 +249,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             label = label,
             clientAttributionMetadata = null,
             isElements = false,
-            apiConfiguration = apiConfiguration,
+            apiConfiguration = apiConfigurationProvider(),
         )
     }
 

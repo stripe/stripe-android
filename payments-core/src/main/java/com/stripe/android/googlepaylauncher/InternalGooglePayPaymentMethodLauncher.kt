@@ -73,6 +73,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
                 clientAttributionMetadata = clientAttributionMetadata,
                 isElements = isElements,
                 publishableKey = apiConfiguration.publishableKey,
+                stripeAccountId = apiConfiguration.stripeAccountId,
                 displayItems = displayItems,
                 billingEmailOverride = billingEmailOverride,
             )
