@@ -10,8 +10,6 @@ import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnNotificationsChange
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import java.util.UUID
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class NotificationBannerView internal constructor(
@@ -48,7 +46,7 @@ class NotificationBannerView internal constructor(
     /** The title shown by full-screen tasks opened from this banner. */
     var taskTitle: String? = null
 
-    /** The banner's current initial-load state. */
+    /** The banner's current load state. */
     var initialLoadState: InitialLoadState = InitialLoadState.LOADING
         private set
 
@@ -128,6 +126,20 @@ class NotificationBannerView internal constructor(
         listener?.onInitialLoadStateChanged(state)
     }
 
+    private fun reloadBanner() {
+        removeCallbacks(finishLoading)
+        didReceiveInitialNotifications = false
+        pendingContentHeight = 0
+
+        if (initialLoadState != InitialLoadState.LOADING) {
+            initialLoadState = InitialLoadState.LOADING
+            listener?.onInitialLoadStateChanged(InitialLoadState.LOADING)
+        }
+
+        publishSettledContentHeight()
+        reloadConcealedWebContent()
+    }
+
     private fun presentTask(task: JsonObject) {
         if (notificationBannerTaskController != null) {
             return
@@ -149,10 +161,7 @@ class NotificationBannerView internal constructor(
         }
         controller.onDismissListener = StripeComponentController.OnDismissListener {
             notificationBannerTaskController = null
-            callSetterWithSerializableValue(
-                setter = "setMobileNotificationRefreshToken",
-                value = JsonPrimitive(UUID.randomUUID().toString()),
-            )
+            reloadBanner()
         }
         notificationBannerTaskController = controller
         controller.show()
@@ -171,7 +180,7 @@ interface NotificationBannerListener : StripeEmbeddedComponentListener {
     /** Called after the banner publishes a new content height, in pixels. */
     fun onContentHeightChanged(height: Int) {}
 
-    /** Called when the banner finishes its one-time initial-load lifecycle. */
+    /** Called when the banner's load state changes. */
     fun onInitialLoadStateChanged(state: NotificationBannerView.InitialLoadState) {}
 }
 

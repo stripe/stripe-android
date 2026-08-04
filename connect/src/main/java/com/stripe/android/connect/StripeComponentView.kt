@@ -341,6 +341,12 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         webView?.isVisible = viewModel?.stateFlow?.value?.isNativeLoadingIndicatorVisible == false
     }
 
+    internal fun reloadConcealedWebContent() {
+        isWebContentVisible = false
+        webView?.isVisible = false
+        webView?.reload()
+    }
+
     internal open fun onComponentEvent(event: ComponentEvent) {}
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
