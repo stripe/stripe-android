@@ -456,7 +456,7 @@ internal class DefaultCustomerSheetLoaderTest {
                 workContext = coroutineContext,
                 customerAdapter = FakeCustomerAdapter(),
                 errorReporter = FakeErrorReporter(),
-                apiConfigurationState = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+                apiConfigurationProvider = { ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null) },
             )
         )
 

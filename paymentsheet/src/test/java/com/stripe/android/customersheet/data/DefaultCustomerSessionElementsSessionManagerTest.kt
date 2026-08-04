@@ -512,7 +512,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
                 onIntentConfiguration = onIntentConfiguration,
                 onProvidesCustomerSessionClientSecret = onCustomerSessionClientSecret,
             ),
-            apiConfigurationState = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfigurationProvider = { ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null) },
             timeProvider = timeProvider,
             workContext = coroutineContext,
         )

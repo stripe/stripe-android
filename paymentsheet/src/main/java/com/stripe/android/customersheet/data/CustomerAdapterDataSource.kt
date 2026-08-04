@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -30,7 +31,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
     private val elementsSessionRepository: ElementsSessionRepository,
     private val customerAdapter: CustomerAdapter,
     private val errorReporter: ErrorReporter,
-    private val apiConfigurationState: ApiConfiguration.State,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetInitializationDataSource,
     CustomerSheetSavedSelectionDataSource,
@@ -134,7 +135,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
             customPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = apiConfigurationState,
+            apiConfiguration = apiConfigurationProvider.get(),
         ).onSuccess {
             errorReporter.report(
                 errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS,
