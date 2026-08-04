@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.link.DefaultLinkConfigurationLoader
 import com.stripe.android.link.LinkConfigurationLoader
 import com.stripe.android.link.LinkControllerInteractor
@@ -15,8 +16,8 @@ import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentE
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
+import javax.inject.Provider
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.paymentsheet.repositories.NoOpPaymentMethodMessagingPromotionHelperModule
 import com.stripe.android.paymentsheet.state.NoOpTapToAddConnectionStarterModule
@@ -37,7 +38,6 @@ import javax.inject.Singleton
         ExtendedPaymentElementConfirmationModule::class,
         NoOpTapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
-        ApiConfigurationModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
@@ -66,6 +66,19 @@ internal interface LinkControllerModule {
         @Singleton
         fun providePaymentMethodMetadata(interactor: LinkControllerInteractor): PaymentMethodMetadata? {
             return interactor.paymentMethodMetadata
+        }
+
+        @Provides
+        fun provideApiConfigurationStateProvider(
+            interactor: Provider<LinkControllerInteractor>
+        ): () -> ApiConfiguration.State {
+            return {
+                val config = requireNotNull(interactor.get().configuration)
+                ApiConfiguration.State(
+                    publishableKey = config.publishableKey,
+                    stripeAccountId = config.stripeAccountId,
+                )
+            }
         }
 
         // TODO

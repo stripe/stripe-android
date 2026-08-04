@@ -69,7 +69,8 @@ internal class LinkControllerInteractor @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) {
 
-    private var configuration: LinkController.Configuration.State? = null
+    internal var configuration: LinkController.Configuration.State? = null
+        private set
 
     private val tag = "LinkControllerViewInteractor"
 
