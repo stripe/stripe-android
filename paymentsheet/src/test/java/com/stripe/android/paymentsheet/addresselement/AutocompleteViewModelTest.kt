@@ -21,7 +21,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
@@ -286,12 +285,6 @@ class AutocompleteViewModelTest {
                 AutocompleteViewModel.Event.GoBack(address = null)
             )
         }
-    }
-
-    @Test
-    fun `initializing ViewModel emits onShow event`() {
-        createViewModel()
-        verify(mockEventReporter).onShow(eq("US"))
     }
 
     @Test

@@ -52,6 +52,7 @@ interface DurationProvider {
         ExpressCheckoutElement,
         AddressAutocompleteSession,
         AddressAutocompleteFetch,
+        AddressAutocompleteDetailsFetch,
         AddressElementCompletion
     }
 }
