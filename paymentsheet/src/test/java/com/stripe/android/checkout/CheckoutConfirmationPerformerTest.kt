@@ -6,11 +6,9 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
@@ -83,13 +81,8 @@ internal class CheckoutConfirmationPerformerTest {
     ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             paymentSelection = paymentSelection,
-            embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "US",
-                    )
-                )
+            configuration = CheckoutController.Configuration()
+                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
                 .build(),
         )
     }

@@ -5,6 +5,7 @@ import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
 import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
 import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -13,12 +14,12 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
 @OptIn(CheckoutSessionPreview::class)
-internal class CheckoutEmbeddedConfigurationFactoryTest {
+internal class CheckoutEmbeddedConfigurationTest {
 
     @Test
     fun `uses the provided merchant display name`() {
-        val result = factory(merchantDisplayName = "Acme Corp").create(
-            configuration = controllerConfiguration(),
+        val result = controllerConfiguration().asEmbeddedPaymentElementConfiguration(
+            merchantDisplayName = "Acme Corp",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
@@ -28,57 +29,73 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `propagates embeddedViewDisplaysMandateText when true`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(embeddedViewDisplaysMandateText = true),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            collectedDetails = collectedDetails(),
-        )
+        val result = controllerConfiguration(embeddedViewDisplaysMandateText = true)
+            .asEmbeddedPaymentElementConfiguration(
+                merchantDisplayName = "Example, Inc.",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                collectedDetails = collectedDetails(),
+            )
 
         assertThat(result.embeddedViewDisplaysMandateText).isTrue()
     }
 
     @Test
     fun `propagates embeddedViewDisplaysMandateText when false`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(embeddedViewDisplaysMandateText = false),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            collectedDetails = collectedDetails(),
-        )
+        val result = controllerConfiguration(embeddedViewDisplaysMandateText = false)
+            .asEmbeddedPaymentElementConfiguration(
+                merchantDisplayName = "Example, Inc.",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                collectedDetails = collectedDetails(),
+            )
 
         assertThat(result.embeddedViewDisplaysMandateText).isFalse()
     }
 
     @Test
     fun `maps billingDetailsCollectionConfiguration address`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(billingDetailsAddress = Full),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = false),
-            collectedDetails = collectedDetails(),
-        )
+        val result = controllerConfiguration(billingDetailsAddress = Full)
+            .asEmbeddedPaymentElementConfiguration(
+                merchantDisplayName = "Example, Inc.",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = false),
+                collectedDetails = collectedDetails(),
+            )
 
         assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSFull)
     }
 
     @Test
     fun `upgrades Automatic to Full when the session requires a billing address`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(billingDetailsAddress = Automatic),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = true),
-            collectedDetails = collectedDetails(),
-        )
+        val result = controllerConfiguration(billingDetailsAddress = Automatic)
+            .asEmbeddedPaymentElementConfiguration(
+                merchantDisplayName = "Example, Inc.",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = true),
+                collectedDetails = collectedDetails(),
+            )
 
         assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSFull)
     }
 
     @Test
     fun `leaves Automatic unchanged when the session does not require a billing address`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(billingDetailsAddress = Automatic),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = false),
+        val result = controllerConfiguration(billingDetailsAddress = Automatic)
+            .asEmbeddedPaymentElementConfiguration(
+                merchantDisplayName = "Example, Inc.",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = false),
+                collectedDetails = collectedDetails(),
+            )
+
+        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSAutomatic)
+    }
+
+    @Test
+    fun `sets attachDefaultsToPaymentMethod to true`() {
+        val result = controllerConfiguration().asEmbeddedPaymentElementConfiguration(
+            merchantDisplayName = "Example, Inc.",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSAutomatic)
+        assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
     }
 
     @Test
@@ -90,8 +107,8 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
                 .additionalEnabledNetworks(listOf("INTERAC")),
         )
 
-        val result = factory().create(
-            configuration = configuration,
+        val result = configuration.asEmbeddedPaymentElementConfiguration(
+            merchantDisplayName = "Example, Inc.",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "GB"),
             collectedDetails = collectedDetails(),
         )
@@ -112,8 +129,8 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             googlePayConfiguration = GooglePayConfiguration(GooglePayConfiguration.Environment.Production),
         )
 
-        val result = factory().create(
-            configuration = configuration,
+        val result = configuration.asEmbeddedPaymentElementConfiguration(
+            merchantDisplayName = "Example, Inc.",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
             collectedDetails = collectedDetails(),
         )
@@ -123,19 +140,20 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `leaves googlePay null when the merchant supplied no googlePayConfiguration`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(googlePayConfiguration = null),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
-            collectedDetails = collectedDetails(),
-        )
+        val result = controllerConfiguration(googlePayConfiguration = null)
+            .asEmbeddedPaymentElementConfiguration(
+                merchantDisplayName = "Example, Inc.",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
+                collectedDetails = collectedDetails(),
+            )
 
         assertThat(result.googlePay).isNull()
     }
 
     @Test
     fun `sources the billing email from the checkout session customer email`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(),
+        val result = controllerConfiguration().asEmbeddedPaymentElementConfiguration(
+            merchantDisplayName = "Example, Inc.",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
             collectedDetails = collectedDetails(),
         )
@@ -144,9 +162,9 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `populates billing details from the session data`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(),
+    fun `populates billing details from the collected details`() {
+        val result = controllerConfiguration().asEmbeddedPaymentElementConfiguration(
+            merchantDisplayName = "Example, Inc.",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(
                 billingName = "Jane Billing",
@@ -175,9 +193,9 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `populates shipping details from the session data`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(),
+    fun `populates shipping details from the collected details`() {
+        val result = controllerConfiguration().asEmbeddedPaymentElementConfiguration(
+            merchantDisplayName = "Example, Inc.",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(
                 shippingName = "John Shipping",
@@ -205,19 +223,19 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `sets attachDefaultsToPaymentMethod to true`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(),
+    fun `derived CommonConfiguration nulls the fields not carried by the embedded config`() {
+        val result = controllerConfiguration().asEmbeddedPaymentElementConfiguration(
+            merchantDisplayName = "Example, Inc.",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
-        )
+        ).asCommonConfiguration()
 
-        assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
+        assertThat(result.customer).isNull()
+        assertThat(result.externalPaymentMethods).isEmpty()
+        assertThat(result.customPaymentMethods).isEmpty()
+        assertThat(result.walletButtons).isNull()
+        assertThat(result.googlePlacesApiKey).isNull()
     }
-
-    private fun factory(
-        merchantDisplayName: String = "Example, Inc.",
-    ) = CheckoutEmbeddedConfigurationFactory(merchantDisplayName = merchantDisplayName)
 
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,

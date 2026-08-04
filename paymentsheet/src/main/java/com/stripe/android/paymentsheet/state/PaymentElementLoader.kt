@@ -5,6 +5,9 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkout.CheckoutCollectedDetails
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.asEmbeddedPaymentElementConfiguration
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
@@ -31,6 +34,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -94,6 +98,21 @@ internal interface PaymentElementLoader {
             val configuration: EmbeddedPaymentElement.Configuration,
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
+        }
+
+        @OptIn(CheckoutSessionPreview::class)
+        data class Checkout(
+            val configuration: CheckoutController.Configuration.State,
+            val merchantDisplayName: String,
+            private val collectedDetails: CheckoutCollectedDetails,
+            private val checkoutSessionResponse: CheckoutSessionResponse,
+        ) : Configuration {
+            override val commonConfiguration: CommonConfiguration =
+                configuration.asEmbeddedPaymentElementConfiguration(
+                    merchantDisplayName = merchantDisplayName,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedDetails = collectedDetails,
+                ).asCommonConfiguration()
         }
 
         data class CryptoOnramp(
@@ -637,6 +656,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
             is PaymentElementLoader.Configuration.StandaloneLink,
+            is PaymentElementLoader.Configuration.Checkout,
             is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
             is PaymentElementLoader.Configuration.PaymentSheet ->
                 if (

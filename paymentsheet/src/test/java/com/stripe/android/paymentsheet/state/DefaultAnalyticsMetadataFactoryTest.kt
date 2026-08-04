@@ -3,6 +3,9 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkout.CheckoutCollectedDetails
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.PaymentElement
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.link.LinkConfiguration
@@ -28,6 +31,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -36,6 +40,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import org.junit.Test
 import javax.inject.Provider
@@ -718,6 +723,28 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(embeddedAppearance?.get("style")).isEqualTo(true)
         assertThat(embeddedAppearance?.get("row_style")).isEqualTo("floating_button")
         assertThat(appearance?.get("usage")).isEqualTo(true)
+    }
+
+    @OptIn(CheckoutSessionPreview::class)
+    @Test
+    fun `create emits embedded subtype analytics for a Checkout configuration`() = runScenario {
+        val configuration = PaymentElementLoader.Configuration.Checkout(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration()
+                        .embeddedViewDisplaysMandateText(false)
+                )
+                .build(),
+            merchantDisplayName = "Test Merchant",
+            collectedDetails = CheckoutCollectedDetails(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        )
+
+        val resultMap = createAnalyticsMetadata(configuration = configuration)
+
+        val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
+        assertThat(mpeConfig?.get("embedded_view_displays_mandate_text")).isEqualTo(false)
+        assertThat(mpeConfig?.get("card_funding_acceptance")).isEqualTo(false)
     }
 
     @Test

@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
@@ -79,9 +80,25 @@ internal class CheckoutStateLoaderTest {
         assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
         assertThat(billingAddress.postalCode).isEqualTo("94103")
         assertThat(billingAddress.state).isEqualTo("CA")
-        assertThat(stateHolder.state?.embeddedConfiguration?.defaultBillingDetails?.address?.postalCode)
-            .isEqualTo("94103")
+        assertThat(
+            stateHolder.state?.embeddedConfiguration()
+                ?.defaultBillingDetails?.address?.postalCode
+        ).isEqualTo("94103")
     }
+
+    @Test
+    fun `loadInitial threads the injected merchant display name into the payment element load`() =
+        runScenario(merchantDisplayName = "Test Merchant Inc.") {
+            loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+            val integrationConfiguration = paymentElementLoader.lastIntegrationConfiguration
+            assertThat(integrationConfiguration)
+                .isInstanceOf(PaymentElementLoader.Configuration.Checkout::class.java)
+            val checkout = integrationConfiguration as PaymentElementLoader.Configuration.Checkout
+            assertThat(checkout.merchantDisplayName).isEqualTo("Test Merchant Inc.")
+
+            assertThat(stateHolder.state?.merchantDisplayName).isEqualTo("Test Merchant Inc.")
+        }
 
     @Test
     fun `loadInitial populates the customer state holder from the loaded customer`() = runScenario(
@@ -262,10 +279,10 @@ internal class CheckoutStateLoaderTest {
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
+        merchantDisplayName = "Example, Inc.",
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
@@ -327,7 +344,7 @@ internal class CheckoutStateLoaderTest {
             customer = customer,
         )
         val loader = CheckoutStateLoader(
-            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(merchantDisplayName),
+            merchantDisplayName = merchantDisplayName,
             flagImageResolver = flagImageResolver,
             paymentElementLoader = paymentElementLoader,
             selectionChooser = chooser,

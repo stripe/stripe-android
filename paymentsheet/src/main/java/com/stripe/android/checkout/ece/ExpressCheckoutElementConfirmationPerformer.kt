@@ -63,7 +63,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         state: CheckoutControllerState,
         paymentSelection: PaymentSelection,
     ): ConfirmationHandler.Args? {
-        val configuration = state.embeddedConfiguration.asCommonConfiguration()
+        val configuration = state.embeddedConfiguration().asCommonConfiguration()
         val confirmationOption = paymentSelection.toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,

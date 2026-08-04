@@ -171,14 +171,6 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure uses app name as merchant display name, not checkout session data`() =
-        runConfigureScenario {
-            result.getOrThrow()
-            assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
-                .isEqualTo(expectedMerchantDisplayName)
-        }
-
-    @Test
     fun `configure propagates embeddedViewDisplaysMandateText from payment element configuration`() =
         runConfigureScenario(
             configuration = CheckoutController.Configuration().paymentElement(
@@ -186,8 +178,9 @@ internal class CheckoutControllerTest {
             ),
         ) {
             result.getOrThrow()
-            assertThat(committedState?.embeddedConfiguration?.embeddedViewDisplaysMandateText)
-                .isFalse()
+            assertThat(committedState?.merchantDisplayName).isEqualTo(expectedMerchantDisplayName)
+            val embeddedConfiguration = committedState?.embeddedConfiguration()
+            assertThat(embeddedConfiguration?.embeddedViewDisplaysMandateText).isFalse()
         }
 
     @Test
@@ -208,7 +201,8 @@ internal class CheckoutControllerTest {
             },
         ) {
             result.getOrThrow()
-            assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
+            val embeddedConfiguration = committedState?.embeddedConfiguration()
+            assertThat(embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
                 .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
         }
 
@@ -287,8 +281,7 @@ internal class CheckoutControllerTest {
         // death: the committed state is read back from the restored namespaced child.
         val state = committedStateFor(savedStateHandle.simulateProcessDeath())
         assertThat(state).isNotNull()
-        assertThat(state!!.embeddedConfiguration.merchantDisplayName)
-            .isEqualTo(expectedMerchantDisplayName)
+        assertThat(state!!.configuration).isEqualTo(CheckoutController.Configuration().build())
     }
 
     @Test

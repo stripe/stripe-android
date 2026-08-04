@@ -14,6 +14,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -130,6 +131,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         when (this@analyticsMap) {
             is PaymentElementLoader.Configuration.PaymentSheet -> putAll(analyticsMap())
             is PaymentElementLoader.Configuration.Embedded -> putAll(analyticsMap())
+            is PaymentElementLoader.Configuration.Checkout -> putAll(analyticsMap())
             is PaymentElementLoader.Configuration.CryptoOnramp,
             is PaymentElementLoader.Configuration.StandaloneLink -> Unit
         }
@@ -156,6 +158,18 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         )
         put("embedded_view_displays_mandate_text", SimpleBoolean(configuration.embeddedViewDisplaysMandateText))
     }
+
+    // Checkout reuses the embedded content, but never surfaces a form sheet action or a
+    // row-selection immediate action (see CheckoutStateLoader), so both are always reported as
+    // their non-interactive defaults.
+    @OptIn(CheckoutSessionPreview::class)
+    private fun PaymentElementLoader.Configuration.Checkout.analyticsMap() =
+        buildMap<String, AnalyticsMetadata.Value> {
+            put(
+                "embedded_view_displays_mandate_text",
+                SimpleBoolean(configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText)
+            )
+        }
 
     private fun CommonConfiguration.analyticsMap() = buildMap<String, AnalyticsMetadata.Value> {
         put("customer", SimpleBoolean(customer != null))

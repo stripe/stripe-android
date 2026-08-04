@@ -2,6 +2,7 @@ package com.stripe.android.checkout.ece
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -13,13 +14,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeErrorReporter
@@ -149,13 +148,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     private fun googlePayState(): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
-            embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "US",
-                    )
-                )
+            configuration = CheckoutController.Configuration()
+                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
                 .build(),
         )
     }

@@ -27,7 +27,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {
         val state = stateHolder.state ?: return null
-        val configuration = state.embeddedConfiguration.asCommonConfiguration()
+        val configuration = state.embeddedConfiguration().asCommonConfiguration()
         val confirmationOption = state.paymentSelection?.toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,

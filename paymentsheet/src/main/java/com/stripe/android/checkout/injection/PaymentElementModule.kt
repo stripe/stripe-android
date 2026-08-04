@@ -61,11 +61,12 @@ internal interface PaymentElementModule {
         ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
             return stateHolder.stateFlow.mapAsStateFlow { state ->
                 state?.let {
+                    val embeddedConfiguration = it.embeddedConfiguration()
                     EmbeddedContentHelperStateHolder.State(
                         paymentMethodMetadata = it.paymentMethodMetadata,
-                        appearance = it.embeddedConfiguration.appearance.embeddedAppearance,
-                        embeddedViewDisplaysMandateText = it.embeddedConfiguration.embeddedViewDisplaysMandateText,
-                        configuration = it.embeddedConfiguration,
+                        appearance = embeddedConfiguration.appearance.embeddedAppearance,
+                        embeddedViewDisplaysMandateText = embeddedConfiguration.embeddedViewDisplaysMandateText,
+                        configuration = embeddedConfiguration,
                     )
                 }
             }
