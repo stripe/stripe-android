@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
@@ -454,7 +455,6 @@ internal class PaymentSheetPlaygroundActivity :
                 if (playgroundState.displaysShippingAddressButton()) {
                     ShippingAddressButton(
                         addressLauncher = addressLauncher,
-                        playgroundState = playgroundState,
                         address = { flowController.shippingDetails },
                     )
                 }
@@ -682,7 +682,6 @@ internal class PaymentSheetPlaygroundActivity :
     @Composable
     private fun ShippingAddressButton(
         addressLauncher: AddressLauncher,
-        playgroundState: PlaygroundState.Payment,
         address: () -> AddressDetails?,
     ) {
         val context = LocalContext.current
@@ -693,7 +692,7 @@ internal class PaymentSheetPlaygroundActivity :
                     .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
                     .appearance(AppearanceStore.state.toPaymentSheetAppearance())
                     .build()
-                addressLauncher.present(playgroundState.clientSecret, configuration)
+                addressLauncher.present(PaymentConfiguration.getInstance(context).publishableKey, configuration)
             },
             modifier = Modifier.fillMaxWidth(),
         ) {
