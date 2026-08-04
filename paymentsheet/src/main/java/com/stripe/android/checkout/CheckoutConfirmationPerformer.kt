@@ -1,7 +1,10 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout
 
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
@@ -15,6 +18,7 @@ import javax.inject.Named
 internal class CheckoutConfirmationPerformer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val resultCallback: CheckoutController.ResultCallback,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
@@ -22,6 +26,9 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         val arguments = confirmationArgs() ?: return
         viewModelScope.launch {
             confirmationHandler.start(arguments)
+            confirmationHandler.awaitResult()?.let { result ->
+                resultCallback.onResult(result.toCheckoutControllerResult())
+            }
         }
     }
 

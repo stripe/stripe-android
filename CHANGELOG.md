@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED] `CheckoutController` now delivers results for manual and express checkout confirmation.
+
 ## 23.14.0 - 2026-08-03
 
 ### CryptoOnramp

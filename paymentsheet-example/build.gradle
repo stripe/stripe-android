@@ -66,6 +66,10 @@ sentry {
 }
 
 android {
+    testOptions {
+        unitTests.includeAndroidResources = true
+    }
+
     defaultConfig {
         applicationId "com.stripe.android.paymentsheet.example"
         versionCode 11
@@ -155,6 +159,13 @@ dependencies {
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.leakCanary
+
+    testImplementation project(':payments-core-testing')
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.junit
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+    testImplementation testLibs.espresso.core
 
     androidTestImplementation project(':payments-ui-core')
     androidTestImplementation project(':payments-core-testing')

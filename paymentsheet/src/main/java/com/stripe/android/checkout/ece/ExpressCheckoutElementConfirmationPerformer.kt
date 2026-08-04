@@ -1,9 +1,14 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout.ece
 
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.toCheckoutControllerResult
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
@@ -25,6 +30,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     private val confirmationHandler: ConfirmationHandler,
     private val eventReporter: ExpressCheckoutElementEventReporter,
     private val errorReporter: ErrorReporter,
+    private val resultCallback: CheckoutController.ResultCallback,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : ExpressCheckoutElementConfirmationPerformer {
@@ -50,11 +56,15 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         viewModelScope.launch {
             confirmationHandler.start(confirmationArgs)
 
-            when (val result = confirmationHandler.awaitResult()) {
+            val result = confirmationHandler.awaitResult()
+            when (result) {
                 is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
                 is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
                 is ConfirmationHandler.Result.Canceled,
                 null -> Unit
+            }
+            result?.let {
+                resultCallback.onResult(it.toCheckoutControllerResult())
             }
         }
     }

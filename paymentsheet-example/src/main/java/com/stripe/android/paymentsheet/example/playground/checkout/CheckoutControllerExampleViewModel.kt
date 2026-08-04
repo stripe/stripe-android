@@ -16,11 +16,8 @@ import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.checkout.GooglePayConfiguration.Environment
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -33,14 +30,24 @@ internal class CheckoutControllerExampleViewModel(
     private val _status = MutableStateFlow<Status>(Status.Loading)
     val status: StateFlow<Status> = _status.asStateFlow()
 
-    private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
+    private val _confirmationResult = MutableStateFlow<ConfirmationResult?>(null)
+    val confirmationResult: StateFlow<ConfirmationResult?> = _confirmationResult.asStateFlow()
 
     val controller = CheckoutController.Builder(
         application = application,
         savedStateHandle = savedStateHandle,
     ).resultCallback { result ->
-        Log.d(TAG, "Result: $result")
+        when (result) {
+            is CheckoutController.Result.Completed -> {
+                _confirmationResult.value = ConfirmationResult.Completed
+            }
+            is CheckoutController.Result.Failed -> {
+                _confirmationResult.value = ConfirmationResult.Failed(
+                    result.error.message ?: "An unknown error occurred."
+                )
+            }
+            is CheckoutController.Result.Canceled -> Unit
+        }
     }.build()
 
     init {
@@ -50,10 +57,15 @@ internal class CheckoutControllerExampleViewModel(
         viewModelScope.launch {
             controller.session.collect { session ->
                 updateConfiguredState { it.copy(session = session) }
-                if (session?.status == Session.Status.Complete) {
-                    _sessionComplete.tryEmit(Unit)
-                }
             }
+        }
+    }
+
+    fun startNewPayment() {
+        _confirmationResult.value = null
+        _status.value = Status.Loading
+        viewModelScope.launch {
+            fetchAndConfigure()
         }
     }
 
@@ -105,6 +117,11 @@ internal class CheckoutControllerExampleViewModel(
             val session: Session?,
         ) : Status
         data class Error(val message: String) : Status
+    }
+
+    sealed interface ConfirmationResult {
+        data object Completed : ConfirmationResult
+        data class Failed(val message: String) : ConfirmationResult
     }
 
     companion object {

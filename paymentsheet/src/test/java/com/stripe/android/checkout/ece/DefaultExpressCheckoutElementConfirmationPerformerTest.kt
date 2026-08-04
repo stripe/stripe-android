@@ -1,7 +1,9 @@
 package com.stripe.android.checkout.ece
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -122,6 +124,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         confirmationHandler.startTurbine.awaitItem()
         assertThat(eventReporter.calls.awaitItem())
             .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentSuccess(expressButton))
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
     }
 
     @Test
@@ -145,6 +148,24 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val failureCall = call as FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentFailure
         assertThat(failureCall.expressButton).isEqualTo(expressButton)
         assertThat(failureCall.error.cause.message).isEqualTo("Payment failed")
+        val result = resultTurbine.awaitItem()
+        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
+        assertThat((result as CheckoutController.Result.Failed).error.message).isEqualTo("Payment failed")
+    }
+
+    @Test
+    fun `confirm reports canceled when confirmation is canceled`() = runScenario(
+        state = googlePayState(),
+        expressButton = createGooglePayExpressButton(),
+    ) {
+        confirmationHandler.awaitResultTurbine.add(
+            ConfirmationHandler.Result.Canceled(ConfirmationHandler.Result.Canceled.Action.None)
+        )
+
+        performer.confirm(expressButton)
+
+        confirmationHandler.startTurbine.awaitItem()
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
     }
 
     private fun googlePayState(): CheckoutControllerState {
@@ -179,6 +200,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeExpressCheckoutElementEventReporter()
         val errorReporter = FakeErrorReporter()
+        val resultTurbine = Turbine<CheckoutController.Result>()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
         stateHolder.state = state
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
@@ -186,6 +208,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
+            resultCallback = CheckoutController.ResultCallback(resultTurbine::add),
             statusBarColor = null,
             viewModelScope = backgroundScope,
         )
@@ -197,11 +220,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             errorReporter = errorReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
+            resultTurbine = resultTurbine,
         ).block()
 
         confirmationHandler.validate()
         eventReporter.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
+        resultTurbine.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -211,5 +236,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val errorReporter: FakeErrorReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
+        val resultTurbine: Turbine<CheckoutController.Result>,
     )
 }

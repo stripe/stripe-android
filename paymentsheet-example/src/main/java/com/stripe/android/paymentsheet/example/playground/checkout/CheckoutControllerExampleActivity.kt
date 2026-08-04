@@ -3,7 +3,6 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -30,13 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
-import kotlinx.coroutines.launch
 
 internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 
@@ -49,15 +46,9 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         val presenter = viewModel.controller.createPresenter(this)
         val paymentElement = presenter.paymentElement()
 
-        lifecycleScope.launch {
-            viewModel.sessionComplete.collect {
-                Toast.makeText(this@CheckoutControllerExampleActivity, "Payment complete!", Toast.LENGTH_LONG).show()
-                finish()
-            }
-        }
-
         setContent {
             val status by viewModel.status.collectAsState()
+            val confirmationResult by viewModel.confirmationResult.collectAsState()
 
             PlaygroundTheme(
                 content = {
@@ -83,25 +74,65 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                 },
                 bottomBarContent = {
                     val configured = status as? CheckoutControllerExampleViewModel.Status.Configured
-                    PaymentOptionRow(configured?.session?.paymentOptionDisplayData)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { paymentElement.presentPaymentOptions() },
-                        enabled = configured != null,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Select Payment Method")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { presenter.confirm() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Confirm")
+                    when (val result = confirmationResult) {
+                        null -> {
+                            PaymentOptionRow(configured?.session?.paymentOptionDisplayData)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { paymentElement.presentPaymentOptions() },
+                                enabled = configured != null,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text("Select Payment Method")
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { presenter.confirm() },
+                                enabled = configured != null,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text("Confirm")
+                            }
+                        }
+                        else -> CheckoutResultSection(
+                            result = result,
+                            onNewPayment = viewModel::startNewPayment,
+                        )
                     }
                 },
             )
         }
+    }
+}
+
+@Composable
+internal fun CheckoutResultSection(
+    result: CheckoutControllerExampleViewModel.ConfirmationResult,
+    onNewPayment: () -> Unit,
+) {
+    when (result) {
+        is CheckoutControllerExampleViewModel.ConfirmationResult.Completed -> {
+            Text(
+                text = "Payment completed",
+                style = MaterialTheme.typography.h6,
+            )
+        }
+        is CheckoutControllerExampleViewModel.ConfirmationResult.Failed -> {
+            Text(
+                text = "Payment failed",
+                style = MaterialTheme.typography.h6,
+                color = Color.Red,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = result.message)
+        }
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+    Button(
+        onClick = onNewPayment,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text("New payment")
     }
 }
 
