@@ -18,6 +18,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val KEYBOARD_VISIBILITY_TIMEOUT_MS = 5_000L
+
 /** Verifies that the managed device used for keyboard-dependent tests has a working IME. */
 @RequiresIme
 @RunWith(AndroidJUnit4::class)
@@ -39,12 +41,17 @@ internal class ManagedDeviceImeSmokeTest {
         }
 
         composeTestRule.onNodeWithTag(TEXT_FIELD_TAG).performClick()
-        composeTestRule.waitForKeyboardToBeVisible(composeTestRule.activity)
+        composeTestRule.waitUntil(KEYBOARD_VISIBILITY_TIMEOUT_MS) {
+            imeBottomInset() > 0
+        }
 
-        val imeBottomInset = ViewCompat.getRootWindowInsets(
+        assertThat(imeBottomInset()).isGreaterThan(0)
+    }
+
+    private fun imeBottomInset(): Int {
+        return ViewCompat.getRootWindowInsets(
             composeTestRule.activity.window.decorView,
         )?.getInsets(WindowInsetsCompat.Type.ime())?.bottom ?: 0
-        assertThat(imeBottomInset).isGreaterThan(0)
     }
 
     private companion object {
