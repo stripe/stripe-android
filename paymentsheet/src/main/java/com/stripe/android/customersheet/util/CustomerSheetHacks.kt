@@ -51,11 +51,13 @@ internal object CustomerSheetHacks {
                     .create(
                         application = application,
                         adapter = integration.adapter,
-                        apiConfigurationState = PaymentConfiguration.getInstance(application).let {
-                            ApiConfiguration.State(
-                                publishableKey = it.publishableKey,
-                                stripeAccountId = it.stripeAccountId,
-                            )
+                        apiConfigurationProvider = {
+                            PaymentConfiguration.getInstance(application).let {
+                                ApiConfiguration.State(
+                                    publishableKey = it.publishableKey,
+                                    stripeAccountId = it.stripeAccountId,
+                                )
+                            }
                         },
                     )
 
@@ -70,11 +72,13 @@ internal object CustomerSheetHacks {
                     .create(
                         application = application,
                         customerSessionProvider = integration.customerSessionProvider,
-                        apiConfigurationState = PaymentConfiguration.getInstance(application).let {
-                            ApiConfiguration.State(
-                                publishableKey = it.publishableKey,
-                                stripeAccountId = it.stripeAccountId,
-                            )
+                        apiConfigurationProvider = {
+                            PaymentConfiguration.getInstance(application).let {
+                                ApiConfiguration.State(
+                                    publishableKey = it.publishableKey,
+                                    stripeAccountId = it.stripeAccountId,
+                                )
+                            }
                         },
                     )
 

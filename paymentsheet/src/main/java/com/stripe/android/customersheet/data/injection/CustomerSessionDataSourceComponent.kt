@@ -41,7 +41,7 @@ internal interface CustomerSessionDataSourceComponent {
         fun create(
             @BindsInstance application: Application,
             @BindsInstance customerSessionProvider: CustomerSheet.CustomerSessionProvider,
-            @BindsInstance apiConfigurationState: ApiConfiguration.State,
+            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
         ): CustomerSessionDataSourceComponent
     }
 }
