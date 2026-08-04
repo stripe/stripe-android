@@ -67,6 +67,20 @@ class InputAddressViewModelTest {
     )
 
     @Test
+    fun `initializing ViewModel fires onShow with initial country`() {
+        createViewModel(
+            address = AddressDetails(address = PaymentSheet.Address(country = "US"))
+        )
+        verify(eventReporter).onShow(eq("US"))
+    }
+
+    @Test
+    fun `initializing ViewModel fires onShow with empty string when no initial country`() {
+        createViewModel()
+        verify(eventReporter).onShow(eq(""))
+    }
+
+    @Test
     fun `no autocomplete address passed has an empty address to start`() = runTest(UnconfinedTestDispatcher()) {
         val flow = MutableStateFlow<AddressDetails?>(null)
         whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)

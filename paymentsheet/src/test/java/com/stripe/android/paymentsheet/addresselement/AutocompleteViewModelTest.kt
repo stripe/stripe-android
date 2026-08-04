@@ -289,12 +289,6 @@ class AutocompleteViewModelTest {
     }
 
     @Test
-    fun `initializing ViewModel emits onShow event`() {
-        createViewModel()
-        verify(mockEventReporter).onShow(eq("US"))
-    }
-
-    @Test
     fun `clearQuery clears textfield and predictions`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
 
