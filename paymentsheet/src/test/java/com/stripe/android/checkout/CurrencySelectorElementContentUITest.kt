@@ -129,7 +129,7 @@ internal class CurrencySelectorElementContentUITest {
 
     @Test
     fun clickingUnselectedOption_sendsUpdateCurrencyRequest() = runScenario {
-        assertThat(controller.checkoutSession.value?.currencySelectorOptions?.selectedCode)
+        assertThat(controller.session.value?.currencySelectorOptions?.selectedCode)
             .isEqualTo("EUR")
 
         // The bodyPart matcher asserts the request carried updated_currency=USD; a request that

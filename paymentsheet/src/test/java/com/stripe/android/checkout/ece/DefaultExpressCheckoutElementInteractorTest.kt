@@ -108,7 +108,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `state reflects available express button types from checkoutSession`() {
+    fun `state reflects available express button types from session`() {
         val googlePayConfiguration = createGooglePayConfiguration(
             buttonType = GooglePayConfiguration.ButtonType.Checkout,
             additionalEnabledNetworks = listOf("INTERAC"),

@@ -86,17 +86,17 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure emits checkoutSession with id from response`() = runConfigureScenario {
+    fun `configure emits session with id from response`() = runConfigureScenario {
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
 
     @Test
-    fun `checkoutSession flow transitions from null to loaded session`() = runTest {
+    fun `session flow transitions from null to loaded session`() = runTest {
         networkRule.defaultInit()
         val controller = createController()
 
-        controller.checkoutSession.test {
+        controller.session.test {
             assertThat(awaitItem()).isNull()
 
             controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
@@ -225,7 +225,7 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure does not emit checkoutSession when network request fails`() = runConfigureScenario(
+    fun `configure does not emit session when network request fails`() = runConfigureScenario(
         networkSetup = {
             networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
@@ -234,7 +234,7 @@ internal class CheckoutControllerTest {
         },
     ) {
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isNull()
+        assertThat(controller.session.value).isNull()
         assertThat(committedState).isNull()
     }
 
@@ -256,15 +256,15 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `checkoutSession is null before configure`() = runTest {
+    fun `session is null before configure`() = runTest {
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
-        assertThat(controller.checkoutSession.value).isNull()
+        assertThat(controller.session.value).isNull()
         assertThat(committedStateFor(savedStateHandle)).isNull()
     }
 
     @Test
-    fun `checkoutSession is restored from savedStateHandle after recreation`() = runTest {
+    fun `session is restored from savedStateHandle after recreation`() = runTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
@@ -273,7 +273,7 @@ internal class CheckoutControllerTest {
         // Simulate process death: persist the handle and build a new controller from the restored copy.
         val recreated = createController(savedStateHandle.simulateProcessDeath())
 
-        assertThat(recreated.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(recreated.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
 
     @Test
@@ -300,7 +300,7 @@ internal class CheckoutControllerTest {
         controller.destroy()
 
         assertThat(committedState).isNull()
-        assertThat(controller.checkoutSession.value).isNull()
+        assertThat(controller.session.value).isNull()
     }
 
     @Test
@@ -317,7 +317,7 @@ internal class CheckoutControllerTest {
             )
 
         val controller = createController(savedStateHandle)
-        controller.checkoutSession.test {
+        controller.session.test {
             assertThat(awaitItem()?.paymentOptionDisplayData).isNotNull()
 
             assertThat(controller.clearPaymentOption().isSuccess).isTrue()
@@ -351,7 +351,7 @@ internal class CheckoutControllerTest {
             assertThat(result.exceptionOrNull()).hasMessageThat()
                 .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
             // The rejected clear leaves the selection intact.
-            assertThat(controller.checkoutSession.value?.paymentOptionDisplayData).isNotNull()
+            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
         }
 
     @Test
@@ -391,8 +391,8 @@ internal class CheckoutControllerTest {
 
             // Both controllers share the parent handle, but each persists under its own namespace, so
             // configuring the first leaves the second's state untouched.
-            assertThat(first.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(second.checkoutSession.value).isNull()
+            assertThat(first.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(second.session.value).isNull()
         }
 
     @Test
@@ -405,7 +405,7 @@ internal class CheckoutControllerTest {
         // After process death, a controller under a different name starts from empty state.
         val recreated = createController(savedStateHandle.simulateProcessDeath(), integrationName = "second")
 
-        assertThat(recreated.checkoutSession.value).isNull()
+        assertThat(recreated.session.value).isNull()
     }
 
     @Test
@@ -439,12 +439,12 @@ internal class CheckoutControllerTest {
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.applyPromotionCode("INVALID")
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -473,7 +473,7 @@ internal class CheckoutControllerTest {
         val result = controller.updateLineItemQuantity("li_1", 3)
 
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(7000)
+        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(7000)
     }
 
     @Test
@@ -482,12 +482,12 @@ internal class CheckoutControllerTest {
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid quantity"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.updateLineItemQuantity("li_1", -1)
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -502,7 +502,7 @@ internal class CheckoutControllerTest {
         val result = controller.updateCurrency("usd")
 
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(5099)
+        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(5099)
     }
 
     @Test
@@ -511,12 +511,12 @@ internal class CheckoutControllerTest {
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid currency"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.updateCurrency("invalid")
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -538,12 +538,12 @@ internal class CheckoutControllerTest {
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid shipping rate"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.selectShippingOption("shr_invalid")
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -584,7 +584,7 @@ internal class CheckoutControllerTest {
         val result = controller.updateEmail("checkout@example.com")
 
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.customerEmail).isEqualTo("checkout@example.com")
+        assertThat(controller.session.value?.customerEmail).isEqualTo("checkout@example.com")
     }
 
     @Test
@@ -617,12 +617,12 @@ internal class CheckoutControllerTest {
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid email"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.updateEmail("invalid")
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -788,18 +788,18 @@ internal class CheckoutControllerTest {
         val result = controller.runServerUpdate { Result.success(Unit) }
 
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(8000)
+        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(8000)
     }
 
     @Test
     fun `runServerUpdate returns failure when serverUpdate throws`() = runMutationScenario {
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.runServerUpdate { throw IllegalStateException("Server error") }
 
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -818,12 +818,12 @@ internal class CheckoutControllerTest {
             response.setResponseCode(500)
             response.setBody("""{"error": {"message": "Internal server error"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.runServerUpdate { Result.success(Unit) }
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -1026,7 +1026,7 @@ internal class CheckoutControllerTest {
 
             assertThat(results[0].isSuccess).isTrue()
             assertThat(results[1].isSuccess).isTrue()
-            assertThat(controller.checkoutSession.value?.id).isEqualTo("cs_test_after_promo")
+            assertThat(controller.session.value?.id).isEqualTo("cs_test_after_promo")
         }
 
     @Test
@@ -1126,7 +1126,7 @@ internal class CheckoutControllerTest {
             initModifier = allowedShippingCountries(listOf("US", "CA")),
             assertLoadingConsumed = true,
         ) {
-            val before = controller.checkoutSession.value
+            val before = controller.session.value
 
             // Fast-fail returns before runSerialized, so isUpdating must never flip to true.
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
@@ -1143,7 +1143,7 @@ internal class CheckoutControllerTest {
             assertThat(exception).hasMessageThat().isEqualTo(
                 "Country code 'DE' is not in allowedShippingCountries"
             )
-            assertThat(controller.checkoutSession.value).isEqualTo(before)
+            assertThat(controller.session.value).isEqualTo(before)
         }
 
     @Test
@@ -1162,7 +1162,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `updateShippingAddress fails for all countries when allowedShippingCountries is empty`() =
         runMutationScenario(initModifier = allowedShippingCountries(emptyList())) {
-            val before = controller.checkoutSession.value
+            val before = controller.session.value
 
             val result = controller.updateShippingAddress(
                 name = null,
@@ -1176,7 +1176,7 @@ internal class CheckoutControllerTest {
             assertThat(exception).hasMessageThat().isEqualTo(
                 "Country code 'US' is not in allowedShippingCountries"
             )
-            assertThat(controller.checkoutSession.value).isEqualTo(before)
+            assertThat(controller.session.value).isEqualTo(before)
         }
 
     @Test

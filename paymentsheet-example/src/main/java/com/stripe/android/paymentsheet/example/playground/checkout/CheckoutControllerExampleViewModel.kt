@@ -48,8 +48,8 @@ internal class CheckoutControllerExampleViewModel(
             fetchAndConfigure()
         }
         viewModelScope.launch {
-            controller.checkoutSession.collect { session ->
-                updateConfiguredState { it.copy(checkoutSession = session) }
+            controller.session.collect { session ->
+                updateConfiguredState { it.copy(session = session) }
                 if (session?.status == Session.Status.Complete) {
                     _sessionComplete.tryEmit(Unit)
                 }
@@ -78,7 +78,7 @@ internal class CheckoutControllerExampleViewModel(
                 ).fold(
                     onSuccess = {
                         _status.value = Status.Configured(
-                            checkoutSession = controller.checkoutSession.value,
+                            session = controller.session.value,
                         )
                     },
                     onFailure = { error ->
@@ -102,7 +102,7 @@ internal class CheckoutControllerExampleViewModel(
     sealed interface Status {
         data object Loading : Status
         data class Configured(
-            val checkoutSession: Session?,
+            val session: Session?,
         ) : Status
         data class Error(val message: String) : Status
     }

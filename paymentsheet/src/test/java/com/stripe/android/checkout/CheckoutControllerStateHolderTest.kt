@@ -31,7 +31,7 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `checkoutSession projects the paymentOption the factory builds from the committed state`() {
+    fun `session projects the paymentOption the factory builds from the committed state`() {
         val expectedOption = PaymentOptionDisplayData(
             imageLoader = { error("not needed for this test") },
             label = "Google Pay",
@@ -48,7 +48,7 @@ internal class CheckoutControllerStateHolderTest {
         testScenario(paymentOptionFactory = factory) {
             stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
 
-            assertThat(stateHolder.checkoutSession.value?.paymentOptionDisplayData).isSameInstanceAs(expectedOption)
+            assertThat(stateHolder.session.value?.paymentOptionDisplayData).isSameInstanceAs(expectedOption)
             assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
         }
     }
