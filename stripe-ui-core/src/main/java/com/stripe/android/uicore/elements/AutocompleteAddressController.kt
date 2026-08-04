@@ -17,9 +17,10 @@ class AutocompleteAddressController(
     val initialValues: Map<IdentifierSpec, String?>,
     interactorFactory: AutocompleteAddressInteractor.Factory,
     countryCodes: Set<String> = emptySet(),
+    private val countryElementIdentifier: IdentifierSpec,
     private val countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
-        initialValues[IdentifierSpec.Country]
+        initialValues[countryElementIdentifier]
     ),
     private val phoneNumberConfig: AddressFieldConfiguration,
     private val nameConfig: AddressFieldConfiguration,
@@ -76,7 +77,7 @@ class AutocompleteAddressController(
     private val isValidating = MutableStateFlow(false)
 
     val countryElement = CountryElement(
-        IdentifierSpec.Country,
+        countryElementIdentifier,
         countryDropdownFieldController,
     )
 
@@ -125,7 +126,13 @@ class AutocompleteAddressController(
              * Merges the current and new values together. New value keys will override current
              * value keys if provided.
              */
-            val newValues = currentValues.plus(event.values ?: emptyMap())
+            val newValues = currentValues.plus(
+                event.values
+                    ?.mapKeys { (identifier, _) ->
+                        if (identifier == IdentifierSpec.Country) countryElementIdentifier else identifier
+                    }
+                    .orEmpty(),
+            )
 
             when (event) {
                 is AutocompleteAddressInteractor.Event.OnValues -> Unit
@@ -135,7 +142,7 @@ class AutocompleteAddressController(
             val newAddressInputMode = toAddressInputMode(expandForm, newValues)
 
             if (currentValues != newValues || newAddressInputMode != addressElementFlow.value.addressInputMode) {
-                newValues[IdentifierSpec.Country]?.let {
+                newValues[countryElementIdentifier]?.let {
                     countryDropdownFieldController.onRawValueChange(it)
                 }
 
@@ -177,7 +184,7 @@ class AutocompleteAddressController(
         values: Map<IdentifierSpec, String?>
     ): AddressInputMode {
         val googlePlacesApiKey = config.googlePlacesApiKey
-        val countrySupported = isCountrySupported(values[IdentifierSpec.Country])
+        val countrySupported = isCountrySupported(values[countryElementIdentifier])
 
         val showInline = inlineAutocompleteActive && !expandForm &&
             countrySupported && values[IdentifierSpec.Line1].isNullOrEmpty()

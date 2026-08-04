@@ -14,6 +14,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.utils.isInstanceOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -73,6 +74,27 @@ internal class CardBillingAddressElementTest {
             dropdownFieldController.onRawValueChange("US")
             expectMostRecentItem().verifyFieldsShown()
         }
+    }
+
+    @Test
+    fun `Country-only collection preserves a configured country identifier`() = runTest {
+        val countryIdentifier = IdentifierSpec.Generic("payment_method_data[future_lpm][country]")
+        val element = BillingAddressElement(
+            identifier = IdentifierSpec.Generic("billing_element"),
+            rawValuesMap = mapOf(countryIdentifier to "DE"),
+            countryCodes = setOf("DE"),
+            countryElementIdentifier = countryIdentifier,
+            autocompleteAddressInteractorFactory = null,
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+            addressCollectionMode = BillingAddressCollectionMode.Country(emptyMap()),
+        )
+
+        assertThat(element.countryElement.identifier).isEqualTo(countryIdentifier)
+        assertThat(element.countryElement.controller.rawFieldValue.value).isEqualTo("DE")
+        val formFieldIdentifiers = element.getFormFieldValueFlow().first().map { it.first }
+        assertThat(formFieldIdentifiers).contains(countryIdentifier)
+        assertThat(formFieldIdentifiers).doesNotContain(IdentifierSpec.Country)
     }
 
     @Test
@@ -312,6 +334,7 @@ internal class CardBillingAddressElementTest {
             rawValuesMap = emptyMap(),
             countryCodes = emptySet(),
             countryDropdownFieldController = dropdownFieldController,
+            countryElementIdentifier = IdentifierSpec.Country,
             autocompleteAddressInteractorFactory = null,
             sameAsShippingElement = null,
             shippingValuesMap = null,
@@ -382,6 +405,7 @@ internal class CardBillingAddressElementTest {
                 rawValuesMap = emptyMap(),
                 countryCodes = emptySet(),
                 countryDropdownFieldController = dropdownFieldController,
+                countryElementIdentifier = IdentifierSpec.Country,
                 autocompleteAddressInteractorFactory = {
                     object : AutocompleteAddressInteractor {
                         override val autocompleteConfig: AutocompleteAddressInteractor.Config =

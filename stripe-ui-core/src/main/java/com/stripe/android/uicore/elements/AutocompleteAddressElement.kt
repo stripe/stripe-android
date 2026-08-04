@@ -9,9 +9,10 @@ class AutocompleteAddressElement(
     override val identifier: IdentifierSpec,
     initialValues: Map<IdentifierSpec, String?>,
     countryCodes: Set<String> = emptySet(),
+    countryElementIdentifier: IdentifierSpec,
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
-        initialValues[IdentifierSpec.Country]
+        initialValues[countryElementIdentifier]
     ),
     phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
     nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
@@ -26,6 +27,7 @@ class AutocompleteAddressElement(
             identifier = identifier,
             initialValues = initialValues,
             countryCodes = countryCodes,
+            countryElementIdentifier = countryElementIdentifier,
             countryDropdownFieldController = countryDropdownFieldController,
             phoneNumberConfig = phoneNumberConfig,
             nameConfig = nameConfig,

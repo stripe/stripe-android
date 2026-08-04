@@ -296,6 +296,40 @@ class AutocompleteAddressControllerTest {
         }
 
     @Test
+    fun `Autocomplete preserves a configured country identifier`() = runTest {
+        TestAutocompleteAddressInteractor.test(
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = null,
+                autocompleteCountries = setOf("DE", "FR"),
+            ),
+        ) {
+            val countryIdentifier = IdentifierSpec.Generic("payment_method_data[future_lpm][country]")
+            val controller = createAutocompleteAddressController(
+                values = mapOf(countryIdentifier to "DE"),
+                countryElementIdentifier = countryIdentifier,
+                interactor = interactor,
+            )
+            val registerCall = registerCalls.awaitItem()
+
+            controller.addressElementFlow.test {
+                val initialElement = awaitItem()
+                assertThat(initialElement.countryElement.identifier).isEqualTo(countryIdentifier)
+                assertThat(initialElement.countryElement.controller.rawFieldValue.value).isEqualTo("DE")
+
+                registerCall.onEvent(
+                    AutocompleteAddressInteractor.Event.OnValues(
+                        values = mapOf(IdentifierSpec.Country to "FR"),
+                    ),
+                )
+
+                val updatedElement = awaitItem()
+                assertThat(updatedElement.countryElement.identifier).isEqualTo(countryIdentifier)
+                assertThat(updatedElement.countryElement.controller.rawFieldValue.value).isEqualTo("FR")
+            }
+        }
+    }
+
+    @Test
     fun `Element does not use full-screen autocomplete when stripe-hosted is enabled without inline autocomplete`() =
         noAutocompleteTest(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
@@ -947,6 +981,7 @@ class AutocompleteAddressControllerTest {
 
     private fun createAutocompleteAddressController(
         values: Map<IdentifierSpec, String?> = emptyMap(),
+        countryElementIdentifier: IdentifierSpec = IdentifierSpec.Country,
         phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         emailConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
@@ -965,6 +1000,7 @@ class AutocompleteAddressControllerTest {
         return AutocompleteAddressController(
             identifier = IdentifierSpec.Generic("address"),
             initialValues = values,
+            countryElementIdentifier = countryElementIdentifier,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
             phoneNumberConfig = phoneNumberConfig,

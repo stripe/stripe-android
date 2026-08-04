@@ -187,6 +187,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             identifier = IdentifierSpec.Generic("billing_details[address]"),
             initialValues = defaultAddress?.asFormFieldValues() ?: emptyMap(),
             countryCodes = collectionConfiguration.allowedBillingCountries,
+            countryElementIdentifier = IdentifierSpec.Country,
             sameAsShippingElement = sameAsShippingElement,
             interactorFactory = it,
             shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),

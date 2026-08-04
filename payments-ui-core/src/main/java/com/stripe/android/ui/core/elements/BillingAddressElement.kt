@@ -75,9 +75,10 @@ class BillingAddressElement(
     override val identifier: IdentifierSpec,
     rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     countryCodes: Set<String> = emptySet(),
+    countryElementIdentifier: IdentifierSpec,
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
-        rawValuesMap[IdentifierSpec.Country]
+        rawValuesMap[countryElementIdentifier]
     ),
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     sameAsShippingElement: SameAsShippingElement?,
@@ -113,6 +114,7 @@ class BillingAddressElement(
             identifier = identifier,
             initialValues = rawValuesMap,
             countryCodes = countryCodes,
+            countryElementIdentifier = countryElementIdentifier,
             nameConfig = nameConfig,
             phoneNumberConfig = phoneNumberConfig,
             emailConfig = emailConfig,
@@ -132,7 +134,7 @@ class BillingAddressElement(
                 emailConfig = emailConfig,
             ),
             countryElement = CountryElement(
-                identifier = IdentifierSpec.Country,
+                identifier = countryElementIdentifier,
                 controller = countryDropdownFieldController,
             ),
             shippingValuesMap = shippingValuesMap,

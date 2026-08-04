@@ -18,6 +18,7 @@ internal class AddressFormController(
         identifier = IdentifierSpec.Generic("address"),
         initialValues = initialValues,
         countryCodes = config?.allowedCountries ?: CountryUtils.supportedBillingCountries,
+        countryElementIdentifier = IdentifierSpec.Country,
         nameConfig = AddressFieldConfiguration.REQUIRED,
         phoneNumberConfig = parsePhoneNumberConfig(config?.additionalFields?.phone),
         shippingValuesMap = null,

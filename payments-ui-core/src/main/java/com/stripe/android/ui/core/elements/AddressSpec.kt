@@ -85,6 +85,7 @@ data class AddressSpec(
                     identifier = apiPath,
                     initialValues = initialValues,
                     countryCodes = allowedCountryCodes,
+                    countryElementIdentifier = IdentifierSpec.Country,
                     sameAsShippingElement = sameAsShippingElement,
                     shippingValuesMap = shippingValues,
                     hideCountry = hideCountry,
