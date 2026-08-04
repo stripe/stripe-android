@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import androidx.test.espresso.intent.Intents
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.stripe.android.test.core.PlaygroundTestDriver
@@ -34,6 +33,5 @@ internal open class BasePlaygroundTest(
         // Runs even if the test body threw before its own teardown() call, so a destroyed
         // activity is never left referenced by the driver.
         testDriver.teardown()
-        Intents.release()
     }
 }
