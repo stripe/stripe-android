@@ -1334,11 +1334,13 @@ internal class CustomerSheetViewModel(
                     args = args,
                     integrationType = args.integrationType,
                     savedStateHandle = extras.createSavedStateHandle(),
-                    apiConfigurationState = PaymentConfiguration.getInstance(application).let {
-                        ApiConfiguration.State(
-                            publishableKey = it.publishableKey,
-                            stripeAccountId = it.stripeAccountId,
-                        )
+                    apiConfigurationProvider = {
+                        PaymentConfiguration.getInstance(application).let {
+                            ApiConfiguration.State(
+                                publishableKey = it.publishableKey,
+                                stripeAccountId = it.stripeAccountId,
+                            )
+                        }
                     },
                 )
 

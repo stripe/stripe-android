@@ -26,21 +26,6 @@ class ApiConfigurationFromPaymentConfigurationModule {
 }
 
 /**
- * Converts a bound [ApiConfiguration.State] instance into a `() -> ApiConfiguration.State`
- * provider function. Use this in components that bind [ApiConfiguration.State] via
- * `@BindsInstance` or a `@Provides` method and need to satisfy dependencies that
- * take `() -> ApiConfiguration.State`.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module
-class ApiConfigurationStateToProviderModule {
-    @Provides
-    fun provideApiConfigurationStateProvider(
-        state: ApiConfiguration.State
-    ): () -> ApiConfiguration.State = { state }
-}
-
-/**
  * Eagerly evaluates a `() -> ApiConfiguration.State` provider function to produce an
  * [ApiConfiguration.State] instance. Use this in components that only have a
  * `() -> ApiConfiguration.State` binding and need to satisfy dependencies that

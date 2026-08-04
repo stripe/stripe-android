@@ -819,11 +819,13 @@ class CheckoutController @Inject internal constructor(
                 savedStateHandle = savedStateHandle.checkoutSubHandle(integrationName),
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
-                apiConfigurationState = PaymentConfiguration.getInstance(application).let {
-                    ApiConfiguration.State(
-                        publishableKey = it.publishableKey,
-                        stripeAccountId = it.stripeAccountId,
-                    )
+                apiConfigurationProvider = {
+                    PaymentConfiguration.getInstance(application).let {
+                        ApiConfiguration.State(
+                            publishableKey = it.publishableKey,
+                            stripeAccountId = it.stripeAccountId,
+                        )
+                    }
                 },
             )
 

@@ -21,7 +21,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         RetryDelayModule::class,
-        ApiConfigurationStateToProviderModule::class,
+        ApiConfigurationStateFromProviderModule::class,
     ]
 )
 internal interface Stripe3ds2TransactionViewModelFactoryComponent {
@@ -36,7 +36,7 @@ internal interface Stripe3ds2TransactionViewModelFactoryComponent {
             @Named(ENABLE_LOGGING)
             enableLogging: Boolean,
             @BindsInstance
-            apiConfigurationState: ApiConfiguration.State,
+            apiConfigurationProvider: () -> ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,

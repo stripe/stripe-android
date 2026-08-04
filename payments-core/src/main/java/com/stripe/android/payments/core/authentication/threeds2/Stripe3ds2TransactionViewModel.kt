@@ -319,10 +319,12 @@ internal class Stripe3ds2TransactionViewModelFactory(
             .create(
                 context = application,
                 enableLogging = args.enableLogging,
-                apiConfigurationState = ApiConfiguration.State(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.requestOptions.stripeAccount,
-                ),
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.requestOptions.stripeAccount,
+                    )
+                },
                 productUsage = args.productUsage,
                 isInstantApp = InstantApps.isInstantApp(application),
             )

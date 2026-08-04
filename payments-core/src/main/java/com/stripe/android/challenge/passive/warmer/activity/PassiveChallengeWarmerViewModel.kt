@@ -42,10 +42,12 @@ internal class PassiveChallengeWarmerViewModel @Inject constructor(
                 DaggerPassiveChallengeWarmerActivityComponent.factory()
                     .create(
                         context = app,
-                        apiConfigurationState = ApiConfiguration.State(
-                            publishableKey = args.publishableKey,
-                            stripeAccountId = null,
-                        ),
+                        apiConfigurationProvider = {
+                            ApiConfiguration.State(
+                                publishableKey = args.publishableKey,
+                                stripeAccountId = null,
+                            )
+                        },
                         productUsage = args.productUsage.toSet(),
                         passiveCaptchaParams = args.passiveCaptchaParams,
                     )

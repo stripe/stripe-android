@@ -8,7 +8,7 @@ import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewModel
-import com.stripe.android.payments.core.injection.ApiConfigurationStateToProviderModule
+import com.stripe.android.payments.core.injection.ApiConfigurationStateFromProviderModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -23,7 +23,7 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoreCommonModule::class,
-        ApiConfigurationStateToProviderModule::class,
+        ApiConfigurationStateFromProviderModule::class,
     ]
 )
 internal interface CollectBankAccountComponent {

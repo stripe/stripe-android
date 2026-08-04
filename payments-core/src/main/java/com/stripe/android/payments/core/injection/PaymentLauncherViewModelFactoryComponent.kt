@@ -16,7 +16,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentLauncherModule::class,
-        ApiConfigurationStateToProviderModule::class,
+        ApiConfigurationStateFromProviderModule::class,
         ApiRequestOptionsModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
@@ -38,7 +38,7 @@ internal interface PaymentLauncherViewModelFactoryComponent {
             @Named(ENABLE_LOGGING)
             enableLogging: Boolean,
             @BindsInstance
-            apiConfigurationState: ApiConfiguration.State,
+            apiConfigurationProvider: () -> ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,

@@ -136,7 +136,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
                     enableLogging = enableLogging,
                     workContext = workContext,
                     uiContext = uiContext,
-                    apiConfigurationState = apiConfigurationState,
+                    apiConfigurationProvider = { apiConfigurationState },
                     productUsage = productUsage,
                     isInstantApp = isInstantApp,
                     includePaymentSheetNextActionHandlers = includePaymentSheetNextActionHandlers,

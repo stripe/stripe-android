@@ -7,7 +7,7 @@ import com.stripe.android.challenge.confirmation.IntentConfirmationChallengeView
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.payments.core.injection.ApiConfigurationStateToProviderModule
+import com.stripe.android.payments.core.injection.ApiConfigurationStateFromProviderModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -25,7 +25,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
-        ApiConfigurationStateToProviderModule::class,
+        ApiConfigurationStateFromProviderModule::class,
         ApiRequestOptionsModule::class,
     ]
 )
@@ -46,10 +46,12 @@ internal interface IntentConfirmationChallengeComponent {
 @Module
 internal object IntentConfirmationChallengeConfigModule {
     @Provides
-    fun provideApiConfigurationState(
+    fun provideApiConfigurationProvider(
         args: IntentConfirmationChallengeArgs
-    ): ApiConfiguration.State = ApiConfiguration.State(
-        publishableKey = args.publishableKey,
-        stripeAccountId = null,
-    )
+    ): () -> ApiConfiguration.State = {
+        ApiConfiguration.State(
+            publishableKey = args.publishableKey,
+            stripeAccountId = null,
+        )
+    }
 }
