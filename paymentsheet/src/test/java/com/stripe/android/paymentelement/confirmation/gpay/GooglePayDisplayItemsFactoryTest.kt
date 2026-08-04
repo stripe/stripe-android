@@ -103,9 +103,19 @@ class GooglePayDisplayItemsFactoryTest {
                 price = 2000L,
             ),
             displayItem(
+                label = "Cost excluding tax",
+                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+                price = 2000L,
+            ),
+            displayItem(
                 label = "SAVE50",
                 type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
                 price = -500L,
+            ),
+            displayItem(
+                label = "Estimated total (final tax may vary)",
+                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                price = 1500L,
             ),
         ).inOrder()
     }
@@ -136,9 +146,19 @@ class GooglePayDisplayItemsFactoryTest {
                 price = 1000L,
             ),
             displayItem(
+                label = "Cost excluding tax",
+                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+                price = 1000L,
+            ),
+            displayItem(
                 label = "Sales Tax",
                 type = GooglePayJsonFactory.DisplayItem.Type.TAX,
                 price = 80L,
+            ),
+            displayItem(
+                label = "Estimated total (final tax may vary)",
+                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                price = 1080L,
             ),
         ).inOrder()
     }
@@ -168,6 +188,11 @@ class GooglePayDisplayItemsFactoryTest {
                 price = 2000L,
             ),
             displayItem(
+                label = "Cost excluding tax",
+                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+                price = 2000L,
+            ),
+            displayItem(
                 label = "SAVE50",
                 type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
                 price = -500L,
@@ -176,6 +201,11 @@ class GooglePayDisplayItemsFactoryTest {
                 label = "VAT",
                 type = GooglePayJsonFactory.DisplayItem.Type.TAX,
                 price = 120L,
+            ),
+            displayItem(
+                label = "Estimated total (final tax may vary)",
+                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                price = 1620L,
             ),
         ).inOrder()
     }
