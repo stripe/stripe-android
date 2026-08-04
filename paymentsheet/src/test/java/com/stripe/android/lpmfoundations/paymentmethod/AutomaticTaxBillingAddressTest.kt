@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.BlikDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeroDefinition
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -18,6 +19,7 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.ui.core.elements.additionalAutomaticTaxFieldsByCountry
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.FormElement
@@ -92,21 +94,41 @@ class AutomaticTaxBillingAddressTest {
             .sectionFields()
             .filterIsInstance<BillingAddressElement>()
             .single()
-        val formValues = requireNotNull(
-            CompleteFormFieldValueFilter(
-                currentFieldValueMap = addressElement.getFormFieldValueFlow().map { it.toMap() },
-                hiddenIdentifiers = addressElement.hiddenIdentifiers,
-                userRequestedReuse = flowOf(PaymentSelection.CustomerRequestedSave.NoRequest),
-                defaultValues = emptyMap(),
-            ).filterFlow().first()
-        )
+        val createParams = addressElement.toCreateParams(metadata, PaymentMethod.Type.Blik.code)
+        val billingDetails = createParams.toParamMap()["billing_details"] as Map<*, *>
 
-        val createParams = FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-            fieldValuePairs = formValues.fieldValuePairs,
-            code = PaymentMethod.Type.Blik.code,
-            requiresMandate = false,
-            clientAttributionMetadata = metadata.clientAttributionMetadata,
+        assertThat(billingDetails["address"]).isEqualTo(
+            mapOf(
+                "line1" to "510 Townsend Street",
+                "city" to "San Francisco",
+                "state" to "CA",
+                "postal_code" to "94103",
+                "country" to "US",
+            )
         )
+    }
+
+    @Test
+    fun `widened Klarna address is included in create params`() = runTest {
+        val metadata = createMetadata(
+            paymentMethodCode = PaymentMethod.Type.Klarna.code,
+            checkoutSessionResponse = automaticTaxCheckoutSessionResponse,
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                address = PaymentSheet.Address(
+                    line1 = "510 Townsend Street",
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94103",
+                    country = "US",
+                ),
+            ),
+        )
+        val addressElement = KlarnaDefinition.formElements(metadata)
+            .sectionFields()
+            .filterIsInstance<BillingAddressElement>()
+            .single()
+
+        val createParams = addressElement.toCreateParams(metadata, PaymentMethod.Type.Klarna.code)
         val billingDetails = createParams.toParamMap()["billing_details"] as Map<*, *>
 
         assertThat(billingDetails["address"]).isEqualTo(
@@ -278,9 +300,33 @@ class AutomaticTaxBillingAddressTest {
                     uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
                 )
             )
-            assertWithMessage("$code should contain exactly one address")
-                .that(formElements.sectionFields().filterIsInstance<AddressFieldsElement>())
-                .hasSize(1)
+            val addressFields = formElements.sectionFields().filterIsInstance<AddressFieldsElement>()
+            assertWithMessage("$code should contain exactly one address").that(addressFields).hasSize(1)
+
+            val addressElement = addressFields.single()
+            if (addressElement !is BillingAddressElement) {
+                assertWithMessage("$code should already contain a full address")
+                    .that(addressElement)
+                    .isInstanceOf(AddressElement::class.java)
+                return@forEach
+            }
+
+            if (code == PaymentMethod.Type.Wero.code) {
+                val controller = addressElement.countryElement.controller
+                listOf("DE", "BE", "FR").forEach { allowedCountry ->
+                    controller.onRawValueChange(allowedCountry)
+                    assertThat(controller.rawFieldValue.value).isEqualTo(allowedCountry)
+                }
+                controller.onRawValueChange("US")
+                assertThat(controller.rawFieldValue.value).isNotEqualTo("US")
+            }
+
+            val selectedCountry = requireNotNull(addressElement.countryElement.controller.rawFieldValue.value)
+            additionalAutomaticTaxFieldsByCountry[selectedCountry].orEmpty().forEach { requiredField ->
+                assertWithMessage("$code should show $requiredField for $selectedCountry")
+                    .that(addressElement.hiddenIdentifiers.value)
+                    .doesNotContain(requiredField)
+            }
         }
     }
 
@@ -294,6 +340,27 @@ class AutomaticTaxBillingAddressTest {
         val addressElement = formElements.sectionFields().filterIsInstance<BillingAddressElement>().single()
         addressElement.countryElement.controller.onRawValueChange(countryCode)
         return addressElement
+    }
+
+    private suspend fun BillingAddressElement.toCreateParams(
+        metadata: PaymentMethodMetadata,
+        paymentMethodCode: String,
+    ): PaymentMethodCreateParams {
+        val formValues = requireNotNull(
+            CompleteFormFieldValueFilter(
+                currentFieldValueMap = getFormFieldValueFlow().map { it.toMap() },
+                hiddenIdentifiers = hiddenIdentifiers,
+                userRequestedReuse = flowOf(PaymentSelection.CustomerRequestedSave.NoRequest),
+                defaultValues = emptyMap(),
+            ).filterFlow().first()
+        )
+
+        return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+            fieldValuePairs = formValues.fieldValuePairs,
+            code = paymentMethodCode,
+            requiresMandate = false,
+            clientAttributionMetadata = metadata.clientAttributionMetadata,
+        )
     }
 
     private fun createMetadata(

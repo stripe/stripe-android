@@ -185,10 +185,7 @@ internal sealed interface UiDefinitionFactory {
 
             buildFormElements(metadata, arguments, builder)
 
-            return builder.build().withAutomaticTaxBillingAddressIfNecessary(
-                paymentMethodCode = createSupportedPaymentMethod(metadata).code,
-                arguments = arguments,
-            )
+            return builder.build()
         }
 
         protected open fun buildFormElements(
@@ -293,39 +290,39 @@ internal sealed interface UiDefinitionFactory {
         metadata: PaymentMethodMetadata,
         sharedDataSpecs: List<SharedDataSpec>,
         arguments: Arguments,
-    ): List<FormElement>? = when (this) {
-        is Simple -> {
-            createBaseFormElements(
+    ): List<FormElement>? {
+        val baseFormElements = when (this) {
+            is Simple -> createBaseFormElements(
                 metadata = metadata,
                 arguments = arguments,
             )
-        }
 
-        is Custom -> {
-            createBaseFormElements(
+            is Custom -> createBaseFormElements(
                 metadata = metadata,
                 arguments = arguments,
-            ).withAutomaticTaxBillingAddressIfNecessary(
-                paymentMethodCode = definition.type.code,
-                arguments = arguments,
             )
-        }
 
-        is RequiresSharedDataSpec -> {
-            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == paymentMethodCode }
-            if (sharedDataSpec != null) {
-                createBaseFormElements(
-                    metadata = metadata,
-                    sharedDataSpec = sharedDataSpec,
-                    transformSpecToElements = TransformSpecToElements(arguments),
-                    arguments = arguments,
-                ).withAutomaticTaxBillingAddressIfNecessary(
-                    paymentMethodCode = definition.type.code,
-                    arguments = arguments,
-                )
-            } else {
-                null
+            is RequiresSharedDataSpec -> {
+                val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == paymentMethodCode }
+                if (sharedDataSpec != null) {
+                    createBaseFormElements(
+                        metadata = metadata,
+                        sharedDataSpec = sharedDataSpec,
+                        transformSpecToElements = TransformSpecToElements(arguments),
+                        arguments = arguments,
+                    )
+                } else {
+                    null
+                }
             }
+        }
+
+        return baseFormElements?.let { formElements ->
+            AutomaticTaxFormFinalizer.finalize(
+                formElements = formElements,
+                paymentMethodCode = paymentMethodCode,
+                arguments = arguments,
+            )
         }
     }
 }

@@ -18,53 +18,55 @@ import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.SectionElement
 
-/**
- * Widens an existing shared address for automatic tax, or appends a country-first billing
- * address when the payment method does not already collect one.
- */
-internal fun List<FormElement>.withAutomaticTaxBillingAddressIfNecessary(
-    paymentMethodCode: String,
-    arguments: UiDefinitionFactory.Arguments,
-): List<FormElement> {
-    val shouldCollectTaxAddress = arguments.requiresBillingAddressForAutomaticTax &&
-        arguments.billingDetailsCollectionConfiguration.address ==
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-    if (!shouldCollectTaxAddress || paymentMethodCode in separatelyRenderedPaymentMethodCodes) {
-        return this
-    }
+/** Finalizes a base payment method form with any billing fields required for automatic tax. */
+internal object AutomaticTaxFormFinalizer {
+    fun finalize(
+        formElements: List<FormElement>,
+        paymentMethodCode: String,
+        arguments: UiDefinitionFactory.Arguments,
+    ): List<FormElement> {
+        val shouldCollectTaxAddress = arguments.requiresBillingAddressForAutomaticTax &&
+            arguments.billingDetailsCollectionConfiguration.address ==
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+        if (!shouldCollectTaxAddress || paymentMethodCode in separatelyRenderedPaymentMethodCodes) {
+            return formElements
+        }
 
-    val addressField = filterIsInstance<SectionElement>()
-        .flatMap { it.fields }
-        .filterIsInstance<AddressFieldsElement>()
-        .firstOrNull()
-    if (addressField != null && addressField !is BillingAddressElement) {
-        return this
-    }
+        val addressFields = formElements.filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<AddressFieldsElement>()
+        assert(addressFields.size <= 1) { "A payment method form must not contain multiple billing addresses." }
 
-    val existingSameAsShippingElement = filterIsInstance<SameAsShippingElement>().firstOrNull()
-    val sameAsShippingElement = existingSameAsShippingElement ?: createSameAsShippingElement(arguments)
+        val addressField = addressFields.firstOrNull()
+        if (addressField != null && addressField !is BillingAddressElement) {
+            return formElements
+        }
 
-    if (addressField is BillingAddressElement) {
-        return widenBillingAddress(
-            addressField = addressField,
+        val existingSameAsShippingElement = formElements.filterIsInstance<SameAsShippingElement>().firstOrNull()
+        val sameAsShippingElement = existingSameAsShippingElement ?: createSameAsShippingElement(arguments)
+
+        if (addressField is BillingAddressElement) {
+            return formElements.widenBillingAddress(
+                addressField = addressField,
+                sameAsShippingElement = sameAsShippingElement,
+                appendSameAsShippingElement = existingSameAsShippingElement == null,
+            )
+        }
+
+        val addressElement = createTaxBillingAddressElement(
+            arguments = arguments,
+            countryDropdownFieldController = DropdownFieldController(
+                config = CountryConfig(arguments.billingDetailsCollectionConfiguration.allowedBillingCountries),
+                initialValue = arguments.initialValues[IdentifierSpec.Country],
+            ),
             sameAsShippingElement = sameAsShippingElement,
-            appendSameAsShippingElement = existingSameAsShippingElement == null,
+        )
+
+        return formElements + listOfNotNull(
+            SectionElement.wrap(addressElement, R.string.stripe_billing_details.resolvableString),
+            sameAsShippingElement,
         )
     }
-
-    val addressElement = createTaxBillingAddressElement(
-        arguments = arguments,
-        countryDropdownFieldController = DropdownFieldController(
-            config = CountryConfig(arguments.billingDetailsCollectionConfiguration.allowedBillingCountries),
-            initialValue = arguments.initialValues[IdentifierSpec.Country],
-        ),
-        sameAsShippingElement = sameAsShippingElement,
-    )
-
-    return this + listOfNotNull(
-        SectionElement.wrap(addressElement, R.string.stripe_billing_details.resolvableString),
-        sameAsShippingElement,
-    )
 }
 
 private fun List<FormElement>.widenBillingAddress(
