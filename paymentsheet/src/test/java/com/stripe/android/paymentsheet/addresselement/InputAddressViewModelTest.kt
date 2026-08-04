@@ -67,16 +67,18 @@ class InputAddressViewModelTest {
     )
 
     @Test
-    fun `initializing ViewModel fires onShow with initial country`() {
-        createViewModel(
+    fun `onScreenShown fires onShow with initial country`() {
+        val viewModel = createViewModel(
             address = AddressDetails(address = PaymentSheet.Address(country = "US"))
         )
+        viewModel.onScreenShown()
         verify(eventReporter).onShow(eq("US"))
     }
 
     @Test
-    fun `initializing ViewModel fires onShow with empty string when no initial country`() {
-        createViewModel()
+    fun `onScreenShown fires onShow with empty string when no initial country`() {
+        val viewModel = createViewModel()
+        viewModel.onScreenShown()
         verify(eventReporter).onShow(eq(""))
     }
 

@@ -14,11 +14,10 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         override val eventName: String = "mc_address_show"
         override val additionalParams: Map<String, Any>
             get() {
-                return mapOf(
-                    FIELD_ADDRESS_DATA_BLOB to mapOf(
-                        FIELD_ADDRESS_COUNTRY_CODE to country
-                    )
-                )
+                val data = buildMap<String, Any> {
+                    if (country.isNotEmpty()) put(FIELD_ADDRESS_COUNTRY_CODE, country)
+                }
+                return mapOf(FIELD_ADDRESS_DATA_BLOB to data)
             }
     }
 

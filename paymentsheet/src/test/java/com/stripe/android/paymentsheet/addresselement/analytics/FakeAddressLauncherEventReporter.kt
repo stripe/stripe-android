@@ -13,15 +13,15 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
     private val _autocompleteSessionStartedCalls = Turbine<String>()
     val autocompleteSessionStartedCalls: ReceiveTurbine<String> = _autocompleteSessionStartedCalls
 
-    private val _autocompleteFetchStartedCalls = Turbine<String>()
-    val autocompleteFetchStartedCalls: ReceiveTurbine<String> = _autocompleteFetchStartedCalls
+    private val _autocompleteFetchStartedCalls = Turbine<Unit>()
+    val autocompleteFetchStartedCalls: ReceiveTurbine<Unit> = _autocompleteFetchStartedCalls
 
     private val _autocompleteSuggestionsReturnedCalls = Turbine<SuggestionsReturnedCall>()
     val autocompleteSuggestionsReturnedCalls: ReceiveTurbine<SuggestionsReturnedCall> =
         _autocompleteSuggestionsReturnedCalls
 
-    private val _autocompleteDetailsFetchStartedCalls = Turbine<String>()
-    val autocompleteDetailsFetchStartedCalls: ReceiveTurbine<String> = _autocompleteDetailsFetchStartedCalls
+    private val _autocompleteDetailsFetchStartedCalls = Turbine<Unit>()
+    val autocompleteDetailsFetchStartedCalls: ReceiveTurbine<Unit> = _autocompleteDetailsFetchStartedCalls
 
     private val _autocompleteSelectedCalls = Turbine<SelectedCall>()
     val autocompleteSelectedCalls: ReceiveTurbine<SelectedCall> = _autocompleteSelectedCalls
@@ -45,8 +45,8 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         _autocompleteSessionStartedCalls.add(sessionToken)
     }
 
-    override fun onAutocompleteFetchStarted(sessionToken: String) {
-        _autocompleteFetchStartedCalls.add(sessionToken)
+    override fun onAutocompleteFetchStarted() {
+        _autocompleteFetchStartedCalls.add(Unit)
     }
 
     override fun onAutocompleteSuggestionsReturned(
@@ -57,8 +57,8 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         _autocompleteSuggestionsReturnedCalls.add(SuggestionsReturnedCall(sessionToken, queryLength, resultCount))
     }
 
-    override fun onAutocompleteDetailsFetchStarted(sessionToken: String) {
-        _autocompleteDetailsFetchStartedCalls.add(sessionToken)
+    override fun onAutocompleteDetailsFetchStarted() {
+        _autocompleteDetailsFetchStartedCalls.add(Unit)
     }
 
     override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String) {

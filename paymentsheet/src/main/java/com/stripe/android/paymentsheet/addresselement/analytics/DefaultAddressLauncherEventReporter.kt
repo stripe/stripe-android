@@ -52,11 +52,11 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onAutocompleteFetchStarted(sessionToken: String) {
+    override fun onAutocompleteFetchStarted() {
         durationProvider.start(DurationProvider.Key.AddressAutocompleteFetch, reset = true)
     }
 
-    override fun onAutocompleteDetailsFetchStarted(sessionToken: String) {
+    override fun onAutocompleteDetailsFetchStarted() {
         durationProvider.start(DurationProvider.Key.AddressAutocompleteDetailsFetch, reset = true)
     }
 

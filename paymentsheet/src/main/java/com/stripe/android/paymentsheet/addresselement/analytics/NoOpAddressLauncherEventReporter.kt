@@ -8,9 +8,9 @@ internal object NoOpAddressLauncherEventReporter : AddressLauncherEventReporter 
         editDistance: Int?,
     ) = Unit
     override fun onAutocompleteSessionStarted(sessionToken: String) = Unit
-    override fun onAutocompleteFetchStarted(sessionToken: String) = Unit
+    override fun onAutocompleteFetchStarted() = Unit
     override fun onAutocompleteSuggestionsReturned(sessionToken: String, queryLength: Int, resultCount: Int) = Unit
-    override fun onAutocompleteDetailsFetchStarted(sessionToken: String) = Unit
+    override fun onAutocompleteDetailsFetchStarted() = Unit
     override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String) = Unit
     override fun onAutocompleteError(sessionToken: String, error: Throwable) = Unit
 }

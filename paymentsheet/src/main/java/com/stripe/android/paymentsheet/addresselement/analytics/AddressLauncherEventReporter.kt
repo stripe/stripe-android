@@ -11,7 +11,7 @@ internal interface AddressLauncherEventReporter {
 
     fun onAutocompleteSessionStarted(sessionToken: String)
 
-    fun onAutocompleteFetchStarted(sessionToken: String)
+    fun onAutocompleteFetchStarted()
 
     fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
@@ -19,7 +19,7 @@ internal interface AddressLauncherEventReporter {
         resultCount: Int,
     )
 
-    fun onAutocompleteDetailsFetchStarted(sessionToken: String)
+    fun onAutocompleteDetailsFetchStarted()
 
     fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String)
 

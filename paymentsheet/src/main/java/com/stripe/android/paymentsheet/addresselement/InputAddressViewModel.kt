@@ -120,8 +120,11 @@ internal class InputAddressViewModel @Inject constructor(
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
+    fun onScreenShown() {
+        eventReporter.onShow(_collectedAddress.value?.address?.country.orEmpty())
+    }
+
     init {
-        eventReporter.onShow(_collectedAddress.value?.address?.country ?: "")
 
         viewModelScope.launch {
             navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(

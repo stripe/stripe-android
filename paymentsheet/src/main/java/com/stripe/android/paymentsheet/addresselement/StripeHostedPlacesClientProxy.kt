@@ -46,7 +46,7 @@ internal class StripeHostedPlacesClientProxy(
         if (isFirstQuery) {
             eventReporter.onAutocompleteSessionStarted(token)
         }
-        eventReporter.onAutocompleteFetchStarted(token)
+        eventReporter.onAutocompleteFetchStarted()
         return repository.findAutocompletePredictions(
             query = q,
             country = country,
@@ -99,7 +99,7 @@ internal class StripeHostedPlacesClientProxy(
                 )
             )
         }
-        eventReporter.onAutocompleteDetailsFetchStarted(sessionToken = token)
+        eventReporter.onAutocompleteDetailsFetchStarted()
         return repository.fetchPlaceDetails(
             placeId = placeId,
             sessionToken = token,
