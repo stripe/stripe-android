@@ -83,7 +83,7 @@ internal class CurrencySelectorViewModelTest {
         viewModel.errorMessage.test {
             assertThat(awaitItem()).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
 
-            checkoutSessionFlow.value = CheckoutSessionResponseFactory.create(currency = "eur")
+            sessionFlow.value = CheckoutSessionResponseFactory.create(currency = "eur")
                 .asCheckoutSession(
                     flagImages = null,
                     paymentOptionDisplayData = null,
@@ -125,7 +125,7 @@ internal class CurrencySelectorViewModelTest {
     ) = runTest(dispatcher) {
         val application = ApplicationProvider.getApplicationContext<Application>()
         val fakeAnalyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val checkoutSessionFlow = MutableStateFlow(
+        val sessionFlow = MutableStateFlow(
             CheckoutSessionResponseFactory.create().asCheckoutSession(
                 flagImages = null,
                 paymentOptionDisplayData = null,
@@ -136,7 +136,7 @@ internal class CurrencySelectorViewModelTest {
         val updateCurrencyResult = Turbine<Result<Unit>>()
 
         val viewModel = CurrencySelectorViewModel(
-            checkoutSession = checkoutSessionFlow,
+            session = sessionFlow,
             updateCurrency = { code ->
                 updateCurrencyCalls.add(code)
                 updateCurrencyResult.awaitItem()
@@ -151,7 +151,7 @@ internal class CurrencySelectorViewModelTest {
 
         Scenario(
             fakeAnalyticsRequestExecutor = fakeAnalyticsRequestExecutor,
-            checkoutSessionFlow = checkoutSessionFlow,
+            sessionFlow = sessionFlow,
             updateCurrencyCalls = updateCurrencyCalls,
             updateCurrencyResult = updateCurrencyResult,
             viewModel = viewModel,
@@ -163,7 +163,7 @@ internal class CurrencySelectorViewModelTest {
 
     private class Scenario(
         val fakeAnalyticsRequestExecutor: FakeAnalyticsRequestExecutor,
-        val checkoutSessionFlow: MutableStateFlow<Session>,
+        val sessionFlow: MutableStateFlow<Session>,
         val updateCurrencyCalls: Turbine<String>,
         val updateCurrencyResult: Turbine<Result<Unit>>,
         val viewModel: CurrencySelectorViewModel,

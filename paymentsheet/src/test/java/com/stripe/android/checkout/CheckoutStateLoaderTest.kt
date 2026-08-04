@@ -175,7 +175,7 @@ internal class CheckoutStateLoaderTest {
     fun `loadInitial commits state that exposes the checkout session`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
-        assertThat(stateHolder.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(stateHolder.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         // No adaptive pricing in the response, so no flag images are resolved.
         assertThat(stateHolder.state?.flagImages).isNull()
     }
