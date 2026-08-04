@@ -479,5 +479,10 @@ internal interface DefaultErrorReporterModule {
                 stripeAccountId = null,
             )
         }
+
+        @Provides
+        fun provideApiConfigurationStateProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiConfiguration.State = { state }
     }
 }

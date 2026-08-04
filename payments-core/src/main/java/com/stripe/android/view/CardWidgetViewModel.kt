@@ -25,10 +25,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Provider
 
 internal class CardWidgetViewModel(
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     private val stripeRepository: StripeRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
@@ -56,7 +55,7 @@ internal class CardWidgetViewModel(
     }
 
     private suspend fun determineCbcEligibility(): Boolean {
-        val apiConfig = apiConfigProvider.get()
+        val apiConfig = apiConfigProvider()
 
         val response = stripeRepository.retrieveCardElementConfig(
             requestOptions = ApiRequest.Options(
@@ -75,7 +74,7 @@ internal class CardWidgetViewModel(
     class Factory(val context: Context) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val apiConfigProvider = Provider {
+            val apiConfigProvider: () -> ApiConfiguration.State = {
                 val config = PaymentConfiguration.getInstance(context)
                 ApiConfiguration.State(
                     publishableKey = config.publishableKey,
@@ -84,7 +83,7 @@ internal class CardWidgetViewModel(
             }
             val stripeRepository = StripeApiRepository(
                 context = context,
-                publishableKeyProvider = { apiConfigProvider.get().publishableKey },
+                publishableKeyProvider = { apiConfigProvider().publishableKey },
                 requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
             )
 

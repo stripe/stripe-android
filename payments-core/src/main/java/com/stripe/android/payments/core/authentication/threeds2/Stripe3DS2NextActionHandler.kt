@@ -16,7 +16,6 @@ import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -26,7 +25,7 @@ import javax.inject.Singleton
 internal class Stripe3DS2NextActionHandler @Inject constructor(
     private val config: PaymentAuthConfig,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentNextActionHandler<StripeIntent>() {
 
@@ -73,7 +72,7 @@ internal class Stripe3DS2NextActionHandler @Inject constructor(
                 requestOptions,
                 enableLogging = enableLogging,
                 host.statusBarColor,
-                apiConfigProvider.get().publishableKey,
+                apiConfigProvider().publishableKey,
                 productUsage
             )
         )

@@ -29,6 +29,7 @@ import kotlin.coroutines.CoroutineContext
         WeChatPayNextActionHandlerModule::class,
         CoreCommonModule::class,
         StripeRepositoryModule::class,
+        ApiConfigurationStateToProviderModule::class,
     ]
 )
 internal interface NextActionHandlerComponent {

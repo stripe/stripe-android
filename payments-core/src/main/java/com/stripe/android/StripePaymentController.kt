@@ -65,7 +65,7 @@ constructor(
         analyticsRequestExecutor,
         paymentAnalyticsRequestFactory,
     )
-    private val apiConfigProvider = javax.inject.Provider {
+    private val apiConfigProvider: () -> ApiConfiguration.State = {
         ApiConfiguration.State(
             publishableKey = publishableKeyProvider(),
             stripeAccountId = null,
@@ -110,7 +110,7 @@ constructor(
             enableLogging = enableLogging,
             workContext = workContext,
             uiContext = uiContext,
-            apiConfigurationState = apiConfigProvider.get(),
+            apiConfigurationState = apiConfigProvider(),
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
             includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.

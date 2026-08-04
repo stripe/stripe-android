@@ -20,7 +20,8 @@ import javax.inject.Singleton
         Stripe3ds2TransactionModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        RetryDelayModule::class
+        RetryDelayModule::class,
+        ApiConfigurationStateToProviderModule::class,
     ]
 )
 internal interface Stripe3ds2TransactionViewModelFactoryComponent {

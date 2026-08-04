@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import javax.inject.Provider
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constructor(
@@ -30,7 +29,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
     @Assisted private val handler: PreparePaymentMethodHandler,
     private val errorReporter: ErrorReporter,
     private val stripeRepository: StripeRepository,
-    private val requestOptionsProvider: Provider<ApiRequest.Options>,
+    private val requestOptionsProvider: () -> ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
     override suspend fun intercept(
@@ -40,7 +39,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.createPaymentMethod(
             confirmationOption.createParams.updatedWithProductUsage(intentConfiguration),
-            requestOptionsProvider.get()
+            requestOptionsProvider()
         ).fold(
             onSuccess = { paymentMethod ->
                 intercept(
@@ -79,7 +78,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
         runCatching {
             stripeRepository.createSavedPaymentMethodRadarSession(
                 paymentMethodId = paymentMethod.id,
-                requestOptions = requestOptionsProvider.get(),
+                requestOptions = requestOptionsProvider(),
             ).getOrThrow()
         }.onFailure {
             errorReporter.report(

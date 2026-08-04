@@ -6,6 +6,7 @@ import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiConfigurationStateFromProviderModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -21,6 +22,7 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         ApiConfigurationModule::class,
+        ApiConfigurationStateFromProviderModule::class,
         ApiRequestOptionsModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentOptionsViewModelModule::class,

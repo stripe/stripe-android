@@ -16,7 +16,6 @@ import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -24,7 +23,7 @@ import kotlin.coroutines.CoroutineContext
  * through a JavaScript-based WebView implementation.
  */
 internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     @UIContext private val uiContext: CoroutineContext
 ) : PaymentNextActionHandler<StripeIntent>() {
@@ -76,7 +75,7 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
         val intentConfirmationChallengeNextActionStarter = intentConfirmationChallengeNextActionStarterFactory(host)
         intentConfirmationChallengeNextActionStarter.start(
             IntentConfirmationChallengeActivityContract.Args(
-                publishableKey = apiConfigProvider.get().publishableKey,
+                publishableKey = apiConfigProvider().publishableKey,
                 intent = actionable,
                 productUsage = productUsageTokens
             )

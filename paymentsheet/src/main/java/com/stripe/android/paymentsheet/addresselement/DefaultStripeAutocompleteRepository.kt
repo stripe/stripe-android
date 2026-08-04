@@ -4,12 +4,11 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
-import javax.inject.Provider
 
 internal class DefaultStripeAutocompleteRepository(
     private val stripeNetworkClient: StripeNetworkClient,
     private val apiRequestFactory: ApiRequest.Factory,
-    private val requestOptionsProvider: Provider<ApiRequest.Options>,
+    private val requestOptionsProvider: () -> ApiRequest.Options,
 ) : StripeAutocompleteRepository {
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
@@ -34,7 +33,7 @@ internal class DefaultStripeAutocompleteRepository(
             stripeErrorJsonParser = stripeErrorJsonParser,
             request = apiRequestFactory.createPost(
                 url = AUTOCOMPLETE_URL,
-                options = requestOptionsProvider.get(),
+                options = requestOptionsProvider(),
                 params = params,
             ),
             responseJsonParser = AutocompletePredictionsResponseJsonParser,
@@ -60,7 +59,7 @@ internal class DefaultStripeAutocompleteRepository(
             stripeErrorJsonParser = stripeErrorJsonParser,
             request = apiRequestFactory.createPost(
                 url = DETAILS_URL,
-                options = requestOptionsProvider.get(),
+                options = requestOptionsProvider(),
                 params = params,
             ),
             responseJsonParser = PlaceDetailsResponseJsonParser,

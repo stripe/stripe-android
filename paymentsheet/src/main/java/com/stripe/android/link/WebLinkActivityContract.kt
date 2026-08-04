@@ -15,7 +15,6 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import org.json.JSONObject
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * Contract used to explicitly launch Link as a web view.
@@ -23,11 +22,11 @@ import javax.inject.Provider
 internal class WebLinkActivityContract @Inject internal constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
-    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
+    private val apiConfigurationProvider: () -> ApiConfiguration.State,
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
-        val apiConfiguration = apiConfigurationProvider.get()
+        val apiConfiguration = apiConfigurationProvider()
         val payload = PopupPayload.create(
             configuration = input.configuration,
             context = context,

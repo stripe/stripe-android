@@ -12,28 +12,67 @@ import javax.inject.Provider
 @Module(includes = [PaymentConfigurationModule::class])
 class ApiConfigurationFromPaymentConfigurationModule {
     @Provides
-    fun provideApiConfigurationState(
+    fun provideApiConfigurationStateProvider(
         paymentConfiguration: Provider<PaymentConfiguration>
-    ): ApiConfiguration.State {
-        val config = paymentConfiguration.get()
-        return ApiConfiguration.State(
-            publishableKey = config.publishableKey,
-            stripeAccountId = config.stripeAccountId,
-        )
+    ): () -> ApiConfiguration.State {
+        return {
+            val config = paymentConfiguration.get()
+            ApiConfiguration.State(
+                publishableKey = config.publishableKey,
+                stripeAccountId = config.stripeAccountId,
+            )
+        }
     }
+}
+
+/**
+ * Converts a bound [ApiConfiguration.State] instance into a `() -> ApiConfiguration.State`
+ * provider function. Use this in components that bind [ApiConfiguration.State] via
+ * `@BindsInstance` or a `@Provides` method and need to satisfy dependencies that
+ * take `() -> ApiConfiguration.State`.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Module
+class ApiConfigurationStateToProviderModule {
+    @Provides
+    fun provideApiConfigurationStateProvider(
+        state: ApiConfiguration.State
+    ): () -> ApiConfiguration.State = { state }
+}
+
+/**
+ * Eagerly evaluates a `() -> ApiConfiguration.State` provider function to produce an
+ * [ApiConfiguration.State] instance. Use this in components that only have a
+ * `() -> ApiConfiguration.State` binding and need to satisfy dependencies that
+ * take [ApiConfiguration.State] directly.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Module
+class ApiConfigurationStateFromProviderModule {
+    @Provides
+    fun provideApiConfigurationState(
+        provider: () -> ApiConfiguration.State
+    ): ApiConfiguration.State = provider()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
 class ApiRequestOptionsModule {
     @Provides
-    fun provideApiRequestOptions(
-        apiConfigurationState: Provider<ApiConfiguration.State>
-    ): ApiRequest.Options {
-        val state = apiConfigurationState.get()
-        return ApiRequest.Options(
-            apiKey = state.publishableKey,
-            stripeAccount = state.stripeAccountId,
-        )
+    fun provideApiRequestOptionsProvider(
+        apiConfigurationProvider: () -> ApiConfiguration.State
+    ): () -> ApiRequest.Options {
+        return {
+            val state = apiConfigurationProvider()
+            ApiRequest.Options(
+                apiKey = state.publishableKey,
+                stripeAccount = state.stripeAccountId,
+            )
+        }
     }
+
+    @Provides
+    fun provideApiRequestOptions(
+        apiRequestOptionsProvider: () -> ApiRequest.Options
+    ): ApiRequest.Options = apiRequestOptionsProvider()
 }

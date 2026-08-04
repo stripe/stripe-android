@@ -5,6 +5,7 @@ import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiConfigurationStateToProviderModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.polling.IntentStatusPoller
@@ -19,6 +20,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         PollingViewModelModule::class,
         StripeRepositoryModule::class,
+        ApiConfigurationStateToProviderModule::class,
         ApiRequestOptionsModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoreCommonModule::class

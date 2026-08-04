@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationStateFromProviderModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
@@ -42,6 +43,7 @@ import javax.inject.Singleton
         TapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
         ApiConfigurationModule::class,
+        ApiConfigurationStateFromProviderModule::class,
         PaymentElementRequestSurfaceModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class,

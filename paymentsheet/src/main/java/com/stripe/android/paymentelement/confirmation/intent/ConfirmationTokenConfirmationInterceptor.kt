@@ -36,7 +36,6 @@ import com.stripe.android.paymentsheet.toDeferredIntentParams
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import javax.inject.Provider
 
 internal class ConfirmationTokenConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -45,7 +44,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val context: Context,
     private val stripeRepository: StripeRepository,
-    private val requestOptionsProvider: Provider<ApiRequest.Options>,
+    private val requestOptionsProvider: () -> ApiRequest.Options,
     private val userFacingLogger: UserFacingLogger,
 ) : IntentConfirmationInterceptor {
     init {
@@ -68,7 +67,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         null -> null
     }
 
-    private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptionsProvider.get().apiKeyIsLiveMode)
+    private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptionsProvider().apiKeyIsLiveMode)
 
     override suspend fun intercept(
         intent: StripeIntent,
@@ -81,7 +80,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 shippingValues,
                 clientAttributionMetadata,
             ),
-            options = requestOptionsProvider.get(),
+            options = requestOptionsProvider(),
         ).fold(
             onSuccess = { confirmationToken ->
                 handleDeferredOnConfirmationTokenCreated(
@@ -117,13 +116,13 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 clientAttributionMetadata,
             ),
             options = if (paymentMethod.customerId != null) {
-                requestOptionsProvider.get().copy(
+                requestOptionsProvider().copy(
                     apiKey = ephemeralKeySecret ?: "".also {
                         userFacingLogger.logWarningWithoutPii(ERROR_MISSING_EPHEMERAL_KEY_SECRET)
                     }
                 )
             } else {
-                requestOptionsProvider.get()
+                requestOptionsProvider()
             },
         ).fold(
             onSuccess = { confirmationToken ->
@@ -196,7 +195,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
-            options = requestOptionsProvider.get(),
+            options = requestOptionsProvider(),
         ).mapCatching { intent ->
             if (intent.isConfirmed) {
                 ConfirmationDefinition.Action.Complete(
@@ -274,7 +273,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 null
             },
             clientContext =
-            if (requestOptionsProvider.get().apiKeyIsLiveMode) {
+            if (requestOptionsProvider().apiKeyIsLiveMode) {
                 null
             } else {
                 prepareConfirmationTokenClientContextParams(

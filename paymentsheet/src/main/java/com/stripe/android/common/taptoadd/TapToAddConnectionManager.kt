@@ -30,7 +30,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConnectionManager {
@@ -58,7 +57,7 @@ internal interface TapToAddConnectionManager {
             errorReporter: ErrorReporter,
             applicationContext: Context,
             logger: Logger,
-            apiConfigProvider: Provider<ApiConfiguration.State>,
+            apiConfigProvider: () -> ApiConfiguration.State,
             workContext: CoroutineContext,
             callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
             isSimulatedProvider: TapToAddIsSimulatedProvider,
@@ -89,7 +88,7 @@ internal interface TapToAddConnectionManager {
 internal class DefaultTapToAddConnectionManager(
     private val applicationContext: Context,
     private val workContext: CoroutineContext,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
     private val logger: Logger,
@@ -296,7 +295,7 @@ internal class DefaultTapToAddConnectionManager(
                 context = applicationContext,
                 tokenProvider = object : ConnectionTokenProvider {
                     override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
-                        callback.onSuccess(apiConfigProvider.get().publishableKey)
+                        callback.onSuccess(apiConfigProvider().publishableKey)
                     }
                 },
                 listener = this,

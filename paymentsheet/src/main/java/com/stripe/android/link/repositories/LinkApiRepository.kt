@@ -39,7 +39,6 @@ import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -49,17 +48,17 @@ import kotlin.coroutines.CoroutineContext
 internal class LinkApiRepository @Inject constructor(
     application: Application,
     private val requestSurface: RequestSurface,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     private val stripeRepository: StripeRepository,
     private val consumersApiService: ConsumersApiService,
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?,
     private val errorReporter: ErrorReporter,
-    private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
+    private val apiRequestOptionsProvider: () -> ApiRequest.Options,
 ) : LinkRepository {
 
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(application, { apiConfigProvider.get().publishableKey }, workContext)
+        DefaultFraudDetectionDataRepository(application, { apiConfigProvider().publishableKey }, workContext)
 
     init {
         fraudDetectionDataRepository.refresh()
@@ -80,7 +79,7 @@ internal class LinkApiRepository @Inject constructor(
                     requestSurface = requestSurface.value,
                     sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = false,
-                    requestOptions = apiRequestOptionsProvider.get(),
+                    requestOptions = apiRequestOptionsProvider(),
                     customerId = customerId,
                     supportedVerificationTypes = supportedVerificationTypes
                 )
@@ -101,7 +100,7 @@ internal class LinkApiRepository @Inject constructor(
                     sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = true,
                     supportedVerificationTypes = null,
-                    requestOptions = apiRequestOptionsProvider.get(),
+                    requestOptions = apiRequestOptionsProvider(),
                     customerId = null
                 )
             )
@@ -127,7 +126,7 @@ internal class LinkApiRepository @Inject constructor(
                 requestSurface = requestSurface.value,
                 verificationToken = verificationToken,
                 appId = appId,
-                requestOptions = apiRequestOptionsProvider.get(),
+                requestOptions = apiRequestOptionsProvider(),
                 sessionId = sessionId,
                 customerId = customerId,
                 supportedVerificationTypes = supportedVerificationTypes,
@@ -147,7 +146,7 @@ internal class LinkApiRepository @Inject constructor(
                 consumerSessionClientSecret = consumerSessionClientSecret,
                 supportedVerificationTypes = supportedVerificationTypes,
                 requestSurface = requestSurface.value,
-                requestOptions = apiRequestOptionsProvider.get(),
+                requestOptions = apiRequestOptionsProvider(),
             )
         }
     }
@@ -174,7 +173,7 @@ internal class LinkApiRepository @Inject constructor(
                 consentAction = consentAction,
                 requestSurface = requestSurface.value
             ),
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -207,7 +206,7 @@ internal class LinkApiRepository @Inject constructor(
                 verificationToken = verificationToken,
                 appId = appId
             ),
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -225,7 +224,7 @@ internal class LinkApiRepository @Inject constructor(
                 email = userEmail,
             ),
             requestSurface = requestSurface.value,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         ).mapCatching {
             val paymentDetails = it.paymentDetails.first()
             val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
@@ -265,7 +264,7 @@ internal class LinkApiRepository @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentMethodId = paymentMethod.id,
             requestSurface = requestSurface.value,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
             customerEphemeralKey = customerEphemeralKey,
         ).mapCatching {
             LinkPaymentDetails.Saved(
@@ -290,7 +289,7 @@ internal class LinkApiRepository @Inject constructor(
                 clientAttributionMetadata = clientAttributionMetadata.toParams(),
             ),
             requestSurface = requestSurface.value,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         ).mapCatching {
             it.paymentDetails.first()
         }.onFailure {
@@ -322,7 +321,7 @@ internal class LinkApiRepository @Inject constructor(
             extraParams = mapOf(
                 "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
             ) + allowRedisplay + billingPhone + paymentMethodParams + clientAttributionMetadataParams,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
         }.map { paymentMethod ->
@@ -393,7 +392,7 @@ internal class LinkApiRepository @Inject constructor(
         )
         stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = params,
-            options = apiRequestOptionsProvider.get(),
+            options = apiRequestOptionsProvider(),
         )
     }
 
@@ -404,7 +403,7 @@ internal class LinkApiRepository @Inject constructor(
         stripeRepository.logOut(
             consumerSessionClientSecret = consumerSessionClientSecret,
             consumerAccountPublishableKey = consumerAccountPublishableKey,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -421,7 +420,7 @@ internal class LinkApiRepository @Inject constructor(
                     type = VerificationType.SMS,
                     customEmailType = null,
                     connectionsMerchantName = null,
-                    requestOptions = apiRequestOptionsProvider.get(),
+                    requestOptions = apiRequestOptionsProvider(),
                     isResendSmsCode = isResendSmsCode
                 )
             )
@@ -441,7 +440,7 @@ internal class LinkApiRepository @Inject constructor(
                     requestSurface = requestSurface.value,
                     type = VerificationType.SMS,
                     consentGranted = consentGranted,
-                    requestOptions = apiRequestOptionsProvider.get(),
+                    requestOptions = apiRequestOptionsProvider(),
                 )
             )
         }
@@ -455,7 +454,7 @@ internal class LinkApiRepository @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             consentGranted = consentGranted,
             requestSurface = requestSurface.value,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -466,7 +465,7 @@ internal class LinkApiRepository @Inject constructor(
         return stripeRepository.listPaymentDetails(
             clientSecret = consumerSessionClientSecret,
             paymentMethodTypes = paymentMethodTypes,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -475,7 +474,7 @@ internal class LinkApiRepository @Inject constructor(
     ): Result<ConsumerShippingAddresses> {
         return stripeRepository.listShippingAddresses(
             clientSecret = consumerSessionClientSecret,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -486,7 +485,7 @@ internal class LinkApiRepository @Inject constructor(
         return stripeRepository.deletePaymentDetails(
             clientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -497,7 +496,7 @@ internal class LinkApiRepository @Inject constructor(
         return stripeRepository.updatePaymentDetails(
             clientSecret = consumerSessionClientSecret,
             paymentDetailsUpdateParams = updateParams,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -511,7 +510,7 @@ internal class LinkApiRepository @Inject constructor(
             intentToken = intentToken,
             linkMode = linkMode,
             requestSurface = requestSurface.value,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -523,7 +522,7 @@ internal class LinkApiRepository @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             phoneNumber = phoneNumber,
             requestSurface = requestSurface.value,
-            requestOptions = apiRequestOptionsProvider.get(),
+            requestOptions = apiRequestOptionsProvider(),
         )
     }
 
@@ -536,7 +535,7 @@ internal class LinkApiRepository @Inject constructor(
                 stripeAccount = null,
             )
         } else {
-            val config = apiConfigProvider.get()
+            val config = apiConfigProvider()
             ApiRequest.Options(
                 apiKey = config.publishableKey,
                 stripeAccount = config.stripeAccountId,

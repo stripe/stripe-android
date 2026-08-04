@@ -19,7 +19,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -29,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class CustomerApiRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     private val logger: Logger,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
@@ -45,7 +44,7 @@ internal class CustomerApiRepository @Inject constructor(
             productUsageTokens,
             ApiRequest.Options(
                 ephemeralKeySecret,
-                apiConfigProvider.get().stripeAccountId
+                apiConfigProvider().stripeAccountId
             )
         ).getOrNull()
     }
@@ -73,7 +72,7 @@ internal class CustomerApiRepository @Inject constructor(
                     productUsageTokens = productUsageTokens,
                     requestOptions = ApiRequest.Options(
                         apiKey = ephemeralKeySecret,
-                        stripeAccount = apiConfigProvider.get().stripeAccountId,
+                        stripeAccount = apiConfigProvider().stripeAccountId,
                     ),
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
@@ -114,7 +113,7 @@ internal class CustomerApiRepository @Inject constructor(
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
-                stripeAccount = apiConfigProvider.get().stripeAccountId,
+                stripeAccount = apiConfigProvider().stripeAccountId,
             ),
         ).onFailure {
             logger.error("Failed to detach payment method $paymentMethodId.", it)
@@ -136,7 +135,7 @@ internal class CustomerApiRepository @Inject constructor(
     ): Result<PaymentMethod> = with(CoroutineScope(workContext)) {
         val requestOptions = ApiRequest.Options(
             apiKey = ephemeralKeySecret,
-            stripeAccount = apiConfigProvider.get().stripeAccountId,
+            stripeAccount = apiConfigProvider().stripeAccountId,
         )
 
         val detachOne: suspend (String) -> Result<PaymentMethod> = { pmId ->
@@ -219,7 +218,7 @@ internal class CustomerApiRepository @Inject constructor(
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
-                stripeAccount = apiConfigProvider.get().stripeAccountId,
+                stripeAccount = apiConfigProvider().stripeAccountId,
             )
         ).onFailure {
             logger.error("Failed to attach payment method $paymentMethodId.", it)
@@ -236,7 +235,7 @@ internal class CustomerApiRepository @Inject constructor(
             paymentMethodUpdateParams = params,
             options = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
-                stripeAccount = apiConfigProvider.get().stripeAccountId,
+                stripeAccount = apiConfigProvider().stripeAccountId,
             )
         ).onFailure {
             logger.error("Failed to update payment method $paymentMethodId.", it)
@@ -251,7 +250,7 @@ internal class CustomerApiRepository @Inject constructor(
         customerId = customerId,
         options = ApiRequest.Options(
             apiKey = ephemeralKeySecret,
-            stripeAccount = apiConfigProvider.get().stripeAccountId,
+            stripeAccount = apiConfigProvider().stripeAccountId,
         )
     )
 
@@ -266,7 +265,7 @@ internal class CustomerApiRepository @Inject constructor(
             productUsageTokens = productUsageTokens,
             requestOptions = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
-                stripeAccount = apiConfigProvider.get().stripeAccountId,
+                stripeAccount = apiConfigProvider().stripeAccountId,
             ),
         ).onFailure {
             logger.error("Failed to retrieve payment method $paymentMethodId.", it)

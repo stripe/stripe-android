@@ -12,7 +12,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @Module
@@ -69,7 +68,7 @@ internal interface TapToAddConnectionModule {
             errorReporter: ErrorReporter,
             logger: Logger,
             applicationContext: Context,
-            apiConfigProvider: Provider<ApiConfiguration.State>,
+            apiConfigProvider: () -> ApiConfiguration.State,
             @IOContext workContext: CoroutineContext,
             callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
             isSimulatedProvider: TapToAddIsSimulatedProvider,
