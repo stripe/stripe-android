@@ -285,7 +285,7 @@ class InlineAutocompleteControllerTest {
         }
 
     @Test
-    fun `onFocusLost cancels an in-flight prediction selection`() = runScenario {
+    fun `onFocusLost does not cancel an in-flight prediction selection`() = runScenario {
         val fetchGate = CompletableDeferred<Unit>()
         fakePlacesClient.fetchPlaceResult = Result.success(
             Address(line1 = "123 Main Street", country = "US")
@@ -298,13 +298,13 @@ class InlineAutocompleteControllerTest {
         delegate.onFocusLost()
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
 
-        // Release the gate — result must be discarded (job was already cancelled)
+        // Release the gate — selection must still complete despite focus loss
         fetchGate.complete(Unit)
         advanceTimeBy(100)
 
         assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
         fakePlacesClient.resetSessionCalls.awaitItem()
-        // No event — selection was cancelled before result was handled
+        eventCalls.awaitItem()
     }
 
     @Test
@@ -843,6 +843,38 @@ class InlineAutocompleteControllerTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `fetchPlace failure clears lastPredictionLine1 so next query fetches normally`() = runScenario {
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            Address(line1 = "123 Main Street", country = "US")
+        )
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        eventCalls.awaitItem()
+
+        // fetchPlace failure must clear lastPredictionLine1
+        fakePlacesClient.fetchPlaceResult = Result.failure(RuntimeException("network error"))
+        delegate.onPredictionSelected("place_2")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+
+        // Typing the first selection's line1 must trigger a fresh fetch, not be suppressed
+        queryFlow.value = "123 Main Street"
+        advanceTimeBy(500)
+
+        fakePlacesClient.findPredictionsCalls.awaitItem()
     }
 
     @Test

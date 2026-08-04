@@ -119,7 +119,6 @@ internal class InlineAutocompleteController(
 
     fun onFocusLost() {
         observeJob?.cancel()
-        selectionJob?.cancel()
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
@@ -149,9 +148,7 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        val wasShowingResults =
-            _inlinePredictionsState.value is AutocompleteAddressInteractor.InlinePredictionsState.Results
-        if (!wasShowingResults) {
+        if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
             _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
         }
         val result = placesClient.findAutocompletePredictions(
@@ -189,6 +186,7 @@ internal class InlineAutocompleteController(
     }
 
     private fun handleFailure(query: String?, country: String?) {
+        lastPredictionLine1 = null
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         if (config.shouldUseStripeHostedAutocomplete) {
             emitExpandForm(query = query, country = country)
