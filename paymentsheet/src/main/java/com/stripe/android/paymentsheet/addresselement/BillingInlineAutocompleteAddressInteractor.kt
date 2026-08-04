@@ -40,6 +40,14 @@ internal class BillingInlineAutocompleteAddressInteractor(
         inlineController.onDismissed()
     }
 
+    override fun onFocusLost() {
+        inlineController.onFocusLost()
+    }
+
+    override fun onFocusGained() {
+        inlineController.onFocusGained()
+    }
+
     override fun onEnterManuallyFromInline() {
         inlineController.expandFormFromInline()
     }

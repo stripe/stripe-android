@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -72,19 +73,25 @@ class AddressTextFieldController(
                 _inlineQuery.value = ""
                 inlineAutocompleteHandler.onDismissed()
             }
+            val predictionsState by inlineAutocompleteHandler.predictionsState.collectAsState()
+            val isDarkTheme = isSystemInDarkTheme()
 
-            Column(modifier = modifier) {
+            Column(
+                modifier = modifier.onFocusChanged { state ->
+                    if (state.hasFocus) {
+                        inlineAutocompleteHandler.onFocusGained()
+                    } else {
+                        inlineAutocompleteHandler.onFocusLost()
+                    }
+                }
+            ) {
                 AddressTextFieldUI(
                     controller = this@AddressTextFieldController,
                     enabled = enabled,
                 )
-                val predictionsState by
-                    inlineAutocompleteHandler.predictionsState.collectAsState()
-                val isDarkTheme = isSystemInDarkTheme()
                 InlineAddressPredictionsUI(
                     state = predictionsState,
-                    attributionDrawable = inlineAutocompleteHandler
-                        .getAttributionDrawable(isDarkTheme),
+                    attributionDrawable = inlineAutocompleteHandler.getAttributionDrawable(isDarkTheme),
                     onPredictionSelected = inlineAutocompleteHandler::onPredictionSelected,
                     onClear = onClear,
                     onEnterManually = inlineAutocompleteHandler::onEnterManually,
