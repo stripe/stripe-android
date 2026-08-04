@@ -10,6 +10,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.ui.core.cardscan.IsStripeCardScanAvailable
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,8 +44,10 @@ internal class IsNfcScanningAvailableTest {
     }
 
     @Test
-    fun `returns false when stripe card scan is allowed`() {
-        val isNfcScanningAvailable = createIsNfcScanningAvailable()
+    fun `returns false when stripe card scan is allowed and SDK is imported`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(result = true),
+        )
 
         assertThat(
             isNfcScanningAvailable.get(
@@ -54,6 +57,22 @@ internal class IsNfcScanningAvailableTest {
                 ),
             )
         ).isFalse()
+    }
+
+    @Test
+    fun `returns true when stripe card scan is allowed but SDK is not imported`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(result = false),
+        )
+
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(
+                    isNfcScanningEnabled = true,
+                    isStripeCardScanAllowed = true,
+                ),
+            )
+        ).isTrue()
     }
 
     @Test
@@ -224,13 +243,21 @@ internal class IsNfcScanningAvailableTest {
         nfcHardwareDelegate: FakeNfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
         eventReporter: FakeEventReporter = FakeEventReporter(),
         mode: EventReporter.Mode = EventReporter.Mode.Complete,
+        isStripeCardScanAvailable: FakeIsStripeCardScanAvailable = FakeIsStripeCardScanAvailable(result = false),
     ): DefaultIsNfcScanningAvailable {
         return DefaultIsNfcScanningAvailable(
             isDeviceSecureForNfc = isDeviceSecureForNfc,
             nfcHardwareDelegate = nfcHardwareDelegate,
             eventReporter = eventReporter,
             mode = mode,
+            isStripeCardScanAvailable = isStripeCardScanAvailable,
         )
+    }
+
+    private class FakeIsStripeCardScanAvailable(
+        private val result: Boolean,
+    ) : IsStripeCardScanAvailable {
+        override fun invoke(): Boolean = result
     }
 
     private fun createMetadata(
