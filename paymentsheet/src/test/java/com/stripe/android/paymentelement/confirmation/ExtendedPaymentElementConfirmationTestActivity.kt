@@ -241,6 +241,21 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
         )
 
         @Provides
+        fun providesApiConfigurationStateProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiConfiguration.State = { state }
+
+        @Provides
+        fun providesApiRequestOptionsProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiRequest.Options = {
+            ApiRequest.Options(
+                apiKey = state.publishableKey,
+                stripeAccount = state.stripeAccountId,
+            )
+        }
+
+        @Provides
         fun providesApiRequestOptions(config: PaymentConfiguration): ApiRequest.Options {
             return ApiRequest.Options(
                 apiKey = config.publishableKey,

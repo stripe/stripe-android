@@ -54,7 +54,9 @@ internal class CustomerApiRepository @Inject constructor(
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
+        stripeAccountId: String?,
     ): Result<List<PaymentMethod>> = withContext(workContext) {
+        val resolvedStripeAccountId = stripeAccountId ?: apiConfigProvider().stripeAccountId
         val requests = types.filter { paymentMethodType ->
             paymentMethodType in setOf(
                 PaymentMethod.Type.Card,
@@ -72,7 +74,7 @@ internal class CustomerApiRepository @Inject constructor(
                     productUsageTokens = productUsageTokens,
                     requestOptions = ApiRequest.Options(
                         apiKey = ephemeralKeySecret,
-                        stripeAccount = apiConfigProvider().stripeAccountId,
+                        stripeAccount = resolvedStripeAccountId,
                     ),
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)

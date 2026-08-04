@@ -221,6 +221,11 @@ internal interface PaymentElementConfirmationTestModule {
         }
 
         @Provides
+        fun providesApiConfigurationStateProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiConfiguration.State = { state }
+
+        @Provides
         @Singleton
         fun providesFakeLinkConfigurationCoordinator(): LinkConfigurationCoordinator =
             FakeLinkConfigurationCoordinator()

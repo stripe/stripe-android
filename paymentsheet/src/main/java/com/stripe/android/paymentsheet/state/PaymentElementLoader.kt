@@ -507,6 +507,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         PaymentMethod.Type.USBankAccount,
                     ), // These are the only payment method types we support as saved payment methods.
                     silentlyFail = apiConfiguration.isLiveMode(),
+                    stripeAccountId = apiConfiguration.stripeAccountId,
                 )
             }
         }

@@ -26,6 +26,7 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
+        stripeAccountId: String? = null,
     ): Result<List<PaymentMethod>>
 
     /**

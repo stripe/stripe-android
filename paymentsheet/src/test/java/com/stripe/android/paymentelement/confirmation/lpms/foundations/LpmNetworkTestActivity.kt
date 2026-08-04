@@ -204,6 +204,11 @@ internal interface LpmNetworkTestModule {
         fun providesEnableLogging(): Boolean = ENABLE_LOGGING_VALUE
 
         @Provides
+        fun providesApiConfigurationStateProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiConfiguration.State = { state }
+
+        @Provides
         @Singleton
         @IOContext
         fun provideWorkContext(): CoroutineContext = UnconfinedTestDispatcher()
