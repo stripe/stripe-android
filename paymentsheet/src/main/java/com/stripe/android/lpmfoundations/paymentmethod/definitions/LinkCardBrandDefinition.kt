@@ -49,7 +49,7 @@ private object LinkCardBrandDefinitionFactory : UiDefinitionFactory.Custom {
     }
 
     // Link Card Brand uses its own mechanism, not these form elements.
-    override fun createFormElements(
+    override fun createBaseFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {

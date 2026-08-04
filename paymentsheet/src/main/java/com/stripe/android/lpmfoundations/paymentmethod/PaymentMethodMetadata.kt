@@ -331,21 +331,25 @@ internal data class PaymentMethodMetadata(
         uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
     ): List<FormElement>? {
         return if (isExternalPaymentMethod(code)) {
-            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormElements(
+            getUiDefinitionFactoryForExternalPaymentMethod(code)?.formElements(
+                paymentMethodCode = code,
                 metadata = this,
+                sharedDataSpecs = sharedDataSpecs,
                 arguments = uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
             )
         } else if (isCustomPaymentMethod(code)) {
-            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createFormElements(
+            getUiDefinitionFactoryForCustomPaymentMethod(code)?.formElements(
+                paymentMethodCode = code,
                 metadata = this,
+                sharedDataSpecs = sharedDataSpecs,
                 arguments = uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
             )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
             definition.uiDefinitionFactory(this).formElements(
+                paymentMethodCode = code,
                 metadata = this,
-                definition = definition,
                 sharedDataSpecs = sharedDataSpecs,
                 arguments = uiDefinitionFactoryArgumentsFactory.create(
                     metadata = this,

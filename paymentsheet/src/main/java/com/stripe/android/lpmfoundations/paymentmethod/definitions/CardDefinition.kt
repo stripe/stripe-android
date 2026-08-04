@@ -115,7 +115,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         )
     }
 
-    override fun createFormElements(
+    @Suppress("LongMethod")
+    override fun createBaseFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {

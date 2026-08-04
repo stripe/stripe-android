@@ -141,20 +141,20 @@ internal sealed interface UiDefinitionFactory {
             return createSupportedPaymentMethod(metadata, sharedDataSpec).asFormHeaderInformation(incentive)
         }
 
-        fun createFormElements(
+        fun createBaseFormElements(
             metadata: PaymentMethodMetadata,
             sharedDataSpec: SharedDataSpec,
             transformSpecToElements: TransformSpecToElements,
             arguments: Arguments,
         ): List<FormElement> {
-            return createFormElements(
+            return createBaseFormElements(
                 metadata = metadata,
                 sharedDataSpec = sharedDataSpec,
                 transformSpecToElements = transformSpecToElements,
             )
         }
 
-        fun createFormElements(
+        fun createBaseFormElements(
             metadata: PaymentMethodMetadata,
             sharedDataSpec: SharedDataSpec,
             transformSpecToElements: TransformSpecToElements,
@@ -180,7 +180,7 @@ internal sealed interface UiDefinitionFactory {
             return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive)
         }
 
-        fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement> {
+        fun createBaseFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement> {
             val builder = FormElementsBuilder(arguments)
 
             buildFormElements(metadata, arguments, builder)
@@ -208,7 +208,7 @@ internal sealed interface UiDefinitionFactory {
             return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive)
         }
 
-        fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
+        fun createBaseFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
     }
 
     fun canBeDisplayedInUi(
@@ -286,29 +286,29 @@ internal sealed interface UiDefinitionFactory {
     }
 
     fun formElements(
-        definition: PaymentMethodDefinition,
+        paymentMethodCode: String,
         metadata: PaymentMethodMetadata,
         sharedDataSpecs: List<SharedDataSpec>,
         arguments: Arguments,
     ): List<FormElement>? = when (this) {
         is Simple -> {
-            createFormElements(
+            createBaseFormElements(
                 metadata = metadata,
                 arguments = arguments,
             )
         }
 
         is Custom -> {
-            createFormElements(
+            createBaseFormElements(
                 metadata = metadata,
                 arguments = arguments,
             )
         }
 
         is RequiresSharedDataSpec -> {
-            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
+            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == paymentMethodCode }
             if (sharedDataSpec != null) {
-                createFormElements(
+                createBaseFormElements(
                     metadata = metadata,
                     sharedDataSpec = sharedDataSpec,
                     transformSpecToElements = TransformSpecToElements(arguments),

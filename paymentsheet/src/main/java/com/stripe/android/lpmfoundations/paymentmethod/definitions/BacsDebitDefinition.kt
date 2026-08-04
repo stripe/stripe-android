@@ -47,7 +47,7 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         iconRequiresTinting = true,
     )
 
-    override fun createFormElements(
+    override fun createBaseFormElements(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
         transformSpecToElements: TransformSpecToElements
