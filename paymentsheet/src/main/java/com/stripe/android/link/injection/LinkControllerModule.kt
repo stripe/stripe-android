@@ -2,12 +2,12 @@ package com.stripe.android.link.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.ApiConfiguration
 import com.stripe.android.link.DefaultLinkConfigurationLoader
 import com.stripe.android.link.LinkConfigurationLoader
 import com.stripe.android.link.LinkControllerInteractor
@@ -17,7 +17,6 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
-import javax.inject.Provider
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.paymentsheet.repositories.NoOpPaymentMethodMessagingPromotionHelperModule
 import com.stripe.android.paymentsheet.state.NoOpTapToAddConnectionStarterModule
@@ -30,6 +29,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(

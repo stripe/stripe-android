@@ -17,7 +17,7 @@ internal object CardElementTestHelper {
         viewModelStoreTestRule: ViewModelStoreTestRule,
     ): ViewModelStoreOwner {
         val cardWidgetViewModel = CardWidgetViewModel(
-            apiConfigProvider = javax.inject.Provider {
+            apiConfigProvider = {
                 ApiConfiguration.State(
                     publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                     stripeAccountId = null,

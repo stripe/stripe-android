@@ -1177,7 +1177,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         pollingAnalyticsEventReporter: FakePollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter(),
     ): PaymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
-        javax.inject.Provider {
+        {
             ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
         },
         stripeRepository,

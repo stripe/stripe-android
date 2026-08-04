@@ -41,7 +41,7 @@ class Stripe3DS2AuthenticatorTest {
     private val authenticator = Stripe3DS2NextActionHandler(
         paymentAuthConfig,
         enableLogging = false,
-        apiConfigProvider = javax.inject.Provider {
+        apiConfigProvider = {
             ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
         },
         productUsage = setOf()

@@ -28,7 +28,7 @@ class CardWidgetViewModelTest {
             val stripeRepository = FakeCardElementConfigRepository()
 
             val viewModel = CardWidgetViewModel(
-                apiConfigProvider = javax.inject.Provider { apiConfigState },
+                apiConfigProvider = { apiConfigState },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher
             ).also { viewModelStoreRule.track(it) }
@@ -46,7 +46,7 @@ class CardWidgetViewModelTest {
             val stripeRepository = FakeCardElementConfigRepository()
 
             val viewModel = CardWidgetViewModel(
-                apiConfigProvider = javax.inject.Provider { apiConfigState },
+                apiConfigProvider = { apiConfigState },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher
             ).also { viewModelStoreRule.track(it) }
@@ -63,7 +63,7 @@ class CardWidgetViewModelTest {
         val stripeRepository = FakeCardElementConfigRepository()
 
         val viewModel = CardWidgetViewModel(
-            apiConfigProvider = javax.inject.Provider { apiConfigState },
+            apiConfigProvider = { apiConfigState },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher
         ).also { viewModelStoreRule.track(it) }
@@ -80,7 +80,7 @@ class CardWidgetViewModelTest {
         val stripeRepository = FakeCardElementConfigRepository()
 
         val viewModel = CardWidgetViewModel(
-            apiConfigProvider = javax.inject.Provider { apiConfigState },
+            apiConfigProvider = { apiConfigState },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher
         ).also { viewModelStoreRule.track(it) }
@@ -98,7 +98,7 @@ class CardWidgetViewModelTest {
         val stripeRepository = FakeCardElementConfigRepository()
 
         val viewModel = CardWidgetViewModel(
-            apiConfigProvider = javax.inject.Provider { apiConfigState },
+            apiConfigProvider = { apiConfigState },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher
         ).also { viewModelStoreRule.track(it) }

@@ -67,7 +67,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         null -> null
     }
 
-    private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptionsProvider().apiKeyIsLiveMode)
+    private val confirmActionHelper: ConfirmActionHelper =
+        ConfirmActionHelper(requestOptionsProvider().apiKeyIsLiveMode)
 
     override suspend fun intercept(
         intent: StripeIntent,

@@ -1080,7 +1080,7 @@ internal class CardNumberEditTextTest {
         val repository = FakeCardElementConfigRepository()
 
         val cardWidgetViewModel = CardWidgetViewModel(
-            apiConfigProvider = javax.inject.Provider {
+            apiConfigProvider = {
                 val config = PaymentConfiguration.getInstance(context)
                 ApiConfiguration.State(
                     publishableKey = config.publishableKey,

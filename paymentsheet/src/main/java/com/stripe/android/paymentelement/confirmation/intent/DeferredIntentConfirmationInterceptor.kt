@@ -39,7 +39,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     private val requestOptionsProvider: () -> ApiRequest.Options,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
 ) : IntentConfirmationInterceptor {
-    private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptionsProvider().apiKeyIsLiveMode)
+    private val confirmActionHelper: ConfirmActionHelper =
+        ConfirmActionHelper(requestOptionsProvider().apiKeyIsLiveMode)
 
     override suspend fun intercept(
         intent: StripeIntent,

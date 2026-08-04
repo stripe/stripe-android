@@ -39,7 +39,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
     private val processor = SetupIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
-        javax.inject.Provider {
+        {
             ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
         },
         mockStripeRepository,

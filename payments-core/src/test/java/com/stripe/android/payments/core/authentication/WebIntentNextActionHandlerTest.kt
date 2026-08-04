@@ -183,7 +183,7 @@ class WebIntentNextActionHandlerTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             enableLogging = false,
             uiContext = testDispatcher,
-            apiConfigProvider = javax.inject.Provider {
+            apiConfigProvider = {
                 ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
             },
             isInstantApp = false,
