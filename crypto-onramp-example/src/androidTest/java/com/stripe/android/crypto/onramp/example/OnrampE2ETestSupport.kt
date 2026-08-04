@@ -574,7 +574,7 @@ private fun UUID.testPhoneNumber(country: String): String {
     val positiveBits = leastSignificantBits ushr 1
     return when (country) {
         "MT" -> "+35679${(positiveBits % 1_000_000).toString().padStart(6, '0')}"
-        else -> "+1202${((positiveBits % 8_000_000) + 2_000_000)}"
+        else -> "+1212${((positiveBits % 8_000_000) + 2_000_000)}"
     }
 }
 
