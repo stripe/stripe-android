@@ -252,7 +252,7 @@ class BillingAddressElement(
                 additionalFieldsByCountry = buildMap {
                     putAll(mode.additionalFieldsByCountry)
                     additionalFieldsByCountry.forEach { (countryCode, additionalFields) ->
-                        merge(countryCode, additionalFields) { existing, additional -> existing + additional }
+                        put(countryCode, get(countryCode).orEmpty() + additionalFields)
                     }
                 }
             )
