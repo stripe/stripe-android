@@ -104,6 +104,16 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).mapCatching { response ->
+                if (configurationState.defaultBillingAddress != null &&
+                    response.automaticTaxEnabled &&
+                    response.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING
+                ) {
+                    checkoutSessionRepository.updateTaxRegion(sessionId, configurationState.defaultBillingAddress)
+                        .getOrThrow()
+                } else {
+                    response
+                }
+            }.mapCatching { response ->
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
