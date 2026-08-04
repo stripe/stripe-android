@@ -2,10 +2,8 @@ package com.stripe.android.utils
 
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.testing.QuarantinedTestRule
-import com.stripe.android.testing.RetryRule
 import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -31,7 +29,6 @@ class TestRules private constructor(
 
         fun create(
             disableAnimations: Boolean = true,
-            retryCount: Int = 3,
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
             val composeTestRule = createEmptyComposeRule()
@@ -43,12 +40,6 @@ class TestRules private constructor(
                 .let { chain ->
                     if (disableAnimations) {
                         chain.around(DisableAnimationsRule())
-                    } else {
-                        chain
-                    }
-                }.let { chain ->
-                    if (BuildConfig.IS_RUNNING_IN_CI && !BuildConfig.RUN_LATENCY_TESTS_IN_CI) {
-                        chain.around(RetryRule(retryCount))
                     } else {
                         chain
                     }

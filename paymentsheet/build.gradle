@@ -148,6 +148,8 @@ dependencies {
 android {
     defaultConfig {
         testApplicationId "com.stripe.android.paymentsheet.test"
+        testInstrumentationRunner "com.stripe.android.testing.StripeAndroidJUnitRunner"
+        testInstrumentationRunnerArguments retryCount: "5"
     }
 
     buildFeatures {
