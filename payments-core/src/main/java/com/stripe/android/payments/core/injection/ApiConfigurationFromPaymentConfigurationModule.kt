@@ -9,7 +9,7 @@ import dagger.Provides
 import javax.inject.Provider
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module(includes = [PaymentConfigurationModule::class, ApiRequestOptionsModule::class])
+@Module(includes = [PaymentConfigurationModule::class])
 class ApiConfigurationFromPaymentConfigurationModule {
     @Provides
     fun provideApiConfigurationState(
