@@ -147,7 +147,7 @@ internal interface CustomerSheetTestHelper {
                     },
                     stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
                         override fun create(
-                            apiConfigurationState: ApiConfiguration.State,
+                            apiConfigurationProvider: () -> ApiConfiguration.State,
                             statusBarColor: Int?,
                             includePaymentSheetNextHandlers: Boolean,
                             hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>

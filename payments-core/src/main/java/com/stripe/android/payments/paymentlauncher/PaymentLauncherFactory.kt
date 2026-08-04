@@ -96,10 +96,12 @@ class PaymentLauncherFactory(
     ): PaymentLauncher {
         val productUsage = setOf("PaymentLauncher")
         return StripePaymentLauncher(
-            apiConfigurationState = ApiConfiguration.State(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
-            ),
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                )
+            },
             hostActivityLauncher = hostActivityLauncher,
             statusBarColor = statusBarColor,
             includePaymentSheetNextHandlers = false,
@@ -110,12 +112,14 @@ class PaymentLauncherFactory(
 
     fun create(applicationContext: Context): PaymentLauncher {
         val productUsage = setOf("PaymentLauncher")
-        val config = PaymentConfiguration.getInstance(applicationContext)
         return StripePaymentLauncher(
-            apiConfigurationState = ApiConfiguration.State(
-                publishableKey = config.publishableKey,
-                stripeAccountId = config.stripeAccountId,
-            ),
+            apiConfigurationProvider = {
+                val config = PaymentConfiguration.getInstance(applicationContext)
+                ApiConfiguration.State(
+                    publishableKey = config.publishableKey,
+                    stripeAccountId = config.stripeAccountId,
+                )
+            },
             hostActivityLauncher = hostActivityLauncher,
             statusBarColor = statusBarColor,
             includePaymentSheetNextHandlers = false,

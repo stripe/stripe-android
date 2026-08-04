@@ -51,7 +51,7 @@ internal class IntentConfirmationModule {
             intentConfirmationInterceptorFactory = interceptorFactory,
             paymentLauncherFactory = { hostActivityLauncher, statusBarColor ->
                 stripePaymentLauncherAssistedFactory.create(
-                    apiConfigurationState = apiConfigProvider.get(),
+                    apiConfigurationProvider = { apiConfigProvider.get() },
                     hostActivityLauncher = hostActivityLauncher,
                     statusBarColor = statusBarColor,
                     includePaymentSheetNextHandlers = true,

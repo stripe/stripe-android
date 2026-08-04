@@ -19,7 +19,7 @@ import dagger.assisted.AssistedFactory
 @AssistedFactory
 interface StripePaymentLauncherAssistedFactory {
     fun create(
-        @Assisted apiConfigurationState: ApiConfiguration.State,
+        @Assisted apiConfigurationProvider: () -> ApiConfiguration.State,
         @Assisted(STATUS_BAR_COLOR) statusBarColor: Int?,
         @Assisted(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextHandlers: Boolean,
         hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>

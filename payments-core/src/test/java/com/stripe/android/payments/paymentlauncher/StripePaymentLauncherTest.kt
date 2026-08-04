@@ -18,10 +18,12 @@ class StripePaymentLauncherTest {
     private val mockHostActivityLauncher =
         mock<ActivityResultLauncher<PaymentLauncherContract.Args>>()
     private val paymentLauncher = StripePaymentLauncher(
-        apiConfigurationState = ApiConfiguration.State(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
-        ),
+        apiConfigurationProvider = {
+            ApiConfiguration.State(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+            )
+        },
         hostActivityLauncher = mockHostActivityLauncher,
         enableLogging = false,
         productUsage = mock(),
