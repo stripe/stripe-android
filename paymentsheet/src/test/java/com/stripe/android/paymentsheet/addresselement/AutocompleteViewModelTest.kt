@@ -174,10 +174,10 @@ class AutocompleteViewModelTest {
     }
 
     @Test
-    fun `query is valid when 2 characters are entered`() = runTest(UnconfinedTestDispatcher()) {
+    fun `query is valid when 3 characters are entered`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
 
-        viewModel.textFieldController.onRawValueChange("12")
+        viewModel.textFieldController.onRawValueChange("123")
 
         whenever(mockClient.findAutocompletePredictions(any(), any(), any())).thenReturn(
             Result.success(
@@ -200,10 +200,10 @@ class AutocompleteViewModelTest {
     }
 
     @Test
-    fun `query is invalid when less than 2 characters are entered`() = runTest(UnconfinedTestDispatcher()) {
+    fun `query is invalid when less than 3 characters are entered`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
 
-        viewModel.textFieldController.onRawValueChange("1")
+        viewModel.textFieldController.onRawValueChange("12")
 
         verify(mockClient, never()).findAutocompletePredictions(any(), any(), any())
     }
