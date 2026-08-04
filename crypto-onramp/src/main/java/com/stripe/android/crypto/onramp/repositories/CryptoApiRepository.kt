@@ -56,7 +56,6 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import org.json.JSONObject
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 
 /*
@@ -69,7 +68,7 @@ internal class CryptoApiRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
     private val linkController: LinkController,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     apiVersion: String,
     sdkVersion: String = StripeSdkVersion.VERSION,
     appInfo: AppInfo?
@@ -376,15 +375,15 @@ internal class CryptoApiRepository @Inject constructor(
             expandFields = listOf("payment_method"),
             options = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = apiConfigProvider.get().stripeAccountId,
+                stripeAccount = apiConfigProvider().stripeAccountId,
             )
         )
     }
 
     private fun buildRequestOptions(): ApiRequest.Options {
         return ApiRequest.Options(
-            apiKey = apiConfigProvider.get().publishableKey,
-            stripeAccount = apiConfigProvider.get().stripeAccountId,
+            apiKey = apiConfigProvider().publishableKey,
+            stripeAccount = apiConfigProvider().stripeAccountId,
         )
     }
 
