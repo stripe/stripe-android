@@ -25,7 +25,13 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
     fun postForResult(
         submissionState: IdentitySubmissionState
     ) = liveData {
-        val result = Fuel.post(EXAMPLE_BACKEND_URL)
+        val result = Fuel.post(
+            if (submissionState.useTestMode) {
+                TEST_MODE_EXAMPLE_BACKEND_URL
+            } else {
+                EXAMPLE_BACKEND_URL
+            }
+        )
             .header("content-type", "application/json")
             .body(
                 json.encodeToString(
@@ -159,5 +165,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
         // https://codesandbox.io/p/devbox/compassionate-violet-gshhgf
         const val EXAMPLE_BACKEND_URL =
             "https://stripe-mobile-identity-verification-playground.stripedemos.com/verification-sessions"
+        const val TEST_MODE_EXAMPLE_BACKEND_URL =
+            "https://stripe-mobile-identity-verification-playground.stripedemos.com/test/verification-sessions"
     }
 }

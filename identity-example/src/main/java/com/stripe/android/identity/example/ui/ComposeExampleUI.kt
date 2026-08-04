@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
@@ -71,6 +72,7 @@ internal enum class IntegrationType {
 }
 
 internal data class IdentitySubmissionState(
+    val useTestMode: Boolean,
     val integrationType: IntegrationType = NATIVE,
     val verificationType: VerificationType = VerificationType.DOCUMENT,
     val allowDrivingLicense: Boolean = true,
@@ -100,7 +102,7 @@ internal fun ExampleScreen(
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
     val (submissionState, onSubmissionStateChanged) = remember {
-        mutableStateOf(IdentitySubmissionState())
+        mutableStateOf(IdentitySubmissionState(useTestMode = false))
     }
 
     val (loadingState, onLoadingStateChanged) = remember {
@@ -134,6 +136,8 @@ internal fun ExampleScreen(
                 .fillMaxHeight()
         ) {
             IntegrationTypeUI(submissionState, onSubmissionStateChanged)
+            Divider()
+            TestModeUI(submissionState, onSubmissionStateChanged)
             Divider()
             TypeSelectUI(
                 submissionState.verificationType,
@@ -188,6 +192,31 @@ internal fun ExampleScreen(
                 onLoadingStateChanged
             )
         }
+    }
+}
+
+@Composable
+private fun TestModeUI(
+    identitySubmissionState: IdentitySubmissionState,
+    onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = identitySubmissionState.useTestMode,
+            onCheckedChange = { useTestMode ->
+                onSubmissionStateChangedListener(
+                    identitySubmissionState.copy(useTestMode = useTestMode)
+                )
+            }
+        )
+        StyledClickableText(
+            text = AnnotatedString(stringResource(R.string.use_test_mode)),
+            onClick = {
+                onSubmissionStateChangedListener(
+                    identitySubmissionState.copy(useTestMode = !identitySubmissionState.useTestMode)
+                )
+            }
+        )
     }
 }
 

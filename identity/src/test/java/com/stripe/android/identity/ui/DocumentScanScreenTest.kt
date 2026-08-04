@@ -276,6 +276,7 @@ class DocumentScanScreenTest {
             verify(mockIdentityViewModel).uploadManualResult(
                 any<Bitmap>(),
                 eq(true),
+                eq(true),
                 any<VerificationPageStaticContentDocumentCapturePage>(),
                 eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE),
                 eq(IdentityScanState.ScanType.DOC_FRONT)
@@ -340,6 +341,7 @@ class DocumentScanScreenTest {
             verify(mockDocumentScanViewModel).captureManualResult(any())
             verify(mockIdentityViewModel).uploadManualResult(
                 any<Bitmap>(),
+                eq(true),
                 eq(true),
                 any<VerificationPageStaticContentDocumentCapturePage>(),
                 eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE),
@@ -410,6 +412,7 @@ class DocumentScanScreenTest {
             }
             val verificationPage = mock<VerificationPage> {
                 on { this.documentCapture } doReturn documentCapture
+                on { this.livemode } doReturn true
             }
             return IdentityViewModel.PageAndModelFiles(
                 page = verificationPage,
