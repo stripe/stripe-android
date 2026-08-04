@@ -856,7 +856,8 @@ internal class DefaultCustomerSheetLoaderTest {
                 override fun invoke(
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
+                    cardBrandFilter: CardBrandFilter,
+                    apiConfiguration: ApiConfiguration.State?
                 ): GooglePayRepository {
                     return if (isGooglePayReady) {
                         readyGooglePayRepository

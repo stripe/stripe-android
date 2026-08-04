@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -56,7 +57,8 @@ internal class DefaultGooglePayRepository(
     private val logger: Logger = Logger.noop(),
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter,
-    private val additionalEnabledNetworks: List<String> = emptyList()
+    private val additionalEnabledNetworks: List<String> = emptyList(),
+    private val apiConfiguration: ApiConfiguration.State? = null
 ) : GooglePayRepository {
 
     @Inject
@@ -82,7 +84,9 @@ internal class DefaultGooglePayRepository(
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(
-        GooglePayConfig(context),
+        apiConfiguration?.let {
+            GooglePayConfig(it.publishableKey, it.stripeAccountId)
+        } ?: GooglePayConfig(context),
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         additionalEnabledNetworks = additionalEnabledNetworks

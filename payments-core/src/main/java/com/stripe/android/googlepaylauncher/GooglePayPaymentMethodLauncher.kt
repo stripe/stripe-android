@@ -182,7 +182,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
             override fun invoke(
                 environment: GooglePayEnvironment,
                 cardFundingFilter: CardFundingFilter,
-                cardBrandFilter: CardBrandFilter
+                cardBrandFilter: CardBrandFilter,
+                apiConfiguration: ApiConfiguration.State?
             ): GooglePayRepository {
                 return DefaultGooglePayRepository(
                     context = context,

@@ -332,14 +332,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             durationProvider.measureDuration(
                 DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported
             ) {
-                isGooglePaySupportedOnDevice()
+                isGooglePaySupportedOnDevice(apiConfiguration)
             }
         }
         val isGooglePaySupportedByConfiguration = async {
             durationProvider.measureDuration(
                 DurationProvider.Key.PaymentSheetLoadIsGooglePayReady
             ) {
-                configuration.isGooglePayReady()
+                configuration.isGooglePayReady(apiConfiguration)
             }
         }
 
@@ -702,29 +702,36 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     // Default filters are used here because this only determines the ready state,
     // not what's presented to Google Pay. This check runs async before we fetch the
     // elements session, so using merchant-defined filters would add latency.
-    private suspend fun isGooglePayReadyForEnvironment(environment: GooglePayEnvironment): Boolean {
+    private suspend fun isGooglePayReadyForEnvironment(
+        environment: GooglePayEnvironment,
+        apiConfiguration: ApiConfiguration.State
+    ): Boolean {
         return googlePayRepositoryFactory(
             environment = environment,
             cardFundingFilter = DefaultCardFundingFilter,
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = DefaultCardBrandFilter,
+            apiConfiguration = apiConfiguration
         ).isReady().first()
     }
 
-    private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
+    private suspend fun CommonConfiguration.isGooglePayReady(
+        apiConfiguration: ApiConfiguration.State
+    ): Boolean {
         return googlePay?.environment?.let { environment ->
             isGooglePayReadyForEnvironment(
-                when (environment) {
+                environment = when (environment) {
                     PaymentSheet.GooglePayConfiguration.Environment.Production ->
                         GooglePayEnvironment.Production
                     PaymentSheet.GooglePayConfiguration.Environment.Test ->
                         GooglePayEnvironment.Test
-                }
+                },
+                apiConfiguration = apiConfiguration
             )
         } ?: false
     }
 
-    private suspend fun isGooglePaySupportedOnDevice(): Boolean {
-        return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production)
+    private suspend fun isGooglePaySupportedOnDevice(apiConfiguration: ApiConfiguration.State): Boolean {
+        return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production, apiConfiguration)
     }
 
     @Suppress("CyclomaticComplexMethod")
