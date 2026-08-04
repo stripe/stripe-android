@@ -3,8 +3,8 @@ package com.stripe.android.networking
 import android.content.Context
 import android.net.http.HttpResponseCache
 import androidx.annotation.RestrictTo
-import com.stripe.android.ApiConfiguration
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
@@ -35,12 +35,12 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.FileUploadRequest
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
+import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.networking.RequestId
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse

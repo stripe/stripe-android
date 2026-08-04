@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -14,7 +15,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.ApiConfiguration
 import com.stripe.android.payments.core.injection.DaggerNextActionHandlerComponent
 import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap

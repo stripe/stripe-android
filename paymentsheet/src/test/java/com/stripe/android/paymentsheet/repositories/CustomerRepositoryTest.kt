@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiConfiguration
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -274,7 +274,9 @@ internal class CustomerRepositoryTest {
             val errorReporter = FakeErrorReporter()
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
-                { ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null) },
+                {
+                    ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+                },
                 Logger.getInstance(false),
                 workContext = testDispatcher,
                 errorReporter = errorReporter
@@ -307,7 +309,9 @@ internal class CustomerRepositoryTest {
             val errorReporter = FakeErrorReporter()
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
-                { ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null) },
+                {
+                    ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+                },
                 Logger.getInstance(false),
                 workContext = testDispatcher,
                 errorReporter = errorReporter
@@ -577,7 +581,12 @@ internal class CustomerRepositoryTest {
             workContext = coroutineContext,
             errorReporter = errorReporter,
             stripeRepository = stripeRepository,
-            apiConfigProvider = { ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = "acct_123") },
+            apiConfigProvider = {
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = "acct_123"
+                )
+            },
             logger = Logger.getInstance(false),
         )
     }

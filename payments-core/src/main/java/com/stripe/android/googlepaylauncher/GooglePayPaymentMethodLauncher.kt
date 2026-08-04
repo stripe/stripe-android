@@ -2,7 +2,6 @@ package com.stripe.android.googlepaylauncher
 
 import android.content.Context
 import android.os.Parcelable
-import com.stripe.android.ApiConfiguration
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -16,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -64,10 +64,12 @@ class GooglePayPaymentMethodLauncher internal constructor(
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {
-    private val apiConfigurationProvider = { ApiConfiguration.State(
+    private val apiConfigurationProvider = {
+        ApiConfiguration.State(
         publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
         stripeAccountId = PaymentConfiguration.getInstance(context).stripeAccountId,
-    ) }
+    )
+    }
     private var isReady = false
     private val internalLauncher = InternalGooglePayPaymentMethodLauncher(
         activityResultLauncher = activityResultLauncher,

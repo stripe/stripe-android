@@ -183,7 +183,9 @@ class WebIntentNextActionHandlerTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             enableLogging = false,
             uiContext = testDispatcher,
-            apiConfigProvider = javax.inject.Provider { ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null) },
+            apiConfigProvider = javax.inject.Provider {
+                ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+            },
             isInstantApp = false,
             defaultReturnUrl = DefaultReturnUrl("some_package_name"),
             redirectResolver = redirectResolver,

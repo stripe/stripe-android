@@ -25,7 +25,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
-
 @RunWith(RobolectricTestRunner::class)
 class DefaultSavedPaymentMethodRepositoryTest {
 

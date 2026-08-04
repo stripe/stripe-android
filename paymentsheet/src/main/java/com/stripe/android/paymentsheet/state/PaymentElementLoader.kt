@@ -5,7 +5,6 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
@@ -43,6 +42,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection

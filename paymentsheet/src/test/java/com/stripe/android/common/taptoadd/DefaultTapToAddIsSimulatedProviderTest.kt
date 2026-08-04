@@ -15,7 +15,9 @@ class DefaultTapToAddIsSimulatedProviderTest {
     fun `get returns true when test mode and application is debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = true),
-            apiConfigProvider = provider { ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null) },
+            apiConfigProvider = provider {
+                ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+             },
         )
 
         assertThat(provider.get()).isTrue()
@@ -25,7 +27,9 @@ class DefaultTapToAddIsSimulatedProviderTest {
     fun `get returns false when live mode even if debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = true),
-            apiConfigProvider = provider { ApiConfiguration.State(publishableKey = "pk_live_123", stripeAccountId = null) },
+            apiConfigProvider = provider {
+                ApiConfiguration.State(publishableKey = "pk_live_123", stripeAccountId = null)
+             },
         )
 
         assertThat(provider.get()).isFalse()
@@ -35,7 +39,9 @@ class DefaultTapToAddIsSimulatedProviderTest {
     fun `get returns false when test mode but application is not debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = false),
-            apiConfigProvider = provider { ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null) },
+            apiConfigProvider = provider {
+                ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            },
         )
 
         assertThat(provider.get()).isFalse()
@@ -45,7 +51,9 @@ class DefaultTapToAddIsSimulatedProviderTest {
     fun `get returns false when live mode and not debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = false),
-            apiConfigProvider = provider { ApiConfiguration.State(publishableKey = "pk_live_123", stripeAccountId = null) },
+            apiConfigProvider = provider {
+                ApiConfiguration.State(publishableKey = "pk_live_123", stripeAccountId = null)
+             },
         )
 
         assertThat(provider.get()).isFalse()

@@ -1,13 +1,13 @@
 package com.stripe.android.attestation
 
 import android.app.Application
-import com.stripe.android.ApiConfiguration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.attestation.AttestationActivity.Companion.getArgs
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
 import com.stripe.android.core.exception.StripeException

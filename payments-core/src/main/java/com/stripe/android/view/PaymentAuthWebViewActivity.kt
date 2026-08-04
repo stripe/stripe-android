@@ -142,7 +142,9 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         error: Throwable?
     ) {
         if (error != null) {
-            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { requireNotNull(_args).publishableKey })
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = {
+                requireNotNull(_args).publishableKey
+            })
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
                     stripeException = StripeException.create(error),

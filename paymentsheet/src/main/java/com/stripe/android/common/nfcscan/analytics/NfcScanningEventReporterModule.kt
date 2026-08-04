@@ -1,6 +1,5 @@
 package com.stripe.android.common.nfcscan.analytics
 
-import android.content.Context
 import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING

@@ -5,7 +5,6 @@ import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.ApiConfiguration
 import com.stripe.android.BuildConfig
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
@@ -38,6 +37,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -212,7 +212,6 @@ internal interface NativeLinkModule {
         ): ApiConfiguration.State {
             return paymentMethodMetadata.apiConfiguration
         }
-
 
         @Provides
         @NativeLinkScope

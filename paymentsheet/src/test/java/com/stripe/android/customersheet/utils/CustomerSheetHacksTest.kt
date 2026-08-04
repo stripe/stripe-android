@@ -5,6 +5,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.FakeCustomerAdapter
@@ -12,7 +13,6 @@ import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.customersheet.data.CustomerSessionInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSessionIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSessionPaymentMethodDataSource
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.data.CustomerSessionSavedSelectionDataSource
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.isInstanceOf

@@ -27,8 +27,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.DefaultPrefsRepository

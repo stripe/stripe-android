@@ -49,7 +49,6 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class CheckoutSessionConfirmationInterceptorTest {

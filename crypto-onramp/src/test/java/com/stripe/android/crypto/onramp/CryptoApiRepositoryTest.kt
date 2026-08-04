@@ -45,7 +45,12 @@ class CryptoApiRepositoryTest {
     private val cryptoApiRepository = CryptoApiRepository(
         stripeNetworkClient = stripeNetworkClient,
         stripeRepository = stripeRepository,
-        apiConfigProvider = { ApiConfiguration.State(publishableKey = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm", stripeAccountId = "TestAccountId") },
+        apiConfigProvider = {
+            ApiConfiguration.State(
+                publishableKey = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm",
+                stripeAccountId = "TestAccountId"
+            )
+        },
         apiVersion = CRYPTO_ONRAMP_API_VERSION,
         sdkVersion = StripeSdkVersion.VERSION,
         appInfo = null,

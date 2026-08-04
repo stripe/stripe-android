@@ -84,7 +84,10 @@ internal class AddressElementViewModelModule {
             PlacesClientProxy.create(
                 context,
                 it,
-                errorReporter = ErrorReporter.createFallbackInstance(context, publishableKeyProvider = { args.publishableKey }),
+                errorReporter = ErrorReporter.createFallbackInstance(
+                    context = context,
+                    publishableKeyProvider = { args.publishableKey }
+                ),
             )
         }
     }

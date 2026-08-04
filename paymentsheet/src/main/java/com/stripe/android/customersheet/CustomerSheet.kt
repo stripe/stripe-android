@@ -605,7 +605,9 @@ class CustomerSheet internal constructor(
                         imageLoader = DefaultStripeImageLoader(application),
                         errorReporter = ErrorReporter.createFallbackInstance(
                             context = application,
-                            publishableKeyProvider = { PaymentConfiguration.getInstance(application.applicationContext).publishableKey },
+                            publishableKeyProvider = {
+                                PaymentConfiguration.getInstance(application.applicationContext).publishableKey
+                             },
                             productUsage = setOf("CustomerSheet"),
                         ),
                         context = application,

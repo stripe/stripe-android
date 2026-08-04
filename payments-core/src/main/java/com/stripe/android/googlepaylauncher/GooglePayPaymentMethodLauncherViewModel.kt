@@ -14,7 +14,6 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.ApiConfiguration
 import com.stripe.android.BuildConfig
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException

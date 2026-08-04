@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
 import android.os.Parcelable
-import com.stripe.android.PaymentConfiguration
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -12,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult

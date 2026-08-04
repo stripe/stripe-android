@@ -76,6 +76,7 @@ import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogFcLiteExperiment
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
@@ -84,7 +85,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
-import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.CustomerFactory

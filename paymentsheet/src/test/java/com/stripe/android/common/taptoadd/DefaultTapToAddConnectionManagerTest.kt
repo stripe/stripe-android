@@ -708,7 +708,9 @@ class DefaultTapToAddConnectionManagerTest {
                         isSimulatedProvider = object : TapToAddIsSimulatedProvider {
                             override fun get(): Boolean = isSimulated
                         },
-                        apiConfigProvider = { ApiConfiguration.State(publishableKey = "pk_test", stripeAccountId = null) },
+                        apiConfigProvider = {
+                            ApiConfiguration.State(publishableKey = "pk_test", stripeAccountId = null)
+                        },
                         callbackRetriever = callbackRetriever,
                     ),
                     terminalInstance = terminalInstance,
