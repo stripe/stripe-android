@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -28,7 +27,6 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class CustomerApiRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val apiConfigProvider: () -> ApiConfiguration.State,
     private val logger: Logger,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
@@ -38,13 +36,14 @@ internal class CustomerApiRepository @Inject constructor(
     override suspend fun retrieveCustomer(
         customerId: String,
         ephemeralKeySecret: String,
+        stripeAccountId: String?,
     ): Customer? {
         return stripeRepository.retrieveCustomer(
             customerId,
             productUsageTokens,
             ApiRequest.Options(
                 ephemeralKeySecret,
-                apiConfigProvider().stripeAccountId
+                stripeAccountId
             )
         ).getOrNull()
     }
@@ -56,7 +55,6 @@ internal class CustomerApiRepository @Inject constructor(
         silentlyFail: Boolean,
         stripeAccountId: String?,
     ): Result<List<PaymentMethod>> = withContext(workContext) {
-        val resolvedStripeAccountId = stripeAccountId ?: apiConfigProvider().stripeAccountId
         val requests = types.filter { paymentMethodType ->
             paymentMethodType in setOf(
                 PaymentMethod.Type.Card,
@@ -74,7 +72,7 @@ internal class CustomerApiRepository @Inject constructor(
                     productUsageTokens = productUsageTokens,
                     requestOptions = ApiRequest.Options(
                         apiKey = ephemeralKeySecret,
-                        stripeAccount = resolvedStripeAccountId,
+                        stripeAccount = stripeAccountId,
                     ),
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
@@ -109,13 +107,14 @@ internal class CustomerApiRepository @Inject constructor(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> {
         return stripeRepository.detachPaymentMethod(
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
-                stripeAccount = apiConfigProvider().stripeAccountId,
+                stripeAccount = stripeAccountId,
             ),
         ).onFailure {
             logger.error("Failed to detach payment method $paymentMethodId.", it)
@@ -134,10 +133,11 @@ internal class CustomerApiRepository @Inject constructor(
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> = with(CoroutineScope(workContext)) {
         val requestOptions = ApiRequest.Options(
             apiKey = ephemeralKeySecret,
-            stripeAccount = apiConfigProvider().stripeAccountId,
+            stripeAccount = stripeAccountId,
         )
 
         val detachOne: suspend (String) -> Result<PaymentMethod> = { pmId ->
@@ -155,6 +155,7 @@ internal class CustomerApiRepository @Inject constructor(
             // We only support removing duplicate cards.
             types = listOf(PaymentMethod.Type.Card),
             silentlyFail = false,
+            stripeAccountId = stripeAccountId,
         ).getOrElse {
             return Result.failure(it)
         }
@@ -213,6 +214,7 @@ internal class CustomerApiRepository @Inject constructor(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> =
         stripeRepository.attachPaymentMethod(
             customerId = customerId,
@@ -220,7 +222,7 @@ internal class CustomerApiRepository @Inject constructor(
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
-                stripeAccount = apiConfigProvider().stripeAccountId,
+                stripeAccount = stripeAccountId,
             )
         ).onFailure {
             logger.error("Failed to attach payment method $paymentMethodId.", it)
@@ -231,13 +233,14 @@ internal class CustomerApiRepository @Inject constructor(
         ephemeralKeySecret: String,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> =
         stripeRepository.updatePaymentMethod(
             paymentMethodId = paymentMethodId,
             paymentMethodUpdateParams = params,
             options = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
-                stripeAccount = apiConfigProvider().stripeAccountId,
+                stripeAccount = stripeAccountId,
             )
         ).onFailure {
             logger.error("Failed to update payment method $paymentMethodId.", it)
@@ -247,12 +250,13 @@ internal class CustomerApiRepository @Inject constructor(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String?,
+        stripeAccountId: String?,
     ): Result<Customer> = stripeRepository.setDefaultPaymentMethod(
         paymentMethodId = paymentMethodId,
         customerId = customerId,
         options = ApiRequest.Options(
             apiKey = ephemeralKeySecret,
-            stripeAccount = apiConfigProvider().stripeAccountId,
+            stripeAccount = stripeAccountId,
         )
     )
 
@@ -260,6 +264,7 @@ internal class CustomerApiRepository @Inject constructor(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> =
         stripeRepository.retrieveCustomerPaymentMethod(
             customerId = customerId,
@@ -267,7 +272,7 @@ internal class CustomerApiRepository @Inject constructor(
             productUsageTokens = productUsageTokens,
             requestOptions = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
-                stripeAccount = apiConfigProvider().stripeAccountId,
+                stripeAccount = stripeAccountId,
             ),
         ).onFailure {
             logger.error("Failed to retrieve payment method $paymentMethodId.", it)

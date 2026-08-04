@@ -14,6 +14,7 @@ internal interface CustomerRepository {
     suspend fun retrieveCustomer(
         customerId: String,
         ephemeralKeySecret: String,
+        stripeAccountId: String?,
     ): Customer?
 
     /**
@@ -26,7 +27,7 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
-        stripeAccountId: String? = null,
+        stripeAccountId: String?,
     ): Result<List<PaymentMethod>>
 
     /**
@@ -38,6 +39,7 @@ internal interface CustomerRepository {
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod>
 
     /**
@@ -49,6 +51,7 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod>
 
     /**
@@ -58,6 +61,7 @@ internal interface CustomerRepository {
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod>
 
     suspend fun updatePaymentMethod(
@@ -65,17 +69,20 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
+        stripeAccountId: String?,
     ): Result<PaymentMethod>
 
     suspend fun setDefaultPaymentMethod(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String?,
+        stripeAccountId: String?,
     ): Result<Customer>
 
     suspend fun retrievePaymentMethod(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod>
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -25,6 +26,7 @@ internal interface RetrieveCustomerEmail {
 internal class DefaultRetrieveCustomerEmail @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val durationProvider: DurationProvider,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
 ) : RetrieveCustomerEmail {
 
     override suspend operator fun invoke(
@@ -59,6 +61,7 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
         return customerRepository.retrieveCustomer(
             customerId = customerId,
             ephemeralKeySecret = ephemeralKeySecret,
+            stripeAccountId = apiConfigProvider().stripeAccountId,
         )?.email
     }
 }
