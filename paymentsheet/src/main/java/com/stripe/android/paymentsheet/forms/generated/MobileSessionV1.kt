@@ -15,8 +15,8 @@ internal object MobileSessionContractV1 {
     const val CONTRACT_REVISION = "eae9b348c98cf67b"
     const val CONTRACT_MAJOR = 1
     const val CONTRACT_DIGEST = "eae9b348c98cf67b22e31322185f8ec64623e7d5d585cce083d844404d2a8a74"
-    const val GENERATOR_DIGEST = "1c73661c349629c8618462a0fc49288e2ea503cb1d18e8a88aa47f77ab0a1838"
-    const val MINT_COMMIT = "0e0af7a5520f591076157a04f20df631a1418055"
+    const val GENERATOR_DIGEST = "0c88f2a5a9217e261d82cdad233e898a9612f8c6a4699685b5973f069cfb5d97"
+    const val MINT_COMMIT = "ddfcb9410dc5e7d81f9bcac242c9bfe153abc16d"
 }
 
 /** Serializable Apple Pay settings from PaymentSheet.Configuration. */

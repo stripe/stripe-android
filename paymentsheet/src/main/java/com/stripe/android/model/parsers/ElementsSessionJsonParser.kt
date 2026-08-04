@@ -33,16 +33,12 @@ internal class MobileSessionContractException(
     internal enum class ErrorCode(val analyticsValue: String) {
         DecodeFailure("decode_failure"),
         UnsupportedContractMajor("unsupported_contract_major"),
-        InvalidContractRevision("invalid_contract_revision"),
         UnsupportedFeatureValue("unsupported_feature_value"),
         CollectionBounds("collection_bounds"),
         InconsistentPaymentMethodCatalog("inconsistent_payment_method_catalog"),
         InvalidAsset("invalid_asset"),
         UnsupportedFormElement("unsupported_form_element"),
         MalformedFormElement("malformed_form_element"),
-        MissingResponseHeader("missing_response_header"),
-        MalformedResponseHeader("malformed_response_header"),
-        ResponseHeaderBodyMismatch("response_header_body_mismatch"),
         MissingPayload("missing_payload"),
     }
 }
@@ -666,7 +662,6 @@ internal class ElementsSessionJsonParser(
 
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()
 
-        private val CONTRACT_REVISION_PATTERN = Regex("^[0-9a-f]{16}$")
         private val SUPPORTED_FINANCIAL_CONNECTIONS_LITE_VALUES = setOf("automatic", "disabled", "preferred")
         private val SUPPORTED_NATIVE_COMPONENTS = setOf(
             "card_details",
@@ -730,11 +725,6 @@ internal class ElementsSessionJsonParser(
             if (contract.major != MobileSessionContract.CONTRACT_MAJOR) {
                 throw MobileSessionContractException(
                     MobileSessionContractException.ErrorCode.UnsupportedContractMajor
-                )
-            }
-            if (!CONTRACT_REVISION_PATTERN.matches(contract.revision)) {
-                throw MobileSessionContractException(
-                    MobileSessionContractException.ErrorCode.InvalidContractRevision
                 )
             }
             if (features.financialConnectionsLite !in SUPPORTED_FINANCIAL_CONNECTIONS_LITE_VALUES) {

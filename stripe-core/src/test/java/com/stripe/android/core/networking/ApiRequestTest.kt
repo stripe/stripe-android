@@ -26,10 +26,10 @@ internal class ApiRequestTest {
         val request = FACTORY.createGet(
             SOURCES_URL,
             OPTIONS,
-            additionalHeaders = mapOf("Stripe-Mobile-Session-Contract" to "major=1; revision=abc")
+            additionalHeaders = mapOf("X-Example-Header" to "example-value")
         )
 
-        assertEquals("major=1; revision=abc", request.headers["Stripe-Mobile-Session-Contract"])
+        assertEquals("example-value", request.headers["X-Example-Header"])
     }
 
     @Test

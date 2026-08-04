@@ -36,7 +36,6 @@ import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import com.stripe.android.paymentsheet.forms.generated.MobileSessionContractV1 as MobileSessionContract
 import com.stripe.android.paymentsheet.forms.generated.PaymentSheetConfigV1 as PaymentSheetConfig
 
 internal interface ElementsSessionRepository {
@@ -105,7 +104,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         val elementsSession = retrieveElementsSession(params, options, paymentSheetConfig)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
-            if (shouldFallback(elementsSession, mobileSessionContractRequested = paymentSheetConfig != null)) {
+            if (shouldFallback(elementsSession, mobileSessionRequested = paymentSheetConfig != null)) {
                 fallback(params, elementsSessionFailure)
             } else {
                 elementsSession
@@ -151,13 +150,13 @@ internal class RealElementsSessionRepository @Inject constructor(
                 url = ELEMENTS_SESSIONS_URL,
                 options = options,
                 params = requestParams + expandParam,
-                additionalHeaders = mobileSessionContractHeaders(paymentSheetConfig),
+                additionalHeaders = mobileSessionAPIVersionHeaders(paymentSheetConfig),
             ),
             responseJsonParser = ElementsSessionJsonParser(
                 params = params,
                 isLiveMode = options.apiKeyIsLiveMode,
             ),
-            responseValidator = mobileSessionContractResponseValidator(paymentSheetConfig),
+            responseValidator = mobileSessionResponseValidator(paymentSheetConfig),
         ).map { it.withServerDrivenPaymentMethodAvailability() }
     }
 
@@ -194,9 +193,9 @@ internal class RealElementsSessionRepository @Inject constructor(
 
     private fun shouldFallback(
         elementsSession: Result<ElementsSession>,
-        mobileSessionContractRequested: Boolean,
+        mobileSessionRequested: Boolean,
     ): Boolean {
-        if (mobileSessionContractRequested) {
+        if (mobileSessionRequested) {
             return false
         }
         return (elementsSession.exceptionOrNull() as? StripeException)?.let {
@@ -204,53 +203,26 @@ internal class RealElementsSessionRepository @Inject constructor(
         } ?: false
     }
 
-    private fun validateMobileSessionContractResponse(
-        response: StripeResponse<String>,
-        elementsSession: ElementsSession,
-    ) {
-        val bodyContract = elementsSession.mobilePaymentElement?.contract
-            ?: throw MobileSessionContractException(
-                MobileSessionContractException.ErrorCode.MissingPayload
-            )
-        val headerMatch = mobileSessionContractResponseHeader(response)
-        val headerMajor = headerMatch.groupValues[1].toInt()
-        val headerRevision = headerMatch.groupValues[2]
-        if (headerMajor != bodyContract.major || headerRevision != bodyContract.revision) {
-            throw MobileSessionContractException(
-                MobileSessionContractException.ErrorCode.ResponseHeaderBodyMismatch
-            )
+    private fun mobileSessionResponseValidator(
+        paymentSheetConfig: PaymentSheetConfig?,
+    ): ((StripeResponse<String>, ElementsSession) -> Unit)? {
+        return paymentSheetConfig?.let {
+            { _, elementsSession ->
+                if (elementsSession.mobilePaymentElement == null) {
+                    throw MobileSessionContractException(
+                        MobileSessionContractException.ErrorCode.MissingPayload
+                    )
+                }
+            }
         }
     }
 
-    private fun mobileSessionContractResponseHeader(response: StripeResponse<String>): MatchResult {
-        val headerValues = response.getHeaderValue(MOBILE_SESSION_CONTRACT_HEADER)
-            ?: throw MobileSessionContractException(
-                MobileSessionContractException.ErrorCode.MissingResponseHeader
-            )
-        val headerValue = headerValues.singleOrNull()
-            ?: throw MobileSessionContractException(
-                MobileSessionContractException.ErrorCode.MalformedResponseHeader
-            )
-        return parseMobileSessionContractResponseHeader(headerValue)
-    }
-
-    private fun parseMobileSessionContractResponseHeader(headerValue: String): MatchResult {
-        return MOBILE_SESSION_CONTRACT_HEADER_PATTERN.matchEntire(headerValue)
-            ?: throw MobileSessionContractException(
-                MobileSessionContractException.ErrorCode.MalformedResponseHeader
-            )
-    }
-
-    private fun mobileSessionContractHeaders(paymentSheetConfig: PaymentSheetConfig?): Map<String, String> {
-        return paymentSheetConfig?.let {
-            mapOf(MOBILE_SESSION_CONTRACT_HEADER to MOBILE_SESSION_CONTRACT_HEADER_VALUE)
-        }.orEmpty()
-    }
-
-    private fun mobileSessionContractResponseValidator(
+    private fun mobileSessionAPIVersionHeaders(
         paymentSheetConfig: PaymentSheetConfig?,
-    ): ((StripeResponse<String>, ElementsSession) -> Unit)? {
-        return paymentSheetConfig?.let { ::validateMobileSessionContractResponse }
+    ): Map<String, String> {
+        return paymentSheetConfig?.let {
+            mapOf("Stripe-Version" to MOBILE_SESSION_API_VERSION)
+        }.orEmpty()
     }
 
     private companion object {
@@ -263,12 +235,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         private val ELEMENTS_SESSIONS_URL: String
             get() = "${ApiRequest.API_HOST}/v1/elements/sessions"
 
-        private const val MOBILE_SESSION_CONTRACT_HEADER = "Stripe-Mobile-Session-Contract"
-        private val MOBILE_SESSION_CONTRACT_HEADER_VALUE =
-            "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=${MobileSessionContract.CONTRACT_REVISION}"
-        private val MOBILE_SESSION_CONTRACT_HEADER_PATTERN = Regex(
-            "^major=(0|[1-9][0-9]*); revision=([0-9a-f]{16})$"
-        )
+        private const val MOBILE_SESSION_API_VERSION = "2026-07-29.dahlia"
     }
 }
 

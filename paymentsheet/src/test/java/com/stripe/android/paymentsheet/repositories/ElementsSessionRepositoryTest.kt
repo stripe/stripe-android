@@ -7,6 +7,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.Stripe
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -77,7 +78,7 @@ internal class ElementsSessionRepositoryTest {
 
         val request = requestCaptor.firstValue as ApiRequest
         val params = requireNotNull(request.params)
-        assertThat(request.headers).doesNotContainKey(MOBILE_SESSION_CONTRACT_HEADER)
+        assertThat(request.headers["Stripe-Version"]).isEqualTo(Stripe.API_VERSION)
         assertThat(params["mobile_app_id"]).isEqualTo(APP_ID)
         assertThat(params["locale"]).isEqualTo(locale.toLanguageTag())
     }
@@ -85,7 +86,7 @@ internal class ElementsSessionRepositoryTest {
     @Test
     fun `get sends generated PaymentSheet config`() = runTest {
         whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
-            negotiatedElementsSessionResponse()
+            mobileSessionElementsSessionResponse()
         )
         val paymentSheetConfig = PaymentSheetConfig(
             merchantCountryCode = "GB",
@@ -120,9 +121,7 @@ internal class ElementsSessionRepositoryTest {
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
         val request = requestCaptor.firstValue as ApiRequest
-        assertThat(request.headers["Stripe-Mobile-Session-Contract"]).isEqualTo(
-            "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=${MobileSessionContract.CONTRACT_REVISION}"
-        )
+        assertThat(request.headers["Stripe-Version"]).isEqualTo("2026-07-29.dahlia")
 
         @Suppress("UNCHECKED_CAST")
         val config = requireNotNull(request.params?.get("payment_sheet_config")) as Map<String, Any?>
@@ -135,76 +134,27 @@ internal class ElementsSessionRepositoryTest {
     }
 
     @Test
-    fun `negotiated response accepts a same-major server revision`() = runTest {
+    fun `mobile session response accepts a same-major server revision`() = runTest {
         val serverRevision = "0000000000000000"
         whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
-            negotiatedElementsSessionResponse(
+            mobileSessionElementsSessionResponse(
                 bodyRevision = serverRevision,
-                responseHeaderValue = "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=$serverRevision",
             )
         )
 
-        val result = getNegotiatedElementsSession()
+        val result = getMobileSessionElementsSession()
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().mobilePaymentElement?.contract?.revision).isEqualTo(serverRevision)
     }
 
     @Test
-    fun `negotiated response fails when response header is missing without fallback`() = runTest {
+    fun `mobile session response fails when mobile payment element is missing without fallback`() = runTest {
         whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
-            negotiatedElementsSessionResponse(responseHeaderValue = null)
+            mobileSessionElementsSessionResponse(includeMobilePaymentElement = false)
         )
 
-        val result = getNegotiatedElementsSession()
-
-        assertMobileSessionContractFailure(
-            result,
-            MobileSessionContractException.ErrorCode.MissingResponseHeader,
-        )
-        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
-    }
-
-    @Test
-    fun `negotiated response fails when response header is malformed without fallback`() = runTest {
-        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
-            negotiatedElementsSessionResponse(responseHeaderValue = "major=1, revision=bad")
-        )
-
-        val result = getNegotiatedElementsSession()
-
-        assertMobileSessionContractFailure(
-            result,
-            MobileSessionContractException.ErrorCode.MalformedResponseHeader,
-        )
-        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
-    }
-
-    @Test
-    fun `negotiated response fails when response header and body metadata differ without fallback`() = runTest {
-        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
-            negotiatedElementsSessionResponse(
-                responseHeaderValue =
-                    "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=0000000000000000"
-            )
-        )
-
-        val result = getNegotiatedElementsSession()
-
-        assertMobileSessionContractFailure(
-            result,
-            MobileSessionContractException.ErrorCode.ResponseHeaderBodyMismatch,
-        )
-        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
-    }
-
-    @Test
-    fun `negotiated response fails when mobile payment element is missing without fallback`() = runTest {
-        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
-            negotiatedElementsSessionResponse(includeMobilePaymentElement = false)
-        )
-
-        val result = getNegotiatedElementsSession()
+        val result = getMobileSessionElementsSession()
 
         assertMobileSessionContractFailure(
             result,
@@ -214,12 +164,12 @@ internal class ElementsSessionRepositoryTest {
     }
 
     @Test
-    fun `negotiated server failure does not enter legacy fallback`() = runTest {
+    fun `mobile session server failure does not enter legacy fallback`() = runTest {
         whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
             StripeResponse(500, """{"error":{"message":"Server error"}}""", emptyMap())
         )
 
-        val result = getNegotiatedElementsSession()
+        val result = getMobileSessionElementsSession()
 
         assertThat(result.isFailure).isTrue()
         verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
@@ -1200,7 +1150,7 @@ internal class ElementsSessionRepositoryTest {
         clientParams = TEST_CLIENT_PARAMS,
     )
 
-    private suspend fun getNegotiatedElementsSession(): Result<ElementsSession> {
+    private suspend fun getMobileSessionElementsSession(): Result<ElementsSession> {
         return createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
@@ -1214,10 +1164,9 @@ internal class ElementsSessionRepositoryTest {
         )
     }
 
-    private fun negotiatedElementsSessionResponse(
+    private fun mobileSessionElementsSessionResponse(
         bodyMajor: Int = MobileSessionContract.CONTRACT_MAJOR,
         bodyRevision: String = MobileSessionContract.CONTRACT_REVISION,
-        responseHeaderValue: String? = MOBILE_SESSION_CONTRACT_HEADER_VALUE,
         includeMobilePaymentElement: Boolean = true,
     ): StripeResponse<String> {
         val responseBody = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString())
@@ -1237,10 +1186,7 @@ internal class ElementsSessionRepositoryTest {
                     )
             )
         }
-        val responseHeaders = responseHeaderValue?.let {
-            mapOf(MOBILE_SESSION_CONTRACT_HEADER to listOf(it))
-        }.orEmpty()
-        return StripeResponse(200, responseBody.toString(), responseHeaders)
+        return StripeResponse(200, responseBody.toString(), emptyMap())
     }
 
     private fun assertMobileSessionContractFailure(
@@ -1263,9 +1209,6 @@ internal class ElementsSessionRepositoryTest {
     companion object {
         private const val APP_ID = "com.app.id"
         private const val MOBILE_SESSION_ID = "session_123"
-        private const val MOBILE_SESSION_CONTRACT_HEADER = "Stripe-Mobile-Session-Contract"
-        private val MOBILE_SESSION_CONTRACT_HEADER_VALUE =
-            "major=${MobileSessionContract.CONTRACT_MAJOR}; revision=${MobileSessionContract.CONTRACT_REVISION}"
         private val TEST_CLIENT_PARAMS = ElementsSessionClientParams(
             mobileAppId = APP_ID,
             mobileSessionIdProvider = { MOBILE_SESSION_ID },
