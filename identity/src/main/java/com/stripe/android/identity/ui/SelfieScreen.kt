@@ -620,6 +620,10 @@ private enum class SelfieStatus(
         labelRes = R.string.stripe_selfie_place_face,
         showsActivityIndicator = false
     ),
+    MoveCloser(
+        labelRes = R.string.stripe_selfie_move_closer,
+        showsActivityIndicator = false
+    ),
     LookLeft(
         labelRes = R.string.stripe_selfie_look_left,
         showsActivityIndicator = false
@@ -677,13 +681,21 @@ private fun IdentityScanState?.status(): SelfieStatus? {
     val transitioner = this?.transitioner as? FaceDetectorTransitioner
     return when (this) {
         null -> null
-        is IdentityScanState.Initial -> when (transitioner?.activeCapture) {
-            FaceDetectorTransitioner.Capture.LEFT -> SelfieStatus.LookLeft
-            FaceDetectorTransitioner.Capture.RIGHT -> SelfieStatus.LookRight
-            FaceDetectorTransitioner.Capture.FRONT,
-            null -> SelfieStatus.PlaceFace
+        is IdentityScanState.Initial -> if (feedbackRes == R.string.stripe_selfie_move_closer) {
+            SelfieStatus.MoveCloser
+        } else {
+            when (transitioner?.activeCapture) {
+                FaceDetectorTransitioner.Capture.LEFT -> SelfieStatus.LookLeft
+                FaceDetectorTransitioner.Capture.RIGHT -> SelfieStatus.LookRight
+                FaceDetectorTransitioner.Capture.FRONT,
+                null -> SelfieStatus.PlaceFace
+            }
         }
-        is IdentityScanState.Found -> SelfieStatus.HoldStill
+        is IdentityScanState.Found -> if (feedbackRes == R.string.stripe_selfie_move_closer) {
+            SelfieStatus.MoveCloser
+        } else {
+            SelfieStatus.HoldStill
+        }
         is IdentityScanState.Satisfied,
         is IdentityScanState.Finished -> when (transitioner?.completedCapture) {
             FaceDetectorTransitioner.Capture.LEFT -> SelfieStatus.CapturedLeft

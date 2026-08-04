@@ -248,6 +248,8 @@
   <string name="stripe_selfie_not_saved_warning">Your selfie images have not been saved. Do you want to leave?</string>
   <!-- Status text instructing the user to place their face inside the selfie guide -->
   <string name="stripe_selfie_place_face">Place your face within the frame</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Move closer</string>
   <!-- Title for the optional training consent section on the selfie warmup page -->
   <string name="stripe_selfie_training_consent_title">Help us improve verifications</string>
   <!-- Body for selfie warmup page -->

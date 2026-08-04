@@ -94,6 +94,9 @@ internal class FaceDetectorTransitioner(
     internal var captureGuideProgress: Float = 0f
         private set
 
+    private var consecutiveTooFarFrameCount = 0
+    private var shouldShowMoveCloser = false
+
     internal val isWaitingForSideCapturePrompt: Boolean
         get() = shouldWaitForSideCapturePrompt()
 
@@ -109,6 +112,7 @@ internal class FaceDetectorTransitioner(
         sideCapturePromptCompleted = true
         sideCaptureBestFrameStartedAt = null
         latestSideCaptureFallbackFrame = null
+        resetMoveCloserFeedback()
         return this
     }
 
@@ -243,6 +247,7 @@ internal class FaceDetectorTransitioner(
         val shouldRefreshInitialAfterSidePrompt = consumeSideCapturePromptCompletion()
         val nowTimestampMs = SystemClock.elapsedRealtime()
         val motionBlurResult = determineMotionBlurResult(analyzerOutput, nowTimestampMs)
+        updateMoveCloserFeedback(analyzerOutput, motionBlurResult)
         val previousCaptureGuideProgress = captureGuideProgress
         val isFrameValid = isFrameValidForActiveCapture(analyzerOutput, motionBlurResult)
         rememberSideCaptureFallbackFrame(
@@ -282,9 +287,10 @@ internal class FaceDetectorTransitioner(
             else -> {
                 Log.d(TAG, "Valid face not found, stay in Initial")
                 if (shouldRefreshInitialAfterSidePrompt ||
-                    shouldRefreshInitialForCaptureGuideProgress(previousCaptureGuideProgress)
+                    shouldRefreshInitialForCaptureGuideProgress(previousCaptureGuideProgress) ||
+                    initialState.feedbackRes != moveCloserFeedbackRes()
                 ) {
-                    Initial(initialState.type, this)
+                    initialState.withFeedback(moveCloserFeedbackRes())
                 } else {
                     initialState
                 }
@@ -307,6 +313,7 @@ internal class FaceDetectorTransitioner(
 
         val nowTimestampMs = SystemClock.elapsedRealtime()
         val motionBlurResult = determineMotionBlurResult(analyzerOutput, nowTimestampMs)
+        updateMoveCloserFeedback(analyzerOutput, motionBlurResult)
 
         if (activeCapture != Capture.FRONT) {
             return transitionFromFoundForSideCapture(
@@ -329,7 +336,7 @@ internal class FaceDetectorTransitioner(
                     "Get a selfie before selfie capture interval, ignored. " +
                         "Current selfieCollected: ${selfieFrameSaver.selfieCollected()}"
                 )
-                foundState
+                foundState.withMoveCloserFeedbackIfChanged()
             }
 
             isFrameValidForActiveCapture(analyzerOutput, motionBlurResult) -> {
@@ -364,7 +371,7 @@ internal class FaceDetectorTransitioner(
                         "passed(${foundState.reachedStateAt.elapsedNow()}), stays in Found. " +
                         "Current selfieCollected: ${selfieFrameSaver.selfieCollected()}"
                 )
-                foundState
+                foundState.withMoveCloserFeedbackIfChanged()
             }
 
             else -> {
@@ -429,6 +436,7 @@ internal class FaceDetectorTransitioner(
             activeCapture = nextCapture
             activeCaptureStartedAt = TimeSource.Monotonic.markNow()
             restartCaptureTimeout()
+            resetMoveCloserFeedback()
             completedCapture = null
             captureGuideProgress = 0f
             sideCapturePromptCompleted = false
@@ -456,19 +464,68 @@ internal class FaceDetectorTransitioner(
     ): MotionBlurDetector.Output? {
         // Avoid feeding noisy bounding boxes to the detector when the face isn't confidently detected.
         return if (isFaceScoreOverThreshold(analyzerOutput.resultScore)) {
-            motionBlurDetector.determineMotionBlur(analyzerOutput.boundingBox, nowTimestampMs)
+            motionBlurDetector.determineMotionBlur(analyzerOutput.validationBoundingBox, nowTimestampMs)
         } else {
             null
         }
+    }
+
+    private fun updateMoveCloserFeedback(
+        analyzerOutput: FaceDetectorOutput,
+        motionBlurResult: MotionBlurDetector.Output?
+    ) {
+        if (activeCapture != Capture.FRONT || !isFaceTooFar(analyzerOutput, motionBlurResult)) {
+            resetMoveCloserFeedback()
+            return
+        }
+
+        if (!shouldShowMoveCloser) {
+            consecutiveTooFarFrameCount += 1
+            shouldShowMoveCloser = consecutiveTooFarFrameCount >= MOVE_CLOSER_REQUIRED_FRAME_COUNT
+        }
+    }
+
+    private fun resetMoveCloserFeedback() {
+        consecutiveTooFarFrameCount = 0
+        shouldShowMoveCloser = false
+    }
+
+    private fun moveCloserFeedbackRes(): Int? {
+        return if (shouldShowMoveCloser) {
+            com.stripe.android.identity.R.string.stripe_selfie_move_closer
+        } else {
+            null
+        }
+    }
+
+    private fun Found.withMoveCloserFeedbackIfChanged(): Found {
+        val feedbackRes = moveCloserFeedbackRes()
+        return if (this.feedbackRes == feedbackRes) {
+            this
+        } else {
+            withFeedback(feedbackRes)
+        }
+    }
+
+    private fun isFaceTooFar(
+        analyzerOutput: FaceDetectorOutput,
+        motionBlurResult: MotionBlurDetector.Output?
+    ): Boolean {
+        val boundingBox = analyzerOutput.validationBoundingBox
+        return isFaceScoreOverThreshold(analyzerOutput.resultScore) &&
+            motionBlurResult?.hasMotionBlur != true &&
+            isFaceCentered(boundingBox) &&
+            isFaceAwayFromEdges(boundingBox) &&
+            boundingBox.width * boundingBox.height <= selfieCapturePage.minCoverageThreshold
     }
 
     private fun isFaceValid(
         analyzerOutput: FaceDetectorOutput,
         motionBlurResult: MotionBlurDetector.Output?,
     ) =
-        isFaceCentered(analyzerOutput.boundingBox) &&
-            isFaceAwayFromEdges(analyzerOutput.boundingBox) &&
-            isFaceCoverageOK(analyzerOutput.boundingBox) &&
+        isFaceCentered(analyzerOutput.validationBoundingBox) &&
+            isFaceAwayFromEdges(analyzerOutput.validationBoundingBox) &&
+            isFaceCoverageOK(analyzerOutput.validationBoundingBox) &&
             isFaceScoreOverThreshold(analyzerOutput.resultScore) &&
             // Match iOS: treat frames as invalid only when motion blur is explicitly detected.
             motionBlurResult?.hasMotionBlur != true
@@ -541,6 +598,7 @@ internal class FaceDetectorTransitioner(
                 "score=${analyzerOutput.resultScore}, " +
                 "faceScoreOk=${isFaceScoreOverThreshold(analyzerOutput.resultScore)}, " +
                 "bbox=${analyzerOutput.boundingBox}, " +
+                "fullFrameBBox=${analyzerOutput.fullFrameBoundingBox}, " +
                 "pose=$pose, " +
                 "yaw=${pose?.yaw}, " +
                 "pitch=${pose?.pitch}, " +
@@ -692,8 +750,8 @@ internal class FaceDetectorTransitioner(
         motionBlurResult: MotionBlurDetector.Output?,
     ): Float {
         val faceScore = analyzerOutput.resultScore.coerceIn(0f, 1f)
-        val centeringScore = calculateCenteringScore(analyzerOutput.boundingBox)
-        val coverageScore = calculateCoverageScore(analyzerOutput.boundingBox)
+        val centeringScore = calculateCenteringScore(analyzerOutput.validationBoundingBox)
+        val coverageScore = calculateCoverageScore(analyzerOutput.validationBoundingBox)
         val stabilityScore = when (motionBlurResult?.hasMotionBlur) {
             true -> 0f
             false -> 1f
@@ -839,6 +897,7 @@ internal class FaceDetectorTransitioner(
         private const val SIDE_CAPTURE_YAW_THRESHOLD_DEGREES = 15f
         private const val DEFAULT_MOTION_BLUR_MIN_DURATION_MS = 100L
         private const val DEFAULT_UNKNOWN_STABILITY_SCORE = 0.5f
+        private const val MOVE_CLOSER_REQUIRED_FRAME_COUNT = 3
         private val DEFAULT_SIDE_CAPTURE_SEQUENCE = listOf(Capture.RIGHT, Capture.LEFT)
 
         // Mirrors iOS FaceScannerOutput.BestFrame

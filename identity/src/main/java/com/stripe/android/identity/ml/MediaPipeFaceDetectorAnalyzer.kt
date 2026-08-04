@@ -42,9 +42,10 @@ internal class MediaPipeFaceDetectorAnalyzer(
         state: IdentityScanState
     ): AnalyzerOutput {
         val preprocessStat = modelPerformanceTracker.trackPreprocess()
-        val inputBitmap = data.cameraPreviewImage.image.cropCenter(
+        val sourceBitmap = data.cameraPreviewImage.image
+        val inputBitmap = sourceBitmap.cropCenter(
             maxAspectRatioInSize(
-                data.cameraPreviewImage.image.size(),
+                sourceBitmap.size(),
                 1f
             )
         ).asArgb8888()
@@ -59,14 +60,20 @@ internal class MediaPipeFaceDetectorAnalyzer(
         val output = if (landmarks.isNullOrEmpty()) {
             FaceDetectorOutput(
                 boundingBox = EMPTY_BOUNDING_BOX,
-                resultScore = 0f
+                resultScore = 0f,
+                fullFrameBoundingBox = EMPTY_BOUNDING_BOX
             )
         } else {
+            val boundingBox = landmarks.boundingBox()
             FaceDetectorOutput(
-                boundingBox = landmarks.boundingBox(),
+                boundingBox = boundingBox,
                 resultScore = MEDIA_PIPE_FACE_SCORE,
                 pose = result.facePose(),
-                faceLandmarkResult = result.encodedFaceLandmarkResult()
+                faceLandmarkResult = result.encodedFaceLandmarkResult(),
+                fullFrameBoundingBox = boundingBox.toFullFrame(
+                    inputWidth = sourceBitmap.width,
+                    inputHeight = sourceBitmap.height
+                )
             )
         }
 
@@ -75,6 +82,7 @@ internal class MediaPipeFaceDetectorAnalyzer(
             "MediaPipeFaceDetectorAnalyzer output " +
                 "score=${output.resultScore}, " +
                 "bbox=${output.boundingBox}, " +
+                "fullFrameBBox=${output.fullFrameBoundingBox}, " +
                 "pose=${output.pose}, " +
                 "state=${state::class.simpleName}"
         )
@@ -165,6 +173,29 @@ internal class MediaPipeFaceDetectorAnalyzer(
                 top = top.coerceIn(0f, 1f),
                 width = (right - left).coerceIn(0f, 1f),
                 height = (bottom - top).coerceIn(0f, 1f)
+            )
+        }
+
+        private fun BoundingBox.toFullFrame(
+            inputWidth: Int,
+            inputHeight: Int
+        ): BoundingBox {
+            val cropSide = minOf(inputWidth, inputHeight).toFloat()
+            if (cropSide <= 0f) {
+                return this
+            }
+
+            val offsetX = (inputWidth - cropSide) / 2f
+            val offsetY = (inputHeight - cropSide) / 2f
+            val fullLeft = ((offsetX + left * cropSide) / inputWidth).coerceIn(0f, 1f)
+            val fullTop = ((offsetY + top * cropSide) / inputHeight).coerceIn(0f, 1f)
+            val fullRight = ((offsetX + (left + width) * cropSide) / inputWidth).coerceIn(0f, 1f)
+            val fullBottom = ((offsetY + (top + height) * cropSide) / inputHeight).coerceIn(0f, 1f)
+            return BoundingBox(
+                left = fullLeft,
+                top = fullTop,
+                width = (fullRight - fullLeft).coerceAtLeast(0f),
+                height = (fullBottom - fullTop).coerceAtLeast(0f)
             )
         }
 

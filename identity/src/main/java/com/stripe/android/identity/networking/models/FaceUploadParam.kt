@@ -123,7 +123,14 @@ internal data class FaceFrameDataParam(
                 yaw = pose?.yaw?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
                 pitch = pose?.pitch?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
                 roll = pose?.roll?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
-                bbox = boundingBoxInFullFrame(
+                bbox = selfieFrame.output.fullFrameBoundingBox?.let {
+                    listOf(
+                        (it.left * image.width).toInt(),
+                        (it.top * image.height).toInt(),
+                        (it.width * image.width).toInt(),
+                        (it.height * image.height).toInt()
+                    )
+                } ?: boundingBoxInFullFrame(
                     boundingBox = boundingBox,
                     inputWidth = image.width,
                     inputHeight = image.height

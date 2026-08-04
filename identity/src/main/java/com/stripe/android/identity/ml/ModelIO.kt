@@ -51,8 +51,12 @@ internal data class FaceDetectorOutput(
     val boundingBox: BoundingBox,
     val resultScore: Float,
     val pose: FacePose? = null,
-    val faceLandmarkResult: String? = null
-) : AnalyzerOutput
+    val faceLandmarkResult: String? = null,
+    val fullFrameBoundingBox: BoundingBox? = null
+) : AnalyzerOutput {
+    val validationBoundingBox: BoundingBox
+        get() = fullFrameBoundingBox ?: boundingBox
+}
 
 /**
  * Optional face pose metadata in degrees. The legacy detector does not populate this.
