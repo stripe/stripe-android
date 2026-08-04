@@ -58,7 +58,7 @@ fun cardBillingAddressCollectionMode(
                 }
                 if (requiresBillingAddressForAutomaticTax) {
                     additionalAutomaticTaxFieldsByCountry.forEach { (countryCode, fields) ->
-                        merge(countryCode, fields) { existing, additional -> existing + additional }
+                        put(countryCode, get(countryCode).orEmpty() + fields)
                     }
                 }
             }
