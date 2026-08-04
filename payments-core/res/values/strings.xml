@@ -160,8 +160,6 @@
   <string name="stripe_google_pay_total">Total</string>
   <!-- Google Pay line item showing the amount before exclusive taxes. -->
   <string name="stripe_google_pay_cost_excluding_tax">Cost excluding tax</string>
-  <!-- Google Pay line item showing an estimated exclusive tax amount. -->
-  <string name="stripe_google_pay_estimated_tax">Estimated tax</string>
   <!-- Google Pay total label when the final tax may change with the selected billing address. -->
   <string name="stripe_google_pay_estimated_total">Estimated total (final tax may vary)</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->
