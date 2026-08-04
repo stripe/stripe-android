@@ -20,6 +20,8 @@ internal class PaymentSheetAutocompleteModule {
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
-        publishableKeyProvider = { apiConfigProvider.get().publishableKey },
+        requestOptionsProvider = Provider {
+            ApiRequest.Options(apiKey = apiConfigProvider.get().publishableKey)
+        },
     )
 }

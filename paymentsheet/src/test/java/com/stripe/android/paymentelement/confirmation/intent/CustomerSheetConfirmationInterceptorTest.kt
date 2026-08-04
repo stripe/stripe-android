@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 class CustomerSheetConfirmationInterceptorTest {
@@ -358,7 +359,7 @@ class CustomerSheetConfirmationInterceptorTest {
             clientAttributionMetadata = clientAttributionMetadata,
             integrationMetadata = integrationMetadata,
             stripeRepository = stripeRepository,
-            requestOptions = requestOptions,
+            requestOptionsProvider = Provider { requestOptions },
             setupIntentInterceptorFactory = setupIntentInterceptorFactory,
             attachPaymentMethodInterceptorFactory = attachPaymentMethodInterceptorFactory,
             logger = logger,

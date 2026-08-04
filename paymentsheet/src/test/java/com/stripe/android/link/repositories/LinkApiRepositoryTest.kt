@@ -1044,7 +1044,13 @@ class LinkApiRepositoryTest {
             consumersApiService = consumersApiService,
             workContext = Dispatchers.IO,
             locale = Locale.US,
-            errorReporter = errorReporter
+            errorReporter = errorReporter,
+            apiRequestOptionsProvider = Provider {
+                ApiRequest.Options(
+                    apiKey = PUBLISHABLE_KEY,
+                    stripeAccount = STRIPE_ACCOUNT_ID,
+                )
+            },
         )
     }
 

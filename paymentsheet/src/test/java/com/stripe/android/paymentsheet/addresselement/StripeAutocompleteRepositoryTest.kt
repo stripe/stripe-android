@@ -10,6 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.File
+import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 class StripeAutocompleteRepositoryTest {
@@ -113,7 +114,7 @@ class StripeAutocompleteRepositoryTest {
         val repository = DefaultStripeAutocompleteRepository(
             stripeNetworkClient = networkClient,
             apiRequestFactory = ApiRequest.Factory(),
-            publishableKeyProvider = { "pk_test_123" },
+            requestOptionsProvider = Provider { ApiRequest.Options(apiKey = "pk_test_123") },
         )
         return Scenario(networkClient = networkClient, repository = repository)
     }
