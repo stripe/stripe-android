@@ -20,6 +20,9 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
     val autocompleteSuggestionsReturnedCalls: ReceiveTurbine<SuggestionsReturnedCall> =
         _autocompleteSuggestionsReturnedCalls
 
+    private val _autocompleteDetailsFetchStartedCalls = Turbine<String>()
+    val autocompleteDetailsFetchStartedCalls: ReceiveTurbine<String> = _autocompleteDetailsFetchStartedCalls
+
     private val _autocompleteSelectedCalls = Turbine<SelectedCall>()
     val autocompleteSelectedCalls: ReceiveTurbine<SelectedCall> = _autocompleteSelectedCalls
 
@@ -54,6 +57,10 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         _autocompleteSuggestionsReturnedCalls.add(SuggestionsReturnedCall(sessionToken, queryLength, resultCount))
     }
 
+    override fun onAutocompleteDetailsFetchStarted(sessionToken: String) {
+        _autocompleteDetailsFetchStartedCalls.add(sessionToken)
+    }
+
     override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String) {
         _autocompleteSelectedCalls.add(SelectedCall(sessionToken, queryLength, placeId))
     }
@@ -68,6 +75,7 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         _autocompleteSessionStartedCalls.ensureAllEventsConsumed()
         _autocompleteFetchStartedCalls.ensureAllEventsConsumed()
         _autocompleteSuggestionsReturnedCalls.ensureAllEventsConsumed()
+        _autocompleteDetailsFetchStartedCalls.ensureAllEventsConsumed()
         _autocompleteSelectedCalls.ensureAllEventsConsumed()
         _autocompleteErrorCalls.ensureAllEventsConsumed()
     }

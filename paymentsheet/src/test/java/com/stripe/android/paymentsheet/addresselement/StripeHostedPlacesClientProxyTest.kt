@@ -391,7 +391,7 @@ class StripeHostedPlacesClientProxyTest {
     }
 
     @Test
-    fun `fetchPlace success fires onAutocompleteSelected with query length and place id`() = runTest {
+    fun `fetchPlace success fires onAutocompleteDetailsFetchStarted then onAutocompleteSelected`() = runTest {
         val eventReporter = FakeAddressLauncherEventReporter()
         val repository = defaultRepository()
         val proxy = createProxy(repository = repository, eventReporter = eventReporter)
@@ -403,6 +403,7 @@ class StripeHostedPlacesClientProxyTest {
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
 
         proxy.fetchPlace("place_123", Locale.US)
+        eventReporter.autocompleteDetailsFetchStartedCalls.awaitItem()
         repository.fetchPlaceDetailsCalls.awaitItem()
 
         val selectedCall = eventReporter.autocompleteSelectedCalls.awaitItem()
@@ -413,7 +414,36 @@ class StripeHostedPlacesClientProxyTest {
     }
 
     @Test
-    fun `fetchPlace failure fires onAutocompleteError`() = runTest {
+    fun `fetchPlace with cached inline address fires onAutocompleteSelected without detail fetch`() = runTest {
+        val inlineAddress = StripeProxyAddress(
+            line1 = "123 Main St", line2 = null, city = "SF", state = "CA", postalCode = "94105", country = "US"
+        )
+        val repository = FakeStripeAutocompleteRepository().apply {
+            predictionsResult = Result.success(
+                AutocompletePredictionsResult(
+                    predictions = listOf(AutocompleteSuggestion("place_123", "123 Main St", "SF, CA", inlineAddress))
+                )
+            )
+        }
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val proxy = createProxy(repository = repository, eventReporter = eventReporter)
+
+        proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
+        repository.findPredictionsCalls.awaitItem()
+        eventReporter.autocompleteSessionStartedCalls.awaitItem()
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
+        eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
+
+        proxy.fetchPlace("place_123", Locale.US)
+
+        val selectedCall = eventReporter.autocompleteSelectedCalls.awaitItem()
+        assertThat(selectedCall.placeId).isEqualTo("place_123")
+        repository.ensureAllEventsConsumed()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `fetchPlace failure fires onAutocompleteError without onAutocompleteSelected`() = runTest {
         val eventReporter = FakeAddressLauncherEventReporter()
         val repository = defaultRepository().apply {
             detailsResult = Result.failure(RuntimeException("Details error"))
@@ -427,9 +457,9 @@ class StripeHostedPlacesClientProxyTest {
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
 
         proxy.fetchPlace("place_123", Locale.US)
+        eventReporter.autocompleteDetailsFetchStartedCalls.awaitItem()
         repository.fetchPlaceDetailsCalls.awaitItem()
 
-        eventReporter.autocompleteSelectedCalls.awaitItem()
         val errorCall = eventReporter.autocompleteErrorCalls.awaitItem()
         assertThat(errorCall.error).hasMessageThat().isEqualTo("Details error")
         repository.ensureAllEventsConsumed()

@@ -86,8 +86,8 @@ internal class StripeHostedPlacesClientProxy(
             token = sessionToken
             queryLength = lastQueryLength
         }
-        eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
         if (cached?.address != null) {
+            eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
             return Result.success(
                 Address(
                     line1 = cached.address.line1,
@@ -99,6 +99,7 @@ internal class StripeHostedPlacesClientProxy(
                 )
             )
         }
+        eventReporter.onAutocompleteDetailsFetchStarted(sessionToken = token)
         return repository.fetchPlaceDetails(
             placeId = placeId,
             sessionToken = token,
@@ -120,6 +121,8 @@ internal class StripeHostedPlacesClientProxy(
                 postalCode = result.address?.postalCode,
                 country = result.address?.country,
             )
+        }.onSuccess {
+            eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
         }.onFailure { error ->
             eventReporter.onAutocompleteError(sessionToken = token, error = error)
         }

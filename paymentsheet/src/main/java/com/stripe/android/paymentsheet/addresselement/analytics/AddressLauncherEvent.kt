@@ -85,6 +85,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         private val queryLength: Int,
         private val placeId: String,
         private val sessionElapsed: Duration?,
+        private val timeToFetch: Duration?,
     ) : AddressLauncherEvent() {
         override val eventName: String = "mc_address_autocomplete_selected"
         override val additionalParams: Map<String, Any>
@@ -95,6 +96,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
                     FIELD_PLACE_ID to placeId,
                 )
                 sessionElapsed?.let { data[FIELD_SESSION_ELAPSED] = it.toDouble(DurationUnit.SECONDS) }
+                timeToFetch?.let { data[FIELD_TIME_TO_FETCH] = it.toDouble(DurationUnit.SECONDS) }
                 return mapOf(FIELD_ADDRESS_DATA_BLOB to data)
             }
     }

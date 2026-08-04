@@ -19,6 +19,8 @@ internal interface AddressLauncherEventReporter {
         resultCount: Int,
     )
 
+    fun onAutocompleteDetailsFetchStarted(sessionToken: String)
+
     fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String)
 
     fun onAutocompleteError(sessionToken: String, error: Throwable)
