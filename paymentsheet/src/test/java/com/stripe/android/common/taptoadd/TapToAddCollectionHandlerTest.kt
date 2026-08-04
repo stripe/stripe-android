@@ -988,7 +988,7 @@ class TapToAddCollectionHandlerTest {
         assertThat(collectPaymentMethodCall.config).isEqualTo(
             CollectSetupIntentConfiguration.Builder()
                 .build()
-            )
+        )
         collectPaymentMethodCall.callback.onSuccess(collectedIntent)
         return collectedIntent
     }

@@ -467,7 +467,7 @@ internal class CryptoApiRepository @Inject constructor(
             statusCode = response.code,
             message = stripeError?.message
                 ?: "Request failed with status code ${response.code} and non-JSON error " +
-                    "body."
+                "body."
         )
     }
 
@@ -503,6 +503,10 @@ internal class CryptoApiRepository @Inject constructor(
     )
 
     internal companion object {
+        // Use a preview API version for networks and parameters behind preview API features.
+        // Bump this when new onramp features require a newer API version.
+        internal const val CRYPTO_ONRAMP_API_VERSION = "2026-03-25.preview"
+
         private const val FIELD_ERROR = "error"
         private const val FIELD_REASON = "reason"
         private const val FIELD_USER_MESSAGE = "user_message"

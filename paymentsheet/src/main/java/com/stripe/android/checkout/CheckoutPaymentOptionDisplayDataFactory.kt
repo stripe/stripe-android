@@ -1,0 +1,98 @@
+package com.stripe.android.checkout
+
+import android.content.Context
+import androidx.compose.ui.text.AnnotatedString
+import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.embedded.content.NullUiDefinitionFactoryHelper
+import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.billingDetails
+import com.stripe.android.paymentsheet.model.darkThemeIconUrl
+import com.stripe.android.paymentsheet.model.drawableResourceId
+import com.stripe.android.paymentsheet.model.drawableResourceIdNight
+import com.stripe.android.paymentsheet.model.label
+import com.stripe.android.paymentsheet.model.lightThemeIconUrl
+import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
+import com.stripe.android.paymentsheet.model.paymentMethodType
+import javax.inject.Inject
+
+@OptIn(CheckoutSessionPreview::class)
+internal fun interface CheckoutPaymentOptionDisplayDataFactory {
+    fun create(
+        selection: PaymentSelection?,
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ): PaymentOptionDisplayData?
+}
+
+@OptIn(CheckoutSessionPreview::class)
+internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructor(
+    private val iconLoader: PaymentSelection.IconLoader,
+    private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
+    private val context: Context,
+    private val linkAccountHolder: LinkAccountHolder,
+) : CheckoutPaymentOptionDisplayDataFactory {
+    override fun create(
+        selection: PaymentSelection?,
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ): PaymentOptionDisplayData? {
+        if (selection == null) {
+            return null
+        }
+
+        val mandate = when (selection) {
+            is PaymentSelection.New -> {
+                paymentMethodMetadata.formElementsForCode(
+                    code = selection.paymentMethodType,
+                    uiDefinitionFactoryArgumentsFactory = NullUiDefinitionFactoryHelper.nullEmbeddedUiDefinitionFactory
+                )?.firstNotNullOfOrNull { it.mandateText }
+            }
+            is PaymentSelection.Saved -> selection.mandateTextFromPaymentMethodMetadata(paymentMethodMetadata)
+            is PaymentSelection.CustomPaymentMethod,
+            is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.GooglePay,
+            is PaymentSelection.Link -> null
+        }
+
+        return PaymentOptionDisplayData(
+            imageLoader = {
+                cardArtDrawableLoader.load(selection) ?: iconLoader.load(
+                    drawableResourceId = selection.drawableResourceId,
+                    drawableResourceIdNight = selection.drawableResourceIdNight,
+                    lightThemeIconUrl = selection.lightThemeIconUrl,
+                    darkThemeIconUrl = selection.darkThemeIconUrl,
+                )
+            },
+            label = selection.label(
+                paymentMethodMetadata.effectiveLinkBrand(
+                    linkAccountHolder.linkAccountInfo.value.account
+                )
+            ).resolve(context),
+            billingDetails = selection.billingDetails?.toCheckoutBillingDetails(),
+            paymentMethodType = selection.paymentMethodType,
+            mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context)),
+        )
+    }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): CheckoutController.BillingDetails {
+    return CheckoutController.BillingDetails(
+        address = address?.let { modelAddress ->
+            CheckoutController.BillingDetails.Address(
+                city = modelAddress.city,
+                country = modelAddress.country,
+                line1 = modelAddress.line1,
+                line2 = modelAddress.line2,
+                postalCode = modelAddress.postalCode,
+                state = modelAddress.state,
+            )
+        },
+        email = email,
+        name = name,
+        phone = phone,
+    )
+}

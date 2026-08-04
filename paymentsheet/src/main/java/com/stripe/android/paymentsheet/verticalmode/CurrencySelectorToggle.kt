@@ -52,7 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CurrencySelectorElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import androidx.compose.ui.R as ComposeR
 import com.stripe.android.uicore.R as StripeUiCoreR
@@ -92,7 +92,7 @@ internal fun CurrencySelectorToggle(
     isEnabled: Boolean,
     showCurrencyCode: Boolean,
     errorMessage: String? = null,
-    appearance: Checkout.CurrencySelectorContentAppearance.State,
+    appearance: CurrencySelectorElement.Appearance.State,
     modifier: Modifier = Modifier,
 ) {
     val shape = appearance.cornerRadiusDp?.let { RoundedCornerShape(it.dp) }

@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -28,11 +30,16 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.FormInsets
+import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldComposable
@@ -109,29 +116,35 @@ fun CardPillElementUI(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    val textFieldInsets = LocalTextFieldInsets.current
+
+    Box(
         modifier = modifier
             .fillMaxWidth()
+            .height(textFieldInsets.cardPillMinHeight())
             .padding(
-                start = 16.dp,
-                end = 12.dp,
-                top = 12.dp,
-                bottom = 12.dp
+                start = textFieldInsets.start.dp,
+                end = textFieldInsets.end.dp,
             ),
-        verticalAlignment = Alignment.CenterVertically,
+        contentAlignment = Alignment.CenterStart,
     ) {
-        CardBrandIcon(cardBrand)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CardBrandIcon(cardBrand)
 
-        Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-        CardNumberText(
-            lastFourDigits = lastFourDigits,
-            cardBrand = cardBrand,
-        )
+            CardNumberText(
+                lastFourDigits = lastFourDigits,
+                cardBrand = cardBrand,
+            )
 
-        Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(4.dp))
 
-        DismissButton(enabled, onDismiss)
+            DismissButton(enabled, onDismiss)
+        }
     }
 }
 
@@ -203,3 +216,43 @@ private fun DismissButton(
             ),
     )
 }
+
+/**
+ * Minimum height for card pill. This builds the height to be exactly
+ */
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun FormInsets.cardPillMinHeight(): Dp {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+
+    val topPaddingValue = top.dp
+    val bottomPaddingValue = bottom.dp
+
+    val labelStyle = MaterialTheme.typography.subtitle1
+    val inputStyle = MaterialTheme.typography.body1
+
+    val labelHeight = remember(textMeasurer, labelStyle, density, topPaddingValue) {
+        with(density) {
+            val lastBaseline = textMeasurer.measure(
+                text = AnnotatedString(LABEL_MEASUREMENT_TEXT),
+                style = labelStyle,
+            ).lastBaseline.toDp()
+            maxOf(lastBaseline, topPaddingValue)
+        }
+    }
+
+    val inputHeight = remember(textMeasurer, inputStyle, density) {
+        with(density) {
+            textMeasurer.measure(
+                text = AnnotatedString(LABEL_MEASUREMENT_TEXT),
+                style = inputStyle,
+            ).size.height.toDp()
+        }
+    }
+
+    return labelHeight + inputHeight + TextFieldLabelToInputPadding + bottomPaddingValue
+}
+
+private val TextFieldLabelToInputPadding = 4.dp
+private const val LABEL_MEASUREMENT_TEXT = " "

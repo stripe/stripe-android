@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.nfcscan.LocalNfcScanEventShownReporter
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.PrimaryButton
@@ -261,6 +262,9 @@ internal fun AddPaymentMethod(
             LocalCardBrandDisallowedReporter provides disallowedReporter,
             LocalAnalyticsEventReporter provides analyticsEventReporter,
             LocalCardScanEventsReporter provides cardScanEventReporter,
+            LocalNfcScanEventShownReporter provides {
+                viewActionHandler(CustomerSheetViewAction.OnNfcScanButtonShown)
+            },
         ) {
             PaymentElement(
                 enabled = viewState.enabled,

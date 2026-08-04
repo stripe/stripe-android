@@ -65,14 +65,14 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
             val DEFAULT_TAP_ZONE = TapZone(xBias = 0.5f, yBias = 0.3f)
 
-            val LOW_TAP_ZONE = TapZone(xBias = 0.2f, yBias = 0.2f)
-            val HIGH_TAP_ZONE = TapZone(xBias = 0.2f, yBias = 0.85f)
+            val HIGH_TAP_ZONE = TapZone(xBias = 0.2f, yBias = 0.2f)
+            val LOW_TAP_ZONE = TapZone(xBias = 0.2f, yBias = 0.85f)
 
             val HIGH_LOW_CASES = arrayOf(
-                arrayOf(DeviceRotation.Portrait, LOW_TAP_ZONE, Orientation.Portrait, Error.None),
                 arrayOf(DeviceRotation.Portrait, HIGH_TAP_ZONE, Orientation.Portrait, Error.None),
-                arrayOf(DeviceRotation.UpsideDown, LOW_TAP_ZONE, Orientation.Portrait, Error.None),
+                arrayOf(DeviceRotation.Portrait, LOW_TAP_ZONE, Orientation.Portrait, Error.None),
                 arrayOf(DeviceRotation.UpsideDown, HIGH_TAP_ZONE, Orientation.Portrait, Error.None),
+                arrayOf(DeviceRotation.UpsideDown, LOW_TAP_ZONE, Orientation.Portrait, Error.None),
             )
 
             val PORTRAIT_CLOSE_START_TAP_ZONE = TapZone(xBias = 0.05f, yBias = 0.3f)
@@ -157,6 +157,12 @@ internal class NfcScanningLayoutScreenshotTestSuite {
                 arrayOf(
                     DeviceRotation.Portrait,
                     PORTRAIT_CLOSE_END_TAP_ZONE,
+                    Orientation.Portrait,
+                    Error.Message(ERROR_TEXT),
+                ),
+                arrayOf(
+                    DeviceRotation.Portrait,
+                    LOW_TAP_ZONE,
                     Orientation.Portrait,
                     Error.Message(ERROR_TEXT),
                 ),

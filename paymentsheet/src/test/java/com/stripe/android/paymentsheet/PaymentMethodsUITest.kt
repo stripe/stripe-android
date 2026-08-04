@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.NewPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.image.TEST_TAG_IMAGE_FROM_URL
 import kotlinx.coroutines.test.runTest
@@ -19,6 +20,9 @@ import kotlin.test.Test
 class PaymentMethodsUITest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val workingUrl = "working-url"
     private val brokenUrl = "broken-url"

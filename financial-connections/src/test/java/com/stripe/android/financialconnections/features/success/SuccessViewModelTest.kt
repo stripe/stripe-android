@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.test.runTest
@@ -29,6 +30,9 @@ internal class SuccessViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val getOrFetchSync = mock<GetOrFetchSync>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -45,7 +49,7 @@ internal class SuccessViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         successContentRepository = SuccessContentRepository(SavedStateHandle()),
         getCachedAccounts = getCachedAccounts,
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `init - when skipSuccessPane is true, complete session and emit Finish`() = runTest {

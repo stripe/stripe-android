@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.analytics.NoOpAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -203,18 +204,20 @@ internal class PaymentMethodViewModel @Inject constructor(
                             eventReporter = parentComponent.eventReporter,
                             savedStateHandle = parentComponent.viewModel.savedStateHandle,
                             autocompleteAddressInteractorFactory =
-                            PaymentElementAutocompleteAddressInteractor.Factory(
-                                launcher = parentComponent.autocompleteLauncher,
-                                autocompleteConfig = AutocompleteAddressInteractor.Config(
-                                    googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
-                                    autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                                    isInlineAutocompleteEnabled =
-                                        FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+                                PaymentElementAutocompleteAddressInteractor.Factory(
+                                    launcher = parentComponent.autocompleteLauncher,
+                                    autocompleteConfig = AutocompleteAddressInteractor.Config(
+                                        googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
+                                        autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+                                        isInlineAutocompleteEnabled =
+                                            FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+                                    ),
+                                    placesClient = null,
+                                    stripeAutocompleteRepository = null,
+                                    coroutineScope = null,
+                                    shouldUseAutocompleteProxyEndpointsProvider = { false },
+                                    eventReporter = NoOpAddressLauncherEventReporter,
                                 ),
-                                placesClient = null,
-                                coroutineScope = null,
-                                shouldUseAutocompleteProxyEndpointsProvider = { false },
-                            ),
                             isLinkUI = true,
                         ),
                         logger = parentComponent.logger,

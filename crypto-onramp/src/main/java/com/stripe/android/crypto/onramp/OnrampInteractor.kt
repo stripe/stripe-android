@@ -669,7 +669,7 @@ internal class OnrampInteractor @Inject constructor(
                         sublabel = it.sublabel,
                         type = it.type.toDisplayType()
                     ),
-                        kycInfo = null
+                    kycInfo = null
                 )
             } ?: run {
                 val error = mapError(
@@ -986,7 +986,7 @@ internal class OnrampInteractor @Inject constructor(
                     Status.Completed(OnrampCheckoutResult.Failed(mappedError))
                 }
             )
-			
+
         if (checkoutStatus is Status.Completed) {
             clearPendingCheckout()
         }

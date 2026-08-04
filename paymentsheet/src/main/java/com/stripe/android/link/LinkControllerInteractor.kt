@@ -118,7 +118,9 @@ internal class LinkControllerInteractor @Inject constructor(
     init {
         coroutineScope.launch {
             _presentSelectionSucceededFlow.collect {
-                val presentResult = performCreatePaymentMethod(apiKey = null).fold(
+                val pmResult = performCreatePaymentMethod(apiKey = null)
+                updateState { it.copy(createdPaymentMethod = pmResult.getOrNull()) }
+                val presentResult = pmResult.fold(
                     onSuccess = { pm -> LinkController.PresentResult.Completed(pm) },
                     onFailure = { error -> LinkController.PresentResult.Failed(error) }
                 )
@@ -137,25 +139,33 @@ internal class LinkControllerInteractor @Inject constructor(
         MutableSharedFlow<LinkController.ConfirmSetupIntentResult>(extraBufferCapacity = 1)
     val confirmSetupIntentResultFlow = _confirmSetupIntentResultFlow.asSharedFlow()
 
-    internal val setupIntentClientSecret: String?
-        get() = _state.value.setupIntentClientSecret
+    internal val lastCreatedPaymentMethod: PaymentMethod?
+        get() = _state.value.createdPaymentMethod
 
     val paymentMethodMetadata: PaymentMethodMetadata?
         get() = _state.value.paymentMethodMetadata
 
     val selectedPaymentMethodPreview: StateFlow<LinkController.PaymentMethodPreview?> =
         _state.mapAsStateFlow { state ->
-            state.selectedPaymentMethod?.details?.toPreview(application, cachedIconLoader)
+            state.selectedPaymentMethod?.details?.toPreview(
+                context = application,
+                iconLoader = cachedIconLoader,
+                reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
+            )
         }
 
     fun state(context: Context): StateFlow<LinkController.State> {
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
             LinkController.State(
-                elementsSessionId = state.linkComponent?.configuration?.elementsSessionId,
+                elementsSessionId = state.linkConfiguration?.elementsSessionId,
                 internalLinkAccount = account,
-                merchantLogoUrl = state.linkComponent?.configuration?.merchantLogoUrl,
+                merchantLogoUrl = state.linkConfiguration?.merchantLogoUrl,
                 selectedPaymentMethodPreview = state.selectedPaymentMethod?.details
-                    ?.toPreview(context, cachedIconLoader),
+                    ?.toPreview(
+                        context = context,
+                        iconLoader = cachedIconLoader,
+                        reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
+                    ),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
@@ -186,7 +196,6 @@ internal class LinkControllerInteractor @Inject constructor(
                         it.copy(
                             linkComponent = component,
                             paymentMethodMetadata = paymentMethodMetadata,
-                            setupIntentClientSecret = config.setupIntentClientSecret,
                         )
                     }
                     savedStateHandle[LINK_CONFIGURED_KEY] = true
@@ -202,6 +211,7 @@ internal class LinkControllerInteractor @Inject constructor(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?,
         paymentMethodTypes: List<LinkController.PaymentMethodType>?,
+        collectName: Boolean = false,
     ) {
         if (_state.value.presentationType != null) return
         updateState { it.copy(presentationType = PresentationType.PaymentMethods) }
@@ -209,6 +219,7 @@ internal class LinkControllerInteractor @Inject constructor(
             launcher = launcher,
             email = email,
             paymentMethodTypes = paymentMethodTypes,
+            collectName = collectName,
             onConfigurationError = { error ->
                 updateState { it.copy(presentationType = null) }
                 _presentPaymentMethodsResultFlow.tryEmit(
@@ -220,7 +231,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     selectedPayment = state.selectedPaymentMethod?.details,
                     paymentMethodFilters = paymentMethodTypes?.toFilters(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
-                    shouldShowSecondaryCta = false,
+                    canContinueWithoutLink = false,
                 )
             }
         )
@@ -252,7 +263,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     selectedPayment = state.selectedPaymentMethod?.details,
                     paymentMethodFilters = config.supportedPaymentMethodTypes?.toFilters(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
-                    shouldShowSecondaryCta = false,
+                    canContinueWithoutLink = false,
                 )
             }
         )
@@ -301,13 +312,14 @@ internal class LinkControllerInteractor @Inject constructor(
         email: String?,
         phoneNumber: String? = null,
         paymentMethodTypes: List<LinkController.PaymentMethodType>?,
+        collectName: Boolean = false,
         onError: (Throwable) -> Unit,
         onSuccess: (LinkConfiguration) -> Unit
     ) {
         val configuration = requireLinkComponent()
             .map { it.configuration }
             .map { config ->
-                if (email == null && phoneNumber == null && paymentMethodTypes == null) {
+                if (email == null && phoneNumber == null && paymentMethodTypes == null && !collectName) {
                     // No change needed.
                     config
                 } else {
@@ -317,21 +329,14 @@ internal class LinkControllerInteractor @Inject constructor(
                             phone = phoneNumber ?: config.customerInfo.phone,
                         )
 
-                    val nameCollectionConfig = when {
-                        paymentMethodTypes == null ||
-                            paymentMethodTypes.contains(LinkController.PaymentMethodType.BankAccount) -> {
-                            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                        }
-                        paymentMethodTypes.contains(LinkController.PaymentMethodType.Generic) -> {
-                            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
-                        }
-                        else -> {
-                            config.billingDetailsCollectionConfiguration.name
-                        }
+                    val billingDetailsCollectionConfiguration = if (collectName) {
+                        config.billingDetailsCollectionConfiguration.copy(
+                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        )
+                    } else {
+                        config.billingDetailsCollectionConfiguration
                     }
 
-                    val billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration
-                        .copy(name = nameCollectionConfig)
                     config.copy(
                         customerInfo = customerInfo,
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -582,12 +587,6 @@ internal class LinkControllerInteractor @Inject constructor(
         )
     }
 
-    internal suspend fun performCreatePaymentMethodForConfirmation(): Result<PaymentMethod> {
-        val result = performCreatePaymentMethod(apiKey = null)
-        updateState { it.copy(createdPaymentMethod = result.getOrNull()) }
-        return result
-    }
-
     internal fun onSetupIntentConfirmationResult(result: InternalPaymentResult) {
         val confirmResult = when (result) {
             is InternalPaymentResult.Completed -> {
@@ -686,6 +685,7 @@ internal class LinkControllerInteractor @Inject constructor(
         email: String? = null,
         phoneNumber: String? = null,
         paymentMethodTypes: List<LinkController.PaymentMethodType>? = null,
+        collectName: Boolean = false,
         onConfigurationError: (Throwable) -> Unit,
         getLaunchMode: (linkAccount: LinkAccount?, state: State) -> LinkLaunchMode?
     ) {
@@ -695,6 +695,7 @@ internal class LinkControllerInteractor @Inject constructor(
             email = email,
             phoneNumber = phoneNumber,
             paymentMethodTypes = paymentMethodTypes,
+            collectName = collectName,
             onError = onConfigurationError,
             onSuccess = { configuration ->
                 updateStateOnNewEmail(email)
@@ -716,6 +717,10 @@ internal class LinkControllerInteractor @Inject constructor(
                         linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         launchMode = launchMode,
+                        // LinkController launches Link for selection/authentication only (never
+                        // in-Link confirmation), and this singleton has no host Activity to read a
+                        // status bar color from.
+                        statusBarColor = null,
                     )
                 )
             }
@@ -786,7 +791,6 @@ internal class LinkControllerInteractor @Inject constructor(
     internal data class State(
         val linkComponent: LinkComponent? = null,
         val paymentMethodMetadata: PaymentMethodMetadata? = null,
-        val setupIntentClientSecret: String? = null,
         val emailInput: String? = null,
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,
@@ -871,7 +875,8 @@ internal fun PaymentMethodPreviewDetails.toPreview(
 
 internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     context: Context,
-    iconLoader: PaymentSelection.IconLoader
+    iconLoader: PaymentSelection.IconLoader,
+    reduceLinkBranding: Boolean,
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = buildString {
@@ -882,7 +887,11 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
         append(" •••• ")
         append(last4)
     }
-    val drawableResourceId = getIconDrawableRes(context.isSystemDarkTheme())
+    val drawableResourceId = if (reduceLinkBranding) {
+        getIconDrawableRes(context.isSystemDarkTheme())
+    } else {
+        getLinkIconArrow()
+    }
 
     val type = when (this@toPreview) {
         is ConsumerPaymentDetails.Card, is ConsumerPaymentDetails.Passthrough -> {

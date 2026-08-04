@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -42,6 +43,9 @@ internal class AccountPickerViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val pollAuthorizationSessionAccounts = mock<PollAuthorizationSessionAccounts>()
     private val getSync = mock<GetOrFetchSync>()
@@ -67,7 +71,7 @@ internal class AccountPickerViewModelTest {
         consumerSessionProvider = { cachedConsumerSession() },
         currentLinkBrand = FakeCurrentLinkBrand(),
         presentSheet = mock(),
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `init - if PartnerAccounts response returns skipAccountSelection, state includes it`() =

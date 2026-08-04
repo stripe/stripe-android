@@ -8,10 +8,17 @@ import com.stripe.android.utils.TestRules
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
+import org.junit.rules.RuleChain
 
-internal open class BasePlaygroundTest(disableAnimations: Boolean = true) {
+internal open class BasePlaygroundTest(
+    disableAnimations: Boolean = true,
+    block: RuleChain.() -> RuleChain = { this },
+) {
     @get:Rule
-    open val rules = TestRules.create(disableAnimations = disableAnimations)
+    open val rules = TestRules.create(
+        disableAnimations = disableAnimations,
+        block = block,
+    )
 
     lateinit var device: UiDevice
     lateinit var testDriver: PlaygroundTestDriver
@@ -24,6 +31,9 @@ internal open class BasePlaygroundTest(disableAnimations: Boolean = true) {
 
     @After
     fun after() {
+        // Runs even if the test body threw before its own teardown() call, so a destroyed
+        // activity is never left referenced by the driver.
+        testDriver.teardown()
         Intents.release()
     }
 }

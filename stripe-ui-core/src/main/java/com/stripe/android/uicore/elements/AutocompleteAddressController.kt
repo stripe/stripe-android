@@ -33,7 +33,10 @@ class AutocompleteAddressController(
     private val config = interactor.autocompleteConfig
 
     private val inlineAutocompleteActive =
-        config.isInlineAutocompleteEnabled && config.isPlacesAvailable
+        config.isInlineAutocompleteEnabled && (
+            config.shouldUseStripeHostedAutocomplete ||
+                (!config.googlePlacesApiKey.isNullOrBlank() && config.isPlacesAvailable)
+            )
 
     private val inlineAutocompleteHandler: InlineAutocompleteHandler? =
         if (inlineAutocompleteActive) {
@@ -129,7 +132,7 @@ class AutocompleteAddressController(
                 }
 
                 _addressElementFlow.value =
-                    createAddressElement(newValues, toAddressInputMode(expandForm, newValues))
+                    createAddressElement(newValues, newAddressInputMode)
             }
         }
     }
@@ -155,19 +158,22 @@ class AutocompleteAddressController(
         )
     }
 
+    private fun isCountrySupported(country: String?): Boolean {
+        if (country.isNullOrBlank()) return true
+        val supported = config.autocompleteCountries
+        return supported.isEmpty() || supported.any { it.equals(country, ignoreCase = true) }
+    }
+
     private fun toAddressInputMode(
         expandForm: Boolean,
         values: Map<IdentifierSpec, String?>
     ): AddressInputMode {
         val googlePlacesApiKey = config.googlePlacesApiKey
+        val countrySupported = isCountrySupported(values[IdentifierSpec.Country])
 
-        return if (googlePlacesApiKey == null) {
-            AddressInputMode.NoAutocomplete(
-                phoneNumberConfig = phoneNumberConfig,
-                nameConfig = nameConfig,
-                emailConfig = emailConfig,
-            )
-        } else if (inlineAutocompleteActive && !expandForm && values[IdentifierSpec.Line1] == null) {
+        val showInline = inlineAutocompleteActive && !expandForm &&
+            countrySupported && values[IdentifierSpec.Line1].isNullOrEmpty()
+        return if (showInline) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
@@ -175,7 +181,7 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
-        } else if (config.isInlineAutocompleteEnabled) {
+        } else if (config.isInlineAutocompleteEnabled || googlePlacesApiKey == null) {
             AddressInputMode.NoAutocomplete(
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,

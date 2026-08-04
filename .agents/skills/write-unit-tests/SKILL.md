@@ -11,8 +11,9 @@ This skill describes how to structure tests in the Stripe Android SDK using fake
 1. **Use fakes over mocks** - Leverage fake implementations for dependencies (see `create-fake` skill)
 2. **Create test scenarios** - Use Scenario classes with `runScenario` functions to organize test setup
 3. **Verify all events consumed** - Call `ensureAllEventsConsumed()` on fakes after test block
-4. **Use Truth assertions** - Always use `assertThat(actual).isEqualTo(expected)` from Google Truth
-5. **Use Turbine for Flow testing** - Test Flow emissions with Turbine's `.test { }` syntax
+4. **Use Truth assertions** - Always use `assertThat(actual).isEqualTo(expected)` from Google Truth 
+5. **One case per test** - Each `@Test` should cover a single scenario or configuration
+6. **Use Turbine for Flow testing** - Test Flow emissions with Turbine's `.test { }` syntax
 
 ## Basic Test Structure
 
@@ -31,7 +32,8 @@ fun `test description`() = runScenario(
     val result = systemUnderTest.doSomething()
 
     // 3. Verify: Assert results and check fake calls
-    assertThat(result).isEqualTo(expected)
+    assertThat(result.status).isEqualTo(expectedStatus)
+    assertThat(result.id).isEqualTo(expectedId)
     assertThat(fakeService.calls.awaitItem()).isEqualTo(expectedCall)
 }
 // 4. Validation: ensureAllEventsConsumed called automatically by runScenario
@@ -111,6 +113,41 @@ fun `fetching data returns success when repository succeeds`() = runScenario {
 // ensureAllEventsConsumed called automatically
 ```
 
+## Assertion Style
+
+When the code under test returns an object, prefer asserting on the specific fields you care about instead of asserting that the whole object is equal to an expected object:
+
+```kotlin
+assertThat(result.status).isEqualTo(Status.Complete)
+assertThat(result.paymentMethodId).isEqualTo("pm_123")
+```
+
+Use whole-object equality only when exact object equality is the behavior under test.
+
+Field-level assertions usually produce better failure messages because the failing property is obvious.
+
+## One Case Per Test
+
+Keep each unit test focused on a single case. If you need to verify several related configurations, write one test per configuration instead of combining them into one test.
+
+```kotlin
+@Test
+fun `analytics event for saved card`() = runScenario(
+    paymentSelection = PaymentSelection.Saved(paymentMethod),
+) {
+    assertThat(fakeAnalytics.calls.awaitItem().event).isEqualTo("saved_card")
+}
+
+@Test
+fun `analytics event for new card`() = runScenario(
+    paymentSelection = PaymentSelection.New.Card(cardParams),
+) {
+    assertThat(fakeAnalytics.calls.awaitItem().event).isEqualTo("new_card")
+}
+```
+
+This keeps failures isolated. When multiple scenarios are combined into one test, execution stops at the first failing assertion and hides the rest of the failures from that run.
+
 ## Turbine Flow Testing
 
 Use Turbine's `.test { }` to assert Flow emissions:
@@ -147,6 +184,7 @@ fun `state updates when data changes`() = runScenario {
 | Flow testing | `flow.test { assertThat(awaitItem()).isEqualTo(x) }` |
 | Fake call tracking | `assertThat(fake.calls.awaitItem()).isEqualTo(call)` |
 | Fake validation | `ensureAllEventsConsumed()` — automatic in runScenario |
+| Test granularity | One scenario or configuration per `@Test` |
 | Compose UI tests | Invoke `compose-tests` skill |
 | Creating fakes | Invoke `create-fake` skill |
 | NetworkRule integration tests | Invoke `network-tests` skill |
@@ -237,3 +275,5 @@ fun `concurrent operations are serialized by mutex`() = runTest {
 - **Using `Thread.sleep` in tests** — use `testScheduler.advanceUntilIdle()` instead
 - **Testing stdlib behavior** — don't test that `HashMap.clear()` works
 - **Vacuous assertions** — assert the pre-condition exists before testing its removal
+- **Asserting on full objects by default** — prefer field-level assertions unless exact object equality is the contract being tested
+- **Combining multiple scenarios in one test** — split related configurations into separate `@Test`s so failures stay isolated

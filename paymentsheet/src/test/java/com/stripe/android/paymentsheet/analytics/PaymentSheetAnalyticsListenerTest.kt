@@ -2,12 +2,14 @@ package com.stripe.android.paymentsheet.analytics
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.testing.CleanupTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -18,6 +20,9 @@ import org.mockito.kotlin.verifyNoMoreInteractions
 import kotlin.test.Test
 
 class PaymentSheetAnalyticsListenerTest {
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @Test
     fun `cannotProperlyReturnFromLinkAndOtherLPMs should report event at maximum once`() = runScenario {
         analyticsListener.cannotProperlyReturnFromLinkAndOtherLPMs()
@@ -127,7 +132,7 @@ class PaymentSheetAnalyticsListenerTest {
             val eventReporter = mock<EventReporter>()
             val currentScreen = MutableStateFlow<PaymentSheetScreen>(PaymentSheetScreen.Loading)
             val currentPaymentMethodTypeProvider = { "card" }
-            val coroutineScope = CoroutineScope(coroutineContext + SupervisorJob())
+            val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(coroutineContext + SupervisorJob()))
             val analyticsListener = PaymentSheetAnalyticsListener(
                 savedStateHandle = SavedStateHandle(),
                 eventReporter = eventReporter,

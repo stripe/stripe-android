@@ -30,9 +30,11 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.AbsPaymentController
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
@@ -45,6 +47,9 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherViewModelTest {
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val savedStateHandle = SavedStateHandle()
     private val googlePayJsonFactory = GooglePayJsonFactory(
         googlePayConfig = GooglePayConfig(
@@ -273,7 +278,7 @@ class GooglePayLauncherViewModelTest {
         savedStateHandle = savedStateHandle,
         errorReporter = FakeErrorReporter(),
         workContext = testDispatcher,
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     private class FakePaymentController : AbsPaymentController() {
         override fun shouldHandlePaymentResult(

@@ -20,8 +20,8 @@ internal class OnrampErrorLogger @Inject constructor(
         return (this as? StripeCryptoOnrampError)?.developerMessage
             ?: (
                 "Inspect the returned failure error for details. Error type: ${javaClass.simpleName}.\n" +
-                "Message: ${this.message}\n" +
-                "Cause: ${this.cause?.message}"
-            )
+                    "Message: ${this.message}\n" +
+                    "Cause: ${this.cause?.message}"
+                )
     }
 }

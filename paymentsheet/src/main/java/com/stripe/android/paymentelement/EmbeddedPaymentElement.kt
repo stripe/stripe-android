@@ -8,7 +8,6 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.LifecycleOwner
@@ -16,9 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.checkout.Checkout
-import com.stripe.android.checkout.CheckoutConfigurationMerger
-import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.utils.StatusBarCompat
@@ -90,43 +86,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     }
 
     /**
-     * Call this method to configure [EmbeddedPaymentElement] or when the [Checkout] values you used to
-     *  configure [EmbeddedPaymentElement] change.
-     *
-     * This ensures the appropriate payment methods are displayed, collect the right fields, etc.
-     * - Note: Upon completion, [paymentOption] may become null if it's no longer available.
-     */
-    @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun configure(
-        checkout: Checkout,
-        configuration: Configuration,
-    ): ConfigureResult {
-        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
-        return configurationCoordinator.configure(
-            configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
-                .forCheckoutSession(checkout.internalState),
-            initializationMode = checkout.internalState.initializationMode,
-        )
-    }
-
-    /**
-     * A composable function that displays a vertical list of wallet payment methods that can be used for express
-     * checkout.
-     */
-    @WalletButtonsPreview
-    @Composable
-    fun WalletButtons() {
-        val walletButtonsContent by contentHelper.walletButtonsContent.collectAsState()
-
-        val walletButtonsViewClickHandler = remember {
-            WalletButtonsViewClickHandler { false }
-        }
-
-        walletButtonsContent?.Content(walletButtonsViewClickHandler)
-    }
-
-    /**
      * A composable function that displays payment methods.
      *
      * It can present a sheet to collect more details or display saved payment methods.
@@ -150,7 +109,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * Sets the current [paymentOption] to `null`.
      */
     fun clearPaymentOption() {
-        selectionHolder.set(null)
+        selectionHolder.setSelection(null)
     }
 
     /**

@@ -66,7 +66,7 @@ private fun Card(
     val imageRepository = LocalTapToAddImageRepository.current
 
     val state: MutableState<TapToAddImageRepository.CardArt?> = remember {
-       mutableStateOf(imageRepository?.get(cardBrand))
+        mutableStateOf(imageRepository?.get(cardBrand))
     }
 
     imageRepository?.let { repository ->
@@ -137,10 +137,12 @@ private fun BoxScope.CardNumber(
             fontWeight = FontWeight.W500,
             fontFamily = FontFamily.Monospace,
         ),
-        modifier = Modifier.padding(
-            horizontal = 20.dp,
-            vertical = 10.dp,
-        ).align(Alignment.BottomStart),
+        modifier = Modifier
+            .padding(
+                horizontal = 20.dp,
+                vertical = 10.dp,
+            )
+            .align(Alignment.BottomStart),
     )
 }
 

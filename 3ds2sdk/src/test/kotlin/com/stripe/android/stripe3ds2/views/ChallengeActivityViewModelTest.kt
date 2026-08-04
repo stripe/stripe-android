@@ -10,6 +10,7 @@ import com.stripe.android.stripe3ds2.transaction.ChallengeRequestResult
 import com.stripe.android.stripe3ds2.transaction.ChallengeRequestResultFixures
 import com.stripe.android.stripe3ds2.transaction.FakeTransactionTimer
 import com.stripe.android.stripe3ds2.transaction.TransactionTimer
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.cancel
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -20,6 +21,9 @@ import kotlin.test.Test
 class ChallengeActivityViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val actionHandler = object : ChallengeActionHandler {
         override suspend fun submit(action: ChallengeAction): ChallengeRequestResult {
@@ -69,6 +73,6 @@ class ChallengeActivityViewModelTest {
             actionHandler,
             transactionTimer,
             FakeErrorReporter(),
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

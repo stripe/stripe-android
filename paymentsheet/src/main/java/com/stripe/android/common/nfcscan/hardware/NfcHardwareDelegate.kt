@@ -7,11 +7,11 @@ import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import javax.inject.Inject
 
 internal interface NfcHardwareDelegate {
     fun isAvailable(): Boolean
@@ -23,9 +23,18 @@ internal interface NfcHardwareDelegate {
         activity: AppCompatActivity,
         onTagDiscovered: (Tag) -> Unit,
     )
+
+    companion object {
+        @VisibleForTesting
+        var override: NfcHardwareDelegate? = null
+
+        fun create(application: Application): NfcHardwareDelegate {
+            return override ?: DefaultNfcHardwareDelegate(application)
+        }
+    }
 }
 
-internal class DefaultNfcHardwareDelegate @Inject constructor(
+internal class DefaultNfcHardwareDelegate(
     application: Application
 ) : NfcHardwareDelegate {
     private val nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(application)

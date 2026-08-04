@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakePollingAnalyticsEventReporter
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -35,7 +36,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             timeLimit = timeLimit,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit)
     }
@@ -46,7 +47,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             timeLimit = timeLimit,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit)
 
@@ -65,7 +66,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
 
@@ -81,7 +82,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
 
@@ -99,7 +100,7 @@ class PollingViewModelTest {
         val viewModel = createPollingViewModel(
             poller = fakePoller,
             timeLimit = 10.seconds,
-        ).also { viewModelStoreRule.track(it) }
+        )
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
@@ -121,7 +122,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         advanceTimeBy(5.seconds + 1.milliseconds)
 
@@ -142,7 +143,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         advanceTimeBy(5.seconds + 1.milliseconds)
 
@@ -176,7 +177,7 @@ class PollingViewModelTest {
             timeLimit = timeLimit,
             timeProvider = timeProvider,
             savedStateHandle = savedStateHandle,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         val remainingTime = timeLimit - alreadyPassed
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(remainingTime)
@@ -190,7 +191,7 @@ class PollingViewModelTest {
             timeLimit = 5.minutes,
             poller = fakePoller,
             initialDelay = ZERO,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
@@ -202,10 +203,227 @@ class PollingViewModelTest {
     }
 
     @Test
+    fun `Reports analytics when polling times out`() = runTest(StandardTestDispatcher()) {
+        val fakePoller = FakeIntentStatusPoller().apply {
+            emitNextPollResult(StripeIntent.Status.RequiresAction)
+        }
+        val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+        createPollingViewModel(
+            poller = fakePoller,
+            timeLimit = 10.seconds,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+        )
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+        fakePoller.enqueueForcePollResult(StripeIntent.Status.RequiresAction)
+
+        advanceTimeBy(10.seconds + 1.milliseconds)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+        advanceTimeBy(3.seconds)
+
+        val call = pollingAnalyticsEventReporter.awaitCall()
+        assertThat(call).isEqualTo(
+            FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                paymentMethodType = "blik",
+                lastKnownStatus = "RequiresAction",
+                timeLimitSeconds = 10,
+            )
+        )
+    }
+
+    @Test
+    fun `Reports analytics exactly once when PayNow polling times out`() = runTest(StandardTestDispatcher()) {
+        val fakePoller = FakeIntentStatusPoller().apply {
+            emitNextPollResult(StripeIntent.Status.RequiresAction)
+        }
+        val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+        createPollingViewModel(
+            poller = fakePoller,
+            timeLimit = 10.seconds,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+            paymentMethodType = "paynow",
+        )
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+        fakePoller.enqueueForcePollResult(StripeIntent.Status.RequiresAction)
+
+        advanceTimeBy(10.seconds + 1.milliseconds)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+        advanceTimeBy(3.seconds)
+
+        assertThat(pollingAnalyticsEventReporter.awaitCall()).isEqualTo(
+            FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                paymentMethodType = "paynow",
+                lastKnownStatus = "RequiresAction",
+                timeLimitSeconds = 10,
+            )
+        )
+        pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Reports analytics exactly once when PromptPay polling times out`() = runTest(StandardTestDispatcher()) {
+        val fakePoller = FakeIntentStatusPoller().apply {
+            emitNextPollResult(StripeIntent.Status.RequiresAction)
+        }
+        val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+        createPollingViewModel(
+            poller = fakePoller,
+            timeLimit = 10.seconds,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+            paymentMethodType = "promptpay",
+        )
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+        fakePoller.enqueueForcePollResult(StripeIntent.Status.RequiresAction)
+
+        advanceTimeBy(10.seconds + 1.milliseconds)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+        advanceTimeBy(3.seconds)
+
+        assertThat(pollingAnalyticsEventReporter.awaitCall()).isEqualTo(
+            FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                paymentMethodType = "promptpay",
+                lastKnownStatus = "RequiresAction",
+                timeLimitSeconds = 10,
+            )
+        )
+        pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Does not report analytics when polling succeeds after timeout`() = runTest(StandardTestDispatcher()) {
+        val fakePoller = FakeIntentStatusPoller().apply {
+            emitNextPollResult(StripeIntent.Status.RequiresAction)
+        }
+        val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+        val viewModel = createPollingViewModel(
+            poller = fakePoller,
+            timeLimit = 10.seconds,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+        )
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+        fakePoller.enqueueForcePollResult(StripeIntent.Status.Succeeded)
+
+        advanceTimeBy(10.seconds + 1.milliseconds)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+        advanceTimeBy(3.seconds)
+
+        assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Success)
+        pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Canceling during the timeout grace window does not clobber state or report analytics`() =
+        // Uses the class-level testDispatcher (also bound to Dispatchers.Main via CoroutineTestRule)
+        // rather than an ad-hoc StandardTestDispatcher, so that advanceTimeBy reliably controls
+        // viewModelScope's delays and handleCancel() interleaves deterministically during the grace window.
+        runTest(testDispatcher) {
+            val fakePoller = FakeIntentStatusPoller().apply {
+                emitNextPollResult(StripeIntent.Status.RequiresAction)
+            }
+            val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+            val viewModel = createPollingViewModel(
+                poller = fakePoller,
+                timeLimit = 10.seconds,
+                pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+            )
+            assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+            // If the (buggy) delayed timeout job were allowed to complete, it would force-poll
+            // this result and report a timeout for what is actually a user cancellation.
+            fakePoller.enqueueForcePollResult(StripeIntent.Status.RequiresAction)
+
+            advanceTimeBy(10.seconds + 1.milliseconds)
+
+            // handleTimeLimitReached() stops the poller and enters its 3-second grace delay.
+            assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+            viewModel.handleCancel()
+            assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+            advanceTimeBy(3.seconds)
+
+            assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Canceled)
+            pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `Does not report a delayed timeout for a payment that already declined`() =
+        runTest(StandardTestDispatcher()) {
+            val fakePoller = FakeIntentStatusPoller()
+            val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+            val viewModel = createPollingViewModel(
+                timeLimit = 5.minutes,
+                poller = fakePoller,
+                initialDelay = ZERO,
+                pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+            )
+            assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+            // Anything that's not succeeded or requires_action is considered a failure, well
+            // before the 5 minute deadline.
+            fakePoller.emitNextPollResult(StripeIntent.Status.RequiresPaymentMethod)
+
+            assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Failed)
+            assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+            // Advance past the original deadline (plus the timeout handler's grace delay). If the
+            // pending timeout job weren't canceled, it would force-poll and report a timeout for
+            // this already-resolved decline.
+            advanceTimeBy(5.minutes + 3.seconds + 1.milliseconds)
+
+            assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Failed)
+            pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `Does not report a delayed timeout for a payment that already succeeded`() =
+        runTest(StandardTestDispatcher()) {
+            val fakePoller = FakeIntentStatusPoller()
+            val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+            val viewModel = createPollingViewModel(
+                timeLimit = 5.minutes,
+                poller = fakePoller,
+                initialDelay = ZERO,
+                pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+            )
+            assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+            fakePoller.emitNextPollResult(StripeIntent.Status.Succeeded)
+
+            // Unlike a Failed transition, a Succeeded transition doesn't explicitly stop the
+            // poller here (DefaultIntentStatusPoller stops itself once it observes a terminal
+            // status), so no second turbine item is expected.
+            assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Success)
+
+            advanceTimeBy(5.minutes + 3.seconds + 1.milliseconds)
+
+            assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Success)
+            pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+        }
+
+    @Test
     fun `QR code shown on start when QR code available`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
     }
@@ -214,7 +432,7 @@ class PollingViewModelTest {
     fun `QR code hidden on start when QR code not available`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = null,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
     }
@@ -223,7 +441,7 @@ class PollingViewModelTest {
     fun `QR code hidden on cancel`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         viewModel.handleCancel()
 
@@ -234,7 +452,7 @@ class PollingViewModelTest {
     fun `QR code hidden on hide QR code`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         viewModel.hideQrCode()
 
@@ -242,19 +460,18 @@ class PollingViewModelTest {
     }
 
     @Test
-    fun `QR code hidden when polling state is not active`() = runTest(testDispatcher) {
+    fun `QR code hidden when polling state is not active`() = runTest(StandardTestDispatcher()) {
         val fakePoller = FakeIntentStatusPoller()
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url",
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
         fakePoller.emitNextPollResult(StripeIntent.Status.Succeeded)
 
-        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Success)
         assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
     }
@@ -265,7 +482,7 @@ class PollingViewModelTest {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url",
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
 
@@ -278,27 +495,31 @@ class PollingViewModelTest {
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
         assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
     }
-}
 
-private fun createPollingViewModel(
-    timeLimit: Duration = 5.minutes,
-    initialDelay: Duration = 5.seconds,
-    poller: IntentStatusPoller = FakeIntentStatusPoller(),
-    timeProvider: TimeProvider = FakeTimeProvider(),
-    savedStateHandle: SavedStateHandle = SavedStateHandle(),
-    qrCodeUrl: String? = null,
-): PollingViewModel {
-    return PollingViewModel(
-        args = PollingViewModel.Args(
-            clientSecret = "secret",
-            timeLimit = timeLimit,
-            initialDelay = initialDelay,
-            ctaText = R.string.stripe_blik_confirm_payment,
-            stripeAccountId = null,
-            qrCodeUrl = qrCodeUrl,
-        ),
-        poller = poller,
-        timeProvider = timeProvider,
-        savedStateHandle = savedStateHandle,
-    )
+    private fun createPollingViewModel(
+        timeLimit: Duration = 5.minutes,
+        initialDelay: Duration = 5.seconds,
+        poller: IntentStatusPoller = FakeIntentStatusPoller(),
+        timeProvider: TimeProvider = FakeTimeProvider(),
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        qrCodeUrl: String? = null,
+        pollingAnalyticsEventReporter: FakePollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter(),
+        paymentMethodType: String = "blik",
+    ): PollingViewModel {
+        return PollingViewModel(
+            args = PollingViewModel.Args(
+                clientSecret = "secret",
+                timeLimit = timeLimit,
+                initialDelay = initialDelay,
+                ctaText = R.string.stripe_blik_confirm_payment,
+                stripeAccountId = null,
+                qrCodeUrl = qrCodeUrl,
+                paymentMethodType = paymentMethodType,
+            ),
+            poller = poller,
+            timeProvider = timeProvider,
+            savedStateHandle = savedStateHandle,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+        ).also { viewModelStoreRule.track(it) }
+    }
 }

@@ -1,3 +1,65 @@
+import groovy.xml.XmlSlurper
+
+def enforcedUnitTestLintIssueIds = [
+    'ComposeCleanupRuleUsageIssue',
+    'TestResourceCleanup',
+] as Set
+
 dependencies {
     lintChecks project(":lint")
+}
+
+afterEvaluate {
+    def unitTestLintTask = tasks.findByName('lintAnalyzeReleaseUnitTest')
+    def lintReleaseTask = tasks.findByName('lintRelease')
+
+    if (unitTestLintTask != null && lintReleaseTask != null) {
+        def reportFile = layout.buildDirectory.file(
+            'intermediates/unit_test_lint_partial_results/release/lintAnalyzeReleaseUnitTest/out/lint-definite.xml'
+        )
+        def testSourceDir = project.layout.projectDirectory.dir('src/test/java').asFile.absolutePath
+        def checkTask = tasks.register('checkReleaseUnitTestCustomLint') {
+            dependsOn unitTestLintTask
+            // Use files() (not file()) so a missing lint-definite.xml — which lint only
+            // emits when there are definite incidents — is tolerated instead of failing
+            // task input validation. file().optional() does not help here because the
+            // provider always resolves to a value (a path), so Gradle still validates
+            // that path exists.
+            inputs.files(reportFile)
+
+            doLast {
+                def file = reportFile.get().asFile
+
+                if (!file.exists() || file.length() == 0L) {
+                    return
+                }
+
+                def incidents = new XmlSlurper(false, false)
+                    .parse(file)
+                    .incident
+                    .findAll { incident ->
+                        incident.@id.text() in enforcedUnitTestLintIssueIds
+                    }
+
+                if (!incidents.isEmpty()) {
+                    def failures = incidents.collect { incident ->
+                        def location = incident.location[0]
+                        def filePath = location.@file.text()
+                            .replaceFirst('^\\$\\{[^}]+}/', "${testSourceDir}/")
+                        def line = location.@line.text()
+                        def message = incident.@message.text()
+
+                        "${filePath}:${line}: ${message}"
+                    }
+
+                    throw new GradleException(
+                        "Unit-test lint found enforced custom lint violations:\n" +
+                            failures.join('\n')
+                    )
+                }
+            }
+        }
+
+        lintReleaseTask.dependsOn(checkTask)
+    }
 }

@@ -31,8 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.checkout.CheckoutSession
-import com.stripe.android.checkout.PaymentElement
+import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
@@ -73,6 +73,9 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
+                                if (session.isExpressCheckoutElementAvailable) {
+                                    presenter.expressCheckoutElement().Content()
+                                }
                                 paymentElement.PaymentOptionsContent()
                             }
                         }
@@ -80,7 +83,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                 },
                 bottomBarContent = {
                     val configured = status as? CheckoutControllerExampleViewModel.Status.Configured
-//                    PaymentOptionRow(configured?.paymentOption)
+                    PaymentOptionRow(configured?.checkoutSession?.paymentOptionDisplayData)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = { paymentElement.presentPaymentOptions() },
@@ -130,7 +133,7 @@ private fun ErrorContent(message: String) {
 }
 
 @Composable
-private fun PaymentOptionRow(paymentOption: PaymentElement.PaymentOptionDisplayData?) {
+private fun PaymentOptionRow(paymentOption: PaymentOptionDisplayData?) {
     if (paymentOption != null) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -157,7 +160,7 @@ private fun PaymentOptionRow(paymentOption: PaymentElement.PaymentOptionDisplayD
 }
 
 @Composable
-private fun LineItemsSection(session: CheckoutSession) {
+private fun LineItemsSection(session: Session) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = "Line Items", style = MaterialTheme.typography.h6)
         Spacer(modifier = Modifier.height(8.dp))
@@ -181,7 +184,7 @@ private fun LineItemsSection(session: CheckoutSession) {
 }
 
 @Composable
-private fun TotalSummarySection(session: CheckoutSession) {
+private fun TotalSummarySection(session: Session) {
     val summary = session.totalSummary ?: return
 
     Column(modifier = Modifier.fillMaxWidth()) {

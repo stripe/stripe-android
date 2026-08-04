@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
 import android.content.Intent
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -15,6 +16,7 @@ internal sealed interface EmbeddedActivityResult : Parcelable {
     @Parcelize
     data class Complete(
         val selection: PaymentSelection?,
+        val previousNewSelections: Bundle,
         val hasBeenConfirmed: Boolean,
         val customerState: CustomerState?,
         val shouldInvokeSelectionCallback: Boolean,

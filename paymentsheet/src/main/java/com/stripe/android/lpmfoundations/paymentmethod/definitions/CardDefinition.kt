@@ -211,7 +211,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 tapToAddHelper = arguments.tapToAddHelper,
                 paymentMethodMetadata = metadata,
             )
-        } else if (metadata.isNfcScanningEnabled) {
+        } else if (arguments.isNfcScanningAvailable?.get(metadata) == true) {
             NfcScanningAction(paymentMethodMetadata = metadata)
         } else {
             CardScanAction(
@@ -241,6 +241,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,
                     arguments.shippingValues,
+                    arguments.requiresBillingAddressForAutomaticTax,
                 )
             )
         }
@@ -273,6 +274,7 @@ private fun cardBillingElements(
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
+    requiresBillingAddressForAutomaticTax: Boolean,
 ): List<FormElement> {
     val sameAsShippingElement =
         shippingValues?.get(IdentifierSpec.SameAsShipping)
@@ -291,6 +293,7 @@ private fun cardBillingElements(
         shippingValuesMap = shippingValues,
         collectionConfiguration = collectionConfiguration,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
     )
 
     val title = when {

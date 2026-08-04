@@ -6,16 +6,22 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CleanupTestRule
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class MandateHandlerTest {
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @Test
     fun `updateMandateText ignores showAbove if in vertical mode`() = runScenario(
         isVerticalMode = true,
@@ -136,7 +142,7 @@ class MandateHandlerTest {
             val selection = MutableStateFlow<PaymentSelection?>(null)
             Scenario(
                 handler = MandateHandler(
-                    coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+                    coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
                     selection = selection,
                     merchantDisplayName = "Example, Inc.",
                     isVerticalModeProvider = { isVerticalMode },

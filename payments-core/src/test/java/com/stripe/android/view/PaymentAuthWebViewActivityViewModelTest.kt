@@ -11,12 +11,17 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
+import com.stripe.android.testing.ViewModelStoreTestRule
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewActivityViewModelTest {
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val analyticsRequests = mutableListOf<AnalyticsRequest>()
     private val analyticsRequestExecutor = AnalyticsRequestExecutor { analyticsRequests.add(it) }
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -143,7 +148,7 @@ class PaymentAuthWebViewActivityViewModelTest {
             args,
             analyticsRequestExecutor,
             analyticsRequestFactory
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private companion object {

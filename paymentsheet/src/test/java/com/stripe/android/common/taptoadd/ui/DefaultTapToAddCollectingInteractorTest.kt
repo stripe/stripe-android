@@ -15,14 +15,23 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 internal class DefaultTapToAddCollectingInteractorTest {
+    private val cleanupRule = CleanupTestRule(DefaultTapToAddCollectingInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(cleanupRule)
+
     @Test
     fun `create launches collection with payment method metadata`() {
         val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true)
@@ -177,7 +186,7 @@ internal class DefaultTapToAddCollectingInteractorTest {
                     onTapToAddNotSupported = { onTapToAddNotSupported.add(it) },
                     onCanceled = { onCanceled.add(Unit) },
                     logger = FakeLogger(),
-                ),
+                ).also { cleanupRule.track(it) },
                 onCollected = onCollected,
                 onFailedCollection = onFailedCollection,
                 onTapToAddNotSupported = onTapToAddNotSupported,

@@ -6,10 +6,12 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 internal interface EmbeddedConfigurationCoordinator {
@@ -27,6 +29,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHelper: EmbeddedStateHelper,
     @ViewModelScope private val viewModelScope: CoroutineScope,
+    @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
 ) : EmbeddedConfigurationCoordinator {
     override suspend fun configure(
         configuration: EmbeddedPaymentElement.Configuration,
@@ -69,6 +72,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
                 paymentMethodMetadata = state.paymentMethodMetadata,
                 selection = newPaymentSelection,
                 configuration = configuration,
+                statusBarColor = statusBarColor,
             ),
             customer = state.customer,
             previousNewSelections = Bundle(),

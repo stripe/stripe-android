@@ -24,11 +24,13 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.SetupIntentFactory
@@ -37,10 +39,10 @@ import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 internal class CustomerSheetScreenshotTest {
-    @get:Rule
-    val paparazzi = PaparazziRule(
+    private val paparazzi = PaparazziRule(
         SystemAppearance.entries,
         listOf(FontSize.DefaultFont),
         listOf(PaymentSheetAppearance.DefaultAppearance),
@@ -49,8 +51,7 @@ internal class CustomerSheetScreenshotTest {
             .fillMaxWidth(),
     )
 
-    @get:Rule
-    val paparazziWithEveryAppearance = PaparazziRule(
+    private val paparazziWithEveryAppearance = PaparazziRule(
         SystemAppearance.entries,
         FontSize.entries,
         PaymentSheetAppearance.entries,
@@ -59,8 +60,16 @@ internal class CustomerSheetScreenshotTest {
             .fillMaxWidth(),
     )
 
+    private val coroutineRule = CoroutineTestRule()
+
+    private val closeInteractorRule = CleanupTestRule(UpdatePaymentMethodInteractor::close)
+
     @get:Rule
-    val coroutineRule = CoroutineTestRule()
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(closeInteractorRule)
+        .around(paparazzi)
+        .around(paparazziWithEveryAppearance)
+        .around(coroutineRule)
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
@@ -393,7 +402,7 @@ internal class CustomerSheetScreenshotTest {
                 removeMessage = null,
                 onUpdateSuccess = {},
                 autocompleteAddressInteractorFactory = null,
-            ),
+            ).also { closeInteractorRule.track(it) },
             isLiveMode = true,
         )
     }

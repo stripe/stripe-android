@@ -210,21 +210,21 @@ internal class DefaultCreateLinkStateTest {
     }
 
     private val customerWithEmail = ElementsSession.Customer(
-            paymentMethods = emptyList(),
-            defaultPaymentMethod = null,
-            email = "customer@example.com",
-            session = ElementsSession.Customer.Session(
-                id = "cuss_123",
-                liveMode = false,
-                apiKey = "ek_test_123",
-                apiKeyExpiry = 999999999,
-                customerId = "cus_123",
-                components = ElementsSession.Customer.Components(
-                    mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                )
-            ),
-        )
+        paymentMethods = emptyList(),
+        defaultPaymentMethod = null,
+        email = "customer@example.com",
+        session = ElementsSession.Customer.Session(
+            id = "cuss_123",
+            liveMode = false,
+            apiKey = "ek_test_123",
+            apiKeyExpiry = 999999999,
+            customerId = "cus_123",
+            components = ElementsSession.Customer.Components(
+                mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+            )
+        ),
+    )
 
     private class FakeCardFundingFilterFactory : CardFundingFilter.Factory<List<PaymentSheet.CardFundingType>> {
         var invokedWith: List<PaymentSheet.CardFundingType>? = null

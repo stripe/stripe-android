@@ -7,10 +7,11 @@ import com.stripe.android.checkout.ece.ExpressCheckoutElementContent
 import com.stripe.android.checkout.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ExpressCheckoutElement internal constructor(
+class ExpressCheckoutElement @Inject internal constructor(
     private val interactor: ExpressCheckoutElementInteractor,
 ) {
 

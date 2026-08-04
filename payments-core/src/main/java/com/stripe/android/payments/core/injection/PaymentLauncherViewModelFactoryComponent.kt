@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.polling.PollingAnalyticsModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -19,7 +20,8 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
-        CoreCommonModule::class
+        CoreCommonModule::class,
+        PollingAnalyticsModule::class,
     ]
 )
 internal interface PaymentLauncherViewModelFactoryComponent {

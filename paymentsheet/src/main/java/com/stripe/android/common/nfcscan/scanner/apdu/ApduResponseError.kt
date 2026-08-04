@@ -7,6 +7,7 @@ internal sealed class ApduResponseError(
     class TooShort : ApduResponseError("APDU response is too short! Needs at least two bytes!")
 
     data class Command(
+        val apduCommand: ApduCommand<*>,
         val sw1: Byte,
         val sw2: Byte,
     ) : ApduResponseError("APDU error: SW1=$sw1, SW2=$sw2")

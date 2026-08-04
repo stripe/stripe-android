@@ -43,6 +43,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -78,6 +79,9 @@ internal class CardNumberEditTextTest {
 
     @get:Rule
     val testActivityRule = createTestActivityRule<TestActivity>()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private var completionCallbackInvocations = 0
     private val completionCallback: () -> Unit = { completionCallbackInvocations++ }
@@ -1075,7 +1079,7 @@ internal class CardNumberEditTextTest {
             paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
             stripeRepository = repository,
             dispatcher = dispatcher
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         val store = ViewModelStore().apply {
             val className = CardWidgetViewModel::class.java.canonicalName

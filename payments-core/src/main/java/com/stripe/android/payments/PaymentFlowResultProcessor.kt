@@ -17,6 +17,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.shouldRefresh
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.polling.PollingAnalyticsEventReporter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -35,6 +36,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
+    private val pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
 ) {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
@@ -242,18 +244,25 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     ): Result<T> {
         var timeOfLastRequest = initialRetrieveIntentStartTime
         var stripeIntentResult: Result<T>? = null
+        var lastObservedStatus: StripeIntent.Status? = null
+
+        suspend fun retrieveAndTrackStatus(): Result<T> {
+            val result = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+            lastObservedStatus = result.getOrNull()?.status ?: lastObservedStatus
+            return result
+        }
 
         val timeRemaining = getPollingDurationForPaymentMethod(originalIntent) -
             (System.currentTimeMillis() - initialRetrieveIntentStartTime)
 
         withTimeoutOrNull(timeRemaining) {
-            stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+            stripeIntentResult = retrieveAndTrackStatus()
             while (shouldRetry(stripeIntentResult)) {
                 // We want to delay a maximum of 1s between requests, including the time the request took.
                 // e.g. if the previous request took 250ms, the delay will be 750ms
                 delay(POLLING_DELAY - (System.currentTimeMillis() - timeOfLastRequest))
                 timeOfLastRequest = System.currentTimeMillis()
-                stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+                stripeIntentResult = retrieveAndTrackStatus()
             }
         }
 
@@ -261,7 +270,15 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // request took longer than the polling duration for the payment method. Ensures we always call retrieve
         // at least once after the polling duration
         if (shouldRetry(stripeIntentResult) || stripeIntentResult == null) {
-            stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+            stripeIntentResult = retrieveAndTrackStatus()
+
+            if (shouldRetry(stripeIntentResult)) {
+                pollingAnalyticsEventReporter.onPollingTimedOut(
+                    paymentMethodType = originalIntent.paymentMethod?.type?.code ?: "unknown",
+                    lastKnownStatus = lastObservedStatus?.name,
+                    timeLimitSeconds = getPollingDurationForPaymentMethod(originalIntent) / 1000,
+                )
+            }
         }
 
         return stripeIntentResult as Result<T>
@@ -312,13 +329,15 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     stripeRepository: StripeRepository,
     logger: Logger,
-    @IOContext workContext: CoroutineContext
+    @IOContext workContext: CoroutineContext,
+    pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
     context,
     publishableKeyProvider,
     stripeRepository,
     logger,
-    workContext
+    workContext,
+    pollingAnalyticsEventReporter,
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -376,13 +395,15 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     stripeRepository: StripeRepository,
     logger: Logger,
-    @IOContext workContext: CoroutineContext
+    @IOContext workContext: CoroutineContext,
+    pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
 ) : PaymentFlowResultProcessor<SetupIntent, SetupIntentResult>(
     context,
     publishableKeyProvider,
     stripeRepository,
     logger,
-    workContext
+    workContext,
+    pollingAnalyticsEventReporter,
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,

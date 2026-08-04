@@ -76,12 +76,13 @@ internal class FakePaymentElementLoader(
                 ?: PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent),
             paymentMethodLayout = when (integrationConfiguration) {
                 is PaymentElementLoader.Configuration.CryptoOnramp,
+                is PaymentElementLoader.Configuration.StandaloneLink,
                 is PaymentElementLoader.Configuration.Embedded -> PaymentSheet.PaymentMethodLayout.Vertical
                 is PaymentElementLoader.Configuration.PaymentSheet ->
                     integrationConfiguration.configuration.paymentMethodLayout
             }
         )
-        }
+    }
 
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,

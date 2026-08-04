@@ -36,6 +36,7 @@ import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.utils.TestIntegrityRequestManager
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -60,6 +61,9 @@ class FinancialConnectionsSheetViewModelTest {
 
     @get:Rule
     val rule: TestRule = CoroutineTestRule(testDispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheetConfiguration(
@@ -1039,6 +1043,6 @@ class FinancialConnectionsSheetViewModelTest {
             integrityVerdictManager = mock(),
             logger = Logger.noop(),
             ioDispatcher = testDispatcher,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

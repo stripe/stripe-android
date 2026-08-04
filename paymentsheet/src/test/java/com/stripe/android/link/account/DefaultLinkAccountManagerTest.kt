@@ -961,7 +961,7 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             override suspend fun createLinkAccountSession(
                 consumerSessionClientSecret: String,
-                stripeIntent: StripeIntent,
+                intentToken: String?,
                 linkMode: LinkMode?,
             ): Result<LinkAccountSession> {
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
@@ -996,6 +996,63 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.createLinkAccountSession()
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    @Test
+    fun `createLinkAccountSession passes intent client secret as intent token`() = runSuspendTest {
+        var capturedIntentToken: String? = null
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun createLinkAccountSession(
+                consumerSessionClientSecret: String,
+                intentToken: String?,
+                linkMode: LinkMode?,
+            ): Result<LinkAccountSession> {
+                capturedIntentToken = intentToken
+                return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
+            }
+        }
+        val accountManager = accountManager(
+            stripeIntent = PaymentIntentFactory.create(clientSecret = "pi_123_secret_abc"),
+            linkRepository = linkRepository,
+        )
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        accountManager.createLinkAccountSession()
+
+        assertThat(capturedIntentToken).isEqualTo("pi_123_secret_abc")
+    }
+
+    @Test
+    fun `createLinkAccountSession falls back to elements session ID when intent client secret is null`() =
+        runSuspendTest {
+        var capturedIntentToken: String? = null
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun createLinkAccountSession(
+                consumerSessionClientSecret: String,
+                intentToken: String?,
+                linkMode: LinkMode?,
+            ): Result<LinkAccountSession> {
+                capturedIntentToken = intentToken
+                return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
+            }
+        }
+        val accountManager = accountManager(
+            stripeIntent = PaymentIntentFactory.create(clientSecret = null),
+            linkRepository = linkRepository,
+        )
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        accountManager.createLinkAccountSession()
+
+        assertThat(capturedIntentToken).isEqualTo(TestFactory.LINK_CONFIGURATION.elementsSessionId)
     }
 
     @Test

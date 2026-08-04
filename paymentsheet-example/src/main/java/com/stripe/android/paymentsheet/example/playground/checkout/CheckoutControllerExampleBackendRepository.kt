@@ -25,6 +25,7 @@ internal class CheckoutControllerExampleBackendRepository(
             .initialization("checkout_session")
             .useCheckoutSession(true)
             .mode("payment")
+            .customerEmail("email@example.com")
             .currency("usd")
             .amount(5000)
             .customer("new")

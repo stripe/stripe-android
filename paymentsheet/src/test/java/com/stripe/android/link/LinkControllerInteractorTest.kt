@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeActivityResultLauncher
@@ -33,7 +34,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
-import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,12 +69,8 @@ class LinkControllerInteractorTest {
 
     // Each created interactor owns a scope with a perpetual collector in its init; track and cancel
     // them so the scopes don't outlive the test.
-    private val trackedScopes = mutableListOf<CoroutineScope>()
-
-    @After
-    fun cancelTrackedScopes() {
-        trackedScopes.forEach { it.cancel() }
-    }
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `Initial state is correct`() = runTest {
@@ -478,7 +474,7 @@ class LinkControllerInteractorTest {
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = null,
                     sharePaymentDetailsImmediatelyAfterCreation = false,
-                    shouldShowSecondaryCta = false,
+                    canContinueWithoutLink = false,
                 )
             )
 
@@ -561,7 +557,7 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `onPresentPaymentMethods() with BankAccount payment method requires name collection`() = runTest {
+    fun `onPresentPaymentMethods() with collectName=true forces name collection to Always`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
 
@@ -569,16 +565,19 @@ class LinkControllerInteractorTest {
         interactor.presentPaymentMethods(
             launcher = launcher,
             email = null,
-            paymentMethodTypes = listOf(LinkController.PaymentMethodType.BankAccount)
+            paymentMethodTypes = listOf(LinkController.PaymentMethodType.BankAccount),
+            collectName = true,
         )
 
-        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
         assertThat(collectionConfig.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
     }
 
     @Test
-    fun `onPresentPaymentMethods() with Generic payment method uses automatic name collection`() = runTest {
+    fun `onPresentPaymentMethods() without collectName uses configured billingDetailsCollectionConfiguration`() =
+        runTest {
         val interactor = createInteractor()
         configure(interactor)
 
@@ -589,7 +588,49 @@ class LinkControllerInteractorTest {
             paymentMethodTypes = listOf(LinkController.PaymentMethodType.Generic)
         )
 
-        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
+        assertThat(collectionConfig.name)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
+    }
+
+    @Test
+    fun `onPresentPaymentMethods() respects merchant-configured name collection`() = runTest {
+        val interactor = createInteractor()
+        configure(
+            interactor,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            ),
+        )
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.presentPaymentMethods(
+            launcher = launcher,
+            email = null,
+            paymentMethodTypes = listOf(LinkController.PaymentMethodType.Card),
+        )
+
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
+        assertThat(collectionConfig.name)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+    }
+
+    @Test
+    fun `onPresentPaymentMethods() with null paymentMethodTypes uses configured default`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.presentPaymentMethods(
+            launcher = launcher,
+            email = null,
+            paymentMethodTypes = null,
+        )
+
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
         assertThat(collectionConfig.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
     }
@@ -1035,7 +1076,7 @@ class LinkControllerInteractorTest {
     }
 
     private fun createInteractor(): LinkControllerInteractor {
-        val coroutineScope = CoroutineScope(dispatcher).also { trackedScopes.add(it) }
+        val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher))
         return LinkControllerInteractor(
             application = application,
             logger = logger,
@@ -1364,6 +1405,30 @@ class LinkControllerInteractorTest {
             assertThat((result as LinkController.PresentResult.Completed).paymentMethod)
                 .isEqualTo(expectedPaymentMethod)
         }
+    }
+
+    @Test
+    fun `onLinkActivityResult() with present flow Completed stores createdPaymentMethod in state`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        interactor.presentFull(FakeActivityResultLauncher())
+
+        val expectedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        linkAccountManager.createPaymentMethodResult = Result.success(expectedPaymentMethod)
+
+        interactor.presentResultFlow.test {
+            interactor.onLinkActivityResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                    selectedPayment = createTestPaymentMethod(),
+                    shippingAddress = null,
+                )
+            )
+            awaitItem() // wait for PresentResult
+        }
+
+        assertThat(interactor.lastCreatedPaymentMethod).isEqualTo(expectedPaymentMethod)
     }
 
     @Test

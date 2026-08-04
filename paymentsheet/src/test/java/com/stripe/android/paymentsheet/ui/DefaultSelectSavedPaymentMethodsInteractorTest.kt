@@ -12,14 +12,23 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.mockito.kotlin.mock
 
 class DefaultSelectSavedPaymentMethodsInteractorTest {
+
+    private val cleanupRule = CleanupTestRule(DefaultSelectSavedPaymentMethodsInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(cleanupRule)
 
     @Test
     fun initialState_isCorrect() {
@@ -534,6 +543,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             isLiveMode = true,
             linkBrand = LinkBrand.Link,
         )
+        cleanupRule.track(interactor)
 
         TestParams(
             interactor = interactor,
@@ -546,7 +556,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 testBlock()
             }
             ensureAllEventsConsumed()
-            interactor.close()
         }
     }
 

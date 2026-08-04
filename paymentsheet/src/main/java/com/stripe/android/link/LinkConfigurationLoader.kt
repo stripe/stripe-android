@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkMetadata
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
@@ -17,18 +18,28 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val linkGateFactory: LinkGate.Factory,
     private val savedStateHandle: SavedStateHandle,
+    private val requestSurface: RequestSurface,
 ) : LinkConfigurationLoader {
     private val tag = "LinkConfigurationLoader"
 
     override suspend fun load(configuration: LinkController.Configuration.State): Result<LinkMetadata> {
-        val initializationMode = if (configuration.setupIntentClientSecret != null) {
-            PaymentElementLoader.InitializationMode.SetupIntent(configuration.setupIntentClientSecret)
-        } else {
-            PaymentElementLoader.InitializationMode.CryptoOnramp
+        val (initializationMode, integrationConfiguration) = when (requestSurface) {
+            RequestSurface.CryptoOnramp -> Pair(
+                PaymentElementLoader.InitializationMode.CryptoOnramp(
+                    paymentMethodTypes = configuration.paymentMethodTypes,
+                ),
+                PaymentElementLoader.Configuration.CryptoOnramp(configuration),
+            )
+            else -> Pair(
+                PaymentElementLoader.InitializationMode.StandaloneLink(
+                    paymentMethodTypes = configuration.paymentMethodTypes,
+                ),
+                PaymentElementLoader.Configuration.StandaloneLink(configuration),
+            )
         }
         return paymentElementLoader.load(
             initializationMode = initializationMode,
-            integrationConfiguration = PaymentElementLoader.Configuration.CryptoOnramp(configuration),
+            integrationConfiguration = integrationConfiguration,
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = savedStateHandle.contains(
                     LinkControllerInteractor.LINK_CONFIGURED_KEY

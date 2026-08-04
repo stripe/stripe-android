@@ -26,18 +26,24 @@ import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RadarOptionsFactory
 import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import kotlin.coroutines.CoroutineContext
 
 internal class AttestationConfirmationDefinitionTest {
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `'key' should be 'Attestation'`() {
@@ -617,7 +623,7 @@ internal class AttestationConfirmationDefinitionTest {
     private fun createAttestationConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
-        coroutineScope: CoroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+        coroutineScope: CoroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         workContext: CoroutineContext = UnconfinedTestDispatcher(),
         publishableKey: String = launcherArgs.publishableKey,
         productUsage: Set<String> = launcherArgs.productUsage,

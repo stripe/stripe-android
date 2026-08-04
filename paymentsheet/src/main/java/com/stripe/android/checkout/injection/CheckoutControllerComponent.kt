@@ -3,11 +3,17 @@
 package com.stripe.android.checkout.injection
 
 import android.app.Application
+import android.content.Context
+import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.checkout.ece.DefaultAvailableExpressButtonTypesFactory
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
@@ -31,21 +37,24 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
@@ -69,6 +78,7 @@ import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -76,7 +86,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import java.util.UUID
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -85,6 +95,7 @@ import javax.inject.Singleton
     modules = [
         CheckoutControllerModule::class,
         CheckoutModule::class,
+        ExtendedPaymentElementConfirmationModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         ElementsSessionClientParamsModule::class,
@@ -110,13 +121,14 @@ internal interface CheckoutControllerComponent {
         fun create(
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
         ): CheckoutControllerComponent
     }
 }
 
 @Suppress("TooManyFunctions")
-@Module
+@Module(subcomponents = [CheckoutPresenterSubcomponent::class])
 internal interface CheckoutControllerModule {
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
@@ -182,17 +194,20 @@ internal interface CheckoutControllerModule {
     @Binds
     fun bindsEmbeddedSelectionChooser(impl: DefaultEmbeddedSelectionChooser): EmbeddedSelectionChooser
 
+    @Binds
+    fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
+
+    @Binds
+    fun bindsCheckoutPaymentOptionDisplayDataFactory(
+        impl: DefaultCheckoutPaymentOptionDisplayDataFactory
+    ): CheckoutPaymentOptionDisplayDataFactory
+
+    @Binds
+    fun bindsAvailableExpressButtonTypesFactory(
+        impl: DefaultAvailableExpressButtonTypesFactory
+    ): AvailableExpressButtonTypesFactory
+
     companion object {
-        private const val CALLBACK_IDENTIFIER_KEY = "CheckoutController_CallbackIdentifier"
-
-        @Provides
-        @Singleton
-        @PaymentElementCallbackIdentifier
-        fun providePaymentElementCallbackIdentifier(savedStateHandle: SavedStateHandle): String {
-            return savedStateHandle.get<String>(CALLBACK_IDENTIFIER_KEY)
-                ?: UUID.randomUUID().toString().also { savedStateHandle[CALLBACK_IDENTIFIER_KEY] = it }
-        }
-
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
@@ -209,6 +224,11 @@ internal interface CheckoutControllerModule {
         @Provides
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
+        }
+
+        @Provides
+        fun provideResources(context: Context): Resources {
+            return context.resources
         }
 
         @Provides
@@ -235,12 +255,6 @@ internal interface CheckoutControllerModule {
         }
 
         @Provides
-        @Singleton
-        fun provideCvcRecollectionHandler(): CvcRecollectionHandler {
-            return CvcRecollectionHandlerImpl()
-        }
-
-        @Provides
         fun providePaymentMethodMetadata(
             stateHolder: CheckoutControllerStateHolder,
         ): PaymentMethodMetadata? {
@@ -253,6 +267,40 @@ internal interface CheckoutControllerModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
+
+        @Provides
+        @Singleton
+        fun provideConfirmationHandler(
+            confirmationHandlerFactory: ConfirmationHandler.Factory,
+            @ViewModelScope coroutineScope: CoroutineScope,
+        ): ConfirmationHandler {
+            return confirmationHandlerFactory.create(coroutineScope)
+        }
+
+        @Provides
+        @Singleton
+        fun provideCustomerStateHolder(
+            savedStateHandle: SavedStateHandle,
+            selectionHolder: EmbeddedSelectionHolder,
+            paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>,
+        ): CustomerStateHolder {
+            val customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow {
+                it?.customerMetadata
+            }
+            return DefaultCustomerStateHolder(
+                savedStateHandle = savedStateHandle,
+                selection = selectionHolder.selection,
+                customerMetadata = customerMetadata,
+                paymentMethodMetadataFlow = paymentMethodMetadataFlow,
+            )
+        }
+
+        @Provides
+        fun providePaymentMethodMetadataFlow(
+            stateHolder: CheckoutControllerStateHolder,
+        ): StateFlow<PaymentMethodMetadata?> {
+            return stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata }
         }
     }
 }

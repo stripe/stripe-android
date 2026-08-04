@@ -26,26 +26,21 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.CheckoutInstances
-import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.CheckoutStateFactory
-import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -55,9 +50,11 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
@@ -69,7 +66,7 @@ import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -82,20 +79,20 @@ import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
 import kotlin.test.BeforeTest
 
-@OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentOptionsActivityTest {
 
     private val composeTestRule = createEmptyComposeRule()
     private val networkRule = NetworkRule()
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
         .around(InstantTaskExecutorRule())
+        .around(coroutineScopeCleanupRule)
         .around(composeTestRule)
         .around(networkRule)
-        .around(CheckoutInstancesTestRule())
         .around(RetryRule(3))
 
     @get:Rule
@@ -475,41 +472,6 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `onDestroy clears checkout integration launched flag`() {
-        val checkout = CheckoutStateFactory.createCheckout(context)
-        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
-
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    integrationMetadata = IntegrationMetadata.CheckoutSession(
-                        id = "cs_test",
-                        instancesKey = CheckoutStateFactory.DEFAULT_KEY,
-                    ),
-                ),
-            ),
-        )
-
-        runActivityScenario(args) {
-            it.onActivity {
-                pressBack()
-            }
-            composeTestRule.waitForIdle()
-            idleLooper()
-        }
-
-        // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-
-        // After the activity finishes, the integration launched flag should be cleared.
-        // If it wasn't cleared, this would return a failure with "payment flow is presented" message.
-        val result = runBlocking { checkout.applyPromotionCode("code") }
-        assertThat(result.isSuccess).isTrue()
-    }
-
-    @Test
     fun `promotion message is displayed when selecting klarna from saved PMs screen`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = PaymentMethodFixtures.createCards(1),
@@ -569,12 +531,15 @@ internal class PaymentOptionsActivityTest {
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
-                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
+                stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )
         }.also { viewModelStoreRule.track(it) }
 

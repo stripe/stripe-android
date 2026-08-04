@@ -3,14 +3,23 @@ package com.stripe.android.common.taptoadd.ui
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 internal class DefaultTapToAddDelayInteractorTest {
+    private val cleanupRule = CleanupTestRule(DefaultTapToAddDelayInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(cleanupRule)
+
     @Test
     fun `card brand and last4 are set from payment method`() = runTest {
         val paymentMethod = PaymentMethodFactory.card()
@@ -24,7 +33,7 @@ internal class DefaultTapToAddDelayInteractorTest {
             coroutineContext = coroutineContext,
             paymentMethod = paymentMethod,
             onShown = {},
-        )
+        ).also { cleanupRule.track(it) }
 
         assertThat(interactor.cardBrand).isEqualTo(CardBrand.MasterCard)
         assertThat(interactor.last4).isEqualTo("1234")
@@ -39,7 +48,7 @@ internal class DefaultTapToAddDelayInteractorTest {
             coroutineContext = coroutineContext,
             paymentMethod = paymentMethod,
             onShown = { onShownCalls.add(Unit) },
-        )
+        ).also { cleanupRule.track(it) }
 
         advanceTimeBy(1000L)
         runCurrent()
@@ -56,7 +65,7 @@ internal class DefaultTapToAddDelayInteractorTest {
             coroutineContext = coroutineContext,
             paymentMethod = paymentMethod,
             onShown = { onShownCalls.add(Unit) },
-        )
+        ).also { cleanupRule.track(it) }
         interactor.close()
         advanceTimeBy(1000L)
         runCurrent()

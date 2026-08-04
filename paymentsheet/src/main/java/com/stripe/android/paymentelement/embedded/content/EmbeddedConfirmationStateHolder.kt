@@ -42,6 +42,7 @@ internal class EmbeddedConfirmationStateHolder @Inject constructor(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val selection: PaymentSelection?,
         val configuration: EmbeddedPaymentElement.Configuration,
+        val statusBarColor: Int?,
     ) : Parcelable
 
     companion object {

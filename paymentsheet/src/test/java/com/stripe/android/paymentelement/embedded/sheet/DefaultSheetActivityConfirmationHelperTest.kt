@@ -9,11 +9,13 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
@@ -44,7 +46,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
         onClickDelegate.set { }
         onClickDelegate.clear()
 
-        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         confirmationHelper.confirm()
 
         assertThat(confirmationHandler.startTurbine.awaitItem()).isNotNull()
@@ -54,7 +56,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
 
     @Test
     fun `confirm starts confirmation with correct option when selection is not null`() = testScenario {
-        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         confirmationHelper.confirm()
 
@@ -76,17 +78,21 @@ internal class DefaultSheetActivityConfirmationHelperTest {
     fun `when formSheetAction=continue confirm returns result`() = testScenario(
         configurationModifier = { formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue) }
     ) {
-        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         confirmationHelper.confirm()
 
         assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
             EmbeddedActivityResult.Complete(
+                previousNewSelections = selectionHolder.previousNewSelections,
                 selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
                 hasBeenConfirmed = false,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
-                launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                launchMode = EmbeddedLaunchMode.Form(
+                    selectedPaymentMethodCode = "card",
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                ),
             )
         )
 
@@ -104,7 +110,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
             .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             .configurationModifier()
@@ -123,7 +129,11 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             eventReporter = eventReporter,
             customerStateHolder = customerStateHolder,
             coroutineScope = backgroundScope,
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
+            statusBarColor = null,
         )
 
         Scenario(

@@ -36,6 +36,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -53,6 +54,9 @@ class LinkFormElementTest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `If initial user input is provided, should be displayed to the user when alongside SFU`() {
@@ -185,10 +189,12 @@ class LinkFormElementTest {
     }
 
     private fun createLinkConfigurationCoordinator(): LinkConfigurationCoordinator {
-        return FakeLinkConfigurationCoordinator
+        return FakeLinkConfigurationCoordinator(viewModelStoreRule)
     }
 
-    private object FakeLinkConfigurationCoordinator : LinkConfigurationCoordinator {
+    private class FakeLinkConfigurationCoordinator(
+        private val viewModelStoreRule: ViewModelStoreTestRule,
+    ) : LinkConfigurationCoordinator {
         override val accountFlow: StateFlow<LinkAccount?>
             get() = stateFlowOf(null)
 
@@ -205,6 +211,7 @@ class LinkFormElementTest {
                 inlineSignupViewModelFactory = FakeLinkInlineSignupAssistedViewModelFactory(
                     linkAccountManager = linkAccountManager,
                     configuration = configuration,
+                    viewModelStoreRule = viewModelStoreRule,
                 )
             )
         }
@@ -251,6 +258,7 @@ class LinkFormElementTest {
     private class FakeLinkInlineSignupAssistedViewModelFactory(
         private val linkAccountManager: LinkAccountManager,
         private val configuration: LinkConfiguration,
+        private val viewModelStoreRule: ViewModelStoreTestRule,
     ) : LinkInlineSignupAssistedViewModelFactory {
         override fun create(
             signupMode: LinkSignupMode,
@@ -266,7 +274,7 @@ class LinkFormElementTest {
                 logger = Logger.noop(),
                 lookupDelay = 0L,
                 previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
-            )
+            ).also { viewModelStoreRule.track(it) }
         }
     }
 

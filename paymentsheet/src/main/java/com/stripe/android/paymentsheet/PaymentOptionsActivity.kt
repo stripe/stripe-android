@@ -9,7 +9,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -68,7 +67,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivity
                     viewModel.paymentOptionsActivityResult.filterNotNull().collect { sheetResult ->
                         setActivityResult(sheetResult)
                         bottomSheetState.hide()
-                        viewModel.navigationHandler.closeScreens()
                         finish()
                     }
                 }
@@ -80,13 +78,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivity
                     PaymentSheetScreen(viewModel)
                 }
             }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (isFinishing) {
-            CheckoutInstances.markIntegrationDismissed(starterArgs?.state?.paymentMethodMetadata)
         }
     }
 

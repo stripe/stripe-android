@@ -32,7 +32,7 @@ class AddressElement(
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
     private val hideCountry: Boolean = false,
-    inlineAutocompleteHandler: InlineAutocompleteHandler? = null,
+    private val inlineAutocompleteHandler: InlineAutocompleteHandler? = null,
 ) : SectionMultiFieldElement(_identifier), AddressFieldsElement {
 
     override val allowsUserInteraction: Boolean = true
@@ -205,11 +205,7 @@ class AddressElement(
             }
         }
 
-        arrangeFieldsForInputMode(
-            baseElements = baseElements,
-            inputMode = addressInputMode,
-            country = country
-        ).apply {
+        arrangeFieldsForInputMode(baseElements, country).apply {
             onEach {
                 it.onValidationStateChanged(isValidating)
             }
@@ -256,22 +252,10 @@ class AddressElement(
         this.isValidating.value = isValidating
     }
 
-    /**
-     * Arranges form fields based on input mode:
-     * - For autocomplete flows: Email → Phone → Address fields (better UX for quick entry)
-     * - For manual entry flows: Address fields → Email → Phone (traditional form order)
-     */
     private fun arrangeFieldsForInputMode(
         baseElements: List<SectionFieldElement>,
-        inputMode: AddressInputMode,
-        country: String?
+        country: String?,
     ): List<SectionFieldElement> {
-        val isAutocompleteActive = when (inputMode) {
-            is AddressInputMode.AutocompleteInline -> true
-            is AddressInputMode.AutocompleteCondensed -> inputMode.supportsAutoComplete(country, isPlacesAvailable)
-            is AddressInputMode.AutocompleteExpanded -> true
-            else -> false
-        }
         val emailField = when {
             addressInputMode.emailConfig != AddressFieldConfiguration.HIDDEN -> emailElement
             else -> null
@@ -280,7 +264,13 @@ class AddressElement(
             addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN -> phoneNumberElement
             else -> null
         }
-        return if (isAutocompleteActive) {
+        val contactFieldsFirst = inlineAutocompleteHandler != null ||
+            addressInputMode is AddressInputMode.AutocompleteExpanded ||
+            (
+                addressInputMode is AddressInputMode.AutocompleteCondensed &&
+                    addressInputMode.supportsAutoComplete(country, isPlacesAvailable)
+                )
+        return if (contactFieldsFirst) {
             buildList {
                 emailField?.let { add(it) }
                 phoneField?.let { add(it) }

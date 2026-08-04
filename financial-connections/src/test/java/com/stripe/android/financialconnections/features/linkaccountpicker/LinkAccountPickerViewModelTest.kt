@@ -32,6 +32,7 @@ import com.stripe.android.financialconnections.model.ShareNetworkedAccountsRespo
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -49,6 +50,9 @@ class LinkAccountPickerViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val getSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
@@ -76,7 +80,7 @@ class LinkAccountPickerViewModelTest {
             nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
             presentSheet = presentSheet,
             acceptConsent = mock()
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @Test

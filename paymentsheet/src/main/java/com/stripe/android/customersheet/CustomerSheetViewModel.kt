@@ -13,6 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -97,6 +98,7 @@ internal class CustomerSheetViewModel(
     private val savedSelectionDataSourceProvider: Single<CustomerSheetSavedSelectionDataSource>,
     private val configuration: CustomerSheet.Configuration,
     private val integrationType: CustomerSheetIntegration.Type,
+    private val statusBarColor: Int?,
     private val logger: Logger,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -104,6 +106,7 @@ internal class CustomerSheetViewModel(
     private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
+    private val isNfcScanningAvailable: IsNfcScanningAvailable,
     private val errorReporter: ErrorReporter,
     private val savedStateHandle: SavedStateHandle,
     internal val userFacingLogger: UserFacingLogger,
@@ -115,6 +118,7 @@ internal class CustomerSheetViewModel(
         originalPaymentSelection: PaymentSelection?,
         configuration: CustomerSheet.Configuration,
         integrationType: CustomerSheetIntegration.Type,
+        args: CustomerSheetContract.Args,
         logger: Logger,
         eventReporter: CustomerSheetEventReporter,
         @IOContext workContext: CoroutineContext = Dispatchers.IO,
@@ -122,6 +126,7 @@ internal class CustomerSheetViewModel(
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
+        isNfcScanningAvailable: IsNfcScanningAvailable,
         errorReporter: ErrorReporter,
         savedStateHandle: SavedStateHandle,
         userFacingLogger: UserFacingLogger,
@@ -132,6 +137,7 @@ internal class CustomerSheetViewModel(
         savedSelectionDataSourceProvider = CustomerSheetHacks.savedSelectionDataSource,
         configuration = configuration,
         integrationType = integrationType,
+        statusBarColor = args.statusBarColor,
         logger = logger,
         eventReporter = eventReporter,
         workContext = workContext,
@@ -139,6 +145,7 @@ internal class CustomerSheetViewModel(
         paymentConfiguration = paymentConfiguration,
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
+        isNfcScanningAvailable = isNfcScanningAvailable,
         errorReporter = errorReporter,
         savedStateHandle = savedStateHandle,
         userFacingLogger = userFacingLogger,
@@ -281,6 +288,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
             is CustomerSheetViewAction.OnAnalyticsEvent -> onAnalyticsEvent(viewAction.event)
             is CustomerSheetViewAction.OnCardScanEvent -> onCardScanEvent(viewAction.event)
+            is CustomerSheetViewAction.OnNfcScanButtonShown -> onNfcScanButtonShown()
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
@@ -475,7 +483,8 @@ internal class CustomerSheetViewModel(
                         },
                         autocompleteAddressInteractorFactory = null,
                         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
-                        paymentMethodMessagingPromotionsHelper = null
+                        paymentMethodMessagingPromotionsHelper = null,
+                        isNfcScanningAvailable = isNfcScanningAvailable,
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -823,7 +832,8 @@ internal class CustomerSheetViewModel(
                 },
                 autocompleteAddressInteractorFactory = null,
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
-                paymentMethodMessagingPromotionsHelper = null
+                paymentMethodMessagingPromotionsHelper = null,
+                isNfcScanningAvailable = isNfcScanningAvailable,
             )
         ) ?: emptyList()
 
@@ -951,6 +961,10 @@ internal class CustomerSheetViewModel(
         eventReporter.onCardScanEvent(event)
     }
 
+    private fun onNfcScanButtonShown() {
+        eventReporter.onNfcScanButtonShown()
+    }
+
     private fun onDisallowedCardBrandEntered(brand: CardBrand) {
         eventReporter.onDisallowedCardBrandEntered(brand)
     }
@@ -994,6 +1008,7 @@ internal class CustomerSheetViewModel(
                         shouldSave = true,
                     ),
                     paymentMethodMetadata = metadata,
+                    statusBarColor = statusBarColor,
                 )
             )
 
@@ -1312,7 +1327,7 @@ internal class CustomerSheetViewModel(
                 .create(
                     application = extras.requireApplication(),
                     configuration = args.configuration,
-                    statusBarColor = args.statusBarColor,
+                    args = args,
                     integrationType = args.integrationType,
                     savedStateHandle = extras.createSavedStateHandle(),
                 )

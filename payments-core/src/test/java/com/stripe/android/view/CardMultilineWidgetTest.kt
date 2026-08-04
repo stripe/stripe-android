@@ -40,6 +40,7 @@ import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -76,8 +77,13 @@ internal class CardMultilineWidgetTest {
     @get:Rule
     val testActivityRule = createTestActivityRule<CardMultilineWidgetTestActivity>()
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @BeforeTest
     fun setup() {
+        CardMultilineWidgetTestActivity.viewModelStoreTestRule = viewModelStoreRule
+
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
@@ -1411,7 +1417,10 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
         CardMultilineWidget(this, shouldShowPostalCode = true).apply {
             id = VIEW_ID
 
-            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(
+                isCbcEligible = args.isCbcEligible,
+                viewModelStoreTestRule = viewModelStoreTestRule,
+            )
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
         }
@@ -1421,7 +1430,10 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
         CardMultilineWidget(this, shouldShowPostalCode = false).apply {
             id = NO_ZIP_VIEW_ID
 
-            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(
+                isCbcEligible = args.isCbcEligible,
+                viewModelStoreTestRule = viewModelStoreTestRule,
+            )
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
         }
@@ -1449,5 +1461,7 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
     companion object {
         const val VIEW_ID = 12345
         const val NO_ZIP_VIEW_ID = 12346
+
+        lateinit var viewModelStoreTestRule: ViewModelStoreTestRule
     }
 }

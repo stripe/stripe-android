@@ -5,7 +5,7 @@ package com.stripe.android.common.nfcscan.scanner.apdu
  */
 internal data class SelectApplicationCommand(
     val aid: ApplicationIdentifier,
-) : ApduCommand<Unit>() {
+) : ApduCommand<PdolTemplate>() {
     /*
      * Interindustry standardized command for ISO 7816-4
      */
@@ -31,7 +31,16 @@ internal data class SelectApplicationCommand(
      */
     override val dataArray = aid.value.hexToByteArray()
 
-    override fun responseData(tlv: Map<String, ByteArray>) {
-        // No-op
+    override fun responseData(tlv: Map<String, ByteArray>): PdolTemplate {
+        return tlv[TAG_PDOL]
+            ?.takeIf {
+                it.isNotEmpty()
+            }?.let {
+                PdolTemplate.Available(it)
+            } ?: PdolTemplate.None
+    }
+
+    private companion object {
+        const val TAG_PDOL = "9F38"
     }
 }

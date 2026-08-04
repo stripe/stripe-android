@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -8,11 +9,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -320,6 +323,11 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 mobileSessionIdProvider = { "test_session" },
             ),
             stripeNetworkClient = DefaultStripeNetworkClient(),
+            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKey = "pk_test_123",
+            ),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
         )

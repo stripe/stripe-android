@@ -88,7 +88,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             val linkAccount = requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
             linkRepository.createLinkAccountSession(
                 consumerSessionClientSecret = linkAccount.clientSecret,
-                stripeIntent = config.stripeIntent,
+                intentToken = config.stripeIntent.clientSecret ?: config.elementsSessionId,
                 linkMode = config.linkMode,
             ).getOrThrow()
         }

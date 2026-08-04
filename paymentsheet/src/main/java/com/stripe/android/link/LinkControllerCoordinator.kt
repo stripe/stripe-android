@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import android.app.Activity
 import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
@@ -8,8 +9,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.link.injection.LinkControllerPresenterScope
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import kotlinx.coroutines.launch
@@ -18,6 +21,7 @@ import javax.inject.Inject
 @LinkControllerPresenterScope
 internal class LinkControllerCoordinator @Inject constructor(
     private val application: Application,
+    activity: Activity,
     private val interactor: LinkControllerInteractor,
     private val lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
@@ -44,7 +48,7 @@ internal class LinkControllerCoordinator @Inject constructor(
         paymentLauncher = PaymentLauncherFactory(
             activityResultRegistryOwner = activityResultRegistryOwner,
             lifecycleOwner = lifecycleOwner,
-            statusBarColor = null,
+            statusBarColor = StatusBarCompat.color(activity),
             callback = PaymentLauncher.InternalPaymentResultCallback { result ->
                 interactor.onSetupIntentConfirmationResult(result)
             }
@@ -84,33 +88,24 @@ internal class LinkControllerCoordinator @Inject constructor(
         )
     }
 
-    fun createPaymentMethodAndConfirmSetupIntent() {
+    fun confirmSetupIntent(clientSecret: String) {
         lifecycleOwner.lifecycleScope.launch {
-            val setupIntentClientSecret = interactor.setupIntentClientSecret
-            if (setupIntentClientSecret == null) {
+            val paymentMethod = interactor.lastCreatedPaymentMethod
+            if (paymentMethod?.id == null) {
                 interactor.emitConfirmSetupIntentResult(
                     LinkController.ConfirmSetupIntentResult.Failed(
-                        IllegalStateException("No setupIntentClientSecret in Configuration")
+                        IllegalStateException("No payment method available. Call present() first.")
                     )
                 )
                 return@launch
             }
 
-            val pmResult = interactor.performCreatePaymentMethodForConfirmation()
-            pmResult.fold(
-                onSuccess = { paymentMethod ->
-                    paymentLauncher.confirm(
-                        ConfirmSetupIntentParams.create(
-                            paymentMethodId = paymentMethod.id,
-                            clientSecret = setupIntentClientSecret,
-                        )
-                    )
-                },
-                onFailure = { error ->
-                    interactor.emitConfirmSetupIntentResult(
-                        LinkController.ConfirmSetupIntentResult.Failed(error)
-                    )
-                }
+            paymentLauncher.confirm(
+                ConfirmSetupIntentParams.create(
+                    paymentMethodId = paymentMethod.id,
+                    clientSecret = clientSecret,
+                    mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+                )
             )
         }
     }

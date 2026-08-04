@@ -76,7 +76,7 @@ internal abstract class ApduCommand<TResponseData> {
         val sw2 = rawResponse[rawResponse.size - 1]
 
         if (sw1 != 0x90.toByte() || sw2 != 0x00.toByte()) {
-            return Result.failure(ApduResponseError.Command(sw1, sw2))
+            return Result.failure(ApduResponseError.Command(this, sw1, sw2))
         }
 
         val rawData = rawResponse.copyOfRange(0, rawResponse.size - 2)

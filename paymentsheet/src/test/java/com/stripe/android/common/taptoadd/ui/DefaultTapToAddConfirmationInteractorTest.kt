@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
@@ -33,10 +34,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class DefaultTapToAddConfirmationInteractorTest {
+    private val cleanupRule = CleanupTestRule(DefaultTapToAddConfirmationInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(cleanupRule)
+
     @Test
     fun `CancelPressed reports tap to add canceled with confirmation source`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
@@ -149,6 +158,20 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
         assertThat(confirmationOption.paymentMethod).isEqualTo(paymentMethod)
         assertThat(args.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
+    }
+
+    @Test
+    fun `PrimaryButtonPressed forwards statusBarColor to confirmation args`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
+        statusBarColor = 0x00FF00,
+    ) {
+        interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+
+        assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isFalse()
+        val args = confirmationHandlerScenario.startTurbine.awaitItem()
+
+        assertThat(args.statusBarColor).isEqualTo(0x00FF00)
     }
 
     @Test
@@ -531,6 +554,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
         initialCvcState: CvcFormHelper.State = CvcFormHelper.State.NotRequired,
+        statusBarColor: Int? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()
@@ -549,10 +573,12 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 confirmationHandler = handler,
                 cvcFormHelper = cvcFormHelper,
                 eventReporter = eventReporter,
+                statusBarColor = statusBarColor,
                 onComplete = {
                     onCompleteCalls.add(Unit)
                 },
             )
+            cleanupRule.track(interactor)
 
             block(
                 Scenario(
@@ -568,7 +594,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
             eventReporter.validate()
             onCompleteCalls.ensureAllEventsConsumed()
-            interactor.close()
         }
     }
 

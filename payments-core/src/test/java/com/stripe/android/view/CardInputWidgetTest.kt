@@ -38,6 +38,8 @@ import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.testing.ViewModelStoreTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -67,6 +69,12 @@ internal class CardInputWidgetTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val testDispatcher = StandardTestDispatcher()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -76,6 +84,8 @@ internal class CardInputWidgetTest {
 
     @BeforeTest
     fun setup() {
+        CardInputWidgetTestActivity.viewModelStoreTestRule = viewModelStoreRule
+
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
@@ -1921,7 +1931,10 @@ internal class CardInputWidgetTestActivity : AppCompatActivity() {
             layoutWidthCalculator = CardInputWidget.LayoutWidthCalculator { text, _ -> text.length * 10 }
             frameWidthSupplier = { 500 }
 
-            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(
+                isCbcEligible = args.isCbcEligible,
+                viewModelStoreTestRule = viewModelStoreTestRule,
+            )
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
 
@@ -1948,5 +1961,7 @@ internal class CardInputWidgetTestActivity : AppCompatActivity() {
 
     companion object {
         const val VIEW_ID = 12345
+
+        lateinit var viewModelStoreTestRule: ViewModelStoreTestRule
     }
 }

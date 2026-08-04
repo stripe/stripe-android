@@ -42,6 +42,7 @@ import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -62,6 +63,9 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @get:Rule
     val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
@@ -594,5 +598,5 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         savedStateHandle = SavedStateHandle(),
         initialState = initialState,
         createInstantDebitsResult = createInstantDebitsResult,
-    )
+    ).also { viewModelStoreRule.track(it) }
 }

@@ -7,11 +7,13 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -34,14 +36,15 @@ import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
-import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
+import com.stripe.android.paymentsheet.utils.RecordingInternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
-import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -49,6 +52,12 @@ import org.mockito.kotlin.verify
 import com.stripe.android.R as PaymentsCoreR
 
 class GooglePayConfirmationDefinitionTest {
+    @get:Rule
+    val allowNoExistingPaymentMethodForGooglePayRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.allowNoExistingPaymentMethodForGooglePay,
+        isEnabled = false,
+    )
+
     @Test
     fun `'key' should be 'GooglePay`() {
         val definition = createGooglePayConfirmationDefinition()
@@ -71,31 +80,36 @@ class GooglePayConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'createLauncher' should register launcher properly for activity result`() = runTest {
-        val definition = createGooglePayConfirmationDefinition()
+    fun `'createLauncher' should register launcher and create internal launcher with skipped ready check`() =
+        RecordingInternalGooglePayPaymentMethodLauncherFactory.test(mock()) {
+            val definition = createGooglePayConfirmationDefinition(factory)
 
-        var onResultCalled = false
-        val onResult: (GooglePayPaymentMethodLauncher.Result) -> Unit = { onResultCalled = true }
-        DummyActivityResultCaller.test {
-            definition.createLauncher(
-                activityResultCaller = activityResultCaller,
-                onResult = onResult,
-            )
+            var onResultCalled = false
+            val onResult: (GooglePayPaymentMethodLauncher.Result) -> Unit = { onResultCalled = true }
+            DummyActivityResultCaller.test {
+                definition.createLauncher(
+                    activityResultCaller = activityResultCaller,
+                    onResult = onResult,
+                )
 
-            val call = awaitRegisterCall()
+                val call = awaitRegisterCall()
+                val registeredLauncher = awaitNextRegisteredLauncher()
 
-            assertThat(awaitNextRegisteredLauncher()).isNotNull()
+                assertThat(registeredLauncher).isNotNull()
 
-            assertThat(call.contract).isInstanceOf<GooglePayPaymentMethodLauncherContractV2>()
-            assertThat(call.callback).isInstanceOf<ActivityResultCallback<*>>()
+                val createCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
+                assertThat(createCall.activityResultLauncher).isEqualTo(registeredLauncher)
 
-            val callback = call.callback.asCallbackFor<GooglePayPaymentMethodLauncher.Result>()
+                assertThat(call.contract).isInstanceOf<GooglePayPaymentMethodLauncherContractV2>()
+                assertThat(call.callback).isInstanceOf<ActivityResultCallback<*>>()
 
-            callback.onActivityResult(GooglePayPaymentMethodLauncher.Result.Completed(PaymentMethodFactory.card()))
+                val callback = call.callback.asCallbackFor<GooglePayPaymentMethodLauncher.Result>()
 
-            assertThat(onResultCalled).isTrue()
+                callback.onActivityResult(GooglePayPaymentMethodLauncher.Result.Completed(PaymentMethodFactory.card()))
+
+                assertThat(onResultCalled).isTrue()
+            }
         }
-    }
 
     @Test
     fun `'toResult' should return 'NextStep' when 'GooglePayLauncherResult' is 'Completed'`() = runTest {
@@ -264,39 +278,21 @@ class GooglePayConfirmationDefinitionTest {
         )
 
     @Test
-    fun `On 'launch', should create google pay launcher properly`() = runTest {
-        RecordingGooglePayPaymentMethodLauncherFactory.test(mock()) {
-            val definition = createGooglePayConfirmationDefinition(factory)
-            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
-
-            definition.launch(
-                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                confirmationArgs = CONFIRMATION_PARAMETERS,
-                arguments = EmptyConfirmationLauncherArgs,
-                launcher = launcher,
-            )
-
-            val createGooglePayLauncherCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
-
-            assertThat(createGooglePayLauncherCall.activityResultLauncher).isEqualTo(launcher)
-            assertThat(createGooglePayLauncherCall.skipReadyCheck).isTrue()
-            assertThat(createGooglePayLauncherCall.cardBrandFilter).isEqualTo(DefaultCardBrandFilter)
-
-            assertThat(createGooglePayLauncherCall.config.environment).isEqualTo(GooglePayEnvironment.Test)
-            assertThat(createGooglePayLauncherCall.config.merchantName).isEqualTo("Test merchant Inc.")
-            assertThat(createGooglePayLauncherCall.config.merchantCountryCode).isEqualTo("US")
-            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isTrue()
-            assertThat(createGooglePayLauncherCall.config.existingPaymentMethodRequired).isTrue()
-            assertThat(createGooglePayLauncherCall.config.isEmailRequired).isFalse()
-            assertThat(createGooglePayLauncherCall.config.billingAddressConfig.isRequired).isTrue()
-            assertThat(createGooglePayLauncherCall.config.billingAddressConfig.isPhoneNumberRequired).isFalse()
-            assertThat(createGooglePayLauncherCall.config.billingAddressConfig.format)
-                .isEqualTo(GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full)
-        }
-    }
+    fun `when allowNoExistingPaymentMethodForGooglePay is disabled, existingPaymentMethodRequired should be true`() =
+        runExistingPaymentMethodRequiredTest(
+            allowNoExistingPaymentMethodForGooglePay = false,
+            existingPaymentMethodRequired = true,
+        )
 
     @Test
-    fun `On 'launch', should create google pay launcher properly with excepted parameters`() =
+    fun `when allowNoExistingPaymentMethodForGooglePay is enabled, existingPaymentMethodRequired should be false`() =
+        runExistingPaymentMethodRequiredTest(
+            allowNoExistingPaymentMethodForGooglePay = true,
+            existingPaymentMethodRequired = false,
+        )
+
+    @Test
+    fun `On 'launch', should present with expected parameters`() =
         runLaunchParametersTest(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             merchantNameShouldBe = "Test merchant Inc.",
@@ -310,7 +306,7 @@ class GooglePayConfirmationDefinitionTest {
         )
 
     @Test
-    fun `On 'launch', should create launcher with required billing parameters, prod env, and expected card filter`() =
+    fun `On 'launch', should present with required billing parameters, prod env, and expected card filter`() =
         runLaunchParametersTest(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
                 config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
@@ -337,7 +333,7 @@ class GooglePayConfirmationDefinitionTest {
         )
 
     @Test
-    fun `On 'launch', should create google pay launcher properly with no billing parameters`() =
+    fun `On 'launch', should present with no billing parameters`() =
         runLaunchParametersTest(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
                 config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
@@ -356,144 +352,150 @@ class GooglePayConfirmationDefinitionTest {
 
     @OptIn(SharedPaymentTokenSessionPreview::class)
     @Test
-    fun `On 'launch', should create google pay launcher with expected merchant name from seller`() = runTest {
-        RecordingGooglePayPaymentMethodLauncherFactory.test(mock()) {
-            val definition = createGooglePayConfirmationDefinition(factory)
-            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+    fun `On 'launch', should present with expected merchant name from seller`() = runTest {
+        val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
+        val definition = createGooglePayConfirmationDefinition()
 
-            definition.launch(
-                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                    paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
-                        sellerBusinessName = "My business, Inc.",
-                    ),
+        definition.launch(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
+                    sellerBusinessName = "My business, Inc.",
                 ),
-                arguments = EmptyConfirmationLauncherArgs,
-                launcher = launcher,
-            )
+            ),
+            arguments = EmptyConfirmationLauncherArgs,
+            launcher = launcher,
+        )
 
-            val createGooglePayLauncherCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
-
-            assertThat(createGooglePayLauncherCall.activityResultLauncher).isEqualTo(launcher)
-            assertThat(createGooglePayLauncherCall.config.merchantName).isEqualTo("My business, Inc.")
-        }
+        verify(launcher).present(
+            currencyCode = "usd",
+            amount = 1000L,
+            config = launcherConfig(merchantName = "My business, Inc."),
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+            transactionId = "pi_12345",
+            label = null,
+            isElements = true,
+            publishableKey = null,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+        )
     }
 
     @Test
     fun `On 'launch', should use payment intent currency code if available`() = runTest {
-        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+        val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
+        val definition = createGooglePayConfirmationDefinition()
 
-        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
-            val definition = createGooglePayConfirmationDefinition(factory)
-            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
-
-            definition.launch(
-                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
-                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
-                        merchantCurrencyCode = "USD",
-                    ),
+        definition.launch(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                    merchantCurrencyCode = "USD",
                 ),
-                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PAYMENT_INTENT.copy(currency = "CAD")
-                    ),
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PAYMENT_INTENT.copy(currency = "CAD")
                 ),
-                arguments = EmptyConfirmationLauncherArgs,
-                launcher = launcher,
-            )
+            ),
+            arguments = EmptyConfirmationLauncherArgs,
+            launcher = launcher,
+        )
 
-            assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
-
-            verify(googlePayLauncher, times(1)).present(
-                currencyCode = "CAD",
-                amount = 1000L,
-                transactionId = "pi_12345",
-                label = null,
-                clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
-                isElements = true,
-            )
-        }
+        verify(launcher, times(1)).present(
+            currencyCode = "CAD",
+            amount = 1000L,
+            config = launcherConfig(),
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+            transactionId = "pi_12345",
+            label = null,
+            isElements = true,
+            publishableKey = null,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+        )
     }
 
     @Test
     fun `On 'launch', should use payment intent currency & amount`() = runTest {
-        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+        val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
+        val definition = createGooglePayConfirmationDefinition()
 
-        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
-            val definition = createGooglePayConfirmationDefinition(factory)
-            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
-
-            definition.launch(
-                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
-                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
-                        merchantCurrencyCode = "USD",
-                        customLabel = "Merchant Inc."
-                    ),
+        definition.launch(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                    merchantCurrencyCode = "USD",
+                    customLabel = "Merchant Inc."
                 ),
-                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PAYMENT_INTENT.copy(currency = "CAD")
-                    ),
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PAYMENT_INTENT.copy(currency = "CAD")
                 ),
-                arguments = EmptyConfirmationLauncherArgs,
-                launcher = launcher,
-            )
+            ),
+            arguments = EmptyConfirmationLauncherArgs,
+            launcher = launcher,
+        )
 
-            assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
-
-            verify(googlePayLauncher, times(1)).present(
-                currencyCode = "CAD",
-                amount = 1000L,
-                transactionId = "pi_12345",
-                label = "Merchant Inc.",
-                clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
-                isElements = true,
-            )
-        }
+        verify(launcher, times(1)).present(
+            currencyCode = "CAD",
+            amount = 1000L,
+            config = launcherConfig(),
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+            transactionId = "pi_12345",
+            label = "Merchant Inc.",
+            isElements = true,
+            publishableKey = null,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+        )
     }
 
     @Test
     fun `On 'launch', should use set currency & custom amount when using setup intent`() = runTest {
-        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+        val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
+        val definition = createGooglePayConfirmationDefinition()
 
-        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
-            val definition = createGooglePayConfirmationDefinition(factory)
-            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
-
-            definition.launch(
-                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
-                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
-                        merchantCurrencyCode = "USD",
-                        customAmount = 2099L,
-                        customLabel = "Merchant Inc."
-                    ),
+        definition.launch(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                    merchantCurrencyCode = "USD",
+                    customAmount = 2099L,
+                    customLabel = "Merchant Inc."
                 ),
-                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = SetupIntentFactory.create(),
-                    ),
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = SetupIntentFactory.create(),
                 ),
-                arguments = EmptyConfirmationLauncherArgs,
-                launcher = launcher,
-            )
+            ),
+            arguments = EmptyConfirmationLauncherArgs,
+            launcher = launcher,
+        )
 
-            assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
-
-            verify(googlePayLauncher, times(1)).present(
-                currencyCode = "USD",
-                amount = 2099L,
-                transactionId = "pi_12345",
-                label = "Merchant Inc.",
-                clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
-                isElements = true,
-            )
-        }
+        verify(launcher, times(1)).present(
+            currencyCode = "USD",
+            amount = 2099L,
+            config = launcherConfig(),
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+            transactionId = "pi_12345",
+            label = "Merchant Inc.",
+            isElements = true,
+            publishableKey = null,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+        )
     }
 
     @Test
     fun `On 'launch', should pass display items to present`() = runTest {
-        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
-
         val displayItems = listOf(
             com.stripe.android.GooglePayJsonFactory.DisplayItem(
                 label = "Widget",
@@ -507,38 +509,39 @@ class GooglePayConfirmationDefinitionTest {
             ),
         )
 
-        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
-            val definition = createGooglePayConfirmationDefinition(factory)
-            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+        val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
+        val definition = createGooglePayConfirmationDefinition()
 
-            definition.launch(
-                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
-                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
-                        merchantCurrencyCode = "USD",
-                        displayItems = displayItems,
-                    ),
+        definition.launch(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                    merchantCurrencyCode = "USD",
+                    displayItems = displayItems,
                 ),
-                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PAYMENT_INTENT.copy(currency = "USD")
-                    ),
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PAYMENT_INTENT.copy(currency = "USD")
                 ),
-                arguments = EmptyConfirmationLauncherArgs,
-                launcher = launcher,
-            )
+            ),
+            arguments = EmptyConfirmationLauncherArgs,
+            launcher = launcher,
+        )
 
-            assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
-
-            verify(googlePayLauncher, times(1)).present(
-                currencyCode = "USD",
-                amount = 1000L,
-                transactionId = "pi_12345",
-                label = null,
-                clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
-                isElements = true,
-                displayItems = displayItems,
-            )
-        }
+        verify(launcher, times(1)).present(
+            currencyCode = "USD",
+            amount = 1000L,
+            config = launcherConfig(),
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+            transactionId = "pi_12345",
+            label = null,
+            isElements = true,
+            publishableKey = null,
+            displayItems = displayItems,
+            billingEmailOverride = null,
+        )
     }
 
     private fun runActionTest(
@@ -574,45 +577,79 @@ class GooglePayConfirmationDefinitionTest {
         confirmationOption: GooglePayConfirmationOption,
         environmentShouldBe: GooglePayEnvironment,
         merchantNameShouldBe: String,
-        merchantCountryCodeShouldBe: String?,
+        merchantCountryCodeShouldBe: String,
         billingAddressShouldBeRequired: Boolean,
         phoneNumberShouldBeRequired: Boolean,
         emailShouldBeRequired: Boolean,
         billingAddressFormatShouldBe: GooglePayPaymentMethodLauncher.BillingAddressConfig.Format,
         cardBrandFilterShouldBe: CardBrandFilter
-    ) {
-        RecordingGooglePayPaymentMethodLauncherFactory.test(mock()) {
-            val definition = createGooglePayConfirmationDefinition(factory)
-            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+    ) = runTest {
+        val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
+        val definition = createGooglePayConfirmationDefinition()
 
-            definition.launch(
-                confirmationOption = confirmationOption,
-                confirmationArgs = CONFIRMATION_PARAMETERS,
-                arguments = EmptyConfirmationLauncherArgs,
-                launcher = launcher,
-            )
+        definition.launch(
+            confirmationOption = confirmationOption,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            arguments = EmptyConfirmationLauncherArgs,
+            launcher = launcher,
+        )
 
-            val createGooglePayLauncherCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
+        verify(launcher).present(
+            currencyCode = "usd",
+            amount = 1000L,
+            config = launcherConfig(
+                environment = environmentShouldBe,
+                merchantCountryCode = merchantCountryCodeShouldBe,
+                merchantName = merchantNameShouldBe,
+                isEmailRequired = emailShouldBeRequired,
+                billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                    isRequired = billingAddressShouldBeRequired,
+                    format = billingAddressFormatShouldBe,
+                    isPhoneNumberRequired = phoneNumberShouldBeRequired,
+                ),
+            ),
+            cardBrandFilter = cardBrandFilterShouldBe,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+            transactionId = "pi_12345",
+            label = null,
+            isElements = true,
+            publishableKey = null,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+        )
+    }
 
-            // Should always be the same value
-            assertThat(createGooglePayLauncherCall.activityResultLauncher).isEqualTo(launcher)
-            assertThat(createGooglePayLauncherCall.skipReadyCheck).isTrue()
-            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isTrue()
-            assertThat(createGooglePayLauncherCall.config.existingPaymentMethodRequired).isTrue()
+    private fun runExistingPaymentMethodRequiredTest(
+        allowNoExistingPaymentMethodForGooglePay: Boolean,
+        existingPaymentMethodRequired: Boolean,
+    ) = runTest {
+        allowNoExistingPaymentMethodForGooglePayRule.setEnabled(allowNoExistingPaymentMethodForGooglePay)
 
-            // Can vary on merchant's config
-            assertThat(createGooglePayLauncherCall.cardBrandFilter).isEqualTo(cardBrandFilterShouldBe)
-            assertThat(createGooglePayLauncherCall.config.environment).isEqualTo(environmentShouldBe)
-            assertThat(createGooglePayLauncherCall.config.merchantName).isEqualTo(merchantNameShouldBe)
-            assertThat(createGooglePayLauncherCall.config.merchantCountryCode).isEqualTo(merchantCountryCodeShouldBe)
-            assertThat(createGooglePayLauncherCall.config.isEmailRequired).isEqualTo(emailShouldBeRequired)
-            assertThat(createGooglePayLauncherCall.config.billingAddressConfig.isRequired)
-                .isEqualTo(billingAddressShouldBeRequired)
-            assertThat(createGooglePayLauncherCall.config.billingAddressConfig.isPhoneNumberRequired)
-                .isEqualTo(phoneNumberShouldBeRequired)
-            assertThat(createGooglePayLauncherCall.config.billingAddressConfig.format)
-                .isEqualTo(billingAddressFormatShouldBe)
-        }
+        val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
+        val definition = createGooglePayConfirmationDefinition()
+
+        definition.launch(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            arguments = EmptyConfirmationLauncherArgs,
+            launcher = launcher,
+        )
+
+        verify(launcher).present(
+            currencyCode = "usd",
+            amount = 1000L,
+            config = launcherConfig(existingPaymentMethodRequired = existingPaymentMethodRequired),
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+            transactionId = "pi_12345",
+            label = null,
+            isElements = true,
+            publishableKey = null,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+        )
     }
 
     private fun assertFailActionFromCurrencyFailure(
@@ -648,9 +685,33 @@ class GooglePayConfirmationDefinitionTest {
         assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
     }
 
+    private fun launcherConfig(
+        environment: GooglePayEnvironment = GooglePayEnvironment.Test,
+        merchantCountryCode: String = "US",
+        merchantName: String = "Test merchant Inc.",
+        isEmailRequired: Boolean = false,
+        existingPaymentMethodRequired: Boolean = true,
+        billingAddressConfig: GooglePayPaymentMethodLauncher.BillingAddressConfig =
+            GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                isRequired = true,
+                format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+                isPhoneNumberRequired = false,
+            ),
+    ): GooglePayPaymentMethodLauncher.Config {
+        return GooglePayPaymentMethodLauncher.Config(
+            environment = environment,
+            merchantCountryCode = merchantCountryCode,
+            merchantName = merchantName,
+            isEmailRequired = isEmailRequired,
+            billingAddressConfig = billingAddressConfig,
+            existingPaymentMethodRequired = existingPaymentMethodRequired,
+            additionalEnabledNetworks = emptyList(),
+        )
+    }
+
     private fun createGooglePayConfirmationDefinition(
-        googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory =
-            RecordingGooglePayPaymentMethodLauncherFactory.noOp(launcher = mock()),
+        googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory =
+            RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(launcher = mock()),
         userFacingLogger: UserFacingLogger = FakeUserFacingLogger()
     ): GooglePayConfirmationDefinition {
         return GooglePayConfirmationDefinition(

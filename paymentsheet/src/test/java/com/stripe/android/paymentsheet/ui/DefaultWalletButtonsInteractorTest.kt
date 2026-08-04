@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -46,6 +47,7 @@ import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -63,6 +65,9 @@ class DefaultWalletButtonsInteractorTest {
 
     @get:Rule
     val analyticsEventCallbackRule = AnalyticEventCallbackRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `on init with no arguments, state should be empty`() = runTest {
@@ -931,6 +936,7 @@ class DefaultWalletButtonsInteractorTest {
             ),
             appearance = appearance,
             paymentSelection = null,
+            statusBarColor = null,
         )
     }
 
@@ -948,7 +954,7 @@ class DefaultWalletButtonsInteractorTest {
         return DefaultWalletButtonsInteractor(
             arguments = stateFlowOf(arguments),
             confirmationHandler = confirmationHandler,
-            coroutineScope = CoroutineScope(testDispatcher),
+            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(testDispatcher)),
             errorReporter = errorReporter,
             eventReporter = eventReporter,
             linkInlineInteractor = NoOpLinkInlineInteractor(),

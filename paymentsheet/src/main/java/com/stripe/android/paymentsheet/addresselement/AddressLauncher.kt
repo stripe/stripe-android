@@ -86,8 +86,8 @@ class AddressLauncher internal constructor(
         configuration: Configuration = Configuration()
     ) {
         val args = AddressElementActivityContract.Args(
-            publishableKey,
-            configuration,
+            publishableKey = publishableKey,
+            config = configuration,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -112,6 +112,7 @@ class AddressLauncher internal constructor(
         internal val googlePlacesApiKey: String? = null,
         internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         internal val billingAddress: PaymentSheet.BillingDetails?,
+        internal val useStripeHostedAutocomplete: Boolean = false,
     ) : Parcelable {
         @JvmOverloads
         constructor(

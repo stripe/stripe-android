@@ -64,6 +64,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             launchMode = confirmationOption.linkLaunchMode,
             linkExpressMode = confirmationOption.linkExpressMode,
+            statusBarColor = confirmationArgs.statusBarColor,
         )
     }
 

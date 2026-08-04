@@ -23,7 +23,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
@@ -31,6 +30,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
@@ -130,6 +130,10 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                         hasResult = true
                         when (args?.launchMode) {
                             is EmbeddedLaunchMode.Form -> dismissAndFinish()
+                            is EmbeddedLaunchMode.PaymentOptions -> {
+                                setCancelledPaymentOptionsResult()
+                                finish()
+                            }
                             is EmbeddedLaunchMode.Manage, null -> {
                                 setManageResult(shouldInvokeSelectionCallback = result == true)
                                 finish()
@@ -198,7 +202,6 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         super.onDestroy()
 
         if (isFinishing) {
-            CheckoutInstances.markIntegrationDismissed(args?.paymentMethodMetadata)
             if (::eventReporter.isInitialized) {
                 eventReporter.onDismiss()
             }
@@ -218,6 +221,9 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             is EmbeddedLaunchMode.Manage, null -> {
                 setManageResult(shouldInvokeSelectionCallback = false)
             }
+            is EmbeddedLaunchMode.PaymentOptions -> {
+                setCancelledPaymentOptionsResult()
+            }
         }
         finish()
     }
@@ -228,10 +234,22 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         setActivityResult(
             EmbeddedActivityResult.Complete(
                 selection = selectionHolder.selection.value,
+                previousNewSelections = selectionHolder.previousNewSelections,
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
                 shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
                 launchMode = args?.launchMode ?: EmbeddedLaunchMode.Manage,
+            )
+        )
+    }
+
+    private fun setCancelledPaymentOptionsResult() {
+        setActivityResult(
+            EmbeddedActivityResult.Cancelled(
+                customerState = customerStateHolder.customer.value,
+                launchMode = EmbeddedLaunchMode.PaymentOptions(
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                ),
             )
         )
     }

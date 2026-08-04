@@ -9,7 +9,6 @@ internal class BillingInlineAutocompleteAddressInteractor(
     placesClient: PlacesClientProxy,
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
     coroutineScope: CoroutineScope,
-    shouldUseAutocompleteProxyEndpoints: Boolean,
 ) : AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
@@ -18,7 +17,6 @@ internal class BillingInlineAutocompleteAddressInteractor(
         config = autocompleteConfig,
         coroutineScope = coroutineScope,
         eventListenerProvider = { eventListener },
-        shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
     )
 
     override val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState> =
@@ -43,7 +41,7 @@ internal class BillingInlineAutocompleteAddressInteractor(
     }
 
     override fun onEnterManuallyFromInline() {
-        eventListener?.invoke(AutocompleteAddressInteractor.Event.OnExpandForm(null))
+        inlineController.expandFormFromInline()
     }
 
     fun dispose() {

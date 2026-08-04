@@ -20,14 +20,14 @@ fun Icon(
 ) {
     BoxWithConstraints(modifier = modifier.clip(shape = RoundedCornerShape(3.dp))) {
         iconUrl?.let {
-                StripeImage(
-                    url = iconUrl,
-                    imageLoader = LocalStripeImageLoader.current,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit,
-                    errorContent = errorContent
-                )
+            StripeImage(
+                url = iconUrl,
+                imageLoader = LocalStripeImageLoader.current,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+                errorContent = errorContent
+            )
         } ?: errorContent()
     }
 }

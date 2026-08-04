@@ -365,6 +365,7 @@ class TapToAddHelperTest {
             updateSelection = updateSelection,
             customerStateHolder = customerStateHolder,
             linkSignupMode = stateFlowOf(linkSignupMode),
+            statusBarColor = null,
         )
     }
 

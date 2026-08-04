@@ -277,11 +277,23 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL(
             partialEventName = "embedded.embedded_sheet_launcher.embedded_state_is_null"
         ),
+        EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED(
+            partialEventName = "embedded.present_payment_options.not_configured"
+        ),
+        EMBEDDED_PRESENT_PAYMENT_OPTIONS_NO_LAUNCHER(
+            partialEventName = "embedded.present_payment_options.no_launcher"
+        ),
         WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM(
             partialEventName = "wallet_buttons.wallet_arguments.null_on_confirm"
         ),
         WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
             partialEventName = "wallet_buttons.confirmation_arguments.null_on_confirm"
+        ),
+        EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM(
+            partialEventName = "express_checkout_element.state.null_on_confirm"
+        ),
+        EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
+            partialEventName = "express_checkout_element.confirmation_arguments.null_on_confirm"
         ),
         INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL(
             partialEventName = "intent_confirmation_handler.passive_challenge.params_null"
@@ -342,6 +354,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PREFETCHED_PMS_NULL_FOR_EPHEMERAL_KEY(
             partialEventName = "payment_methods_prefetch.null_for_ephemeral_key"
+        ),
+        CHECKOUT_SELECTION_SET_BEFORE_LOAD(
+            partialEventName = "checkout.selection_set_before_load"
         );
 
         override val eventName: String

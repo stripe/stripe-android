@@ -1,9 +1,6 @@
 package com.stripe.android.paymentelement
 
-import com.google.android.gms.wallet.IsReadyToPayRequest
-import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -33,7 +30,6 @@ internal class EmbeddedPaymentElementTest {
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)
 
-    private val walletButtonsPage = WalletButtonsPage(testRules.compose)
     private val embeddedContentPage = EmbeddedContentPage(testRules.compose)
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
@@ -240,61 +236,6 @@ internal class EmbeddedPaymentElementTest {
 
             testContext.markTestSucceeded()
         }
-    }
-
-    @Test
-    fun testWalletButtonsShown() = runEmbeddedPaymentElementTest(
-        networkRule = networkRule,
-        showWalletButtons = true,
-        createIntentCallback = { _, shouldSavePaymentMethod ->
-            assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
-        },
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        GooglePayRepository.googlePayAvailabilityClientFactory = object : GooglePayAvailabilityClient.Factory {
-            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
-                return object : GooglePayAvailabilityClient {
-                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
-                        return true
-                    }
-                }
-            }
-        }
-
-        networkRule.elementsSession { response ->
-            response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
-        }
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
-
-        testContext.configure {
-            customer(
-                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "cuss_123",
-                )
-            )
-
-            googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "US",
-                )
-            )
-        }
-
-        testContext.consumePaymentOptionEvent("google_pay", "Google Pay")
-
-        walletButtonsPage.assertLinkIsDisplayed()
-        walletButtonsPage.assertGooglePayIsDisplayed()
-
-        testContext.markTestSucceeded()
     }
 
     @Test

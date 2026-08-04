@@ -26,6 +26,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -38,11 +39,15 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 class PaymentMethodViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Before
     fun setUp() {
@@ -284,6 +289,6 @@ class PaymentMethodViewModelTest {
                 dismissalCoordinator = dismissalCoordinator,
                 linkLaunchMode = LinkLaunchMode.Full
             ),
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

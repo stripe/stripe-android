@@ -1,3 +1,5 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.link
 
 import android.os.Parcel
@@ -19,13 +21,14 @@ import kotlinx.parcelize.TypeParceler
  * @param primaryButton Configuration for primary button styling (corner radius, height).
  *
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@LinkControllerPreview
 class LinkAppearance {
 
     private var lightColors: Colors? = null
     private var darkColors: Colors? = null
     private var style: Style = Style.AUTOMATIC
     private var primaryButton: PrimaryButton? = null
+    private var reduceLinkBranding: Boolean = false
 
     fun lightColors(lightColors: Colors) = apply {
         this.lightColors = lightColors
@@ -43,6 +46,10 @@ class LinkAppearance {
         this.primaryButton = primaryButton
     }
 
+    fun reduceLinkBranding(reduceLinkBranding: Boolean) = apply {
+        this.reduceLinkBranding = reduceLinkBranding
+    }
+
     @Poko
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -51,6 +58,7 @@ class LinkAppearance {
         val darkColors: Colors.State,
         val style: Style,
         val primaryButton: PrimaryButton.State,
+        val reduceLinkBranding: Boolean,
     ) : Parcelable
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -60,13 +68,14 @@ class LinkAppearance {
             darkColors = (darkColors ?: Colors()).build(isDark = true),
             style = style,
             primaryButton = (primaryButton ?: PrimaryButton()).build(),
+            reduceLinkBranding = reduceLinkBranding,
         )
     }
 
     /**
      * Color configuration for Link components.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     class Colors {
         private var primary: Color? = null
         private var contentOnPrimary: Color? = null
@@ -108,7 +117,7 @@ class LinkAppearance {
      * The light/dark mode style of the appearance.
      */
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     enum class Style : Parcelable {
         AUTOMATIC,
         ALWAYS_LIGHT,
@@ -118,7 +127,7 @@ class LinkAppearance {
     /**
      * Configuration for primary button styling.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     class PrimaryButton {
         private var cornerRadiusDp: Float? = null
         private var heightDp: Float? = null

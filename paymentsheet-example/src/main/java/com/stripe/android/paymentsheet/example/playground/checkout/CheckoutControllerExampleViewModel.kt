@@ -12,7 +12,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutSession
+import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.checkout.GooglePayConfiguration.Environment
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,7 +50,7 @@ internal class CheckoutControllerExampleViewModel(
         viewModelScope.launch {
             controller.checkoutSession.collect { session ->
                 updateConfiguredState { it.copy(checkoutSession = session) }
-                if (session?.status == CheckoutSession.Status.Complete) {
+                if (session?.status == Session.Status.Complete) {
                     _sessionComplete.tryEmit(Unit)
                 }
             }
@@ -65,7 +67,15 @@ internal class CheckoutControllerExampleViewModel(
     private suspend fun fetchAndConfigure() {
         repository.fetchCheckoutSessionClientSecret().fold(
             onSuccess = { clientSecret ->
-                controller.configure(clientSecret).fold(
+                controller.configure(
+                    checkoutSessionClientSecret = clientSecret,
+                    configuration = CheckoutController.Configuration()
+                        .googlePayConfiguration(
+                            GooglePayConfiguration(
+                                environment = Environment.Test
+                            )
+                        )
+                ).fold(
                     onSuccess = {
                         _status.value = Status.Configured(
                             checkoutSession = controller.checkoutSession.value,
@@ -92,7 +102,7 @@ internal class CheckoutControllerExampleViewModel(
     sealed interface Status {
         data object Loading : Status
         data class Configured(
-            val checkoutSession: CheckoutSession?,
+            val checkoutSession: Session?,
         ) : Status
         data class Error(val message: String) : Status
     }

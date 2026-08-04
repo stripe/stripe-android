@@ -35,6 +35,7 @@ internal class PollingActivity : AppCompatActivity() {
             ctaText = args.ctaText,
             stripeAccountId = args.stripeAccountId,
             qrCodeUrl = args.qrCodeUrl,
+            paymentMethodType = args.paymentMethodType,
         )
     }
 

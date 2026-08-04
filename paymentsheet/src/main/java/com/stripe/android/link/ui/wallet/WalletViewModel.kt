@@ -659,7 +659,7 @@ private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): R
             is SetupIntent -> R.string.stripe_wallet_continue_another_way.resolvableString
         }
         is LinkLaunchMode.PaymentMethodSelection -> {
-            if (linkLaunchMode.shouldShowSecondaryCta) {
+            if (linkLaunchMode.canContinueWithoutLink) {
                 R.string.stripe_wallet_continue_another_way.resolvableString
             } else {
                 null

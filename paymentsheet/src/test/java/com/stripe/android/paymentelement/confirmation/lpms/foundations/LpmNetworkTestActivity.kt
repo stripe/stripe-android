@@ -33,7 +33,6 @@ import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfir
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -203,10 +202,6 @@ internal interface LpmNetworkTestModule {
         }
 
         @Provides
-        @Named(STATUS_BAR_COLOR)
-        fun providesStatusBarColor(): Int? = STATUS_BAR_COLOR_VALUE
-
-        @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = ENABLE_LOGGING_VALUE
 
@@ -222,7 +217,6 @@ internal interface LpmNetworkTestModule {
             }
         }
 
-        private val STATUS_BAR_COLOR_VALUE = null
         private const val ENABLE_LOGGING_VALUE = false
     }
 }

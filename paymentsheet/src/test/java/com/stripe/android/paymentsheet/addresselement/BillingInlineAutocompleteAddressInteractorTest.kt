@@ -2,8 +2,8 @@ package com.stripe.android.paymentsheet.addresselement
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.model.Address
+import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -25,7 +25,7 @@ class BillingInlineAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `onEnterManuallyFromInline emits OnExpandForm with null values`() = runScenario {
+    fun `onEnterManuallyFromInline emits OnExpandForm with null values when query is empty`() = runScenario {
         interactor.onEnterManuallyFromInline()
 
         assertThat(eventCalls.awaitItem())
@@ -36,20 +36,24 @@ class BillingInlineAutocompleteAddressInteractorTest {
     fun `onPredictionSelected forwards the resulting event to the registered listener`() = runScenario {
         // Address-mapping detail is covered by InlineAutocompleteControllerTest; here we only
         // verify the event the controller produces reaches the listener wired via register().
-        fakePlacesClient.fetchPlaceResult = Result.success(FetchPlaceResponse(Place(emptyList())))
+        fakePlacesClient.fetchPlaceResult = Result.success(Address())
 
         interactor.onPredictionSelected("place_1")
         advanceTimeBy(100)
 
-        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem()).isEqualTo("place_1")
+        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
+        fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(eventCalls.awaitItem())
-            .isInstanceOf(AutocompleteAddressInteractor.Event.OnValues::class.java)
+            .isInstanceOf(AutocompleteAddressInteractor.Event.OnExpandForm::class.java)
     }
 
     private fun runScenario(
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
-        val fakePlaces = FakePlacesClientProxy()
+        val fakePlaces = FakePlacesClientProxy(
+            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+            fetchPlaceResult = Result.success(Address()),
+        )
         val eventCalls = Turbine<AutocompleteAddressInteractor.Event>()
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",
@@ -61,7 +65,6 @@ class BillingInlineAutocompleteAddressInteractorTest {
             placesClient = fakePlaces,
             autocompleteConfig = config,
             coroutineScope = backgroundScope,
-            shouldUseAutocompleteProxyEndpoints = false,
         )
         interactor.register { event -> eventCalls.add(event) }
 

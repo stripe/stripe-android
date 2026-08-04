@@ -11,7 +11,6 @@ import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromot
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.DurationProvider
@@ -102,6 +101,12 @@ internal interface PaymentElementLoader {
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
+
+        data class StandaloneLink(
+            val configuration: LinkController.Configuration.State
+        ) : Configuration {
+            override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
+        }
     }
 
     sealed class InitializationMode : Parcelable {
@@ -118,6 +123,16 @@ internal interface PaymentElementLoader {
             } else {
                 null
             }
+        }
+
+        /**
+         * Deliberately narrower than [walletsDisabledReason]: true only while an address is
+         * still needed, not for the rest of the session once tax is satisfied.
+         */
+        fun requiresBillingAddressForAutomaticTax(): Boolean {
+            val checkoutSession = this as? CheckoutSession ?: return false
+            return checkoutSession.checkoutSessionResponse.taxStatus ==
+                CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
         }
 
         enum class WalletsDisabledReason {
@@ -191,13 +206,28 @@ internal interface PaymentElementLoader {
         }
 
         @Parcelize
-        object CryptoOnramp : InitializationMode() {
+        data class CryptoOnramp(
+            val paymentMethodTypes: List<String>? = null,
+        ) : InitializationMode() {
             override fun validate() {
                 // Nothing to validate.
             }
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return IntegrationMetadata.CryptoOnramp
+            }
+        }
+
+        @Parcelize
+        data class StandaloneLink(
+            val paymentMethodTypes: List<String>? = null,
+        ) : InitializationMode() {
+            override fun validate() {
+                // Nothing to validate.
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.StandaloneLink
             }
         }
 
@@ -268,7 +298,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
     private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
-    private val isNfcScanningAvailable: IsNfcScanningAvailable,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -297,6 +326,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             isLiveMode = paymentConfiguration.get().isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
@@ -564,7 +594,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(elementsSession, customerMetadata)
-        val isNfcScanningAvailable = isNfcScanningAvailable.get(elementsSession, customerMetadata)
 
         val analyticsMetadata = analyticsMetadataFactory.create(
             initializationMode = initializationMode,
@@ -595,7 +624,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
-            isNfcScanningEnabled = isNfcScanningAvailable,
             paymentMethodLayout = paymentMethodLayout,
         )
 
@@ -608,6 +636,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): PaymentMethodLayout {
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.StandaloneLink,
             is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
             is PaymentElementLoader.Configuration.PaymentSheet ->
                 if (

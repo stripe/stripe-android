@@ -20,6 +20,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorE
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -36,6 +37,9 @@ internal class IntentConfirmationChallengeViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `when Ready event is received, bridgeReady emits value`() = testScenario {
@@ -304,7 +308,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         requestOptions = REQUEST_OPTIONS,
         fireAndForgetScope = TestScope(testDispatcher),
         logger = Logger.noop(),
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     private class FakeStripeRepository(
         private val cancelResult: Result<StripeIntent>,

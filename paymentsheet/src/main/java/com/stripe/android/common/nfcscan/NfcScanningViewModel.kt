@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.common.nfcscan.analytics.NfcScanCancellationReason
 import com.stripe.android.common.nfcscan.analytics.NfcScanningEventReporter
 import com.stripe.android.common.nfcscan.scanner.NfcCardScanner
 import com.stripe.android.common.nfcscan.scanner.ScannedCardData
 import com.stripe.android.common.nfcscan.tapzone.TapZoneResolver
+import com.stripe.android.common.nfcscan.ui.HapticFeedbackType
 import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
@@ -27,12 +29,13 @@ internal class NfcScanningViewModel @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     tapZoneResolver: TapZoneResolver,
     private val cardScanner: NfcCardScanner,
+    private val timeoutManager: NfcScanningTimeoutManager,
     private val eventReporter: NfcScanningEventReporter,
 ) : ViewModel() {
     private val tapZone = tapZoneResolver.get()
 
-    private val _result = MutableSharedFlow<NfcScanningContract.Result>()
-    val result = _result.asSharedFlow()
+    private val _event = MutableSharedFlow<NfcScanningEvent>()
+    val event = _event.asSharedFlow()
 
     private val _viewState = MutableStateFlow(
         NfcScanningViewState(
@@ -44,14 +47,19 @@ internal class NfcScanningViewModel @Inject constructor(
 
     private var pendingValidCardData: ScannedCardData? = null
     private var successShownDispatched = false
+    private var isFlowClosed = false
+    private var numberOfAttempts = 0
 
     init {
         eventReporter.onNfcScanStarted()
+        timeoutManager.start()
 
         viewModelScope.launch {
             cardScanner.state.collectLatest { state ->
                 when (state) {
                     is NfcCardScanner.State.Scanning -> {
+                        timeoutManager.reset()
+
                         _viewState.emit(
                             NfcScanningViewState(
                                 tapZone = tapZone,
@@ -59,9 +67,14 @@ internal class NfcScanningViewModel @Inject constructor(
                             )
                         )
 
+                        numberOfAttempts++
                         eventReporter.onNfcScanAttemptStarted()
                     }
                     is NfcCardScanner.State.Failed -> {
+                        timeoutManager.reset()
+
+                        _event.emit(NfcScanningEvent.TriggerHapticFeedback(HapticFeedbackType.Failed))
+
                         val error = state.error
 
                         _viewState.emit(
@@ -71,9 +84,16 @@ internal class NfcScanningViewModel @Inject constructor(
                             )
                         )
 
-                        eventReporter.onNfcScanAttemptFailed(errorCode = error.code)
+                        eventReporter.onNfcScanAttemptFailed(
+                            errorCode = error.code,
+                            parameters = error.parameters,
+                        )
                     }
                     is NfcCardScanner.State.Complete -> {
+                        timeoutManager.cancel()
+
+                        _event.emit(NfcScanningEvent.TriggerHapticFeedback(HapticFeedbackType.Success))
+
                         _viewState.emit(
                             NfcScanningViewState(
                                 tapZone = tapZone,
@@ -88,6 +108,14 @@ internal class NfcScanningViewModel @Inject constructor(
                 }
             }
         }
+
+        viewModelScope.launch {
+            timeoutManager.timeout.collectLatest {
+                if (pendingValidCardData == null) {
+                    cancel(NfcScanCancellationReason.Timeout)
+                }
+            }
+        }
     }
 
     fun register(activity: AppCompatActivity) {
@@ -98,8 +126,7 @@ internal class NfcScanningViewModel @Inject constructor(
         when (viewAction) {
             is NfcScanningViewAction.Close -> {
                 viewModelScope.launch {
-                    eventReporter.onNfcScanCancelled()
-                    _result.emit(NfcScanningContract.Result.Canceled)
+                    cancel(NfcScanCancellationReason.UserInitiated)
                 }
             }
             is NfcScanningViewAction.SuccessShown -> {
@@ -107,14 +134,16 @@ internal class NfcScanningViewModel @Inject constructor(
                     return
                 }
                 successShownDispatched = true
-                eventReporter.onNfcScanSucceeded()
+                eventReporter.onNfcScanSucceeded(numberOfAttempts)
                 viewModelScope.launch {
                     pendingValidCardData?.let { cardData ->
-                        _result.emit(
-                            NfcScanningContract.Result.Complete(
-                                cardNumber = cardData.cardNumber,
-                                expirationYear = cardData.expirationYear,
-                                expirationMonth = cardData.expirationMonth,
+                        _event.emit(
+                            NfcScanningEvent.CloseWithResult(
+                                NfcScanningContract.Result.Complete(
+                                    cardNumber = cardData.cardNumber,
+                                    expirationYear = cardData.expirationYear,
+                                    expirationMonth = cardData.expirationMonth,
+                                )
                             )
                         )
                     }
@@ -124,8 +153,23 @@ internal class NfcScanningViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        timeoutManager.cancel()
         viewModelScope.cancel()
         super.onCleared()
+    }
+
+    private suspend fun cancel(reason: NfcScanCancellationReason) {
+        if (isFlowClosed) {
+            return
+        }
+
+        isFlowClosed = true
+        timeoutManager.cancel()
+        eventReporter.onNfcScanCancelled(
+            reason = reason,
+            numberOfAttempts = numberOfAttempts,
+        )
+        _event.emit(NfcScanningEvent.CloseWithResult(NfcScanningContract.Result.Canceled))
     }
 
     companion object {

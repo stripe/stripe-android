@@ -7,6 +7,6 @@ Use:
   `./scripts/deploy/propose_release.rb`
   `./scripts/deploy/deploy_release.rb`
 
-`propose release` creates the version bump branch, signed tag, and PR handoff.
-`deploy release` publishes from the existing signed tag after the version bump PR is merged.
+`propose release` creates the version bump branch and PR handoff.
+`deploy release` creates the signed tag from the merged version bump PR and publishes it.
 EOS

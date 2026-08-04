@@ -90,6 +90,9 @@ internal data class ElementsSession(
     val isTapToAddEnabled: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED] == true
 
+    val isNfcScanningEnabled: Boolean
+        get() = flags[Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED] == true
+
     val isLinkInlineSignupWithSavedPaymentMethodsEnabled: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED] == true
 
@@ -245,6 +248,7 @@ internal data class ElementsSession(
         ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION("elements_mobile_attest_on_intent_confirmation"),
         ELEMENTS_MOBILE_CARD_FUND_FILTERING("elements_mobile_card_funding_filtering"),
         ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED("elements_mobile_android_tap_to_add_enabled"),
+        ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED("elements_mobile_android_nfc_scanning_enabled"),
         ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED(
             "elements_mobile_link_inline_signup_with_saved_pm_enabled"
         ),
@@ -266,6 +270,7 @@ internal data class ElementsSession(
         LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
         LINK_GLOBAL_HOLD_BACK_AA("link_global_holdback_aa"),
         LINK_AB_TEST("link_ab_test"),
+        OCS_MOBILE_NFC_SCANNING_FEATURE_HOLDBACK("ocs_mobile_nfc_scanning_feature_holdback"),
         OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS("ocs_mobile_payment_method_messaging_promotions"),
         CONNECTIONS_FC_LITE_VS_NATIVE("connections_fc_lite_vs_native"),
         CONNECTIONS_FC_LITE_VS_NATIVE_AA("connections_fc_lite_vs_native_aa"),

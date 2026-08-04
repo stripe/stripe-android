@@ -29,6 +29,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.DocumentScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -55,6 +56,9 @@ import java.io.File
 class DocumentScanScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val mockNavController = mock<NavController>()
@@ -207,7 +211,7 @@ class DocumentScanScreenTest {
     }
 
     @Test
-    fun verifyManualCaptureControlHiddenWhenLiveCaptureRequired() {
+    fun verifyManualCaptureControlShownWhenLiveCaptureRequired() {
         pageAndModelFilesLiveData.value = Resource.success(
             createPageAndModelFiles(requireLiveCapture = true)
         )
@@ -215,8 +219,9 @@ class DocumentScanScreenTest {
         testDocumentScanScreen(
             scannerState = IdentityScanViewModel.State.Scanning(),
         ) {
-            onNodeWithTag(CAPTURE_MODE_CONTROL_TAG).assertDoesNotExist()
-            onNodeWithTag(MANUAL_CAPTURE_MODE_TAG).assertDoesNotExist()
+            onNodeWithTag(CAPTURE_MODE_CONTROL_TAG).assertExists()
+            onNodeWithTag(LIVE_CAPTURE_MODE_TAG).assertExists().assertIsEnabled()
+            onNodeWithTag(MANUAL_CAPTURE_MODE_TAG).assertExists().assertIsEnabled()
             verify(mockDocumentScanViewModel).startScan(
                 eq(IdentityScanState.ScanType.DOC_FRONT),
                 any()
@@ -224,6 +229,56 @@ class DocumentScanScreenTest {
             verify(mockDocumentScanViewModel, never()).startManualCapture(
                 any(),
                 any()
+            )
+        }
+    }
+
+    @Test
+    fun verifyManualCaptureCanBeActivatedWhenLiveCaptureRequired() {
+        whenever(mockDocumentScanViewModel.captureManualResult(any())).thenReturn(
+            CameraPreviewImage(
+                image = mock(),
+                viewBounds = Rect()
+            )
+        )
+        pageAndModelFilesLiveData.value = Resource.success(
+            createPageAndModelFiles(requireLiveCapture = true)
+        )
+
+        testDocumentScanScreen(
+            targetScanType = IdentityScanState.ScanType.DOC_FRONT,
+            scannerState = IdentityScanViewModel.State.Scanning(),
+        ) {
+            onNodeWithTag(MANUAL_CAPTURE_MODE_TAG).performClick()
+            waitForIdle()
+
+            verify(mockDocumentScanViewModel).startManualCapture(
+                eq(IdentityScanState.ScanType.DOC_FRONT),
+                any()
+            )
+            onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertTextEquals(
+                context.getString(R.string.stripe_take_photo).uppercase()
+            )
+            onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
+
+            latestManualCaptureFrameFlow.update {
+                CameraPreviewImage(
+                    image = mock(),
+                    viewBounds = Rect()
+                )
+            }
+            waitForIdle()
+
+            onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsEnabled()
+            onNodeWithTag(CONTINUE_BUTTON_TAG).performClick()
+
+            verify(mockDocumentScanViewModel).captureManualResult(any())
+            verify(mockIdentityViewModel).uploadManualResult(
+                any<Bitmap>(),
+                eq(true),
+                any<VerificationPageStaticContentDocumentCapturePage>(),
+                eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE),
+                eq(IdentityScanState.ScanType.DOC_FRONT)
             )
         }
     }

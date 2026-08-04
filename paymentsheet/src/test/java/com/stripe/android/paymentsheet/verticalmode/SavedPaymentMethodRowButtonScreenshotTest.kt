@@ -208,6 +208,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                     )
                 )
             ),
-            )
+        )
     }
 }

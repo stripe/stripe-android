@@ -7,8 +7,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.R
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -32,6 +35,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -42,7 +46,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -51,6 +57,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
+
+    private val closeInteractorRule = CleanupTestRule(PaymentMethodVerticalLayoutInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(closeInteractorRule)
 
     @Test
     fun state_updatesWhenProcessingUpdates() = runScenario {
@@ -62,6 +74,21 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             awaitItem().run {
                 assertThat(isProcessing).isTrue()
             }
+        }
+    }
+
+    @Test
+    fun state_usesLinkAccountBrand() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link),
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Link)
+
+            linkAccountSource.value = LinkAccountUpdate.Value(
+                LinkAccount(TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink)),
+            )
+
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Onelink)
         }
     }
 
@@ -1497,6 +1524,40 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun `updateMandateText receives updates while open and stops after close`() {
+        val paymentMethodTypes = listOf("card", "cashapp")
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes
+            )
+        )
+        val mandateTurbine = Turbine<Pair<ResolvableString?, Boolean>>()
+        runScenario(
+            paymentMethodMetadata = paymentMethodMetadata,
+            formTypeForCode = { FormHelper.FormType.MandateOnly("Foobar".resolvableString) },
+            updateMandateText = { mandateText, showAbove ->
+                mandateTurbine.add(mandateText to showAbove)
+            },
+        ) {
+            // Initial mandate (no selection) is pushed through the callback.
+            assertThat(mandateTurbine.awaitItem()).isEqualTo(null to true)
+
+            // Selecting a payment method with a mandate pushes the updated text.
+            selectionSource.value = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+            assertThat(mandateTurbine.awaitItem()).isEqualTo("Foobar".resolvableString to true)
+
+            // After close(), the collectors are cancelled along with the interactor's scope, so
+            // further mandate changes are no longer pushed. Guards against the previous behavior
+            // where these collectors ran on the viewModelScope and outlived the screen.
+            interactor.close()
+            selectionSource.value = null
+            testScope.testScheduler.advanceUntilIdle()
+            mandateTurbine.expectNoEvents()
+            mandateTurbine.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun temporarySelection_doesNotAllowChangeDetails_whenSavedCardIsSelected() = runScenario(
         formTypeForCode = {
             FormHelper.FormType.UserInteractionRequired
@@ -1842,6 +1903,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         invokeRowSelectionCallback: (() -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
+        updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)? = null,
         promotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -1852,6 +1914,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> =
             MutableStateFlow(initialMostRecentlySelectedSavedPaymentMethod)
         val walletsState = MutableStateFlow(initialWalletsState)
+        val linkAccount = MutableStateFlow(LinkAccountUpdate.Value(account = null))
         val canRemove = MutableStateFlow(true)
         val isCurrentScreen: MutableStateFlow<Boolean> = MutableStateFlow(initialIsCurrentScreen)
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(incentive)
@@ -1911,8 +1974,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     Pair(visibleItems, hiddenItems)
                 )
             },
+            updateMandateText = updateMandateText,
+            linkAccount = linkAccount,
             paymentMethodMessagePromotionsHelper = promotionsHelper
         )
+        closeInteractorRule.track(interactor)
 
         TestParams(
             selection = selection,
@@ -1924,6 +1990,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             mostRecentlySelectedSavedPaymentMethodSource = mostRecentlySelectedSavedPaymentMethod,
             paymentMethodsSource = paymentMethods,
             walletsState = walletsState,
+            linkAccountSource = linkAccount,
             interactor = interactor,
             canRemove = canRemove,
             transitionToManageScreenTurbine = transitionToManageScreenTurbine,
@@ -1951,6 +2018,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val mostRecentlySelectedSavedPaymentMethodSource: MutableStateFlow<PaymentMethod?>,
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>>,
         val walletsState: MutableStateFlow<WalletsState?>,
+        val linkAccountSource: MutableStateFlow<LinkAccountUpdate.Value>,
         val canRemove: MutableStateFlow<Boolean>,
         val interactor: PaymentMethodVerticalLayoutInteractor,
         val transitionToManageScreenTurbine: ReceiveTurbine<Unit>,

@@ -95,9 +95,6 @@ internal interface NativeLinkComponent {
             @BindsInstance
             savedStateHandle: SavedStateHandle,
             @BindsInstance
-            @Named(STATUS_BAR_COLOR)
-            statusBarColor: Int?,
-            @BindsInstance
             application: Application,
             @BindsInstance
             @Named(LINK_EXPRESS_MODE)
@@ -108,6 +105,9 @@ internal interface NativeLinkComponent {
             linkAccountUpdate: LinkAccountUpdate.Value,
             @BindsInstance
             requestSurface: RequestSurface,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
         ): NativeLinkComponent
     }
 }

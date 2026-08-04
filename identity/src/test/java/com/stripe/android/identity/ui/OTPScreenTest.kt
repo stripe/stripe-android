@@ -27,6 +27,7 @@ import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.OTPViewModel
 import com.stripe.android.identity.viewmodel.OTPViewState
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -52,6 +53,9 @@ import org.robolectric.annotation.Config
 class OTPScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val verificationPageOTP = mock<VerificationPage>().also {
         whenever(it.phoneOtp).thenReturn(

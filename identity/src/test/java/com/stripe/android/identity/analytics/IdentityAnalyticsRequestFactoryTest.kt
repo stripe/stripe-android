@@ -31,8 +31,10 @@ import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.testing.CleanupTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
@@ -49,6 +51,10 @@ import org.robolectric.RobolectricTestRunner
 class IdentityAnalyticsRequestFactoryTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     private val mockIdentityRepository = mock<IdentityRepository>()
     private val mockArgs = mock<IdentityVerificationSheetContract.Args> {
         on { verificationSessionId }.thenReturn(VERIFICATION_SESSION)
@@ -59,7 +65,7 @@ class IdentityAnalyticsRequestFactoryTest {
         ApplicationProvider.getApplicationContext(),
         mockArgs,
         mockIdentityRepository,
-        CoroutineScope(UnconfinedTestDispatcher())
+        coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher()))
     )
 
     private val mockPageScreenPresented = mock<VerificationPage> {

@@ -34,6 +34,7 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.testing.fakeCreationExtras
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -62,6 +63,9 @@ import kotlin.test.assertNotNull
 class PaymentLauncherViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     internal class TestFragment : Fragment()
 
@@ -132,7 +136,7 @@ class PaymentLauncherViewModelTest {
             durationProvider,
         ).apply {
             register(activityResultCaller, lifecycleOwner)
-        }
+        }.also { viewModelStoreRule.track(it) }
 
     @Before
     fun setUpMocks() = runTest {

@@ -19,7 +19,9 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveIntera
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.job
 import javax.inject.Inject
 
 internal class EmbeddedFormInteractorFactory @Inject constructor(
@@ -36,8 +38,11 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         paymentMethodCode: PaymentMethodCode,
         hasSavedPaymentMethods: Boolean
     ): DefaultVerticalModeFormInteractor {
+        val formScope = CoroutineScope(
+            viewModelScope.coroutineContext + SupervisorJob(viewModelScope.coroutineContext.job)
+        )
         val formHelper = embeddedFormHelperFactory.create(
-            coroutineScope = viewModelScope,
+            coroutineScope = formScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             automaticallyLaunchedCardScanFormDataHelper =
@@ -45,7 +50,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
                     selectedPaymentMethodCode = paymentMethodCode,
                     paymentMethodMetadata = paymentMethodMetadata,
                 ),
-            selectionUpdater = { embeddedSelectionHolder.set(it) },
+            selectionUpdater = { embeddedSelectionHolder.setSelection(it) },
             tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
@@ -60,7 +65,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         val formType = formHelper.formTypeForCode(paymentMethodCode)
         val formArguments = formHelper.createFormArguments(paymentMethodCode)
         if (formType is FormHelper.FormType.MandateOnly) {
-            embeddedSelectionHolder.set(
+            embeddedSelectionHolder.setSelection(
                 formArguments.noUserInteractionFormFieldValues().transformToPaymentSelection(
                     paymentMethod = requireNotNull(
                         paymentMethodMetadata.supportedPaymentMethodForCode(code = paymentMethodCode)
@@ -87,7 +92,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             ).displayedIncentive,
             // Embedded does not support validation at the moment. Should update here once it does.
             validationRequested = MutableSharedFlow(),
-            coroutineScope = viewModelScope,
+            coroutineScope = formScope,
             uiContext = Dispatchers.Main,
         )
     }
@@ -100,7 +105,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            setSelection = embeddedSelectionHolder::set,
+            setSelection = embeddedSelectionHolder::setSelection,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->

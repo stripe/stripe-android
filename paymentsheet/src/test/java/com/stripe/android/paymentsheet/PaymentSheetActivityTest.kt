@@ -33,23 +33,20 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CardBrandFilter
-import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.CheckoutInstances
-import com.stripe.android.checkout.CheckoutStateFactory
-import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -63,8 +60,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
@@ -74,6 +69,8 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
@@ -99,6 +96,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
@@ -106,6 +104,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -117,6 +116,7 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -140,7 +140,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
-@OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentSheetActivityTest {
@@ -160,12 +159,14 @@ internal class PaymentSheetActivityTest {
     @get:Rule
     val networkRule = NetworkRule()
 
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val googlePayPaymentMethodLauncherFactory =
-        createGooglePayPaymentMethodLauncherFactory()
+    private val googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory()
 
     private val paymentLauncherFactory = PaymentLauncherFactory(
         hostActivityLauncher = mock(),
@@ -211,36 +212,7 @@ internal class PaymentSheetActivityTest {
     @AfterTest
     fun cleanup() {
         WeakMapInjectorRegistry.clear()
-        CheckoutInstances.clear()
         Dispatchers.resetMain()
-    }
-
-    @Test
-    fun `onDestroy clears checkout integration launched flag`() {
-        val checkout = CheckoutStateFactory.createCheckout(context)
-        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
-
-        val viewModel = createViewModel(
-            integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = "cs_test",
-                instancesKey = CheckoutStateFactory.DEFAULT_KEY,
-            ),
-        )
-        val scenario = activityScenario(viewModel)
-        scenario.launchForResult(intent).use {
-            it.onActivity { activity ->
-                pressBack()
-            }
-            composeTestRule.waitForIdle()
-        }
-
-        // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-
-        val result = runBlocking { checkout.applyPromotionCode("code") }
-        assertThat(result.isSuccess).isTrue()
     }
 
     @Test
@@ -1288,6 +1260,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Suppress("LongMethod")
     private fun createViewModel(
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
@@ -1307,13 +1280,12 @@ internal class PaymentSheetActivityTest {
             accountStatus = AccountStatus.SignedOut,
             email = "email@email.com"
         )
-
         TestViewModelFactory.create(
             linkConfigurationCoordinator = coordinator,
         ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
                 args = args,
-                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 eventReporter = eventReporter,
                 paymentElementLoader = FakePaymentElementLoader(
                     stripeIntent = paymentIntent,
@@ -1336,8 +1308,7 @@ internal class PaymentSheetActivityTest {
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                     paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
-                    intentConfirmationInterceptorFactory =
-                    object : IntentConfirmationInterceptor.Factory {
+                    intentConfirmationInterceptorFactory = object : IntentConfirmationInterceptor.Factory {
                         override suspend fun create(
                             integrationMetadata: IntegrationMetadata,
                             customerMetadata: CustomerMetadata?,
@@ -1365,15 +1336,17 @@ internal class PaymentSheetActivityTest {
                         args: Args,
                         processing: StateFlow<Boolean>,
                         coroutineScope: CoroutineScope,
-                    ): CvcRecollectionInteractor {
-                        return FakeCvcRecollectionInteractor()
-                    }
+                    ): CvcRecollectionInteractor = FakeCvcRecollectionInteractor()
                 },
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
+                linkAccountHolder = LinkAccountHolder(savedStateHandle),
+                stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )
         }.also { viewModelStoreRule.track(it) }
     }
@@ -1403,19 +1376,11 @@ internal class PaymentSheetActivityTest {
     }
 
     private fun createGooglePayPaymentMethodLauncherFactory() =
-        object : GooglePayPaymentMethodLauncherFactory {
+        object : InternalGooglePayPaymentMethodLauncherFactory {
             override fun create(
-                lifecycleScope: CoroutineScope,
-                config: GooglePayPaymentMethodLauncher.Config,
-                readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
                 activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                skipReadyCheck: Boolean,
-                cardBrandFilter: CardBrandFilter,
-                cardFundingFilter: CardFundingFilter
-            ): GooglePayPaymentMethodLauncher {
-                val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
-                readyCallback.onReady(true)
-                return googlePayPaymentMethodLauncher
+            ): InternalGooglePayPaymentMethodLauncher {
+                return mock<InternalGooglePayPaymentMethodLauncher>()
             }
         }
 

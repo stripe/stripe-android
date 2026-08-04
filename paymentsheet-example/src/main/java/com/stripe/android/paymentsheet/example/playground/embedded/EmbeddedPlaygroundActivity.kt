@@ -28,17 +28,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.TapToAddPreview
-import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -53,20 +50,15 @@ import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationT
 import com.stripe.android.paymentsheet.example.playground.settings.DropdownSetting
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRowSelectionBehaviorSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
-import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
-import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import kotlinx.coroutines.launch
 
 @OptIn(
     ExperimentalAnalyticEventCallbackApi::class,
-    WalletButtonsPreview::class,
     TapToAddPreview::class,
-    CheckoutSessionPreview::class,
 )
 internal class EmbeddedPlaygroundActivity :
     AppCompatActivity(),
@@ -76,19 +68,16 @@ internal class EmbeddedPlaygroundActivity :
     CreateCardPresentSetupIntentCallback {
     companion object {
         private const val PLAYGROUND_STATE_KEY = "playgroundState"
-        private const val CHECKOUT_STATE_KEY = "checkoutState"
         const val EMBEDDED_PAYMENT_ELEMENT_STATE_KEY = "EMBEDDED_PAYMENT_ELEMENT_STATE_KEY"
 
         fun create(
             context: Context,
             playgroundState: PlaygroundState.Payment,
             embeddedPaymentElementState: EmbeddedPaymentElement.State? = null,
-            checkoutState: Checkout.State? = null,
         ): Intent {
             return Intent(context, EmbeddedPlaygroundActivity::class.java).apply {
                 putExtra(PLAYGROUND_STATE_KEY, playgroundState)
                 putExtra(EMBEDDED_PAYMENT_ELEMENT_STATE_KEY, embeddedPaymentElementState)
-                putExtra(CHECKOUT_STATE_KEY, checkoutState)
             }
         }
     }
@@ -97,7 +86,6 @@ internal class EmbeddedPlaygroundActivity :
     private lateinit var playgroundState: PlaygroundState.Payment
     private lateinit var playgroundSettings: PlaygroundSettings
     private lateinit var embeddedPaymentElement: EmbeddedPaymentElement
-    private var checkout: Checkout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,7 +97,6 @@ internal class EmbeddedPlaygroundActivity :
         }
         this.playgroundState = initialPlaygroundState
         this.playgroundSettings = initialPlaygroundState.snapshot.playgroundSettings()
-        this.checkout = getCheckout()
 
         val embeddedBuilder = createBuilder()
             .confirmCustomPaymentMethodCallback(this)
@@ -134,17 +121,10 @@ internal class EmbeddedPlaygroundActivity :
 
             fun configure() = coroutineScope.launch {
                 loadingState = LoadingState.Loading
-                val result = if (playgroundState.initializationType == InitializationType.CheckoutSession) {
-                    embeddedPaymentElement.configure(
-                        checkout = requireNotNull(checkout),
-                        configuration = playgroundState.embeddedConfiguration(),
-                    )
-                } else {
-                    embeddedPaymentElement.configure(
-                        intentConfiguration = playgroundState.intentConfiguration(),
-                        configuration = playgroundState.embeddedConfiguration(),
-                    )
-                }
+                val result = embeddedPaymentElement.configure(
+                    intentConfiguration = playgroundState.intentConfiguration(),
+                    configuration = playgroundState.embeddedConfiguration(),
+                )
                 loadingState = when (result) {
                     is EmbeddedPaymentElement.ConfigureResult.Failed -> {
                         LoadingState.Failed(result.error.message ?: "Unknown error")
@@ -166,9 +146,6 @@ internal class EmbeddedPlaygroundActivity :
             BottomSheetContent(
                 loadingState = loadingState,
                 configure = ::configure,
-                showWalletButtons =
-                playgroundState.snapshot[WalletButtonsSettingsDefinition] !=
-                    WalletButtonsPlaygroundType.Disabled,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             )
         }
@@ -180,14 +157,12 @@ internal class EmbeddedPlaygroundActivity :
     private fun BottomSheetContent(
         loadingState: LoadingState,
         configure: () -> Unit,
-        showWalletButtons: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         PlaygroundTheme(
             content = {
                 loadingState.Content(
                     embeddedPaymentElement = embeddedPaymentElement,
-                    showWalletButtons = showWalletButtons,
                     retry = configure
                 )
             },
@@ -344,12 +319,6 @@ internal class EmbeddedPlaygroundActivity :
     }
 
     @Suppress("DEPRECATION")
-    private fun getCheckout(): Checkout? {
-        return intent.getParcelableExtra<Checkout.State?>(CHECKOUT_STATE_KEY)
-            ?.let { Checkout.createWithState(this, it) }
-    }
-
-    @Suppress("DEPRECATION")
     private fun getEmbeddedPaymentElementState(savedInstanceState: Bundle?): EmbeddedPaymentElement.State? {
         if (savedInstanceState != null) {
             return null // Only set the state the first time.
@@ -369,7 +338,6 @@ internal class EmbeddedPlaygroundActivity :
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
-                showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -383,19 +351,11 @@ internal class EmbeddedPlaygroundActivity :
             }
         }
         data object Complete : LoadingState() {
-            @OptIn(WalletButtonsPreview::class)
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
-                showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
-                if (showWalletButtons) {
-                    Box(modifier = Modifier.padding(bottom = 12.dp)) {
-                        embeddedPaymentElement.WalletButtons()
-                    }
-                }
-
                 Box(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
                     embeddedPaymentElement.Content()
                 }
@@ -405,7 +365,6 @@ internal class EmbeddedPlaygroundActivity :
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
-                showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
                 Text(message)
@@ -418,7 +377,6 @@ internal class EmbeddedPlaygroundActivity :
         @Composable
         abstract fun Content(
             embeddedPaymentElement: EmbeddedPaymentElement,
-            showWalletButtons: Boolean,
             retry: () -> Unit
         )
     }

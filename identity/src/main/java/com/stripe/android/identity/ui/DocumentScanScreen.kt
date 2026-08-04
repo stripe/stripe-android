@@ -99,7 +99,6 @@ internal fun DocumentScanScreen(
         identityViewModel = identityViewModel,
         navController = navController
     ) { pageAndModelFiles ->
-        val isManualCaptureAllowed = !pageAndModelFiles.page.documentCapture.requireLiveCapture
         var captureMode by rememberSaveable {
             mutableStateOf(CaptureMode.LIVE)
         }
@@ -111,7 +110,7 @@ internal fun DocumentScanScreen(
 
         fun startDocumentCapture(scanType: IdentityScanState.ScanType) {
             identityViewModel.updateNewScanType(scanType)
-            if (isManualCaptureAllowed && captureMode == CaptureMode.MANUAL) {
+            if (captureMode == CaptureMode.MANUAL) {
                 documentScanViewModel.startManualCapture(
                     scanType = scanType,
                     lifecycleOwner = lifecycleOwner
@@ -153,8 +152,7 @@ internal fun DocumentScanScreen(
                     documentScannerState = documentScannerState,
                     feedback = feedback,
                     targetScanType = targetScanType,
-                    captureMode = if (isManualCaptureAllowed) captureMode else CaptureMode.LIVE,
-                    isManualCaptureAllowed = isManualCaptureAllowed,
+                    captureMode = captureMode,
                     hasManualCaptureFrame = latestManualCaptureFrame != null,
                     identityScanViewModel = documentScanViewModel,
                     identityViewModel = identityViewModel,
@@ -162,7 +160,7 @@ internal fun DocumentScanScreen(
                     cameraManager = cameraManager,
                     documentScanViewModel = documentScanViewModel,
                     onCaptureModeChanged = { newMode ->
-                        if (!isManualCaptureAllowed || captureMode == newMode) {
+                        if (captureMode == newMode) {
                             return@DocumentCaptureScreen
                         }
                         documentScanViewModel.stopScan(lifecycleOwner)
@@ -212,7 +210,6 @@ private fun DocumentCaptureScreen(
     @StringRes feedback: Int?,
     targetScanType: IdentityScanState.ScanType?,
     captureMode: CaptureMode,
-    isManualCaptureAllowed: Boolean,
     hasManualCaptureFrame: Boolean,
     identityScanViewModel: IdentityScanViewModel,
     identityViewModel: IdentityViewModel,
@@ -224,9 +221,9 @@ private fun DocumentCaptureScreen(
     onContinueClick: () -> Unit
 ) {
     val collectedData by identityViewModel.collectedData.collectAsState()
-    val isManualCaptureMode = isManualCaptureAllowed && captureMode == CaptureMode.MANUAL
+    val isManualCaptureMode = captureMode == CaptureMode.MANUAL
 
-    LaunchedEffect(captureMode, isManualCaptureAllowed) {
+    LaunchedEffect(captureMode) {
         val scanType = if (collectedData.idDocumentFront != null) {
             IdentityScanState.ScanType.DOC_BACK
         } else {
@@ -292,14 +289,12 @@ private fun DocumentCaptureScreen(
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
         ) {
-            if (isManualCaptureAllowed) {
-                CaptureModeControl(
-                    captureMode = captureMode,
-                    enabled = documentScannerState !is IdentityScanViewModel.State.Scanned &&
-                        documentScannerState !is IdentityScanViewModel.State.ManualCaptured,
-                    onCaptureModeChanged = onCaptureModeChanged
-                )
-            }
+            CaptureModeControl(
+                captureMode = captureMode,
+                enabled = documentScannerState !is IdentityScanViewModel.State.Scanned &&
+                    documentScannerState !is IdentityScanViewModel.State.ManualCaptured,
+                onCaptureModeChanged = onCaptureModeChanged
+            )
             Text(
                 text = title,
                 modifier = Modifier

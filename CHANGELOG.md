@@ -3,8 +3,27 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.14.0 - 2026-08-03
+
+### CryptoOnramp
+* [ADDED] Added Tempo as a supported wallet network and pinned Crypto Onramp internal API calls to the preview API version required by newer networks.
+
+### PaymentSheet
+* [ADDED] `LinkController` now supports appearance customization via `LinkAppearance` (private preview).
+
+## 23.13.1 - 2026-07-23
+
+### Payments
+* [FIXED][13544](https://github.com/stripe/stripe-android/pull/13544) Fixed an issue where the SDK could fail to correctly reconcile and close out an Alipay payment in test mode.
+
+### PaymentSheet
+* [ADDED] Added `billingDetailsCollectionConfiguration` to `LinkController.Configuration` (private preview).
+
+## 23.13.0 - 2026-07-20
+
 ### Payments
 * [FIXED][7581](https://github.com/stripe/stripe-android/issues/7581) Declined card error messages from 3DS2 payment flows are now localized instead of always displaying the raw English message from the server.
+* [CHANGED] `LinkController` now requires calling `confirmSetupIntent` to confirm a SetupIntent after presenting the Link sheet (private preview).
 
 ## 23.12.0 - 2026-07-13
 

@@ -80,7 +80,15 @@ private fun rememberNfcCoilRingState(
     status: NfcScanningStatus,
     onSuccessShown: () -> Unit,
 ): NfcCoilRingProgress {
+    val onSuccessShown by rememberUpdatedState(onSuccessShown)
+
     if (LocalInspectionMode.current) {
+        LaunchedEffect(status) {
+            if (status == NfcScanningStatus.Scanned) {
+                onSuccessShown()
+            }
+        }
+
         return when (status) {
             NfcScanningStatus.Scanned -> NfcCoilRingProgress.Complete
             is NfcScanningStatus.Idle,
@@ -93,7 +101,6 @@ private fun rememberNfcCoilRingState(
     }
 
     val animatables = rememberRingAnimatables(savedState.progress)
-    val onSuccessShown by rememberUpdatedState(onSuccessShown)
 
     LaunchedEffect(status) {
         when (status) {
