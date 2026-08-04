@@ -222,7 +222,7 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `uploadManualResult test mode front uploads placeholder image`() = runBlocking {
+    fun `uploadManualResult test mode front uploads placeholder image`() = runBlocking<Unit> {
         mockUploadSuccess()
 
         viewModel.uploadManualResult(
@@ -245,7 +245,7 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `uploadManualResult test mode back uploads placeholder image`() = runBlocking {
+    fun `uploadManualResult test mode back uploads placeholder image`() = runBlocking<Unit> {
         mockUploadSuccess()
 
         viewModel.uploadManualResult(
@@ -315,7 +315,7 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `uploadScanResult test mode selfie uploads placeholder image`() = runBlocking {
+    fun `uploadScanResult test mode selfie uploads placeholder image`() = runBlocking<Unit> {
         mockUploadSuccess()
         val testModeVerificationPage = mock<VerificationPage> {
             on { selfieCapture }.thenReturn(SELFIE_CAPTURE)

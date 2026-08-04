@@ -25,6 +25,7 @@ import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.camera.framework.util.NANOS_PER_MILLI
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
@@ -811,14 +812,7 @@ internal class IdentityViewModel(
                         TestModeImage.DOCUMENT_BACK
                     }
                 )
-                var uploadTime = 0L
-                identityRepository.uploadImage(
-                    verificationId = verificationArgs.verificationSessionId,
-                    ephemeralKey = verificationArgs.ephemeralKeySecret,
-                    imageFile = fileToUpload,
-                    filePurpose = filePurpose,
-                    onSuccessExecutionTimeBlock = { uploadTime = it }
-                ) to uploadTime
+                uploadPreparedImage(fileToUpload, filePurpose)
             }.fold(
                 onSuccess = { fileTimePair ->
                     identityAnalyticsRequestFactory.imageUpload(
@@ -1009,14 +1003,7 @@ internal class IdentityViewModel(
                     isLiveMode = isLiveMode,
                     testModeImage = TestModeImage.SELFIE
                 )
-                var uploadTime = 0L
-                identityRepository.uploadImage(
-                    verificationId = verificationArgs.verificationSessionId,
-                    ephemeralKey = verificationArgs.ephemeralKeySecret,
-                    imageFile = fileToUpload,
-                    filePurpose = filePurpose,
-                    onSuccessExecutionTimeBlock = { uploadTime = it }
-                ) to uploadTime
+                uploadPreparedImage(fileToUpload, filePurpose)
             }.fold(
                 onSuccess = { fileTimePair ->
                     identityAnalyticsRequestFactory.imageUpload(
@@ -1096,6 +1083,21 @@ internal class IdentityViewModel(
         this
     } else {
         identityIO.createTestModeFileToUpload(testModeImage)
+    }
+
+    private suspend fun uploadPreparedImage(
+        imageFile: File,
+        filePurpose: StripeFilePurpose
+    ): Pair<StripeFile, Long> {
+        var uploadTime = 0L
+        val stripeFile = identityRepository.uploadImage(
+            verificationId = verificationArgs.verificationSessionId,
+            ephemeralKey = verificationArgs.ephemeralKeySecret,
+            imageFile = imageFile,
+            filePurpose = filePurpose,
+            onSuccessExecutionTimeBlock = { uploadTime = it }
+        )
+        return stripeFile to uploadTime
     }
 
     /**
