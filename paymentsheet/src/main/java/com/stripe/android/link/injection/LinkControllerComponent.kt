@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkController
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.payments.core.injection.ApiConfigurationStateFromProviderModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import dagger.BindsInstance
@@ -17,7 +16,6 @@ import javax.inject.Singleton
     modules = [
         LinkControllerModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
-        ApiConfigurationStateFromProviderModule::class,
         ApiRequestOptionsModule::class,
     ]
 )

@@ -103,7 +103,7 @@ internal class CustomerSheetViewModel(
     private val logger: Logger,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
-    private val apiConfiguration: ApiConfiguration.State,
+    private val apiConfigurationProvider: () -> ApiConfiguration.State,
     private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
@@ -123,7 +123,7 @@ internal class CustomerSheetViewModel(
         logger: Logger,
         eventReporter: CustomerSheetEventReporter,
         @IOContext workContext: CoroutineContext = Dispatchers.IO,
-        apiConfiguration: ApiConfiguration.State,
+        apiConfigurationProvider: () -> ApiConfiguration.State,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
@@ -143,7 +143,7 @@ internal class CustomerSheetViewModel(
         eventReporter = eventReporter,
         workContext = workContext,
         productUsage = productUsage,
-        apiConfiguration = apiConfiguration,
+        apiConfigurationProvider = apiConfigurationProvider,
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         isNfcScanningAvailable = isNfcScanningAvailable,
@@ -171,7 +171,7 @@ internal class CustomerSheetViewModel(
         )
     )
 
-    private val isConfiguredLiveMode = apiConfiguration.isLiveMode()
+    private val isConfiguredLiveMode = apiConfigurationProvider().isLiveMode()
     private val isLiveMode
         get() = customerState.value.metadata?.stripeIntent?.isLiveMode ?: isConfiguredLiveMode
 
@@ -904,8 +904,8 @@ internal class CustomerSheetViewModel(
             sellerBusinessName = null,
             forceSetupFutureUseBehavior = false,
             clientAttributionMetadata = clientAttributionMetadata,
-            publishableKey = apiConfiguration.publishableKey,
-            stripeAccountId = apiConfiguration.stripeAccountId,
+            publishableKey = apiConfigurationProvider().publishableKey,
+            stripeAccountId = apiConfigurationProvider().stripeAccountId,
         )
     }
 

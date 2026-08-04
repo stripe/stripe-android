@@ -31,7 +31,7 @@ internal interface AttestationComponent {
         fun build(
             @BindsInstance application: Application,
             @BindsInstance
-            apiConfigurationState: ApiConfiguration.State,
+            apiConfigurationProvider: () -> ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,

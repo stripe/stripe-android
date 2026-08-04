@@ -25,21 +25,6 @@ class ApiConfigurationFromPaymentConfigurationModule {
     }
 }
 
-/**
- * Eagerly evaluates a `() -> ApiConfiguration.State` provider function to produce an
- * [ApiConfiguration.State] instance. Use this in components that only have a
- * `() -> ApiConfiguration.State` binding and need to satisfy dependencies that
- * take [ApiConfiguration.State] directly.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module
-class ApiConfigurationStateFromProviderModule {
-    @Provides
-    fun provideApiConfigurationState(
-        provider: () -> ApiConfiguration.State
-    ): ApiConfiguration.State = provider()
-}
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
 class ApiRequestOptionsModule {

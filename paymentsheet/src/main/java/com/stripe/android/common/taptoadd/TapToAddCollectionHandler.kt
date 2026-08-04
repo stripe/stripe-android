@@ -59,7 +59,7 @@ internal interface TapToAddCollectionHandler {
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             stripeRepository: StripeRepository,
-            apiConfiguration: ApiConfiguration.State,
+            apiConfigurationProvider: () -> ApiConfiguration.State,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
             userFacingLogger: UserFacingLogger,
@@ -71,7 +71,7 @@ internal interface TapToAddCollectionHandler {
                     terminalWrapper = terminalWrapper,
                     connectionManager = connectionManager,
                     stripeRepository = stripeRepository,
-                    apiConfiguration = apiConfiguration,
+                    apiConfigurationProvider = apiConfigurationProvider,
                     tapToPayUxConfiguration = tapToPayUxConfiguration,
                     userFacingLogger = userFacingLogger,
                     errorReporter = errorReporter,
@@ -88,7 +88,7 @@ internal interface TapToAddCollectionHandler {
 internal class DefaultTapToAddCollectionHandler(
     private val terminalWrapper: TerminalWrapper,
     private val stripeRepository: StripeRepository,
-    private val apiConfiguration: ApiConfiguration.State,
+    private val apiConfigurationProvider: () -> ApiConfiguration.State,
     private val connectionManager: TapToAddConnectionManager,
     private val errorReporter: ErrorReporter,
     private val userFacingLogger: UserFacingLogger,
@@ -356,7 +356,7 @@ internal class DefaultTapToAddCollectionHandler(
 
         return ApiRequest.Options(
             apiKey = ephemeralKeySecret,
-            stripeAccount = apiConfiguration.stripeAccountId,
+            stripeAccount = apiConfigurationProvider().stripeAccountId,
         )
     }
 

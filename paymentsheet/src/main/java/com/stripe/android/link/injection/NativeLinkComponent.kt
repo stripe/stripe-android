@@ -27,7 +27,6 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.ApiConfigurationStateFromProviderModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
@@ -50,7 +49,6 @@ internal annotation class NativeLinkScope
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
-        ApiConfigurationStateFromProviderModule::class,
         ApiRequestOptionsModule::class,
     ]
 )

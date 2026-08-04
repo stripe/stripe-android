@@ -28,10 +28,12 @@ internal class AddressElementViewModel @Inject internal constructor(
                 .create(
                     context = applicationSupplier(),
                     starterArgs = args,
-                    apiConfigurationState = ApiConfiguration.State(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = null,
-                    ),
+                    apiConfigurationProvider = {
+                        ApiConfiguration.State(
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = null,
+                        )
+                    },
                 )
                 .addressElementViewModel as T
         }

@@ -35,7 +35,7 @@ internal interface AddressElementViewModelFactoryComponent {
         fun create(
             @BindsInstance context: Context,
             @BindsInstance starterArgs: AddressElementActivityContract.Args,
-            @BindsInstance apiConfigurationState: ApiConfiguration.State,
+            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
         ): AddressElementViewModelFactoryComponent
     }
 }

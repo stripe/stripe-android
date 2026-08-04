@@ -36,14 +36,14 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
     @IntentAuthenticatorMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
     @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
-    apiConfigurationState: ApiConfiguration.State,
+    apiConfigurationProvider: () -> ApiConfiguration.State,
 ) : PaymentNextActionHandlerRegistry {
 
     private val paymentSheetNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler> by lazy {
         paymentSheetNextActionHandlers(
             includePaymentSheetNextActionHandlers,
             applicationContext,
-            apiConfigurationState.publishableKey,
+            apiConfigurationProvider().publishableKey,
         )
     }
 
