@@ -460,37 +460,6 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `updateLineItemQuantity sends line item params and updates session on success`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("updated_line_item_quantity[line_item_id]", "li_1"),
-            bodyPart("updated_line_item_quantity[quantity]", "3"),
-            bodyPart("updated_line_item_quantity[fail_update_on_discount_error]", "true"),
-            responseFactory = successResponseFactory { json ->
-                json.put("total_summary", totalSummaryJson(due = 7000))
-            },
-        )
-
-        val result = controller.updateLineItemQuantity("li_1", 3)
-
-        result.getOrThrow()
-        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(7000)
-    }
-
-    @Test
-    fun `updateLineItemQuantity returns failure and preserves session on error`() = runMutationScenario {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "Invalid quantity"}}""")
-        }
-        val before = controller.session.value
-
-        val result = controller.updateLineItemQuantity("li_1", -1)
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(controller.session.value).isEqualTo(before)
-    }
-
-    @Test
     fun `updateCurrency sends updated_currency and updates session on success`() = runMutationScenario {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "usd"),
@@ -517,60 +486,6 @@ internal class CheckoutControllerTest {
 
         assertThat(result.isFailure).isTrue()
         assertThat(controller.session.value).isEqualTo(before)
-    }
-
-    @Test
-    fun `selectShippingOption sends shipping rate on success`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("shipping_rate", "shr_express"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-            responseFactory = successResponseFactory(),
-        )
-
-        val result = controller.selectShippingOption("shr_express")
-
-        assertThat(result.isSuccess).isTrue()
-    }
-
-    @Test
-    fun `selectShippingOption returns failure on error`() = runMutationScenario {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "Invalid shipping rate"}}""")
-        }
-        val before = controller.session.value
-
-        val result = controller.selectShippingOption("shr_invalid")
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(controller.session.value).isEqualTo(before)
-    }
-
-    @Test
-    fun `updateTaxId sends type and value on success`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("tax_id_collection[tax_id][type]", "us_ein"),
-            bodyPart("tax_id_collection[tax_id][value]", "123456789"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-            responseFactory = successResponseFactory(),
-        )
-
-        val result = controller.updateTaxId("us_ein", "123456789")
-
-        assertThat(result.isSuccess).isTrue()
-    }
-
-    @Test
-    fun `updateTaxId trims whitespace from type and value`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("tax_id_collection[tax_id][type]", "us_ein"),
-            bodyPart("tax_id_collection[tax_id][value]", "123456789"),
-            responseFactory = successResponseFactory(),
-        )
-
-        val result = controller.updateTaxId("  us_ein  ", "  123456789  ")
-
-        assertThat(result.isSuccess).isTrue()
     }
 
     @Test
@@ -1014,14 +929,14 @@ internal class CheckoutControllerTest {
             // The second mutation must target the session id produced by the first, proving the
             // mutex serialized them (an unserialized call would hit the original id and fail).
             networkRule.checkoutUpdate(
-                bodyPart("updated_line_item_quantity[line_item_id]", "li_1"),
+                bodyPart("customer_email", "example3@example.com"),
                 sessionId = "cs_test_after_promo",
                 responseFactory = successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") },
             )
 
             val results = listOf(
                 async { controller.applyPromotionCode("10OFF") },
-                async { controller.updateLineItemQuantity("li_1", 2) },
+                async { controller.updateEmail("example3@example.com") },
             ).awaitAll()
 
             assertThat(results[0].isSuccess).isTrue()
