@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.luxe
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
@@ -44,7 +45,9 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -153,6 +156,93 @@ internal class TransformSpecToElementsTest {
         assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("AT")
         assertThat(addressElement.hiddenIdentifiers.value).isEmpty()
         assertThat(formElements[1]).isInstanceOf(SameAsShippingElement::class.java)
+    }
+
+    @Test
+    fun `Country spec full collection omits same-as-shipping without a shipping value`() = runTest {
+        val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
+        val formElements = TransformSpecToElementsFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
+        ).transform(
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(
+                CountrySpec(
+                    apiPath = countryIdentifier,
+                    allowedCountryCodes = setOf("AT"),
+                ),
+            ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements.single()).isInstanceOf(SectionElement::class.java)
+    }
+
+    @Test
+    fun `Country spec full collection wires returned same-as-shipping to the address`() = runTest {
+        val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
+        val formElements = TransformSpecToElementsFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
+            initialValues = mapOf(countryIdentifier to "AT"),
+            shippingValues = mapOf(
+                countryIdentifier to "BE",
+                IdentifierSpec.SameAsShipping to "false",
+            ),
+        ).transform(
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(
+                CountrySpec(
+                    apiPath = countryIdentifier,
+                    allowedCountryCodes = setOf("AT", "BE"),
+                ),
+            ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        assertThat(formElements).hasSize(2)
+        val billingAddressElement = (
+            (formElements.first() as SectionElement).fields.single() as BillingAddressElement
+        )
+        val sameAsShippingElement = formElements[1] as SameAsShippingElement
+
+        billingAddressElement.getFormFieldValueFlow()
+            .map { values -> values.single { it.first == countryIdentifier }.second.value }
+            .filter { country -> country == "BE" }
+            .test {
+                sameAsShippingElement.setRawValue(
+                    mapOf(IdentifierSpec.SameAsShipping to "true"),
+                )
+
+                assertThat(awaitItem()).isEqualTo("BE")
+                cancelAndIgnoreRemainingEvents()
+            }
+    }
+
+    @Test
+    fun `Country spec full collection uses autocomplete factory`() = runTest {
+        val formElements = TransformSpecToElementsFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
+            autocompleteAddressInteractorFactory = {
+                TestAutocompleteAddressInteractor.noOp()
+            },
+        ).transform(
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(CountrySpec()),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        val billingAddressElement = (
+            (formElements.single() as SectionElement).fields.single() as BillingAddressElement
+        )
+
+        assertThat(billingAddressElement.addressElement)
+            .isInstanceOf(AutocompleteAddressElement::class.java)
     }
 
     @Test
