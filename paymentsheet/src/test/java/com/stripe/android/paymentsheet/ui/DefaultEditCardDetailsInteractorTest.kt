@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -607,9 +607,9 @@ internal class DefaultEditCardDetailsInteractorTest {
             val addressSectionElement = requireNotNull(billingAddressForm).addressSectionElement
 
             assertThat(addressSectionElement.fields.size).isEqualTo(1)
-            assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+            assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-            val cardBillingAddressElement = addressSectionElement.fields[0] as CardBillingAddressElement
+            val cardBillingAddressElement = addressSectionElement.fields[0] as BillingAddressElement
 
             assertThat(cardBillingAddressElement.countryElement.controller.displayItems)
                 .hasSize(CountryUtils.supportedBillingCountries.size)
@@ -632,9 +632,9 @@ internal class DefaultEditCardDetailsInteractorTest {
             val addressSectionElement = requireNotNull(billingAddressForm).addressSectionElement
 
             assertThat(addressSectionElement.fields.size).isEqualTo(1)
-            assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+            assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-            val cardBillingAddressElement = addressSectionElement.fields[0] as CardBillingAddressElement
+            val cardBillingAddressElement = addressSectionElement.fields[0] as BillingAddressElement
 
             assertThat(cardBillingAddressElement.countryElement.controller.displayItems).containsExactly(
                 "\uD83C\uDDFA\uD83C\uDDF8 United States",

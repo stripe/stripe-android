@@ -106,6 +106,16 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).mapCatching { response ->
+                if (configurationState.defaultBillingAddress != null &&
+                    response.automaticTaxEnabled &&
+                    response.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING
+                ) {
+                    checkoutSessionRepository.updateTaxRegion(sessionId, configurationState.defaultBillingAddress)
+                        .getOrThrow()
+                } else {
+                    response
+                }
+            }.mapCatching { response ->
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
@@ -130,30 +140,6 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun removePromotionCode(): kotlin.Result<Unit> = withCheckoutState { sessionId ->
         checkoutSessionRepository.applyPromotionCode(sessionId, "")
-    }
-
-    /**
-     * Updates the quantity of a line item.
-     *
-     * @param lineItemId The ID of the line item to update.
-     * @param quantity The new quantity.
-     */
-    suspend fun updateLineItemQuantity(
-        lineItemId: String,
-        quantity: Int,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity)
-    }
-
-    /**
-     * Selects a shipping option.
-     *
-     * @param id The ID of the shipping option to select.
-     */
-    suspend fun selectShippingOption(
-        id: String,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.selectShippingRate(sessionId, id)
     }
 
     /**
@@ -184,19 +170,6 @@ class CheckoutController @Inject internal constructor(
                 ),
             )
         }
-    }
-
-    /**
-     * Updates the customer's tax ID.
-     *
-     * @param type The type of tax ID (e.g. "eu_vat"). Leading/trailing whitespace is trimmed.
-     * @param value The tax ID value. Leading/trailing whitespace is trimmed.
-     */
-    suspend fun updateTaxId(
-        type: String,
-        value: String,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
     }
 
     /**
@@ -429,7 +402,7 @@ class CheckoutController @Inject internal constructor(
         /**
          * The customer's email address from the checkout session.
          */
-        val customerEmail: String?,
+        val email: String?,
         /**
          * The tax computation status for this checkout session.
          */

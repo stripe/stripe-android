@@ -126,30 +126,6 @@ internal class CheckoutSessionRepository @Inject constructor(
         ),
     )
 
-    suspend fun updateLineItemQuantity(
-        sessionId: String,
-        lineItemId: String,
-        quantity: Int,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "updated_line_item_quantity[line_item_id]" to lineItemId,
-            "updated_line_item_quantity[quantity]" to quantity.toString(),
-            "updated_line_item_quantity[fail_update_on_discount_error]" to "true",
-        ),
-    )
-
-    suspend fun selectShippingRate(
-        sessionId: String,
-        shippingRateId: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "shipping_rate" to shippingRateId,
-            "elements_session_client[is_aggregation_expected]" to "true",
-        ),
-    )
-
     suspend fun updateTaxRegion(
         sessionId: String,
         address: Address.State,
@@ -164,19 +140,6 @@ internal class CheckoutSessionRepository @Inject constructor(
             putIfNotEmpty("tax_region[postal_code]", address.postalCode)
             put("elements_session_client[is_aggregation_expected]", "true")
         },
-    )
-
-    suspend fun updateTaxId(
-        sessionId: String,
-        type: String,
-        value: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "tax_id_collection[tax_id][type]" to type,
-            "tax_id_collection[tax_id][value]" to value,
-            "elements_session_client[is_aggregation_expected]" to "true",
-        ),
     )
 
     suspend fun updateEmail(

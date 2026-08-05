@@ -37,7 +37,7 @@ internal class DefaultNfcCardDataParserTest {
             ),
         )
 
-        assertThat(result).isEqualTo(UNSUPPORTED_CARD_ERROR)
+        assertUnsupportedCardError(result)
     }
 
     @Test
@@ -48,7 +48,7 @@ internal class DefaultNfcCardDataParserTest {
             ),
         )
 
-        assertThat(result).isEqualTo(UNSUPPORTED_CARD_ERROR)
+        assertUnsupportedCardError(result)
     }
 
     @Test
@@ -59,7 +59,7 @@ internal class DefaultNfcCardDataParserTest {
             ),
         )
 
-        assertThat(result).isEqualTo(UNSUPPORTED_CARD_ERROR)
+        assertUnsupportedCardError(result)
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class DefaultNfcCardDataParserTest {
             ),
         )
 
-        assertThat(result).isEqualTo(UNSUPPORTED_CARD_ERROR)
+        assertUnsupportedCardError(result)
     }
 
     @Test
@@ -121,7 +121,7 @@ internal class DefaultNfcCardDataParserTest {
             ),
         )
 
-        assertThat(result).isEqualTo(UNSUPPORTED_CARD_ERROR)
+        assertUnsupportedCardError(result)
     }
 
     @Test
@@ -133,14 +133,14 @@ internal class DefaultNfcCardDataParserTest {
             ),
         )
 
-        assertThat(result).isEqualTo(UNSUPPORTED_CARD_ERROR)
+        assertUnsupportedCardError(result)
     }
 
     @Test
     fun `parse returns unsupported card error when no recognized tags are present`() {
         val result = parser.parse(emptyMap())
 
-        assertThat(result).isEqualTo(UNSUPPORTED_CARD_ERROR)
+        assertUnsupportedCardError(result)
     }
 
     @Test
@@ -152,7 +152,7 @@ internal class DefaultNfcCardDataParserTest {
             ),
         )
 
-        assertThat(result).isEqualTo(MOBILE_WALLET_ERROR)
+        assertMobileWalletError(result)
     }
 
     @Test
@@ -163,7 +163,7 @@ internal class DefaultNfcCardDataParserTest {
             ),
         )
 
-        assertThat(result).isEqualTo(MOBILE_WALLET_ERROR)
+        assertMobileWalletError(result)
     }
 
     @Test
@@ -196,7 +196,25 @@ internal class DefaultNfcCardDataParserTest {
             ),
         )
 
-        assertThat(result).isEqualTo(UNSUPPORTED_CARD_ERROR)
+        assertUnsupportedCardError(result)
+    }
+
+    private fun assertUnsupportedCardError(result: NfcCardDataParser.Result) {
+        assertThat(result).isInstanceOf(NfcCardDataParser.Result.Error::class.java)
+        val error = (result as NfcCardDataParser.Result.Error).error as GenericNfcScanningError
+        assertThat(error.errorCode).isEqualTo("cardUnsupportedByNfc")
+        assertThat(error.userMessage).isEqualTo(
+            R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+        )
+    }
+
+    private fun assertMobileWalletError(result: NfcCardDataParser.Result) {
+        assertThat(result).isInstanceOf(NfcCardDataParser.Result.Error::class.java)
+        val error = (result as NfcCardDataParser.Result.Error).error as GenericNfcScanningError
+        assertThat(error.errorCode).isEqualTo("mobileWalletUnsupportedByNfc")
+        assertThat(error.userMessage).isEqualTo(
+            R.string.stripe_nfc_scan_error_mobile_wallet.resolvableString,
+        )
     }
 
     private fun hexToBytes(hex: String): ByteArray {
@@ -213,15 +231,5 @@ internal class DefaultNfcCardDataParserTest {
         const val TAG_TOKEN_REQUESTOR_ID = "9F19"
 
         const val AIP_MOBILE_WALLET_BYTE_2 = 0x40.toByte()
-
-        val UNSUPPORTED_CARD_ERROR = NfcCardDataParser.Result.Error(
-            errorCode = "cardUnsupportedByNfc",
-            userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
-        )
-
-        val MOBILE_WALLET_ERROR = NfcCardDataParser.Result.Error(
-            errorCode = "mobileWalletUnsupportedByNfc",
-            userMessage = R.string.stripe_nfc_scan_error_mobile_wallet.resolvableString,
-        )
     }
 }

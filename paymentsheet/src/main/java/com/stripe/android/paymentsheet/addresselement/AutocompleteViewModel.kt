@@ -104,9 +104,6 @@ internal class AutocompleteViewModel @Inject constructor(
                 }
             }
         }
-        autocompleteArgs.country?.let { country ->
-            eventReporter.onShow(country)
-        }
     }
 
     fun selectPrediction(prediction: AutocompletePrediction) {
@@ -273,6 +270,6 @@ internal class AutocompleteViewModel @Inject constructor(
     companion object {
         const val SEARCH_DEBOUNCE_MS = 400L
         const val MAX_DISPLAYED_RESULTS = 4
-        const val MIN_CHARS_AUTOCOMPLETE = 2
+        const val MIN_CHARS_AUTOCOMPLETE = 3
     }
 }

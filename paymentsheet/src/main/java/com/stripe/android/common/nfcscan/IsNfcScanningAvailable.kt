@@ -6,6 +6,7 @@ import com.stripe.android.common.nfcscan.security.IsDeviceSecureForNfc
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.ui.core.cardscan.IsStripeCardScanAvailable
 import javax.inject.Inject
 
 internal interface IsNfcScanningAvailable {
@@ -17,11 +18,12 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
     private val nfcHardwareDelegate: NfcHardwareDelegate,
     private val eventReporter: EventReporter,
     private val mode: EventReporter.Mode,
+    private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
 ) : IsNfcScanningAvailable {
     override fun get(metadata: PaymentMethodMetadata): Boolean {
         val hasRequirements = metadata.isNfcScanningEnabled &&
             !metadata.isTapToAddSupported &&
-            !metadata.isStripeCardScanAllowed
+            !canUseStripeCardScan(metadata)
 
         if (!hasRequirements) {
             return false
@@ -60,6 +62,12 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
         )
 
         eventReporter.onExperimentExposure(exposure)
+    }
+
+    private fun canUseStripeCardScan(
+        metadata: PaymentMethodMetadata,
+    ): Boolean {
+        return metadata.isStripeCardScanAllowed && isStripeCardScanAvailable()
     }
 }
 

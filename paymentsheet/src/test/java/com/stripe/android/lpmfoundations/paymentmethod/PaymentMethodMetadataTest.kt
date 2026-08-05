@@ -1226,7 +1226,6 @@ internal class PaymentMethodMetadataTest {
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
-            requiresBillingAddressForAutomaticTax = false,
             checkoutSessionResponse = null,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = ApiConfiguration.State(
@@ -1400,7 +1399,6 @@ internal class PaymentMethodMetadataTest {
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
-            requiresBillingAddressForAutomaticTax = false,
             checkoutSessionResponse = null,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = ApiConfiguration.State(
@@ -2213,12 +2211,14 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax true when checkout session requires it`() {
+    fun `createForPaymentElement requires automatic tax billing address when tax status requires it`() {
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "key",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 ),
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),
@@ -2228,12 +2228,46 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax false when tax status is ready`() {
+    fun `createForPaymentElement requires automatic tax billing address when tax status is ready`() {
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "key",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     taxStatus = CheckoutSessionResponse.TaxStatus.READY,
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            ),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),
+        )
+
+        assertThat(metadata.requiresBillingAddressForAutomaticTax).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement does not require automatic tax billing address when automatic tax is disabled`() {
+        val metadata = createPaymentElementMetadata(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "key",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    automaticTaxEnabled = false,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            ),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),
+        )
+
+        assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement does not require automatic tax billing address when tax uses shipping`() {
+        val metadata = createPaymentElementMetadata(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "key",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
                 ),
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),

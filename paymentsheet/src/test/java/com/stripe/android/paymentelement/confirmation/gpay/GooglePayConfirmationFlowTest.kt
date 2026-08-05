@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
@@ -38,6 +39,7 @@ class GooglePayConfirmationFlowTest {
                 val mediator = ConfirmationMediator(
                     savedStateHandle = savedStateHandle,
                     definition = GooglePayConfirmationDefinition(
+                        context = mock<Context>(),
                         googlePayPaymentMethodLauncherFactory = factory,
                         userFacingLogger = null,
                     ),
@@ -96,6 +98,7 @@ class GooglePayConfirmationFlowTest {
         confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = GooglePayConfirmationDefinition(
+            context = mock<Context>(),
             googlePayPaymentMethodLauncherFactory =
                 RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(mock()),
             userFacingLogger = null,

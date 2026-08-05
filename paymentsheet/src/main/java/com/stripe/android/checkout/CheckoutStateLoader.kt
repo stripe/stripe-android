@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import android.graphics.Bitmap
 import android.os.Bundle
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -14,6 +13,7 @@ import javax.inject.Inject
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutStateLoader @Inject constructor(
     private val embeddedConfigurationFactory: CheckoutEmbeddedConfigurationFactory,
+    private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
     private val flagImageResolver: FlagImageResolver,
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
@@ -59,6 +59,12 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
         )
 
+        val commonConfiguration = commonConfigurationFactory.create(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )
+
         val loaderState = paymentElementLoader.load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = response.id,
@@ -82,7 +88,7 @@ internal class CheckoutStateLoader @Inject constructor(
             paymentMethods = loaderState.customer?.paymentMethods,
             previousSelection = carryForward.previousSelection,
             newSelection = loaderState.paymentSelection,
-            newConfiguration = embeddedConfig.asCommonConfiguration(),
+            newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
 
@@ -93,6 +99,7 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
+            commonConfiguration = commonConfiguration,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,

@@ -1,7 +1,9 @@
 package com.stripe.android.common.nfcscan.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.nfcscan.scanner.GenericNfcScanningError
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
@@ -74,7 +76,12 @@ internal class DefaultNfcScanningEventReporterTest {
     fun `onNfcScanAttemptFailed ends duration and fires event with duration and error code`() = runScenario {
         durationProvider.start(DurationProvider.Key.NfcScanAttempt)
 
-        reporter.onNfcScanAttemptFailed(errorCode = "expiredCard")
+        reporter.onNfcScanAttemptFailed(
+            error = GenericNfcScanningError(
+                errorCode = "expiredCard",
+                userMessage = resolvableString("Expired card"),
+            ),
+        )
 
         assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt)))
             .isTrue()
@@ -90,10 +97,13 @@ internal class DefaultNfcScanningEventReporterTest {
         durationProvider.start(DurationProvider.Key.NfcScanAttempt)
 
         reporter.onNfcScanAttemptFailed(
-            errorCode = "nfcCardReadFailed",
-            parameters = mapOf(
-                "sw1" to "64",
-                "sw2" to "00",
+            error = GenericNfcScanningError(
+                errorCode = "nfcCardReadFailed",
+                userMessage = resolvableString("Read failed"),
+                parameters = mapOf(
+                    "sw1" to "64",
+                    "sw2" to "00",
+                ),
             ),
         )
 
