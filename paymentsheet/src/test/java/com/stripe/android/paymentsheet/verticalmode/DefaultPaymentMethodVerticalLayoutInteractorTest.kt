@@ -2024,7 +2024,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 onUpdatePaymentMethodTurbine.add(paymentMethod)
             },
             shouldUpdateVerticalModeSelection = shouldUpdateVerticalModeSelection,
-            dispatcher = testDispatcher,
+            coroutineScope = TestScope(testDispatcher),
             mainDispatcher = testDispatcher,
             invokeRowSelectionCallback = invokeRowSelectionCallback,
             displaysMandatesInFormScreen = displaysMandatesInFormScreen,

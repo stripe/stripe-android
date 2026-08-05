@@ -23,11 +23,13 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emitAll
@@ -61,9 +63,11 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     private fun createVerticalInitialScreens(): List<EmbeddedNavigator.Screen> {
-        val formHelper = createFormHelper()
+        val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
+        val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
+        val formHelper = createFormHelper(formHelperScope)
         val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
-            interactor = createInteractor(formHelper),
+            interactor = createInteractor(formHelper, coroutineScope),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
@@ -105,9 +109,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         )
     }
 
-    private fun createFormHelper(): FormHelper {
+    private fun createFormHelper(coroutineScope: CoroutineScope): FormHelper {
         return embeddedFormHelperFactory.createForVerticalLayout(
-            coroutineScope = viewModelScope,
+            coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             selectionUpdater = { selectionHolder.setSelection(it) },
@@ -116,7 +120,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     @Suppress("LongMethod")
-    private fun createInteractor(formHelper: FormHelper): PaymentMethodVerticalLayoutInteractor {
+    private fun createInteractor(
+        formHelper: FormHelper,
+        coroutineScope: CoroutineScope,
+    ): PaymentMethodVerticalLayoutInteractor {
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = stateFlowOf(false),
@@ -167,6 +174,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             },
             // Embedded renders mandate text through its own path, not the mandate-above-button handler.
             updateMandateText = null,
+            coroutineScope = coroutineScope,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             linkAccount = linkAccountHolder.linkAccountInfo,
         )
