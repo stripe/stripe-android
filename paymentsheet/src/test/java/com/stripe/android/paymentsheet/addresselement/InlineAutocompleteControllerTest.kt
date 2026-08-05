@@ -871,6 +871,53 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
+    fun `autocompleteFilledAddress is null initially`() = runScenario {
+        assertThat(delegate.autocompleteFilledAddress).isNull()
+    }
+
+    @Test
+    fun `autocompleteFilledAddress tracks selected prediction address`() = runScenario {
+        val fetchedAddress = Address(
+            line1 = "123 Main Street",
+            city = "San Francisco",
+            state = "CA",
+            postalCode = "94105",
+            country = "US",
+        )
+        fakePlacesClient.fetchPlaceResult = Result.success(fetchedAddress)
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        eventCalls.awaitItem()
+
+        assertThat(delegate.autocompleteFilledAddress).isEqualTo(fetchedAddress)
+    }
+
+    @Test
+    fun `autocompleteFilledAddress remains null after failed fetch`() = runScenario {
+        fakePlacesClient.fetchPlaceResult = Result.failure(RuntimeException("network error"))
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+
+        assertThat(delegate.autocompleteFilledAddress).isNull()
+    }
+
+    @Test
     fun `onDismissed while find-predictions fetch is in-flight prevents stale results`() = runScenario {
         val fetchGate = CompletableDeferred<Unit>()
         fakePlacesClient.onBeforeFindPredictions = { fetchGate.await() }

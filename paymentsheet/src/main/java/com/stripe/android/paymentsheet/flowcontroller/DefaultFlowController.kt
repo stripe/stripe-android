@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -58,12 +59,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.computeBillingEditDistance
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -608,6 +611,7 @@ internal class DefaultFlowController @Inject internal constructor(
         when (result) {
             is PaymentOptionsActivityResult.Succeeded -> {
                 viewModel.paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
+                viewModel.autocompleteFilledAddress = result.autocompleteFilledAddress
                 onPaymentSelection(canceled = false)
             }
             null,
@@ -643,6 +647,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                         intentId = result.intent.id,
                     )
+                    reportBillingAddressCompleted(paymentSelection)
                 }
 
                 onPaymentResult(
@@ -710,6 +715,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
+            viewModel.autocompleteFilledAddress = null
             viewModel.state = null
             viewModel.previousConfigureRequest = null
             paymentOptionResultCallback.onPaymentOptionResult(PaymentOptionResult(null, false))
@@ -758,6 +764,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         deferredIntentConfirmationType = deferredIntentConfirmationType,
                         intentId = intentId,
                     )
+                    reportBillingAddressCompleted(paymentSelection)
                 }
             }
             is PaymentResult.Failed -> {
@@ -772,6 +779,21 @@ internal class DefaultFlowController @Inject internal constructor(
                 // Nothing to do here
             }
         }
+    }
+
+    private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
+        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
+        val billingAddress = paymentSelection.billingDetails?.address ?: return
+        val countryCode = billingAddress.country ?: return
+        val filledAddress = viewModel.autocompleteFilledAddress
+        val editDistance = filledAddress?.let {
+            computeBillingEditDistance(it, billingAddress)
+        }
+        eventReporter.onBillingAddressCompleted(
+            addressCountryCode = countryCode,
+            autocompleteResultSelected = filledAddress != null,
+            editDistance = editDistance,
+        )
     }
 
     private fun PaymentResult.convertToPaymentSheetResult() = when (this) {

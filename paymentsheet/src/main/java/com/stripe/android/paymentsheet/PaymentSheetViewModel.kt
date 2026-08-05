@@ -24,6 +24,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -46,12 +47,14 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.computeBillingEditDistance
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
@@ -658,6 +661,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
                 intentId = intentId,
             )
+            reportBillingAddressCompleted(paymentSelection)
         }
 
         // Log out of Link to invalidate the token
@@ -674,6 +678,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
             }
         }
+    }
+
+    private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
+        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
+        val billingAddress = paymentSelection.billingDetails?.address ?: return
+        val countryCode = billingAddress.country ?: return
+        val filledAddress = autocompleteFilledAddress
+        val editDistance = filledAddress?.let {
+            computeBillingEditDistance(it, billingAddress)
+        }
+        eventReporter.onBillingAddressCompleted(
+            addressCountryCode = countryCode,
+            autocompleteResultSelected = filledAddress != null,
+            editDistance = editDistance,
+        )
     }
 
     private fun processConfirmationResult(result: ConfirmationHandler.Result?) {

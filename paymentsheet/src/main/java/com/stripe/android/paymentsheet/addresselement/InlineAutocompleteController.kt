@@ -32,6 +32,8 @@ internal class InlineAutocompleteController(
     private var countryFlow: StateFlow<String?>? = null
     private var observeJob: Job? = null
     private var selectionJob: Job? = null
+    var autocompleteFilledAddress: Address? = null
+        private set
 
     private val _inlinePredictionsState = MutableStateFlow<AutocompleteAddressInteractor.InlinePredictionsState>(
         AutocompleteAddressInteractor.InlinePredictionsState.Idle
@@ -95,6 +97,7 @@ internal class InlineAutocompleteController(
 
     private fun handleFetchPlaceSuccess(address: Address) {
         lastPredictionLine1 = address.line1
+        autocompleteFilledAddress = address
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         eventListenerProvider()?.invoke(
             AutocompleteAddressInteractor.Event.OnExpandForm(
