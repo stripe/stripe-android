@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.IntSize
 import com.stripe.android.testing.CoroutineTestRule
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -267,7 +267,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
     }
 
     @Test
-    fun `dispose - cancels pending jobs and cleans up resources`() = runTest {
+    fun `reset - cancels pending jobs and clears tracking state`() = runTest {
         val tracker = getTracker(
             expectedItems = listOf("card"),
         )
@@ -278,11 +278,30 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("card", coordinates)
         tracker.updateVisibility("card", coordinates)
 
+        advanceTimeBy(TIME_ADVANCE_LESSER_THAN_DEBOUNCE_DELAY)
         tracker.reset()
 
         // Should not dispatch even after delay
         advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
+    }
+
+    @Test
+    fun `reset - tracker can dispatch a new event after reset`() = runTest {
+        val tracker = getTracker(
+            expectedItems = listOf("card"),
+        )
+        val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
+
+        tracker.updateVisibility("card", coordinates)
+        tracker.updateVisibility("card", coordinates)
+        tracker.reset()
+
+        tracker.updateVisibility("card", coordinates)
+        tracker.updateVisibility("card", coordinates)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
+
+        verify(callback).invoke(listOf("card"), emptyList())
     }
 
     @Test
@@ -369,11 +388,11 @@ class PaymentMethodInitialVisibilityTrackerTest {
     private val defaultCoordinateSize = IntSize(100, 50)
     private val defaultBounds = Rect(0f, 0f, 100f, 50f)
 
-    private fun getTracker(expectedItems: List<String>): PaymentMethodInitialVisibilityTracker {
+    private fun TestScope.getTracker(expectedItems: List<String>): PaymentMethodInitialVisibilityTracker {
         return PaymentMethodInitialVisibilityTracker(
             expectedItems = expectedItems,
             renderedLpmCallback = callback,
-            dispatcher = Dispatchers.Main,
+            coroutineScope = this,
         )
     }
 
