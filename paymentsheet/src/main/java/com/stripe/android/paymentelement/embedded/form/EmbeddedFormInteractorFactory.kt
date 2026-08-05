@@ -14,14 +14,13 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
+import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.job
 import javax.inject.Inject
 
 internal class EmbeddedFormInteractorFactory @Inject constructor(
@@ -38,11 +37,10 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         paymentMethodCode: PaymentMethodCode,
         hasSavedPaymentMethods: Boolean
     ): DefaultVerticalModeFormInteractor {
-        val formScope = CoroutineScope(
-            viewModelScope.coroutineContext + SupervisorJob(viewModelScope.coroutineContext.job)
-        )
+        val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
+        val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
         val formHelper = embeddedFormHelperFactory.create(
-            coroutineScope = formScope,
+            coroutineScope = formHelperScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             automaticallyLaunchedCardScanFormDataHelper =
@@ -92,7 +90,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             ).displayedIncentive,
             // Embedded does not support validation at the moment. Should update here once it does.
             validationRequested = MutableSharedFlow(),
-            coroutineScope = formScope,
+            coroutineScope = coroutineScope,
             uiContext = Dispatchers.Main,
         )
     }
