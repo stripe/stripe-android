@@ -782,7 +782,7 @@ class CustomerAdapterTest {
             prefsRepositoryFactory = prefsRepositoryFactory,
             workContext = testDispatcher,
             apiConfigProvider = {
-                ApiConfiguration.State("pk_123", null)
+                ApiConfiguration.State("pk_123", "acc_123")
             },
         )
     }
