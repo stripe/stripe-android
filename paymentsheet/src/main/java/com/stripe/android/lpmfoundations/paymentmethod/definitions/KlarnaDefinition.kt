@@ -6,10 +6,10 @@ import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
+import com.stripe.android.lpmfoundations.paymentmethod.CountrySpecFormElementFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.lpmfoundations.paymentmethod.transformToFormElements
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -65,12 +65,12 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .ignoreBillingAddressRequirements()
             .apply {
-                CountrySpec(
-                    allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                ).transformToFormElements(
-                    arguments = arguments,
-                    initialCountry = arguments.initialValues[IdentifierSpec.Country],
-                ).forEach { element(it) }
+                CountrySpecFormElementFactory(arguments).transform(
+                    CountrySpec(
+                        allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                    ),
+                )
+                    .forEach { element(it) }
 
                 if (KlarnaDefinition.requiresMandate(metadata)) {
                     builder.footer(
@@ -131,11 +131,14 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
                     )
                 )
                 .apply {
-                    CountrySpec(
-                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                    ).transformToFormElements(
+                    CountrySpecFormElementFactory(
                         arguments = arguments,
                         initialCountry = metadata.stripeIntent.countryCode,
+                    ).transform(
+                        CountrySpec(
+                            allowedCountryCodes = arguments.billingDetailsCollectionConfiguration
+                                .allowedBillingCountries,
+                        ),
                     ).forEach { element(it) }
                 }
         }

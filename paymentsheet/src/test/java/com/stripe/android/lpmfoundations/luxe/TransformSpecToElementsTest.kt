@@ -41,6 +41,7 @@ import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberElement
+import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
@@ -68,16 +69,26 @@ internal class TransformSpecToElementsTest {
     }
 
     @Test
-    fun `Adding a country section sets up the section and country elements correctly`() =
+    fun `Country spec renders one country-only section for automatic collection`() =
         runBlocking {
-            val countrySection = CountrySpec(allowedCountryCodes = setOf("AT"))
-            val formElement = transformSpecToElements.transform(
+            val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
+            val countrySpec = CountrySpec(
+                apiPath = countryIdentifier,
+                allowedCountryCodes = setOf("AT"),
+            )
+            val formElements = TransformSpecToElementsFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
+                initialValues = mapOf(countryIdentifier to "AT"),
+            ).transform(
                 metadata = PaymentMethodMetadataFactory.create(),
-                specs = listOf(element = countrySection),
+                specs = listOf(element = countrySpec),
                 termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
 
-            val countrySectionElement = formElement.first() as SectionElement
+            assertThat(formElements).hasSize(1)
+            val countrySectionElement = formElements.single() as SectionElement
             val billingAddressElement = countrySectionElement.fields[0] as BillingAddressElement
             val countryElement = billingAddressElement.countryElement
 
@@ -87,9 +98,15 @@ internal class TransformSpecToElementsTest {
             // Verify the correct config is setup for the controller
             assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
 
-            assertThat(countrySectionElement.identifier.v1).isEqualTo("billing_details[address][country]_section")
+            assertThat(countrySectionElement.identifier.v1).isEqualTo(
+                "payment_method_data[country]_section",
+            )
 
-            assertThat(countryElement.identifier.v1).isEqualTo("billing_details[address][country]")
+            assertThat(billingAddressElement.identifier).isEqualTo(countryIdentifier)
+            assertThat(countryElement.identifier).isEqualTo(countryIdentifier)
+            assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("AT")
+            assertThat(countryElement.getFormFieldValueFlow().first().single().first)
+                .isEqualTo(countryIdentifier)
             assertThat(billingAddressElement.hiddenIdentifiers.value).containsAtLeast(
                 IdentifierSpec.Line1,
                 IdentifierSpec.City,
@@ -100,17 +117,23 @@ internal class TransformSpecToElementsTest {
         }
 
     @Test
-    fun `Country spec owns full billing address without duplicate placeholder`() = runBlocking {
+    fun `Country spec renders full address and same-as-shipping without duplicate placeholder`() = runBlocking {
+        val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
         val transform = TransformSpecToElementsFactory.create(
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
+            initialValues = mapOf(countryIdentifier to "AT"),
+            shippingValues = mapOf(IdentifierSpec.SameAsShipping to "true"),
         )
 
         val formElements = transform.transform(
             metadata = PaymentMethodMetadataFactory.create(),
             specs = listOf(
-                CountrySpec(allowedCountryCodes = setOf("AT")),
+                CountrySpec(
+                    apiPath = countryIdentifier,
+                    allowedCountryCodes = setOf("AT"),
+                ),
                 PlaceholderSpec(
                     field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry,
                 ),
@@ -118,11 +141,18 @@ internal class TransformSpecToElementsTest {
             termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
-        assertThat(formElements).hasSize(1)
-        val section = formElements.single() as SectionElement
+        assertThat(formElements).hasSize(2)
+        val section = formElements[0] as SectionElement
         assertThat(section.identifier.v1).isEqualTo("billing_details[address]_section")
+        assertThat(section.controller.label).isEqualTo(
+            R.string.stripe_billing_details.resolvableString,
+        )
         val addressElement = section.fields.single() as BillingAddressElement
+        assertThat(addressElement.identifier).isEqualTo(IdentifierSpec.BillingAddress)
+        assertThat(addressElement.countryElement.identifier).isEqualTo(countryIdentifier)
+        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("AT")
         assertThat(addressElement.hiddenIdentifiers.value).isEmpty()
+        assertThat(formElements[1]).isInstanceOf(SameAsShippingElement::class.java)
     }
 
     @Test
@@ -465,6 +495,8 @@ private object TransformSpecToElementsFactory {
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         requiresMandate: Boolean = false,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
+        shippingValues: Map<IdentifierSpec, String?>? = null,
     ): TransformSpecToElements {
         val context = ContextThemeWrapper(
             ApplicationProvider.getApplicationContext(),
@@ -473,12 +505,12 @@ private object TransformSpecToElementsFactory {
 
         return TransformSpecToElements(
             UiDefinitionFactory.Arguments(
-                initialValues = mapOf(),
+                initialValues = initialValues,
                 initialLinkUserInput = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
                 cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-                shippingValues = null,
+                shippingValues = shippingValues,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 requiresBillingAddressForAutomaticTax = false,

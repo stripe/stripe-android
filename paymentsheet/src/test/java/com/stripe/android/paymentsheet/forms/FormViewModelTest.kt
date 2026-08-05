@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
-import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
@@ -79,7 +78,7 @@ internal class FormViewModelTest {
         val formViewModel = createViewModel(
             args,
             listOf(
-                CountrySpec().transform(emptyMap())
+                countrySection()
             )
         )
 
@@ -102,7 +101,7 @@ internal class FormViewModelTest {
                 listOf(
                     NameSpec().transform(emptyMap()),
                     EmailSpec().transform(emptyMap()),
-                    CountrySpec().transform(emptyMap()),
+                    countrySection(),
                 )
             )
 
@@ -125,7 +124,7 @@ internal class FormViewModelTest {
             args,
             listOf(
                 EmailSpec().transform(emptyMap()),
-                CountrySpec().transform(emptyMap()),
+                countrySection(),
             )
         )
 
@@ -159,7 +158,7 @@ internal class FormViewModelTest {
                 args,
                 listOf(
                     EmailSpec().transform(emptyMap()),
-                    CountrySpec().transform(emptyMap()),
+                    countrySection(),
                     SaveForFutureUseElement(true, ""),
                 )
             )
@@ -201,16 +200,16 @@ internal class FormViewModelTest {
             listOf(
                 NameSpec().transform(emptyMap()),
                 EmailSpec().transform(emptyMap()),
-                CountrySpec(
-                    allowedCountryCodes = setOf(
+                countrySection(
+                    setOf(
                         "AT",
                         "BE",
                         "DE",
                         "ES",
                         "IT",
-                        "NL"
-                    )
-                ).transform(emptyMap()),
+                        "NL",
+                    ),
+                ),
                 SaveForFutureUseElement(true, ""),
             )
         )
@@ -854,13 +853,13 @@ internal class FormViewModelTest {
         )
         val originalElements = listOf(
             EmailSpec().transform(emptyMap()),
-            CountrySpec().transform(emptyMap()),
+            countrySection(),
         )
         val formViewModel = createViewModel(args, originalElements)
 
         val newElementsWithSameIdentifiers = listOf(
             EmailSpec().transform(emptyMap()),
-            CountrySpec().transform(emptyMap()),
+            countrySection(),
         )
         formViewModel.updateFormElements(newElementsWithSameIdentifiers)
 
@@ -874,4 +873,16 @@ internal class FormViewModelTest {
         formArguments = arguments,
         formElements = formElements,
     ).also { viewModelStoreRule.track(it) }
+
+    private fun countrySection(allowedCountryCodes: Set<String> = emptySet()): SectionElement {
+        return SectionElement.wrap(
+            CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = DropdownFieldController(
+                    config = CountryConfig(allowedCountryCodes),
+                    initialValue = null,
+                ),
+            ),
+        )
+    }
 }
