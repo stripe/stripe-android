@@ -35,3 +35,5 @@ Multi-module Android library for payment processing and financial services.
 - `create-fake` — fake implementations with Turbine call tracking
 - `compose-tests` — Compose UI tests with composeRule, Robolectric, node assertions
 - `network-tests` — NetworkRule integration tests with testBodyFromFile and fixture patterns
+
+**Build validation** — invoke `delegate-low-reasoning-work` before running routine Gradle checks, formatting, static analysis, or generated-output validation. Delegate when a low-cost subagent is available.
