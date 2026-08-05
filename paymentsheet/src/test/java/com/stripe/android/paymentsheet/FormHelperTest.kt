@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
-import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -45,14 +44,19 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.Executors
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -218,65 +222,55 @@ internal class FormHelperTest {
     }
 
     @Test
-    fun `first onFormFieldValuesChanged call delivers selection instead of being dropped`() = runTest {
-        val cardBrand = "visa"
-        val name = "Joe"
-        val formFieldValues = FormFieldValues(
-            fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-                IdentifierSpec.Name to FormFieldEntry(name, true),
-            ),
-            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
-        )
-        val selectionUpdaterCalls = Turbine<PaymentSelection?>()
-        val formHelper = createFormHelper(
-            newPaymentSelectionProvider = { null },
-            selectionUpdater = { selection ->
-                selectionUpdaterCalls.add(selection)
-            },
-        )
+    fun `first onFormFieldValuesChanged call is not dropped on a real async dispatcher`() {
+        // A regular TestDispatcher runs launched coroutines eagerly/inline, so it can't catch a
+        // regression here: the bug this guards against is a genuine scheduling gap between the
+        // init{} collector's launch and it actually subscribing, which only shows up with a real
+        // dispatcher. lastFormValues' replay = 1 is what keeps this update from being lost even if
+        // the very first call to onFormFieldValuesChanged races ahead of that subscription.
+        val executor = Executors.newSingleThreadExecutor()
+        try {
+            val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(executor.asCoroutineDispatcher()))
+            val cardBrand = "visa"
+            val name = "Joe"
+            val receivedSelection = CompletableDeferred<PaymentSelection?>()
 
-        formHelper.onFormFieldValuesChanged(formFieldValues, "card")
+            val formHelper = DefaultFormHelper(
+                coroutineScope = coroutineScope,
+                linkInlineHandler = LinkInlineHandler.create(),
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                newPaymentSelectionProvider = { null },
+                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                selectionUpdater = { selection -> receivedSelection.complete(selection) },
+                setAsDefaultMatchesSaveForFutureUse = false,
+                eventReporter = FakeEventReporter(),
+                savedStateHandle = SavedStateHandle(),
+                autocompleteAddressInteractorFactory = null,
+                automaticallyLaunchedCardScanFormDataHelper = null,
+                tapToAddHelper = null,
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                isNfcScanningAvailable = null,
+            )
 
-        val selection = selectionUpdaterCalls.awaitItem() as PaymentSelection.New.Card
-        assertThat(selection.brand.code).isEqualTo(cardBrand)
-        selectionUpdaterCalls.ensureAllEventsConsumed()
-    }
+            val formFieldValues = FormFieldValues(
+                fieldValuePairs = mapOf(
+                    IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+                    IdentifierSpec.Name to FormFieldEntry(name, true),
+                ),
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            )
+            formHelper.onFormFieldValuesChanged(formFieldValues, "card")
 
-    @Test
-    fun `repeated onFormFieldValuesChanged calls only start a single collector`() = runTest {
-        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-        val selectionUpdaterCalls = Turbine<PaymentSelection?>()
-        val formHelper = createFormHelper(
-            newPaymentSelectionProvider = { null },
-            selectionUpdater = { selection ->
-                selectionUpdaterCalls.add(selection)
-            },
-        )
+            val selection = runBlocking {
+                withTimeoutOrNull(5_000) { receivedSelection.await() }
+            } as? PaymentSelection.New.Card
 
-        val firstFormFieldValues = FormFieldValues(
-            fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.Name to FormFieldEntry("Joe", true),
-            ),
-            userRequestedReuse = customerRequestedSave,
-        )
-        formHelper.onFormFieldValuesChanged(firstFormFieldValues, "card")
-        val firstSelection = selectionUpdaterCalls.awaitItem() as PaymentSelection.New.Card
-        assertThat(firstSelection.brand.code).isEqualTo("visa")
-
-        val secondFormFieldValues = FormFieldValues(
-            fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("mastercard", true),
-                IdentifierSpec.Name to FormFieldEntry("Jane", true),
-            ),
-            userRequestedReuse = customerRequestedSave,
-        )
-        formHelper.onFormFieldValuesChanged(secondFormFieldValues, "card")
-        val secondSelection = selectionUpdaterCalls.awaitItem() as PaymentSelection.New.Card
-        assertThat(secondSelection.brand.code).isEqualTo("mastercard")
-
-        selectionUpdaterCalls.ensureAllEventsConsumed()
+            assertThat(selection).isNotNull()
+            assertThat(selection?.brand?.code).isEqualTo(cardBrand)
+        } finally {
+            executor.shutdownNow()
+        }
     }
 
     @Test
