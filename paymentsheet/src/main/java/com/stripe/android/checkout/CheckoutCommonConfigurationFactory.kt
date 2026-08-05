@@ -1,6 +1,5 @@
 package com.stripe.android.checkout
 
-import com.stripe.android.checkout.injection.MerchantDisplayName
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -8,15 +7,13 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
 
 @OptIn(CheckoutSessionPreview::class)
-internal class CheckoutCommonConfigurationFactory @Inject constructor(
-    @MerchantDisplayName private val merchantDisplayName: String,
-) {
+internal class CheckoutCommonConfigurationFactory @Inject constructor() {
     fun create(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
     ): CommonConfiguration = CommonConfiguration(
-        merchantDisplayName = merchantDisplayName,
+        merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse),
         customer = ConfigurationDefaults.customer,
         googlePay = configuration.toGooglePayConfiguration(checkoutSessionResponse),
         link = ConfigurationDefaults.link,

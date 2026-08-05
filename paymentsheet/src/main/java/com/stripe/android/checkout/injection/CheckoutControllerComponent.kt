@@ -232,12 +232,6 @@ internal interface CheckoutControllerModule {
         }
 
         @Provides
-        @MerchantDisplayName
-        fun provideMerchantDisplayName(application: Application): String {
-            return application.applicationInfo.loadLabel(application.packageManager).toString()
-        }
-
-        @Provides
         fun providesInternalRowSelectionCallback(
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): InternalRowSelectionCallback? {

@@ -26,9 +26,7 @@ internal object CheckoutControllerStateFactory {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration: CommonConfiguration = CheckoutCommonConfigurationFactory(
-            merchantDisplayName = "Example, Inc.",
-        ).create(
+        commonConfiguration: CommonConfiguration = CheckoutCommonConfigurationFactory().create(
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
             collectedDetails = collectedDetails,
