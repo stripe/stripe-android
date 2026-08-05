@@ -783,6 +783,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
         if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
+        if (paymentSelection !is PaymentSelection.New) return
         val billingAddress = paymentSelection.billingDetails?.address ?: return
         val countryCode = billingAddress.country ?: return
         val filledAddress = viewModel.autocompleteFilledAddress
