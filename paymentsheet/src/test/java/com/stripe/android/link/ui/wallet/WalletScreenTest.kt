@@ -44,10 +44,10 @@ import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
