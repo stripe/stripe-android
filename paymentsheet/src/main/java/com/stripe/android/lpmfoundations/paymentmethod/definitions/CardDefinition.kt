@@ -36,6 +36,8 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.ui.core.elements.cardBillingAddressCollectionMode
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingController
@@ -288,17 +290,24 @@ private fun cardBillingElements(
                 )
             }
     val addressElement = BillingAddressElement(
-        IdentifierSpec.Generic("credit_billing"),
-        countryCodes = allowedCountries,
-        rawValuesMap = initialValues,
-        sameAsShippingElement = sameAsShippingElement,
-        shippingValuesMap = shippingValues,
-        addressCollectionMode = cardBillingAddressCollectionMode(
-            addressCollectionMode = collectionConfiguration.address,
-            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
+        configuration = BillingAddressElement.Configuration(
+            identifier = IdentifierSpec.Generic("credit_billing"),
+            initialValues = initialValues,
+            countryCodes = allowedCountries,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            shippingValues = shippingValues,
+            addressCollectionMode = cardBillingAddressCollectionMode(
+                addressCollectionMode = collectionConfiguration.address,
+                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
+            ),
+            collectionConfiguration = collectionConfiguration,
+            shouldHideCountryOnNoAddressCollection = true,
         ),
-        collectionConfiguration = collectionConfiguration,
-        autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        countryDropdownFieldController = DropdownFieldController(
+            CountryConfig(allowedCountries),
+            initialValues[IdentifierSpec.Country],
+        ),
+        sameAsShippingElement = sameAsShippingElement,
     )
 
     val title = when {
