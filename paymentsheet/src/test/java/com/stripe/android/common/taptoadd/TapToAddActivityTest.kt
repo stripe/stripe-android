@@ -30,7 +30,7 @@ import com.stripe.android.paymentsheet.state.LinkSignupModeResult
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ShampooRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.tta.testing.TapToAddCardAddedPage
 import com.stripe.android.tta.testing.TapToAddCardCollectionTestHelper
@@ -76,7 +76,7 @@ class TapToAddActivityTest {
         .around(imageLoaderTestRule)
         .around(FeatureFlagTestRule(FeatureFlags.forceTapToAddWithTerminal, isEnabled = true))
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(RetryRule())
+        .around(ShampooRule(iterations = 5))
         .around(intentsRule)
 
     private val linkHelper = TapToAddLinkTestHelper(composeTestRule, networkRule)

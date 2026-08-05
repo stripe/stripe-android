@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.utils
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ShampooRule
 import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -35,7 +35,7 @@ class TestRules private constructor(
                 .around(DetectLeaksAfterTestSuccess())
                 .around(FakeGooglePayRepositoryRule())
                 .around(composeTestRule)
-                .around(RetryRule())
+                .around(ShampooRule(iterations = 5))
                 .around(networkRule)
                 .around(terminalTestRule)
                 .block()

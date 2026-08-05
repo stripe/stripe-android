@@ -28,7 +28,7 @@ import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.rules.activityScenarioRule
 import com.stripe.android.connect.webview.serialization.AlertJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ShampooRule
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.equalTo
 import org.junit.After
@@ -52,7 +52,7 @@ class FullScreenComponentTest {
     @get:Rule
     val ruleChain: RuleChain = RuleChain
         .outerRule(activityRule)
-        .around(RetryRule())
+        .around(ShampooRule(iterations = 5))
 
     private val rootView
         get() = isAssignableFrom(StripeComponentDialogFragmentView::class.java)

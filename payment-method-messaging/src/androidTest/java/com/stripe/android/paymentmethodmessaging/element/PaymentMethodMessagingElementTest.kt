@@ -12,7 +12,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ShampooRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -29,7 +29,7 @@ class PaymentMethodMessagingElementTest {
     val testRule: RuleChain = RuleChain.emptyRuleChain()
         .around(composeTestRule)
         .around(networkRule)
-        .around(RetryRule())
+        .around(ShampooRule(iterations = 5))
         .around(AdvancedFraudSignalsTestRule())
 
     private val getConfigRequestMatcher = composite(

@@ -52,7 +52,7 @@ import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ShampooRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -93,7 +93,7 @@ internal class PaymentOptionsActivityTest {
         .around(coroutineScopeCleanupRule)
         .around(composeTestRule)
         .around(networkRule)
-        .around(RetryRule())
+        .around(ShampooRule(iterations = 5))
 
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()

@@ -21,7 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.example.store.ONRAMP_PREFS_NAME
 import com.stripe.android.testing.FeatureFlagTestRule
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ShampooRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -44,7 +44,7 @@ class OnrampFlowTest {
     val rule = RuleChain.emptyRuleChain()
         .around(composeRule)
         .around(attestationFeatureFlagTestRule)
-        .around(RetryRule())
+        .around(ShampooRule(iterations = 5))
         .around(activityRule)
 
     private val defaultTimeout: Duration = 30.seconds

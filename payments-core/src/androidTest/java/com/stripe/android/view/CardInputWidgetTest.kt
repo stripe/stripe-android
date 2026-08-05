@@ -22,7 +22,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.activityScenarioRule
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ShampooRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -34,7 +34,7 @@ class CardInputWidgetTest {
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
         .around(composeTestRule)
-        .around(RetryRule())
+        .around(ShampooRule(iterations = 5))
         .around(activityRule)
 
     @Test

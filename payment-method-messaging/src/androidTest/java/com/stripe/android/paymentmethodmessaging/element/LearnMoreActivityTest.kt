@@ -14,7 +14,7 @@ import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement.Appearance.Theme
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ShampooRule
 import org.hamcrest.Matchers.containsString
 import org.junit.Rule
 import org.junit.Test
@@ -26,7 +26,7 @@ internal class LearnMoreActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
     @get:Rule
-    val retryRule = RetryRule()
+    val shampooRule = ShampooRule(iterations = 5)
 
     @Test
     fun loadsUrl() {

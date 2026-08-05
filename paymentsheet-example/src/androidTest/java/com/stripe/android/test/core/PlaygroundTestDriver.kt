@@ -1225,7 +1225,7 @@ internal class PlaygroundTestDriver(
 
     private fun monitorCurrentActivity(application: Application) {
         this.application = application
-        // Unregister first so retried attempts (e.g. RetryRule) don't stack callbacks.
+        // Unregister first so repeated attempts (e.g. ShampooRule) don't stack callbacks.
         application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
