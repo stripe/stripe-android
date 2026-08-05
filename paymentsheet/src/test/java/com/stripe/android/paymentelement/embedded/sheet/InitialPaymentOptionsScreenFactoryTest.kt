@@ -43,7 +43,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     ) {
         val screens = factory.createInitialScreen()
         assertThat(screens).hasSize(1)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
     }
 
     @Test
@@ -72,7 +72,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val screens = factory.createInitialScreen()
 
         assertThat(screens).hasSize(1)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
     }
 
     @Test
@@ -82,7 +82,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val screens = factory.createInitialScreen()
 
         assertThat(screens).hasSize(2)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.Form>()
     }
 
@@ -99,7 +99,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val screens = factory.createInitialScreen()
 
         assertThat(screens).hasSize(1)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
     }
 
     @Suppress("LongMethod")
@@ -155,7 +155,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
         val fakeInteractor =
             com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor.create()
-        val initialScreen = EmbeddedNavigator.Screen.PaymentOptions(
+        val initialScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = fakeInteractor,
             isLiveMode = true,
             sheetActivityState = sheetActivityStateHolder.state,

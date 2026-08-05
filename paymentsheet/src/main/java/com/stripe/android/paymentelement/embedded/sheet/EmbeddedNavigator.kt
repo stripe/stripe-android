@@ -108,7 +108,7 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageAll -> eventReporter.onShowManageSavedPaymentMethods()
             is Screen.ManageUpdate -> eventReporter.onShowEditablePaymentOption()
             is Screen.Form -> Unit
-            is Screen.PaymentOptions -> eventReporter.onShowNewPaymentOptions()
+            is Screen.VerticalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
         }
     }
 
@@ -117,7 +117,7 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageAll -> Unit
             is Screen.ManageUpdate -> eventReporter.onHideEditablePaymentOption()
             is Screen.Form -> Unit
-            is Screen.PaymentOptions -> Unit
+            is Screen.VerticalPaymentOptions -> Unit
         }
     }
 
@@ -271,7 +271,7 @@ internal class EmbeddedNavigator private constructor(
             }
         }
 
-        class PaymentOptions(
+        class VerticalPaymentOptions(
             private val interactor: PaymentMethodVerticalLayoutInteractor,
             private val isLiveMode: Boolean,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
