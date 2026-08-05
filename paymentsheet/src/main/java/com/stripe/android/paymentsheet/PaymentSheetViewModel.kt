@@ -24,6 +24,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -46,12 +47,14 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.computeBillingEditDistance
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
@@ -580,6 +583,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             val confirmationOption = withContext(viewModelScope.coroutineContext) {
                 inProgressSelection = paymentSelection
+                persistBillingAnalytics(paymentSelection)
 
                 paymentSelectionWithCvcIfEnabled(paymentSelection)
                     ?.toConfirmationOption(
@@ -658,6 +662,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
                 intentId = intentId,
             )
+            reportBillingAddressCompleted(paymentSelection)
         }
 
         // Log out of Link to invalidate the token
@@ -674,6 +679,32 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
             }
         }
+    }
+
+    private fun persistBillingAnalytics(paymentSelection: PaymentSelection?) {
+        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
+        if (paymentSelection !is PaymentSelection.New) return
+        val billingAddress = paymentSelection.billingDetails?.address ?: return
+        val filledAddress = autocompleteFilledAddress
+        savedStateHandle[AUTOCOMPLETE_USED_KEY] = filledAddress != null
+        savedStateHandle[AUTOCOMPLETE_EDIT_DISTANCE_KEY] = filledAddress?.let {
+            computeBillingEditDistance(it, billingAddress)
+        }
+    }
+
+    private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
+        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
+        if (paymentSelection !is PaymentSelection.New) return
+        val countryCode = paymentSelection.billingDetails?.address?.country ?: return
+        val autocompleteUsed = savedStateHandle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true
+        val editDistance = savedStateHandle.get<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
+        savedStateHandle.remove<Boolean>(AUTOCOMPLETE_USED_KEY)
+        savedStateHandle.remove<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
+        eventReporter.onBillingAddressCompleted(
+            addressCountryCode = countryCode,
+            autocompleteResultSelected = autocompleteUsed,
+            editDistance = editDistance,
+        )
     }
 
     private fun processConfirmationResult(result: ConfirmationHandler.Result?) {
@@ -813,6 +844,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private companion object {
         const val IN_PROGRESS_SELECTION = "IN_PROGRESS_PAYMENT_SELECTION"
+        const val AUTOCOMPLETE_USED_KEY = "BILLING_AUTOCOMPLETE_USED"
+        const val AUTOCOMPLETE_EDIT_DISTANCE_KEY = "BILLING_AUTOCOMPLETE_EDIT_DISTANCE"
     }
 }
 

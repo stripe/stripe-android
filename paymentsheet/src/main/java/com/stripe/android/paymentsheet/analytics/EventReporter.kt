@@ -261,6 +261,15 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onTapToAddAttemptWithUnsupportedDevice()
 
     /**
+     * The user confirms payment with a billing address filled.
+     */
+    fun onBillingAddressCompleted(
+        addressCountryCode: String,
+        autocompleteResultSelected: Boolean,
+        editDistance: Int?,
+    )
+
+    /**
      * Promotions fetched from PMM API.
      */
     fun onPaymentMethodMessagePromotionsFetchBegin()
