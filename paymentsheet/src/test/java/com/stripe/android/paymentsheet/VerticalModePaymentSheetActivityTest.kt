@@ -60,7 +60,7 @@ internal class VerticalModePaymentSheetActivityTest {
         .around(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(RetryRule(3))
+        .around(RetryRule())
 
     @Test
     fun `Allows paying with card`() = runTest(

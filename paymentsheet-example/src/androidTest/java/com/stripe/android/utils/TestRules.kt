@@ -48,7 +48,7 @@ class TestRules private constructor(
                     }
                 }.let { chain ->
                     if (BuildConfig.IS_RUNNING_IN_CI && !BuildConfig.RUN_LATENCY_TESTS_IN_CI) {
-                        chain.around(RetryRule(retryCount))
+                        chain.around(RetryRule())
                     } else {
                         chain
                     }

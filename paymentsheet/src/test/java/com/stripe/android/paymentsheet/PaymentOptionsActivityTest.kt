@@ -93,7 +93,7 @@ internal class PaymentOptionsActivityTest {
         .around(coroutineScopeCleanupRule)
         .around(composeTestRule)
         .around(networkRule)
-        .around(RetryRule(3))
+        .around(RetryRule())
 
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()

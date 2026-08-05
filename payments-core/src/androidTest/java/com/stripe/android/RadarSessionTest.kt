@@ -56,7 +56,7 @@ class RadarSessionTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(CoroutineTestRule(testDispatcher))
         .around(scenarioRule)
-        .around(RetryRule(3))
+        .around(RetryRule())
 
     @Test
     fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest(testDispatcher) {

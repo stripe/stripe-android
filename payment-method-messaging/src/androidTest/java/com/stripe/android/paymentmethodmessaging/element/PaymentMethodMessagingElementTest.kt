@@ -29,7 +29,7 @@ class PaymentMethodMessagingElementTest {
     val testRule: RuleChain = RuleChain.emptyRuleChain()
         .around(composeTestRule)
         .around(networkRule)
-        .around(RetryRule(5))
+        .around(RetryRule())
         .around(AdvancedFraudSignalsTestRule())
 
     private val getConfigRequestMatcher = composite(

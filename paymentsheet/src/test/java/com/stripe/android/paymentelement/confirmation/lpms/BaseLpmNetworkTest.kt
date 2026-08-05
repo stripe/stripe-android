@@ -40,7 +40,7 @@ internal open class BaseLpmNetworkTest(
         .around(createTestActivityRule<LpmNetworkTestActivity>())
         .around(IntentsRule())
         .around(PaymentElementCallbackTestRule())
-        .around(RetryRule(attempts = 3))
+        .around(RetryRule())
 
     fun test(
         testType: TestType,

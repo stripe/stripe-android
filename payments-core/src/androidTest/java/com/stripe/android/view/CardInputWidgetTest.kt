@@ -34,7 +34,7 @@ class CardInputWidgetTest {
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
         .around(composeTestRule)
-        .around(RetryRule(3))
+        .around(RetryRule())
         .around(activityRule)
 
     @Test
