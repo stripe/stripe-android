@@ -130,10 +130,12 @@ internal interface CustomerSheetTestHelper {
             configuration = configuration,
             integrationType = integrationType,
             statusBarColor = null,
-            apiConfiguration = if (isLiveMode) {
-                ApiConfiguration.State(publishableKey = "pk_live", stripeAccountId = null)
-            } else {
-                apiConfiguration
+            apiConfigurationProvider = {
+                if (isLiveMode) {
+                    ApiConfiguration.State(publishableKey = "pk_live", stripeAccountId = null)
+                } else {
+                    apiConfiguration
+                }
             },
             logger = Logger.noop(),
             productUsage = emptySet(),

@@ -39,7 +39,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class AttestationConfirmationDefinitionTest {
@@ -639,7 +638,7 @@ internal class AttestationConfirmationDefinitionTest {
             integrityRequestManager = integrityRequestManager,
             coroutineScope = coroutineScope,
             workContext = workContext,
-            apiConfigProvider = Provider {
+            apiConfigProvider = {
                 ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = null,

@@ -35,7 +35,6 @@ import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import javax.inject.Provider
 
 internal class PassiveChallengeConfirmationDefinitionTest {
     @get:Rule
@@ -611,7 +610,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     ): PassiveChallengeConfirmationDefinition {
         return PassiveChallengeConfirmationDefinition(
             errorReporter = errorReporter,
-            apiConfigProvider = Provider {
+            apiConfigProvider = {
                 ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = null,

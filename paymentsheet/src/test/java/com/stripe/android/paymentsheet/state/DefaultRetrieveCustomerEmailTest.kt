@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
@@ -94,7 +95,9 @@ internal class DefaultRetrieveCustomerEmailTest {
         val retrieveEmail = DefaultRetrieveCustomerEmail(
             customerRepository,
             FakeDurationProvider(),
-        )
+        ) {
+            ApiConfiguration.State("pk_123", null)
+        }
 
         val result = retrieveEmail(
             configuration = configuration,
@@ -127,6 +130,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         override suspend fun retrieveCustomer(
             customerId: String,
             ephemeralKeySecret: String,
+            stripeAccountId: String?
         ) = null.also {
             retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret))
         }

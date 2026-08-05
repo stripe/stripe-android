@@ -339,6 +339,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
             checkoutSessionRepository = checkoutSessionRepository,
+            apiConfigProvider = { ApiConfiguration.State("pk_123", null) }
         )
 
         Scenario(

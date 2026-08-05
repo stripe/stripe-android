@@ -18,7 +18,6 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RadarOptionsFactory
 import com.stripe.android.utils.FakePassiveChallengeWarmer
 import org.junit.Test
-import javax.inject.Provider
 
 internal class PassiveChallengeConfirmationFlowTest {
     @Test
@@ -97,7 +96,7 @@ internal class PassiveChallengeConfirmationFlowTest {
     ) = PassiveChallengeConfirmationDefinition(
         errorReporter = errorReporter,
         passiveChallengeWarmer = passiveChallengeWarmer,
-        apiConfigProvider = Provider {
+        apiConfigProvider = {
             ApiConfiguration.State(
                 publishableKey = "pk_123",
                 stripeAccountId = null,

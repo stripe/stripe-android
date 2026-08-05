@@ -1054,6 +1054,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret: String,
                     types: List<PaymentMethod.Type>,
                     silentlyFail: Boolean,
+                    stripeAccountId: String?
                 ): Result<List<PaymentMethod>> {
                     requestPaymentMethodTypes = types
                     return Result.success(
@@ -4926,7 +4927,9 @@ internal class DefaultPaymentElementLoaderTest {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
             durationProvider,
-        )
+        ) {
+            ApiConfiguration.State("pk_123", null)
+        }
         val createLinkState = DefaultCreateLinkState(
             accountStatusProvider = { linkAccountState },
             retrieveCustomerEmail = retrieveCustomerEmailImpl,

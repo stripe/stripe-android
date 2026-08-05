@@ -46,7 +46,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
-import javax.inject.Provider
 
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
@@ -1034,7 +1033,7 @@ class LinkApiRepositoryTest {
         return LinkApiRepository(
             application = ApplicationProvider.getApplicationContext(),
             requestSurface = RequestSurface.PaymentElement,
-            apiConfigProvider = Provider {
+            apiConfigProvider = {
                 ApiConfiguration.State(
                     publishableKey = PUBLISHABLE_KEY,
                     stripeAccountId = STRIPE_ACCOUNT_ID,
@@ -1045,7 +1044,7 @@ class LinkApiRepositoryTest {
             workContext = Dispatchers.IO,
             locale = Locale.US,
             errorReporter = errorReporter,
-            apiRequestOptionsProvider = Provider {
+            apiRequestOptionsProvider = {
                 ApiRequest.Options(
                     apiKey = PUBLISHABLE_KEY,
                     stripeAccount = STRIPE_ACCOUNT_ID,

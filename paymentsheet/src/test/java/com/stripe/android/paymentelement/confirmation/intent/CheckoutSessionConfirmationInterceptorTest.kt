@@ -48,7 +48,6 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -385,7 +384,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             context = applicationContext,
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
-            requestOptionsProvider = Provider { ApiRequest.Options(apiKey = "pk_test_123") },
+            requestOptionsProvider = { ApiRequest.Options(apiKey = "pk_test_123") },
         )
 
         runTest {
