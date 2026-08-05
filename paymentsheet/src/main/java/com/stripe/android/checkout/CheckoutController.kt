@@ -131,30 +131,6 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Updates the quantity of a line item.
-     *
-     * @param lineItemId The ID of the line item to update.
-     * @param quantity The new quantity.
-     */
-    suspend fun updateLineItemQuantity(
-        lineItemId: String,
-        quantity: Int,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity)
-    }
-
-    /**
-     * Selects a shipping option.
-     *
-     * @param id The ID of the shipping option to select.
-     */
-    suspend fun selectShippingOption(
-        id: String,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.selectShippingRate(sessionId, id)
-    }
-
-    /**
      * Sets the shipping address for this checkout.
      *
      * The address is stored locally and used when presenting payment UI. If automatic tax is
@@ -182,19 +158,6 @@ class CheckoutController @Inject internal constructor(
                 ),
             )
         }
-    }
-
-    /**
-     * Updates the customer's tax ID.
-     *
-     * @param type The type of tax ID (e.g. "eu_vat"). Leading/trailing whitespace is trimmed.
-     * @param value The tax ID value. Leading/trailing whitespace is trimmed.
-     */
-    suspend fun updateTaxId(
-        type: String,
-        value: String,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
     }
 
     /**
