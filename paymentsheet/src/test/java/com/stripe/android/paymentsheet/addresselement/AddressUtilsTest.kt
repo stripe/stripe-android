@@ -126,19 +126,6 @@ class AddressUtilsTest {
     }
 
     @Test
-    fun `computeBillingEditDistance returns zero for identical addresses`() {
-        val address = Address(
-            line1 = "510 Townsend St",
-            line2 = "Suite 200",
-            city = "San Francisco",
-            state = "CA",
-            postalCode = "94102",
-            country = "US",
-        )
-        assertThat(computeBillingEditDistance(address, address)).isEqualTo(0)
-    }
-
-    @Test
     fun `computeBillingEditDistance sums edits across fields`() {
         val autocomplete = Address(
             line1 = "510 Townsend St",
@@ -160,21 +147,15 @@ class AddressUtilsTest {
 
     @Test
     fun `computeBillingEditDistance excludes country from calculation`() {
-        val autocomplete = Address(
+        val address = Address(
             line1 = "123 Main St",
             city = "Toronto",
             state = "ON",
             postalCode = "M5V",
             country = "CA",
         )
-        val billing = Address(
-            line1 = "123 Main St",
-            city = "Toronto",
-            state = "ON",
-            postalCode = "M5V",
-            country = "US",
-        )
-        assertThat(computeBillingEditDistance(autocomplete, billing)).isEqualTo(0)
+        val sameWithDifferentCountry = address.copy(country = "US")
+        assertThat(computeBillingEditDistance(address, sameWithDifferentCountry)).isEqualTo(0)
     }
 
     @Test

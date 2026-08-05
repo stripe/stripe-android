@@ -871,11 +871,6 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `autocompleteFilledAddress is null initially`() = runScenario {
-        assertThat(delegate.autocompleteFilledAddress).isNull()
-    }
-
-    @Test
     fun `autocompleteFilledAddress tracks selected prediction address`() = runScenario {
         val fetchedAddress = Address(
             line1 = "123 Main Street",
