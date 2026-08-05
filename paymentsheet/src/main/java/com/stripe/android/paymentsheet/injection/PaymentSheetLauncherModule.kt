@@ -44,8 +44,18 @@ internal abstract class PaymentSheetLauncherModule {
         }
 
         @Provides
-        fun providePaymentMethodMetadata(viewModel: PaymentSheetViewModel): PaymentMethodMetadata? {
-            return viewModel.paymentMethodMetadata.value
+        @Singleton
+        fun providePaymentMethodMetadataFlow(
+            viewModel: PaymentSheetViewModel
+        ): kotlinx.coroutines.flow.StateFlow<PaymentMethodMetadata?> {
+            return viewModel.paymentMethodMetadata
+        }
+
+        @Provides
+        fun providePaymentMethodMetadata(
+            flow: kotlinx.coroutines.flow.StateFlow<PaymentMethodMetadata?>
+        ): PaymentMethodMetadata? {
+            return flow.value
         }
 
         @Provides
