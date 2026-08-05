@@ -35,8 +35,8 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
                 }
                 WalletType.Link -> ExpressButtonType.Link.takeIf {
                     expressCheckoutElementConfiguration.linkVisibility !=
-                        ExpressCheckoutElement.Configuration.LinkVisibility.Never
-                        && !expressCheckoutElementConfiguration.shippingAddressRequired
+                        ExpressCheckoutElement.Configuration.LinkVisibility.Never &&
+                        !expressCheckoutElementConfiguration.shippingAddressRequired
                 }
             }
         }
