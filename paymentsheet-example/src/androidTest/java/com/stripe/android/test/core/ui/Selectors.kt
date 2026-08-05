@@ -1,6 +1,7 @@
 package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
+import android.os.SystemClock.sleep
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasContentDescription
@@ -13,12 +14,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject
 import androidx.test.uiautomator.UiSelector
-import androidx.test.uiautomator.Until
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethod.Type.Blik
@@ -53,7 +51,7 @@ import com.stripe.android.uicore.R as UiCoreR
 internal class Selectors(
     val device: UiDevice,
     val composeTestRule: ComposeTestRule,
-    testParameters: TestParameters
+    private val testParameters: TestParameters
 ) {
     val continueButton = BuyButton(composeTestRule)
     val complete = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
@@ -157,48 +155,94 @@ internal class Selectors(
 
     val closeButton = UiAutomatorText("Close", device = device)
 
+    @OptIn(ExperimentalTestApi::class)
     fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
-        assertThat(
-            device.wait(
-                Until.findObject(
-                    By.textContains("test ${if (isSetup) "setup" else "payment"} page")
-                ),
-                HOOKS_PAGE_LOAD_TIMEOUT * 1000
-            )
-        ).isNotNull()
+        val authorizationText = requireNotNull(testParameters.authorizationAction).text(isSetup)
+        val readinessText = authorizationText.ifBlank {
+            "test ${if (isSetup) "setup" else "payment"} page"
+        }
+        val authorizationSelector = UiSelector().textContains(readinessText)
+
+        composeTestRule.waitUntil(
+            conditionDescription = "authorization page content '$readinessText' to load",
+            timeoutMillis = HOOKS_PAGE_LOAD_TIMEOUT * 1000,
+        ) {
+            device.findObject(authorizationSelector).exists()
+        }
         device.waitForIdle()
     }
 
-    /**
-     * Clicks through Chrome's first-run onboarding, which otherwise blocks the authorization page.
-     * No-op if it isn't showing.
-     */
-    fun dismissChromeFirstRunIfPresent() {
-        val chrome = BrowserUI.Chrome.packageName
-        // Chrome may still be launching.
-        device.wait(Until.hasObject(By.pkg(chrome)), 5_000L)
-
-        // Chrome onboarding button ids, tied to the API 33 google_apis Chrome build; revisit if
-        // that system image is bumped.
-        val freButtonIds = listOf(
-            "terms_accept",
-            "next_button",
-            "signin_fre_dismiss_button",
-            "negative_button",
-            "button_secondary",
-        )
-        repeat(8) {
-            val clicked = freButtonIds.any { id ->
-                val button = device.findObject(By.res("$chrome:id/$id"))
-                if (button != null) {
-                    runCatching { button.click() }
-                    device.waitForIdle()
-                    true
-                } else {
-                    false
+    /** Waits for the browser chooser or browser, then handles Chrome's first-run onboarding. */
+    @OptIn(ExperimentalTestApi::class)
+    fun awaitBrowserAndDismissFirstRun(browser: BrowserUI) {
+        var launchedActivity: String? = null
+        composeTestRule.waitUntil(
+            conditionDescription = "browser chooser or ${browser.name} to launch",
+            timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+        ) {
+            currentTopActivity()?.let { activity ->
+                val isRequestedBrowser = activity.contains(browser.packageName)
+                if (isRequestedBrowser) {
+                    launchedActivity = activity
                 }
+                isRequestedBrowser
+            } == true || selectBrowserPrompt.exists()
+        }
+
+        if (launchedActivity == null) {
+            browserIconAtPrompt(browser).click()
+            composeTestRule.waitUntil(
+                conditionDescription = "${browser.name} to launch",
+                timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+            ) {
+                currentTopActivity()?.let { activity ->
+                    if (activity.contains(browser.packageName)) {
+                        launchedActivity = activity
+                    }
+                }
+                launchedActivity != null
             }
-            if (!clicked) return
+        }
+
+        if (browser == BrowserUI.Chrome && launchedActivity?.contains(CHROME_FIRST_RUN_ACTIVITY) == true) {
+            dismissChromeFirstRunWithInput()
+        }
+    }
+
+    private fun currentTopActivity(): String? {
+        return runCatching {
+            device.executeShellCommand("dumpsys activity activities")
+                .lineSequence()
+                .firstOrNull { "topResumedActivity=" in it }
+        }.getOrNull()
+    }
+
+    private fun dismissChromeFirstRunWithInput() {
+        // The API 33 google_apis image has two fixed first-run screens. Accessibility remains
+        // attached to the PaymentSheet window while Chrome is foreground, so use proportional
+        // coordinates for its bottom action buttons.
+        val (displayWidth, displayHeight) = physicalDisplaySize()
+        val buttonY = displayHeight * 9 / 10
+        device.click(displayWidth / 2, buttonY)
+        sleep(CHROME_FIRST_RUN_SCREEN_TRANSITION_MS)
+        device.click(displayWidth / 8, buttonY)
+    }
+
+    private fun physicalDisplaySize(): Pair<Int, Int> {
+        val dimensions = runCatching {
+            device.executeShellCommand("wm size")
+                .lineSequence()
+                .first { it.startsWith("Physical size:") }
+                .substringAfter(':')
+                .trim()
+                .split('x')
+        }.getOrNull()
+        val width = dimensions?.getOrNull(0)?.toIntOrNull()
+        val height = dimensions?.getOrNull(1)?.toIntOrNull()
+        return if (width != null && height != null) {
+            width to height
+        } else {
+            device.displayWidth to device.displayHeight
         }
     }
 
@@ -415,6 +459,11 @@ internal class Selectors(
     }
 
     companion object {
+        private const val BROWSER_LAUNCH_TIMEOUT_MS = 60_000L
+        private const val CHROME_FIRST_RUN_SCREEN_TRANSITION_MS = 2_000L
+        private const val CHROME_FIRST_RUN_ACTIVITY =
+            "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
+
         fun browserWindow(device: UiDevice, browser: BrowserUI): UiObject? =
             device.findObject(
                 UiSelector()
