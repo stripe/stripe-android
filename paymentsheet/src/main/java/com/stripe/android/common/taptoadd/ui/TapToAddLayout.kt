@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.StateFlow
 
@@ -147,7 +148,7 @@ private fun VisibleCancelButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    val closeResource = if (isSystemInDarkTheme()) {
+    val closeResource = if (MaterialTheme.stripeThemeIsDark) {
         R.drawable.stripe_ic_paymentsheet_tta_close_dark
     } else {
         R.drawable.stripe_ic_paymentsheet_tta_close_light

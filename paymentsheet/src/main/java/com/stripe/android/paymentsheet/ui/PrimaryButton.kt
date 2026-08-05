@@ -12,6 +12,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -40,6 +41,7 @@ import com.stripe.android.uicore.getOnBackgroundColor
 import com.stripe.android.uicore.getOnSuccessBackgroundColor
 import com.stripe.android.uicore.getSuccessBackgroundColor
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeThemeIsDark
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -317,7 +319,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun LabelUI(label: String, color: Int?) {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         Text(
             text = label,
             textAlign = TextAlign.Center,

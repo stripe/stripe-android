@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.text.EmbeddableImage
 
 internal enum class LinkTermsType {
@@ -119,7 +120,7 @@ internal fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
 @Preview(name = "All types - Link")
 @Composable
 private fun LinkTermsAllTypesLinkPreview() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         Surface {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 LinkTermsType.entries.forEach { type ->
@@ -137,7 +138,7 @@ private fun LinkTermsAllTypesLinkPreview() {
 @Preview(name = "All types - Onelink")
 @Composable
 private fun LinkTermsAllTypesOnelinkPreview() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         Surface {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 LinkTermsType.entries.forEach { type ->

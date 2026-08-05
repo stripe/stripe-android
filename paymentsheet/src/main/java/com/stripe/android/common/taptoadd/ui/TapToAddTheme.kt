@@ -1,6 +1,7 @@
 package com.stripe.android.common.taptoadd.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -14,6 +15,7 @@ import com.stripe.android.common.taptoadd.TapToAddImageRepository
 import com.stripe.android.uicore.StripeColors
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 
 @Composable
@@ -22,6 +24,7 @@ internal fun TapToAddTheme(
     content: @Composable () -> Unit,
 ) {
     StripeTheme(
+        isDark = MaterialTheme.stripeThemeIsDark,
         colors = TapToAddThemeDefaults.colors,
         typography = TapToAddThemeDefaults.typography,
     ) {
@@ -46,7 +49,7 @@ private object TapToAddThemeDefaults {
     val colors: StripeColors
         @Composable
         get() {
-            val isDarkTheme = isSystemInDarkTheme()
+            val isDarkTheme = MaterialTheme.stripeThemeIsDark
 
             return remember {
                 val colors = StripeThemeDefaults.colors(isDarkTheme)

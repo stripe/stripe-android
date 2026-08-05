@@ -68,7 +68,9 @@ internal class LearnMoreActivity : AppCompatActivity() {
         }
 
         setContent {
-            StripeTheme {
+            StripeTheme(
+                isDark = args?.theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
+            ) {
                 val bottomSheetState = rememberStripeBottomSheetState()
                 val layoutInfo = rememberStripeBottomSheetLayoutInfo()
                 val scope = rememberCoroutineScope()

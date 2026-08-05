@@ -56,12 +56,13 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 @Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
 internal fun OTPElementUIPreview() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         OTPElementUI(
             enabled = true,
             element = OTPElement(
@@ -75,7 +76,7 @@ internal fun OTPElementUIPreview() {
 @Composable
 @Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
 internal fun OTPElementUIDisabledPreview() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         OTPElementUI(
             enabled = false,
             element = OTPElement(

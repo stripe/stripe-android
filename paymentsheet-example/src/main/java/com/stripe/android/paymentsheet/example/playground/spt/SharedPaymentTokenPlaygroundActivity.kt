@@ -65,6 +65,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
 import com.stripe.android.uicore.getOnBackgroundColor
+import com.stripe.android.uicore.stripeThemeIsDark
 import kotlinx.coroutines.launch
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
@@ -129,7 +130,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                 configure()
             }
 
-            StripeTheme {
+            StripeTheme(MaterialTheme.stripeThemeIsDark) {
                 screenContent.Content(
                     ScreenContent.Parameters(
                         paymentOption = paymentOption,

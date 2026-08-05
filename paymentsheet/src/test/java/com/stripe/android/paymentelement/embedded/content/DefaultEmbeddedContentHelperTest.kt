@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.createCustomerState
@@ -49,6 +50,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
+                paymentSheetAppearance = PaymentSheet.Appearance(),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             assertThat(awaitItem()).isNotNull()
@@ -63,6 +65,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
+                paymentSheetAppearance = PaymentSheet.Appearance(),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             assertThat(awaitItem()).isNotNull()

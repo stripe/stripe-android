@@ -82,8 +82,8 @@ import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 
@@ -513,6 +513,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     }
 
     val context = LocalContext.current
+    val isDark = MaterialTheme.stripeThemeIsDark
 
     Box {
         AndroidViewBinding(
@@ -523,7 +524,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
                 primaryButton.setAppearanceConfiguration(
                     StripeTheme.primaryButtonStyle,
                     tintList = ColorStateList.valueOf(
-                        if (context.isSystemDarkTheme()) {
+                        if (isDark) {
                             viewModel.config.appearance.primaryButton.colorsDark.background
                         } else {
                             viewModel.config.appearance.primaryButton.colorsLight.background

@@ -179,9 +179,11 @@ internal fun StripeThemeForLink(
     sectionStyle: SectionStyle = SectionStyle.Borderless,
     content: @Composable () -> Unit
 ) {
-    val stripeDefaultColors = StripeThemeDefaults.colors(isDark = LinkTheme.colors.isDark)
+    val isDark = LinkTheme.colors.isDark
+    val stripeDefaultColors = StripeThemeDefaults.colors(isDark = isDark)
 
     StripeTheme(
+        isDark = isDark,
         colors = stripeDefaultColors.copy(
             component = LinkTheme.colors.surfaceSecondary,
             onComponent = LinkTheme.colors.textPrimary,

@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.FLOW_CONTROLLER_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
@@ -106,7 +107,10 @@ internal object FlowControllerModule {
         @Named(WALLETS_BUTTON_LINK_LAUNCHER) walletsButtonLinkLauncher: LinkPaymentLauncher,
     ): WalletButtonsContent {
         return WalletButtonsContent(
-            interactor = DefaultWalletButtonsInteractor.create(viewModel, walletsButtonLinkLauncher)
+            interactor = DefaultWalletButtonsInteractor.create(viewModel, walletsButtonLinkLauncher),
+            appearanceProvider = {
+                viewModel.configureRequest.value?.configuration?.appearance ?: PaymentSheet.Appearance()
+            },
         )
     }
 

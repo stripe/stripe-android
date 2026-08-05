@@ -27,7 +27,7 @@ internal data class SupportedPaymentMethod(
     val displayName: ResolvableString,
     /** This describes the image in the LPM selector.  These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */
     @DrawableRes val iconResource: Int,
-    /** This describes the image in the LPM selector when the luminance of `Colors.component` is less than 0.5. */
+    /** This describes the image in the LPM selector when appearance is in dark mode. */
     @DrawableRes val iconResourceNight: Int?,
     /** An optional light theme icon url if it's supported. */
     val lightThemeIconUrl: String?,

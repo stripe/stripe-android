@@ -3,7 +3,6 @@ package com.stripe.android.common.nfcscan.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -19,13 +18,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @Composable
 internal fun NfcCloseButton(
     onPress: () -> Unit,
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = MaterialTheme.stripeThemeIsDark
     val outline = if (isDarkTheme) {
         Modifier.border(width = Dp.Hairline, color = Color.White.copy(alpha = 0.2f), shape = CircleShape)
     } else {

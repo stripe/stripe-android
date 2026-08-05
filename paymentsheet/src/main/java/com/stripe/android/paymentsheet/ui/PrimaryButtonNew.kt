@@ -29,6 +29,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -59,6 +60,7 @@ import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.stripeThemeIsDark
 import kotlinx.coroutines.delay
 
 const val PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON_TEST_TAG"
@@ -365,7 +367,7 @@ private fun PrimaryButtonPreview() {
         mutableStateOf<PrimaryButtonProcessingState>(PrimaryButtonProcessingState.Idle(null))
     }
 
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(

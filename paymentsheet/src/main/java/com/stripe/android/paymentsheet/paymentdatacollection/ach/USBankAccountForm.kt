@@ -61,6 +61,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
@@ -511,6 +512,7 @@ private fun AccountDetailsRemoveBankDialog(
     last4: String,
 ) {
     SimpleDialogElementUI(
+        isDark = MaterialTheme.stripeThemeIsDark,
         titleText = stringResource(
             id = R.string.stripe_paymentsheet_remove_bank_account_title
         ),

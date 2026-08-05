@@ -24,6 +24,7 @@ const val TEST_TAG_SIMPLE_DIALOG = "simple_dialog"
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SimpleDialogElementUI(
+    isDark: Boolean,
     titleText: String,
     messageText: String?,
     confirmText: String,
@@ -32,7 +33,7 @@ fun SimpleDialogElementUI(
     onConfirmListener: () -> Unit,
     onDismissListener: () -> Unit,
 ) {
-    StripeTheme {
+    StripeTheme(isDark) {
         AlertDialog(
             modifier = Modifier.testTag(TEST_TAG_SIMPLE_DIALOG),
             onDismissRequest = {

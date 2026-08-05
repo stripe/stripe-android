@@ -28,6 +28,7 @@ import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -49,7 +50,7 @@ internal class SepaMandateActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            StripeTheme {
+            StripeTheme(MaterialTheme.stripeThemeIsDark) {
                 val bottomSheetState = rememberStripeBottomSheetState()
 
                 ElementsBottomSheetLayout(

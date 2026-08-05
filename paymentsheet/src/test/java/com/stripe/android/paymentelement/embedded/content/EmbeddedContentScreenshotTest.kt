@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
@@ -28,6 +29,7 @@ internal class EmbeddedContentScreenshotTest {
             embeddedViewDisplaysMandateText = true,
             appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             isImmediateAction = false,
+            paymentSheetAppearance = PaymentSheet.Appearance(),
         )
         paparazziRule.snapshot {
             content.Content()
@@ -46,6 +48,7 @@ internal class EmbeddedContentScreenshotTest {
             embeddedViewDisplaysMandateText = true,
             appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             isImmediateAction = false,
+            paymentSheetAppearance = PaymentSheet.Appearance(),
         )
         paparazziRule.snapshot {
             content.Content()
@@ -64,6 +67,7 @@ internal class EmbeddedContentScreenshotTest {
             embeddedViewDisplaysMandateText = false,
             appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             isImmediateAction = false,
+            paymentSheetAppearance = PaymentSheet.Appearance(),
         )
         paparazziRule.snapshot {
             content.Content()

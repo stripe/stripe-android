@@ -6,6 +6,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
@@ -28,6 +29,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
     fun create(
         selection: PaymentSelection?,
         paymentMethodMetadata: PaymentMethodMetadata,
+        appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     ): EmbeddedPaymentElement.PaymentOptionDisplayData? {
         if (selection == null) {
             return null
@@ -59,6 +61,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
+                    themeMode = appearance.themeMode,
                 )
             },
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),

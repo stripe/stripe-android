@@ -65,6 +65,7 @@ internal interface PaymentElementModule {
                         paymentMethodMetadata = it.paymentMethodMetadata,
                         appearance = it.embeddedConfiguration.appearance.embeddedAppearance,
                         embeddedViewDisplaysMandateText = it.embeddedConfiguration.embeddedViewDisplaysMandateText,
+                        paymentSheetAppearance = it.embeddedConfiguration.appearance,
                         configuration = it.embeddedConfiguration,
                     )
                 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.view.CardInputWidget
 import com.stripe.example.R
 
@@ -43,7 +45,7 @@ class CardInputWidgetComposeExampleActivity : AppCompatActivity() {
                 mutableStateOf(true)
             }
 
-            StripeTheme {
+            StripeTheme(MaterialTheme.stripeThemeIsDark) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) {

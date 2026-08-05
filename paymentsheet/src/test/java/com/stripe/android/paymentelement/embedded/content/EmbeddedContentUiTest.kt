@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
@@ -68,6 +69,7 @@ internal class EmbeddedContentUiTest {
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                     appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
+                    paymentSheetAppearance = PaymentSheet.Appearance(),
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 )
                 val content = awaitItem()
@@ -92,6 +94,7 @@ internal class EmbeddedContentUiTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
+                paymentSheetAppearance = PaymentSheet.Appearance(),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             val content = awaitItem()
@@ -116,6 +119,7 @@ internal class EmbeddedContentUiTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 appearance = Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 embeddedViewDisplaysMandateText = true,
+                paymentSheetAppearance = PaymentSheet.Appearance(),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             val content = awaitItem()

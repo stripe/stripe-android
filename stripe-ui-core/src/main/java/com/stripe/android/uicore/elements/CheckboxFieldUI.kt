@@ -31,6 +31,7 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import androidx.compose.ui.R as ComposeR
 
@@ -163,7 +164,7 @@ private fun CheckboxFieldUIViewPreview() {
         mutableStateOf(false)
     }
 
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         CheckboxFieldUIView(
             modifier = Modifier.padding(vertical = 8.dp),
             enabled = true,

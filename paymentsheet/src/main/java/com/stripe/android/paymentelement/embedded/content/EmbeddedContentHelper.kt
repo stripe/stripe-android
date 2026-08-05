@@ -52,6 +52,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                         embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
                         appearance = state.appearance,
                         isImmediateAction = isImmediateAction,
+                        paymentSheetAppearance = state.paymentSheetAppearance,
                     )
                 }
             }

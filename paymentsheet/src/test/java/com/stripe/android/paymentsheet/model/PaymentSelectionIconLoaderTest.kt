@@ -9,6 +9,7 @@ import android.graphics.drawable.VectorDrawable
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.FakeStripeImageLoader
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -23,7 +24,9 @@ internal class PaymentSelectionIconLoaderTest {
 
     private val workingUrl = "working url"
     private val brokenUrl = "broken url"
+    private val darkUrl = "dark url"
     private val simpleBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+    private val darkBitmap = Bitmap.createBitmap(20, 20, Bitmap.Config.ARGB_8888)
     private val testDispatcher = StandardTestDispatcher()
 
     @Test
@@ -69,9 +72,33 @@ internal class PaymentSelectionIconLoaderTest {
         assertThat(drawable.current).isEqualTo(PaymentSelection.IconLoader.emptyDrawable)
     }
 
+    @Test
+    fun loadPaymentOptionWithIconUrl_alwaysDark_usesDarkIconFromUrl() = runScenario(
+        iconUrl = workingUrl,
+        darkIconUrl = darkUrl,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link_ref,
+        themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+    ) {
+        assertThat(drawable.current).isInstanceOf<BitmapDrawable>()
+        assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(darkBitmap)
+    }
+
+    @Test
+    fun loadPaymentOptionWithIconUrl_alwaysLight_usesLightIconFromUrl() = runScenario(
+        iconUrl = workingUrl,
+        darkIconUrl = darkUrl,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link_ref,
+        themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+    ) {
+        assertThat(drawable.current).isInstanceOf<BitmapDrawable>()
+        assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(simpleBitmap)
+    }
+
     private fun runScenario(
         iconUrl: String?,
+        darkIconUrl: String? = null,
         iconRes: Int?,
+        themeMode: PaymentSheet.ThemeMode = PaymentSheet.ThemeMode.Automatic,
         block: Scenario.() -> Unit,
     ) = runTest(testDispatcher) {
         val drawable = PaymentSelection.IconLoader(
@@ -79,6 +106,7 @@ internal class PaymentSelectionIconLoaderTest {
             imageLoader = FakeStripeImageLoader(
                 loadResultByUrl = mapOf(
                     workingUrl to Result.success(simpleBitmap),
+                    darkUrl to Result.success(darkBitmap),
                     brokenUrl to Result.failure(Throwable()),
                 ),
             ),
@@ -86,7 +114,8 @@ internal class PaymentSelectionIconLoaderTest {
             drawableResourceId = iconRes ?: 0,
             drawableResourceIdNight = null,
             lightThemeIconUrl = iconUrl,
-            darkThemeIconUrl = null,
+            darkThemeIconUrl = darkIconUrl,
+            themeMode = themeMode,
         )
         advanceUntilIdle()
         Scenario(drawable = drawable).apply { block() }

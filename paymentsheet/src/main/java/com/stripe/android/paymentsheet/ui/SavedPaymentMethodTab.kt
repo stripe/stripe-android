@@ -47,6 +47,7 @@ import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.stripeThemeIsDark
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 const val SAVED_PAYMENT_METHOD_CARD_TEST_TAG = "SAVED_PAYMENT_METHOD_CARD_TEST_TAG"
@@ -250,7 +251,7 @@ private fun ModifyBadge(
 @Preview(name = "Selected payment option", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SavedPaymentMethodTabUISelected() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         SavedPaymentMethodTab(
             viewWidth = 100.dp,
             isSelected = true,
@@ -269,7 +270,7 @@ private fun SavedPaymentMethodTabUISelected() {
 @Preview(name = "Payment option in modifiable mode")
 @Composable
 private fun SavedPaymentMethodTabUIModifiable() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         SavedPaymentMethodTab(
             viewWidth = 100.dp,
             isSelected = false,
@@ -288,7 +289,7 @@ private fun SavedPaymentMethodTabUIModifiable() {
 @Preview(name = "Default Payment option in modifiable mode")
 @Composable
 private fun DefaultSavedPaymentMethodTabUIModifiable() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         SavedPaymentMethodTab(
             viewWidth = 100.dp,
             isSelected = false,

@@ -1,8 +1,8 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -10,6 +10,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -74,7 +75,7 @@ class AddressTextFieldController(
                 inlineAutocompleteHandler.onDismissed()
             }
             val predictionsState by inlineAutocompleteHandler.predictionsState.collectAsState()
-            val isDarkTheme = isSystemInDarkTheme()
+            val isDarkTheme = MaterialTheme.stripeThemeIsDark
 
             Column(
                 modifier = modifier.onFocusChanged { state ->

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -52,6 +53,7 @@ import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventR
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
 
@@ -218,6 +220,7 @@ internal fun AddPaymentMethod(
 
     if (viewState.displayDismissConfirmationModal) {
         SimpleDialogElementUI(
+            isDark = MaterialTheme.stripeThemeIsDark,
             titleText = stringResource(id = R.string.stripe_confirm_close_form_title),
             messageText = stringResource(id = R.string.stripe_confirm_close_form_body),
             confirmText = stringResource(id = R.string.stripe_paymentsheet_close),

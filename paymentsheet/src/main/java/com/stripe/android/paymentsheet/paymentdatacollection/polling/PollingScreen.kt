@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -233,7 +234,7 @@ private class PollingLifecycleObserver(
 @Preview(heightDp = 400)
 @Composable
 private fun ActivePollingScreenPreview() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         Surface {
             PollingScreen(
                 uiState = PollingUiState(
@@ -251,7 +252,7 @@ private fun ActivePollingScreenPreview() {
 @Preview(heightDp = 400)
 @Composable
 private fun FailedPollingScreenPreview() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         Surface {
             PollingScreen(
                 uiState = PollingUiState(

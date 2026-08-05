@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.core.strings.resolvableString
@@ -9,6 +10,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.R as StripeR
 
 @Composable
@@ -22,6 +24,7 @@ internal fun RemovePaymentMethodDialogUI(
     val messageText = removeMessage ?: paymentMethod.getRemoveDialogDescription().resolve()
 
     SimpleDialogElementUI(
+        isDark = MaterialTheme.stripeThemeIsDark,
         titleText = removeTitle,
         messageText = messageText,
         confirmText = stringResource(StripeR.string.stripe_remove),

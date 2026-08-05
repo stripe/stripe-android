@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -178,7 +179,10 @@ internal fun TestModeBadge() {
 @Preview
 @Composable
 internal fun PaymentSheetTopBar_Preview() {
-    StripeTheme(colors = StripeThemeDefaults.colorsLight.copy(appBarIcon = Color.Red)) {
+    StripeTheme(
+        isDark = MaterialTheme.stripeThemeIsDark,
+        colors = StripeThemeDefaults.colorsLight.copy(appBarIcon = Color.Red)
+    ) {
         val state = PaymentSheetTopBarState(
             showTestModeLabel = true,
             showEditMenu = true,
@@ -199,7 +203,7 @@ internal fun PaymentSheetTopBar_Preview() {
 @Preview
 @Composable
 internal fun TestModeBadge_Preview() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         TestModeBadge()
     }
 }

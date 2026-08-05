@@ -36,6 +36,7 @@ import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
@@ -235,7 +236,7 @@ private fun MandateButtons(
 @Composable
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 private fun BacsMandateConfirmationFormPreview() {
-    StripeTheme {
+    StripeTheme(MaterialTheme.stripeThemeIsDark) {
         BacsMandateConfirmationFormView(
             state = BacsMandateConfirmationViewState(
                 accountNumber = "00012345",
