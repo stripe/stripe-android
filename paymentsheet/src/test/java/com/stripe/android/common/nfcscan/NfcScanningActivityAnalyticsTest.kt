@@ -80,7 +80,14 @@ internal class NfcScanningActivityAnalyticsTest {
     fun `declined card fires attempt failed with error code`() {
         networkRule.expectNfcScanStarted()
         networkRule.expectNfcScanAttemptStarted()
-        networkRule.expectNfcScanAttemptFailed(errorCode = "cardDeclinedByNfc")
+        networkRule.expectNfcScanAttemptFailed(
+            errorCode = "cardDeclinedByNfc",
+            errorMatchers = createApduErrorMatchers(
+                executedCommands = listOf("selectPpse"),
+                sw1 = "69",
+                sw2 = "85",
+            ),
+        )
 
         launchScenario {
             dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
@@ -93,7 +100,14 @@ internal class NfcScanningActivityAnalyticsTest {
     fun `unsupported card fires attempt failed with error code`() {
         networkRule.expectNfcScanStarted()
         networkRule.expectNfcScanAttemptStarted()
-        networkRule.expectNfcScanAttemptFailed(errorCode = "cardUnsupportedByNfc")
+        networkRule.expectNfcScanAttemptFailed(
+            errorCode = "cardUnsupportedByNfc",
+            errorMatchers = createApduErrorMatchers(
+                executedCommands = listOf("selectPpse"),
+                sw1 = "6A",
+                sw2 = "82",
+            ),
+        )
 
         launchScenario {
             dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
@@ -103,10 +117,38 @@ internal class NfcScanningActivityAnalyticsTest {
     }
 
     @Test
+    fun `select application failure includes executed commands in analytics`() {
+        networkRule.expectNfcScanStarted()
+        networkRule.expectNfcScanAttemptStarted()
+        networkRule.expectNfcScanAttemptFailed(
+            errorCode = "cardUnsupportedByNfc",
+            errorMatchers = createApduErrorMatchers(
+                executedCommands = listOf(
+                    "selectPpse",
+                    "selectApplication(aid=A0000000031010)",
+                ),
+                sw1 = "6A",
+                sw2 = "82",
+            ),
+        )
+
+        launchScenario {
+            dispatchCardRead(NfcScanningActivityTestFixtures.selectApplicationFailureResponses())
+            assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+            isoDep.assertConnect()
+            isoDep.assertCommand(NfcScanningActivityTestFixtures.ApduCommands.SELECT_PPSE)
+            isoDep.assertCommand(NfcScanningActivityTestFixtures.ApduCommands.SELECT_VISA_APPLICATION)
+            isoDep.assertClose()
+        }
+    }
+
+    @Test
     fun `expired card fires attempt failed with error code`() {
         networkRule.expectNfcScanStarted()
         networkRule.expectNfcScanAttemptStarted()
-        networkRule.expectNfcScanAttemptFailed(errorCode = "expiredCard")
+        networkRule.expectNfcScanAttemptFailed(
+            errorCode = "expiredCard",
+        )
 
         launchScenario {
             dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
