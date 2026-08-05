@@ -8,6 +8,11 @@ import com.stripe.android.common.nfcscan.scanner.NfcTagTransceiver
  */
 internal abstract class ApduCommand<TResponseData> {
     /**
+     * Human-readable name for debugging and analytics.
+     */
+    abstract val name: String
+
+    /**
      * Instruction class - indicates the type of command
      */
     protected abstract val classByte: Byte
