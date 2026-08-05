@@ -27,11 +27,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
 import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOnBackgroundColor
+import com.stripe.android.uicore.stripePrimaryButtonStyle
 import com.stripe.android.ui.core.R as UiCoreR
 
 @Composable
@@ -48,16 +48,17 @@ internal fun PrimaryButton(
     // We need to use PaymentsTheme.primaryButtonStyle instead of MaterialTheme
     // because of the rules API for primary button.
     val context = LocalContext.current
-    val background = Color(StripeTheme.primaryButtonStyle.getBackgroundColor(context))
-    val onBackground = Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(context))
+    val style = MaterialTheme.stripePrimaryButtonStyle
+    val background = Color(style.getBackgroundColor(context))
+    val onBackground = Color(style.getOnBackgroundColor(context))
     val borderStroke = BorderStroke(
-        StripeTheme.primaryButtonStyle.shape.borderStrokeWidth.dp,
-        Color(StripeTheme.primaryButtonStyle.getBorderStrokeColor(context))
+        style.shape.borderStrokeWidth.dp,
+        Color(style.getBorderStrokeColor(context))
     )
     val shape = RoundedCornerShape(
-        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
+        style.shape.cornerRadius.dp
     )
-    val textStyle = StripeTheme.primaryButtonStyle.getComposeTextStyle()
+    val textStyle = style.getComposeTextStyle()
 
     CompositionLocalProvider(
         LocalContentAlpha provides if (isEnabled) ContentAlpha.high else ContentAlpha.disabled
@@ -71,7 +72,7 @@ internal fun PrimaryButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(
-                        minHeight = StripeTheme.primaryButtonStyle.shape.height.dp
+                        minHeight = style.shape.height.dp
                     ),
                 enabled = isEnabled,
                 shape = shape,
@@ -110,7 +111,7 @@ private fun PrimaryButtonContent(
     displayLockIcon: Boolean,
 ) {
     val context = LocalContext.current
-    val onBackground = Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(context))
+    val onBackground = Color(MaterialTheme.stripePrimaryButtonStyle.getOnBackgroundColor(context))
 
     BoxWithConstraints(contentAlignment = Alignment.CenterStart) {
         Text(

@@ -14,12 +14,16 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
@@ -31,11 +35,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.uicore.PrimaryButtonStyle
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.convertDpToPx
 import com.stripe.android.uicore.getBorderStrokeColor
-import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOnBackgroundColor
 import com.stripe.android.uicore.getOnSuccessBackgroundColor
 import com.stripe.android.uicore.getSuccessBackgroundColor
@@ -59,6 +61,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     private var originalLabel: ResolvableString? = null
 
     private var defaultLabelColor: Int? = null
+    private var labelTextStyle by mutableStateOf(TextStyle.Default)
 
     @VisibleForTesting
     internal var externalLabel: ResolvableString? = null
@@ -103,8 +106,10 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     fun setAppearanceConfiguration(
         primaryButtonStyle: PrimaryButtonStyle,
+        labelTextStyle: TextStyle,
         tintList: ColorStateList?
     ) {
+        this.labelTextStyle = labelTextStyle
         cornerRadius = context.convertDpToPx(primaryButtonStyle.shape.cornerRadius.dp)
         borderStrokeWidth = context.convertDpToPx(primaryButtonStyle.shape.borderStrokeWidth.dp)
         borderStrokeColor = primaryButtonStyle.getBorderStrokeColor(context)
@@ -170,6 +175,7 @@ internal class PrimaryButton @JvmOverloads constructor(
                 LabelUI(
                     label = text.resolve(),
                     color = defaultLabelColor,
+                    style = labelTextStyle,
                 )
             }
         }
@@ -316,21 +322,19 @@ internal class PrimaryButton @JvmOverloads constructor(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun LabelUI(label: String, color: Int?) {
-    StripeTheme {
-        Text(
-            text = label,
-            textAlign = TextAlign.Center,
-            color = color?.let { Color(it) } ?: Color.Unspecified,
-            style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
-            modifier = Modifier
-                .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
-                .semantics {
-                    // This shouldn't be visible for accessibility purposes
-                    // due to the content description and the click listener
-                    // being defined outside of compose, in PrimaryButton.
-                    hideFromAccessibility()
-                }
-        )
-    }
+private fun LabelUI(label: String, color: Int?, style: TextStyle) {
+    Text(
+        text = label,
+        textAlign = TextAlign.Center,
+        color = color?.let { Color(it) } ?: Color.Unspecified,
+        style = style,
+        modifier = Modifier
+            .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+            .semantics {
+                // This shouldn't be visible for accessibility purposes
+                // due to the content description and the click listener
+                // being defined outside of compose, in PrimaryButton.
+                hideFromAccessibility()
+            }
+    )
 }
