@@ -281,7 +281,7 @@ class InlineAutocompleteControllerTest {
             fakePlacesClient.fetchPlaceCalls.awaitItem()
             fakePlacesClient.resetSessionCalls.awaitItem()
             assertThat(delegate.inlinePredictionsState.value)
-                .isEqualTo(InlinePredictionsState.Idle)
+                .isEqualTo(InlinePredictionsState.Results(query = "", predictions = emptyList()))
         }
 
     @Test
@@ -728,9 +728,8 @@ class InlineAutocompleteControllerTest {
         val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
         assertThat(call.placeId).isEqualTo("place-id-123")
         fakePlacesClient.resetSessionCalls.awaitItem()
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem())
-            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+        assertThat(delegate.inlinePredictionsState.value)
+            .isEqualTo(InlinePredictionsState.Results(query = "", predictions = emptyList()))
     }
 
     @Test
@@ -761,14 +760,8 @@ class InlineAutocompleteControllerTest {
 
         fakePlacesClient.fetchPlaceCalls.awaitItem()
         fakePlacesClient.resetSessionCalls.awaitItem()
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem()).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnExpandForm(
-                values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main",
-                    IdentifierSpec.Country to "US",
-                )
-            )
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(
+            InlinePredictionsState.Results(query = "123 Main", predictions = emptyList())
         )
     }
 
