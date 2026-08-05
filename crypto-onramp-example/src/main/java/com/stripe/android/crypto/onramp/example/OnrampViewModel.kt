@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -151,7 +152,7 @@ internal class OnrampViewModel(
         successMessage = "Sign up successful!",
         failureLabel = "Sign up",
         request = { currentEmail, currentPassword ->
-            testBackendRepository.signUp(currentEmail, currentPassword, false)
+            testBackendRepository.signUp(currentEmail, currentPassword, true)
         }
     )
 
@@ -162,7 +163,7 @@ internal class OnrampViewModel(
         successMessage = "Log in successful!",
         failureLabel = "Log in",
         request = { currentEmail, currentPassword ->
-            testBackendRepository.logIn(currentEmail, currentPassword, false)
+            testBackendRepository.logIn(currentEmail, currentPassword, true)
         }
     )
 
@@ -281,6 +282,7 @@ internal class OnrampViewModel(
     fun onBackToLoginSignup() {
         val googlePayIsReady = _uiState.value.googlePayIsReady
         val samsungPayIsReady = _uiState.value.samsungPayIsReady
+        val samsungPayUnavailableMessage = _uiState.value.samsungPayUnavailableMessage
         val savedUser = userDataStore.load()
 
         _uiState.value = savedUser?.let {
@@ -290,11 +292,13 @@ internal class OnrampViewModel(
                 screen = Screen.SeamlessSignIn,
                 googlePayIsReady = googlePayIsReady,
                 samsungPayIsReady = samsungPayIsReady,
+                samsungPayUnavailableMessage = samsungPayUnavailableMessage,
             )
         } ?: OnrampUiState(
             screen = Screen.LoginSignup,
             googlePayIsReady = googlePayIsReady,
             samsungPayIsReady = samsungPayIsReady,
+            samsungPayUnavailableMessage = samsungPayUnavailableMessage,
         )
     }
 
@@ -1012,8 +1016,31 @@ internal class OnrampViewModel(
     }
 
     private fun samsungPayIsReady(isReady: Boolean, result: SamsungPayAvailabilityResult) {
-        result.toString()
-        _uiState.update { it.copy(samsungPayIsReady = isReady) }
+        val unavailableMessage = when (result) {
+            is SamsungPayAvailabilityResult.Available -> null
+            is SamsungPayAvailabilityResult.Unavailable -> {
+                Log.d(SAMSUNG_PAY_LOG_TAG, result.error.developerMessage)
+                buildSamsungPayUnavailableMessage(result)
+            }
+        }
+
+        _uiState.update {
+            it.copy(
+                samsungPayIsReady = isReady,
+                samsungPayUnavailableMessage = unavailableMessage,
+            )
+        }
+    }
+
+    private fun buildSamsungPayUnavailableMessage(
+        result: SamsungPayAvailabilityResult.Unavailable
+    ): String {
+        val error = result.error
+        val samsungPayErrorCode = error.samsungPayErrorCode
+            ?.let { " (Samsung code: $it)" }
+            .orEmpty()
+
+        return "Samsung Pay disabled: ${error.reason.code}$samsungPayErrorCode"
     }
 
     private fun buildIdentifiersRequest(state: OnrampUiState): List<ComplianceIdentifier>? {
@@ -1120,6 +1147,7 @@ internal class OnrampViewModel(
                 screen = Screen.LoginSignup,
                 googlePayIsReady = currentState.googlePayIsReady,
                 samsungPayIsReady = currentState.samsungPayIsReady,
+                samsungPayUnavailableMessage = currentState.samsungPayUnavailableMessage,
             )
         }
     }
@@ -1136,7 +1164,8 @@ internal class OnrampViewModel(
     }
 }
 
-private const val DEFAULT_DESTINATION_NETWORK = "ethereum"
+private const val DEFAULT_DESTINATION_NETWORK = ONRAMP_DESTINATION_NETWORK
+private const val SAMSUNG_PAY_LOG_TAG = "OnrampSamsungPay"
 
 private fun List<String>.joinToStringOrNone(): String {
     return takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None"

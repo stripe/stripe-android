@@ -28,6 +28,8 @@ import com.stripe.android.crypto.onramp.example.COLLECT_CARD_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.COLLECT_SAMSUNG_PAY_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_CRYPTO_TOKEN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_SESSION_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.ONRAMP_SOURCE_AMOUNT_MINOR_UNITS
+import com.stripe.android.crypto.onramp.example.ONRAMP_SOURCE_CURRENCY_CODE
 import com.stripe.android.crypto.onramp.example.REGISTER_WALLET_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
@@ -266,6 +268,7 @@ internal fun VerificationSection(
 internal fun PaymentSection(
     googlePayIsReady: Boolean,
     samsungPayIsReady: Boolean,
+    samsungPayUnavailableMessage: String?,
     onCollectPayment: (PaymentMethodSelection) -> Unit
 ) {
     Text(
@@ -326,13 +329,21 @@ internal fun PaymentSection(
             .padding(bottom = 8.dp)
     )
 
+    if (!samsungPayIsReady && samsungPayUnavailableMessage != null) {
+        Text(
+            text = samsungPayUnavailableMessage,
+            color = MaterialTheme.colors.error,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+    }
+
     Spacer(modifier = Modifier.height(32.dp))
 }
 
 private fun samsungPaySelection(): PaymentMethodSelection.SamsungPay {
     return PaymentMethodSelection.SamsungPay(
-        currencyCode = "USD",
-        amount = 199L,
+        currencyCode = ONRAMP_SOURCE_CURRENCY_CODE,
+        amount = ONRAMP_SOURCE_AMOUNT_MINOR_UNITS,
         orderNumber = "onramp-example-order",
     )
 }

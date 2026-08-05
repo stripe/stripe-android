@@ -31,6 +31,7 @@ internal data class OnrampUiState(
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
     val googlePayIsReady: Boolean = false,
     val samsungPayIsReady: Boolean = false,
+    val samsungPayUnavailableMessage: String? = null,
     val kycFirstName: String = "",
     val kycLastName: String = "",
     val kycBirthCountry: String = "",

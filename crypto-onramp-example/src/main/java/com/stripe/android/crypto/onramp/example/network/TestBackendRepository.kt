@@ -11,6 +11,10 @@ import com.github.kittinunf.fuel.core.interceptors.LogRequestAsCurlInterceptor
 import com.github.kittinunf.fuel.core.interceptors.LogRequestInterceptor
 import com.github.kittinunf.fuel.core.interceptors.LogResponseInterceptor
 import com.github.kittinunf.fuel.core.requests.suspendable
+import com.stripe.android.crypto.onramp.example.ONRAMP_DESTINATION_CURRENCY
+import com.stripe.android.crypto.onramp.example.ONRAMP_DESTINATION_NETWORK
+import com.stripe.android.crypto.onramp.example.ONRAMP_SOURCE_AMOUNT
+import com.stripe.android.crypto.onramp.example.ONRAMP_SOURCE_CURRENCY
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
@@ -34,10 +38,10 @@ class TestBackendRepository {
         paymentToken: String,
         walletAddress: String,
         authToken: String,
-        destinationNetwork: String = "ethereum",
-        sourceAmount: Double = 10.0,
-        sourceCurrency: String = "usd",
-        destinationCurrency: String = "eth",
+        destinationNetwork: String = ONRAMP_DESTINATION_NETWORK,
+        sourceAmount: Double = ONRAMP_SOURCE_AMOUNT,
+        sourceCurrency: String = ONRAMP_SOURCE_CURRENCY,
+        destinationCurrency: String = ONRAMP_DESTINATION_CURRENCY,
         customerIpAddress: String = "127.0.0.1",
         settlementSpeed: SettlementSpeed,
     ): ApiResult<OnrampSessionResponse, FuelError> {

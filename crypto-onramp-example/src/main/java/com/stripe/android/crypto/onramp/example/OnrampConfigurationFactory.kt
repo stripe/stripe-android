@@ -51,8 +51,8 @@ internal object OnrampConfigurationFactory {
 }
 
 private const val MERCHANT_NAME = "Onramp Example"
-private const val SAMSUNG_PAY_SERVICE_ID = "SERVICE_ID" // Replace with valid service ID for Samsung Pay.
+private const val SAMSUNG_PAY_SERVICE_ID = "fc8bfdf3366c4c3ebe69e3"
 
 @Suppress("MaxLineLength")
 private const val PUBLISHABLE_KEY =
-    "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO"
+    "pk_live_51K9W3OHMaDsveWq0HThYw9J0urQA6s2ROY8lLdCypHrcAG38NC5lu55BHjRlxqNUDHhgYFKgAdhKQmjI1cJhRH2o00cqnSo4aR"

@@ -33,6 +33,7 @@ dependencies {
     implementation project(':crypto-onramp')
     implementation project(':payments')
     implementation project(":stripe-ui-core")
+    implementation files("libs/samsungpay_2.22.00.jar")
 
     implementation libs.compose.activity
     implementation libs.compose.material
