@@ -126,7 +126,7 @@ internal class DefaultFormHelper(
         }
     }
 
-    private val lastFormValues = MutableSharedFlow<Pair<FormFieldValues?, String>>()
+    private val lastFormValues = MutableSharedFlow<Pair<FormFieldValues?, String>>(replay = 1)
 
     private val paymentSelection: Flow<PaymentSelection?> = combine(
         lastFormValues,
