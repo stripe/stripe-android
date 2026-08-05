@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import android.content.Context
 import androidx.activity.result.ActivityResultCallback
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -47,11 +48,14 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.robolectric.RobolectricTestRunner
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import com.stripe.android.R as PaymentsCoreR
 
+@RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationDefinitionTest {
     @get:Rule
     val allowNoExistingPaymentMethodForGooglePayRule = FeatureFlagTestRule(
@@ -497,7 +501,7 @@ class GooglePayConfirmationDefinitionTest {
 
     @Test
     fun `On 'launch', should pass display items to present`() = runTest {
-        val context = mock<Context>()
+        val context = ApplicationProvider.getApplicationContext<Context>()
         val displayItems = listOf(
             GooglePayDisplayItem(
                 label = "Widget".resolvableString,
@@ -718,7 +722,7 @@ class GooglePayConfirmationDefinitionTest {
         googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory =
             RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(launcher = mock()),
         userFacingLogger: UserFacingLogger = FakeUserFacingLogger(),
-        context: Context = mock(),
+        context: Context = ApplicationProvider.getApplicationContext(),
     ): GooglePayConfirmationDefinition {
         return GooglePayConfirmationDefinition(
             context = context,
