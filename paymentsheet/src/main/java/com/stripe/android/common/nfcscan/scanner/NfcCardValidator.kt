@@ -1,6 +1,5 @@
 package com.stripe.android.common.nfcscan.scanner
 
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -13,10 +12,7 @@ internal interface NfcCardValidator {
 
     sealed interface Result {
         data object Validated : Result
-        data class Invalid(
-            val errorCode: String,
-            val userMessage: ResolvableString,
-        ) : Result
+        data class Invalid(val error: NfcScanningError) : Result
     }
 }
 
@@ -26,8 +22,10 @@ internal class DefaultNfcCardValidator @Inject constructor(
     override fun validate(cardData: ScannedCardData): NfcCardValidator.Result {
         if (!paymentMethodMetadata.cardBrandFilter.isAccepted(CardBrand.fromCardNumber(cardData.cardNumber))) {
             return NfcCardValidator.Result.Invalid(
-                errorCode = UNSUPPORTED_CARD_VALIDATION_ERROR_CODE,
-                userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+                error = GenericNfcScanningError(
+                    errorCode = UNSUPPORTED_CARD_VALIDATION_ERROR_CODE,
+                    userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+                )
             )
         }
 
@@ -38,8 +36,10 @@ internal class DefaultNfcCardValidator @Inject constructor(
             )
         ) {
             return NfcCardValidator.Result.Invalid(
-                errorCode = EXPIRED_CARD_VALIDATION_ERROR_CODE,
-                userMessage = R.string.stripe_nfc_scan_error_expired_card.resolvableString,
+                error = GenericNfcScanningError(
+                    errorCode = EXPIRED_CARD_VALIDATION_ERROR_CODE,
+                    userMessage = R.string.stripe_nfc_scan_error_expired_card.resolvableString,
+                ),
             )
         }
 

@@ -34,7 +34,7 @@ class InlineAutocompleteControllerTest {
     fun `query shorter than minimum chars stays Idle`() = runScenario {
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
-        queryFlow.value = "a"
+        queryFlow.value = "ab"
         advanceTimeBy(500)
 
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
@@ -47,11 +47,11 @@ class InlineAutocompleteControllerTest {
         )
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
-        queryFlow.value = "ab"
+        queryFlow.value = "abc"
         advanceTimeBy(500)
 
         val call = fakePlacesClient.findPredictionsCalls.awaitItem()
-        assertThat(call.query).isEqualTo("ab")
+        assertThat(call.query).isEqualTo("abc")
     }
 
     @Test
