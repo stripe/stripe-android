@@ -246,6 +246,40 @@ internal class TransformSpecToElementsTest {
     }
 
     @Test
+    fun `Country spec full collection preserves custom country identifier with autocomplete`() = runTest {
+        val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
+        val formElements = TransformSpecToElementsFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
+            initialValues = mapOf(countryIdentifier to "AT"),
+            autocompleteAddressInteractorFactory = {
+                TestAutocompleteAddressInteractor.noOp()
+            },
+        ).transform(
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(
+                CountrySpec(
+                    apiPath = countryIdentifier,
+                    allowedCountryCodes = setOf("AT"),
+                ),
+            ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        val billingAddressElement = (
+            (formElements.single() as SectionElement).fields.single() as BillingAddressElement
+        )
+        val autocompleteAddressElement = billingAddressElement.addressElement as AutocompleteAddressElement
+        val formFieldValues = autocompleteAddressElement.getFormFieldValueFlow().first().toMap()
+
+        assertThat(autocompleteAddressElement.countryElement.identifier).isEqualTo(countryIdentifier)
+        assertThat(formFieldValues).containsKey(countryIdentifier)
+        assertThat(formFieldValues[countryIdentifier]?.value).isEqualTo("AT")
+        assertThat(formFieldValues).doesNotContainKey(IdentifierSpec.Country)
+    }
+
+    @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() =
         runBlocking {
             val idealSection = IDEAL_BANK_CONFIG
