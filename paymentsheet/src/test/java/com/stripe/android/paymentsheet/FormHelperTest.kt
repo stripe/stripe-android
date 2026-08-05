@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -214,6 +215,68 @@ internal class FormHelperTest {
             }
         ).onFormFieldValuesChanged(formFieldValues, "card")
         assertThat(hasCalledSelectionUpdater).isTrue()
+    }
+
+    @Test
+    fun `first onFormFieldValuesChanged call delivers selection instead of being dropped`() = runTest {
+        val cardBrand = "visa"
+        val name = "Joe"
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+                IdentifierSpec.Name to FormFieldEntry(name, true),
+            ),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+        )
+        val selectionUpdaterCalls = Turbine<PaymentSelection?>()
+        val formHelper = createFormHelper(
+            newPaymentSelectionProvider = { null },
+            selectionUpdater = { selection ->
+                selectionUpdaterCalls.add(selection)
+            },
+        )
+
+        formHelper.onFormFieldValuesChanged(formFieldValues, "card")
+
+        val selection = selectionUpdaterCalls.awaitItem() as PaymentSelection.New.Card
+        assertThat(selection.brand.code).isEqualTo(cardBrand)
+        selectionUpdaterCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `repeated onFormFieldValuesChanged calls only start a single collector`() = runTest {
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        val selectionUpdaterCalls = Turbine<PaymentSelection?>()
+        val formHelper = createFormHelper(
+            newPaymentSelectionProvider = { null },
+            selectionUpdater = { selection ->
+                selectionUpdaterCalls.add(selection)
+            },
+        )
+
+        val firstFormFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                IdentifierSpec.Name to FormFieldEntry("Joe", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+        formHelper.onFormFieldValuesChanged(firstFormFieldValues, "card")
+        val firstSelection = selectionUpdaterCalls.awaitItem() as PaymentSelection.New.Card
+        assertThat(firstSelection.brand.code).isEqualTo("visa")
+
+        val secondFormFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry("mastercard", true),
+                IdentifierSpec.Name to FormFieldEntry("Jane", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+        formHelper.onFormFieldValuesChanged(secondFormFieldValues, "card")
+        val secondSelection = selectionUpdaterCalls.awaitItem() as PaymentSelection.New.Card
+        assertThat(secondSelection.brand.code).isEqualTo("mastercard")
+
+        selectionUpdaterCalls.ensureAllEventsConsumed()
     }
 
     @Test
