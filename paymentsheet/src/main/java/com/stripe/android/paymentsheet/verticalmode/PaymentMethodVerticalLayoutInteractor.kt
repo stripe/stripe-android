@@ -604,7 +604,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         renderedLpmCallback = { visiblePaymentMethods, hiddenPaymentMethods ->
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
         },
-        dispatcher = dispatcher
+        coroutineScope = coroutineScope,
     )
 
     private fun updatePaymentMethodVisibility(itemCode: String, layoutCoordinates: LayoutCoordinates) {
