@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.BacsDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BlikDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeroDefinition
@@ -24,12 +25,14 @@ import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -158,6 +161,52 @@ class AutomaticTaxBillingAddressTest {
     }
 
     @Test
+    fun `appended tax address retains an existing same as shipping element once`() {
+        val metadata = createMetadata(
+            paymentMethodCode = PaymentMethod.Type.Blik.code,
+            checkoutSessionResponse = automaticTaxCheckoutSessionResponse,
+        )
+        val sameAsShippingElement = SameAsShippingElement(
+            identifier = IdentifierSpec.SameAsShipping,
+            controller = SameAsShippingController(true),
+        )
+
+        val formElements = AutomaticTaxFormFinalizer.finalize(
+            formElements = listOf(sameAsShippingElement),
+            paymentMethodCode = PaymentMethod.Type.Blik.code,
+            arguments = TestUiDefinitionFactoryArgumentsFactory.create().create(
+                metadata = metadata,
+                requiresMandate = false,
+            ),
+        )
+
+        assertThat(formElements.filterIsInstance<SameAsShippingElement>()).containsExactly(sameAsShippingElement)
+    }
+
+    @Test
+    fun `multiple billing addresses cause automatic tax finalization to fail`() {
+        val metadata = createMetadata(
+            paymentMethodCode = PaymentMethod.Type.Blik.code,
+            checkoutSessionResponse = automaticTaxCheckoutSessionResponse,
+        )
+        val formElements = BlikDefinition.formElements(metadata)
+
+        val exception = assertThrows(IllegalStateException::class.java) {
+            AutomaticTaxFormFinalizer.finalize(
+                formElements = formElements + formElements,
+                paymentMethodCode = PaymentMethod.Type.Blik.code,
+                arguments = TestUiDefinitionFactoryArgumentsFactory.create().create(
+                    metadata = metadata,
+                    requiresMandate = false,
+                ),
+            )
+        }
+
+        assertThat(exception).hasMessageThat()
+            .contains("A payment method form must not contain multiple billing addresses.")
+    }
+
+    @Test
     fun `existing country section is widened without duplication`() {
         val formElements = WeroDefinition.formElements(
             metadata = createMetadata(
@@ -210,6 +259,37 @@ class AutomaticTaxBillingAddressTest {
 
         val addressElement = formElements.sectionFields().filterIsInstance<BillingAddressElement>().single()
         assertThat(addressElement.addressElement).isInstanceOf(AddressElement::class.java)
+    }
+
+    @Test
+    fun `specialized full address is preserved by automatic tax finalization`() {
+        val baseMetadata = createMetadata(
+            paymentMethodCode = PaymentMethod.Type.BacsDebit.code,
+            checkoutSessionResponse = null,
+        )
+        val baseFormElements = requireNotNull(
+            baseMetadata.formElementsForCode(
+                code = PaymentMethod.Type.BacsDebit.code,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            )
+        )
+        val specializedAddress = baseFormElements.sectionFields().filterIsInstance<AddressElement>().single()
+        val taxMetadata = createMetadata(
+            paymentMethodCode = PaymentMethod.Type.BacsDebit.code,
+            checkoutSessionResponse = automaticTaxCheckoutSessionResponse,
+        )
+
+        val finalizedFormElements = AutomaticTaxFormFinalizer.finalize(
+            formElements = baseFormElements,
+            paymentMethodCode = PaymentMethod.Type.BacsDebit.code,
+            arguments = TestUiDefinitionFactoryArgumentsFactory.create().create(
+                metadata = taxMetadata,
+                requiresMandate = BacsDebitDefinition.requiresMandate(taxMetadata),
+            ),
+        )
+
+        assertThat(finalizedFormElements.sectionFields().filterIsInstance<AddressElement>())
+            .containsExactly(specializedAddress)
     }
 
     @Test

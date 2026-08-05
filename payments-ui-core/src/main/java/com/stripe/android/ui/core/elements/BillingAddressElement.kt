@@ -45,7 +45,6 @@ sealed interface BillingAddressCollectionMode {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun cardBillingAddressCollectionMode(
     addressCollectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
-    requiresBillingAddressForAutomaticTax: Boolean,
 ): BillingAddressCollectionMode {
     return when (addressCollectionMode) {
         BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> BillingAddressCollectionMode.Never
@@ -54,11 +53,6 @@ fun cardBillingAddressCollectionMode(
             val additionalFieldsByCountry = buildMap {
                 listOf("US", "GB", "CA").forEach { countryCode ->
                     put(countryCode, setOf(IdentifierSpec.PostalCode))
-                }
-                if (requiresBillingAddressForAutomaticTax) {
-                    additionalAutomaticTaxFieldsByCountry.forEach { (countryCode, fields) ->
-                        put(countryCode, get(countryCode).orEmpty() + fields)
-                    }
                 }
             }
             BillingAddressCollectionMode.Country(additionalFieldsByCountry)

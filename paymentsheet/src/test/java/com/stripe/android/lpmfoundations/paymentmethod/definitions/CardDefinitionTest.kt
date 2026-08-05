@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NfcScanningAction
@@ -41,12 +42,14 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.filterOutHiddenIdentifiers
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -438,6 +441,44 @@ class CardDefinitionTest {
     }
 
     @Test
+    fun `createFormElements shows only postal code for IN when automatic tax billing address is required`() = runTest {
+        val cardBillingElement = createAutomaticCardBillingAddressElement(
+            checkoutSessionResponse = automaticTaxCheckoutSessionResponse(),
+        )
+
+        cardBillingElement.hiddenIdentifiers.test {
+            cardBillingElement.countryElement.controller.onRawValueChange("IN")
+
+            val hiddenIdentifiers = expectMostRecentItem()
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
+            assertThat(hiddenIdentifiers).containsAtLeast(
+                IdentifierSpec.Line1,
+                IdentifierSpec.City,
+                IdentifierSpec.State,
+            )
+        }
+    }
+
+    @Test
+    fun `createFormElements shows PR tax fields without state`() = runTest {
+        val cardBillingElement = createAutomaticCardBillingAddressElement(
+            checkoutSessionResponse = automaticTaxCheckoutSessionResponse(),
+        )
+
+        cardBillingElement.hiddenIdentifiers.test {
+            cardBillingElement.countryElement.controller.onRawValueChange("PR")
+
+            val hiddenIdentifiers = expectMostRecentItem()
+            assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
+            assertThat(hiddenIdentifiers).containsNoneOf(
+                IdentifierSpec.Line1,
+                IdentifierSpec.City,
+                IdentifierSpec.PostalCode,
+            )
+        }
+    }
+
+    @Test
     fun `createFormElements shows line1, city, state, and postal code for US when automatic tax billing is required`() {
         val cardBillingElement = createAutomaticCardBillingAddressElement(
             checkoutSessionResponse = automaticTaxCheckoutSessionResponse(),
@@ -464,16 +505,47 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements does not union tax fields when requiresBillingAddressForAutomaticTax is false`() {
+    fun `createFormElements does not show tax fields when automatic tax is disabled`() = runTest {
         val cardBillingElement = createAutomaticCardBillingAddressElement(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 automaticTaxEnabled = false,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             ),
         )
-        cardBillingElement.countryElement.controller.onRawValueChange("FR")
 
-        assertThat(cardBillingElement.shownIdentifierParamPaths()).containsExactly("billing_details[address][country]")
+        cardBillingElement.hiddenIdentifiers.test {
+            cardBillingElement.countryElement.controller.onRawValueChange("US")
+
+            val hiddenIdentifiers = expectMostRecentItem()
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
+            assertThat(hiddenIdentifiers).containsAtLeast(
+                IdentifierSpec.Line1,
+                IdentifierSpec.City,
+                IdentifierSpec.State,
+            )
+        }
+    }
+
+    @Test
+    fun `createFormElements does not show tax fields when tax uses shipping address`() = runTest {
+        val cardBillingElement = createAutomaticCardBillingAddressElement(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            ),
+        )
+
+        cardBillingElement.hiddenIdentifiers.test {
+            cardBillingElement.countryElement.controller.onRawValueChange("US")
+
+            val hiddenIdentifiers = expectMostRecentItem()
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
+            assertThat(hiddenIdentifiers).containsAtLeast(
+                IdentifierSpec.Line1,
+                IdentifierSpec.City,
+                IdentifierSpec.State,
+            )
+        }
     }
 
     @Test

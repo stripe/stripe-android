@@ -76,76 +76,6 @@ internal class CardBillingAddressElementTest {
     }
 
     @Test
-    fun `Verify that automatic tax fields are unioned with AVS defaults for IN`() = runTest {
-        val element = createCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
-
-        element.hiddenIdentifiers.test {
-            // IN has no AVS default fields, but requires a postal code for automatic tax.
-            dropdownFieldController.onRawValueChange("IN")
-            expectMostRecentItem().verifyFieldsShown(IdentifierSpec.PostalCode)
-        }
-    }
-
-    @Test
-    fun `Verify that automatic tax fields for PR do not require state`() = runTest {
-        val element = createCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
-
-        element.hiddenIdentifiers.test {
-            dropdownFieldController.onRawValueChange("PR")
-            expectMostRecentItem().verifyFieldsShown(
-                IdentifierSpec.Line1,
-                IdentifierSpec.City,
-                IdentifierSpec.PostalCode,
-            )
-        }
-    }
-
-    @Test
-    fun `Verify that automatic tax fields are shown for US`() = runTest {
-        val element = createCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
-
-        element.hiddenIdentifiers.test {
-            dropdownFieldController.onRawValueChange("US")
-            expectMostRecentItem().verifyFieldsShown(
-                IdentifierSpec.Line1,
-                IdentifierSpec.City,
-                IdentifierSpec.State,
-                IdentifierSpec.PostalCode,
-            )
-        }
-    }
-
-    @Test
-    fun `Verify that automatic tax fields have no effect when address collection is Never`() = runTest {
-        val element = createCardBillingAddressElement(
-            requiresBillingAddressForAutomaticTax = true,
-            collectionConfiguration = BillingDetailsCollectionConfiguration(
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-            ),
-        )
-
-        element.hiddenIdentifiers.test {
-            dropdownFieldController.onRawValueChange("US")
-            expectMostRecentItem().verifyFieldsShown()
-        }
-    }
-
-    @Test
-    fun `Verify that automatic tax fields have no effect when address collection is Full`() = runTest {
-        val element = createCardBillingAddressElement(
-            requiresBillingAddressForAutomaticTax = true,
-            collectionConfiguration = BillingDetailsCollectionConfiguration(
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            ),
-        )
-
-        element.hiddenIdentifiers.test {
-            dropdownFieldController.onRawValueChange("US")
-            assertThat(expectMostRecentItem()).isEmpty()
-        }
-    }
-
-    @Test
     fun `Verify that AutocompleteAddressElement is used when billing details collection is Full`() =
         autocompleteTest(
             configuration = BillingDetailsCollectionConfiguration(
@@ -291,14 +221,12 @@ internal class CardBillingAddressElementTest {
     }
 
     private fun createCardBillingAddressElement(
-        requiresBillingAddressForAutomaticTax: Boolean = false,
         collectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
     ): BillingAddressElement {
         return createBillingAddressElement(
             collectionConfiguration = collectionConfiguration,
             addressCollectionMode = cardBillingAddressCollectionMode(
                 addressCollectionMode = collectionConfiguration.address,
-                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             ),
         )
     }
@@ -405,7 +333,6 @@ internal class CardBillingAddressElementTest {
                     shippingValues = null,
                     addressCollectionMode = cardBillingAddressCollectionMode(
                         addressCollectionMode = configuration.address,
-                        requiresBillingAddressForAutomaticTax = false,
                     ),
                     collectionConfiguration = configuration,
                     shouldHideCountryOnNoAddressCollection = true,

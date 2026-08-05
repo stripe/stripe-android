@@ -58,7 +58,7 @@ internal class FormViewModel(
         }
     }
 
-    private val billingAddressElement = elements.filterIsInstance<SectionElement>()
+    private val cardBillingElement = elements.filterIsInstance<SectionElement>()
         .flatMap { it.fields }
         .filterIsInstance<BillingAddressElement>()
         .firstOrNull()
@@ -77,10 +77,10 @@ internal class FormViewModel(
     }
 
     internal val hiddenIdentifiers = combineAsStateFlow(
-        billingAddressElement?.hiddenIdentifiers ?: stateFlowOf(emptySet()),
+        cardBillingElement?.hiddenIdentifiers ?: stateFlowOf(emptySet()),
         externalHiddenIdentifiers
-    ) { billingAddressIdentifiers, externalHiddenIdentifiers ->
-        externalHiddenIdentifiers.plus(billingAddressIdentifiers)
+    ) { cardBillingIdentifiers, externalHiddenIdentifiers ->
+        externalHiddenIdentifiers.plus(cardBillingIdentifiers)
     }
 
     // This will convert the save for future use value into a CustomerRequestedSave operation

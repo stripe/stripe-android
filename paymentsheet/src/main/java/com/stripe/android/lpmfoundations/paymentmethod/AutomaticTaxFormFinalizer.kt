@@ -8,6 +8,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BillingAddressCollectionMode
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.additionalAutomaticTaxFieldsByCountry
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -35,10 +36,13 @@ internal object AutomaticTaxFormFinalizer {
         val addressFields = formElements.filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<AddressFieldsElement>()
-        assert(addressFields.size <= 1) { "A payment method form must not contain multiple billing addresses." }
+        check(addressFields.size <= 1) { "A payment method form must not contain multiple billing addresses." }
 
         val addressField = addressFields.firstOrNull()
         if (addressField != null && addressField !is BillingAddressElement) {
+            check(addressField is AddressElement) {
+                "A specialized automatic-tax address must use AddressElement."
+            }
             return formElements
         }
 
@@ -64,7 +68,7 @@ internal object AutomaticTaxFormFinalizer {
 
         return formElements + listOfNotNull(
             SectionElement.wrap(addressElement, R.string.stripe_billing_details.resolvableString),
-            sameAsShippingElement,
+            sameAsShippingElement.takeIf { existingSameAsShippingElement == null },
         )
     }
 }
@@ -118,7 +122,6 @@ private fun createTaxBillingAddressElement(
             identifier = IdentifierSpec.Generic("billing_details[address]"),
             initialValues = arguments.initialValues,
             countryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
-            countryElementIdentifier = IdentifierSpec.Country,
             autocompleteAddressInteractorFactory = null,
             shippingValues = arguments.shippingValues,
             addressCollectionMode = BillingAddressCollectionMode.Country(

@@ -245,7 +245,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,
                     arguments.shippingValues,
-                    arguments.requiresBillingAddressForAutomaticTax,
                 )
             )
         }
@@ -278,7 +277,6 @@ private fun cardBillingElements(
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
-    requiresBillingAddressForAutomaticTax: Boolean,
 ): List<FormElement> {
     val sameAsShippingElement =
         shippingValues?.get(IdentifierSpec.SameAsShipping)
@@ -298,7 +296,6 @@ private fun cardBillingElements(
             shippingValues = shippingValues,
             addressCollectionMode = cardBillingAddressCollectionMode(
                 addressCollectionMode = collectionConfiguration.address,
-                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             ),
             collectionConfiguration = collectionConfiguration,
             shouldHideCountryOnNoAddressCollection = true,
