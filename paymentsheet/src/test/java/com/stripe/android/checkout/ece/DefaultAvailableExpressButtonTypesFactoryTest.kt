@@ -56,6 +56,30 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
         )
     }
 
+    @Test
+    fun `create keeps google pay when shipping address is required`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.GooglePay),
+            configuration = ExpressCheckoutElement.Configuration()
+                .shippingAddressRequired(true),
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(
+            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
+        )
+    }
+
+    @Test
+    fun `create filters out link when shipping address is required`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link),
+            configuration = ExpressCheckoutElement.Configuration()
+                .shippingAddressRequired(true),
+        )
+
+        assertThat(availableExpressButtonTypes).isEmpty()
+    }
+
     private fun create(
         availableWallets: List<WalletType>,
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
