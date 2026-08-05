@@ -78,7 +78,6 @@ internal class InlineAutocompleteController(
     fun onPredictionSelected(predictionId: String) {
         selectionJob?.cancel()
         val queryAtSelection = queryFlow?.value
-        val countryAtSelection = countryFlow?.value
         selectionJob = coroutineScope.launch {
             val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
             try {
@@ -86,7 +85,7 @@ internal class InlineAutocompleteController(
                 ensureActive()
                 result.fold(
                     onSuccess = { handleFetchPlaceSuccess(it) },
-                    onFailure = { handleFailure(queryAtSelection, countryAtSelection) }
+                    onFailure = { handleFailure(queryAtSelection) }
                 )
             } finally {
                 placesClient.resetSession()
@@ -185,12 +184,12 @@ internal class InlineAutocompleteController(
         )
     }
 
-    private fun handleFailure(query: String?, country: String?) {
+    private fun handleFailure(query: String?) {
         lastPredictionLine1 = null
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-        if (config.shouldUseStripeHostedAutocomplete) {
-            emitExpandForm(query = query, country = country)
-        }
+        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Results(
+            query = query ?: "",
+            predictions = emptyList(),
+        )
     }
 
     private fun emitExpandForm(query: String?, country: String?) {
