@@ -839,7 +839,8 @@ class CheckoutController @Inject internal constructor(
         /**
          * Sets the merchant display name shown to the customer during checkout.
          *
-         * If not set, the business name from the checkout session is used.
+         * If not set, the business name from the checkout session is used, falling back to the
+         * name of your app.
          */
         fun merchantDisplayName(
             merchantDisplayName: String,

@@ -48,7 +48,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             shippingAddress = address(),
         )
 
-        val expected = CheckoutEmbeddedConfigurationFactory()
+        val expected = CheckoutEmbeddedConfigurationFactory(appName = "Test App")
             .create(configuration, checkoutSessionResponse, collectedDetails)
             .asCommonConfiguration()
         val actual = factory()
@@ -81,6 +81,17 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         assertThat(result.merchantDisplayName).isEqualTo("Session Biz")
+    }
+
+    @Test
+    fun `falls back to the app name when merchant display name and business name are unset`() {
+        val result = factory(appName = "My App").create(
+            configuration = controllerConfiguration(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(businessName = null),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.merchantDisplayName).isEqualTo("My App")
     }
 
     @Test
@@ -159,7 +170,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(result.googlePlacesApiKey).isNull()
     }
 
-    private fun factory() = CheckoutCommonConfigurationFactory()
+    private fun factory(appName: String = "Test App") = CheckoutCommonConfigurationFactory(appName)
 
     private fun controllerConfiguration(
         billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
