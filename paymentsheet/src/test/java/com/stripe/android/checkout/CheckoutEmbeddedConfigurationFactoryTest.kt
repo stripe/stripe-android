@@ -17,13 +17,28 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `uses the provided merchant display name`() {
-        val result = factory(merchantDisplayName = "Acme Corp").create(
-            configuration = controllerConfiguration(),
+        val configuration = CheckoutController.Configuration()
+            .merchantDisplayName("Acme Corp")
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
         assertThat(result.merchantDisplayName).isEqualTo("Acme Corp")
+    }
+
+    @Test
+    fun `falls back to the checkout session business name when merchant display name is unset`() {
+        val result = factory().create(
+            configuration = controllerConfiguration(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(businessName = "Session Biz"),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.merchantDisplayName).isEqualTo("Session Biz")
     }
 
     @Test
@@ -215,9 +230,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
     }
 
-    private fun factory(
-        merchantDisplayName: String = "Example, Inc.",
-    ) = CheckoutEmbeddedConfigurationFactory(merchantDisplayName = merchantDisplayName)
+    private fun factory() = CheckoutEmbeddedConfigurationFactory()
 
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,

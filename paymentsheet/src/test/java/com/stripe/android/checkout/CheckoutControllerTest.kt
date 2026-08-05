@@ -56,13 +56,7 @@ internal class CheckoutControllerTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val networkRule = NetworkRule()
 
-    // The controller defaults the merchant display name to the host app's label, never the checkout
-    // session. Mirroring that resolution here keeps the assertion decoupled from Robolectric's
-    // package naming while still failing if the code regresses to a session-sourced value.
-    private val expectedMerchantDisplayName: String
-        get() = applicationContext.applicationInfo
-            .loadLabel(applicationContext.packageManager)
-            .toString()
+    private val expectedMerchantDisplayName = "Mobile Example Account"
 
     // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
     private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)
@@ -201,11 +195,21 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure uses app name as merchant display name, not checkout session data`() =
+    fun `configure defaults merchant display name to the checkout session business name`() =
         runConfigureScenario {
             result.getOrThrow()
             assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
                 .isEqualTo(expectedMerchantDisplayName)
+        }
+
+    @Test
+    fun `configure uses the configured merchant display name over the checkout session business name`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().merchantDisplayName("Acme Corp"),
+        ) {
+            result.getOrThrow()
+            assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
+                .isEqualTo("Acme Corp")
         }
 
     @Test

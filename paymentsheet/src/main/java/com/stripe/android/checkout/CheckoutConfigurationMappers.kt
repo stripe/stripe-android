@@ -14,6 +14,11 @@ internal fun CheckoutController.Configuration.State.toBillingDetailsCollectionCo
         .asPaymentSheet()
 
 @OptIn(CheckoutSessionPreview::class)
+internal fun CheckoutController.Configuration.State.resolveMerchantDisplayName(
+    checkoutSessionResponse: CheckoutSessionResponse,
+): String = merchantDisplayName ?: checkoutSessionResponse.businessName.orEmpty()
+
+@OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutController.Configuration.State.toGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
