@@ -61,12 +61,11 @@ internal fun computeBillingEditDistance(
     billingAddress: com.stripe.android.model.Address,
 ): Int {
     var editDistance = 0
-    editDistance += (autocompleteAddress.city ?: "").levenshtein(billingAddress.city ?: "")
-    editDistance += (autocompleteAddress.country ?: "").levenshtein(billingAddress.country ?: "")
     editDistance += (autocompleteAddress.line1 ?: "").levenshtein(billingAddress.line1 ?: "")
     editDistance += (autocompleteAddress.line2 ?: "").levenshtein(billingAddress.line2 ?: "")
-    editDistance += (autocompleteAddress.postalCode ?: "").levenshtein(billingAddress.postalCode ?: "")
+    editDistance += (autocompleteAddress.city ?: "").levenshtein(billingAddress.city ?: "")
     editDistance += (autocompleteAddress.state ?: "").levenshtein(billingAddress.state ?: "")
+    editDistance += (autocompleteAddress.postalCode ?: "").levenshtein(billingAddress.postalCode ?: "")
     return editDistance
 }
 

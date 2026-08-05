@@ -84,6 +84,9 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 
+private const val AUTOCOMPLETE_USED_KEY = "BILLING_AUTOCOMPLETE_USED"
+private const val AUTOCOMPLETE_EDIT_DISTANCE_KEY = "BILLING_AUTOCOMPLETE_EDIT_DISTANCE"
+
 @Suppress("LargeClass")
 @OptIn(WalletButtonsPreview::class)
 @FlowControllerScope
@@ -553,6 +556,7 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
     ) {
+        persistBillingAnalytics(paymentSelection)
         viewModelScope.launch {
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
@@ -781,18 +785,33 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
+    private fun persistBillingAnalytics(paymentSelection: PaymentSelection?) {
+        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
+        if (paymentSelection !is PaymentSelection.New) return
+        val billingAddress = paymentSelection.billingDetails?.address ?: return
+        val filledAddress = viewModel.autocompleteFilledAddress
+        viewModel.handle[AUTOCOMPLETE_USED_KEY] = filledAddress != null
+        viewModel.handle[AUTOCOMPLETE_EDIT_DISTANCE_KEY] = filledAddress?.let {
+            computeBillingEditDistance(it, billingAddress)
+        }
+    }
+
     private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
         if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
         val billingAddress = paymentSelection.billingDetails?.address ?: return
         val countryCode = billingAddress.country ?: return
         val filledAddress = viewModel.autocompleteFilledAddress
+        val autocompleteUsed =
+            filledAddress != null || viewModel.handle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true
         val editDistance = filledAddress?.let {
             computeBillingEditDistance(it, billingAddress)
-        }
+        } ?: viewModel.handle.get<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
+        viewModel.handle.remove<Boolean>(AUTOCOMPLETE_USED_KEY)
+        viewModel.handle.remove<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
         eventReporter.onBillingAddressCompleted(
             addressCountryCode = countryCode,
-            autocompleteResultSelected = filledAddress != null,
+            autocompleteResultSelected = autocompleteUsed,
             editDistance = editDistance,
         )
     }

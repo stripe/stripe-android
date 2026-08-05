@@ -583,6 +583,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             val confirmationOption = withContext(viewModelScope.coroutineContext) {
                 inProgressSelection = paymentSelection
+                persistBillingAnalytics(paymentSelection)
 
                 paymentSelectionWithCvcIfEnabled(paymentSelection)
                     ?.toConfirmationOption(
@@ -680,18 +681,33 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    private fun persistBillingAnalytics(paymentSelection: PaymentSelection?) {
+        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
+        if (paymentSelection !is PaymentSelection.New) return
+        val billingAddress = paymentSelection.billingDetails?.address ?: return
+        val filledAddress = autocompleteFilledAddress
+        savedStateHandle[AUTOCOMPLETE_USED_KEY] = filledAddress != null
+        savedStateHandle[AUTOCOMPLETE_EDIT_DISTANCE_KEY] = filledAddress?.let {
+            computeBillingEditDistance(it, billingAddress)
+        }
+    }
+
     private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
         if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
         val billingAddress = paymentSelection.billingDetails?.address ?: return
         val countryCode = billingAddress.country ?: return
         val filledAddress = autocompleteFilledAddress
+        val autocompleteUsed =
+            filledAddress != null || savedStateHandle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true
         val editDistance = filledAddress?.let {
             computeBillingEditDistance(it, billingAddress)
-        }
+        } ?: savedStateHandle.get<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
+        savedStateHandle.remove<Boolean>(AUTOCOMPLETE_USED_KEY)
+        savedStateHandle.remove<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
         eventReporter.onBillingAddressCompleted(
             addressCountryCode = countryCode,
-            autocompleteResultSelected = filledAddress != null,
+            autocompleteResultSelected = autocompleteUsed,
             editDistance = editDistance,
         )
     }
@@ -833,6 +849,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private companion object {
         const val IN_PROGRESS_SELECTION = "IN_PROGRESS_PAYMENT_SELECTION"
+        const val AUTOCOMPLETE_USED_KEY = "BILLING_AUTOCOMPLETE_USED"
+        const val AUTOCOMPLETE_EDIT_DISTANCE_KEY = "BILLING_AUTOCOMPLETE_EDIT_DISTANCE"
     }
 }
 
