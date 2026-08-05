@@ -126,7 +126,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         scenario.onActivity { activity ->
             assertThat(activity.embeddedNavigator.canGoBack).isFalse()
             assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         }
     }
 

@@ -344,7 +344,7 @@ internal class EmbeddedNavigatorTest {
         val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
         val eventReporter = FakeEventReporter()
         val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
-        val paymentOptionsScreen = EmbeddedNavigator.Screen.PaymentOptions(
+        val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = paymentOptionsInteractor,
             isLiveMode = true,
             sheetActivityState = stateFlowOf(
@@ -593,8 +593,8 @@ internal class EmbeddedNavigatorTest {
 
     private fun createPaymentOptionsScreen(
         isLiveMode: Boolean = true,
-    ): EmbeddedNavigator.Screen.PaymentOptions {
-        return EmbeddedNavigator.Screen.PaymentOptions(
+    ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
+        return EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = FakePaymentMethodVerticalLayoutInteractor.create(),
             isLiveMode = isLiveMode,
             sheetActivityState = stateFlowOf(

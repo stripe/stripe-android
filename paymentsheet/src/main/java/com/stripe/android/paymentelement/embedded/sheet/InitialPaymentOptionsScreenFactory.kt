@@ -53,7 +53,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
 ) {
     fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
         val formHelper = createFormHelper()
-        val paymentOptionsScreen = EmbeddedNavigator.Screen.PaymentOptions(
+        val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = createInteractor(formHelper),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
@@ -158,7 +158,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private fun isCurrentScreen(): StateFlow<Boolean> = flow {
         emitAll(embeddedNavigatorProvider.get().screen)
     }.map { screen ->
-        screen is EmbeddedNavigator.Screen.PaymentOptions
+        screen is EmbeddedNavigator.Screen.VerticalPaymentOptions
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
