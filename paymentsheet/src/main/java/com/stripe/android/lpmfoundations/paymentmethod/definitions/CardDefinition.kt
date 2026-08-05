@@ -27,13 +27,14 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CardScanAction
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
+import com.stripe.android.ui.core.elements.cardBillingAddressCollectionMode
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -285,15 +286,18 @@ private fun cardBillingElements(
                     controller = SameAsShippingController(it)
                 )
             }
-    val addressElement = CardBillingAddressElement(
+    val addressElement = BillingAddressElement(
         IdentifierSpec.Generic("credit_billing"),
         countryCodes = allowedCountries,
         rawValuesMap = initialValues,
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = shippingValues,
+        addressCollectionMode = cardBillingAddressCollectionMode(
+            addressCollectionMode = collectionConfiguration.address,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
+        ),
         collectionConfiguration = collectionConfiguration,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-        requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
     )
 
     val title = when {
