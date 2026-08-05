@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
 import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
@@ -496,21 +497,25 @@ class GooglePayConfirmationDefinitionTest {
 
     @Test
     fun `On 'launch', should pass display items to present`() = runTest {
+        val context = mock<Context>()
         val displayItems = listOf(
-            com.stripe.android.GooglePayJsonFactory.DisplayItem(
-                label = "Widget",
+            GooglePayDisplayItem(
+                label = "Widget".resolvableString,
                 type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
                 price = 2000L,
             ),
-            com.stripe.android.GooglePayJsonFactory.DisplayItem(
-                label = "Tax",
+            GooglePayDisplayItem(
+                label = "Tax".resolvableString,
                 type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.TAX,
                 price = 500L,
             ),
         )
+        val resolvedDisplayItems = displayItems.map { displayItem ->
+            displayItem.resolve(context)
+        }
 
         val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
-        val definition = createGooglePayConfirmationDefinition()
+        val definition = createGooglePayConfirmationDefinition(context = context)
 
         definition.launch(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
@@ -539,7 +544,7 @@ class GooglePayConfirmationDefinitionTest {
             label = null,
             isElements = true,
             publishableKey = null,
-            displayItems = displayItems,
+            displayItems = resolvedDisplayItems,
             billingEmailOverride = null,
         )
     }
@@ -712,9 +717,11 @@ class GooglePayConfirmationDefinitionTest {
     private fun createGooglePayConfirmationDefinition(
         googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory =
             RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(launcher = mock()),
-        userFacingLogger: UserFacingLogger = FakeUserFacingLogger()
+        userFacingLogger: UserFacingLogger = FakeUserFacingLogger(),
+        context: Context = mock(),
     ): GooglePayConfirmationDefinition {
         return GooglePayConfirmationDefinition(
+            context = context,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             userFacingLogger = userFacingLogger,
         )
