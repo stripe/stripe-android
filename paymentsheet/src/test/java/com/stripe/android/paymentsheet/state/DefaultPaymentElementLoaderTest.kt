@@ -58,6 +58,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -3890,6 +3891,92 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
+
+    @Test
+    fun `Uses horizontal payment method orientation for embedded when layout is horizontal`() = runScenario {
+        val result = createPaymentElementLoader().loadEmbedded(PaymentSheet.PaymentMethodLayout.Horizontal)
+
+        assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
+            .isEqualTo(PaymentMethodOrientation.Horizontal)
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `Uses horizontal payment method orientation for embedded automatic layout with two payment methods`() =
+        runScenario {
+            val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            )
+
+            val result = createPaymentElementLoader(stripeIntent = stripeIntent)
+                .loadEmbedded(PaymentSheet.PaymentMethodLayout.Automatic)
+
+            assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
+                .isEqualTo(PaymentMethodOrientation.Horizontal)
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    @Test
+    fun `Uses vertical payment method orientation for embedded automatic layout with three payment methods`() =
+        runScenario {
+            val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna"),
+            )
+
+            val result = createPaymentElementLoader(stripeIntent = stripeIntent)
+                .loadEmbedded(PaymentSheet.PaymentMethodLayout.Automatic)
+
+            assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
+                .isEqualTo(PaymentMethodOrientation.Vertical)
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    @Test
+    fun `Forces vertical payment method orientation for embedded automatic layout when session flag is set`() =
+        runScenario {
+            val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            )
+            val loader = createPaymentElementLoader(
+                stripeIntent = stripeIntent,
+                elementsSessionRepository = FakeElementsSessionRepository(
+                    stripeIntent = stripeIntent,
+                    error = null,
+                    linkSettings = null,
+                    flags = mapOf(
+                        ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT to true,
+                    ),
+                ),
+            )
+
+            val result = loader.loadEmbedded(PaymentSheet.PaymentMethodLayout.Automatic)
+
+            assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
+                .isEqualTo(PaymentMethodOrientation.Vertical)
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    private suspend fun PaymentElementLoader.loadEmbedded(
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+    ): PaymentElementLoader.State {
+        return load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder(
+                    merchantDisplayName = "Merchant, Inc.",
+                ).build(),
+                paymentMethodLayout = paymentMethodLayout,
+            ),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+    }
 
     @OptIn(CardFundingFilteringPrivatePreview::class)
     private fun testCardFundingFiltering(
