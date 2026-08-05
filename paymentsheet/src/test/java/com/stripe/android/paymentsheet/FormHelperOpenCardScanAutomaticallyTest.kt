@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
@@ -153,6 +154,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
     ) {
         val defaultFormHelper = DefaultFormHelper.create(
             viewModel = viewModel,
+            coroutineScope = viewModel.viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true
         )

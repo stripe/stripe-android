@@ -815,6 +815,7 @@ internal class PaymentSheetViewModelTest {
             val linkInlineHandler = LinkInlineHandler.create()
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
+                coroutineScope = viewModel.viewModelScope,
                 paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                 linkInlineHandler = linkInlineHandler,
             )
@@ -1609,6 +1610,7 @@ internal class PaymentSheetViewModelTest {
 
         val observedArgs = DefaultFormHelper.create(
             viewModel = viewModel,
+            coroutineScope = viewModel.viewModelScope,
             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
         ).createFormArguments(
             paymentMethodCode = LpmRepositoryTestHelpers.card.code,
@@ -2782,6 +2784,7 @@ internal class PaymentSheetViewModelTest {
                 val linkInlineHandler = LinkInlineHandler.create()
                 val formHelper = DefaultFormHelper.create(
                     viewModel = viewModel,
+                    coroutineScope = viewModel.viewModelScope,
                     paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                     linkInlineHandler = linkInlineHandler,
                 )

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
@@ -95,6 +96,7 @@ internal class DefaultAddPaymentMethodInteractor(
             val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
+                coroutineScope = viewModel.viewModelScope,
                 paymentMethodMetadata = paymentMethodMetadata,
                 shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper

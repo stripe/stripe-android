@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -135,6 +136,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         ): PaymentMethodVerticalLayoutInteractor {
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
+                coroutineScope = viewModel.viewModelScope,
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )

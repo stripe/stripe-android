@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -125,6 +126,7 @@ internal class DefaultVerticalModeFormInteractor(
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
+                coroutineScope = viewModel.viewModelScope,
                 paymentMethodMetadata = paymentMethodMetadata,
                 shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
