@@ -5,18 +5,11 @@ import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
- * Opt-in annotation for [ApiConfiguration], which is currently in preview.
- */
-@RequiresOptIn(level = RequiresOptIn.Level.WARNING)
-@Retention(AnnotationRetention.BINARY)
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)
-annotation class ApiConfigurationPreview
-
-/**
  * Holds API credentials (publishable key and optional Stripe account ID) for use with
  * payment UI components. When not provided, components fall back to
  * [PaymentConfiguration.getInstance].
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ApiConfiguration(
     private val publishableKey: String,
 ) {
