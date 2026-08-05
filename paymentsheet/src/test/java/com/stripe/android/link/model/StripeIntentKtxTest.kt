@@ -38,10 +38,10 @@ class StripeIntentKtxTest {
     }
 
     @Test
-    fun `When funding sources is empty then defaults to card`() {
+    fun `When funding sources is empty then returns empty set`() {
         val supportedTypes = stripeIntent(fundingSources = emptyList())
             .supportedPaymentMethodTypes()
-        assertThat(supportedTypes).containsExactly("card")
+        assertThat(supportedTypes).isEmpty()
     }
 
     private fun stripeIntent(
