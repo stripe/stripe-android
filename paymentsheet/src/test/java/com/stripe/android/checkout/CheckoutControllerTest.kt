@@ -171,6 +171,36 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaultBillingAddress(
+            CheckoutController.Address()
+                .city("San Francisco")
+                .country("US")
+                .line1("510 Townsend St")
+                .line2("Suite 100")
+                .postalCode("94103")
+                .state("CA")
+        ),
+        networkSetup = {
+            networkRule.checkoutInit(
+                responseFactory = successResponseFactory(automaticTaxFor("billing")),
+            )
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+                bodyPart("tax_region[line1]", "510 Townsend St"),
+                bodyPart("tax_region[line2]", "Suite 100"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                responseFactory = successResponseFactory(automaticTaxFor("billing")),
+            )
+        },
+    ) {
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
     fun `configure uses app name as merchant display name, not checkout session data`() =
         runConfigureScenario {
             result.getOrThrow()
