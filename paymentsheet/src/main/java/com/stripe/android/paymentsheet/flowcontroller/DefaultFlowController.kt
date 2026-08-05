@@ -799,14 +799,9 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
         if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
-        val billingAddress = paymentSelection.billingDetails?.address ?: return
-        val countryCode = billingAddress.country ?: return
-        val filledAddress = viewModel.autocompleteFilledAddress
-        val autocompleteUsed =
-            filledAddress != null || viewModel.handle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true
-        val editDistance = filledAddress?.let {
-            computeBillingEditDistance(it, billingAddress)
-        } ?: viewModel.handle.get<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
+        val countryCode = paymentSelection.billingDetails?.address?.country ?: return
+        val autocompleteUsed = viewModel.handle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true
+        val editDistance = viewModel.handle.get<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
         viewModel.handle.remove<Boolean>(AUTOCOMPLETE_USED_KEY)
         viewModel.handle.remove<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
         eventReporter.onBillingAddressCompleted(

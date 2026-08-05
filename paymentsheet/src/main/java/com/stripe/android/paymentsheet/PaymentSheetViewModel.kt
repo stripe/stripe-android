@@ -695,14 +695,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
         if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
-        val billingAddress = paymentSelection.billingDetails?.address ?: return
-        val countryCode = billingAddress.country ?: return
-        val filledAddress = autocompleteFilledAddress
-        val autocompleteUsed =
-            filledAddress != null || savedStateHandle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true
-        val editDistance = filledAddress?.let {
-            computeBillingEditDistance(it, billingAddress)
-        } ?: savedStateHandle.get<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
+        val countryCode = paymentSelection.billingDetails?.address?.country ?: return
+        val autocompleteUsed = savedStateHandle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true
+        val editDistance = savedStateHandle.get<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
         savedStateHandle.remove<Boolean>(AUTOCOMPLETE_USED_KEY)
         savedStateHandle.remove<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
         eventReporter.onBillingAddressCompleted(
