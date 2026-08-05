@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.example.model
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.stripe.android.crypto.onramp.example.network.CustomerWallet
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -24,6 +25,8 @@ internal data class OnrampUiState(
     val cryptoPaymentToken: String? = null,
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,
+    val wallets: List<CustomerWallet> = emptyList(),
+    val isWalletsLoading: Boolean = false,
     val authToken: String? = null,
     @TypeParceler<OnrampSessionResponse?, NullOnrampSessionResponseParceler>
     val onrampSession: OnrampSessionResponse? = null,

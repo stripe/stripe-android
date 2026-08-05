@@ -5,12 +5,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
@@ -18,9 +23,11 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.crypto.onramp.example.CHECKOUT_BUTTON_TAG
@@ -28,12 +35,17 @@ import com.stripe.android.crypto.onramp.example.COLLECT_CARD_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_CRYPTO_TOKEN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_SESSION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.REGISTER_WALLET_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.deleteWalletButtonTag
+import com.stripe.android.crypto.onramp.example.network.CustomerWallet
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.ui.components.GooglePayButton
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
+
+private const val WALLET_METADATA_ALPHA = 0.6f
+private val VerifiedWalletColor = Color(0xFF2E7D32)
 
 @Composable
 internal fun OperationsHeader(
@@ -162,6 +174,40 @@ internal fun SelectedPaymentSummary(
 
 @Composable
 internal fun WalletAddressSection(
+    wallets: List<CustomerWallet>,
+    isLoading: Boolean,
+    walletAddress: String,
+    onWalletAddressChange: (String) -> Unit,
+    selectedNetwork: CryptoNetwork,
+    isDropdownExpanded: Boolean,
+    onDropdownExpandedChange: (Boolean) -> Unit,
+    onSelectNetwork: (CryptoNetwork) -> Unit,
+    onRegisterWalletAddress: () -> Unit,
+    onDeleteWallet: (CustomerWallet) -> Unit,
+    onRefreshWallets: () -> Unit
+) {
+    RegisteredWalletsSection(
+        wallets = wallets,
+        isLoading = isLoading,
+        onDeleteWallet = onDeleteWallet,
+        onRefreshWallets = onRefreshWallets
+    )
+
+    RegisterWalletAddressForm(
+        isLoading = isLoading,
+        walletAddress = walletAddress,
+        onWalletAddressChange = onWalletAddressChange,
+        selectedNetwork = selectedNetwork,
+        isDropdownExpanded = isDropdownExpanded,
+        onDropdownExpandedChange = onDropdownExpandedChange,
+        onSelectNetwork = onSelectNetwork,
+        onRegisterWalletAddress = onRegisterWalletAddress
+    )
+}
+
+@Composable
+private fun RegisterWalletAddressForm(
+    isLoading: Boolean,
     walletAddress: String,
     onWalletAddressChange: (String) -> Unit,
     selectedNetwork: CryptoNetwork,
@@ -221,12 +267,124 @@ internal fun WalletAddressSection(
 
     Button(
         onClick = onRegisterWalletAddress,
+        enabled = !isLoading,
         modifier = Modifier
             .testTag(REGISTER_WALLET_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
         Text("Register Wallet Address")
+    }
+}
+
+@Composable
+private fun RegisteredWalletsSection(
+    wallets: List<CustomerWallet>,
+    isLoading: Boolean,
+    onDeleteWallet: (CustomerWallet) -> Unit,
+    onRefreshWallets: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Registered Wallets",
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            }
+            TextButton(
+                onClick = onRefreshWallets,
+                enabled = !isLoading
+            ) {
+                Text("Refresh")
+            }
+        }
+    }
+
+    if (wallets.isEmpty() && !isLoading) {
+        Text(
+            text = "No registered wallets",
+            color = MaterialTheme.colors.onSurface.copy(alpha = WALLET_METADATA_ALPHA),
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+    }
+
+    wallets.forEach { wallet ->
+        CustomerWalletRow(
+            wallet = wallet,
+            enabled = !isLoading,
+            onDelete = { onDeleteWallet(wallet) }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+private fun CustomerWalletRow(
+    wallet: CustomerWallet,
+    enabled: Boolean,
+    onDelete: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.05f),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = wallet.network.replaceFirstChar { it.uppercase() },
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = wallet.walletAddress,
+                    fontFamily = FontFamily.Monospace,
+                    style = MaterialTheme.typography.caption
+                )
+                Text(
+                    text = "ID: ${wallet.id}",
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = WALLET_METADATA_ALPHA),
+                    style = MaterialTheme.typography.caption
+                )
+                if (wallet.verifiedOwnership) {
+                    Text(
+                        text = "Verified",
+                        color = VerifiedWalletColor,
+                        style = MaterialTheme.typography.caption
+                    )
+                }
+            }
+
+            TextButton(
+                onClick = onDelete,
+                enabled = enabled,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colors.error
+                ),
+                modifier = Modifier.testTag(deleteWalletButtonTag(wallet.id))
+            ) {
+                Text("Delete")
+            }
+        }
     }
 }
 

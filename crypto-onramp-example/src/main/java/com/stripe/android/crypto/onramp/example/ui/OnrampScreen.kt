@@ -91,6 +91,8 @@ internal fun OnrampScreen(
                     uiState = uiState,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
+                    onDeleteWallet = viewModel::deleteWallet,
+                    onRefreshWallets = viewModel::refreshWallets,
                     onCollectKyc = viewModel::collectKycInfo,
                     onVerifyKyc = onVerifyKyc,
                     onStartVerification = onStartVerification,

@@ -13,6 +13,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
@@ -105,6 +106,17 @@ class OnrampCoordinator @Inject internal constructor(
         network: CryptoNetwork
     ): OnrampRegisterWalletAddressResult {
         return interactor.registerWalletAddress(walletAddress, network)
+    }
+
+    /**
+     * Deletes the given crypto wallet from the current Link account.
+     * Requires an authenticated Link user.
+     *
+     * @param walletId The ID of the crypto wallet to delete.
+     * @return [OnrampDeleteWalletAddressResult] indicating the result of deleting the wallet.
+     */
+    suspend fun deleteWalletAddress(walletId: String): OnrampDeleteWalletAddressResult {
+        return interactor.deleteWalletAddress(walletId)
     }
 
     /**

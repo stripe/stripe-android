@@ -101,6 +101,10 @@ internal sealed class OnrampAnalyticsEvent(
         )
     )
 
+    data object WalletDeleted : OnrampAnalyticsEvent(
+        name = "wallet_deleted"
+    )
+
     class WalletOwnershipChallengeRetrieved(
         network: CryptoNetwork
     ) : OnrampAnalyticsEvent(
@@ -195,6 +199,7 @@ internal sealed class OnrampAnalyticsEvent(
             AttachKycInfo("attach_kyc_info"),
             VerifyIdentity("verify_identity"),
             RegisterWalletAddress("register_wallet_address"),
+            DeleteWalletAddress("delete_wallet_address"),
             GetWalletOwnershipChallenge("get_wallet_ownership_challenge"),
             SubmitWalletOwnershipSignature("submit_wallet_ownership_signature"),
             CreateCryptoPaymentToken("create_crypto_payment_token"),

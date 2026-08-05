@@ -19,6 +19,7 @@ import com.stripe.android.crypto.onramp.example.model.KEY_UI_STATE
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
 import com.stripe.android.crypto.onramp.example.model.OnrampUserData
 import com.stripe.android.crypto.onramp.example.model.Screen
+import com.stripe.android.crypto.onramp.example.network.CustomerWallet
 import com.stripe.android.crypto.onramp.example.network.LoginSignUpResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
@@ -33,6 +34,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -545,6 +547,66 @@ internal class OnrampViewModel(
                             screen = Screen.AuthenticatedOperations,
                             loadingMessage = null
                         )
+                    }
+                }
+            }
+        }
+    }
+
+    fun refreshWallets() {
+        val currentState = _uiState.value
+        if (currentState.isWalletsLoading) return
+
+        val authToken = currentState.authToken
+        if (authToken.isNullOrBlank()) {
+            _message.value = "No auth token found. Please log in again."
+            return
+        }
+
+        _uiState.update { it.copy(isWalletsLoading = true) }
+
+        viewModelScope.launch {
+            when (val result = testBackendRepository.fetchCustomerWallets(authToken)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            wallets = result.value.data,
+                            isWalletsLoading = false
+                        )
+                    }
+                }
+                is Result.Failure -> {
+                    _message.value = "Failed to fetch wallets: ${result.error.message}"
+                    _uiState.update { it.copy(isWalletsLoading = false) }
+                }
+            }
+        }
+    }
+
+    fun deleteWallet(wallet: CustomerWallet) {
+        if (_uiState.value.isWalletsLoading) return
+
+        _uiState.update { it.copy(isWalletsLoading = true) }
+
+        viewModelScope.launch {
+            when (val result = onrampCoordinator.deleteWalletAddress(wallet.id)) {
+                is OnrampDeleteWalletAddressResult.Completed -> {
+                    _message.value = "Wallet deleted successfully!"
+                    _uiState.update { currentState ->
+                        val deletedCurrentWallet = currentState.walletAddress == wallet.walletAddress &&
+                            currentState.network?.value == wallet.network
+                        currentState.copy(
+                            wallets = currentState.wallets.filterNot { it.id == wallet.id },
+                            walletAddress = currentState.walletAddress.takeUnless { deletedCurrentWallet },
+                            network = currentState.network.takeUnless { deletedCurrentWallet },
+                            isWalletsLoading = false
+                        )
+                    }
+                }
+                is OnrampDeleteWalletAddressResult.Failed -> {
+                    _uiState.update { it.copy(isWalletsLoading = false) }
+                    handleError(result.error) {
+                        _message.value = "Failed to delete wallet: ${result.error.message}"
                     }
                 }
             }

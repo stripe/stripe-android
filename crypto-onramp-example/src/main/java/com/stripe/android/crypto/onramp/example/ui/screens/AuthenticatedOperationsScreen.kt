@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
+import com.stripe.android.crypto.onramp.example.network.CustomerWallet
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -33,6 +34,8 @@ internal fun AuthenticatedOperationsScreen(
     uiState: OnrampUiState,
     onAuthenticate: (String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
+    onDeleteWallet: (CustomerWallet) -> Unit,
+    onRefreshWallets: () -> Unit,
     onCollectKyc: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
@@ -67,10 +70,12 @@ internal fun AuthenticatedOperationsScreen(
     var isKycExpanded by remember { mutableStateOf(false) }
     var isIdentifierExpanded by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        onRefreshWallets()
+    }
+
     LaunchedEffect(uiState.walletAddress) {
-        if (!uiState.walletAddress.isNullOrBlank()) {
-            walletAddressInput = uiState.walletAddress
-        }
+        walletAddressInput = uiState.walletAddress ?: DEFAULT_WALLET_ADDRESS
     }
 
     LaunchedEffect(uiState.network) {
@@ -103,6 +108,8 @@ internal fun AuthenticatedOperationsScreen(
         AuthenticateSection(onAuthenticate = onAuthenticate)
 
         WalletAddressSection(
+            wallets = uiState.wallets,
+            isLoading = uiState.isWalletsLoading,
             walletAddress = walletAddressInput,
             onWalletAddressChange = { walletAddressInput = it },
             selectedNetwork = selectedNetwork,
@@ -111,7 +118,9 @@ internal fun AuthenticatedOperationsScreen(
             onSelectNetwork = { selectedNetwork = it },
             onRegisterWalletAddress = {
                 onRegisterWalletAddress(walletAddressInput, selectedNetwork)
-            }
+            },
+            onDeleteWallet = onDeleteWallet,
+            onRefreshWallets = onRefreshWallets
         )
 
         KycSection(
