@@ -42,6 +42,17 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
+    fun `falls back to the app name when merchant display name and business name are unset`() {
+        val result = factory(appName = "My App").create(
+            configuration = controllerConfiguration(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(businessName = null),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.merchantDisplayName).isEqualTo("My App")
+    }
+
+    @Test
     fun `propagates embeddedViewDisplaysMandateText when true`() {
         val result = factory().create(
             configuration = controllerConfiguration(embeddedViewDisplaysMandateText = true),
@@ -230,7 +241,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
     }
 
-    private fun factory() = CheckoutEmbeddedConfigurationFactory()
+    private fun factory(appName: String = "Test App") = CheckoutEmbeddedConfigurationFactory(appName)
 
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,

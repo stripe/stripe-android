@@ -201,7 +201,7 @@ internal class CheckoutControllerStateHolderTest {
         collectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration = CheckoutCommonConfigurationFactory().create(
+        commonConfiguration = CheckoutCommonConfigurationFactory(appName = "Example, Inc.").create(
             configuration = CheckoutController.Configuration().build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = CheckoutCollectedDetails(),
