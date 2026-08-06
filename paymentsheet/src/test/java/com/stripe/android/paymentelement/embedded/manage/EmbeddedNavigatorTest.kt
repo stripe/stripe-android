@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -23,6 +24,7 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
@@ -48,8 +50,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import kotlin.test.Test
+import com.stripe.android.R as PaymentsCoreR
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
+@Suppress("LargeClass")
 internal class EmbeddedNavigatorTest {
 
     @get:Rule
@@ -353,6 +358,80 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `HorizontalPaymentOptions topBarState hides test mode label in live mode`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState(),
+                isLiveMode = true,
+            ),
+        )
+
+        val topBarState = screen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions topBarState shows test mode label in test mode`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState(),
+                isLiveMode = false,
+            ),
+        )
+
+        val topBarState = screen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isTrue()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions title is null when only one non-card payment method`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState().copy(
+                    supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
+                ),
+            ),
+        )
+
+        assertThat(screen.title().value).isNull()
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions title is add a card when only card is supported`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState().copy(
+                    supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.card),
+                ),
+            ),
+        )
+
+        assertThat(screen.title().value)
+            .isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions title is choose payment method when multiple methods supported`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState().copy(
+                    supportedPaymentMethods = listOf(
+                        LpmRepositoryTestHelpers.card,
+                        LpmRepositoryTestHelpers.usBankAccount,
+                    ),
+                ),
+            ),
+        )
+
+        assertThat(screen.title().value)
+            .isEqualTo(PaymentSheetR.string.stripe_paymentsheet_choose_payment_method.resolvableString)
+    }
+
+    @Test
     fun `initial back stack with a form on top starts on the form and can go back`() = runTest {
         val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
         val eventReporter = FakeEventReporter()
@@ -486,6 +565,36 @@ internal class EmbeddedNavigatorTest {
 
         formScreen.close()
         assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `Form topBarState hides test mode label in live mode`() {
+        val (formScreen, formInteractor) = createFormScreen(isLiveMode = true)
+
+        val topBarState = formScreen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `Form topBarState shows test mode label in test mode`() {
+        val (formScreen, formInteractor) = createFormScreen(isLiveMode = false)
+
+        val topBarState = formScreen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isTrue()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `Form title returns null`() {
+        val (formScreen, formInteractor) = createFormScreen()
+
+        assertThat(formScreen.title().value).isNull()
         formInteractor.validate()
     }
 
@@ -624,9 +733,12 @@ internal class EmbeddedNavigatorTest {
         )
     }
 
-    private fun createHorizontalPaymentOptionsScreen(): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
+    private fun createHorizontalPaymentOptionsScreen(
+        interactor: AddPaymentMethodInteractor =
+            FakeAddPaymentMethodInteractor(FakeAddPaymentMethodInteractor.createState()),
+    ): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
-            interactor = FakeAddPaymentMethodInteractor(FakeAddPaymentMethodInteractor.createState()),
+            interactor = interactor,
             eventReporter = FakeEventReporter(),
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
@@ -642,8 +754,10 @@ internal class EmbeddedNavigatorTest {
         )
     }
 
-    private fun createFormScreen(): Pair<EmbeddedNavigator.Screen.Form, TestFormInteractor> {
-        val formInteractor = TestFormInteractor()
+    private fun createFormScreen(
+        isLiveMode: Boolean = true,
+    ): Pair<EmbeddedNavigator.Screen.Form, TestFormInteractor> {
+        val formInteractor = TestFormInteractor(isLiveMode = isLiveMode)
         val screen = EmbeddedNavigator.Screen.Form(
             formInteractor = formInteractor,
             eventReporter = FakeEventReporter(),
@@ -660,8 +774,9 @@ internal class EmbeddedNavigatorTest {
         return screen to formInteractor
     }
 
-    private class TestFormInteractor : VerticalModeFormInteractor {
-        override val isLiveMode: Boolean = true
+    private class TestFormInteractor(
+        override val isLiveMode: Boolean = true,
+    ) : VerticalModeFormInteractor {
         override val state: StateFlow<VerticalModeFormInteractor.State>
             get() = throw AssertionError("Not expected")
 
