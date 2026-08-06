@@ -65,9 +65,7 @@ class LogLinkGlobalHoldbackExposureTest {
         retrieveCustomerEmail = DefaultRetrieveCustomerEmail(
             customerRepository,
             FakeDurationProvider()
-        ) {
-            ApiConfiguration.State("pk_123", null)
-        }
+        )
         linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
         logLinkHoldbackExperiment = DefaultLogLinkHoldbackExperiment(

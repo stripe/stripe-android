@@ -176,7 +176,6 @@ internal class DefaultCreateLinkStateTest {
         retrieveCustomerEmail: RetrieveCustomerEmail = DefaultRetrieveCustomerEmail(
             FakeCustomerRepository(),
             FakeDurationProvider(),
-            apiConfigProvider = { ApiConfiguration.State("pk_123", null) }
         ),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
@@ -248,6 +247,7 @@ internal class DefaultCreateLinkStateTest {
             configuration: CommonConfiguration,
             customerMetadata: CustomerMetadata?,
             customerEmail: String?,
+            stripeAccountId: String?,
         ): String? {
             invokedWith = Invocation(
                 configuration = configuration,

@@ -20,19 +20,20 @@ internal interface RetrieveCustomerEmail {
         configuration: CommonConfiguration,
         customerMetadata: CustomerMetadata?,
         customerEmail: String?,
+        stripeAccountId: String?
     ): String?
 }
 
 internal class DefaultRetrieveCustomerEmail @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val durationProvider: DurationProvider,
-    private val apiConfigProvider: () -> ApiConfiguration.State,
 ) : RetrieveCustomerEmail {
 
     override suspend operator fun invoke(
         configuration: CommonConfiguration,
         customerMetadata: CustomerMetadata?,
         customerEmail: String?,
+        stripeAccountId: String?
     ): String? {
         return durationProvider.measureDuration(
             DurationProvider.Key.PaymentSheetLoadRetrieveCustomer,
@@ -46,6 +47,7 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
                     defaultEmail ?: retrieveEmailFromApi(
                         customerId = customerMetadata.id,
                         ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                        stripeAccountId = stripeAccountId
                     )
                 }
                 is CustomerMetadata.CheckoutSession,
@@ -57,11 +59,12 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
     private suspend fun retrieveEmailFromApi(
         customerId: String,
         ephemeralKeySecret: String,
+        stripeAccountId: String?
     ): String? {
         return customerRepository.retrieveCustomer(
             customerId = customerId,
             ephemeralKeySecret = ephemeralKeySecret,
-            stripeAccountId = apiConfigProvider().stripeAccountId,
+            stripeAccountId = stripeAccountId,
         )?.email
     }
 }

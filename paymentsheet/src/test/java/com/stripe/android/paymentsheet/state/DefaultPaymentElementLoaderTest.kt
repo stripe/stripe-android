@@ -5014,9 +5014,7 @@ internal class DefaultPaymentElementLoaderTest {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
             durationProvider,
-        ) {
-            ApiConfiguration.State("pk_123", null)
-        }
+        )
         val createLinkState = DefaultCreateLinkState(
             accountStatusProvider = { linkAccountState },
             retrieveCustomerEmail = retrieveCustomerEmailImpl,

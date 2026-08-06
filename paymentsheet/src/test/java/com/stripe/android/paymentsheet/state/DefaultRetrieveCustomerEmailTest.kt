@@ -95,14 +95,13 @@ internal class DefaultRetrieveCustomerEmailTest {
         val retrieveEmail = DefaultRetrieveCustomerEmail(
             customerRepository,
             FakeDurationProvider(),
-        ) {
-            ApiConfiguration.State("pk_123", null)
-        }
+        )
 
         val result = retrieveEmail(
             configuration = configuration,
             customerMetadata = customerMetadata,
             customerEmail = customerEmail,
+            stripeAccountId = null,
         )
 
         Scenario(

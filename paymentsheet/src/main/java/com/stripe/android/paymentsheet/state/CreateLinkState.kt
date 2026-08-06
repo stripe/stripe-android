@@ -241,6 +241,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             configuration,
             customerMetadata,
             customerEmail = elementsSession.customer?.email,
+            stripeAccountId = apiConfiguration.stripeAccountId,
         )
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
