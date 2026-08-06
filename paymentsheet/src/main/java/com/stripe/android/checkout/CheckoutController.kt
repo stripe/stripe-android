@@ -69,7 +69,8 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * The latest [Session] data, or `null` until [configure] has completed successfully.
+     * The latest [Session] data, or `null` until [configure] completes successfully and after a
+     * payment flow completes.
      */
     val session: StateFlow<Session?>
         get() = stateHolder.session
@@ -312,6 +313,7 @@ class CheckoutController @Inject internal constructor(
     ) {
         operationCoordinator.runMutation {
             confirmationStateUpdater.update(checkoutSessionResponse)
+            stateHolder.state = null
             kotlin.Result.success(Unit)
         }
     }
@@ -1095,7 +1097,8 @@ class CheckoutController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface Result {
         /**
-         * The customer completed the payment flow.
+         * The customer completed the payment flow. The controller's loaded [session] is cleared
+         * before this result is delivered.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

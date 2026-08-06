@@ -986,7 +986,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `successful confirmation waits for an in-flight mutation then refreshes state`() =
+    fun `successful confirmation waits for an in-flight mutation then clears state`() =
         runMutationScenario(assertLoadingConsumed = true) {
             val holdMutation = CountDownLatch(1)
             networkRule.checkoutUpdate(
@@ -1018,8 +1018,8 @@ internal class CheckoutControllerTest {
             confirmation.await()
 
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
-            assertThat(committedState().checkoutSessionResponse).isEqualTo(confirmedResponse)
-            assertThat(controller.session.value).isNotNull()
+            assertThat(committedStateOrNull()).isNull()
+            assertThat(controller.session.value).isNull()
         }
 
     @Test
