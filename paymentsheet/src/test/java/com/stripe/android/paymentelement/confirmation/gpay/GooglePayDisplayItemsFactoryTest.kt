@@ -1,12 +1,17 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class GooglePayDisplayItemsFactoryTest {
 
     @Test
@@ -98,9 +103,19 @@ class GooglePayDisplayItemsFactoryTest {
                 price = 2000L,
             ),
             displayItem(
+                label = "Cost excluding tax",
+                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+                price = 2000L,
+            ),
+            displayItem(
                 label = "SAVE50",
                 type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
                 price = -500L,
+            ),
+            displayItem(
+                label = "Estimated total (final tax may vary)",
+                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                price = 1500L,
             ),
         ).inOrder()
     }
@@ -131,9 +146,19 @@ class GooglePayDisplayItemsFactoryTest {
                 price = 1000L,
             ),
             displayItem(
+                label = "Cost excluding tax",
+                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+                price = 1000L,
+            ),
+            displayItem(
                 label = "Sales Tax",
                 type = GooglePayJsonFactory.DisplayItem.Type.TAX,
                 price = 80L,
+            ),
+            displayItem(
+                label = "Estimated total (final tax may vary)",
+                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                price = 1080L,
             ),
         ).inOrder()
     }
@@ -163,6 +188,11 @@ class GooglePayDisplayItemsFactoryTest {
                 price = 2000L,
             ),
             displayItem(
+                label = "Cost excluding tax",
+                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+                price = 2000L,
+            ),
+            displayItem(
                 label = "SAVE50",
                 type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
                 price = -500L,
@@ -171,6 +201,11 @@ class GooglePayDisplayItemsFactoryTest {
                 label = "VAT",
                 type = GooglePayJsonFactory.DisplayItem.Type.TAX,
                 price = 120L,
+            ),
+            displayItem(
+                label = "Estimated total (final tax may vary)",
+                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                price = 1620L,
             ),
         ).inOrder()
     }
@@ -186,7 +221,9 @@ class GooglePayDisplayItemsFactoryTest {
             ),
         )
 
-        return GooglePayDisplayItemsFactory.create(metadata)
+        return GooglePayDisplayItemsFactory.create(metadata).map { displayItem ->
+            displayItem.resolve(ApplicationProvider.getApplicationContext<Context>())
+        }
     }
 
     private companion object {

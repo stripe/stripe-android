@@ -69,7 +69,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             ErrorContent(currentStatus.message)
                         }
                         is CheckoutControllerExampleViewModel.Status.Configured -> {
-                            val session = currentStatus.checkoutSession
+                            val session = currentStatus.session
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
@@ -83,7 +83,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                 },
                 bottomBarContent = {
                     val configured = status as? CheckoutControllerExampleViewModel.Status.Configured
-                    PaymentOptionRow(configured?.checkoutSession?.paymentOptionDisplayData)
+                    PaymentOptionRow(configured?.session?.paymentOptionDisplayData)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = { paymentElement.presentPaymentOptions() },

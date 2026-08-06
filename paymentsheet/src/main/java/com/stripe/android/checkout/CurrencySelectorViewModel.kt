@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @CheckoutSessionPreview
 internal class CurrencySelectorViewModel(
-    private val checkoutSession: StateFlow<Session?>,
+    private val session: StateFlow<Session?>,
     private val updateCurrency: suspend (String) -> Result<Unit>,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
@@ -38,7 +38,7 @@ internal class CurrencySelectorViewModel(
         }
 
         viewModelScope.launch {
-            checkoutSession.collect {
+            session.collect {
                 _errorMessage.value = null
             }
         }
@@ -84,7 +84,7 @@ internal class CurrencySelectorViewModel(
             extras: androidx.lifecycle.viewmodel.CreationExtras
         ): T {
             return CurrencySelectorViewModel(
-                checkoutSession = checkoutController.checkoutSession,
+                session = checkoutController.session,
                 updateCurrency = checkoutController::updateCurrency,
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,

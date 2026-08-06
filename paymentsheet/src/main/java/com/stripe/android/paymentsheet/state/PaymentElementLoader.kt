@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
@@ -116,7 +117,7 @@ internal interface PaymentElementLoader {
         fun walletsDisabledReason(): WalletsDisabledReason? {
             val shouldDisable = (this as? CheckoutSession)
                 ?.checkoutSessionResponse
-                ?.shouldDisableWalletsForAutomaticTaxBilling == true
+                ?.collectsTaxFromBillingAddress == true
 
             return if (shouldDisable) {
                 WalletsDisabledReason.AutomaticTaxBillingAddress
@@ -125,24 +126,8 @@ internal interface PaymentElementLoader {
             }
         }
 
-        /**
-         * Deliberately narrower than [walletsDisabledReason]: true only while an address is
-         * still needed, not for the rest of the session once tax is satisfied.
-         */
-        fun requiresBillingAddressForAutomaticTax(): Boolean {
-            val checkoutSession = this as? CheckoutSession ?: return false
-            return checkoutSession.checkoutSessionResponse.taxStatus ==
-                CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
-        }
-
         enum class WalletsDisabledReason {
             AutomaticTaxBillingAddress;
-
-            val googlePayWarning: String
-                get() = when (this) {
-                    AutomaticTaxBillingAddress ->
-                        "Google Pay is disabled because automatic tax is configured to use the billing address."
-                }
         }
 
         @Parcelize
@@ -650,13 +635,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
     }
 
-    private suspend fun isGooglePayReady(
+    @VisibleForTesting
+    internal suspend fun isGooglePayReady(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
         isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
-        val walletsDisabledReason = initializationMode.walletsDisabledReason()
+        val shouldDisableForAutomaticTaxBilling =
+            (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
+            ?.checkoutSessionResponse
+            ?.let { checkoutSessionResponse ->
+                checkoutSessionResponse.automaticTaxEnabled &&
+                    checkoutSessionResponse.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING &&
+                    configuration.defaultBillingDetails == null
+            } == true
 
         if (!elementsSession.isGooglePayEnabled) {
             userFacingLogger.logWarningWithoutPii(
@@ -666,8 +659,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             userFacingLogger.logWarningWithoutPii(
                 "GooglePayConfiguration is not set."
             )
-        } else if (walletsDisabledReason != null) {
-            userFacingLogger.logWarningWithoutPii(walletsDisabledReason.googlePayWarning)
+        } else if (shouldDisableForAutomaticTaxBilling) {
+            userFacingLogger.logWarningWithoutPii(
+                "Google Pay is disabled because automatic tax is configured to use the billing address and no " +
+                    "default billing address was provided."
+            )
             return false
         } else if (!isGooglePaySupportedByConfiguration.await()) {
             @Suppress("MaxLineLength")

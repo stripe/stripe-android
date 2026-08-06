@@ -30,6 +30,7 @@ internal object CheckoutSessionResponseFactory {
         allowedShippingCountries: List<String>? = null,
         requiresBillingAddress: Boolean = false,
         merchantCountry: String? = "US",
+        businessName: String? = "Example, Inc.",
     ): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = id,
@@ -54,6 +55,7 @@ internal object CheckoutSessionResponseFactory {
             allowedShippingCountries = allowedShippingCountries,
             requiresBillingAddress = requiresBillingAddress,
             merchantCountry = merchantCountry,
+            businessName = businessName,
         )
     }
 }

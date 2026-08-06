@@ -56,6 +56,19 @@ internal fun AddressDetails.editDistance(otherAddress: AddressDetails?): Int {
     return editDistance
 }
 
+internal fun computeBillingEditDistance(
+    autocompleteAddress: com.stripe.android.model.Address,
+    billingAddress: com.stripe.android.model.Address,
+): Int {
+    var editDistance = 0
+    editDistance += (autocompleteAddress.line1 ?: "").levenshtein(billingAddress.line1 ?: "")
+    editDistance += (autocompleteAddress.line2 ?: "").levenshtein(billingAddress.line2 ?: "")
+    editDistance += (autocompleteAddress.city ?: "").levenshtein(billingAddress.city ?: "")
+    editDistance += (autocompleteAddress.state ?: "").levenshtein(billingAddress.state ?: "")
+    editDistance += (autocompleteAddress.postalCode ?: "").levenshtein(billingAddress.postalCode ?: "")
+    return editDistance
+}
+
 @Composable
 internal fun ScrollableColumn(
     modifier: Modifier = Modifier,

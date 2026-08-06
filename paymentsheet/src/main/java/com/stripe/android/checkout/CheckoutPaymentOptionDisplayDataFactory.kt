@@ -5,10 +5,12 @@ import androidx.compose.ui.text.AnnotatedString
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.NullUiDefinitionFactoryHelper
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
 import com.stripe.android.paymentsheet.model.drawableResourceId
 import com.stripe.android.paymentsheet.model.drawableResourceIdNight
@@ -69,8 +71,28 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
                     linkAccountHolder.linkAccountInfo.value.account
                 )
             ).resolve(context),
+            billingDetails = selection.billingDetails?.toCheckoutBillingDetails(),
             paymentMethodType = selection.paymentMethodType,
             mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context)),
         )
     }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): CheckoutController.BillingDetails {
+    return CheckoutController.BillingDetails(
+        address = address?.let { modelAddress ->
+            CheckoutController.BillingDetails.Address(
+                city = modelAddress.city,
+                country = modelAddress.country,
+                line1 = modelAddress.line1,
+                line2 = modelAddress.line2,
+                postalCode = modelAddress.postalCode,
+                state = modelAddress.state,
+            )
+        },
+        email = email,
+        name = name,
+        phone = phone,
+    )
 }

@@ -39,26 +39,17 @@ end
 
 def verify_release_tag_exists
     unless local_git_tag_exists?(release_tag_name)
-        raise "Release tag #{release_tag_name} does not exist locally. Run `git fetch origin --tags` or confirm `propose release` completed."
+        raise "Release tag #{release_tag_name} does not exist locally. Run `git fetch origin --tags` or restart the deploy release tag step."
     end
 end
 
 def create_release_tag
-    if @is_dry_run
-        pr = fetch_release_pr
-        if pr.nil?
-            raise "Could not find a version bump PR for #{release_branch} targeting #{@deploy_branch}. Run `propose release` first."
-        end
-
-        if pr.head.sha.nil? || pr.head.sha.empty?
-            raise "Could not determine the release branch head for dry-run tag creation."
-        end
-
-        @release_source_sha = pr.head.sha
-        rputs "Dry run: using release branch head #{@release_source_sha} as a stand-in for the merged PR revision."
-    else
-        prepare_release_source_from_merged_pr
+    if @skip_release_tag
+        rputs "Dry run: skipping release tag creation because the release source is unavailable."
+        return
     end
+
+    raise "Release source has not been checked out." if @release_source_sha.nil?
 
     if local_git_tag_exists?(release_tag_name)
         verify_release_tag_matches_release_source
@@ -67,6 +58,7 @@ def create_release_tag
         verify_release_tag_matches_release_source
     else
         create_local_release_tag
+        @created_local_release_tag = true
     end
 
     if @is_dry_run
@@ -81,14 +73,20 @@ end
 
 def checkout_release_source
     begin
-        prepare_release_source_from_merged_pr
-        verify_release_tag_matches_release_source
-        checkout_release_tag
+        if @is_dry_run
+            prepare_dry_run_release_source
+        else
+            prepare_release_source_from_merged_pr
+        end
+
+        execute_or_fail("git checkout --detach #{@release_source_sha}")
+        @checked_out_release_source = true
     rescue StandardError => e
         raise unless @is_dry_run
 
         rputs "Dry run: continuing without checked-out release source: #{e.message}"
-        rputs "Dry run: remaining deploy release steps will run from the current checkout instead of #{release_tag_name}."
+        rputs "Dry run: remaining deploy release steps will run from the current checkout without creating #{release_tag_name}."
+        @skip_release_tag = true
     end
 end
 
@@ -101,12 +99,6 @@ def verify_release_tag_matches_release_source
     end
 
     puts "Verified release tag #{release_tag_name} points to #{@release_source_sha}".green
-end
-
-def checkout_release_tag
-    verify_release_tag_exists
-    execute_or_fail("git checkout --detach refs/tags/#{release_tag_name}")
-    @checked_out_release_tag = true
 end
 
 def delete_release_tag(delete_remote: false, delete_local: true)
@@ -126,6 +118,26 @@ private def create_local_release_tag
             env: env
         )
     end
+end
+
+private def prepare_dry_run_release_source
+    pr = fetch_release_pr
+    if pr.nil?
+        raise "Could not find a version bump PR for #{release_branch} targeting #{@deploy_branch}. Run `propose release` first."
+    end
+
+    if pr.head.sha.nil? || pr.head.sha.empty?
+        raise "Could not determine the release branch head for dry-run tag creation."
+    end
+
+    @release_source_sha = pr.head.sha
+    execute_or_fail("git fetch --tags origin #{@deploy_branch} #{release_branch}")
+
+    unless git_commit_exists?(@release_source_sha)
+        raise "Release branch head #{@release_source_sha} is not available locally after fetching #{release_branch}."
+    end
+
+    rputs "Dry run: using release branch head #{@release_source_sha} as a stand-in for the merged PR revision."
 end
 
 private def fetch_release_pr

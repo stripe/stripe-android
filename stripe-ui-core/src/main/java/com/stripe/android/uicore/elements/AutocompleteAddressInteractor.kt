@@ -24,6 +24,10 @@ interface AutocompleteAddressInteractor {
 
     fun onDismissed() = Unit
 
+    fun onFocusLost() = Unit
+
+    fun onFocusGained() = Unit
+
     fun onEnterManuallyFromInline() = Unit
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -1,6 +1,7 @@
 package com.stripe.android.checkout.ece
 
 import app.cash.turbine.Turbine
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 
 internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementEventReporter {
     val calls = Turbine<Call>()
@@ -13,12 +14,15 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
         calls.add(Call.OnEceWalletTapped(expressButton))
     }
 
-    override fun onEcePaymentSuccess() {
-        calls.add(Call.OnEcePaymentSuccess)
+    override fun onEcePaymentSuccess(expressButton: ExpressButton) {
+        calls.add(Call.OnEcePaymentSuccess(expressButton))
     }
 
-    override fun onEcePaymentFailure() {
-        calls.add(Call.OnEcePaymentFailure)
+    override fun onEcePaymentFailure(
+        expressButton: ExpressButton,
+        error: ConfirmationHandler.Result.Failed,
+    ) {
+        calls.add(Call.OnEcePaymentFailure(expressButton, error))
     }
 
     fun ensureAllEventsConsumed() {
@@ -30,8 +34,11 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
 
         data class OnEceWalletTapped(val expressButton: ExpressButton) : Call
 
-        data object OnEcePaymentSuccess : Call
+        data class OnEcePaymentSuccess(val expressButton: ExpressButton) : Call
 
-        data object OnEcePaymentFailure : Call
+        data class OnEcePaymentFailure(
+            val expressButton: ExpressButton,
+            val error: ConfirmationHandler.Result.Failed,
+        ) : Call
     }
 }

@@ -32,4 +32,13 @@ internal class ExpressCheckoutElementTest {
             ExpressCheckoutElement.Configuration.GooglePayVisibility.Never
         )
     }
+
+    @Test
+    fun `configuration builds shipping address required`() {
+        val state = ExpressCheckoutElement.Configuration()
+            .shippingAddressRequired(true)
+            .build()
+
+        assertThat(state.shippingAddressRequired).isTrue()
+    }
 }

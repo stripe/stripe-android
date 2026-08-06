@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
@@ -53,7 +54,11 @@ internal object VerticalModeInitialScreenFactory {
             (viewModel.selection.value as? PaymentSelection.New?)?.let { newPaymentSelection ->
                 val paymentMethodCode = newPaymentSelection.paymentMethodCreateParams.typeCode
 
-                val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
+                val formHelper = DefaultFormHelper.create(
+                    viewModel = viewModel,
+                    coroutineScope = viewModel.viewModelScope,
+                    paymentMethodMetadata = paymentMethodMetadata
+                )
 
                 if (formHelper.formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired) {
                     add(

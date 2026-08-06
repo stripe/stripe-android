@@ -100,6 +100,7 @@ import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -356,7 +357,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load with checkout session automatic tax billing should disable google pay`() = runScenario {
+    fun `load with checkout session automatic tax billing and default billing details keeps google pay`() = runScenario {
         val userFacingLogger = FakeUserFacingLogger()
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -383,17 +384,49 @@ internal class DefaultPaymentElementLoaderTest {
                     initializedViaCompose = false,
                 ),
             ).getOrThrow().paymentMethodMetadata.isGooglePayReady
-        ).isFalse()
+        ).isTrue()
 
         assertThat(userFacingLogger.getLoggedMessages())
-            .contains(
-                "Google Pay is disabled because automatic tax is configured to use the billing address."
+            .doesNotContain(
+                "Google Pay is disabled because automatic tax is configured to use the billing address and" +
+                    " no default billing address was provided."
             )
 
         consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `google pay is disabled for automatic tax billing without default billing details`() = runScenario {
+        val userFacingLogger = FakeUserFacingLogger()
+        val loader = createPaymentElementLoader(userFacingLogger = userFacingLogger)
+        val checkoutSessionResponse = createCheckoutSessionResponse(
+            canDetachPaymentMethod = true,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+
+        val isGooglePayReady = loader.isGooglePayReady(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .defaultBillingDetails(null)
+                .build()
+                .asCommonConfiguration(),
+            elementsSession = requireNotNull(checkoutSessionResponse.elementsSession),
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            isGooglePaySupportedByConfiguration = CompletableDeferred(true),
+        )
+
+        assertThat(isGooglePayReady).isFalse()
+        assertThat(userFacingLogger.getLoggedMessages())
+            .contains(
+                "Google Pay is disabled because automatic tax is configured to use the billing address and no " +
+                    "default billing address was provided."
+            )
     }
 
     @Test
@@ -430,7 +463,8 @@ internal class DefaultPaymentElementLoaderTest {
             .contains("GooglePayConfiguration is not set.")
         assertThat(userFacingLogger.getLoggedMessages())
             .doesNotContain(
-                "Google Pay is disabled because automatic tax is configured to use the billing address."
+                "Google Pay is disabled because automatic tax is configured to use the billing address and " +
+                    "no default billing address was provided."
             )
 
         consumeLoadingEvents()
@@ -4886,7 +4920,7 @@ internal class DefaultPaymentElementLoaderTest {
         durationProvider: FakeDurationProvider = FakeDurationProvider(),
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
             FakePaymentMethodMessagePromotionsExperimentHandler(),
-    ): PaymentElementLoader {
+    ): DefaultPaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
             durationProvider,

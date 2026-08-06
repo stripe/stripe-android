@@ -5,8 +5,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.CardBrandFilter
-import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
@@ -22,9 +20,9 @@ import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSourc
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -51,7 +49,6 @@ import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
-import kotlinx.coroutines.CoroutineScope
 import org.mockito.kotlin.mock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -150,17 +147,11 @@ internal interface CustomerSheetTestHelper {
                             return mock()
                         }
                     },
-                    googlePayPaymentMethodLauncherFactory = object : GooglePayPaymentMethodLauncherFactory {
+                    googlePayPaymentMethodLauncherFactory = object : InternalGooglePayPaymentMethodLauncherFactory {
                         override fun create(
-                            lifecycleScope: CoroutineScope,
-                            config: GooglePayPaymentMethodLauncher.Config,
-                            readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
                             activityResultLauncher:
                             ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                            skipReadyCheck: Boolean,
-                            cardBrandFilter: CardBrandFilter,
-                            cardFundingFilter: CardFundingFilter
-                        ): GooglePayPaymentMethodLauncher = mock()
+                        ): InternalGooglePayPaymentMethodLauncher = mock()
                     },
                     statusBarColor = null,
                     savedStateHandle = savedStateHandle,

@@ -7,6 +7,8 @@ internal data class ReadRecordCommand(
     val recordNumber: Int,
     val shortFileIdentifier: Int,
 ) : ApduCommand<Map<String, ByteArray>>() {
+    override val name = "readRecord(sfi=$shortFileIdentifier, number=$recordNumber)"
+
     /*
      * Interindustry standardized command for ISO 7816-4
      */

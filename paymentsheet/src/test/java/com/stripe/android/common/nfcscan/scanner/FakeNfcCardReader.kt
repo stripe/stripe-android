@@ -1,11 +1,14 @@
 package com.stripe.android.common.nfcscan.scanner
 
 import app.cash.turbine.Turbine
+import com.stripe.android.core.strings.resolvableString
 
 internal class FakeNfcCardReader(
     private val result: NfcCardReader.Result = NfcCardReader.Result.Error(
-        errorCode = "notImplemented",
-        userMessage = com.stripe.android.core.strings.resolvableString("Not implemented"),
+        error = GenericNfcScanningError(
+            errorCode = "notImplemented",
+            userMessage = resolvableString("Not implemented"),
+        ),
     ),
 ) : NfcCardReader {
     val readCardCalls = Turbine<NfcTagTransceiver>()

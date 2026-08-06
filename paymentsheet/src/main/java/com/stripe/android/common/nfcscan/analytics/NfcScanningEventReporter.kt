@@ -1,5 +1,6 @@
 package com.stripe.android.common.nfcscan.analytics
 
+import com.stripe.android.common.nfcscan.scanner.NfcScanningError
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -30,26 +31,28 @@ internal interface NfcScanningEventReporter {
      * User attempt to scan their card with NFC failed meaning the scanner was NOT able to produce valid card
      * details from the NFC card held against the device.
      *
-     * @param errorCode code generated from NFC scanning flow indicating the error
-     * @param parameters additional context about the failure, such as APDU status words
+     * @param error error that occurred within the NFC scanning flow
      */
-    fun onNfcScanAttemptFailed(
-        errorCode: String,
-        parameters: Map<String, String> = emptyMap(),
-    )
+    fun onNfcScanAttemptFailed(error: NfcScanningError)
 
     /**
      * NFC scan flow completed successfully meaning the user is being returned to the calling payment flow after
      * being shown that they successfully scanned valid card details.
+     *
+     * @param numberOfAttempts number of times the user attempted to scan their card with NFC
      */
-    fun onNfcScanSucceeded()
+    fun onNfcScanSucceeded(numberOfAttempts: Int)
 
     /**
      * The user has chosen to exit the NFC scanning flow without scanning valid card details.
      *
      * @param reason why there was an NFC flow cancellation
+     * @param numberOfAttempts number of times the user attempted to scan their card with NFC
      */
-    fun onNfcScanCancelled(reason: NfcScanCancellationReason)
+    fun onNfcScanCancelled(
+        reason: NfcScanCancellationReason,
+        numberOfAttempts: Int,
+    )
 }
 
 internal class DefaultNfcScanningEventReporter @Inject constructor(
@@ -63,9 +66,13 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         fireEvent(eventName = SCAN_STARTED_EVENT_NAME)
     }
 
-    override fun onNfcScanSucceeded() {
+    override fun onNfcScanSucceeded(numberOfAttempts: Int) {
         val duration = durationProvider.end(DurationProvider.Key.NfcScan)
-        fireEvent(eventName = SCAN_SUCCESS_EVENT_NAME, additionalParams = duration.mapOfDurationInSeconds())
+        fireEvent(
+            eventName = SCAN_SUCCESS_EVENT_NAME,
+            additionalParams = duration.mapOfDurationInSeconds() +
+                mapOf(FIELD_NUMBER_OF_ATTEMPTS to numberOfAttempts),
+        )
     }
 
     override fun onNfcScanAttemptStarted() {
@@ -78,31 +85,35 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         fireEvent(eventName = SCAN_ATTEMPT_SUCCEEDED_EVENT_NAME, additionalParams = duration.mapOfDurationInSeconds())
     }
 
-    override fun onNfcScanAttemptFailed(
-        errorCode: String,
-        parameters: Map<String, String>,
-    ) {
+    override fun onNfcScanAttemptFailed(error: NfcScanningError) {
         val duration = durationProvider.end(DurationProvider.Key.NfcScanAttempt)
+
         fireEvent(
             eventName = SCAN_ATTEMPT_FAILED_EVENT_NAME,
             additionalParams = duration.mapOfDurationInSeconds() +
-                mapOf(FIELD_ERROR_CODE to errorCode) +
-                parameters
+                mapOf(FIELD_ERROR_CODE to error.errorCode) +
+                error.parameters,
         )
     }
 
-    override fun onNfcScanCancelled(reason: NfcScanCancellationReason) {
+    override fun onNfcScanCancelled(
+        reason: NfcScanCancellationReason,
+        numberOfAttempts: Int,
+    ) {
         val duration = durationProvider.end(DurationProvider.Key.NfcScan)
         fireEvent(
             eventName = SCAN_CANCELED_EVENT_NAME,
             additionalParams = duration.mapOfDurationInSeconds() +
-                mapOf(FIELD_CANCELLATION_REASON to reason.analyticsValue)
+                mapOf(
+                    FIELD_CANCELLATION_REASON to reason.analyticsValue,
+                    FIELD_NUMBER_OF_ATTEMPTS to numberOfAttempts,
+                )
         )
     }
 
     private fun fireEvent(
         eventName: String,
-        additionalParams: Map<String, Any> = emptyMap()
+        additionalParams: Map<String, Any?> = emptyMap()
     ) {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
@@ -117,7 +128,9 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
 
     private companion object {
         const val FIELD_ERROR_CODE = "error_code"
+
         const val FIELD_CANCELLATION_REASON = "cancellation_reason"
+        const val FIELD_NUMBER_OF_ATTEMPTS = "number_of_attempts"
 
         const val SCAN_STARTED_EVENT_NAME = "nfc_scan_started"
         const val SCAN_SUCCESS_EVENT_NAME = "nfc_scan_success"

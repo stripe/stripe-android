@@ -21,6 +21,7 @@ pipelines:
       test: { }
       run-instrumentation-tests: { }
       run-paymentsheet-instrumentation-tests: { }
+      run-paymentsheet-ime-instrumentation-tests: { }
       run-financial-connections-instrumentation-tests: { }
       run-connections-e2e-payments-tests-on-push: { }
       run-connections-e2e-token-tests-on-push: { }
@@ -330,7 +331,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet instrumentation test results
           inputs:
@@ -339,6 +340,21 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+  run-paymentsheet-ime-instrumentation-tests:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Execute PaymentSheet IME instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33imeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet IME instrumentation test results
+          inputs:
+            - test_title: PaymentSheet IME instrumentation tests
   run-financial-connections-instrumentation-tests:
     before_run:
       - start_emulator

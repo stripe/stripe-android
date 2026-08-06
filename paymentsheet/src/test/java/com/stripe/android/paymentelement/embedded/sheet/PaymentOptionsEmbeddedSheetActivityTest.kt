@@ -126,7 +126,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         scenario.onActivity { activity ->
             assertThat(activity.embeddedNavigator.canGoBack).isFalse()
             assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         }
     }
 
@@ -150,7 +150,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    ),
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",

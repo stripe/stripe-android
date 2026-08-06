@@ -137,11 +137,13 @@ internal class DefaultEventReporter @Inject internal constructor(
                     DurationProvider.Key.PaymentLauncher,
                     DurationProvider.Key.PrepareAttestation,
                     DurationProvider.Key.Attest,
+                    DurationProvider.Key.ExpressCheckoutElement,
                     DurationProvider.Key.IntentConfirmationChallenge,
                     DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
                     DurationProvider.Key.PaymentMethodMessaging,
                     DurationProvider.Key.AddressAutocompleteSession,
                     DurationProvider.Key.AddressAutocompleteFetch,
+                    DurationProvider.Key.AddressAutocompleteDetailsFetch,
                     DurationProvider.Key.AddressElementCompletion -> null
                 }
                 )
@@ -587,6 +589,20 @@ internal class DefaultEventReporter @Inject internal constructor(
         error?.message?.let {
             logger.logWarningWithoutPii("Card scan check failed: $it")
         }
+    }
+
+    override fun onBillingAddressCompleted(
+        addressCountryCode: String,
+        autocompleteResultSelected: Boolean,
+        editDistance: Int?,
+    ) {
+        fireEvent(
+            PaymentSheetEvent.BillingAddressCompleted(
+                addressCountryCode = addressCountryCode,
+                autocompleteResultSelected = autocompleteResultSelected,
+                editDistance = editDistance,
+            )
+        )
     }
 
     override fun onPaymentMethodMessagePromotionsFetchBegin() {

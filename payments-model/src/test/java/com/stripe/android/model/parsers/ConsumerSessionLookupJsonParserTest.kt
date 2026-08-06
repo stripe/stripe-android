@@ -37,6 +37,7 @@ class ConsumerSessionLookupJsonParserTest {
                     unredactedPhoneNumber = null,
                     phoneNumberCountry = null,
                     verificationSessions = emptyList(),
+                    supportedPaymentDetailsTypes = listOf("CARD"),
                 ),
                 errorMessage = null,
                 publishableKey = "asdfg123",

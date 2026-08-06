@@ -106,8 +106,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_error_declined_card">卡片被拒绝。请尝试使用其他卡片。</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
   <string name="stripe_nfc_scan_error_expired_card">银行卡已过期。请尝试使用其他银行卡。</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">不支持移动钱包。请尝试使用实体卡。</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">将卡片放在手机背面</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">出错了。请尝试使用其他银行卡。</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">不支持该银行卡。请尝试其他银行卡。</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->

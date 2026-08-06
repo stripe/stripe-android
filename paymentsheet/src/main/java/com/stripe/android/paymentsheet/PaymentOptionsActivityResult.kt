@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
@@ -27,7 +28,8 @@ internal sealed class PaymentOptionsActivityResult(
     data class Succeeded(
         val paymentSelection: PaymentSelection,
         override val linkAccountInfo: LinkAccountUpdate.Value,
-        override val paymentMethods: List<PaymentMethod>? = null
+        override val paymentMethods: List<PaymentMethod>? = null,
+        val autocompleteFilledAddress: Address? = null,
     ) : PaymentOptionsActivityResult(Activity.RESULT_OK)
 
     @Parcelize

@@ -1,18 +1,19 @@
 package com.stripe.android.common.nfcscan.analytics
 
 import app.cash.turbine.Turbine
+import com.stripe.android.common.nfcscan.scanner.NfcScanningError
 
 internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
     val onNfcScanStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptSucceededCalls = Turbine<Unit>()
-    val onNfcScanAttemptFailedCalls = Turbine<NfcScanAttemptFailedCall>()
-    val onNfcScanSucceededCalls = Turbine<Unit>()
-    val onNfcScanCancelledCalls = Turbine<NfcScanCancellationReason>()
+    val onNfcScanAttemptFailedCalls = Turbine<NfcScanningError>()
+    val onNfcScanSucceededCalls = Turbine<Int>()
+    val onNfcScanCancelledCalls = Turbine<NfcScanCancelledCall>()
 
-    data class NfcScanAttemptFailedCall(
-        val errorCode: String,
-        val parameters: Map<String, String>,
+    data class NfcScanCancelledCall(
+        val reason: NfcScanCancellationReason,
+        val numberOfAttempts: Int,
     )
 
     override fun onNfcScanStarted() {
@@ -27,24 +28,24 @@ internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
         onNfcScanAttemptSucceededCalls.add(Unit)
     }
 
-    override fun onNfcScanAttemptFailed(
-        errorCode: String,
-        parameters: Map<String, String>,
+    override fun onNfcScanAttemptFailed(error: NfcScanningError) {
+        onNfcScanAttemptFailedCalls.add(error)
+    }
+
+    override fun onNfcScanSucceeded(numberOfAttempts: Int) {
+        onNfcScanSucceededCalls.add(numberOfAttempts)
+    }
+
+    override fun onNfcScanCancelled(
+        reason: NfcScanCancellationReason,
+        numberOfAttempts: Int,
     ) {
-        onNfcScanAttemptFailedCalls.add(
-            NfcScanAttemptFailedCall(
-                errorCode = errorCode,
-                parameters = parameters,
+        onNfcScanCancelledCalls.add(
+            NfcScanCancelledCall(
+                reason = reason,
+                numberOfAttempts = numberOfAttempts,
             ),
         )
-    }
-
-    override fun onNfcScanSucceeded() {
-        onNfcScanSucceededCalls.add(Unit)
-    }
-
-    override fun onNfcScanCancelled(reason: NfcScanCancellationReason) {
-        onNfcScanCancelledCalls.add(reason)
     }
 
     fun ensureAllEventsConsumed() {

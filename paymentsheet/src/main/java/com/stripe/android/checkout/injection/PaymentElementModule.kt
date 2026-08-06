@@ -2,6 +2,8 @@ package com.stripe.android.checkout.injection
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutSheetLauncher
+import com.stripe.android.checkout.PaymentElement
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
@@ -44,7 +46,15 @@ internal interface PaymentElementModule {
     @Binds
     fun bindsSheetLauncher(launcher: CheckoutSheetLauncher): EmbeddedSheetLauncher
 
+    @OptIn(CheckoutSessionPreview::class)
     companion object {
+        @Provides
+        fun providePaymentElementConfiguration(
+            stateHolder: CheckoutControllerStateHolder,
+        ): PaymentElement.Configuration.State {
+            return requireNotNull(stateHolder.state).configuration.paymentElementConfiguration
+        }
+
         @Provides
         fun provideEmbeddedContentState(
             stateHolder: CheckoutControllerStateHolder,

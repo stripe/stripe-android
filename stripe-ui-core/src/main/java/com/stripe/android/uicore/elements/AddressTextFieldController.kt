@@ -2,18 +2,11 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.focus.onFocusChanged
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -76,33 +69,30 @@ class AddressTextFieldController(
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
         if (inlineAutocompleteHandler != null) {
-            var fieldWidthDp by remember { mutableStateOf(0.dp) }
-            val density = LocalDensity.current
+            val onClear = {
+                _inlineQuery.value = ""
+                inlineAutocompleteHandler.onDismissed()
+            }
+            val predictionsState by inlineAutocompleteHandler.predictionsState.collectAsState()
+            val isDarkTheme = isSystemInDarkTheme()
 
-            val onClear = remember { { _inlineQuery.value = "" } }
-
-            Box(
-                modifier = modifier
-                    .wrapContentSize(Alignment.TopStart)
-                    .onSizeChanged { size ->
-                        val newWidth = with(density) { size.width.toDp() }
-                        if (newWidth != fieldWidthDp) fieldWidthDp = newWidth
+            Column(
+                modifier = modifier.onFocusChanged { state ->
+                    if (state.hasFocus) {
+                        inlineAutocompleteHandler.onFocusGained()
+                    } else {
+                        inlineAutocompleteHandler.onFocusLost()
                     }
+                }
             ) {
                 AddressTextFieldUI(
                     controller = this@AddressTextFieldController,
                     enabled = enabled,
                 )
-                val predictionsState by
-                    inlineAutocompleteHandler.predictionsState.collectAsState()
-                val isDarkTheme = isSystemInDarkTheme()
                 InlineAddressPredictionsUI(
                     state = predictionsState,
-                    attributionDrawable = inlineAutocompleteHandler
-                        .getAttributionDrawable(isDarkTheme),
-                    fieldWidthDp = fieldWidthDp,
+                    attributionDrawable = inlineAutocompleteHandler.getAttributionDrawable(isDarkTheme),
                     onPredictionSelected = inlineAutocompleteHandler::onPredictionSelected,
-                    onDismiss = inlineAutocompleteHandler::onDismissed,
                     onClear = onClear,
                     onEnterManually = inlineAutocompleteHandler::onEnterManually,
                 )

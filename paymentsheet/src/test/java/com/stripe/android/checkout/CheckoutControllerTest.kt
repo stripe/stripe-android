@@ -9,6 +9,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -55,13 +56,7 @@ internal class CheckoutControllerTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val networkRule = NetworkRule()
 
-    // The controller defaults the merchant display name to the host app's label, never the checkout
-    // session. Mirroring that resolution here keeps the assertion decoupled from Robolectric's
-    // package naming while still failing if the code regresses to a session-sourced value.
-    private val expectedMerchantDisplayName: String
-        get() = applicationContext.applicationInfo
-            .loadLabel(applicationContext.packageManager)
-            .toString()
+    private val expectedMerchantDisplayName = "Mobile Example Account"
 
     // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
     private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)
@@ -85,17 +80,17 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure emits checkoutSession with id from response`() = runConfigureScenario {
+    fun `configure emits session with id from response`() = runConfigureScenario {
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
 
     @Test
-    fun `checkoutSession flow transitions from null to loaded session`() = runTest {
+    fun `session flow transitions from null to loaded session`() = runTest {
         networkRule.defaultInit()
         val controller = createController()
 
-        controller.checkoutSession.test {
+        controller.session.test {
             assertThat(awaitItem()).isNull()
 
             controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
@@ -149,11 +144,72 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure uses app name as merchant display name, not checkout session data`() =
+    fun `configure prefills the default billing address`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaultBillingAddress(
+            CheckoutController.Address()
+                .city(" San Francisco ")
+                .country(" US ")
+                .line1(" 510 Townsend St ")
+                .postalCode(" 94103 ")
+                .state(" CA ")
+        ),
+    ) {
+        result.getOrThrow()
+
+        val billingAddress = requireNotNull(committedState?.collectedDetails?.billingAddress)
+        assertThat(billingAddress.city).isEqualTo("San Francisco")
+        assertThat(billingAddress.country).isEqualTo("US")
+        assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
+        assertThat(billingAddress.postalCode).isEqualTo("94103")
+        assertThat(billingAddress.state).isEqualTo("CA")
+    }
+
+    @Test
+    fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaultBillingAddress(
+            CheckoutController.Address()
+                .city("San Francisco")
+                .country("US")
+                .line1("510 Townsend St")
+                .line2("Suite 100")
+                .postalCode("94103")
+                .state("CA")
+        ),
+        networkSetup = {
+            networkRule.checkoutInit(
+                responseFactory = successResponseFactory(automaticTaxFor("billing")),
+            )
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+                bodyPart("tax_region[line1]", "510 Townsend St"),
+                bodyPart("tax_region[line2]", "Suite 100"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                responseFactory = successResponseFactory(automaticTaxFor("billing")),
+            )
+        },
+    ) {
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `configure defaults merchant display name to the checkout session business name`() =
         runConfigureScenario {
             result.getOrThrow()
             assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
                 .isEqualTo(expectedMerchantDisplayName)
+        }
+
+    @Test
+    fun `configure uses the configured merchant display name over the checkout session business name`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().merchantDisplayName("Acme Corp"),
+        ) {
+            result.getOrThrow()
+            assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
+                .isEqualTo("Acme Corp")
         }
 
     @Test
@@ -203,7 +259,7 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure does not emit checkoutSession when network request fails`() = runConfigureScenario(
+    fun `configure does not emit session when network request fails`() = runConfigureScenario(
         networkSetup = {
             networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
@@ -212,7 +268,7 @@ internal class CheckoutControllerTest {
         },
     ) {
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isNull()
+        assertThat(controller.session.value).isNull()
         assertThat(committedState).isNull()
     }
 
@@ -234,15 +290,15 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `checkoutSession is null before configure`() = runTest {
+    fun `session is null before configure`() = runTest {
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
-        assertThat(controller.checkoutSession.value).isNull()
+        assertThat(controller.session.value).isNull()
         assertThat(committedStateFor(savedStateHandle)).isNull()
     }
 
     @Test
-    fun `checkoutSession is restored from savedStateHandle after recreation`() = runTest {
+    fun `session is restored from savedStateHandle after recreation`() = runTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
@@ -251,7 +307,7 @@ internal class CheckoutControllerTest {
         // Simulate process death: persist the handle and build a new controller from the restored copy.
         val recreated = createController(savedStateHandle.simulateProcessDeath())
 
-        assertThat(recreated.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(recreated.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
 
     @Test
@@ -278,7 +334,7 @@ internal class CheckoutControllerTest {
         controller.destroy()
 
         assertThat(committedState).isNull()
-        assertThat(controller.checkoutSession.value).isNull()
+        assertThat(controller.session.value).isNull()
     }
 
     @Test
@@ -295,7 +351,7 @@ internal class CheckoutControllerTest {
             )
 
         val controller = createController(savedStateHandle)
-        controller.checkoutSession.test {
+        controller.session.test {
             assertThat(awaitItem()?.paymentOptionDisplayData).isNotNull()
 
             assertThat(controller.clearPaymentOption().isSuccess).isTrue()
@@ -329,7 +385,7 @@ internal class CheckoutControllerTest {
             assertThat(result.exceptionOrNull()).hasMessageThat()
                 .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
             // The rejected clear leaves the selection intact.
-            assertThat(controller.checkoutSession.value?.paymentOptionDisplayData).isNotNull()
+            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
         }
 
     @Test
@@ -369,8 +425,8 @@ internal class CheckoutControllerTest {
 
             // Both controllers share the parent handle, but each persists under its own namespace, so
             // configuring the first leaves the second's state untouched.
-            assertThat(first.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(second.checkoutSession.value).isNull()
+            assertThat(first.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(second.session.value).isNull()
         }
 
     @Test
@@ -383,7 +439,7 @@ internal class CheckoutControllerTest {
         // After process death, a controller under a different name starts from empty state.
         val recreated = createController(savedStateHandle.simulateProcessDeath(), integrationName = "second")
 
-        assertThat(recreated.checkoutSession.value).isNull()
+        assertThat(recreated.session.value).isNull()
     }
 
     @Test
@@ -417,12 +473,12 @@ internal class CheckoutControllerTest {
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.applyPromotionCode("INVALID")
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -438,37 +494,6 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `updateLineItemQuantity sends line item params and updates session on success`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("updated_line_item_quantity[line_item_id]", "li_1"),
-            bodyPart("updated_line_item_quantity[quantity]", "3"),
-            bodyPart("updated_line_item_quantity[fail_update_on_discount_error]", "true"),
-            responseFactory = successResponseFactory { json ->
-                json.put("total_summary", totalSummaryJson(due = 7000))
-            },
-        )
-
-        val result = controller.updateLineItemQuantity("li_1", 3)
-
-        result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(7000)
-    }
-
-    @Test
-    fun `updateLineItemQuantity returns failure and preserves session on error`() = runMutationScenario {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "Invalid quantity"}}""")
-        }
-        val before = controller.checkoutSession.value
-
-        val result = controller.updateLineItemQuantity("li_1", -1)
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
-    }
-
-    @Test
     fun `updateCurrency sends updated_currency and updates session on success`() = runMutationScenario {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "usd"),
@@ -480,7 +505,7 @@ internal class CheckoutControllerTest {
         val result = controller.updateCurrency("usd")
 
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(5099)
+        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(5099)
     }
 
     @Test
@@ -489,66 +514,64 @@ internal class CheckoutControllerTest {
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid currency"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.updateCurrency("invalid")
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
-    fun `selectShippingOption sends shipping rate on success`() = runMutationScenario {
+    fun `updateEmail sends customer_email and updates session on success`() = runMutationScenario {
         networkRule.checkoutUpdate(
-            bodyPart("shipping_rate", "shr_express"),
+            bodyPart("customer_email", "checkout@example.com"),
             bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             responseFactory = successResponseFactory(),
         )
 
-        val result = controller.selectShippingOption("shr_express")
+        val result = controller.updateEmail("checkout@example.com")
+
+        result.getOrThrow()
+        assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `updateEmail trims whitespace`() = runMutationScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("customer_email", "checkout@example.com"),
+            responseFactory = successResponseFactory(),
+        )
+
+        val result = controller.updateEmail("  checkout@example.com  ")
 
         assertThat(result.isSuccess).isTrue()
     }
 
     @Test
-    fun `selectShippingOption returns failure on error`() = runMutationScenario {
+    fun `updateEmail sends empty customer_email when cleared with null`() = runMutationScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("customer_email", ""),
+            responseFactory = successResponseFactory(),
+        )
+
+        val result = controller.updateEmail(null)
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `updateEmail returns failure and preserves session on error`() = runMutationScenario {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "Invalid shipping rate"}}""")
+            response.setBody("""{"error": {"message": "Invalid email"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
-        val result = controller.selectShippingOption("shr_invalid")
+        val result = controller.updateEmail("invalid")
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
-    }
-
-    @Test
-    fun `updateTaxId sends type and value on success`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("tax_id_collection[tax_id][type]", "us_ein"),
-            bodyPart("tax_id_collection[tax_id][value]", "123456789"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-            responseFactory = successResponseFactory(),
-        )
-
-        val result = controller.updateTaxId("us_ein", "123456789")
-
-        assertThat(result.isSuccess).isTrue()
-    }
-
-    @Test
-    fun `updateTaxId trims whitespace from type and value`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("tax_id_collection[tax_id][type]", "us_ein"),
-            bodyPart("tax_id_collection[tax_id][value]", "123456789"),
-            responseFactory = successResponseFactory(),
-        )
-
-        val result = controller.updateTaxId("  us_ein  ", "  123456789  ")
-
-        assertThat(result.isSuccess).isTrue()
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -714,18 +737,18 @@ internal class CheckoutControllerTest {
         val result = controller.runServerUpdate { Result.success(Unit) }
 
         result.getOrThrow()
-        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(8000)
+        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(8000)
     }
 
     @Test
     fun `runServerUpdate returns failure when serverUpdate throws`() = runMutationScenario {
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.runServerUpdate { throw IllegalStateException("Server error") }
 
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -744,12 +767,12 @@ internal class CheckoutControllerTest {
             response.setResponseCode(500)
             response.setBody("""{"error": {"message": "Internal server error"}}""")
         }
-        val before = controller.checkoutSession.value
+        val before = controller.session.value
 
         val result = controller.runServerUpdate { Result.success(Unit) }
 
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.checkoutSession.value).isEqualTo(before)
+        assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
@@ -815,8 +838,8 @@ internal class CheckoutControllerTest {
         runMutationScenario(assertLoadingConsumed = true) {
             markIntegrationLaunched()
 
-            // The guard fast-fails before runSerialized, so isLoading must never flip to true.
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            // The guard fast-fails before runSerialized, so isUpdating must never flip to true.
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             val result = controller.configure(DEFAULT_CLIENT_SECRET)
 
@@ -824,7 +847,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `isLoading transitions to true then false on a successful mutation`() = runMutationScenario(
+    fun `isUpdating transitions to true then false on a successful mutation`() = runMutationScenario(
         assertLoadingConsumed = true,
     ) {
         networkRule.checkoutUpdate(
@@ -832,16 +855,16 @@ internal class CheckoutControllerTest {
             responseFactory = successResponseFactory(),
         )
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
         controller.applyPromotionCode("10OFF")
 
-        assertThat(isLoadingTurbine.awaitItem()).isTrue()
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
     }
 
     @Test
-    fun `isLoading stays true while queued mutations are pending`() = runMutationScenario(
+    fun `isUpdating stays true while queued mutations are pending`() = runMutationScenario(
         assertLoadingConsumed = true,
     ) {
         val holdFirstResponse = CountDownLatch(1)
@@ -856,24 +879,24 @@ internal class CheckoutControllerTest {
             responseFactory = successResponseFactory(),
         )
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
         val job1 = async { controller.applyPromotionCode("10OFF") }
         val job2 = async { controller.applyPromotionCode("20OFF") }
         testScheduler.advanceUntilIdle()
 
-        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+        assertThat(isUpdatingTurbine.awaitItem()).isTrue()
 
         holdFirstResponse.countDown()
         job1.await()
         job2.await()
 
-        // isLoading should go directly from true to false with no intermediate flicker.
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        // isUpdating should go directly from true to false with no intermediate flicker.
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
     }
 
     @Test
-    fun `isLoading transitions to true then false on a failed mutation`() = runMutationScenario(
+    fun `isUpdating transitions to true then false on a failed mutation`() = runMutationScenario(
         assertLoadingConsumed = true,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -881,17 +904,17 @@ internal class CheckoutControllerTest {
             response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
         }
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
         controller.applyPromotionCode("INVALID")
 
         // The failure path must still release the loading window via the finally block.
-        assertThat(isLoadingTurbine.awaitItem()).isTrue()
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
     }
 
     @Test
-    fun `isLoading returns to false when a queued mutation is cancelled`() = runMutationScenario(
+    fun `isUpdating returns to false when a queued mutation is cancelled`() = runMutationScenario(
         assertLoadingConsumed = true,
     ) {
         val holdFirstResponse = CountDownLatch(1)
@@ -904,27 +927,27 @@ internal class CheckoutControllerTest {
         // No mock for "20OFF": NetworkRule fails unmatched requests, so if the cancelled mutation's
         // network call fires, the test fails.
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
         val job1 = async { controller.applyPromotionCode("10OFF") }
         val job2 = async { controller.applyPromotionCode("20OFF") }
         testScheduler.advanceUntilIdle()
 
-        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+        assertThat(isUpdatingTurbine.awaitItem()).isTrue()
 
         // Prove job2 has started and is suspended waiting for the mutex, not merely unstarted.
         assertThat(job2.isActive).isTrue()
 
         job2.cancelAndJoin()
 
-        // isLoading stays true because job1 is still in-flight (shared loading window).
-        assertThat(controller.isLoading.value).isTrue()
-        isLoadingTurbine.expectNoEvents()
+        // isUpdating stays true because job1 is still in-flight (shared loading window).
+        assertThat(controller.isUpdating.value).isTrue()
+        isUpdatingTurbine.expectNoEvents()
 
         holdFirstResponse.countDown()
         job1.await()
 
-        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        assertThat(isUpdatingTurbine.awaitItem()).isFalse()
     }
 
     @Test
@@ -940,40 +963,40 @@ internal class CheckoutControllerTest {
             // The second mutation must target the session id produced by the first, proving the
             // mutex serialized them (an unserialized call would hit the original id and fail).
             networkRule.checkoutUpdate(
-                bodyPart("updated_line_item_quantity[line_item_id]", "li_1"),
+                bodyPart("customer_email", "example3@example.com"),
                 sessionId = "cs_test_after_promo",
                 responseFactory = successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") },
             )
 
             val results = listOf(
                 async { controller.applyPromotionCode("10OFF") },
-                async { controller.updateLineItemQuantity("li_1", 2) },
+                async { controller.updateEmail("example3@example.com") },
             ).awaitAll()
 
             assertThat(results[0].isSuccess).isTrue()
             assertThat(results[1].isSuccess).isTrue()
-            assertThat(controller.checkoutSession.value?.id).isEqualTo("cs_test_after_promo")
+            assertThat(controller.session.value?.id).isEqualTo("cs_test_after_promo")
         }
 
     @Test
-    fun `configure toggles isLoading true then false`() = runTest {
+    fun `configure toggles isUpdating true then false`() = runTest {
         networkRule.defaultInit()
         val controller = createController()
 
         turbineScope {
-            val isLoadingTurbine = controller.isLoading.testIn(backgroundScope)
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            val isUpdatingTurbine = controller.isUpdating.testIn(backgroundScope)
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
 
-            assertThat(isLoadingTurbine.awaitItem()).isTrue()
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
-            isLoadingTurbine.cancelAndIgnoreRemainingEvents()
+            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+            isUpdatingTurbine.cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `configure resets isLoading to false when the request fails`() = runTest {
+    fun `configure resets isUpdating to false when the request fails`() = runTest {
         networkRule.checkoutInit { response ->
             response.setResponseCode(500)
             response.setBody("""{"error": {"message": "Internal server error"}}""")
@@ -981,14 +1004,14 @@ internal class CheckoutControllerTest {
         val controller = createController()
 
         turbineScope {
-            val isLoadingTurbine = controller.isLoading.testIn(backgroundScope)
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            val isUpdatingTurbine = controller.isUpdating.testIn(backgroundScope)
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             assertThat(controller.configure(DEFAULT_CLIENT_SECRET).isFailure).isTrue()
 
             // The failure path must still release the loading window via the finally block.
-            assertThat(isLoadingTurbine.awaitItem()).isTrue()
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -1004,13 +1027,13 @@ internal class CheckoutControllerTest {
             }
             networkRule.checkoutInit(responseFactory = successResponseFactory())
 
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             val mutation = async { controller.applyPromotionCode("10OFF") }
             val configure = async { controller.configure(DEFAULT_CLIENT_SECRET) }
             testScheduler.advanceUntilIdle()
 
-            assertThat(isLoadingTurbine.awaitItem()).isTrue()
+            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
             // configure cannot complete while the mutation holds the mutex, proving it is serialized.
             assertThat(configure.isCompleted).isFalse()
 
@@ -1019,7 +1042,7 @@ internal class CheckoutControllerTest {
             assertThat(configure.await().isSuccess).isTrue()
 
             // A single loading window spanned both operations, with no flicker to false in between.
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
         }
 
     // region allowedShippingCountries validation
@@ -1052,10 +1075,10 @@ internal class CheckoutControllerTest {
             initModifier = allowedShippingCountries(listOf("US", "CA")),
             assertLoadingConsumed = true,
         ) {
-            val before = controller.checkoutSession.value
+            val before = controller.session.value
 
-            // Fast-fail returns before runSerialized, so isLoading must never flip to true.
-            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+            // Fast-fail returns before runSerialized, so isUpdating must never flip to true.
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             val result = controller.updateShippingAddress(
                 name = null,
@@ -1069,7 +1092,7 @@ internal class CheckoutControllerTest {
             assertThat(exception).hasMessageThat().isEqualTo(
                 "Country code 'DE' is not in allowedShippingCountries"
             )
-            assertThat(controller.checkoutSession.value).isEqualTo(before)
+            assertThat(controller.session.value).isEqualTo(before)
         }
 
     @Test
@@ -1088,7 +1111,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `updateShippingAddress fails for all countries when allowedShippingCountries is empty`() =
         runMutationScenario(initModifier = allowedShippingCountries(emptyList())) {
-            val before = controller.checkoutSession.value
+            val before = controller.session.value
 
             val result = controller.updateShippingAddress(
                 name = null,
@@ -1102,7 +1125,7 @@ internal class CheckoutControllerTest {
             assertThat(exception).hasMessageThat().isEqualTo(
                 "Country code 'US' is not in allowedShippingCountries"
             )
-            assertThat(controller.checkoutSession.value).isEqualTo(before)
+            assertThat(controller.session.value).isEqualTo(before)
         }
 
     @Test
@@ -1245,10 +1268,10 @@ internal class CheckoutControllerTest {
 
     // Configures a controller from a fresh init, then hands it to [block] alongside the shared
     // SavedStateHandle (used to read committed state and simulate a presented payment flow) and an
-    // isLoading Turbine.
+    // isUpdating Turbine.
     //
     // Set [assertLoadingConsumed] for tests that verify loading behavior: the block must consume
-    // every isLoading emission and this asserts none are left over. Tests that don't care about
+    // every isUpdating emission and this asserts none are left over. Tests that don't care about
     // loading leave it false, and any unconsumed emissions are ignored.
     private fun runMutationScenario(
         initModifier: (JSONObject) -> Unit = {},
@@ -1261,7 +1284,7 @@ internal class CheckoutControllerTest {
         controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
 
         turbineScope {
-            val isLoadingTurbine = controller.isLoading.testIn(backgroundScope)
+            val isUpdatingTurbine = controller.isUpdating.testIn(backgroundScope)
             // Re-derive the controller's own child handle so writes made here (selection, sheet-open)
             // are observed by the controller and vice versa.
             val childHandle = savedStateHandle.checkoutSubHandle(DEFAULT_INTEGRATION_NAME)
@@ -1271,13 +1294,13 @@ internal class CheckoutControllerTest {
                     stateHolder = CheckoutControllerStateFactory.createStateHolder(childHandle),
                     sheetStateHolder = SheetStateHolder(childHandle),
                     testScope = this@runTest,
-                    isLoadingTurbine = isLoadingTurbine,
+                    isUpdatingTurbine = isUpdatingTurbine,
                 )
             )
             if (assertLoadingConsumed) {
-                isLoadingTurbine.ensureAllEventsConsumed()
+                isUpdatingTurbine.ensureAllEventsConsumed()
             } else {
-                isLoadingTurbine.cancelAndIgnoreRemainingEvents()
+                isUpdatingTurbine.cancelAndIgnoreRemainingEvents()
             }
         }
     }
@@ -1287,7 +1310,7 @@ internal class CheckoutControllerTest {
         private val stateHolder: CheckoutControllerStateHolder,
         private val sheetStateHolder: SheetStateHolder,
         private val testScope: TestScope,
-        val isLoadingTurbine: ReceiveTurbine<Boolean>,
+        val isUpdatingTurbine: ReceiveTurbine<Boolean>,
     ) : CoroutineScope by testScope {
         val testScheduler: TestCoroutineScheduler get() = testScope.testScheduler
 
