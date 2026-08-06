@@ -151,13 +151,17 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     intent = intent,
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                        set(CheckoutSessionResponseKey, response)
                     },
                     completedFullPaymentFlow = true,
                 )
             }
             intent.requiresAction() -> {
                 ConfirmationDefinition.Action.Launch(
-                    launcherArguments = Args.NextAction(intent, DeferredIntentConfirmationType.Server),
+                    launcherArguments = Args.NextAction(
+                        intent = intent,
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    ),
                     receivesResultInProcess = false,
                 )
             }
