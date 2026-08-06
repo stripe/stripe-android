@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -55,13 +54,14 @@ internal class DefaultFormHelper(
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
         fun create(
             viewModel: BaseSheetViewModel,
+            coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
             linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
             paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
         ): FormHelper {
             return DefaultFormHelper(
-                coroutineScope = viewModel.viewModelScope,
+                coroutineScope = coroutineScope,
                 linkInlineHandler = linkInlineHandler,
                 cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -126,7 +126,7 @@ internal class DefaultFormHelper(
         }
     }
 
-    private val lastFormValues = MutableSharedFlow<Pair<FormFieldValues?, String>>()
+    private val lastFormValues = MutableSharedFlow<Pair<FormFieldValues?, String>>(replay = 1)
 
     private val paymentSelection: Flow<PaymentSelection?> = combine(
         lastFormValues,

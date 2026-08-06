@@ -11,6 +11,10 @@ interface InlineAutocompleteHandler {
 
     fun onDismissed()
 
+    fun onFocusLost()
+
+    fun onFocusGained()
+
     fun onEnterManually()
 
     fun getAttributionDrawable(isDarkTheme: Boolean): Int?

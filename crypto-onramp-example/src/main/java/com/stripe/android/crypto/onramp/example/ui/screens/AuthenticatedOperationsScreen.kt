@@ -25,6 +25,7 @@ import com.stripe.android.crypto.onramp.example.AUTHENTICATED_OPERATIONS_TAG
 import com.stripe.android.crypto.onramp.example.BACK_TO_SIGN_IN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.LOG_OUT_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
+import com.stripe.android.crypto.onramp.example.model.SourceCurrency
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -37,6 +38,9 @@ internal fun AuthenticatedOperationsScreen(
     uiState: OnrampUiState,
     onAuthenticate: (String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
+    onGetWalletOwnershipChallenge: (String, CryptoNetwork) -> Unit,
+    onSubmitWalletOwnershipSignature: (String) -> Unit,
+    onWalletOwnershipSignatureChange: (String) -> Unit,
     onCollectKyc: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
@@ -48,6 +52,7 @@ internal fun AuthenticatedOperationsScreen(
     onLogOut: () -> Unit,
     onBack: () -> Unit,
     onSelectSettlementSpeed: (SettlementSpeed) -> Unit,
+    onSelectSourceCurrency: (SourceCurrency) -> Unit,
     onKycFirstNameChange: (String) -> Unit,
     onKycLastNameChange: (String) -> Unit,
     onKycBirthCountryChange: (String) -> Unit,
@@ -68,6 +73,7 @@ internal fun AuthenticatedOperationsScreen(
         mutableStateOf(uiState.network ?: CryptoNetwork.Ethereum)
     }
     var isNetworkDropdownExpanded by remember { mutableStateOf(false) }
+    var isWalletOwnershipExpanded by remember { mutableStateOf(false) }
     var isKycExpanded by remember { mutableStateOf(false) }
     var isIdentifierExpanded by remember { mutableStateOf(false) }
 
@@ -119,6 +125,23 @@ internal fun AuthenticatedOperationsScreen(
             }
         )
 
+        WalletOwnershipSection(
+            isExpanded = isWalletOwnershipExpanded,
+            onExpandedChange = { isWalletOwnershipExpanded = it },
+            challengeId = uiState.walletOwnershipChallengeId,
+            challengeMessage = uiState.walletOwnershipChallengeMessage,
+            challengeExpiresAt = uiState.walletOwnershipChallengeExpiresAt,
+            verifiedOwnership = uiState.walletOwnershipVerified,
+            signatureInput = uiState.walletOwnershipSignatureInput,
+            onSignatureInputChange = onWalletOwnershipSignatureChange,
+            onGetWalletOwnershipChallenge = {
+                onGetWalletOwnershipChallenge(walletAddressInput, selectedNetwork)
+            },
+            onSubmitWalletOwnershipSignature = {
+                onSubmitWalletOwnershipSignature(uiState.walletOwnershipSignatureInput)
+            }
+        )
+
         KycSection(
             isExpanded = isKycExpanded,
             onExpandedChange = { isKycExpanded = it },
@@ -158,6 +181,8 @@ internal fun AuthenticatedOperationsScreen(
         )
         PaymentSection(
             googlePayIsReady = uiState.googlePayIsReady,
+            sourceCurrency = uiState.sourceCurrency,
+            onSelectSourceCurrency = onSelectSourceCurrency,
             onCollectPayment = onCollectPayment
         )
         CheckoutSection(

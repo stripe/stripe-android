@@ -34,7 +34,7 @@ class InlineAutocompleteControllerTest {
     fun `query shorter than minimum chars stays Idle`() = runScenario {
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
-        queryFlow.value = "a"
+        queryFlow.value = "ab"
         advanceTimeBy(500)
 
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
@@ -47,11 +47,11 @@ class InlineAutocompleteControllerTest {
         )
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
-        queryFlow.value = "ab"
+        queryFlow.value = "abc"
         advanceTimeBy(500)
 
         val call = fakePlacesClient.findPredictionsCalls.awaitItem()
-        assertThat(call.query).isEqualTo("ab")
+        assertThat(call.query).isEqualTo("abc")
     }
 
     @Test
@@ -281,28 +281,54 @@ class InlineAutocompleteControllerTest {
             fakePlacesClient.fetchPlaceCalls.awaitItem()
             fakePlacesClient.resetSessionCalls.awaitItem()
             assertThat(delegate.inlinePredictionsState.value)
-                .isEqualTo(InlinePredictionsState.Idle)
+                .isEqualTo(InlinePredictionsState.Results(query = "", predictions = emptyList()))
         }
 
     @Test
-    fun `onDismissed cancels an in-flight prediction selection`() = runScenario {
+    fun `onFocusLost does not cancel an in-flight prediction selection`() = runScenario {
         val fetchGate = CompletableDeferred<Unit>()
-        fakePlacesClient.fetchPlaceResult = Result.success(Address())
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            Address(line1 = "123 Main Street", country = "US")
+        )
         fakePlacesClient.onBeforeFetchPlace = { fetchGate.await() }
 
         delegate.onPredictionSelected("place_1")
         advanceTimeBy(100)
 
-        // The selection is suspended in fetchPlace; dismissing must cancel it.
-        delegate.onDismissed()
+        delegate.onFocusLost()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
 
-        // Releasing the gate must not produce an OnValues event, since the job was cancelled.
+        // Release the gate — selection must still complete despite focus loss
         fetchGate.complete(Unit)
         advanceTimeBy(100)
 
         assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        eventCalls.awaitItem()
+    }
+
+    @Test
+    fun `onDismissed cancels an in-flight prediction selection`() = runScenario {
+        val fetchGate = CompletableDeferred<Unit>()
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            Address(line1 = "123 Main Street", country = "US")
+        )
+        fakePlacesClient.onBeforeFetchPlace = { fetchGate.await() }
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        delegate.onDismissed()
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        eventCalls.expectNoEvents()
+
+        // Release the gate — result must be discarded (job was already cancelled)
+        fetchGate.complete(Unit)
+        advanceTimeBy(100)
+
+        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        // No event — selection was cancelled before result was handled
     }
 
     @Test
@@ -361,6 +387,73 @@ class InlineAutocompleteControllerTest {
             advanceTimeBy(500)
             fakePlacesClient.findPredictionsCalls.awaitItem()
         }
+
+    @Test
+    fun `onFocusLost preserves suppression sentinel after selection`() = runScenario {
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            Address(line1 = "123 Main Street", country = "US")
+        )
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        eventCalls.awaitItem()
+
+        // Focus shifts away (e.g. form fills and city field gains focus)
+        delegate.onFocusLost()
+
+        // User taps back into the line1 field — sentinel must survive the focus cycle
+        delegate.onFocusGained()
+
+        // The filled address query arrives — must be suppressed by the sentinel
+        queryFlow.value = "123 Main Street"
+        advanceTimeBy(500)
+
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        // No findPredictions call — verified by ensureAllEventsConsumed() in runScenario teardown
+    }
+
+    @Test
+    fun `onFocusLost before debounce fires prevents stale fetch`() = runScenario {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        // Focus lost before the debounce fires — cancels observeJob
+        delegate.onFocusLost()
+        advanceTimeBy(500)
+
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        // No findPredictions call — verified by ensureAllEventsConsumed
+    }
+
+    @Test
+    fun `onFocusGained re-enables predictions after focus loss`() = runScenario {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        delegate.onFocusLost()
+        advanceTimeBy(500)
+
+        // Re-focus re-enables observation
+        delegate.onFocusGained()
+        queryFlow.value = "123 Main S"
+        advanceTimeBy(500)
+
+        val call = fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(call.query).isEqualTo("123 Main S")
+    }
 
     @Test
     fun `onDismissed clears suppression - typing previously-selected address fetches normally`() =
@@ -635,9 +728,8 @@ class InlineAutocompleteControllerTest {
         val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
         assertThat(call.placeId).isEqualTo("place-id-123")
         fakePlacesClient.resetSessionCalls.awaitItem()
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem())
-            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+        assertThat(delegate.inlinePredictionsState.value)
+            .isEqualTo(InlinePredictionsState.Results(query = "", predictions = emptyList()))
     }
 
     @Test
@@ -668,14 +760,8 @@ class InlineAutocompleteControllerTest {
 
         fakePlacesClient.fetchPlaceCalls.awaitItem()
         fakePlacesClient.resetSessionCalls.awaitItem()
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem()).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnExpandForm(
-                values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main",
-                    IdentifierSpec.Country to "US",
-                )
-            )
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(
+            InlinePredictionsState.Results(query = "123 Main", predictions = emptyList())
         )
     }
 
@@ -750,6 +836,104 @@ class InlineAutocompleteControllerTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `fetchPlace failure clears lastPredictionLine1 so next query fetches normally`() = runScenario {
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            Address(line1 = "123 Main Street", country = "US")
+        )
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        eventCalls.awaitItem()
+
+        // fetchPlace failure must clear lastPredictionLine1
+        fakePlacesClient.fetchPlaceResult = Result.failure(RuntimeException("network error"))
+        delegate.onPredictionSelected("place_2")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+
+        // Typing the first selection's line1 must trigger a fresh fetch, not be suppressed
+        queryFlow.value = "123 Main Street"
+        advanceTimeBy(500)
+
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+    }
+
+    @Test
+    fun `autocompleteFilledAddress tracks selected prediction address`() = runScenario {
+        val fetchedAddress = Address(
+            line1 = "123 Main Street",
+            city = "San Francisco",
+            state = "CA",
+            postalCode = "94105",
+            country = "US",
+        )
+        fakePlacesClient.fetchPlaceResult = Result.success(fetchedAddress)
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        eventCalls.awaitItem()
+
+        assertThat(delegate.autocompleteFilledAddress).isEqualTo(fetchedAddress)
+    }
+
+    @Test
+    fun `autocompleteFilledAddress remains null after failed fetch`() = runScenario {
+        fakePlacesClient.fetchPlaceResult = Result.failure(RuntimeException("network error"))
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+
+        assertThat(delegate.autocompleteFilledAddress).isNull()
+    }
+
+    @Test
+    fun `onDismissed while find-predictions fetch is in-flight prevents stale results`() = runScenario {
+        val fetchGate = CompletableDeferred<Unit>()
+        fakePlacesClient.onBeforeFindPredictions = { fetchGate.await() }
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        // Fetch is suspended at the gate — state should be Loading
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Loading)
+
+        // Dismiss while fetch is in-flight
+        delegate.onDismissed()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+
+        // Release the gate — the result must be discarded, state stays Idle
+        fetchGate.complete(Unit)
+        advanceTimeBy(100)
+
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.connectBillingDetailsFields
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -60,7 +60,7 @@ internal class FormViewModel(
 
     private val cardBillingElement = elements.filterIsInstance<SectionElement>()
         .flatMap { it.fields }
-        .filterIsInstance<CardBillingAddressElement>()
+        .filterIsInstance<BillingAddressElement>()
         .firstOrNull()
 
     private var externalHiddenIdentifiers = MutableStateFlow(emptySet<IdentifierSpec>())

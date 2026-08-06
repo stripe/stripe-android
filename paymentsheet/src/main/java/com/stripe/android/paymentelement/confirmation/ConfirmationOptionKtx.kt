@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.CardFundingFilter
-import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
@@ -11,6 +10,7 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItem
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -19,7 +19,7 @@ internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
     cardFundingFilter: CardFundingFilter,
-    googlePayDisplayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
+    googlePayDisplayItems: List<GooglePayDisplayItem> = emptyList(),
     googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
     googlePayBillingEmailOverride: String? = null,
 ): ConfirmationHandler.Option? {
@@ -127,7 +127,7 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
     cardFundingFilter: CardFundingFilter,
-    displayItems: List<GooglePayJsonFactory.DisplayItem>,
+    displayItems: List<GooglePayDisplayItem>,
     isEmailRequired: Boolean,
     billingEmailOverride: String?,
 ): GooglePayConfirmationOption? {

@@ -29,13 +29,49 @@ import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface BillingAddressCollectionMode {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data object Never : BillingAddressCollectionMode
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data object Full : BillingAddressCollectionMode
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Country(
+        val additionalFieldsByCountry: Map<String, Set<IdentifierSpec>>,
+    ) : BillingAddressCollectionMode
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun cardBillingAddressCollectionMode(
+    addressCollectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
+    requiresBillingAddressForAutomaticTax: Boolean,
+): BillingAddressCollectionMode {
+    return when (addressCollectionMode) {
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> BillingAddressCollectionMode.Never
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> BillingAddressCollectionMode.Full
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+            val additionalFieldsByCountry = buildMap {
+                listOf("US", "GB", "CA").forEach { countryCode ->
+                    put(countryCode, setOf(IdentifierSpec.PostalCode))
+                }
+                if (requiresBillingAddressForAutomaticTax) {
+                    additionalAutomaticTaxFieldsByCountry.forEach { (countryCode, fields) ->
+                        put(countryCode, get(countryCode).orEmpty() + fields)
+                    }
+                }
+            }
+            BillingAddressCollectionMode.Country(additionalFieldsByCountry)
+        }
+    }
+}
+
 /**
- * This is a special type of AddressElement that
- * removes fields from the address based on the country.  It
- * is only intended to be used with the card payment method.
+ * An address element that dynamically removes fields based on the selected country and collection mode.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CardBillingAddressElement(
+class BillingAddressElement(
     override val identifier: IdentifierSpec,
     rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     countryCodes: Set<String> = emptySet(),
@@ -46,10 +82,10 @@ class CardBillingAddressElement(
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
+    private val addressCollectionMode: BillingAddressCollectionMode,
     private val collectionConfiguration: BillingDetailsCollectionConfiguration =
         BillingDetailsCollectionConfiguration(),
     private val shouldHideCountryOnNoAddressCollection: Boolean = true,
-    private val requiresBillingAddressForAutomaticTax: Boolean = false,
 ) : AddressFieldsElement {
     private val nameConfig = if (collectionConfiguration.collectName) {
         AddressFieldConfiguration.REQUIRED
@@ -71,7 +107,7 @@ class CardBillingAddressElement(
 
     @VisibleForTesting
     val addressElement = autocompleteAddressInteractorFactory?.takeIf {
-        collectionConfiguration.address == BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+        addressCollectionMode == BillingAddressCollectionMode.Full
     }?.let { factory ->
         AutocompleteAddressElement(
             identifier = identifier,
@@ -102,7 +138,7 @@ class CardBillingAddressElement(
             shippingValuesMap = shippingValuesMap,
             sameAsShippingElement = sameAsShippingElement,
             hideCountry = shouldHideCountryOnNoAddressCollection &&
-                collectionConfiguration.address == BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                addressCollectionMode == BillingAddressCollectionMode.Never,
         )
     }
 
@@ -164,28 +200,18 @@ class CardBillingAddressElement(
     // card and achv2 uses save for future use
     val hiddenIdentifiers: StateFlow<Set<IdentifierSpec>> =
         countryDropdownFieldController.rawFieldValue.mapAsStateFlow { countryCode ->
-            when (collectionConfiguration.address) {
-                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+            when (val mode = addressCollectionMode) {
+                BillingAddressCollectionMode.Never -> {
                     FieldType.entries
                         .filterNot { it == FieldType.Name }
                         .map { it.identifierSpec }
                         .toSet()
                 }
-                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+                BillingAddressCollectionMode.Full -> {
                     emptySet()
                 }
-                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
-                    val avsShownFields = when (countryCode) {
-                        "US", "GB", "CA" -> setOf(FieldType.PostalCode.identifierSpec)
-                        else -> emptySet()
-                    }
-                    val automaticTaxShownFields = if (requiresBillingAddressForAutomaticTax && countryCode != null) {
-                        automaticTaxRequiredFields(countryCode)
-                    } else {
-                        emptySet()
-                    }
-                    val shownFields = avsShownFields + automaticTaxShownFields
-
+                is BillingAddressCollectionMode.Country -> {
+                    val shownFields = mode.additionalFieldsByCountry[countryCode].orEmpty()
                     FieldType.entries
                         // Filtering name causes the field to be hidden even outside
                         // of this form.
@@ -212,26 +238,4 @@ class CardBillingAddressElement(
     override fun onValidationStateChanged(isValidating: Boolean) {
         addressElement.onValidationStateChanged(isValidating)
     }
-}
-
-/**
- * Billing address fields required in addition to the country, for a Checkout Session using
- * automatic tax with the billing address as the tax source. Most countries only need the
- * country. Source: https://docs.stripe.com/tax/customer-locations
- *
- * Billing only - shipping is out of scope, since it's always collected in full for delivery
- * regardless of tax, so there's no omittable mode there for tax to rescue.
- */
-private val additionalAutomaticTaxFieldsByCountry: Map<String, Set<IdentifierSpec>> = mapOf(
-    "CA" to setOf(IdentifierSpec.PostalCode),
-    "GB" to setOf(IdentifierSpec.PostalCode),
-    "IN" to setOf(IdentifierSpec.PostalCode),
-    "PR" to setOf(IdentifierSpec.Line1, IdentifierSpec.City, IdentifierSpec.PostalCode),
-    "US" to setOf(IdentifierSpec.Line1, IdentifierSpec.City, IdentifierSpec.State, IdentifierSpec.PostalCode),
-)
-
-private fun automaticTaxRequiredFields(countryCode: String): Set<IdentifierSpec> {
-    // Matches the raw, non-uppercased comparison the AVS check above uses - countryCode is
-    // already an uppercase ISO code in practice (from CountryConfig).
-    return additionalAutomaticTaxFieldsByCountry[countryCode].orEmpty()
 }

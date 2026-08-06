@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -25,6 +26,11 @@ internal object CheckoutControllerStateFactory {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        commonConfiguration: CommonConfiguration = CheckoutCommonConfigurationFactory(appName = "Example, Inc.").create(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
+        ),
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
@@ -36,6 +42,7 @@ internal object CheckoutControllerStateFactory {
             collectedDetails = collectedDetails,
             paymentMethodMetadata = paymentMethodMetadata,
             embeddedConfiguration = embeddedConfiguration,
+            commonConfiguration = commonConfiguration,
             paymentSelection = paymentSelection,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,

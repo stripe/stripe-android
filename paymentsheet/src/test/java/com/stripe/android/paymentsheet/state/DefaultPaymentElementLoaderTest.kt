@@ -58,6 +58,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -100,6 +101,7 @@ import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -356,7 +358,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load with checkout session automatic tax billing should disable google pay`() = runScenario {
+    fun `load with checkout session automatic tax billing and default billing details keeps google pay`() = runScenario {
         val userFacingLogger = FakeUserFacingLogger()
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -383,17 +385,49 @@ internal class DefaultPaymentElementLoaderTest {
                     initializedViaCompose = false,
                 ),
             ).getOrThrow().paymentMethodMetadata.isGooglePayReady
-        ).isFalse()
+        ).isTrue()
 
         assertThat(userFacingLogger.getLoggedMessages())
-            .contains(
-                "Google Pay is disabled because automatic tax is configured to use the billing address."
+            .doesNotContain(
+                "Google Pay is disabled because automatic tax is configured to use the billing address and" +
+                    " no default billing address was provided."
             )
 
         consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `google pay is disabled for automatic tax billing without default billing details`() = runScenario {
+        val userFacingLogger = FakeUserFacingLogger()
+        val loader = createPaymentElementLoader(userFacingLogger = userFacingLogger)
+        val checkoutSessionResponse = createCheckoutSessionResponse(
+            canDetachPaymentMethod = true,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+
+        val isGooglePayReady = loader.isGooglePayReady(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .defaultBillingDetails(null)
+                .build()
+                .asCommonConfiguration(),
+            elementsSession = requireNotNull(checkoutSessionResponse.elementsSession),
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            isGooglePaySupportedByConfiguration = CompletableDeferred(true),
+        )
+
+        assertThat(isGooglePayReady).isFalse()
+        assertThat(userFacingLogger.getLoggedMessages())
+            .contains(
+                "Google Pay is disabled because automatic tax is configured to use the billing address and no " +
+                    "default billing address was provided."
+            )
     }
 
     @Test
@@ -430,7 +464,8 @@ internal class DefaultPaymentElementLoaderTest {
             .contains("GooglePayConfiguration is not set.")
         assertThat(userFacingLogger.getLoggedMessages())
             .doesNotContain(
-                "Google Pay is disabled because automatic tax is configured to use the billing address."
+                "Google Pay is disabled because automatic tax is configured to use the billing address and " +
+                    "no default billing address was provided."
             )
 
         consumeLoadingEvents()
@@ -3857,6 +3892,92 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
 
+    @Test
+    fun `Uses horizontal payment method orientation for embedded when layout is horizontal`() = runScenario {
+        val result = createPaymentElementLoader().loadEmbedded(PaymentSheet.PaymentMethodLayout.Horizontal)
+
+        assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
+            .isEqualTo(PaymentMethodOrientation.Horizontal)
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `Uses horizontal payment method orientation for embedded automatic layout with two payment methods`() =
+        runScenario {
+            val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            )
+
+            val result = createPaymentElementLoader(stripeIntent = stripeIntent)
+                .loadEmbedded(PaymentSheet.PaymentMethodLayout.Automatic)
+
+            assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
+                .isEqualTo(PaymentMethodOrientation.Horizontal)
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    @Test
+    fun `Uses vertical payment method orientation for embedded automatic layout with three payment methods`() =
+        runScenario {
+            val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna"),
+            )
+
+            val result = createPaymentElementLoader(stripeIntent = stripeIntent)
+                .loadEmbedded(PaymentSheet.PaymentMethodLayout.Automatic)
+
+            assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
+                .isEqualTo(PaymentMethodOrientation.Vertical)
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    @Test
+    fun `Forces vertical payment method orientation for embedded automatic layout when session flag is set`() =
+        runScenario {
+            val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            )
+            val loader = createPaymentElementLoader(
+                stripeIntent = stripeIntent,
+                elementsSessionRepository = FakeElementsSessionRepository(
+                    stripeIntent = stripeIntent,
+                    error = null,
+                    linkSettings = null,
+                    flags = mapOf(
+                        ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT to true,
+                    ),
+                ),
+            )
+
+            val result = loader.loadEmbedded(PaymentSheet.PaymentMethodLayout.Automatic)
+
+            assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
+                .isEqualTo(PaymentMethodOrientation.Vertical)
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    private suspend fun PaymentElementLoader.loadEmbedded(
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+    ): PaymentElementLoader.State {
+        return load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder(
+                    merchantDisplayName = "Merchant, Inc.",
+                ).build(),
+                paymentMethodLayout = paymentMethodLayout,
+            ),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+    }
+
     @OptIn(CardFundingFilteringPrivatePreview::class)
     private fun testCardFundingFiltering(
         cardFundFilteringFlagEnabled: Boolean?,
@@ -4886,7 +5007,7 @@ internal class DefaultPaymentElementLoaderTest {
         durationProvider: FakeDurationProvider = FakeDurationProvider(),
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
             FakePaymentMethodMessagePromotionsExperimentHandler(),
-    ): PaymentElementLoader {
+    ): DefaultPaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
             durationProvider,

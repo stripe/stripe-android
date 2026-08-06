@@ -19,7 +19,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         status = status.asStatus(),
         liveMode = liveMode,
         currency = currency,
-        customerEmail = customerEmail,
+        email = customerEmail,
         tax = taxStatus.asTax(),
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },

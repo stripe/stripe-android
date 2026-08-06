@@ -44,14 +44,19 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.Executors
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -214,6 +219,58 @@ internal class FormHelperTest {
             }
         ).onFormFieldValuesChanged(formFieldValues, "card")
         assertThat(hasCalledSelectionUpdater).isTrue()
+    }
+
+    @Test
+    fun `first onFormFieldValuesChanged call is not dropped on a real async dispatcher`() {
+        // A regular TestDispatcher runs launched coroutines eagerly/inline, so it can't catch a
+        // regression here: the bug this guards against is a genuine scheduling gap between the
+        // init{} collector's launch and it actually subscribing, which only shows up with a real
+        // dispatcher. lastFormValues' replay = 1 is what keeps this update from being lost even if
+        // the very first call to onFormFieldValuesChanged races ahead of that subscription.
+        val executor = Executors.newSingleThreadExecutor()
+        try {
+            val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(executor.asCoroutineDispatcher()))
+            val cardBrand = "visa"
+            val name = "Joe"
+            val receivedSelection = CompletableDeferred<PaymentSelection?>()
+
+            val formHelper = DefaultFormHelper(
+                coroutineScope = coroutineScope,
+                linkInlineHandler = LinkInlineHandler.create(),
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                newPaymentSelectionProvider = { null },
+                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                selectionUpdater = { selection -> receivedSelection.complete(selection) },
+                setAsDefaultMatchesSaveForFutureUse = false,
+                eventReporter = FakeEventReporter(),
+                savedStateHandle = SavedStateHandle(),
+                autocompleteAddressInteractorFactory = null,
+                automaticallyLaunchedCardScanFormDataHelper = null,
+                tapToAddHelper = null,
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                isNfcScanningAvailable = null,
+            )
+
+            val formFieldValues = FormFieldValues(
+                fieldValuePairs = mapOf(
+                    IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+                    IdentifierSpec.Name to FormFieldEntry(name, true),
+                ),
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            )
+            formHelper.onFormFieldValuesChanged(formFieldValues, "card")
+
+            val selection = runBlocking {
+                withTimeoutOrNull(5_000) { receivedSelection.await() }
+            } as? PaymentSelection.New.Card
+
+            assertThat(selection).isNotNull()
+            assertThat(selection?.brand?.code).isEqualTo(cardBrand)
+        } finally {
+            executor.shutdownNow()
+        }
     }
 
     @Test

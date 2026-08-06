@@ -17,13 +17,39 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `uses the provided merchant display name`() {
-        val result = factory(merchantDisplayName = "Acme Corp").create(
-            configuration = controllerConfiguration(),
+        val configuration = CheckoutController.Configuration()
+            .merchantDisplayName("Acme Corp")
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
         assertThat(result.merchantDisplayName).isEqualTo("Acme Corp")
+    }
+
+    @Test
+    fun `falls back to the checkout session business name when merchant display name is unset`() {
+        val result = factory().create(
+            configuration = controllerConfiguration(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(businessName = "Session Biz"),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.merchantDisplayName).isEqualTo("Session Biz")
+    }
+
+    @Test
+    fun `falls back to the app name when merchant display name and business name are unset`() {
+        val result = factory(appName = "My App").create(
+            configuration = controllerConfiguration(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(businessName = null),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.merchantDisplayName).isEqualTo("My App")
     }
 
     @Test
@@ -215,9 +241,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
     }
 
-    private fun factory(
-        merchantDisplayName: String = "Example, Inc.",
-    ) = CheckoutEmbeddedConfigurationFactory(merchantDisplayName = merchantDisplayName)
+    private fun factory(appName: String = "Test App") = CheckoutEmbeddedConfigurationFactory(appName)
 
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,

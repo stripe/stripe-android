@@ -23,6 +23,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 
+@Suppress("TooManyFunctions")
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
@@ -119,7 +120,12 @@ internal class InputAddressViewModel @Inject constructor(
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
+    fun onScreenShown() {
+        eventReporter.onShow(_collectedAddress.value?.address?.country.orEmpty())
+    }
+
     init {
+
         viewModelScope.launch {
             navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
                 AddressElementNavigator.AutocompleteEvent.KEY
@@ -311,6 +317,14 @@ internal class InputAddressViewModel @Inject constructor(
 
     override fun onDismissed() {
         inlineAutocompleteController?.onDismissed()
+    }
+
+    override fun onFocusLost() {
+        inlineAutocompleteController?.onFocusLost()
+    }
+
+    override fun onFocusGained() {
+        inlineAutocompleteController?.onFocusGained()
     }
 
     override fun onPredictionSelected(predictionId: String) {

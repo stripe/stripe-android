@@ -1,6 +1,8 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
@@ -22,10 +24,13 @@ import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationFlowTest {
     @Test
     fun `on launch, should persist parameters & launch using launcher as expected`() = runTest {
@@ -37,6 +42,7 @@ class GooglePayConfirmationFlowTest {
                 val mediator = ConfirmationMediator(
                     savedStateHandle = savedStateHandle,
                     definition = GooglePayConfirmationDefinition(
+                        context = ApplicationProvider.getApplicationContext<Context>(),
                         googlePayPaymentMethodLauncherFactory = factory,
                         userFacingLogger = null,
                     ),
@@ -95,6 +101,7 @@ class GooglePayConfirmationFlowTest {
         confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = GooglePayConfirmationDefinition(
+            context = ApplicationProvider.getApplicationContext<Context>(),
             googlePayPaymentMethodLauncherFactory =
                 RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(mock()),
             userFacingLogger = null,

@@ -61,9 +61,11 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             SetupIntentJsonParser().parse(it)
         }
 
+        val elementsSessionJson = json.optJSONObject(FIELD_ELEMENTS_SESSION)
+        val businessName = elementsSessionJson?.let { StripeJsonUtils.optString(it, FIELD_BUSINESS_NAME) }
         val parsedElementsSession = parseElementsSession(
             serverBuiltElementsSessionParams = json.optJSONObject(FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS),
-            elementsSessionJson = json.optJSONObject(FIELD_ELEMENTS_SESSION),
+            elementsSessionJson = elementsSessionJson,
             liveMode = liveMode,
         )
         val elementsSession = if (parsedElementsSession != null) {
@@ -112,6 +114,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             allowedShippingCountries = allowedShippingCountries,
             requiresBillingAddress = requiresBillingAddress,
             merchantCountry = merchantCountry,
+            businessName = businessName,
         )
     }
 
@@ -545,6 +548,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_CURRENCY = "currency"
     private const val FIELD_CUSTOMER_EMAIL = "customer_email"
     private const val FIELD_ELEMENTS_SESSION = "elements_session"
+    private const val FIELD_BUSINESS_NAME = "business_name"
     private const val FIELD_TOTAL_SUMMARY = "total_summary"
     private const val FIELD_DUE = "due"
     private const val FIELD_PAYMENT_INTENT = "payment_intent"

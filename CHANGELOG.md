@@ -1,7 +1,11 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### PaymentSheet
+* [FIXED] LinkController (private preview) now returns an error when no funding sources are available for a Link session, rather than silently falling back to card.
+* [ADDED] Added support for the Agrobank, MBSB Bank, and Bank of China FPX banks, and the FPX bank list is now displayed in alphabetical order.
 
 ## 23.14.0 - 2026-08-03
 

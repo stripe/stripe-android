@@ -28,6 +28,7 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.PAYMENT)
         assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
         assertThat(result?.liveMode).isFalse()
+        assertThat(result?.businessName).isEqualTo("Mobile Example Account")
 
         // Verify ElementsSession is parsed correctly
         val elementsSession = result?.elementsSession

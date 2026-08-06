@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegate
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.strings.ResolvableString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,14 +16,8 @@ internal interface NfcCardScanner {
     sealed interface State {
         data object Scanning : State
         data class Complete(val cardData: ScannedCardData) : State
-        data class Failed(val error: Error) : State
+        data class Failed(val error: NfcScanningError) : State
     }
-
-    data class Error(
-        val code: String,
-        val userMessage: ResolvableString,
-        val parameters: Map<String, String> = emptyMap(),
-    )
 
     val state: Flow<State>
 
@@ -57,15 +50,7 @@ internal class DefaultNfcCardScanner @Inject constructor(
                 val cardData = when (val readerResult = cardReader.readCard(transceiver)) {
                     is NfcCardReader.Result.Found -> readerResult.scannedCardData
                     is NfcCardReader.Result.Error -> {
-                        _state.emit(
-                            NfcCardScanner.State.Failed(
-                                error = NfcCardScanner.Error(
-                                    code = readerResult.errorCode,
-                                    userMessage = readerResult.userMessage,
-                                    parameters = readerResult.parameters,
-                                )
-                            )
-                        )
+                        _state.emit(NfcCardScanner.State.Failed(readerResult.error))
 
                         return@launch
                     }
@@ -73,12 +58,7 @@ internal class DefaultNfcCardScanner @Inject constructor(
 
                 val finalResult = when (val result = cardValidator.validate(cardData)) {
                     is NfcCardValidator.Result.Validated -> NfcCardScanner.State.Complete(cardData)
-                    is NfcCardValidator.Result.Invalid -> NfcCardScanner.State.Failed(
-                        error = NfcCardScanner.Error(
-                            code = result.errorCode,
-                            userMessage = result.userMessage,
-                        )
-                    )
+                    is NfcCardValidator.Result.Invalid -> NfcCardScanner.State.Failed(result.error)
                 }
 
                 _state.emit(finalResult)

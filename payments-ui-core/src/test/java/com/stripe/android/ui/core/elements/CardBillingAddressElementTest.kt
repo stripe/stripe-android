@@ -64,6 +64,18 @@ internal class CardBillingAddressElementTest {
     }
 
     @Test
+    fun `Verify that country-only collection does not apply card AVS fields`() = runTest {
+        val element = createBillingAddressElement(
+            addressCollectionMode = BillingAddressCollectionMode.Country(emptyMap()),
+        )
+
+        element.hiddenIdentifiers.test {
+            dropdownFieldController.onRawValueChange("US")
+            expectMostRecentItem().verifyFieldsShown()
+        }
+    }
+
+    @Test
     fun `Verify that automatic tax fields are unioned with AVS defaults for IN`() = runTest {
         val element = createCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
 
@@ -281,8 +293,21 @@ internal class CardBillingAddressElementTest {
     private fun createCardBillingAddressElement(
         requiresBillingAddressForAutomaticTax: Boolean = false,
         collectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
-    ): CardBillingAddressElement {
-        return CardBillingAddressElement(
+    ): BillingAddressElement {
+        return createBillingAddressElement(
+            collectionConfiguration = collectionConfiguration,
+            addressCollectionMode = cardBillingAddressCollectionMode(
+                addressCollectionMode = collectionConfiguration.address,
+                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
+            ),
+        )
+    }
+
+    private fun createBillingAddressElement(
+        collectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
+        addressCollectionMode: BillingAddressCollectionMode,
+    ): BillingAddressElement {
+        return BillingAddressElement(
             identifier = IdentifierSpec.Generic("billing_element"),
             rawValuesMap = emptyMap(),
             countryCodes = emptySet(),
@@ -290,8 +315,8 @@ internal class CardBillingAddressElementTest {
             autocompleteAddressInteractorFactory = null,
             sameAsShippingElement = null,
             shippingValuesMap = null,
+            addressCollectionMode = addressCollectionMode,
             collectionConfiguration = collectionConfiguration,
-            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
     }
 
@@ -349,10 +374,10 @@ internal class CardBillingAddressElementTest {
 
     private fun autocompleteTest(
         configuration: BillingDetailsCollectionConfiguration,
-        block: (CardBillingAddressElement) -> Unit,
+        block: (BillingAddressElement) -> Unit,
     ) = runTest {
         block(
-            CardBillingAddressElement(
+            BillingAddressElement(
                 identifier = IdentifierSpec.Generic("billing_element"),
                 rawValuesMap = emptyMap(),
                 countryCodes = emptySet(),
@@ -376,6 +401,10 @@ internal class CardBillingAddressElementTest {
                 },
                 sameAsShippingElement = null,
                 shippingValuesMap = null,
+                addressCollectionMode = cardBillingAddressCollectionMode(
+                    addressCollectionMode = configuration.address,
+                    requiresBillingAddressForAutomaticTax = false,
+                ),
                 collectionConfiguration = configuration,
             )
         )

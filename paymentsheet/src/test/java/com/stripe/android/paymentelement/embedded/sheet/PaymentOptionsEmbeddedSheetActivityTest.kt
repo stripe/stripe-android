@@ -48,7 +48,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical)
+            EmbeddedLaunchMode.PaymentOptions
         )
     }
 
@@ -62,9 +62,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     hasBeenConfirmed = false,
                     customerState = null,
                     shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.PaymentOptions(
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-                    ),
+                    launchMode = EmbeddedLaunchMode.PaymentOptions,
                 )
             )
         }
@@ -76,7 +74,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
         val complete = result as EmbeddedActivityResult.Complete
         assertThat(complete.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical)
+            EmbeddedLaunchMode.PaymentOptions
         )
     }
 
@@ -93,7 +91,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical)
+            EmbeddedLaunchMode.PaymentOptions
         )
     }
 
@@ -126,7 +124,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         scenario.onActivity { activity ->
             assertThat(activity.embeddedNavigator.canGoBack).isFalse()
             assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         }
     }
 
@@ -150,7 +148,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    ),
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
@@ -158,9 +158,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     previousNewSelections = previousNewSelections,
                     customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                     promotion = null,
-                    launchMode = EmbeddedLaunchMode.PaymentOptions(
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-                    ),
+                    launchMode = EmbeddedLaunchMode.PaymentOptions,
                 ),
             )
         ).use { scenario ->
