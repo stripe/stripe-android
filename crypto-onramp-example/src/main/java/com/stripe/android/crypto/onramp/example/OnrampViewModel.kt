@@ -19,7 +19,9 @@ import com.stripe.android.crypto.onramp.example.model.KEY_UI_STATE
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
 import com.stripe.android.crypto.onramp.example.model.OnrampUserData
 import com.stripe.android.crypto.onramp.example.model.Screen
+import com.stripe.android.crypto.onramp.example.model.SourceCurrency
 import com.stripe.android.crypto.onramp.example.network.LoginSignUpResponse
+import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.example.store.OnrampUserDataStore
@@ -33,12 +35,14 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
@@ -461,11 +465,31 @@ internal class OnrampViewModel(
                 }
             }
             is OnrampCheckoutResult.Failed -> {
-                _message.value = "Checkout failed: ${result.error.message}"
+                val walletOwnershipSession = _uiState.value.onrampSession
+                    ?.takeIf { it.requiresWalletOwnershipVerification }
+                val walletAddress = walletOwnershipSession?.transactionDetails?.walletAddress
+                val walletNetwork = walletOwnershipSession
+                    ?.transactionDetails
+                    ?.destinationNetwork
+                    ?.toCryptoNetwork()
+
+                _message.value = when {
+                    walletOwnershipSession != null -> {
+                        "Checkout requires wallet ownership verification for ${walletAddress.orEmpty()}"
+                    }
+                    else -> "Checkout failed: ${result.error.message}"
+                }
                 _uiState.update {
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
-                        loadingMessage = null
+                        loadingMessage = null,
+                        walletAddress = walletAddress ?: it.walletAddress,
+                        network = walletNetwork ?: it.network,
+                        walletOwnershipVerified = if (walletOwnershipSession != null) {
+                            false
+                        } else {
+                            it.walletOwnershipVerified
+                        }
                     )
                 }
             }
@@ -534,6 +558,11 @@ internal class OnrampViewModel(
                             screen = Screen.AuthenticatedOperations,
                             walletAddress = trimmedWalletAddress,
                             network = network,
+                            walletOwnershipChallengeId = null,
+                            walletOwnershipChallengeMessage = null,
+                            walletOwnershipChallengeExpiresAt = null,
+                            walletOwnershipSignatureInput = "",
+                            walletOwnershipVerified = null,
                             loadingMessage = null
                         )
                     }
@@ -546,6 +575,119 @@ internal class OnrampViewModel(
                             loadingMessage = null
                         )
                     }
+                }
+            }
+        }
+    }
+
+    fun getWalletOwnershipChallenge(walletAddress: String, network: CryptoNetwork) {
+        viewModelScope.launch {
+            val trimmedWalletAddress = walletAddress.trim()
+            if (trimmedWalletAddress.isBlank()) {
+                _message.value = "Please enter a wallet address"
+                return@launch
+            }
+
+            _uiState.update {
+                it.copy(
+                    screen = Screen.Loading,
+                    walletOwnershipChallengeId = null,
+                    walletOwnershipChallengeMessage = null,
+                    walletOwnershipChallengeExpiresAt = null,
+                    walletOwnershipSignatureInput = "",
+                    walletOwnershipVerified = null,
+                    loadingMessage = "Getting wallet ownership challenge..."
+                )
+            }
+
+            when (val result = onrampCoordinator.getWalletOwnershipChallenge(trimmedWalletAddress, network)) {
+                is OnrampGetWalletOwnershipChallengeResult.Completed -> {
+                    val challenge = result.challenge
+                    _message.value = "Wallet ownership challenge created"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            walletAddress = challenge.walletAddress,
+                            network = challenge.network,
+                            walletOwnershipChallengeId = challenge.challengeId,
+                            walletOwnershipChallengeMessage = challenge.message,
+                            walletOwnershipChallengeExpiresAt = challenge.expiresAt,
+                            walletOwnershipSignatureInput = TEST_MODE_WALLET_OWNERSHIP_SIGNATURE,
+                            loadingMessage = null
+                        )
+                    }
+                }
+                is OnrampGetWalletOwnershipChallengeResult.Failed -> handleError(result.error) {
+                    _message.value = "Failed to get wallet ownership challenge: ${result.error.message}"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun submitWalletOwnershipSignature(signature: String) {
+        viewModelScope.launch {
+            val challengeId = _uiState.value.walletOwnershipChallengeId
+            if (challengeId.isNullOrBlank()) {
+                _message.value = "Please get a wallet ownership challenge first"
+                return@launch
+            }
+
+            val trimmedSignature = signature.trim()
+            if (trimmedSignature.isBlank()) {
+                _message.value = "Please enter a wallet ownership signature"
+                return@launch
+            }
+
+            submitWalletOwnershipSignatureInternal(
+                challengeId = challengeId,
+                signature = trimmedSignature
+            )
+        }
+    }
+
+    fun updateWalletOwnershipSignatureInput(signature: String) {
+        _uiState.update { it.copy(walletOwnershipSignatureInput = signature) }
+    }
+
+    private suspend fun submitWalletOwnershipSignatureInternal(
+        challengeId: String,
+        signature: String
+    ) {
+        _uiState.update {
+            it.copy(
+                screen = Screen.Loading,
+                loadingMessage = "Submitting wallet ownership signature..."
+            )
+        }
+
+        when (val result = onrampCoordinator.submitWalletOwnershipSignature(challengeId, signature)) {
+            is OnrampSubmitWalletOwnershipSignatureResult.Completed -> {
+                val wallet = result.consumerWallet
+                _message.value = "Wallet ownership verification submitted"
+                _uiState.update {
+                    it.copy(
+                        screen = Screen.AuthenticatedOperations,
+                        walletAddress = wallet.walletAddress,
+                        network = wallet.network,
+                        walletOwnershipVerified = wallet.verifiedOwnership,
+                        loadingMessage = null
+                    )
+                }
+            }
+            is OnrampSubmitWalletOwnershipSignatureResult.Failed -> handleError(result.error) {
+                _message.value = "Failed to submit wallet ownership signature: ${result.error.message}"
+                _uiState.update {
+                    it.copy(
+                        screen = Screen.AuthenticatedOperations,
+                        walletOwnershipVerified = false,
+                        loadingMessage = null
+                    )
                 }
             }
         }
@@ -757,19 +899,12 @@ internal class OnrampViewModel(
                     walletAddress = walletAddress,
                     authToken = authToken,
                     destinationNetwork = destinationNetwork,
+                    sourceCurrency = currentState.sourceCurrency.value,
                     settlementSpeed = settlementSpeed
                 )
             ) {
                 is Result.Success -> {
-                    _message.value =
-                        "Onramp session created successfully! Session ID: ${result.value.id}"
-                    _uiState.update {
-                        it.copy(
-                            onrampSession = result.value,
-                            screen = Screen.AuthenticatedOperations,
-                            loadingMessage = null
-                        )
-                    }
+                    handleSessionCreated(result.value)
                 }
                 is Result.Failure -> {
                     _message.value =
@@ -782,6 +917,28 @@ internal class OnrampViewModel(
                     }
                 }
             }
+        }
+    }
+
+    private fun handleSessionCreated(session: OnrampSessionResponse) {
+        val requiresWalletOwnershipVerification =
+            session.requiresWalletOwnershipVerification
+        _message.value = if (requiresWalletOwnershipVerification) {
+            "Onramp session requires wallet ownership verification before checkout"
+        } else {
+            "Onramp session created successfully! Session ID: ${session.id}"
+        }
+        _uiState.update {
+            it.copy(
+                onrampSession = session,
+                screen = Screen.AuthenticatedOperations,
+                walletOwnershipVerified = if (requiresWalletOwnershipVerification) {
+                    false
+                } else {
+                    it.walletOwnershipVerified
+                },
+                loadingMessage = null
+            )
         }
     }
 
@@ -798,9 +955,13 @@ internal class OnrampViewModel(
             return
         }
 
+        val sessionForCheckout = onrampSession.copy(
+            transactionDetails = onrampSession.transactionDetails.copy(lastError = null)
+        )
         _uiState.update {
             it.copy(
                 screen = Screen.Loading,
+                onrampSession = sessionForCheckout,
                 loadingMessage = "Performing checkout..."
             )
         }
@@ -810,6 +971,10 @@ internal class OnrampViewModel(
 
     fun updateSettlementSpeed(settlementSpeed: SettlementSpeed) {
         _uiState.update { it.copy(settlementSpeed = settlementSpeed) }
+    }
+
+    fun updateSourceCurrency(sourceCurrency: SourceCurrency) {
+        _uiState.update { it.copy(sourceCurrency = sourceCurrency) }
     }
 
     fun updateKycFirstName(value: String) {
@@ -979,6 +1144,13 @@ internal class OnrampViewModel(
         return false
     }
 
+    private val OnrampSessionResponse.requiresWalletOwnershipVerification: Boolean
+        get() = transactionDetails.lastError == WALLET_OWNERSHIP_VERIFICATION_REQUIRED
+
+    private fun String.toCryptoNetwork(): CryptoNetwork? {
+        return CryptoNetwork.entries.firstOrNull { it.value == this }
+    }
+
     private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {
         if (!error.isLinkAuthorizationError()) {
             onNonAuthError()
@@ -1125,6 +1297,11 @@ internal class OnrampViewModel(
 }
 
 private const val DEFAULT_DESTINATION_NETWORK = "ethereum"
+private const val WALLET_OWNERSHIP_VERIFICATION_REQUIRED = "wallet_ownership_verification_required"
+
+// This constant signature is accepted in test mode. Live mode requires signing the challenge
+// message with the wallet.
+private const val TEST_MODE_WALLET_OWNERSHIP_SIGNATURE = "abcd"
 
 private fun List<String>.joinToStringOrNone(): String {
     return takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None"

@@ -97,6 +97,10 @@ internal class FakeEventReporter : EventReporter {
     val tapToAddAttemptWithUnsupportedDeviceCalls: ReceiveTurbine<Unit> =
         _tapToAddAttemptWithUnsupportedDeviceCalls
 
+    private val _billingAddressCompletedCalls = Turbine<BillingAddressCompletedCall>()
+    val billingAddressCompletedCalls: ReceiveTurbine<BillingAddressCompletedCall> =
+        _billingAddressCompletedCalls
+
     private val _pmmPromotionsFetched = Turbine<Unit>()
     val pmmPromotionsFetched: ReceiveTurbine<Unit> =
         _pmmPromotionsFetched
@@ -131,6 +135,7 @@ internal class FakeEventReporter : EventReporter {
         _tapToAddConfirmCalls.ensureAllEventsConsumed()
         _failedToAddCardWithTapToAddCalls.ensureAllEventsConsumed()
         _tapToAddAttemptWithUnsupportedDeviceCalls.ensureAllEventsConsumed()
+        _billingAddressCompletedCalls.ensureAllEventsConsumed()
         _pmmPromotionsFetched.ensureAllEventsConsumed()
         _pmmPromotionsDisplayed.ensureAllEventsConsumed()
     }
@@ -278,6 +283,20 @@ internal class FakeEventReporter : EventReporter {
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
     }
 
+    override fun onBillingAddressCompleted(
+        addressCountryCode: String,
+        autocompleteResultSelected: Boolean,
+        editDistance: Int?,
+    ) {
+        _billingAddressCompletedCalls.add(
+            BillingAddressCompletedCall(
+                addressCountryCode = addressCountryCode,
+                autocompleteResultSelected = autocompleteResultSelected,
+                editDistance = editDistance,
+            )
+        )
+    }
+
     override fun onPaymentMethodMessagePromotionsFetchBegin() {
         _pmmPromotionsFetched.add(Unit)
     }
@@ -389,5 +408,11 @@ internal class FakeEventReporter : EventReporter {
 
     data class FormCompletedCall(
         val code: PaymentMethodCode
+    )
+
+    data class BillingAddressCompletedCall(
+        val addressCountryCode: String,
+        val autocompleteResultSelected: Boolean,
+        val editDistance: Int?,
     )
 }

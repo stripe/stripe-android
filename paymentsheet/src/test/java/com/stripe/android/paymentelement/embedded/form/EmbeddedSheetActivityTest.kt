@@ -28,7 +28,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -98,7 +97,6 @@ internal class EmbeddedSheetActivityTest {
                     shouldInvokeSelectionCallback = false,
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = "card",
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                     ),
                 )
             )
@@ -124,7 +122,6 @@ internal class EmbeddedSheetActivityTest {
             .isEqualTo(
                 EmbeddedLaunchMode.Form(
                     selectedPaymentMethodCode = "card",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                 )
             )
     }
@@ -147,7 +144,6 @@ internal class EmbeddedSheetActivityTest {
             .isEqualTo(
                 EmbeddedLaunchMode.Form(
                     selectedPaymentMethodCode = "cashapp",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                 )
             )
     }
@@ -173,7 +169,6 @@ internal class EmbeddedSheetActivityTest {
                     promotion = null,
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                     ),
                 ),
             )

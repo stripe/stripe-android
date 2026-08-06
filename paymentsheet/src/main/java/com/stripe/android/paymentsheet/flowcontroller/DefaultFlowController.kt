@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -58,12 +59,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.computeBillingEditDistance
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -80,6 +83,9 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
+
+private const val AUTOCOMPLETE_USED_KEY = "BILLING_AUTOCOMPLETE_USED"
+private const val AUTOCOMPLETE_EDIT_DISTANCE_KEY = "BILLING_AUTOCOMPLETE_EDIT_DISTANCE"
 
 @Suppress("LargeClass")
 @OptIn(WalletButtonsPreview::class)
@@ -550,6 +556,7 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
     ) {
+        persistBillingAnalytics(paymentSelection)
         viewModelScope.launch {
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
@@ -608,6 +615,7 @@ internal class DefaultFlowController @Inject internal constructor(
         when (result) {
             is PaymentOptionsActivityResult.Succeeded -> {
                 viewModel.paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
+                viewModel.autocompleteFilledAddress = result.autocompleteFilledAddress
                 onPaymentSelection(canceled = false)
             }
             null,
@@ -643,6 +651,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                         intentId = result.intent.id,
                     )
+                    reportBillingAddressCompleted(paymentSelection)
                 }
 
                 onPaymentResult(
@@ -710,6 +719,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
+            viewModel.autocompleteFilledAddress = null
             viewModel.state = null
             viewModel.previousConfigureRequest = null
             paymentOptionResultCallback.onPaymentOptionResult(PaymentOptionResult(null, false))
@@ -758,6 +768,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         deferredIntentConfirmationType = deferredIntentConfirmationType,
                         intentId = intentId,
                     )
+                    reportBillingAddressCompleted(paymentSelection)
                 }
             }
             is PaymentResult.Failed -> {
@@ -772,6 +783,32 @@ internal class DefaultFlowController @Inject internal constructor(
                 // Nothing to do here
             }
         }
+    }
+
+    private fun persistBillingAnalytics(paymentSelection: PaymentSelection?) {
+        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
+        if (paymentSelection !is PaymentSelection.New) return
+        val billingAddress = paymentSelection.billingDetails?.address ?: return
+        val filledAddress = viewModel.autocompleteFilledAddress
+        viewModel.handle[AUTOCOMPLETE_USED_KEY] = filledAddress != null
+        viewModel.handle[AUTOCOMPLETE_EDIT_DISTANCE_KEY] = filledAddress?.let {
+            computeBillingEditDistance(it, billingAddress)
+        }
+    }
+
+    private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
+        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
+        if (paymentSelection !is PaymentSelection.New) return
+        val countryCode = paymentSelection.billingDetails?.address?.country ?: return
+        val autocompleteUsed = viewModel.handle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true
+        val editDistance = viewModel.handle.get<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
+        viewModel.handle.remove<Boolean>(AUTOCOMPLETE_USED_KEY)
+        viewModel.handle.remove<Int>(AUTOCOMPLETE_EDIT_DISTANCE_KEY)
+        eventReporter.onBillingAddressCompleted(
+            addressCountryCode = countryCode,
+            autocompleteResultSelected = autocompleteUsed,
+            editDistance = editDistance,
+        )
     }
 
     private fun PaymentResult.convertToPaymentSheetResult() = when (this) {

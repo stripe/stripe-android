@@ -7,6 +7,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -83,6 +84,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
                         integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
                             isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
                             configuration = configuration,
+                            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                         ),
                         metadata = PaymentElementLoader.Metadata(
                             isReloadingAfterProcessDeath = false,

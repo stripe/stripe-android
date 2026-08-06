@@ -56,6 +56,9 @@ internal class PaymentElementAutocompleteAddressInteractor(
     ) : AutocompleteAddressInteractor.Factory {
         private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
 
+        val autocompleteFilledAddress: com.stripe.android.model.Address?
+            get() = activeInlineInteractor?.autocompleteFilledAddress
+
         override fun create(): AutocompleteAddressInteractor {
             if (coroutineScope != null && autocompleteConfig.isInlineAutocompleteEnabled) {
                 val useStripeHosted = shouldUseAutocompleteProxyEndpointsProvider()

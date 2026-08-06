@@ -22,6 +22,9 @@ internal data class LinkAccount(
     val viewedWebviewOpenUrl: Boolean = false,
 ) : Parcelable {
 
+    val supportedPaymentDetailsTypes: List<String>
+        get() = consumerSession.supportedPaymentDetailsTypes
+
     val linkBrand: LinkBrand?
         get() = consumerSession.linkBrand?.let { consumerLinkBrand ->
             if (FeatureFlags.forceOnelinkConsumer.isEnabled) LinkBrand.Onelink else consumerLinkBrand

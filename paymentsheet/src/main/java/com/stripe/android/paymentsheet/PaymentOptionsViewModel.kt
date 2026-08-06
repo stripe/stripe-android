@@ -402,7 +402,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = paymentSelection.withLinkDetails(),
-                        paymentMethods = customerStateHolder.paymentMethods.value
+                        paymentMethods = customerStateHolder.paymentMethods.value,
+                        autocompleteFilledAddress = autocompleteFilledAddress,
                     )
                 )
             }

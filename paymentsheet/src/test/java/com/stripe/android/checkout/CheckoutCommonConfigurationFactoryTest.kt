@@ -48,10 +48,10 @@ internal class CheckoutCommonConfigurationFactoryTest {
             shippingAddress = address(),
         )
 
-        val expected = CheckoutEmbeddedConfigurationFactory(merchantDisplayName = "Example, Inc.")
+        val expected = CheckoutEmbeddedConfigurationFactory(appName = "Test App")
             .create(configuration, checkoutSessionResponse, collectedDetails)
             .asCommonConfiguration()
-        val actual = factory(merchantDisplayName = "Example, Inc.")
+        val actual = factory()
             .create(configuration, checkoutSessionResponse, collectedDetails)
 
         assertThat(actual).isEqualTo(expected)
@@ -59,13 +59,39 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `uses the provided merchant display name`() {
-        val result = factory(merchantDisplayName = "Acme Corp").create(
-            configuration = controllerConfiguration(),
+        val configuration = CheckoutController.Configuration()
+            .merchantDisplayName("Acme Corp")
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
         assertThat(result.merchantDisplayName).isEqualTo("Acme Corp")
+    }
+
+    @Test
+    fun `falls back to the checkout session business name when merchant display name is unset`() {
+        val result = factory().create(
+            configuration = controllerConfiguration(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(businessName = "Session Biz"),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.merchantDisplayName).isEqualTo("Session Biz")
+    }
+
+    @Test
+    fun `falls back to the app name when merchant display name and business name are unset`() {
+        val result = factory(appName = "My App").create(
+            configuration = controllerConfiguration(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(businessName = null),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.merchantDisplayName).isEqualTo("My App")
     }
 
     @Test
@@ -144,9 +170,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(result.googlePlacesApiKey).isNull()
     }
 
-    private fun factory(
-        merchantDisplayName: String = "Example, Inc.",
-    ) = CheckoutCommonConfigurationFactory(merchantDisplayName = merchantDisplayName)
+    private fun factory(appName: String = "Test App") = CheckoutCommonConfigurationFactory(appName)
 
     private fun controllerConfiguration(
         billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,

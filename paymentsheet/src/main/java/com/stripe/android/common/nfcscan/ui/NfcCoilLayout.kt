@@ -16,7 +16,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.nfcscan.tapzone.TapZone
 
-internal val CoilCircleSize = 200.dp
+internal val CoilCircleSize = 160.dp
 private val ShadowElevation = 8.dp
 
 @Composable
@@ -42,6 +42,10 @@ internal fun NfcCoilLayout(
                 verticalBias = tapZone.yBias * 2 - 1,
             ),
         ) {
+            if (status is NfcScanningStatus.Idle) {
+                PulseRings(coilSize = CoilCircleSize)
+            }
+
             NfcCoil(
                 status = status,
                 onSuccessShown = onSuccessShown,

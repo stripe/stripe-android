@@ -9,7 +9,6 @@ import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
@@ -24,6 +23,7 @@ import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
+import com.stripe.android.paymentsheet.utils.addPaymentMethodTitle
 import com.stripe.android.paymentsheet.utils.isOnlyOneNonCardPaymentMethod
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
@@ -42,7 +42,6 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
-import com.stripe.android.R as PaymentsCoreR
 
 internal val formBottomContentPadding = 20.dp
 internal val horizontalModeWalletsDividerSpacing = 16.dp
@@ -213,11 +212,7 @@ internal sealed interface PaymentSheetScreen {
                 if (isWalletEnabled || isCompleteFlow) {
                     null
                 } else {
-                    if (state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
-                        PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
-                    } else {
-                        R.string.stripe_paymentsheet_choose_payment_method.resolvableString
-                    }
+                    state.supportedPaymentMethods.addPaymentMethodTitle()
                 }
             }
         }
@@ -265,11 +260,7 @@ internal sealed interface PaymentSheetScreen {
                 } else if (isCompleteFlow) {
                     R.string.stripe_paymentsheet_add_payment_method_title.resolvableString
                 } else {
-                    if (state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
-                        PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
-                    } else {
-                        R.string.stripe_paymentsheet_choose_payment_method.resolvableString
-                    }
+                    state.supportedPaymentMethods.addPaymentMethodTitle()
                 }
             }
         }

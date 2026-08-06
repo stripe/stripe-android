@@ -94,6 +94,7 @@ internal interface PaymentElementLoader {
         data class Embedded(
             val isRowSelectionImmediateAction: Boolean,
             val configuration: EmbeddedPaymentElement.Configuration,
+            val paymentMethodLayout: PaymentMethodLayout,
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
@@ -632,8 +633,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): PaymentMethodLayout {
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
-            is PaymentElementLoader.Configuration.StandaloneLink,
-            is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
+            is PaymentElementLoader.Configuration.StandaloneLink -> PaymentMethodLayout.Vertical
+            is PaymentElementLoader.Configuration.Embedded ->
+                if (
+                    elementsSession.forceVerticalPaymentMethodLayout &&
+                    integrationConfiguration.paymentMethodLayout == PaymentMethodLayout.Automatic
+                ) {
+                    PaymentMethodLayout.Vertical
+                } else {
+                    integrationConfiguration.paymentMethodLayout
+                }
             is PaymentElementLoader.Configuration.PaymentSheet ->
                 if (
                     elementsSession.forceVerticalPaymentMethodLayout &&

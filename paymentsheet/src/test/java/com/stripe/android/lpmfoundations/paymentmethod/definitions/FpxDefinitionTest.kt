@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
+import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
@@ -68,6 +69,17 @@ class FpxDefinitionTest {
         checkPhoneField(formElements, 0)
         checkEmailField(formElements, 1)
         checkFpxDropdownField(formElements, 2)
+    }
+
+    @Test
+    fun `bank dropdown is sorted in ascending alphabetical order`() {
+        val formElements = FpxDefinition.formElements(fpxMetadata)
+        val bankSection = formElements[0] as SectionElement
+        val dropdownElement = bankSection.fields[0] as SimpleDropdownElement
+        val displayItems = (dropdownElement.controller as DropdownFieldController).displayItems
+
+        assertThat(displayItems)
+            .isEqualTo(displayItems.sortedBy { it.lowercase() })
     }
 
     private fun checkFpxDropdownField(

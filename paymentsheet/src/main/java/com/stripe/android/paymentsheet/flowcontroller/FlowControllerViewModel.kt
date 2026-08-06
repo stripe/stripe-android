@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +40,9 @@ internal class FlowControllerViewModel(
 
     @Volatile
     var paymentSelection: PaymentSelection? = null
+
+    @Volatile
+    var autocompleteFilledAddress: Address? = null
 
     // Used to determine if we need to reload the flow controller configuration.
     var previousConfigureRequest: FlowControllerConfigurationHandler.ConfigureRequest?
@@ -75,6 +79,7 @@ internal class FlowControllerViewModel(
     }
 
     fun resetSession() {
+        autocompleteFilledAddress = null
         restartSession()
     }
 

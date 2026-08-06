@@ -234,8 +234,8 @@ internal interface CheckoutControllerModule {
         }
 
         @Provides
-        @MerchantDisplayName
-        fun provideMerchantDisplayName(application: Application): String {
+        @AppName
+        fun provideAppName(application: Application): String {
             return application.applicationInfo.loadLabel(application.packageManager).toString()
         }
 
