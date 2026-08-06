@@ -1,5 +1,6 @@
 package com.stripe.android.crypto.onramp.analytics
 
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
@@ -185,8 +186,9 @@ internal sealed class OnrampAnalyticsEvent(
         name = "error_occurred",
         params = mapOf(
             "operation_name" to operation.value,
-            "error_message" to error.safeAnalyticsMessage
-        )
+            "error_message" to error.safeAnalyticsMessage,
+            "request_id" to (error as? StripeException)?.requestId,
+        ).filterNotNullValues()
     ) {
         enum class Operation(val value: String) {
             Configure("configure"),

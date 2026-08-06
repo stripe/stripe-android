@@ -27,11 +27,17 @@ internal data class OnrampUiState(
     val network: CryptoNetwork? = null,
     val wallets: List<CustomerWallet> = emptyList(),
     val isWalletsLoading: Boolean = false,
+    val walletOwnershipChallengeId: String? = null,
+    val walletOwnershipChallengeMessage: String? = null,
+    val walletOwnershipChallengeExpiresAt: String? = null,
+    val walletOwnershipSignatureInput: String = "",
+    val walletOwnershipVerified: Boolean? = null,
     val authToken: String? = null,
     @TypeParceler<OnrampSessionResponse?, NullOnrampSessionResponseParceler>
     val onrampSession: OnrampSessionResponse? = null,
     val loadingMessage: String? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
+    val sourceCurrency: SourceCurrency = SourceCurrency.USD,
     val googlePayIsReady: Boolean = false,
     val kycFirstName: String = "",
     val kycLastName: String = "",
@@ -57,6 +63,14 @@ internal enum class Screen {
     Registration,
     Authentication,
     AuthenticatedOperations,
+}
+
+internal enum class SourceCurrency(
+    val value: String,
+    val symbol: String,
+) {
+    USD(value = "usd", symbol = "$"),
+    EUR(value = "eur", symbol = "€"),
 }
 
 private object NullPaymentMethodDisplayDataParceler : Parceler<PaymentMethodDisplayData?> {
