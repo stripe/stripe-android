@@ -171,6 +171,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 googlePayButton = ExpressButton.GooglePay.create(
                     paymentMethodMetadata = paymentMethodMetadata,
                     googlePayConfiguration = googlePayConfiguration,
+                    shippingAddressRequired = false,
+                    allowedShippingCountries = null,
                 ),
             )
         )

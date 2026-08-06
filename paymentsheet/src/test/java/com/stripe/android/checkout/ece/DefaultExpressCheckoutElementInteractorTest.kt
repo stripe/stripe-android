@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -18,6 +19,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -51,7 +54,9 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             ),
             ExpressButton.GooglePay.create(
                 paymentMethodMetadata = paymentMethodMetadata,
-                googlePayConfiguration = googlePayConfiguration
+                googlePayConfiguration = googlePayConfiguration,
+                shippingAddressRequired = false,
+                allowedShippingCountries = null,
             ),
         )
     }
@@ -131,9 +136,32 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 ExpressButton.GooglePay.create(
                     paymentMethodMetadata = paymentMethodMetadata,
                     googlePayConfiguration = googlePayConfiguration,
+                    shippingAddressRequired = false,
+                    allowedShippingCountries = null,
                 ),
             )
         }
+    }
+
+    @Test
+    fun `state includes checkout shipping requirements in Google Pay button`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.GooglePay),
+        ),
+        configuration = ExpressCheckoutElement.Configuration()
+            .shippingAddressRequired(true),
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            allowedShippingCountries = listOf("US", "CA"),
+        ),
+    ) {
+        val button = interactor.state.value.expressButtons.single() as ExpressButton.GooglePay
+        assertThat(button.shippingAddressParameters).isEqualTo(
+            GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+                allowedCountryCodes = setOf("US", "CA"),
+                phoneNumberRequired = false,
+            )
+        )
     }
 
     @Test
@@ -192,6 +220,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         },
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeExpressCheckoutElementEventReporter()
@@ -203,6 +232,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 availableExpressButtonTypes = availableExpressButtonTypes,
                 savedStateHandle = savedStateHandle,
                 configuration = configuration,
+                checkoutSessionResponse = checkoutSessionResponse,
             )
 
             DefaultExpressCheckoutElementInteractor(
@@ -233,6 +263,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         availableExpressButtonTypes: List<ExpressButtonType>,
         savedStateHandle: SavedStateHandle,
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+        checkoutSessionResponse: CheckoutSessionResponse,
     ): CheckoutControllerStateHolder {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
@@ -244,6 +275,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         )
         stateHolder.state = CheckoutControllerStateFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,
+            checkoutSessionResponse = checkoutSessionResponse,
             configuration = CheckoutController.Configuration()
                 .expressCheckoutElement(configuration)
                 .build(),

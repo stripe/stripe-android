@@ -3,6 +3,7 @@
 package com.stripe.android.checkout.ece
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -217,19 +218,54 @@ internal class ExpressButtonTest {
     }
 
     @Test
-    fun `GooglePay toSelection returns Google Pay selection`() {
-        val button = createGooglePayExpressButton()
+    fun `GooglePay create uses shipping address configuration when required`() {
+        val button = createGooglePayExpressButton(
+            shippingAddressRequired = true,
+            allowedShippingCountries = listOf("US", "CA"),
+        )
 
-        assertThat(button.toSelection()).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
+        assertThat(button.shippingAddressParameters).isEqualTo(
+            GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+                allowedCountryCodes = setOf("US", "CA"),
+                phoneNumberRequired = false,
+            )
+        )
+    }
+
+    @Test
+    fun `GooglePay create omits shipping address configuration when not required`() {
+        val button = createGooglePayExpressButton(
+            shippingAddressRequired = false,
+            allowedShippingCountries = listOf("US", "CA"),
+        )
+
+        assertThat(button.shippingAddressParameters).isNull()
+    }
+
+    @Test
+    fun `GooglePay toSelection preserves shipping address parameters`() {
+        val button = createGooglePayExpressButton(
+            shippingAddressRequired = true,
+            allowedShippingCountries = listOf("US", "CA"),
+        )
+
+        val selection = button.toSelection() as PaymentSelection.GooglePay
+        assertThat(selection.shippingAddressParameters)
+            .isSameInstanceAs(button.shippingAddressParameters)
     }
 
     private fun createGooglePayExpressButton(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration()
+        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration(),
+        shippingAddressRequired: Boolean = false,
+        allowedShippingCountries: List<String>? = null,
     ): ExpressButton.GooglePay {
         return ExpressButton.GooglePay.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            googlePayConfiguration = googlePayConfiguration
+            googlePayConfiguration = googlePayConfiguration,
+            shippingAddressRequired = shippingAddressRequired,
+            allowedShippingCountries = allowedShippingCountries,
         )
     }
 

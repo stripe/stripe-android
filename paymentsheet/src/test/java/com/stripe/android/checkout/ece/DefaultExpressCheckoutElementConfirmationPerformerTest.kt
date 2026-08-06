@@ -164,6 +164,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             googlePayConfiguration = GooglePayConfiguration(
                 GooglePayConfiguration.Environment.Test,
             ).build(),
+            shippingAddressRequired = false,
+            allowedShippingCountries = null,
         )
     }
 
