@@ -22,6 +22,7 @@ import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.NameSpec
@@ -38,6 +39,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.EmailElement
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberElement
@@ -57,6 +59,17 @@ import com.stripe.android.core.R as CoreR
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementsTest {
 
+    private val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
+
+    private val countrySpec = CountrySpec(
+        apiPath = countryIdentifier,
+        allowedCountryCodes = setOf("AT"),
+    )
+
+    private val noCountryBillingAddressPlaceholder = PlaceholderSpec(
+        field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry,
+    )
+
     private val nameSection = NameSpec()
 
     private val emailSection = EmailSpec()
@@ -69,158 +82,52 @@ internal class TransformSpecToElementsTest {
     }
 
     @Test
-    fun `Country spec renders one country-only section for automatic collection`() =
-        runBlocking {
-            val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
-            val countrySpec = CountrySpec(
-                apiPath = countryIdentifier,
-                allowedCountryCodes = setOf("AT"),
-            )
-            val formElements = TransformSpecToElementsFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-                ),
-                initialValues = mapOf(countryIdentifier to "AT"),
-            ).transform(
-                metadata = PaymentMethodMetadataFactory.create(),
-                specs = listOf(element = countrySpec),
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            )
-
-            assertThat(formElements).hasSize(1)
-            val countrySectionElement = formElements.single() as SectionElement
-            val billingAddressElement = countrySectionElement.fields[0] as BillingAddressElement
-            val countryElement = billingAddressElement.countryElement
-
-            assertThat(countryElement.controller.displayItems).hasSize(1)
-            assertThat(countryElement.controller.displayItems[0]).isEqualTo("🇦🇹 Austria")
-
-            // Verify the correct config is setup for the controller
-            assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
-
-            assertThat(countrySectionElement.identifier.v1).isEqualTo(
-                "payment_method_data[country]_section",
-            )
-
-            assertThat(billingAddressElement.identifier).isEqualTo(countryIdentifier)
-            assertThat(countryElement.identifier).isEqualTo(countryIdentifier)
-            assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("AT")
-            assertThat(countryElement.getFormFieldValueFlow().first().single().first)
-                .isEqualTo(countryIdentifier)
-            assertThat(billingAddressElement.hiddenIdentifiers.value).containsAtLeast(
-                IdentifierSpec.Line1,
-                IdentifierSpec.City,
-                IdentifierSpec.State,
-                IdentifierSpec.PostalCode,
-            )
-            Unit
-        }
-
-    @Test
-    fun `Country spec preserves separate full billing address placeholder`() = runBlocking {
-        val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
-        val transform = TransformSpecToElementsFactory.create(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            ),
-            initialValues = mapOf(countryIdentifier to "AT"),
+    fun `CountrySpec renders country-only billing address in automatic mode`() = runTest {
+        val formElements = transformCountrySpec(
+            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
         )
 
-        val formElements = transform.transform(
-            metadata = PaymentMethodMetadataFactory.create(),
-            specs = listOf(
-                CountrySpec(
-                    apiPath = countryIdentifier,
-                    allowedCountryCodes = setOf("AT"),
-                ),
-                PlaceholderSpec(
-                    field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry,
-                ),
-            ),
-            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-        )
-
-        assertThat(formElements).hasSize(2)
-        val countrySection = formElements[0] as SectionElement
-        val countryElement = countrySection.fields.single() as BillingAddressElement
-        assertThat(countryElement.identifier).isEqualTo(countryIdentifier)
-        assertThat(countryElement.countryElement.identifier).isEqualTo(countryIdentifier)
-        assertThat(countryElement.countryElement.controller.rawFieldValue.value).isEqualTo("AT")
-        assertThat(countryElement.hiddenIdentifiers.value).containsAtLeast(
-            IdentifierSpec.Line1,
-            IdentifierSpec.City,
-            IdentifierSpec.State,
-            IdentifierSpec.PostalCode,
-        )
-
-        val addressSection = formElements[1] as SectionElement
-        val addressElement = addressSection.fields.single() as AddressElement
-        assertThat(addressElement.fields.first().map { it.identifier })
-            .doesNotContain(IdentifierSpec.Country)
+        assertThat(formElements).hasSize(1)
+        assertCountryOnlyBillingAddressSection(formElements.single() as SectionElement)
     }
 
     @Test
-    fun `Country spec preserves generated full address section`() = runTest {
-        val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
-        val formElements = TransformSpecToElementsFactory.create(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            ),
-        ).transform(
-            metadata = PaymentMethodMetadataFactory.create(),
-            specs = listOf(
-                CountrySpec(
-                    apiPath = countryIdentifier,
-                    allowedCountryCodes = setOf("AT"),
-                ),
-            ),
-            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+    fun `CountrySpec preserves explicit no-country billing address placeholder in full mode`() = runTest {
+        val formElements = transformCountrySpec(
+            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            additionalSpecs = listOf(noCountryBillingAddressPlaceholder),
         )
 
         assertThat(formElements).hasSize(2)
-        val countryElement = (formElements[0] as SectionElement)
-            .fields.single() as BillingAddressElement
-        assertThat(countryElement.identifier).isEqualTo(countryIdentifier)
-        assertThat(countryElement.hiddenIdentifiers.value).containsAtLeast(
-            IdentifierSpec.Line1,
-            IdentifierSpec.City,
-            IdentifierSpec.State,
-            IdentifierSpec.PostalCode,
+        assertCountryOnlyBillingAddressSection(formElements[0] as SectionElement)
+        assertFullAddressSection(
+            section = formElements[1] as SectionElement,
+            containsCountry = false,
         )
-
-        val addressElement = ((formElements[1] as SectionElement).fields.single() as AddressElement)
-        assertThat(addressElement.fields.value.map { it.identifier }).contains(IdentifierSpec.Country)
     }
 
     @Test
-    fun `Country spec remains country-only for never collection`() = runTest {
-        val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
-        val formElements = TransformSpecToElementsFactory.create(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-            ),
-            initialValues = mapOf(countryIdentifier to "AT"),
-        ).transform(
-            metadata = PaymentMethodMetadataFactory.create(),
-            specs = listOf(
-                CountrySpec(
-                    apiPath = countryIdentifier,
-                    allowedCountryCodes = setOf("AT"),
-                ),
-            ),
-            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+    fun `CountrySpec preserves generated billing address in full mode`() = runTest {
+        val formElements = transformCountrySpec(
+            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
         )
 
-        val addressElement = (formElements.single() as SectionElement)
-            .fields.single() as BillingAddressElement
-        assertThat(addressElement.identifier).isEqualTo(countryIdentifier)
-        assertThat(addressElement.countryElement.identifier).isEqualTo(countryIdentifier)
-        assertThat(addressElement.hiddenIdentifiers.value).containsAtLeast(
-            IdentifierSpec.Line1,
-            IdentifierSpec.City,
-            IdentifierSpec.State,
-            IdentifierSpec.PostalCode,
+        assertThat(formElements).hasSize(2)
+        assertCountryOnlyBillingAddressSection(formElements[0] as SectionElement)
+        assertFullAddressSection(
+            section = formElements[1] as SectionElement,
+            containsCountry = true,
         )
+    }
+
+    @Test
+    fun `CountrySpec renders country-only billing address in never mode`() = runTest {
+        val formElements = transformCountrySpec(
+            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+        )
+
+        assertThat(formElements).hasSize(1)
+        assertCountryOnlyBillingAddressSection(formElements.single() as SectionElement)
     }
 
     @Test
@@ -493,6 +400,56 @@ internal class TransformSpecToElementsTest {
 
         assertThat(sectionElement.fields.size).isEqualTo(1)
         assertThat(sectionElement.fields.firstOrNull()).isInstanceOf<AutocompleteAddressElement>()
+    }
+
+    private fun transformCountrySpec(
+        addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
+        additionalSpecs: List<FormItemSpec> = emptyList(),
+    ): List<FormElement> {
+        return TransformSpecToElementsFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = addressCollectionMode,
+            ),
+            initialValues = mapOf(countryIdentifier to "AT"),
+        ).transform(
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(countrySpec) + additionalSpecs,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+    }
+
+    private suspend fun assertCountryOnlyBillingAddressSection(section: SectionElement) {
+        val billingAddressElement = section.fields.single() as BillingAddressElement
+        val countryElement = billingAddressElement.countryElement
+
+        assertThat(section.identifier.v1).isEqualTo("payment_method_data[country]_section")
+        assertThat(billingAddressElement.identifier).isEqualTo(countryIdentifier)
+        assertThat(countryElement.identifier).isEqualTo(countryIdentifier)
+        assertThat(countryElement.controller.displayItems).containsExactly("🇦🇹 Austria")
+        assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("AT")
+        assertThat(countryElement.getFormFieldValueFlow().first().single().first)
+            .isEqualTo(countryIdentifier)
+        assertThat(billingAddressElement.hiddenIdentifiers.value).containsAtLeast(
+            IdentifierSpec.Line1,
+            IdentifierSpec.City,
+            IdentifierSpec.State,
+            IdentifierSpec.PostalCode,
+        )
+    }
+
+    private suspend fun assertFullAddressSection(
+        section: SectionElement,
+        containsCountry: Boolean,
+    ) {
+        val addressElement = section.fields.single() as AddressElement
+        val identifiers = addressElement.fields.first().map { it.identifier }
+
+        if (containsCountry) {
+            assertThat(identifiers).contains(IdentifierSpec.Country)
+        } else {
+            assertThat(identifiers).doesNotContain(IdentifierSpec.Country)
+        }
     }
 
     companion object {
