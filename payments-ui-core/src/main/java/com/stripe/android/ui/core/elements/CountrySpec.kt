@@ -2,10 +2,6 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.uicore.elements.CountryConfig
-import com.stripe.android.uicore.elements.CountryElement
-import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -21,16 +17,4 @@ import kotlinx.serialization.Serializable
 data class CountrySpec(
     @SerialName("allowed_country_codes")
     val allowedCountryCodes: Set<String> = CountryUtils.supportedBillingCountries
-) : FormItemSpec() {
-    fun transform(
-        initialValues: Map<IdentifierSpec, String?>
-    ) = createSectionElement(
-        CountryElement(
-            IdentifierSpec.Country,
-            DropdownFieldController(
-                CountryConfig(allowedCountryCodes),
-                initialValue = initialValues[IdentifierSpec.Country]
-            )
-        )
-    )
-}
+) : FormItemSpec()

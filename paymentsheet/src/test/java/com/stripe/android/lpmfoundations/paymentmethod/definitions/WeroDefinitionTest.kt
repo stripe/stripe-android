@@ -5,8 +5,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,7 +77,7 @@ class WeroDefinitionTest {
         checkNameField(formElements, 1)
         checkEmailField(formElements, 2)
         checkPhoneField(formElements, 3)
-        checkBillingField(formElements, 4)
+        checkLegacyFullAddressField(formElements, 4)
     }
 
     @Test
@@ -103,6 +105,28 @@ class WeroDefinitionTest {
 
         val section = element as SectionElement
         assertThat(section.fields).hasSize(1)
-        assertThat(section.fields[0]).isInstanceOf(CountryElement::class.java)
+        val addressElement = section.fields[0] as BillingAddressElement
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "🇧🇪 Belgium",
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
+        assertThat(addressElement.hiddenIdentifiers.value).containsAtLeast(
+            IdentifierSpec.Line1,
+            IdentifierSpec.City,
+            IdentifierSpec.State,
+            IdentifierSpec.PostalCode,
+        )
+    }
+
+    private fun checkLegacyFullAddressField(
+        formElements: List<FormElement>,
+        position: Int,
+    ) {
+        val section = formElements[position] as SectionElement
+        assertThat(section.identifier.v1).isEqualTo("billing_details[address]_section")
+        val addressElement = section.fields.single() as AddressElement
+        assertThat(addressElement.fields.value.map { it.identifier })
+            .contains(IdentifierSpec.Country)
     }
 }
