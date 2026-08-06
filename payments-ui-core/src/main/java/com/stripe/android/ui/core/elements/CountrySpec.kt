@@ -28,10 +28,10 @@ data class CountrySpec(
         initialValues: Map<IdentifierSpec, String?>
     ) = createSectionElement(
         CountryElement(
-            this.apiPath,
+            IdentifierSpec.Country,
             DropdownFieldController(
-                CountryConfig(this.allowedCountryCodes),
-                initialValue = initialValues[this.apiPath]
+                CountryConfig(allowedCountryCodes),
+                initialValue = initialValues[IdentifierSpec.Country]
             )
         )
     )
