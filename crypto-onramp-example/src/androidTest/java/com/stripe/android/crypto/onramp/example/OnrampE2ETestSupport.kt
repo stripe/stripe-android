@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -36,6 +37,7 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.RetryRule
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.ExternalResource
 import org.junit.rules.RuleChain
@@ -68,6 +70,7 @@ internal class OnrampE2ETestRule : TestRule {
         return RuleChain.emptyRuleChain()
             .around(composeRule)
             .around(attestationFeatureFlagTestRule)
+            .around(RetryRule(3))
             .around(fixtureRule)
             .around(activityRule)
             .apply(base, description)
@@ -472,7 +475,7 @@ internal class OnrampE2EPage(
     }
 
     private fun hideKeyboard() {
-        device.pressBack()
+        Espresso.closeSoftKeyboard()
         composeRule.waitForIdle()
     }
 
