@@ -146,7 +146,7 @@ interface CustomerAdapter {
         ): PaymentSelection? {
             return when (this) {
                 is GooglePay -> {
-                    PaymentSelection.GooglePay
+                    PaymentSelection.GooglePay(shippingAddressParameters = null)
                 }
                 is StripeId -> {
                     paymentMethodProvider(id)?.let {

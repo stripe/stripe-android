@@ -19,7 +19,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     fun `setting selection emits value in selection state flow`() = testScenario {
         selectionHolder.selection.test {
             assertThat(awaitItem()).isNull()
-            selectionHolder.setSelection(PaymentSelection.GooglePay)
+            selectionHolder.setSelection(PaymentSelection.GooglePay(shippingAddressParameters = null))
             assertThat(awaitItem()?.paymentMethodType).isEqualTo("google_pay")
         }
     }
@@ -28,9 +28,9 @@ internal class DefaultEmbeddedSelectionHolderTest {
     fun `setting selection updates savedStateHandle`() = testScenario {
         assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
             .isNull()
-        selectionHolder.setSelection(PaymentSelection.GooglePay)
+        selectionHolder.setSelection(PaymentSelection.GooglePay(shippingAddressParameters = null))
         assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
-            .isEqualTo(PaymentSelection.GooglePay)
+            .isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @Test
@@ -65,11 +65,11 @@ internal class DefaultEmbeddedSelectionHolderTest {
     @Test
     fun `initializing with selection in savedStateHandle sets initial value`() = testScenario(
         setup = {
-            set(EMBEDDED_SELECTION_KEY, PaymentSelection.GooglePay)
+            set(EMBEDDED_SELECTION_KEY, PaymentSelection.GooglePay(shippingAddressParameters = null))
         },
     ) {
         assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
-            .isEqualTo(PaymentSelection.GooglePay)
+            .isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         selectionHolder.setSelection(null)
         assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
             .isNull()

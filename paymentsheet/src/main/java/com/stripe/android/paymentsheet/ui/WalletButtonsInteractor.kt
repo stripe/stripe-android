@@ -127,7 +127,7 @@ internal interface WalletButtonsInteractor {
             )
 
             override fun createSelection(): PaymentSelection {
-                return PaymentSelection.GooglePay
+                return PaymentSelection.GooglePay(shippingAddressParameters = null)
             }
         }
     }

@@ -34,7 +34,10 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
 
     @Test
     fun `create maps a Google Pay selection`() = runScenario {
-        val option = factory.create(selection = PaymentSelection.GooglePay, paymentMethodMetadata = metadata)
+        val option = factory.create(
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
+            paymentMethodMetadata = metadata,
+        )
 
         assertThat(option).isNotNull()
         assertThat(option?.paymentMethodType).isEqualTo("google_pay")
@@ -101,7 +104,10 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
 
     @Test
     fun `create leaves billing details null for Google Pay`() = runScenario {
-        val option = factory.create(selection = PaymentSelection.GooglePay, paymentMethodMetadata = metadata)
+        val option = factory.create(
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
+            paymentMethodMetadata = metadata,
+        )
 
         assertThat(option?.billingDetails).isNull()
     }
@@ -145,7 +151,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     @Test
     fun `imageLoader falls back to the icon loader when there is no card art`() = runScenario {
         val option = factory.create(
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             paymentMethodMetadata = metadata,
         )
 

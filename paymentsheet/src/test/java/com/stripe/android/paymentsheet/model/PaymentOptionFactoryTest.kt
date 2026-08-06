@@ -33,7 +33,7 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with GooglePay should return expected object`() {
         val factory = createFactory()
-        val paymentOption = factory.create(PaymentSelection.GooglePay, null)
+        val paymentOption = factory.create(PaymentSelection.GooglePay(shippingAddressParameters = null), null)
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
         assertThat(paymentOption.label).isEqualTo("Google Pay")
         assertThat(paymentOption.paymentMethodType).isEqualTo("google_pay")
@@ -157,7 +157,7 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with Google Pay should not include billing details`() {
         val factory = createFactory()
-        val paymentOption = factory.create(PaymentSelection.GooglePay, null)
+        val paymentOption = factory.create(PaymentSelection.GooglePay(shippingAddressParameters = null), null)
 
         assertThat(paymentOption.billingDetails).isNull()
     }

@@ -132,7 +132,7 @@ class PaymentSelectionTest {
 
     @Test
     fun `Doesn't display a mandate for Google Pay`() {
-        val googlePay = PaymentSelection.GooglePay
+        val googlePay = PaymentSelection.GooglePay(shippingAddressParameters = null)
         val result = googlePay.mandateText(
             merchantName = "Merchant",
             isSetupFlow = false,

@@ -39,7 +39,7 @@ internal class CheckoutConfirmationPerformerTest {
         // Google Pay is selected but the configuration has no Google Pay set, so toConfirmationOption
         // returns null and there is nothing to confirm.
         state = CheckoutControllerStateFactory.create(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
         ),
     ) {
         performer.confirm()
@@ -48,7 +48,7 @@ internal class CheckoutConfirmationPerformerTest {
     @Test
     fun `confirm starts confirmation with a Google Pay option`() = runScenario(
         statusBarColor = STATUS_BAR_COLOR,
-        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)),
     ) {
         performer.confirm()
 

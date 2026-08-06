@@ -71,7 +71,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     @Test
     fun `create does not attach BillingDetails for Google Pay`() {
         val option = displayDataFactory.create(
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             paymentMethodMetadata = paymentMethodMetadata
         )
 
@@ -101,7 +101,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     @Test
     fun `selecting google pay does not attach mandate to paymentMethodMetadata`() {
         val option = displayDataFactory.create(
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             paymentMethodMetadata = paymentMethodMetadata
         )
 

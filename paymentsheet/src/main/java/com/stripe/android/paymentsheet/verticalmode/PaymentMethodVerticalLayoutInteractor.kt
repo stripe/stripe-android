@@ -436,7 +436,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             iconRequiresTinting = false,
             subtitle = null,
             onClick = {
-                updateSelection(PaymentSelection.GooglePay, false)
+                updateSelection(PaymentSelection.GooglePay(shippingAddressParameters = null), false)
                 invokeRowSelectionCallback?.invoke()
             },
         )

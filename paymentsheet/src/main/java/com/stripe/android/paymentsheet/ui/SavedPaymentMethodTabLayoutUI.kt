@@ -509,7 +509,7 @@ private fun GooglePayTab(
         iconRes = R.drawable.stripe_google_pay_mark,
         labelText = stringResource(StripeR.string.stripe_google_pay),
         description = stringResource(StripeR.string.stripe_google_pay),
-        onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
+        onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay(shippingAddressParameters = null)) },
         cardArtUrl = null,
         modifier = modifier,
     )

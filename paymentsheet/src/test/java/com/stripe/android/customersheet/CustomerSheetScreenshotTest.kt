@@ -245,7 +245,7 @@ internal class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
-                    paymentSelection = PaymentSelection.GooglePay,
+                    paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
                     showGooglePay = true,
                     errorMessage = "This is an error message.",
                 ),

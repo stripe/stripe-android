@@ -279,7 +279,7 @@ internal class PaymentOptionsActivityTest {
             val result = PaymentOptionsActivityResult.fromIntent(scenario.getResult().resultData)
             assertThat(result).isEqualTo(
                 PaymentOptionsActivityResult.Succeeded(
-                    paymentSelection = PaymentSelection.GooglePay,
+                    paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
                     paymentMethods = emptyList(),
                     linkAccountInfo = LinkAccountUpdate.Value(null)
                 )

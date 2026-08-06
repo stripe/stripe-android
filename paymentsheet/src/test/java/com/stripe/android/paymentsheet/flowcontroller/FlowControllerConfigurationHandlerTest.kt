@@ -130,7 +130,7 @@ class FlowControllerConfigurationHandlerTest {
 
         // Signaling we previously loaded elements session here.
         viewModel.previousConfigureRequest = configureRequest
-        viewModel.paymentSelection = PaymentSelection.GooglePay
+        viewModel.paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         configurationHandler.configure(
@@ -145,7 +145,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isSameInstanceAs(configureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
 
         // Configure should not regenerate the analytics sessionId when using the same configuration.
         assertThat(beforeSessionId).isEqualTo(AnalyticsRequestFactory.sessionId)
@@ -161,7 +161,7 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = createInitializationMode(),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         )
-        viewModel.paymentSelection = PaymentSelection.GooglePay
+        viewModel.paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
         val newConfigureRequest = FlowControllerConfigurationHandler.ConfigureRequest(
             initializationMode = createInitializationMode(PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET),
@@ -194,7 +194,7 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = initializationMode,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
         )
-        viewModel.paymentSelection = PaymentSelection.GooglePay
+        viewModel.paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
         val newConfigureRequest = FlowControllerConfigurationHandler.ConfigureRequest(
             initializationMode = initializationMode,

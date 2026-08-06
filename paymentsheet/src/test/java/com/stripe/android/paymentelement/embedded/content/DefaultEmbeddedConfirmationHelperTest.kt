@@ -120,7 +120,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
     private fun defaultLoadedState(): EmbeddedConfirmationStateHolder.State {
         return EmbeddedConfirmationStateHolder.State(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             statusBarColor = null,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
                 .googlePay(

@@ -522,7 +522,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         ).getOrThrow()
 
-        assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
 
         consumeLoadingEvents()
 
@@ -551,7 +551,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow()
 
-            assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2020,7 +2020,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds with saved Google Pay selection`() = runScenario {
         testSuccessfulLoadSendsEventsCorrectly(
-            paymentSelection = PaymentSelection.GooglePay
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
         )
     }
 

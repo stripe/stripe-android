@@ -343,7 +343,7 @@ internal class CheckoutControllerTest {
         // Seed the controller's namespaced child before building; the controller reuses that child.
         savedStateHandle.checkoutSubHandle(DEFAULT_INTEGRATION_NAME)[CheckoutControllerStateHolder.STATE_KEY] =
             CheckoutControllerStateFactory.create(
-                paymentSelection = PaymentSelection.GooglePay,
+                paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
                 temporarySelection = "card",
                 previousNewSelections = Bundle().apply {
                     putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
@@ -375,7 +375,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `clearPaymentOption returns failure and preserves selection when a payment flow is presented`() =
         runMutationScenario {
-            selectPaymentMethod(PaymentSelection.GooglePay)
+            selectPaymentMethod(PaymentSelection.GooglePay(shippingAddressParameters = null))
             markIntegrationLaunched()
 
             val result = controller.clearPaymentOption()

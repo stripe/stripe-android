@@ -220,7 +220,7 @@ internal class ExpressButtonTest {
     fun `GooglePay toSelection returns Google Pay selection`() {
         val button = createGooglePayExpressButton()
 
-        assertThat(button.toSelection()).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(button.toSelection()).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     private fun createGooglePayExpressButton(

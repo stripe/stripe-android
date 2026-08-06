@@ -25,9 +25,11 @@ import kotlin.test.Test
 internal class CheckoutControllerStateHolderTest {
     @Test
     fun `selection projects paymentSelection from the committed state`() = testScenario {
-        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.state = committedState(
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
+        )
 
-        assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @Test
@@ -46,10 +48,12 @@ internal class CheckoutControllerStateHolderTest {
         }
 
         testScenario(paymentOptionFactory = factory) {
-            stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+            stateHolder.state = committedState(
+                paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
+            )
 
             assertThat(stateHolder.session.value?.paymentOptionDisplayData).isSameInstanceAs(expectedOption)
-            assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         }
     }
 
@@ -59,11 +63,12 @@ internal class CheckoutControllerStateHolderTest {
 
         stateHolder.selection.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.setSelection(PaymentSelection.GooglePay)
-            assertThat(awaitItem()).isEqualTo(PaymentSelection.GooglePay)
+            stateHolder.setSelection(PaymentSelection.GooglePay(shippingAddressParameters = null))
+            assertThat(awaitItem()).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         }
 
-        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.state?.paymentSelection)
+            .isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @Test
@@ -123,7 +128,7 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `clearSelection resets selection, temporarySelection and previousNewSelections`() = testScenario {
         stateHolder.state = committedState(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             temporarySelection = "card",
             previousNewSelections = Bundle().apply {
                 putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
@@ -131,7 +136,7 @@ internal class CheckoutControllerStateHolderTest {
         )
 
         stateHolder.selection.test {
-            assertThat(awaitItem()).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(awaitItem()).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
             stateHolder.clearSelection()
             assertThat(awaitItem()).isNull()
         }
@@ -146,7 +151,7 @@ internal class CheckoutControllerStateHolderTest {
 
     @Test
     fun `selection setters no-op before the state is committed`() = testScenario {
-        stateHolder.setSelection(PaymentSelection.GooglePay)
+        stateHolder.setSelection(PaymentSelection.GooglePay(shippingAddressParameters = null))
         assertSetBeforeLoadError(operation = "setSelection")
 
         stateHolder.setTemporarySelection("card")
@@ -171,7 +176,7 @@ internal class CheckoutControllerStateHolderTest {
         // Simulates process-death restore: a committed state is read back from SavedStateHandle by a
         // freshly constructed holder, and every selection projection must reflect it.
         val restored = committedState(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             temporarySelection = "card",
             previousNewSelections = Bundle().apply {
                 putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
@@ -184,7 +189,7 @@ internal class CheckoutControllerStateHolderTest {
             availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(),
         )
 
-        assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         assertThat(stateHolder.temporarySelection.value).isEqualTo("card")
         assertThat(stateHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)

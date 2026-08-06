@@ -259,7 +259,7 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Google Pay selection with config with null google pay config, should return null`() {
         assertThat(
-            PaymentSelection.GooglePay.toConfirmationOption(
+            PaymentSelection.GooglePay(shippingAddressParameters = null).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
                 cardFundingFilter = DefaultCardFundingFilter
@@ -270,7 +270,7 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Google Pay selection with config with google pay config, should return expected option`() {
         assertThat(
-            PaymentSelection.GooglePay.toConfirmationOption(
+            PaymentSelection.GooglePay(shippingAddressParameters = null).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                     .googlePay(
                         PaymentSheet.GooglePayConfiguration(
@@ -310,7 +310,7 @@ class ConfirmationHandlerOptionKtxTest {
     fun `On Google Pay selection with additionalEnabledNetworks, should return expected option with networks`() {
         val additionalNetworks = listOf("INTERAC")
 
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+        val confirmationOption = PaymentSelection.GooglePay(shippingAddressParameters = null).toConfirmationOption(
             configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(
@@ -348,7 +348,7 @@ class ConfirmationHandlerOptionKtxTest {
             ),
         )
 
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+        val confirmationOption = PaymentSelection.GooglePay(shippingAddressParameters = null).toConfirmationOption(
             configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(
@@ -371,7 +371,7 @@ class ConfirmationHandlerOptionKtxTest {
 
     @Test
     fun `On Google Pay selection without displayItems, should return empty displayItems`() {
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+        val confirmationOption = PaymentSelection.GooglePay(shippingAddressParameters = null).toConfirmationOption(
             configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(
@@ -403,7 +403,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         }.build().asCommonConfiguration()
 
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+        val confirmationOption = PaymentSelection.GooglePay(shippingAddressParameters = null).toConfirmationOption(
             configuration = configuration,
             linkConfiguration = null,
             cardFundingFilter = DefaultCardFundingFilter,
@@ -428,7 +428,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         }.build().asCommonConfiguration()
 
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+        val confirmationOption = PaymentSelection.GooglePay(shippingAddressParameters = null).toConfirmationOption(
             configuration = configuration,
             linkConfiguration = null,
             cardFundingFilter = DefaultCardFundingFilter,
@@ -441,7 +441,7 @@ class ConfirmationHandlerOptionKtxTest {
 
     @Test
     fun `On Google Pay selection, should return expected option with email required`() {
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+        val confirmationOption = PaymentSelection.GooglePay(shippingAddressParameters = null).toConfirmationOption(
             configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(
@@ -464,7 +464,7 @@ class ConfirmationHandlerOptionKtxTest {
 
     @Test
     fun `On Google Pay selection, should use billing configuration for email required by default`() {
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+        val confirmationOption = PaymentSelection.GooglePay(shippingAddressParameters = null).toConfirmationOption(
             configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(

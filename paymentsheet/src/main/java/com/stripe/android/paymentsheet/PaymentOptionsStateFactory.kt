@@ -98,7 +98,7 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
 internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
     return when (this) {
         is PaymentOptionsItem.AddCard -> null
-        is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
+        is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay(shippingAddressParameters = null)
         is PaymentOptionsItem.Link -> PaymentSelection.Link(linkBrand)
         is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
     }

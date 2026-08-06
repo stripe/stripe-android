@@ -84,10 +84,10 @@ class ConfirmationReportingUtilsTest {
             },
         )
 
-        eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)
+        eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay(shippingAddressParameters = null))
 
         val event = eventReporter.paymentSuccessCalls.awaitItem()
-        assertThat(event.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(event.paymentSelection).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         assertThat(event.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         eventReporter.validate()
     }
@@ -101,10 +101,10 @@ class ConfirmationReportingUtilsTest {
             type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(12)
         )
 
-        eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)
+        eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay(shippingAddressParameters = null))
 
         val event = eventReporter.paymentFailureCalls.awaitItem()
-        assertThat(event.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(event.paymentSelection).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         assertThat(event.error).isInstanceOf<PaymentSheetConfirmationError.GooglePay>()
         eventReporter.validate()
     }

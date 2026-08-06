@@ -83,7 +83,7 @@ internal class DefaultEmbeddedStateHelperTest {
         assertThat(selectionHolder.selection.value).isNull()
 
         setState(
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
         )
         selectionHolder.previousNewSelections.putParcelable("card", PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -92,7 +92,8 @@ internal class DefaultEmbeddedStateHelperTest {
         assertThat(stateHelper.state).isNotNull()
         assertThat(confirmationStateHolder.state).isNotNull()
         assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(selectionHolder.selection.value)
+            .isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         assertThat(contentStateHolder.dataLoadedTurbine.awaitItem()).isNotNull()
 
         stateHelper.state = null

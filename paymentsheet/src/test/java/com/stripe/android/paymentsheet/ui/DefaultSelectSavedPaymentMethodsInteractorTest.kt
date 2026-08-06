@@ -233,7 +233,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 }
             }
 
-            currentSelectionFlow.value = PaymentSelection.GooglePay
+            currentSelectionFlow.value = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
             interactor.state.test {
                 awaitItem().run {
@@ -364,7 +364,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 }
             }
 
-            currentSelectionFlow.value = PaymentSelection.GooglePay
+            currentSelectionFlow.value = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
             interactor.state.test {
                 awaitItem().run {

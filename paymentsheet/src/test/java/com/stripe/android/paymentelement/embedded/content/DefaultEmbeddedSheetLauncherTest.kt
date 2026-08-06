@@ -396,7 +396,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             configuration = EmbeddedConfigurationFactory.create(),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = null,
@@ -406,7 +406,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchManage(
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             configuration = EmbeddedConfigurationFactory.create(),
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
@@ -423,7 +423,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchManage(
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             configuration = EmbeddedConfigurationFactory.create(),
         )
     }
@@ -565,7 +565,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchPaymentOptions launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val selection = PaymentSelection.GooglePay
+        val selection = PaymentSelection.GooglePay(shippingAddressParameters = null)
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
@@ -626,7 +626,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             configuration = EmbeddedConfigurationFactory.create(),
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs

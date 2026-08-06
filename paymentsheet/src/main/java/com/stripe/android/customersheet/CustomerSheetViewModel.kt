@@ -1161,13 +1161,13 @@ internal class CustomerSheetViewModel(
             awaitSavedSelectionDataSource().setSavedSelection(SavedSelection.GooglePay, shouldSyncDefault = false)
                 .onSuccess {
                     confirmPaymentSelection(
-                        paymentSelection = PaymentSelection.GooglePay,
+                        paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
                         type = "google_pay",
                         syncDefaultEnabled = syncDefaultEnabled,
                     )
                 }.onFailure { cause, displayMessage ->
                     confirmPaymentSelectionError(
-                        paymentSelection = PaymentSelection.GooglePay,
+                        paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
                         type = "google_pay",
                         cause = cause,
                         displayMessage = displayMessage,

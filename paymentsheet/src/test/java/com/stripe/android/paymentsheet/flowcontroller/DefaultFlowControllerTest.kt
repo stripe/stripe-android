@@ -354,7 +354,7 @@ internal class DefaultFlowControllerTest {
             configuration = config,
         )
 
-        viewModel.paymentSelection = PaymentSelection.GooglePay
+        viewModel.paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
         flowController.confirm()
 
@@ -818,7 +818,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `onPaymentOptionResult() with null invoke callback with null`() = runTest {
         val flowController = createFlowController(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
         )
 
         flowController.configureExpectingSuccess(
@@ -891,7 +891,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `onPaymentOptionResult() with cancelled invoke callback when initial value is a card`() = runTest {
         val flowController = createFlowController(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
         )
 
         flowController.configureExpectingSuccess(
@@ -901,7 +901,7 @@ internal class DefaultFlowControllerTest {
         flowController.onPaymentOptionResult(
             PaymentOptionsActivityResult.Canceled(
                 mostRecentError = null,
-                paymentSelection = PaymentSelection.GooglePay,
+                paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
         )
@@ -1390,7 +1390,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.onPaymentOptionResult(
             PaymentOptionsActivityResult.Succeeded(
-                PaymentSelection.GooglePay,
+                PaymentSelection.GooglePay(shippingAddressParameters = null),
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
         )
@@ -1426,7 +1426,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        viewModel.paymentSelection = PaymentSelection.GooglePay
+        viewModel.paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
         flowController.confirm()
 
@@ -1798,8 +1798,10 @@ internal class DefaultFlowControllerTest {
 
         // Simulate that the user has selected a payment method
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult
-                .Succeeded(PaymentSelection.GooglePay, linkAccountInfo = LinkAccountUpdate.Value(null))
+            PaymentOptionsActivityResult.Succeeded(
+                paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
+                linkAccountInfo = LinkAccountUpdate.Value(null),
+            )
         )
 
         // Not enqueueing any loader response, so that the call is considered in-flight
@@ -1855,8 +1857,10 @@ internal class DefaultFlowControllerTest {
 
         // Simulate that the user has selected a payment method
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult
-                .Succeeded(PaymentSelection.GooglePay, linkAccountInfo = LinkAccountUpdate.Value(null))
+            PaymentOptionsActivityResult.Succeeded(
+                paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
+                linkAccountInfo = LinkAccountUpdate.Value(null),
+            )
         )
 
         mockLoader.enqueueFailure()
@@ -2052,7 +2056,7 @@ internal class DefaultFlowControllerTest {
         flowController.onPaymentOptionResult(
             PaymentOptionsActivityResult
                 .Succeeded(
-                    paymentSelection = PaymentSelection.GooglePay,
+                    paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
                     linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
         )

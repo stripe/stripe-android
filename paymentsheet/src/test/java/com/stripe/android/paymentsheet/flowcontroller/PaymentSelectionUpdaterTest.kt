@@ -42,7 +42,9 @@ class PaymentSelectionUpdaterTest {
 
     @Test
     fun `Uses new payment selection if there's no existing one`() {
-        val newState = mockPaymentSheetStateWithPaymentIntent(paymentSelection = PaymentSelection.GooglePay)
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
+        )
         val updater = createUpdater()
         val result = updater(
             selection = null,
@@ -51,7 +53,7 @@ class PaymentSelectionUpdaterTest {
             newConfig = defaultPaymentSheetConfiguration,
             walletButtonsAlreadyShown = false,
         )
-        assertThat(result).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(result).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @Test
@@ -345,7 +347,7 @@ class PaymentSelectionUpdaterTest {
 
     @Test
     fun `PaymentSelection is preserved when config changes are not volatile`() {
-        val existingSelection = PaymentSelection.GooglePay
+        val existingSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
         @Suppress("DEPRECATION")
         val newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -406,7 +408,7 @@ class PaymentSelectionUpdaterTest {
 
     @Test
     fun `PaymentSelection is not preserved when config changes are volatile`() {
-        val existingSelection = PaymentSelection.GooglePay
+        val existingSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
         val newConfig = defaultPaymentSheetConfiguration.newBuilder()
             .defaultBillingDetails(PaymentSheet.BillingDetails(email = "hi-jay@example.com"))
@@ -468,7 +470,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -488,7 +490,7 @@ class PaymentSelectionUpdaterTest {
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(result).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @OptIn(WalletButtonsPreview::class)

@@ -85,7 +85,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
     @Test
     fun `configure sets state to previousSelection`() = testScenario(
         selectionChooser = {
-            PaymentSelection.GooglePay
+            PaymentSelection.GooglePay(shippingAddressParameters = null)
         },
     ) {
         configurationHandler.emit(
@@ -96,7 +96,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             )
         )
 
-        selectionHolder.setSelection(PaymentSelection.GooglePay)
+        selectionHolder.setSelection(PaymentSelection.GooglePay(shippingAddressParameters = null))
         assertThat(confirmationStateHolder.state).isNull()
 
         assertThat(
@@ -108,7 +108,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         stateHelper.stateTurbine.awaitItem().let { state ->
             assertThat(state).isNotNull()
             assertThat(state?.confirmationState?.paymentMethodMetadata).isNotNull()
-            assertThat(state?.confirmationState?.selection).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(state?.confirmationState?.selection)
+                .isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         }
     }
 
@@ -165,7 +166,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             Result.success(
                 createPaymentElementLoaderState(
                     isGooglePayReady = true,
-                    paymentSelection = PaymentSelection.GooglePay,
+                    paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
                 )
             )
         )

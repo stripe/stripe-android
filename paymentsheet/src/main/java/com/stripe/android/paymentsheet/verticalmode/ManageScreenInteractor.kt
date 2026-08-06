@@ -231,7 +231,7 @@ internal class DefaultManageScreenInteractor(
                 null,
                 is PaymentSelection.ExternalPaymentMethod,
                 is PaymentSelection.CustomPaymentMethod,
-                PaymentSelection.GooglePay,
+                is PaymentSelection.GooglePay,
                 is PaymentSelection.Link,
                 is PaymentSelection.New -> return null
                 is PaymentSelection.Saved -> selection.paymentMethod.id

@@ -156,7 +156,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             currentSelection.filter { selection ->
                 selection is PaymentSelection.Saved ||
                     selection is PaymentSelection.Link ||
-                    selection == PaymentSelection.GooglePay
+                    selection is PaymentSelection.GooglePay
             }.collect { selection ->
                 if (selection != _screenSelection.value) {
                     _screenSelection.value = selection

@@ -51,11 +51,11 @@ internal class DefaultEmbeddedSelectionChooserTest {
             ),
             paymentMethods = null,
             previousSelection = null,
-            newSelection = PaymentSelection.GooglePay,
+            newSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             newConfiguration = defaultConfiguration,
             formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
-        assertThat(selection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(selection).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @Test
@@ -92,7 +92,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             ),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
-            newSelection = PaymentSelection.GooglePay,
+            newSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             newConfiguration = defaultConfiguration,
             formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
@@ -148,7 +148,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             ),
             paymentMethods = PaymentMethodFixtures.createCards(3),
             previousSelection = previousSelection,
-            newSelection = PaymentSelection.GooglePay,
+            newSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             newConfiguration = defaultConfiguration,
             formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
@@ -185,7 +185,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             ),
             paymentMethods = PaymentMethodFixtures.createCards(3),
             previousSelection = previousSelection,
-            newSelection = PaymentSelection.GooglePay,
+            newSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             newConfiguration = defaultConfiguration,
             formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
@@ -224,7 +224,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             ),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
-            newSelection = PaymentSelection.GooglePay,
+            newSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             newConfiguration = defaultConfiguration,
             formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
         )
@@ -233,7 +233,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
     @Test
     fun `PaymentSelection is preserved when config changes are not volatile`() = runScenario {
-        val previousSelection = PaymentSelection.GooglePay
+        val previousSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
         val paymentMethod = PaymentMethodFixtures.createCard()
         val newSelection = PaymentSelection.Saved(paymentMethod)
 
@@ -254,7 +254,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
     @Test
     fun `PaymentSelection is not preserved when config changes are volatile`() = runScenario {
-        val previousSelection = PaymentSelection.GooglePay
+        val previousSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
         val paymentMethod = PaymentMethodFixtures.createCard()
         val newSelection = PaymentSelection.Saved(paymentMethod)
 
@@ -456,7 +456,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
     @Test
     fun `previousConfig is set when calling choose`() = runScenario {
-        val previousSelection = PaymentSelection.GooglePay
+        val previousSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
         val paymentMethod = PaymentMethodFixtures.createCard()
         val newSelection = PaymentSelection.Saved(paymentMethod)
 

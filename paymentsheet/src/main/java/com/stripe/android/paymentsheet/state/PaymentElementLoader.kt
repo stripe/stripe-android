@@ -732,7 +732,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }?.toPaymentSelection()
         } else {
             when (val selection = savedSelection.await()) {
-                is SavedSelection.GooglePay -> PaymentSelection.GooglePay.takeIf {
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay(
+                    shippingAddressParameters = null,
+                ).takeIf {
                     !isUsingWalletButtons && isGooglePayReady
                 }
                 is SavedSelection.Link ->
@@ -759,7 +761,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         return primaryPaymentSelection
             ?: customer?.paymentMethods?.firstOrNull()?.toPaymentSelection()
-            ?: PaymentSelection.GooglePay.takeIf {
+            ?: PaymentSelection.GooglePay(
+                shippingAddressParameters = null,
+            ).takeIf {
                 !isUsingWalletButtons && isGooglePayReady
             }
     }

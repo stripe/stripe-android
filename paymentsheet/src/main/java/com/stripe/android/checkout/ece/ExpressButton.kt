@@ -67,7 +67,7 @@ internal sealed interface ExpressButton {
         val additionalEnabledNetworks: List<String>,
     ) : ExpressButton {
 
-        override fun toSelection(): PaymentSelection = PaymentSelection.GooglePay
+        override fun toSelection(): PaymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
         override fun toWalletType(): WalletType = WalletType.GooglePay
 

@@ -621,7 +621,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
             assertThat(updateSelectionTurbine.awaitItem()).isFalse()
             displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
-            assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
             assertThat(updateSelectionTurbine.awaitItem()).isFalse()
         }
     }
@@ -675,7 +675,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 walletsAllowedInHeader = emptyList()
             )
             interactor.state.value.displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
-            assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
             assertThat(updateSelectionTurbine.awaitItem()).isFalse()
 
             walletsState.value = linkAndGooglePayWalletState.copy(
@@ -687,7 +687,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
 
             // Google Pay selection is unaffected.
-            assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         }
     }
 
@@ -1400,7 +1400,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeLink() {
-        val initialPaymentSelection = PaymentSelection.GooglePay
+        val initialPaymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1423,7 +1423,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
         ) {
-            val newSelection = PaymentSelection.GooglePay
+            val newSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
             selectionSource.value = newSelection
 
             interactor.state.test {
@@ -1459,7 +1459,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun whenVerticalModeScreen_becomesCurrentScreen_updateSelectionCalled() {
-        val verticalModeSelection = PaymentSelection.GooglePay
+        val verticalModeSelection = PaymentSelection.GooglePay(shippingAddressParameters = null)
 
         runScenario(
             initialSelection = verticalModeSelection,

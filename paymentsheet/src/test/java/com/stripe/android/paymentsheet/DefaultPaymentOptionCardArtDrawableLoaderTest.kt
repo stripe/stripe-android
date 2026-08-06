@@ -32,7 +32,7 @@ internal class DefaultPaymentOptionCardArtDrawableLoaderTest {
 
     @Test
     fun `load returns null for non-saved selection`() = runScenario {
-        val result = loader.load(PaymentSelection.GooglePay)
+        val result = loader.load(PaymentSelection.GooglePay(shippingAddressParameters = null))
 
         assertThat(result).isNull()
     }

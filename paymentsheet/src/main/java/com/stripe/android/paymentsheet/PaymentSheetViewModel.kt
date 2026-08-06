@@ -447,7 +447,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkoutWithGooglePay() {
-        checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopWallet)
+        checkout(PaymentSelection.GooglePay(shippingAddressParameters = null), CheckoutIdentifier.SheetTopWallet)
     }
 
     @VisibleForTesting

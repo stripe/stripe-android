@@ -236,13 +236,13 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             workContext = testDispatcher,
             customerSheetLoader = FakeCustomerSheetLoader(
                 isGooglePayAvailable = true,
-                paymentSelection = PaymentSelection.GooglePay,
+                paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             ),
         )
         viewModel.viewState.test {
             val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.paymentSelection)
-                .isEqualTo(PaymentSelection.GooglePay)
+                .isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
             assertThat(viewState.errorMessage)
                 .isEqualTo(null)
         }
@@ -353,7 +353,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemSelected(
-                    selection = PaymentSelection.GooglePay
+                    selection = PaymentSelection.GooglePay(shippingAddressParameters = null)
                 )
             )
 
@@ -783,7 +783,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             isGooglePayAvailable = true,
-            savedPaymentSelection = PaymentSelection.GooglePay,
+            savedPaymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
                 savedSelection = CustomerSheetDataResult.success(SavedSelection.GooglePay),
             )
@@ -793,7 +793,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
             val result = awaitItem() as InternalCustomerSheetResult.Selected
-            assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         }
     }
 
@@ -1407,7 +1407,11 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
         )
 
         viewModel.viewState.test {
-            viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.GooglePay(shippingAddressParameters = null)
+                )
+            )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
             verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("google_pay"), eq(false), eq(false))
             cancelAndIgnoreRemainingEvents()
@@ -1433,7 +1437,11 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
         )
 
         viewModel.viewState.test {
-            viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.GooglePay(shippingAddressParameters = null)
+                )
+            )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
             verify(eventReporter).onConfirmPaymentMethodFailed(eq("google_pay"), eq(false), eq(false))
             cancelAndIgnoreRemainingEvents()

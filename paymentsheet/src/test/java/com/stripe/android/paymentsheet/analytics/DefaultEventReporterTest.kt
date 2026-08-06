@@ -92,7 +92,7 @@ class DefaultEventReporterTest {
             )
         )
         eventReporter.onLoadSucceeded(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             paymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata,
         )
 
@@ -137,7 +137,7 @@ class DefaultEventReporterTest {
             ),
         )
         eventReporter.onLoadSucceeded(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             paymentMethodMetadata = metadataWithCardArt,
         )
 
@@ -184,7 +184,7 @@ class DefaultEventReporterTest {
         durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateCustomerState] = 30.milliseconds
 
         eventReporter.onLoadSucceeded(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             paymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata,
         )
 
@@ -214,7 +214,7 @@ class DefaultEventReporterTest {
         )
 
         eventReporter.onLoadSucceeded(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             paymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata,
         )
 
@@ -447,7 +447,9 @@ class DefaultEventReporterTest {
             )
         )
 
-        eventReporter.onPressConfirmButton(paymentSelection = PaymentSelection.GooglePay)
+        eventReporter.onPressConfirmButton(
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
+        )
 
         val analyticEvent = analyticsEventTurbine.awaitItem()
         assertThat(analyticEvent).isEqualTo(AnalyticEvent.TappedConfirmButton("google_pay"))
@@ -1115,7 +1117,7 @@ class DefaultEventReporterTest {
         )
 
         eventReporter.onPaymentSuccess(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             deferredIntentConfirmationType = null,
             intentId = null,
         )
@@ -1140,7 +1142,7 @@ class DefaultEventReporterTest {
         )
 
         eventReporter.onPaymentSuccess(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             intentId = null,
         )
@@ -1302,7 +1304,7 @@ class DefaultEventReporterTest {
         )
 
         eventReporter.onPaymentFailure(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
             error = error,
         )
 

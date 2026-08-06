@@ -242,7 +242,7 @@ internal class DefaultCustomerSheetLoader(
     ): PaymentSelection? {
         return customerSheetSession.savedSelection?.let { selection ->
             when (selection) {
-                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay(shippingAddressParameters = null)
                 is SavedSelection.Link -> null
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.find { paymentMethod ->

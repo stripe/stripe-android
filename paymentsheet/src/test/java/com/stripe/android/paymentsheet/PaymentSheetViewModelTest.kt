@@ -1633,7 +1633,7 @@ internal class PaymentSheetViewModelTest {
     fun `On load with initial Google Pay selection, selection should be null & primary button disabled`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            initialPaymentSelection = PaymentSelection.GooglePay,
+            initialPaymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
         )
 
         viewModel.selection.test {
@@ -1652,7 +1652,7 @@ internal class PaymentSheetViewModelTest {
     fun `On load with initial Link selection, selection should be null & primary button disabled`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            initialPaymentSelection = PaymentSelection.GooglePay,
+            initialPaymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
         )
 
         viewModel.selection.test {
@@ -2558,7 +2558,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
 
-        assertThat(paymentSuccessCall.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(paymentSuccessCall.paymentSelection)
+            .isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @Test
@@ -2603,7 +2604,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
 
-        assertThat(paymentFailureCall.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(paymentFailureCall.paymentSelection)
+            .isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @Test

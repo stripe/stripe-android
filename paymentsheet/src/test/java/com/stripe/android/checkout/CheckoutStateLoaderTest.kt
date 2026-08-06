@@ -132,7 +132,7 @@ internal class CheckoutStateLoaderTest {
 
     @Test
     fun `reload routes the selection through the chooser`() = runScenario(
-        loaderSelection = PaymentSelection.GooglePay,
+        loaderSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
         chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) {
         // The committed state's selection is what the chooser must be offered as the previous
@@ -145,7 +145,7 @@ internal class CheckoutStateLoaderTest {
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         val call = chooser.lastCall
         assertThat(call?.previousSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        assertThat(call?.newSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(call?.newSelection).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @Test
@@ -174,13 +174,16 @@ internal class CheckoutStateLoaderTest {
 
         // The customer picks Google Pay after the initial load; in the single-state model that pick
         // lives on the committed state rather than a separate selection holder.
-        val afterPick = requireNotNull(stateHolder.state).copy(paymentSelection = PaymentSelection.GooglePay)
+        val afterPick = requireNotNull(stateHolder.state).copy(
+            paymentSelection = PaymentSelection.GooglePay(shippingAddressParameters = null),
+        )
 
         // A mutation reloads with the same configuration, so the chooser keeps the customer's
         // selection rather than adopting the loader's recomputed one.
         loader.reload(afterPick)
 
-        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.state?.paymentSelection)
+            .isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
     }
 
     @Test

@@ -17,7 +17,7 @@ class PaymentOptionsStateFactoryTest {
         assertThat(PaymentOptionsItem.AddCard.toPaymentSelection()).isNull()
         assertThat(
             PaymentOptionsItem.GooglePay.toPaymentSelection()
-        ).isEqualTo(PaymentSelection.GooglePay)
+        ).isEqualTo(PaymentSelection.GooglePay(shippingAddressParameters = null))
         assertThat(
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
