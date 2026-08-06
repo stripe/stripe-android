@@ -16,9 +16,9 @@ import org.mockito.kotlin.mock
 internal class FakeAddPaymentMethodInteractor(
     initialState: AddPaymentMethodInteractor.State,
     private val viewActionRecorder: ViewActionRecorder<AddPaymentMethodInteractor.ViewAction> = ViewActionRecorder(),
+    override val isLiveMode: Boolean = true,
 ) : AddPaymentMethodInteractor {
     override val state: StateFlow<AddPaymentMethodInteractor.State> = stateFlowOf(initialState)
-    override val isLiveMode: Boolean = true
 
     override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
         viewActionRecorder.record(viewAction)
