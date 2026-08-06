@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.assertCountryOnlyBillingAddressSection
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
@@ -74,13 +75,11 @@ class KlarnaDefinitionTest {
         checkEmailField(formElements, 1)
 
         val countrySection = formElements[2] as SectionElement
-        assertThat(countrySection.identifier).isEqualTo(
-            IdentifierSpec.Generic("billing_details[address][country]_section"),
+        val addressElement = assertCountryOnlyBillingAddressSection(
+            section = countrySection,
+            countryIdentifier = IdentifierSpec.Country,
         )
-        val addressElement = countrySection.fields.single() as BillingAddressElement
-        assertThat(addressElement.identifier).isEqualTo(IdentifierSpec.Country)
         val countryElement = addressElement.countryElement
-        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
         assertThat(countryElement.controller.displayItems).containsExactly(
             "🇫🇷 France",
             "🇩🇪 Germany",
@@ -91,12 +90,6 @@ class KlarnaDefinitionTest {
                 .flatMap { it.fields }
                 .filterIsInstance<BillingAddressElement>(),
         ).hasSize(1)
-        assertThat(addressElement.hiddenIdentifiers.value).containsAtLeast(
-            IdentifierSpec.Line1,
-            IdentifierSpec.City,
-            IdentifierSpec.State,
-            IdentifierSpec.PostalCode,
-        )
     }
 
     @Test
@@ -298,14 +291,9 @@ class KlarnaDefinitionTest {
 
         val countrySection = element as SectionElement
 
-        assertThat(countrySection.fields).hasSize(1)
-        val addressElement = countrySection.fields[0] as BillingAddressElement
-        assertThat(addressElement.countryElement.identifier).isEqualTo(IdentifierSpec.Country)
-        assertThat(addressElement.hiddenIdentifiers.value).containsAtLeast(
-            IdentifierSpec.Line1,
-            IdentifierSpec.City,
-            IdentifierSpec.State,
-            IdentifierSpec.PostalCode,
+        assertCountryOnlyBillingAddressSection(
+            section = countrySection,
+            countryIdentifier = IdentifierSpec.Country,
         )
     }
 

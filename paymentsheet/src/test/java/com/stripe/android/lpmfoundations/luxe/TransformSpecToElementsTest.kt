@@ -9,6 +9,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.assertCountryOnlyBillingAddressSection
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -16,7 +17,6 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
@@ -84,22 +84,16 @@ internal class TransformSpecToElementsTest {
 
         assertThat(formElements).hasSize(1)
         val section = formElements.single() as SectionElement
-        val billingAddressElement = section.fields.single() as BillingAddressElement
+        val billingAddressElement = assertCountryOnlyBillingAddressSection(
+            section = section,
+            countryIdentifier = countryIdentifier,
+        )
         val countryElement = billingAddressElement.countryElement
 
-        assertThat(section.identifier.v1).isEqualTo("payment_method_data[country]_section")
-        assertThat(billingAddressElement.identifier).isEqualTo(countryIdentifier)
-        assertThat(countryElement.identifier).isEqualTo(countryIdentifier)
         assertThat(countryElement.controller.displayItems).containsExactly("🇦🇹 Austria")
         assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
         assertThat(countryElement.getFormFieldValueFlow().first().single().first)
             .isEqualTo(countryIdentifier)
-        assertThat(billingAddressElement.hiddenIdentifiers.value).containsAtLeast(
-            IdentifierSpec.Line1,
-            IdentifierSpec.City,
-            IdentifierSpec.State,
-            IdentifierSpec.PostalCode,
-        )
     }
 
     @Test
