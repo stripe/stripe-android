@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
-import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
 internal fun interface EmbeddedFormScreenFactory {
@@ -16,7 +15,6 @@ internal class DefaultEmbeddedFormScreenFactory @Inject constructor(
         return formFactory.create(
             EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             )
         )
     }

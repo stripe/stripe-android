@@ -15,7 +15,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
@@ -91,7 +90,6 @@ internal class DefaultSheetActivityConfirmationHelperTest {
                 shouldInvokeSelectionCallback = false,
                 launchMode = EmbeddedLaunchMode.Form(
                     selectedPaymentMethodCode = "card",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                 ),
             )
         )
@@ -131,7 +129,6 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             coroutineScope = backgroundScope,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             ),
             statusBarColor = null,
         )

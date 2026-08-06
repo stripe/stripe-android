@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.FormHelper.FormType
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -102,9 +101,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
                 shouldInvokeSelectionCallback = false,
-                launchMode = EmbeddedLaunchMode.PaymentOptions(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-                ),
+                launchMode = EmbeddedLaunchMode.PaymentOptions,
             )
         )
     }
