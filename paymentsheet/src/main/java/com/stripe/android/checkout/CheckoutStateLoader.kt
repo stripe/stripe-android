@@ -73,6 +73,7 @@ internal class CheckoutStateLoader @Inject constructor(
             integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
                 isRowSelectionImmediateAction = false,
                 configuration = embeddedConfig,
+                paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
             ),
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = false,
