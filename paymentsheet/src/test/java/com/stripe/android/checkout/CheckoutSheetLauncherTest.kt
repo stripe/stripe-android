@@ -461,9 +461,7 @@ internal class CheckoutSheetLauncherTest {
             selection = null,
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions(
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-            ),
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
