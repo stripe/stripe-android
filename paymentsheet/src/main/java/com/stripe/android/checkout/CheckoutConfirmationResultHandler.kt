@@ -55,7 +55,7 @@ internal class CheckoutConfirmationResultHandler @Inject constructor(
         onSucceeded: suspend (CheckoutSessionResponse?) -> Unit,
     ) {
         // Synchronous confirmation carries the latest response. Next-action confirmation does not,
-        // so the controller retrieves the completed Checkout Session before delivering the result.
+        // so the controller retrieves the completed Checkout Session before clearing its state.
         onSucceeded(result.metadata[CheckoutSessionResponseKey])
         resultCallback.onResult(CheckoutController.Result.Completed())
     }
