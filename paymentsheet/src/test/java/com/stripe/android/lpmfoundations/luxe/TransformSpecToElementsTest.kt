@@ -22,7 +22,6 @@ import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.NameSpec
@@ -33,20 +32,17 @@ import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
-import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.EmailElement
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -66,10 +62,6 @@ internal class TransformSpecToElementsTest {
         allowedCountryCodes = setOf("AT"),
     )
 
-    private val noCountryBillingAddressPlaceholder = PlaceholderSpec(
-        field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry,
-    )
-
     private val nameSection = NameSpec()
 
     private val emailSection = EmailSpec()
@@ -82,49 +74,8 @@ internal class TransformSpecToElementsTest {
     }
 
     @Test
-    fun `CountrySpec renders country-only billing address in automatic mode`() = runTest {
-        val formElements = transformCountrySpec(
-            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-        )
-
-        assertThat(formElements).hasSize(1)
-        assertCountryOnlyBillingAddressSection(formElements.single() as SectionElement)
-    }
-
-    @Test
-    fun `CountrySpec preserves explicit no-country billing address placeholder in full mode`() = runTest {
-        val formElements = transformCountrySpec(
-            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            additionalSpecs = listOf(noCountryBillingAddressPlaceholder),
-        )
-
-        assertThat(formElements).hasSize(2)
-        assertCountryOnlyBillingAddressSection(formElements[0] as SectionElement)
-        assertFullAddressSection(
-            section = formElements[1] as SectionElement,
-            containsCountry = false,
-        )
-    }
-
-    @Test
-    fun `CountrySpec preserves generated billing address in full mode`() = runTest {
-        val formElements = transformCountrySpec(
-            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-        )
-
-        assertThat(formElements).hasSize(2)
-        assertCountryOnlyBillingAddressSection(formElements[0] as SectionElement)
-        assertFullAddressSection(
-            section = formElements[1] as SectionElement,
-            containsCountry = true,
-        )
-    }
-
-    @Test
-    fun `CountrySpec renders country-only billing address in never mode`() = runTest {
-        val formElements = transformCountrySpec(
-            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-        )
+    fun `CountrySpec transforms to a country-only billing address section`() = runTest {
+        val formElements = transformCountrySpec()
 
         assertThat(formElements).hasSize(1)
         assertCountryOnlyBillingAddressSection(formElements.single() as SectionElement)
@@ -402,21 +353,14 @@ internal class TransformSpecToElementsTest {
         assertThat(sectionElement.fields.firstOrNull()).isInstanceOf<AutocompleteAddressElement>()
     }
 
-    private fun transformCountrySpec(
-        addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
-        additionalSpecs: List<FormItemSpec> = emptyList(),
-    ): List<FormElement> {
-        return TransformSpecToElementsFactory.create(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = addressCollectionMode,
-            ),
+    private fun transformCountrySpec() =
+        TransformSpecToElementsFactory.create(
             initialValues = mapOf(countryIdentifier to "AT"),
         ).transform(
             metadata = PaymentMethodMetadataFactory.create(),
-            specs = listOf(countrySpec) + additionalSpecs,
+            specs = listOf(countrySpec),
             termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
-    }
 
     private suspend fun assertCountryOnlyBillingAddressSection(section: SectionElement) {
         val billingAddressElement = section.fields.single() as BillingAddressElement
@@ -436,20 +380,6 @@ internal class TransformSpecToElementsTest {
             IdentifierSpec.State,
             IdentifierSpec.PostalCode,
         )
-    }
-
-    private suspend fun assertFullAddressSection(
-        section: SectionElement,
-        containsCountry: Boolean,
-    ) {
-        val addressElement = section.fields.single() as AddressElement
-        val identifiers = addressElement.fields.first().map { it.identifier }
-
-        if (containsCountry) {
-            assertThat(identifiers).contains(IdentifierSpec.Country)
-        } else {
-            assertThat(identifiers).doesNotContain(IdentifierSpec.Country)
-        }
     }
 
     companion object {
