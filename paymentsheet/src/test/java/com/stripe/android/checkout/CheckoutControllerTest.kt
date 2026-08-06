@@ -405,8 +405,10 @@ internal class CheckoutControllerTest {
             checkoutStateLoader = mock(),
             stateHolder = stateHolder,
             sheetStateHolder = SheetStateHolder(SavedStateHandle()),
+            operationCoordinator = mock(),
             checkoutPresenterSubcomponentFactory = mock(),
             paymentElementCallbackIdentifier = DEFAULT_INTEGRATION_NAME,
+            savedState = mock(),
         )
 
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(

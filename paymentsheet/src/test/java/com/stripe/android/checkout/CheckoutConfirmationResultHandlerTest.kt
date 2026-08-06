@@ -158,5 +158,4 @@ internal class CheckoutConfirmationResultHandlerTest {
             testScheduler.runCurrent()
         }
     }
-
 }

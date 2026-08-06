@@ -63,11 +63,6 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
 ) {
-    private val mutex = Mutex()
-    private val pendingMutations = AtomicInteger(0)
-
-    private val _isUpdating = MutableStateFlow(false)
-
     init {
         confirmationResultHandler.register()
     }
