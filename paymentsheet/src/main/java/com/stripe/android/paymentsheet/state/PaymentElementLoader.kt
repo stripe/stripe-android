@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -306,6 +307,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         val configuration = integrationConfiguration.commonConfiguration
         val apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration)
+        eventReporter.onInit(apiConfiguration.publishableKey)
         // Validate configuration before loading
         initializationMode.validate()
         configuration.validate(

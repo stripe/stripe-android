@@ -135,8 +135,6 @@ internal class FakeEventReporter : EventReporter {
         _pmmPromotionsDisplayed.ensureAllEventsConsumed()
     }
 
-    override fun onInit() {
-    }
 
     override fun onDismiss() {
     }

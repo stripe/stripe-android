@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
@@ -52,12 +53,13 @@ internal class DefaultEventReporter @Inject internal constructor(
         origin = ORIGIN,
     )
 
-    override fun onInit() {
+    override fun onInit(publishableKey: String) {
         fireEvent(
             event = PaymentSheetEvent.Init(
                 mode = mode,
             ),
-            paymentMethodMetadata = null, // We won't have a value on init, and using null prevents a stack overflow.
+            paymentMethodMetadata = null,
+            publishableKey = publishableKey,
         )
     }
 
@@ -617,12 +619,15 @@ internal class DefaultEventReporter @Inject internal constructor(
     private fun fireEvent(
         event: PaymentSheetEvent,
         paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),
+        publishableKey: String? = null,
     ) {
         CoroutineScope(workContext).launch {
+            val additionalParams = defaultParams(paymentMethodMetadata) + event.params +
+                (publishableKey?.let { mapOf(AnalyticsFields.PUBLISHABLE_KEY to it) } ?: emptyMap())
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = defaultParams(paymentMethodMetadata) + event.params,
+                    additionalParams = additionalParams,
                 )
             )
         }

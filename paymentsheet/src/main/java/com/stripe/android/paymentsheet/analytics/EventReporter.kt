@@ -14,6 +14,11 @@ import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 
 internal interface LoadingEventReporter {
     /**
+     * PaymentSheet or FlowController have been initialized.
+     */
+    fun onInit(publishableKey: String)
+
+    /**
      * PaymentSheet or FlowController have started loading.
      */
     fun onLoadStarted(initializedViaCompose: Boolean)
@@ -45,11 +50,6 @@ internal interface LoadingEventReporter {
 
 @Suppress("TooManyFunctions")
 internal interface EventReporter : CardScanEventsReporter {
-
-    /**
-     * PaymentSheet has been instantiated or FlowController has finished its configuration.
-     */
-    fun onInit()
 
     /**
      * PaymentSheet has been dismissed by pressing the close button.

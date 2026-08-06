@@ -4981,6 +4981,7 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
+            realEventReporter = FakeEventReporter(),
         )
     }
 

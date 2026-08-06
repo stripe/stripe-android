@@ -56,7 +56,7 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onInit fires event`() = runScenario {
-        eventReporter.onInit()
+        eventReporter.onInit("pk_test_123")
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_init")
