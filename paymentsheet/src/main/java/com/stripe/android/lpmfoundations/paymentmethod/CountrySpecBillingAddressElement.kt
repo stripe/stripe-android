@@ -14,18 +14,17 @@ internal fun CountrySpec.toCountryOnlyBillingAddressSection(
     initialCountry: String?,
 ): SectionElement {
     val countryInitialValues = initialValues.toMutableMap().apply {
-        initialCountry?.let { put(apiPath, it) }
+        initialCountry?.let { put(IdentifierSpec.Country, it) }
     }
     return SectionElement.wrap(
         BillingAddressElement(
-            identifier = apiPath,
+            identifier = IdentifierSpec.Country,
             rawValuesMap = countryInitialValues,
             countryCodes = allowedCountryCodes,
             countryDropdownFieldController = DropdownFieldController(
                 CountryConfig(allowedCountryCodes),
-                initialValue = countryInitialValues[apiPath],
+                initialValue = countryInitialValues[IdentifierSpec.Country],
             ),
-            countryElementIdentifier = apiPath,
             autocompleteAddressInteractorFactory = null,
             sameAsShippingElement = null,
             shippingValuesMap = null,

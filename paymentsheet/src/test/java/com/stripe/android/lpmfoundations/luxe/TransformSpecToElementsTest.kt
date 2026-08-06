@@ -56,10 +56,7 @@ import com.stripe.android.core.R as CoreR
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementsTest {
 
-    private val countryIdentifier = IdentifierSpec.Generic("payment_method_data[country]")
-
     private val countrySpec = CountrySpec(
-        apiPath = countryIdentifier,
         allowedCountryCodes = setOf("AT"),
     )
 
@@ -84,16 +81,13 @@ internal class TransformSpecToElementsTest {
 
         assertThat(formElements).hasSize(1)
         val section = formElements.single() as SectionElement
-        val billingAddressElement = assertCountryOnlyBillingAddressSection(
-            section = section,
-            countryIdentifier = countryIdentifier,
-        )
+        val billingAddressElement = assertCountryOnlyBillingAddressSection(section = section)
         val countryElement = billingAddressElement.countryElement
 
         assertThat(countryElement.controller.displayItems).containsExactly("🇦🇹 Austria")
         assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
         assertThat(countryElement.getFormFieldValueFlow().first().single().first)
-            .isEqualTo(countryIdentifier)
+            .isEqualTo(IdentifierSpec.Country)
     }
 
     @Test

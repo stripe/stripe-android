@@ -75,10 +75,7 @@ class KlarnaDefinitionTest {
         checkEmailField(formElements, 1)
 
         val countrySection = formElements[2] as SectionElement
-        val addressElement = assertCountryOnlyBillingAddressSection(
-            section = countrySection,
-            countryIdentifier = IdentifierSpec.Country,
-        )
+        val addressElement = assertCountryOnlyBillingAddressSection(section = countrySection)
         val countryElement = addressElement.countryElement
         assertThat(countryElement.controller.displayItems).containsExactly(
             "🇫🇷 France",
@@ -291,10 +288,7 @@ class KlarnaDefinitionTest {
 
         val countrySection = element as SectionElement
 
-        assertCountryOnlyBillingAddressSection(
-            section = countrySection,
-            countryIdentifier = IdentifierSpec.Country,
-        )
+        assertCountryOnlyBillingAddressSection(section = countrySection)
     }
 
     private fun checkFullAddressField(

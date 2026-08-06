@@ -7,14 +7,13 @@ import com.stripe.android.uicore.elements.SectionElement
 
 internal fun assertCountryOnlyBillingAddressSection(
     section: SectionElement,
-    countryIdentifier: IdentifierSpec,
 ): BillingAddressElement {
-    assertThat(section.identifier.v1).isEqualTo("${countryIdentifier.v1}_section")
+    assertThat(section.identifier.v1).isEqualTo("${IdentifierSpec.Country.v1}_section")
     assertThat(section.fields).hasSize(1)
 
     val billingAddressElement = section.fields.single() as BillingAddressElement
-    assertThat(billingAddressElement.identifier).isEqualTo(countryIdentifier)
-    assertThat(billingAddressElement.countryElement.identifier).isEqualTo(countryIdentifier)
+    assertThat(billingAddressElement.identifier).isEqualTo(IdentifierSpec.Country)
+    assertThat(billingAddressElement.countryElement.identifier).isEqualTo(IdentifierSpec.Country)
     assertThat(billingAddressElement.hiddenIdentifiers.value).containsAtLeast(
         IdentifierSpec.Line1,
         IdentifierSpec.City,
