@@ -83,7 +83,11 @@ internal class CheckoutConfirmationPerformerTest {
         return CheckoutControllerStateFactory.create(
             paymentSelection = paymentSelection,
             configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
+                .expressCheckoutElement(
+                    ExpressCheckoutElement.Configuration().googlePayConfiguration(
+                        GooglePayConfiguration(GooglePayConfiguration.Environment.Test)
+                    )
+                )
                 .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
         )

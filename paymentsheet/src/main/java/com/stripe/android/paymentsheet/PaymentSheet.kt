@@ -3621,15 +3621,36 @@ class PaymentSheet internal constructor(
      */
     @Parcelize
     @Poko
-    class GooglePayConfiguration @JvmOverloads constructor(
+    class GooglePayConfiguration internal constructor(
         internal val environment: Environment,
         internal val countryCode: String,
-        internal val currencyCode: String? = null,
-        internal val amount: Long? = null,
-        internal val label: String? = null,
-        internal val buttonType: ButtonType = ButtonType.Pay,
-        internal val additionalEnabledNetworks: List<String> = emptyList()
+        internal val currencyCode: String?,
+        internal val amount: Long?,
+        internal val label: String?,
+        internal val buttonType: ButtonType,
+        internal val additionalEnabledNetworks: List<String>,
+        internal val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
     ) : Parcelable {
+
+        @JvmOverloads
+        constructor(
+            environment: Environment,
+            countryCode: String,
+            currencyCode: String? = null,
+            amount: Long? = null,
+            label: String? = null,
+            buttonType: ButtonType = ButtonType.Pay,
+            additionalEnabledNetworks: List<String> = emptyList(),
+        ) : this(
+            environment = environment,
+            countryCode = countryCode,
+            currencyCode = currencyCode,
+            amount = amount,
+            label = label,
+            buttonType = buttonType,
+            additionalEnabledNetworks = additionalEnabledNetworks,
+            shippingAddressParameters = null,
+        )
 
         enum class Environment {
             Production,

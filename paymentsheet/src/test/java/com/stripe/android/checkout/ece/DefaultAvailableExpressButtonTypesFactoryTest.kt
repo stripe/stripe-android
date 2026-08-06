@@ -25,7 +25,7 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     fun `create filters out google pay when configuration is missing`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay),
-            googlePayConfiguration = null,
+            includeGooglePayConfiguration = false,
         )
 
         assertThat(availableExpressButtonTypes).isEmpty()
@@ -83,14 +83,18 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     private fun create(
         availableWallets: List<WalletType>,
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
-        googlePayConfiguration: GooglePayConfiguration.State? = TEST_GOOGLE_PAY_CONFIGURATION,
+        includeGooglePayConfiguration: Boolean = true,
     ): List<ExpressButtonType> {
+        if (includeGooglePayConfiguration) {
+            configuration.googlePayConfiguration(
+                GooglePayConfiguration(GooglePayConfiguration.Environment.Test)
+            )
+        }
         return DefaultAvailableExpressButtonTypesFactory().create(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 availableWallets = availableWallets,
             ),
             expressCheckoutElementConfiguration = configuration.build(),
-            googlePayConfiguration = googlePayConfiguration,
         )
     }
 

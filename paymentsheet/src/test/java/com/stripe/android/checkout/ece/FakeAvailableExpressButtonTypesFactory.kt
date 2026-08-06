@@ -19,7 +19,6 @@ internal class FakeAvailableExpressButtonTypesFactory(
     override fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
-        googlePayConfiguration: GooglePayConfiguration.State?,
     ): List<ExpressButtonType> {
         return availableExpressButtonTypes
     }

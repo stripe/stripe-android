@@ -61,7 +61,11 @@ internal class CheckoutStateLoaderTest {
     fun `loadInitial commits common configuration derived from the controller configuration`() = runScenario {
         loader.loadInitial(
             configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
+                .expressCheckoutElement(
+                    ExpressCheckoutElement.Configuration().googlePayConfiguration(
+                        GooglePayConfiguration(GooglePayConfiguration.Environment.Test)
+                    )
+                )
                 .build(),
             checkoutSessionResponse = response(merchantCountry = "US"),
         )

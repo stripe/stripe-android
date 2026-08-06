@@ -233,7 +233,9 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
                     )
             )
         if (googlePayConfiguration != null) {
-            builder.googlePayConfiguration(googlePayConfiguration)
+            builder.expressCheckoutElement(
+                ExpressCheckoutElement.Configuration().googlePayConfiguration(googlePayConfiguration)
+            )
         }
         return builder.build()
     }

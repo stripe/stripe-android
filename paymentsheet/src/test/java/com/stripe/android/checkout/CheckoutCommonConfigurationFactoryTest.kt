@@ -27,11 +27,13 @@ internal class CheckoutCommonConfigurationFactoryTest {
                         BillingDetailsCollectionConfiguration().address(Full)
                     )
             )
-            .googlePayConfiguration(
-                GooglePayConfiguration(GooglePayConfiguration.Environment.Production)
-                    .label("Total")
-                    .buttonType(GooglePayConfiguration.ButtonType.Checkout)
-                    .additionalEnabledNetworks(listOf("INTERAC"))
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration().googlePayConfiguration(
+                    GooglePayConfiguration(GooglePayConfiguration.Environment.Production)
+                        .label("Total")
+                        .buttonType(GooglePayConfiguration.ButtonType.Checkout)
+                        .additionalEnabledNetworks(listOf("INTERAC"))
+                )
             )
             .build()
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -160,7 +162,9 @@ internal class CheckoutCommonConfigurationFactoryTest {
                     )
             )
         if (googlePayConfiguration != null) {
-            builder.googlePayConfiguration(googlePayConfiguration)
+            builder.expressCheckoutElement(
+                ExpressCheckoutElement.Configuration().googlePayConfiguration(googlePayConfiguration)
+            )
         }
         return builder.build()
     }

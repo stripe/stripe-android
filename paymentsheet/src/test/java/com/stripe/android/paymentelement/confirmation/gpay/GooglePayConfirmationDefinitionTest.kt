@@ -381,6 +381,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -417,6 +418,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -454,6 +456,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -492,6 +495,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -546,6 +550,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = resolvedDisplayItems,
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -622,6 +627,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -654,6 +660,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 

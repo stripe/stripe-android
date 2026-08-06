@@ -49,18 +49,20 @@ internal class CheckoutStateLoader @Inject constructor(
         collectedDetails: CheckoutCollectedDetails,
         carryForward: CarryForward,
     ) {
+        val resolvedConfiguration = configuration.resolveExpressCheckoutElementConfiguration(response)
+
         // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
         // reused when the currencies haven't changed.
         val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
 
         val embeddedConfig = embeddedConfigurationFactory.create(
-            configuration = configuration,
+            configuration = resolvedConfiguration,
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
 
         val commonConfiguration = commonConfigurationFactory.create(
-            configuration = configuration,
+            configuration = resolvedConfiguration,
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
@@ -93,7 +95,7 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         stateHolder.state = CheckoutControllerState(
-            configuration = configuration,
+            configuration = resolvedConfiguration,
             checkoutSessionResponse = response,
             flagImages = flagImages,
             collectedDetails = collectedDetails,

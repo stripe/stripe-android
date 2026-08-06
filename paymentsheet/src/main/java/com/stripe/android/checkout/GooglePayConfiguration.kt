@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
 
@@ -55,6 +56,7 @@ class GooglePayConfiguration(
         val label: String?,
         val buttonType: ButtonType,
         val additionalEnabledNetworks: List<String>,
+        val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
     ) : Parcelable
 
     internal fun build(): State = State(
@@ -62,6 +64,7 @@ class GooglePayConfiguration(
         label = label,
         buttonType = buttonType,
         additionalEnabledNetworks = additionalEnabledNetworks.toList(),
+        shippingAddressParameters = null,
     )
 
     @CheckoutSessionPreview

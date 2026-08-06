@@ -1,11 +1,13 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout
 
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
-@OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutController.Configuration.State.toBillingDetailsCollectionConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.BillingDetailsCollectionConfiguration =
@@ -13,15 +15,36 @@ internal fun CheckoutController.Configuration.State.toBillingDetailsCollectionCo
         .reconcile(checkoutSessionResponse.requiresBillingAddress)
         .asPaymentSheet()
 
-@OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutController.Configuration.State.toGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
     checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
-        googlePayConfiguration?.asPaymentSheet(merchantCountry)
+        expressCheckoutElementConfiguration.googlePayConfiguration?.asPaymentSheet(merchantCountry)
     }
 
-@OptIn(CheckoutSessionPreview::class)
+internal fun CheckoutController.Configuration.State.resolveExpressCheckoutElementConfiguration(
+    checkoutSessionResponse: CheckoutSessionResponse,
+): CheckoutController.Configuration.State {
+    val expressConfiguration = expressCheckoutElementConfiguration
+    val googlePayConfiguration = expressConfiguration.googlePayConfiguration ?: return this
+    val shippingAddressParameters = if (expressConfiguration.shippingAddressRequired) {
+        GooglePayJsonFactory.ShippingAddressParameters(
+            isRequired = true,
+            allowedCountryCodes = checkoutSessionResponse.allowedShippingCountries.orEmpty().toSet(),
+        )
+    } else {
+        null
+    }
+
+    return copy(
+        expressCheckoutElementConfiguration = expressConfiguration.copy(
+            googlePayConfiguration = googlePayConfiguration.copy(
+                shippingAddressParameters = shippingAddressParameters,
+            ),
+        ),
+    )
+}
+
 internal fun CheckoutCollectedDetails.toBillingDetails(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(
@@ -31,7 +54,6 @@ internal fun CheckoutCollectedDetails.toBillingDetails(
     phone = billingPhoneNumber,
 )
 
-@OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutCollectedDetails.toShippingDetails(): AddressDetails = AddressDetails(
     name = shippingName,
     address = shippingAddress?.asPaymentSheet(),

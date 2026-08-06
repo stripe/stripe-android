@@ -9,9 +9,12 @@ internal fun GooglePayConfiguration.State.asPaymentSheet(
 ): PaymentSheet.GooglePayConfiguration = PaymentSheet.GooglePayConfiguration(
     environment = environment.asPaymentSheet(),
     countryCode = merchantCountry,
+    currencyCode = null,
+    amount = null,
     label = label,
     buttonType = buttonType.asPaymentSheet(),
     additionalEnabledNetworks = additionalEnabledNetworks,
+    shippingAddressParameters = shippingAddressParameters,
 )
 
 @OptIn(CheckoutSessionPreview::class)

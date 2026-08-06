@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.GooglePayConfiguration
@@ -150,7 +151,11 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     private fun googlePayState(): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
+                .expressCheckoutElement(
+                    ExpressCheckoutElement.Configuration().googlePayConfiguration(
+                        GooglePayConfiguration(GooglePayConfiguration.Environment.Test)
+                    )
+                )
                 .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
         )

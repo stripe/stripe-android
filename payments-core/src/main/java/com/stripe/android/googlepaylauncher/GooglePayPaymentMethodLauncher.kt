@@ -275,6 +275,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             publishableKey = publishableKey,
             displayItems = displayItems,
             billingEmailOverride = billingEmailOverride,
+            shippingAddressParameters = null,
         )
     }
 

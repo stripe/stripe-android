@@ -147,6 +147,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 displayItems = displayItems,
                 isEmailRequired = isEmailRequired,
                 billingEmailOverride = billingEmailOverride,
+                shippingAddressParameters = googlePay.shippingAddressParameters,
             ),
         )
     }

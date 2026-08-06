@@ -143,7 +143,11 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         )
         stateHolder.state = CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
+                .expressCheckoutElement(
+                    ExpressCheckoutElement.Configuration().googlePayConfiguration(
+                        GooglePayConfiguration(GooglePayConfiguration.Environment.Test)
+                    )
+                )
                 .expressCheckoutElement(ExpressCheckoutElement.Configuration())
                 .build(),
             paymentMethodMetadata = paymentMethodMetadata,

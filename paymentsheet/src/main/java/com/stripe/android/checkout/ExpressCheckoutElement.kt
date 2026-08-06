@@ -31,16 +31,8 @@ class ExpressCheckoutElement @Inject internal constructor(
             Never,
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @CheckoutSessionPreview
-        enum class GooglePayVisibility {
-            Auto,
-            Never,
-        }
-
         private var linkVisibility: LinkVisibility = LinkVisibility.Auto
-        private var googlePayVisibility: GooglePayVisibility = GooglePayVisibility.Auto
-
+        private var googlePayConfiguration: GooglePayConfiguration? = null
         private var shippingAddressRequired: Boolean = false
 
         fun linkVisibility(
@@ -49,10 +41,10 @@ class ExpressCheckoutElement @Inject internal constructor(
             this.linkVisibility = linkVisibility
         }
 
-        fun googlePayVisibility(
-            googlePayVisibility: GooglePayVisibility
+        fun googlePayConfiguration(
+            googlePayConfiguration: GooglePayConfiguration,
         ): Configuration = apply {
-            this.googlePayVisibility = googlePayVisibility
+            this.googlePayConfiguration = googlePayConfiguration
         }
 
         fun shippingAddressRequired(
@@ -64,13 +56,13 @@ class ExpressCheckoutElement @Inject internal constructor(
         @Parcelize
         internal data class State(
             val linkVisibility: LinkVisibility,
-            val googlePayVisibility: GooglePayVisibility,
+            val googlePayConfiguration: GooglePayConfiguration.State?,
             val shippingAddressRequired: Boolean,
         ) : Parcelable
 
         internal fun build(): State = State(
             linkVisibility = linkVisibility,
-            googlePayVisibility = googlePayVisibility,
+            googlePayConfiguration = googlePayConfiguration?.build(),
             shippingAddressRequired = shippingAddressRequired,
         )
     }
