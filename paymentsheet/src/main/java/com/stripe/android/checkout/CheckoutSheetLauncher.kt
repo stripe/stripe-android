@@ -65,25 +65,15 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
-            }
-            is EmbeddedActivityResult.Cancelled -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-            }
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
+            is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
         }
     }
 
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
-            }
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
         }
@@ -91,17 +81,23 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
-            }
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
             is EmbeddedActivityResult.Cancelled -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                applyCustomerState(result.customerState)
                 clearStaleSelection()
             }
             is EmbeddedActivityResult.Error -> Unit
         }
+    }
+
+    private fun applyCompleteResult(result: EmbeddedActivityResult.Complete) {
+        applyCustomerState(result.customerState)
+        selectionHolder.setPreviousNewSelections(result.previousNewSelections)
+        selectionHolder.setSelection(result.selection)
+    }
+
+    private fun applyCustomerState(customerState: CustomerState?) {
+        customerState?.let { customerStateHolder.setCustomerState(it) }
     }
 
     private fun clearStaleSelection() {
