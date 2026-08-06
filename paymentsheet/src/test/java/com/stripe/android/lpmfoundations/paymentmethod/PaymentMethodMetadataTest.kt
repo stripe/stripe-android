@@ -628,7 +628,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formElementsForCode uses one shared full billing address`() = runTest {
+    fun `formElementsForCode preserves Klarna country and full address sections`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -649,15 +649,23 @@ internal class PaymentMethodMetadataTest {
         val sectionFields = formElement
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
-        val addressElements = sectionFields.filterIsInstance<BillingAddressElement>()
+        val countryAddressElements = sectionFields.filterIsInstance<BillingAddressElement>()
+        val fullAddressElements = sectionFields.filterIsInstance<AddressElement>()
 
-        assertThat(addressElements).hasSize(1)
-        val addressElement = addressElements.single()
-        assertThat(addressElement.identifier).isEqualTo(IdentifierSpec.BillingAddress)
-        assertThat(addressElement.countryElement.identifier).isEqualTo(IdentifierSpec.Country)
-        assertThat(addressElement.hiddenIdentifiers.value).isEmpty()
+        assertThat(countryAddressElements).hasSize(1)
+        val countryAddressElement = countryAddressElements.single()
+        assertThat(countryAddressElement.identifier).isEqualTo(IdentifierSpec.Country)
+        assertThat(countryAddressElement.countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+        assertThat(countryAddressElement.hiddenIdentifiers.value).containsAtLeast(
+            IdentifierSpec.Line1,
+            IdentifierSpec.City,
+            IdentifierSpec.State,
+            IdentifierSpec.PostalCode,
+        )
+        assertThat(fullAddressElements).hasSize(1)
+        assertThat(fullAddressElements.single().fields.first().map { it.identifier })
+            .doesNotContain(IdentifierSpec.Country)
         assertThat(sectionFields.filterIsInstance<CountryElement>()).isEmpty()
-        assertThat(sectionFields.filterIsInstance<AddressElement>()).isEmpty()
     }
 
     @Test

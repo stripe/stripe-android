@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
@@ -71,6 +72,21 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
                     ),
                 )
                     .forEach { element(it) }
+
+                if (
+                    metadata.billingDetailsCollectionConfiguration.address ==
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                ) {
+                    AddressSpec(
+                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration
+                            .allowedBillingCountries,
+                        hideCountry = true,
+                    ).transform(
+                        initialValues = arguments.initialValues,
+                        shippingValues = arguments.shippingValues,
+                        autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
+                    ).forEach { element(it) }
+                }
 
                 if (KlarnaDefinition.requiresMandate(metadata)) {
                     builder.footer(
