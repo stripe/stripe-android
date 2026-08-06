@@ -616,6 +616,31 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
+    fun `country switches back to supported after focus loss re-emits OnValues`() = runScenario(
+        autocompleteCountries = setOf("US")
+    ) {
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        // Switching to an unsupported country expands the form.
+        countryFlow.value = "CA"
+        advanceTimeBy(500)
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnValues(mapOf(IdentifierSpec.Country to "CA"))
+        )
+
+        // Expanding removes the inline field from composition, so focus is lost. The country
+        // observation must survive this so the form can revert when a supported country returns.
+        delegate.onFocusLost()
+
+        // Switching back to a supported country must re-emit so the form returns to inline mode.
+        countryFlow.value = "US"
+        advanceTimeBy(500)
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnValues(mapOf(IdentifierSpec.Country to "US"))
+        )
+    }
+
+    @Test
     fun `calling observeQueryChanges again cancels previous observation`() =
         runScenario {
             fakePlacesClient.findPredictionsResult = Result.success(
