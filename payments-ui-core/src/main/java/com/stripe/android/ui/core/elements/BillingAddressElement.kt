@@ -45,7 +45,6 @@ sealed interface BillingAddressCollectionMode {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun cardBillingAddressCollectionMode(
     addressCollectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
-    requiresBillingAddressForAutomaticTax: Boolean,
 ): BillingAddressCollectionMode {
     return when (addressCollectionMode) {
         BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> BillingAddressCollectionMode.Never
@@ -54,11 +53,6 @@ fun cardBillingAddressCollectionMode(
             val additionalFieldsByCountry = buildMap {
                 listOf("US", "GB", "CA").forEach { countryCode ->
                     put(countryCode, setOf(IdentifierSpec.PostalCode))
-                }
-                if (requiresBillingAddressForAutomaticTax) {
-                    additionalAutomaticTaxFieldsByCountry.forEach { (countryCode, fields) ->
-                        put(countryCode, get(countryCode).orEmpty() + fields)
-                    }
                 }
             }
             BillingAddressCollectionMode.Country(additionalFieldsByCountry)
@@ -239,5 +233,31 @@ class BillingAddressElement(
 
     override fun onValidationStateChanged(isValidating: Boolean) {
         addressElement.onValidationStateChanged(isValidating)
+    }
+
+    fun withAdditionalFields(
+        additionalFieldsByCountry: Map<String, Set<IdentifierSpec>>,
+        sameAsShippingElement: SameAsShippingElement?,
+    ): BillingAddressElement {
+        val widenedCollectionMode = when (val mode = configuration.addressCollectionMode) {
+            BillingAddressCollectionMode.Never -> mode
+            BillingAddressCollectionMode.Full -> mode
+            is BillingAddressCollectionMode.Country -> BillingAddressCollectionMode.Country(
+                additionalFieldsByCountry = buildMap {
+                    putAll(mode.additionalFieldsByCountry)
+                    additionalFieldsByCountry.forEach { (countryCode, additionalFields) ->
+                        put(countryCode, get(countryCode).orEmpty() + additionalFields)
+                    }
+                }
+            )
+        }
+
+        return BillingAddressElement(
+            configuration = configuration.copy(
+                addressCollectionMode = widenedCollectionMode,
+            ),
+            countryDropdownFieldController = countryDropdownFieldController,
+            sameAsShippingElement = sameAsShippingElement,
+        )
     }
 }

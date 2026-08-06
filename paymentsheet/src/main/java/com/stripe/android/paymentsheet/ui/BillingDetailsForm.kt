@@ -57,7 +57,6 @@ internal class BillingDetailsForm(
                     AddressCollectionMode.Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                     AddressCollectionMode.Full -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                 },
-                requiresBillingAddressForAutomaticTax = false,
             ),
             collectionConfiguration = BillingDetailsCollectionConfiguration(
                 address = when (addressCollectionMode) {
