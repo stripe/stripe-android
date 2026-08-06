@@ -99,6 +99,63 @@ internal class MediaPipeFaceDetectorAnalyzerTest {
         assertThat(pose.yaw).isEqualTo(unroundedYaw.roundToMaxDecimals(4))
     }
 
+    @Test
+    fun `bounding box maps to full frame for landscape input`() {
+        val fullFrame = toFullFrame(
+            BoundingBox(0.1f, 0.2f, 0.5f, 0.6f),
+            inputWidth = 200,
+            inputHeight = 100
+        )
+
+        assertThat(fullFrame.left).isWithin(0.0001f).of(0.3f)
+        assertThat(fullFrame.top).isWithin(0.0001f).of(0.2f)
+        assertThat(fullFrame.width).isWithin(0.0001f).of(0.25f)
+        assertThat(fullFrame.height).isWithin(0.0001f).of(0.6f)
+    }
+
+    @Test
+    fun `bounding box maps to full frame for portrait input`() {
+        val fullFrame = toFullFrame(
+            BoundingBox(0.1f, 0.2f, 0.5f, 0.6f),
+            inputWidth = 100,
+            inputHeight = 200
+        )
+
+        assertThat(fullFrame.left).isWithin(0.0001f).of(0.1f)
+        assertThat(fullFrame.top).isWithin(0.0001f).of(0.35f)
+        assertThat(fullFrame.width).isWithin(0.0001f).of(0.5f)
+        assertThat(fullFrame.height).isWithin(0.0001f).of(0.3f)
+    }
+
+    @Test
+    fun `bounding box mapping is identity for square input`() {
+        val fullFrame = toFullFrame(
+            BoundingBox(0.1f, 0.2f, 0.5f, 0.6f),
+            inputWidth = 100,
+            inputHeight = 100
+        )
+
+        assertThat(fullFrame.left).isWithin(0.0001f).of(0.1f)
+        assertThat(fullFrame.top).isWithin(0.0001f).of(0.2f)
+        assertThat(fullFrame.width).isWithin(0.0001f).of(0.5f)
+        assertThat(fullFrame.height).isWithin(0.0001f).of(0.6f)
+    }
+
+    @Test
+    fun `toFullFrame returns original box for zero-size input`() {
+        val box = BoundingBox(0.1f, 0.2f, 0.5f, 0.6f)
+
+        assertThat(toFullFrame(box, inputWidth = 0, inputHeight = 0)).isSameInstanceAs(box)
+    }
+
+    private fun toFullFrame(
+        box: BoundingBox,
+        inputWidth: Int,
+        inputHeight: Int
+    ): BoundingBox = with(MediaPipeFaceDetectorAnalyzer) {
+        box.toFullFrame(inputWidth = inputWidth, inputHeight = inputHeight)
+    }
+
     private fun yawRotationMatrix(yawRadians: Double): FloatArray {
         val cosine = cos(yawRadians).toFloat()
         val sine = sin(yawRadians).toFloat()

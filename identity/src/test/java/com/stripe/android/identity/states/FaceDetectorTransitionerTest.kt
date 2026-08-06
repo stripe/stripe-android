@@ -177,6 +177,119 @@ internal class FaceDetectorTransitionerTest {
     }
 
     @Test
+    fun `Found shows move closer after three consecutive too-far frames`() = runBlocking {
+        val transitioner = FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
+        whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
+
+        var foundState = IdentityScanState.Found(
+            IdentityScanState.ScanType.SELFIE,
+            transitioner,
+            reachedStateAt = mockReachedStateAt
+        )
+        repeat(2) {
+            foundState = transitioner.transitionFromFound(
+                foundState,
+                mock(),
+                TOO_FAR_OUTPUT
+            ) as IdentityScanState.Found
+            assertThat(foundState.feedbackRes).isNull()
+        }
+
+        val resultState = transitioner.transitionFromFound(
+            foundState,
+            mock(),
+            TOO_FAR_OUTPUT
+        ) as IdentityScanState.Found
+
+        assertThat(resultState.feedbackRes).isEqualTo(R.string.stripe_selfie_move_closer)
+    }
+
+    @Test
+    fun `move closer feedback is not shown during side captures`() = runBlocking {
+        val transitioner = FaceDetectorTransitioner(
+            SELFIE_CAPTURE_PAGE.copy(numSamples = 1),
+            sideCapturePromptDuration = 0,
+            enable3DFaceCapture = true
+        )
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+        transitioner.transitionFromInitial(
+            IdentityScanState.Initial(
+                IdentityScanState.ScanType.SELFIE,
+                transitioner
+            ),
+            mock(),
+            VALID_OUTPUT
+        )
+        var sideInitial = transitioner.transitionFromSatisfied(
+            acknowledgedSatisfied(transitioner),
+            mock(),
+            VALID_OUTPUT
+        ) as IdentityScanState.Initial
+        assertThat(transitioner.activeCapture).isEqualTo(FaceDetectorTransitioner.Capture.RIGHT)
+
+        repeat(3) {
+            sideInitial = transitioner.transitionFromInitial(
+                sideInitial,
+                mock(),
+                TOO_FAR_OUTPUT
+            ) as IdentityScanState.Initial
+        }
+
+        assertThat(sideInitial.feedbackRes).isNull()
+    }
+
+    @Test
+    fun `move closer streak resets when capture restarts from Unsatisfied`() = runBlocking {
+        val transitioner = FaceDetectorTransitioner(
+            SELFIE_CAPTURE_PAGE,
+            stayInFoundDuration = 0
+        )
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+        var initialState = IdentityScanState.Initial(
+            IdentityScanState.ScanType.SELFIE,
+            transitioner
+        )
+        repeat(2) {
+            initialState = transitioner.transitionFromInitial(
+                initialState,
+                mock(),
+                TOO_FAR_OUTPUT
+            ) as IdentityScanState.Initial
+        }
+
+        whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
+        val unsatisfied = transitioner.transitionFromFound(
+            IdentityScanState.Found(
+                IdentityScanState.ScanType.SELFIE,
+                transitioner,
+                reachedStateAt = mockReachedStateAt
+            ),
+            mock(),
+            INVALID_OUTPUT
+        )
+        assertThat(unsatisfied).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
+
+        var restartedInitial = transitioner.transitionFromUnsatisfied(
+            unsatisfied as IdentityScanState.Unsatisfied,
+            mock(),
+            mock()
+        ) as IdentityScanState.Initial
+
+        // The streak was cleared on restart, so two more too-far frames don't show feedback.
+        repeat(2) {
+            restartedInitial = transitioner.transitionFromInitial(
+                restartedInitial,
+                mock(),
+                TOO_FAR_OUTPUT
+            ) as IdentityScanState.Initial
+        }
+        assertThat(restartedInitial.feedbackRes).isNull()
+    }
+
+    @Test
     fun `Initial validates MediaPipe face using full-frame bounding box`() = runBlocking {
         val transitioner = FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
         transitioner.timeoutAt = mockNeverTimeoutClockMark

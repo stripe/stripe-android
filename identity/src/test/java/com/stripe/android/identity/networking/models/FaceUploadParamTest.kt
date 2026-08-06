@@ -182,6 +182,24 @@ internal class FaceUploadParamTest {
     }
 
     @Test
+    fun `create uses full frame bounding box when available`() {
+        val frameData = FaceFrameDataParam.create(
+            selfieFrame = selfieFrame(
+                output = FaceDetectorOutput(
+                    boundingBox = BoundingBox(0f, 0f, 0.1f, 0.1f),
+                    resultScore = 0.9f,
+                    fullFrameBoundingBox = BoundingBox(0.125f, 0.2f, 0.375f, 0.6f)
+                )
+            ),
+            faceScoreVariance = 0.1f,
+            captureOrder = null,
+            cameraLensModel = null
+        )
+
+        assertThat(frameData.bbox).containsExactly(25, 20, 75, 60).inOrder()
+    }
+
+    @Test
     fun `create omits pose and camera info when unavailable`() {
         val frameData = FaceFrameDataParam.create(
             selfieFrame = selfieFrame(

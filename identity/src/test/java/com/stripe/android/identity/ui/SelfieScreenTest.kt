@@ -155,6 +155,49 @@ class SelfieScreenTest {
     }
 
     @Test
+    fun verifyMoveCloserStatusInInitialState() {
+        testSelfieScanScreen(
+            scannerState = IdentityScanViewModel.State.Scanning(
+                IdentityScanState.Initial(
+                    IdentityScanState.ScanType.SELFIE,
+                    mock(),
+                    R.string.stripe_selfie_move_closer
+                )
+            ),
+            messageId = R.string.stripe_position_selfie
+        ) {
+            onNodeWithTag(SELFIE_SCAN_STATUS_TAG)
+                .assertTextEquals(context.getString(R.string.stripe_selfie_move_closer))
+            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertDoesNotExist()
+            onNodeWithTag(SCAN_VIEW_TAG).assertExists()
+            onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertExists()
+            onNodeWithTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG).assertDoesNotExist()
+            onNodeWithTag(SELFIE_CAPTURED_CHECK_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun verifyMoveCloserStatusInFoundState() {
+        testSelfieScanScreen(
+            scannerState = IdentityScanViewModel.State.Scanning(
+                IdentityScanState.Found(
+                    IdentityScanState.ScanType.SELFIE,
+                    mock(),
+                    feedbackRes = R.string.stripe_selfie_move_closer
+                )
+            ),
+            messageId = R.string.stripe_capturing
+        ) {
+            onNodeWithTag(SELFIE_SCAN_STATUS_TAG)
+                .assertTextEquals(context.getString(R.string.stripe_selfie_move_closer))
+            onNodeWithTag(SCAN_VIEW_TAG).assertExists()
+            onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertExists()
+            onNodeWithTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG).assertExists()
+            onNodeWithTag(SELFIE_CAPTURED_CHECK_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
     fun verifySatisfiedScanningState() {
         testSelfieScanScreen(
             scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Satisfied>()),

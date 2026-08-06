@@ -162,7 +162,8 @@ internal class MediaPipeFaceDetectorAnalyzer(
             )
         }
 
-        private fun BoundingBox.toFullFrame(
+        @VisibleForTesting
+        internal fun BoundingBox.toFullFrame(
             inputWidth: Int,
             inputHeight: Int
         ): BoundingBox {
