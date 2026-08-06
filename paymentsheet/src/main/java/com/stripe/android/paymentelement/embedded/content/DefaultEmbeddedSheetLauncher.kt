@@ -18,7 +18,6 @@ import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -187,7 +186,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             promotion = promotion,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             ),
         )
         activityLauncher.launch(args)
@@ -244,9 +242,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = null,
-            launchMode = EmbeddedLaunchMode.PaymentOptions(
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-            ),
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         activityLauncher.launch(args)
     }

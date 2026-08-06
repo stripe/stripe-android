@@ -21,7 +21,6 @@ import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirm
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
@@ -498,7 +497,6 @@ internal class EmbeddedNavigatorTest {
         val screen = factory.create(
             EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             )
         )
 
@@ -517,7 +515,6 @@ internal class EmbeddedNavigatorTest {
         val screen = factory.create(
             EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             )
         )
 
@@ -543,7 +540,6 @@ internal class EmbeddedNavigatorTest {
         val screen = factory.create(
             EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "cashapp",
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             )
         )
 
@@ -562,7 +558,6 @@ internal class EmbeddedNavigatorTest {
         val screen = factory.create(
             EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             )
         )
 
@@ -654,7 +649,6 @@ internal class EmbeddedNavigatorTest {
             customerStateHolder = FakeCustomerStateHolder(),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             ),
         )
         return screen to formInteractor

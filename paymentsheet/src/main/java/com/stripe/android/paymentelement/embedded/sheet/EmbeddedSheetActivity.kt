@@ -30,7 +30,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
@@ -247,9 +246,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         setActivityResult(
             EmbeddedActivityResult.Cancelled(
                 customerState = customerStateHolder.customer.value,
-                launchMode = EmbeddedLaunchMode.PaymentOptions(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-                ),
+                launchMode = EmbeddedLaunchMode.PaymentOptions,
             )
         )
     }
