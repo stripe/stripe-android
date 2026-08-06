@@ -16,13 +16,12 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.job
 import javax.inject.Inject
 
 internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
@@ -38,15 +37,13 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
 ) {
     @Suppress("LongMethod")
     fun create(): AddPaymentMethodInteractor {
-        val formScope = CoroutineScope(
-            viewModelScope.coroutineContext + SupervisorJob(viewModelScope.coroutineContext.job)
-        )
+        val coroutineScope = viewModelScope.childScope(Dispatchers.Main)
         val initialCode = (embeddedSelectionHolder.selection.value as? PaymentSelection.New)?.paymentMethodType
             ?: paymentMethodMetadata.supportedPaymentMethodTypes().first()
         val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
 
         val formHelper = embeddedFormHelperFactory.create(
-            coroutineScope = formScope,
+            coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             automaticallyLaunchedCardScanFormDataHelper =
@@ -82,7 +79,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             createUSBankAccountFormArguments = { code ->
                 createUsBankAccountFormArguments(code, hasSavedPaymentMethods)
             },
-            coroutineScope = formScope,
+            coroutineScope = coroutineScope,
             uiContext = Dispatchers.Main,
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                 eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
