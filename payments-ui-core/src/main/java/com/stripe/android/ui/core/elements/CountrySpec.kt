@@ -19,8 +19,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class CountrySpec(
-    @SerialName("api_path")
-    override val apiPath: IdentifierSpec = IdentifierSpec.Country,
     @SerialName("allowed_country_codes")
     val allowedCountryCodes: Set<String> = CountryUtils.supportedBillingCountries
 ) : FormItemSpec() {
@@ -28,10 +26,10 @@ data class CountrySpec(
         initialValues: Map<IdentifierSpec, String?>
     ) = createSectionElement(
         CountryElement(
-            this.apiPath,
+            IdentifierSpec.Country,
             DropdownFieldController(
-                CountryConfig(this.allowedCountryCodes),
-                initialValue = initialValues[this.apiPath]
+                CountryConfig(allowedCountryCodes),
+                initialValue = initialValues[IdentifierSpec.Country]
             )
         )
     )

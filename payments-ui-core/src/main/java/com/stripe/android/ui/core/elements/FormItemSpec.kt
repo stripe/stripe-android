@@ -21,7 +21,8 @@ import kotlinx.serialization.json.jsonPrimitive
 @Serializable(with = FormItemSpecSerializer::class)
 sealed class FormItemSpec : Parcelable {
     @SerialName("api_path")
-    abstract val apiPath: IdentifierSpec
+    open val apiPath: IdentifierSpec
+        get() = IdentifierSpec.Country
 
     internal fun createSectionElement(
         sectionFieldElement: SectionFieldElement,

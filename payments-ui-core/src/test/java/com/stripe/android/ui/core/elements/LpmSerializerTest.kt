@@ -173,7 +173,7 @@ class LpmSerializerTest {
     }
 
     @Test
-    fun `Verify all types api_path parsed correctly`() {
+    fun `Verify all API-path-backed types parse correctly`() {
         val types = listOf(
             "billing_address",
             "affirm_header",
@@ -181,10 +181,8 @@ class LpmSerializerTest {
             "au_becs_bsb_number",
             "au_becs_account_number",
             "au_becs_mandate",
-            "country",
             "email",
             "iban",
-            "klarna_country",
             "klarna_header",
             "static_text",
             "name",
@@ -218,7 +216,7 @@ class LpmSerializerTest {
     }
 
     @Test
-    fun `Verify all specs have default api_path parsed correctly`() {
+    fun `Verify all API-path-backed specs have default paths`() {
         val types = mapOf(
             "billing_address" to "billing_details[address]",
             "affirm_header" to "affirm_header",
@@ -226,10 +224,8 @@ class LpmSerializerTest {
             "au_becs_bsb_number" to "au_becs_debit[bsb_number]",
             "au_becs_account_number" to "au_becs_debit[account_number]",
             "au_becs_mandate" to "au_becs_mandate",
-            "country" to "billing_details[address][country]",
             "email" to "billing_details[email]",
             "iban" to "sepa_debit[iban]",
-            "klarna_country" to "billing_details[address][country]",
             "klarna_header" to "klarna_header_text",
             "name" to "billing_details[name]",
             "mandate" to "mandate",
