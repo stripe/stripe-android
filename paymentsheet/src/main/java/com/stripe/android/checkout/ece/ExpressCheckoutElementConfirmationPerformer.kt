@@ -9,7 +9,6 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItems
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,11 +33,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             )
             return
         }
-        val paymentSelection = expressButton.toSelection()
 
         val confirmationArgs = getConfirmationArgs(
             state = state,
-            paymentSelection = paymentSelection,
+            expressButton = expressButton,
         ) ?: run {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
@@ -60,10 +58,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
 
     private fun getConfirmationArgs(
         state: CheckoutControllerState,
-        paymentSelection: PaymentSelection,
+        expressButton: ExpressButton,
     ): ConfirmationHandler.Args? {
         val configuration = state.commonConfiguration
-        val confirmationOption = paymentSelection.toConfirmationOption(
+        val confirmationOption = expressButton.toSelection().toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
@@ -72,6 +70,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                 configuration = configuration,
                 paymentMethodMetadata = state.paymentMethodMetadata,
             ),
+            googlePayShippingAddressParameters = (expressButton as? ExpressButton.GooglePay)?.shippingAddressParameters,
         ) ?: return null
 
         return ConfirmationHandler.Args(
