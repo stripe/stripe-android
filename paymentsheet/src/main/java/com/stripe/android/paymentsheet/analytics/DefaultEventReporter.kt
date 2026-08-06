@@ -591,6 +591,20 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
+    override fun onBillingAddressCompleted(
+        addressCountryCode: String,
+        autocompleteResultSelected: Boolean,
+        editDistance: Int?,
+    ) {
+        fireEvent(
+            PaymentSheetEvent.BillingAddressCompleted(
+                addressCountryCode = addressCountryCode,
+                autocompleteResultSelected = autocompleteResultSelected,
+                editDistance = editDistance,
+            )
+        )
+    }
+
     override fun onPaymentMethodMessagePromotionsFetchBegin() {
         durationProvider.start(DurationProvider.Key.PaymentMethodMessaging)
         fireEvent(

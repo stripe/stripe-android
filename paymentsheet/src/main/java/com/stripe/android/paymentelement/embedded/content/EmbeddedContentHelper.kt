@@ -37,23 +37,23 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     init {
         coroutineScope.launch {
             state.collect { state ->
-                _embeddedContent.value = if (state == null) {
-                    null
-                } else {
+                val replacement = state?.let { currentState ->
                     val isImmediateAction = internalRowSelectionCallback.get() != null
                     EmbeddedContent(
                         interactor = verticalLayoutInteractorFactory.create(
-                            paymentMethodMetadata = state.paymentMethodMetadata,
-                            configuration = state.configuration,
-                            walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
+                            paymentMethodMetadata = currentState.paymentMethodMetadata,
+                            configuration = currentState.configuration,
+                            walletsState = embeddedWalletsHelper.walletsState(currentState.paymentMethodMetadata),
                             isImmediateAction = isImmediateAction,
-                            embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
+                            embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
                         ),
-                        embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
-                        appearance = state.appearance,
+                        embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
+                        appearance = currentState.appearance,
                         isImmediateAction = isImmediateAction,
                     )
                 }
+                _embeddedContent.value?.close()
+                _embeddedContent.value = replacement
             }
         }
     }

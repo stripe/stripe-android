@@ -113,7 +113,7 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
 
     private fun fireEvent(
         eventName: String,
-        additionalParams: Map<String, Any> = emptyMap()
+        additionalParams: Map<String, Any?> = emptyMap()
     ) {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(

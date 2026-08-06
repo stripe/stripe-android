@@ -278,7 +278,7 @@ internal class CheckoutStateLoaderTest {
         collectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration = CheckoutCommonConfigurationFactory("Example, Inc.").create(
+        commonConfiguration = CheckoutCommonConfigurationFactory(appName = "Example, Inc.").create(
             configuration = CheckoutController.Configuration().build(),
             checkoutSessionResponse = checkoutSessionResponse,
             collectedDetails = CheckoutCollectedDetails(),
@@ -304,7 +304,6 @@ internal class CheckoutStateLoaderTest {
     )
 
     private fun runScenario(
-        merchantDisplayName: String = "Example, Inc.",
         loaderSelection: PaymentSelection? = null,
         chosenSelection: PaymentSelection? = null,
         shouldFail: Boolean = false,
@@ -344,8 +343,8 @@ internal class CheckoutStateLoaderTest {
             customer = customer,
         )
         val loader = CheckoutStateLoader(
-            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(merchantDisplayName),
-            commonConfigurationFactory = CheckoutCommonConfigurationFactory(merchantDisplayName),
+            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
+            commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
             flagImageResolver = flagImageResolver,
             paymentElementLoader = paymentElementLoader,
             selectionChooser = chooser,

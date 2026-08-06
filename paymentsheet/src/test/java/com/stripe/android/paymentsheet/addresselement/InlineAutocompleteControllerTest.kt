@@ -281,7 +281,7 @@ class InlineAutocompleteControllerTest {
             fakePlacesClient.fetchPlaceCalls.awaitItem()
             fakePlacesClient.resetSessionCalls.awaitItem()
             assertThat(delegate.inlinePredictionsState.value)
-                .isEqualTo(InlinePredictionsState.Idle)
+                .isEqualTo(InlinePredictionsState.Results(query = "", predictions = emptyList()))
         }
 
     @Test
@@ -728,9 +728,8 @@ class InlineAutocompleteControllerTest {
         val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
         assertThat(call.placeId).isEqualTo("place-id-123")
         fakePlacesClient.resetSessionCalls.awaitItem()
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem())
-            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+        assertThat(delegate.inlinePredictionsState.value)
+            .isEqualTo(InlinePredictionsState.Results(query = "", predictions = emptyList()))
     }
 
     @Test
@@ -761,14 +760,8 @@ class InlineAutocompleteControllerTest {
 
         fakePlacesClient.fetchPlaceCalls.awaitItem()
         fakePlacesClient.resetSessionCalls.awaitItem()
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem()).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnExpandForm(
-                values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main",
-                    IdentifierSpec.Country to "US",
-                )
-            )
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(
+            InlinePredictionsState.Results(query = "123 Main", predictions = emptyList())
         )
     }
 
@@ -875,6 +868,48 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(500)
 
         fakePlacesClient.findPredictionsCalls.awaitItem()
+    }
+
+    @Test
+    fun `autocompleteFilledAddress tracks selected prediction address`() = runScenario {
+        val fetchedAddress = Address(
+            line1 = "123 Main Street",
+            city = "San Francisco",
+            state = "CA",
+            postalCode = "94105",
+            country = "US",
+        )
+        fakePlacesClient.fetchPlaceResult = Result.success(fetchedAddress)
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        eventCalls.awaitItem()
+
+        assertThat(delegate.autocompleteFilledAddress).isEqualTo(fetchedAddress)
+    }
+
+    @Test
+    fun `autocompleteFilledAddress remains null after failed fetch`() = runScenario {
+        fakePlacesClient.fetchPlaceResult = Result.failure(RuntimeException("network error"))
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+
+        assertThat(delegate.autocompleteFilledAddress).isNull()
     }
 
     @Test

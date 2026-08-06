@@ -104,6 +104,16 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).mapCatching { response ->
+                if (configurationState.defaultBillingAddress != null &&
+                    response.automaticTaxEnabled &&
+                    response.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING
+                ) {
+                    checkoutSessionRepository.updateTaxRegion(sessionId, configurationState.defaultBillingAddress)
+                        .getOrThrow()
+                } else {
+                    response
+                }
+            }.mapCatching { response ->
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
@@ -128,30 +138,6 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun removePromotionCode(): kotlin.Result<Unit> = withCheckoutState { sessionId ->
         checkoutSessionRepository.applyPromotionCode(sessionId, "")
-    }
-
-    /**
-     * Updates the quantity of a line item.
-     *
-     * @param lineItemId The ID of the line item to update.
-     * @param quantity The new quantity.
-     */
-    suspend fun updateLineItemQuantity(
-        lineItemId: String,
-        quantity: Int,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity)
-    }
-
-    /**
-     * Selects a shipping option.
-     *
-     * @param id The ID of the shipping option to select.
-     */
-    suspend fun selectShippingOption(
-        id: String,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.selectShippingRate(sessionId, id)
     }
 
     /**
@@ -182,19 +168,6 @@ class CheckoutController @Inject internal constructor(
                 ),
             )
         }
-    }
-
-    /**
-     * Updates the customer's tax ID.
-     *
-     * @param type The type of tax ID (e.g. "eu_vat"). Leading/trailing whitespace is trimmed.
-     * @param value The tax ID value. Leading/trailing whitespace is trimmed.
-     */
-    suspend fun updateTaxId(
-        type: String,
-        value: String,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
     }
 
     /**
@@ -832,6 +805,7 @@ class CheckoutController @Inject internal constructor(
     class Configuration {
         private var adaptivePricingAllowed: Boolean = false
         private var defaultBillingAddress: Address? = null
+        private var merchantDisplayName: String? = null
         private var googlePayConfiguration: GooglePayConfiguration? = null
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
@@ -860,6 +834,18 @@ class CheckoutController @Inject internal constructor(
             defaultBillingAddress: Address,
         ): Configuration = apply {
             this.defaultBillingAddress = defaultBillingAddress
+        }
+
+        /**
+         * Sets the merchant display name shown to the customer during checkout.
+         *
+         * If not set, the business name from the checkout session is used, falling back to the
+         * name of your app.
+         */
+        fun merchantDisplayName(
+            merchantDisplayName: String,
+        ): Configuration = apply {
+            this.merchantDisplayName = merchantDisplayName
         }
 
         /**
@@ -911,6 +897,7 @@ class CheckoutController @Inject internal constructor(
         internal data class State(
             val adaptivePricingAllowed: Boolean,
             val defaultBillingAddress: Address.State?,
+            val merchantDisplayName: String?,
             val googlePayConfiguration: GooglePayConfiguration.State?,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
@@ -921,6 +908,7 @@ class CheckoutController @Inject internal constructor(
         internal fun build(): State = State(
             adaptivePricingAllowed = adaptivePricingAllowed,
             defaultBillingAddress = defaultBillingAddress?.build(),
+            merchantDisplayName = merchantDisplayName,
             paymentElementConfiguration = paymentElementConfiguration.build(),
             currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
             shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),

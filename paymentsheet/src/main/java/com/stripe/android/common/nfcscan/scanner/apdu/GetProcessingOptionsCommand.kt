@@ -6,6 +6,7 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 internal class GetProcessingOptionsCommand(
     val pdolData: ByteArray,
 ) : ApduCommand<ProcessingOptionsInfo>() {
+    override val name = "getProcessingOptions"
     override val classByte = 0x80.toByte()
     override val instructionByte = 0xA8.toByte()
     override val firstParameterByte = 0x00.toByte()

@@ -89,22 +89,27 @@ internal abstract class BaseSheetViewModel(
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
 
+    private val paymentElementAutocompleteFactory = PaymentElementAutocompleteAddressInteractor.Factory(
+        launcher = autocompleteLauncher,
+        autocompleteConfig = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = config.googlePlacesApiKey,
+            autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+            isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+        ),
+        placesClient = placesClient,
+        stripeAutocompleteRepository = stripeAutocompleteRepository,
+        coroutineScope = viewModelScope,
+        shouldUseAutocompleteProxyEndpointsProvider = {
+            _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
+        },
+        eventReporter = addressLauncherEventReporter,
+    )
+
     val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory =
-        PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = autocompleteLauncher,
-            autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = config.googlePlacesApiKey,
-                autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
-            ),
-            placesClient = placesClient,
-            stripeAutocompleteRepository = stripeAutocompleteRepository,
-            coroutineScope = viewModelScope,
-            shouldUseAutocompleteProxyEndpointsProvider = {
-                _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
-            },
-            eventReporter = addressLauncherEventReporter,
-        )
+        paymentElementAutocompleteFactory
+
+    val autocompleteFilledAddress: com.stripe.android.model.Address?
+        get() = paymentElementAutocompleteFactory.autocompleteFilledAddress
 
     internal val validationRequested = MutableSharedFlow<Unit>()
 

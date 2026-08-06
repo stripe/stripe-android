@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
@@ -51,6 +52,9 @@ internal class BillingInlineAutocompleteAddressInteractor(
     override fun onEnterManuallyFromInline() {
         inlineController.expandFormFromInline()
     }
+
+    val autocompleteFilledAddress: Address?
+        get() = inlineController.autocompleteFilledAddress
 
     fun dispose() {
         inlineController.dispose()
