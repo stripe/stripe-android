@@ -9,6 +9,10 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.runTest
@@ -18,30 +22,73 @@ import org.junit.Test
 internal class CheckoutConfirmationResultHandlerTest {
 
     @Test
-    fun `register handles current complete result`() {
-        runScenario(initialResult = succeeded()) {
-            assertThat(callbackCalls.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+    fun `register handles current complete response before invoking callback`() {
+        val response = response(status = CheckoutSessionResponse.Status.COMPLETE)
+
+        runScenario(initialResult = succeeded(response)) {
+            val callbackCall = callbackCalls.awaitItem()
+            assertThat(callbackCall.result).isInstanceOf<CheckoutController.Result.Completed>()
+            assertThat(callbackCall.succeededCallCount).isEqualTo(1)
+            assertThat(callbackCall.succeededResponse).isEqualTo(response)
         }
     }
 
     @Test
-    fun `succeeded result invokes Completed`() = runScenario {
-        emit(succeeded())
+    fun `succeeded with open response passes it to success handler and invokes Completed`() = runScenario {
+        val response = response(status = CheckoutSessionResponse.Status.OPEN)
 
-        assertThat(callbackCalls.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+        emit(succeeded(response))
+
+        val callbackCall = callbackCalls.awaitItem()
+        assertThat(callbackCall.result).isInstanceOf<CheckoutController.Result.Completed>()
+        assertThat(callbackCall.succeededResponse).isEqualTo(response)
+    }
+
+    @Test
+    fun `succeeded with unknown response passes it to success handler and invokes Completed`() = runScenario {
+        val response = response(status = CheckoutSessionResponse.Status.UNKNOWN)
+
+        emit(succeeded(response))
+
+        val callbackCall = callbackCalls.awaitItem()
+        assertThat(callbackCall.result).isInstanceOf<CheckoutController.Result.Completed>()
+        assertThat(callbackCall.succeededResponse).isEqualTo(response)
+    }
+
+    @Test
+    fun `succeeded with expired response passes it to success handler and invokes Completed`() = runScenario {
+        val response = response(status = CheckoutSessionResponse.Status.EXPIRED)
+
+        emit(succeeded(response))
+
+        val callbackCall = callbackCalls.awaitItem()
+        assertThat(callbackCall.result).isInstanceOf<CheckoutController.Result.Completed>()
+        assertThat(callbackCall.succeededResponse).isEqualTo(response)
+    }
+
+    @Test
+    fun `succeeded result without response invokes success handler before Completed`() = runScenario {
+        emit(ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED))
+
+        val callbackCall = callbackCalls.awaitItem()
+        assertThat(callbackCall.result).isInstanceOf<CheckoutController.Result.Completed>()
+        assertThat(callbackCall.succeededCallCount).isEqualTo(1)
+        assertThat(callbackCall.succeededResponse).isNull()
     }
 
     @Test
     fun `each confirmation completion delivers its own callback`() = runScenario {
-        emit(succeeded())
-        assertThat(callbackCalls.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+        val response = response(status = CheckoutSessionResponse.Status.COMPLETE)
+
+        emit(succeeded(response))
+        assertThat(callbackCalls.awaitItem().result).isInstanceOf<CheckoutController.Result.Completed>()
 
         // A second confirmation returns to Confirming before completing again. The interleaved
         // Confirming breaks the state flow's de-duplication, so an identical result still delivers.
         emitConfirming()
-        emit(succeeded())
+        emit(succeeded(response))
 
-        assertThat(callbackCalls.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+        assertThat(callbackCalls.awaitItem().result).isInstanceOf<CheckoutController.Result.Completed>()
     }
 
     @Test
@@ -56,7 +103,7 @@ internal class CheckoutConfirmationResultHandlerTest {
             )
         )
 
-        val result = callbackCalls.awaitItem()
+        val result = callbackCalls.awaitItem().result
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
         assertThat((result as CheckoutController.Result.Failed).error).isEqualTo(cause)
     }
@@ -69,7 +116,7 @@ internal class CheckoutConfirmationResultHandlerTest {
             )
         )
 
-        assertThat(callbackCalls.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
+        assertThat(callbackCalls.awaitItem().result).isInstanceOf<CheckoutController.Result.Canceled>()
     }
 
     @Test
@@ -104,7 +151,7 @@ internal class CheckoutConfirmationResultHandlerTest {
             )
         )
 
-        assertThat(callbackCalls.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
+        assertThat(callbackCalls.awaitItem().result).isInstanceOf<CheckoutController.Result.Canceled>()
     }
 
     private fun runScenario(
@@ -112,7 +159,9 @@ internal class CheckoutConfirmationResultHandlerTest {
         hasReloadedFromProcessDeath: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val callbackCalls = Turbine<CheckoutController.Result>()
+        val callbackCalls = Turbine<CallbackCall>()
+        var succeededCallCount = 0
+        var succeededResponse: CheckoutSessionResponse? = null
         val initialConfirmationState: ConfirmationHandler.State =
             initialResult?.let(ConfirmationHandler.State::Complete)
                 ?: ConfirmationHandler.State.Idle
@@ -122,10 +171,21 @@ internal class CheckoutConfirmationResultHandlerTest {
         )
         val handler = CheckoutConfirmationResultHandler(
             confirmationHandler = confirmationHandler,
-            resultCallback = CheckoutController.ResultCallback(callbackCalls::add),
+            resultCallback = CheckoutController.ResultCallback { result ->
+                callbackCalls.add(
+                    CallbackCall(
+                        result = result,
+                        succeededCallCount = succeededCallCount,
+                        succeededResponse = succeededResponse,
+                    )
+                )
+            },
             viewModelScope = backgroundScope,
         )
-        handler.register()
+        handler.register { response ->
+            succeededCallCount += 1
+            succeededResponse = response
+        }
         testScheduler.runCurrent()
 
         Scenario(
@@ -138,13 +198,29 @@ internal class CheckoutConfirmationResultHandlerTest {
         callbackCalls.ensureAllEventsConsumed()
     }
 
-    private fun succeeded(): ConfirmationHandler.Result.Succeeded {
-        return ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+    private fun response(
+        status: CheckoutSessionResponse.Status,
+    ): CheckoutSessionResponse {
+        return CheckoutSessionResponseFactory.create(
+            id = "cs_confirmed",
+            status = status,
+        )
+    }
+
+    private fun succeeded(
+        response: CheckoutSessionResponse,
+    ): ConfirmationHandler.Result.Succeeded {
+        return ConfirmationHandler.Result.Succeeded(
+            intent = PaymentIntentFixtures.PI_SUCCEEDED,
+            metadata = MutableConfirmationMetadata().apply {
+                set(CheckoutSessionResponseKey, response)
+            },
+        )
     }
 
     private class Scenario(
         val confirmationHandler: FakeConfirmationHandler,
-        val callbackCalls: Turbine<CheckoutController.Result>,
+        val callbackCalls: Turbine<CallbackCall>,
         val testScheduler: TestCoroutineScheduler,
     ) {
         fun emit(result: ConfirmationHandler.Result) {
@@ -158,4 +234,10 @@ internal class CheckoutConfirmationResultHandlerTest {
             testScheduler.runCurrent()
         }
     }
+
+    private data class CallbackCall(
+        val result: CheckoutController.Result,
+        val succeededCallCount: Int,
+        val succeededResponse: CheckoutSessionResponse?,
+    )
 }
