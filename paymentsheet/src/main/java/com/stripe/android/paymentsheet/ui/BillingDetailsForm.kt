@@ -9,6 +9,8 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.cardBillingAddressCollectionMode
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.SectionElement
@@ -39,34 +41,42 @@ internal class BillingDetailsForm(
         null
     }
 
+    private val initialAddressValues = rawAddressValues(billingDetails)
+
     private val cardBillingAddressElement: BillingAddressElement = BillingAddressElement(
-        identifier = IdentifierSpec.BillingAddress,
+        configuration = BillingAddressElement.Configuration(
+            identifier = IdentifierSpec.BillingAddress,
+            initialValues = initialAddressValues,
+            countryCodes = allowedBillingCountries,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            shippingValues = null,
+            addressCollectionMode = cardBillingAddressCollectionMode(
+                addressCollectionMode = when (addressCollectionMode) {
+                    AddressCollectionMode.Automatic ->
+                        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                    AddressCollectionMode.Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                    AddressCollectionMode.Full -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                },
+                requiresBillingAddressForAutomaticTax = false,
+            ),
+            collectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = when (addressCollectionMode) {
+                    AddressCollectionMode.Automatic ->
+                        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                    AddressCollectionMode.Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                    AddressCollectionMode.Full -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                },
+                collectName = nameCollection == NameCollection.InBillingDetailsForm,
+                collectEmail = collectEmail,
+                collectPhone = collectPhone,
+            ),
+            shouldHideCountryOnNoAddressCollection = false,
+        ),
+        countryDropdownFieldController = DropdownFieldController(
+            CountryConfig(allowedBillingCountries),
+            initialAddressValues[IdentifierSpec.Country],
+        ),
         sameAsShippingElement = null,
-        shippingValuesMap = null,
-        countryCodes = allowedBillingCountries,
-        collectionConfiguration = BillingDetailsCollectionConfiguration(
-            address = when (addressCollectionMode) {
-                AddressCollectionMode.Automatic ->
-                    BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-                AddressCollectionMode.Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-                AddressCollectionMode.Full -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-            },
-            collectName = nameCollection == NameCollection.InBillingDetailsForm,
-            collectEmail = collectEmail,
-            collectPhone = collectPhone,
-        ),
-        addressCollectionMode = cardBillingAddressCollectionMode(
-            addressCollectionMode = when (addressCollectionMode) {
-                AddressCollectionMode.Automatic ->
-                    BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-                AddressCollectionMode.Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-                AddressCollectionMode.Full -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-            },
-            requiresBillingAddressForAutomaticTax = false,
-        ),
-        rawValuesMap = rawAddressValues(billingDetails),
-        autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-        shouldHideCountryOnNoAddressCollection = false,
     )
 
     val addressSectionElement = SectionElement.wrap(

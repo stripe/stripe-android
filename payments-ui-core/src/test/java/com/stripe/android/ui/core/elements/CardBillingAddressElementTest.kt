@@ -308,15 +308,18 @@ internal class CardBillingAddressElementTest {
         addressCollectionMode: BillingAddressCollectionMode,
     ): BillingAddressElement {
         return BillingAddressElement(
-            identifier = IdentifierSpec.Generic("billing_element"),
-            rawValuesMap = emptyMap(),
-            countryCodes = emptySet(),
+            configuration = BillingAddressElement.Configuration(
+                identifier = IdentifierSpec.Generic("billing_element"),
+                initialValues = emptyMap(),
+                countryCodes = emptySet(),
+                autocompleteAddressInteractorFactory = null,
+                shippingValues = null,
+                addressCollectionMode = addressCollectionMode,
+                collectionConfiguration = collectionConfiguration,
+                shouldHideCountryOnNoAddressCollection = true,
+            ),
             countryDropdownFieldController = dropdownFieldController,
-            autocompleteAddressInteractorFactory = null,
             sameAsShippingElement = null,
-            shippingValuesMap = null,
-            addressCollectionMode = addressCollectionMode,
-            collectionConfiguration = collectionConfiguration,
         )
     }
 
@@ -378,34 +381,37 @@ internal class CardBillingAddressElementTest {
     ) = runTest {
         block(
             BillingAddressElement(
-                identifier = IdentifierSpec.Generic("billing_element"),
-                rawValuesMap = emptyMap(),
-                countryCodes = emptySet(),
-                countryDropdownFieldController = dropdownFieldController,
-                autocompleteAddressInteractorFactory = {
-                    object : AutocompleteAddressInteractor {
-                        override val autocompleteConfig: AutocompleteAddressInteractor.Config =
-                            AutocompleteAddressInteractor.Config(
-                                googlePlacesApiKey = null,
-                                autocompleteCountries = emptySet()
-                            )
+                configuration = BillingAddressElement.Configuration(
+                    identifier = IdentifierSpec.Generic("billing_element"),
+                    initialValues = emptyMap(),
+                    countryCodes = emptySet(),
+                    autocompleteAddressInteractorFactory = {
+                        object : AutocompleteAddressInteractor {
+                            override val autocompleteConfig: AutocompleteAddressInteractor.Config =
+                                AutocompleteAddressInteractor.Config(
+                                    googlePlacesApiKey = null,
+                                    autocompleteCountries = emptySet()
+                                )
 
-                        override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
-                            // No-op
-                        }
+                            override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
+                                // No-op
+                            }
 
-                        override fun onAutocomplete(country: String) {
-                            error("Should not be called!")
+                            override fun onAutocomplete(country: String) {
+                                error("Should not be called!")
+                            }
                         }
-                    }
-                },
-                sameAsShippingElement = null,
-                shippingValuesMap = null,
-                addressCollectionMode = cardBillingAddressCollectionMode(
-                    addressCollectionMode = configuration.address,
-                    requiresBillingAddressForAutomaticTax = false,
+                    },
+                    shippingValues = null,
+                    addressCollectionMode = cardBillingAddressCollectionMode(
+                        addressCollectionMode = configuration.address,
+                        requiresBillingAddressForAutomaticTax = false,
+                    ),
+                    collectionConfiguration = configuration,
+                    shouldHideCountryOnNoAddressCollection = true,
                 ),
-                collectionConfiguration = configuration,
+                countryDropdownFieldController = dropdownFieldController,
+                sameAsShippingElement = null,
             )
         )
     }

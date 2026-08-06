@@ -18,21 +18,24 @@ internal fun CountrySpec.toCountryOnlyBillingAddressSection(
     }
     return SectionElement.wrap(
         BillingAddressElement(
-            identifier = IdentifierSpec.Country,
-            rawValuesMap = countryInitialValues,
-            countryCodes = allowedCountryCodes,
+            configuration = BillingAddressElement.Configuration(
+                identifier = IdentifierSpec.Country,
+                initialValues = countryInitialValues,
+                countryCodes = allowedCountryCodes,
+                autocompleteAddressInteractorFactory = null,
+                shippingValues = null,
+                addressCollectionMode = BillingAddressCollectionMode.Country(emptyMap()),
+                collectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    allowedCountries = allowedCountryCodes,
+                ),
+                shouldHideCountryOnNoAddressCollection = true,
+            ),
             countryDropdownFieldController = DropdownFieldController(
                 CountryConfig(allowedCountryCodes),
                 initialValue = countryInitialValues[IdentifierSpec.Country],
             ),
-            autocompleteAddressInteractorFactory = null,
             sameAsShippingElement = null,
-            shippingValuesMap = null,
-            addressCollectionMode = BillingAddressCollectionMode.Country(emptyMap()),
-            collectionConfiguration = BillingDetailsCollectionConfiguration(
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-                allowedCountries = allowedCountryCodes,
-            ),
         ),
     )
 }
