@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
+import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -498,6 +499,30 @@ internal class CheckoutSheetLauncherTest {
             selection = null,
             configuration = EmbeddedConfigurationFactory.create(),
         )
+    }
+
+    @Test
+    fun `paymentOptionsResult merges returned previous new selections into selection holder`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
+        val returnedSelections = Bundle().apply {
+            stashNewSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        }
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = returnedSelections,
+            customerState = null,
+            selection = null,
+            hasBeenConfirmed = false,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
+        )
+
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(result)
+
+        assertThat(selectionHolder.getPreviousNewSelection("cashapp"))
+            .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
 
     @Test
