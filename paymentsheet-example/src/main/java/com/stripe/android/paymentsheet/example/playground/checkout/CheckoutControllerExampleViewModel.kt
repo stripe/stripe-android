@@ -41,6 +41,9 @@ internal class CheckoutControllerExampleViewModel(
         savedStateHandle = savedStateHandle,
     ).resultCallback { result ->
         Log.d(TAG, "Result: $result")
+        if (result is CheckoutController.Result.Completed) {
+            _sessionComplete.tryEmit(Unit)
+        }
     }.build()
 
     init {
@@ -50,9 +53,6 @@ internal class CheckoutControllerExampleViewModel(
         viewModelScope.launch {
             controller.session.collect { session ->
                 updateConfiguredState { it.copy(session = session) }
-                if (session?.status == Session.Status.Complete) {
-                    _sessionComplete.tryEmit(Unit)
-                }
             }
         }
     }
