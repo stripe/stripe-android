@@ -28,6 +28,7 @@ internal class InlineAutocompleteController(
 ) {
     private var lastPredictionLine1: String? = null
     private var lastObservedCountry: String? = null
+    private var predictionsPaused = false
     private var queryFlow: StateFlow<String>? = null
     private var countryFlow: StateFlow<String?>? = null
     private var observeJob: Job? = null
@@ -47,6 +48,7 @@ internal class InlineAutocompleteController(
         queryFlow = query
         countryFlow = country
         lastObservedCountry = country.value ?: ""
+        predictionsPaused = false
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
@@ -60,7 +62,10 @@ internal class InlineAutocompleteController(
                     if (countryChanged) {
                         lastObservedCountry = c
                     }
-                    if (!isCountrySupported(c) || q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE) {
+                    if (predictionsPaused ||
+                        !isCountrySupported(c) ||
+                        q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE
+                    ) {
                         lastPredictionLine1 = null
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         if (countryChanged) {
@@ -120,11 +125,15 @@ internal class InlineAutocompleteController(
     }
 
     fun onFocusLost() {
-        observeJob?.cancel()
+        // Pause prediction fetching, but keep observing the country flow so switching between
+        // supported and unsupported countries still toggles the form's mode while the inline
+        // field is unfocused (e.g. after the form has expanded to manual entry).
+        predictionsPaused = true
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
     fun onFocusGained() {
+        predictionsPaused = false
         if (observeJob?.isActive == true) return
         val q = queryFlow ?: return
         val c = countryFlow ?: return
