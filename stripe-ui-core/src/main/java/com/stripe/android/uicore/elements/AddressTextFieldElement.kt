@@ -10,7 +10,10 @@ class AddressTextFieldElement(
     override val identifier: IdentifierSpec,
     label: ResolvableString,
     addressInputMode: AddressInputMode,
-    inlineAutocompleteHandler: InlineAutocompleteHandler? = null,
+    inlineAutocompleteHandler: InlineAutocompleteHandler?,
+    reportsFormValue: Boolean,
+    initialQuery: String,
+    showEnterManually: Boolean,
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
@@ -20,6 +23,9 @@ class AddressTextFieldElement(
             label = label,
             addressInputMode = addressInputMode,
             inlineAutocompleteHandler = inlineAutocompleteHandler,
+            reportsFormValue = reportsFormValue,
+            initialQuery = initialQuery,
+            showEnterManually = showEnterManually,
         )
 
     val inlineQuery: StateFlow<String> get() = controller.inlineQuery

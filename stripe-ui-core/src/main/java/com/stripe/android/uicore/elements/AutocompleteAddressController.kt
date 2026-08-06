@@ -66,6 +66,10 @@ class AutocompleteAddressController(
                 override fun getAttributionDrawable(isDarkTheme: Boolean): Int? {
                     return R.drawable.stripe_google_maps_logo
                 }
+
+                override fun onSearchActivated() {
+                    interactor.onSearchActivated()
+                }
             }
         } else {
             null
@@ -153,6 +157,11 @@ class AutocompleteAddressController(
         values: Map<IdentifierSpec, String?>,
         addressInputMode: AddressInputMode,
     ): AddressElement {
+        val handler = if (isCountrySupported(values[IdentifierSpec.Country])) {
+            inlineAutocompleteHandler
+        } else {
+            null
+        }
         return AddressElement(
             _identifier = identifier,
             rawValuesMap = values,
@@ -162,7 +171,7 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
-            inlineAutocompleteHandler = inlineAutocompleteHandler,
+            inlineAutocompleteHandler = handler,
         )
     }
 
