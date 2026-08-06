@@ -64,7 +64,7 @@ internal abstract class CameraViewModel(
 
         modelPerformanceTracker.reportAndReset(
             if (result.result is FaceDetectorOutput) {
-                if (result.result.pose != null || result.result.faceLandmarkResult != null) {
+                if (result.result.isFromMediaPipe) {
                     MediaPipeFaceDetectorAnalyzer.MODEL_NAME
                 } else {
                     FaceDetectorAnalyzer.MODEL_NAME
@@ -86,6 +86,10 @@ internal abstract class CameraViewModel(
         Log.d(TAG, "onReset is called, resetting status")
         scanState = null
         scanStatePrevious = null
+    }
+
+    override fun onCleared() {
+        laplacianBlurDetector.destroy()
     }
 
     override fun onAnalyzerFailure(t: Throwable): Boolean {

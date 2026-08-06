@@ -60,7 +60,8 @@ internal class MediaPipeFaceDetectorAnalyzer(
             FaceDetectorOutput(
                 boundingBox = EMPTY_BOUNDING_BOX,
                 resultScore = 0f,
-                fullFrameBoundingBox = EMPTY_BOUNDING_BOX
+                fullFrameBoundingBox = EMPTY_BOUNDING_BOX,
+                isFromMediaPipe = true
             )
         } else {
             val boundingBox = landmarks.boundingBox()
@@ -72,7 +73,8 @@ internal class MediaPipeFaceDetectorAnalyzer(
                 fullFrameBoundingBox = boundingBox.toFullFrame(
                     inputWidth = sourceBitmap.width,
                     inputHeight = sourceBitmap.height
-                )
+                ),
+                isFromMediaPipe = true
             )
         }
     }

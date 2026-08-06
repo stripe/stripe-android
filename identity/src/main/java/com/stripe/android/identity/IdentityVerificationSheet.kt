@@ -30,7 +30,7 @@ interface IdentityVerificationSheet {
         /**
          * Optional color to use for the native flow's primary action buttons.
          */
-        @param:ColorInt val brandColor: Int? = null
+        @get:ColorInt val brandColor: Int? = null
     )
 
     /**

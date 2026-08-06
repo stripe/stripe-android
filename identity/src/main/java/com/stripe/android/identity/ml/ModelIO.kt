@@ -56,7 +56,8 @@ internal data class FaceDetectorOutput(
     val resultScore: Float,
     val pose: FacePose? = null,
     val faceLandmarkResult: String? = null,
-    val fullFrameBoundingBox: BoundingBox? = null
+    val fullFrameBoundingBox: BoundingBox? = null,
+    val isFromMediaPipe: Boolean = false
 ) : AnalyzerOutput {
     /** Uses full-frame coordinates when supplied while preserving legacy detector behavior. */
     val validationBoundingBox: BoundingBox

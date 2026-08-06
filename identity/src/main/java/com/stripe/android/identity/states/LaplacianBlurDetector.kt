@@ -25,8 +25,18 @@ internal class LaplacianBlurDetector @Inject constructor(
     private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
 ) {
 
-    private val renderScript by lazy {
+    private val renderScriptDelegate = lazy {
         RenderScript.create(context)
+    }
+    private val renderScript by renderScriptDelegate
+
+    /**
+     * Release the underlying [RenderScript] context. No-op if a blur score was never calculated.
+     */
+    fun destroy() {
+        if (renderScriptDelegate.isInitialized()) {
+            renderScript.destroy()
+        }
     }
 
     /**
