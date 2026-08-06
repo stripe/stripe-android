@@ -200,11 +200,12 @@ class KlarnaDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(3)
+        assertThat(formElements).hasSize(4)
 
         checkKlarnaHeaderText(formElements, 0)
         checkEmailField(formElements, 1)
-        checkFullAddressField(formElements, 2)
+        checkCountryField(formElements, 2)
+        checkFullAddressField(formElements, 3)
     }
 
     @Test
@@ -223,14 +224,15 @@ class KlarnaDefinitionTest {
 
         val formElements = KlarnaDefinition.formElements(metadata = metadata)
 
-        assertThat(formElements).hasSize(6)
+        assertThat(formElements).hasSize(7)
 
         checkKlarnaHeaderText(formElements, 0)
         checkNameField(formElements, 1)
         checkEmailField(formElements, 2)
         checkPhoneField(formElements, 3)
-        checkFullAddressField(formElements, 4)
-        checkMandateField(formElements, metadata, 5)
+        checkCountryField(formElements, 4)
+        checkFullAddressField(formElements, 5)
+        checkMandateField(formElements, metadata, 6)
     }
 
     @Test
@@ -313,9 +315,9 @@ class KlarnaDefinitionTest {
     ) {
         val section = formElements[position] as SectionElement
         assertThat(section.identifier.v1).isEqualTo("billing_details[address]_section")
-        val addressElement = section.fields.single() as BillingAddressElement
-        assertThat(addressElement.addressElement).isInstanceOf<AddressElement>()
-        assertThat(addressElement.hiddenIdentifiers.value).isEmpty()
+        val addressElement = section.fields.single() as AddressElement
+        assertThat(addressElement.fields.value.map { it.identifier })
+            .doesNotContain(IdentifierSpec.Country)
     }
 
     private fun checkMandateField(

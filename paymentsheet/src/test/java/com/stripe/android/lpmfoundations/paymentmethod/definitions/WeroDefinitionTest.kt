@@ -71,12 +71,13 @@ class WeroDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(4)
+        assertThat(formElements).hasSize(5)
 
-        checkFullAddressField(formElements, 0)
+        checkCountryField(formElements, 0)
         checkNameField(formElements, 1)
         checkEmailField(formElements, 2)
         checkPhoneField(formElements, 3)
+        checkLegacyFullAddressField(formElements, 4)
     }
 
     @Test
@@ -118,14 +119,14 @@ class WeroDefinitionTest {
         )
     }
 
-    private fun checkFullAddressField(
+    private fun checkLegacyFullAddressField(
         formElements: List<FormElement>,
         position: Int,
     ) {
         val section = formElements[position] as SectionElement
         assertThat(section.identifier.v1).isEqualTo("billing_details[address]_section")
-        val addressElement = section.fields.single() as BillingAddressElement
-        assertThat(addressElement.addressElement).isInstanceOf(AddressElement::class.java)
-        assertThat(addressElement.hiddenIdentifiers.value).isEmpty()
+        val addressElement = section.fields.single() as AddressElement
+        assertThat(addressElement.fields.value.map { it.identifier })
+            .contains(IdentifierSpec.Country)
     }
 }

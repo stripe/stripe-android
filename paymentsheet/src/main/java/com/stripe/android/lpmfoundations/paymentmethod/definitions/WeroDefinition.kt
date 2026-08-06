@@ -44,7 +44,6 @@ private object WeroUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         builder
-            .ignoreBillingAddressRequirements()
             .apply {
                 CountrySpecFormElementFactory(arguments).transform(
                     CountrySpec(

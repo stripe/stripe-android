@@ -1,9 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BillingAddressCollectionMode
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -11,8 +8,6 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SameAsShippingController
-import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 
 internal class CountrySpecFormElementFactory(
@@ -29,15 +24,7 @@ internal class CountrySpecFormElementFactory(
             initialCountry?.let { put(spec.apiPath, it) }
         }
 
-        return when (arguments.billingDetailsCollectionConfiguration.address) {
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
-                createFullAddressElements(spec, initialValues)
-            }
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
-                listOf(createCountryOnlySection(spec, initialValues))
-            }
-        }
+        return listOf(createCountryOnlySection(spec, initialValues))
     }
 
     private fun createCountryOnlySection(
@@ -48,52 +35,16 @@ internal class CountrySpecFormElementFactory(
             createBillingAddressElement(
                 spec = spec,
                 initialValues = initialValues,
-                addressCollectionMode = BillingAddressCollectionMode.Country(emptyMap()),
-                sameAsShippingElement = null,
             ),
-        )
-    }
-
-    private fun createFullAddressElements(
-        spec: CountrySpec,
-        initialValues: Map<IdentifierSpec, String?>,
-    ): List<FormElement> {
-        val sameAsShippingElement = arguments.shippingValues
-            ?.get(IdentifierSpec.SameAsShipping)
-            ?.toBooleanStrictOrNull()
-            ?.let { isSameAsShipping ->
-                SameAsShippingElement(
-                    identifier = IdentifierSpec.SameAsShipping,
-                    controller = SameAsShippingController(isSameAsShipping),
-                )
-            }
-
-        return listOfNotNull(
-            SectionElement.wrap(
-                createBillingAddressElement(
-                    spec = spec,
-                    initialValues = initialValues,
-                    addressCollectionMode = BillingAddressCollectionMode.Full,
-                    sameAsShippingElement = sameAsShippingElement,
-                ),
-                R.string.stripe_billing_details.resolvableString,
-            ),
-            sameAsShippingElement,
         )
     }
 
     private fun createBillingAddressElement(
         spec: CountrySpec,
         initialValues: Map<IdentifierSpec, String?>,
-        addressCollectionMode: BillingAddressCollectionMode,
-        sameAsShippingElement: SameAsShippingElement?,
     ): BillingAddressElement {
         return BillingAddressElement(
-            identifier = if (addressCollectionMode == BillingAddressCollectionMode.Full) {
-                IdentifierSpec.BillingAddress
-            } else {
-                spec.apiPath
-            },
+            identifier = spec.apiPath,
             rawValuesMap = initialValues,
             countryCodes = spec.allowedCountryCodes,
             countryDropdownFieldController = DropdownFieldController(
@@ -101,16 +52,12 @@ internal class CountrySpecFormElementFactory(
                 initialValue = initialValues[spec.apiPath],
             ),
             countryElementIdentifier = spec.apiPath,
-            autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
-            sameAsShippingElement = sameAsShippingElement,
-            shippingValuesMap = arguments.shippingValues,
-            addressCollectionMode = addressCollectionMode,
+            autocompleteAddressInteractorFactory = null,
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+            addressCollectionMode = BillingAddressCollectionMode.Country(emptyMap()),
             collectionConfiguration = BillingDetailsCollectionConfiguration(
-                address = if (addressCollectionMode == BillingAddressCollectionMode.Full) {
-                    BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-                } else {
-                    BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-                },
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
                 allowedCountries = spec.allowedCountryCodes,
             ),
         )
