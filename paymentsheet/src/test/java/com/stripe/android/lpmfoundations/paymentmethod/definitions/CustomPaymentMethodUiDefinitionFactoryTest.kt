@@ -82,7 +82,7 @@ internal class CustomPaymentMethodUiDefinitionFactoryTest {
             enabled = true,
             elements = CustomPaymentMethodUiDefinitionFactory(
                 displayableCustomPaymentMethod = displayableCustomPaymentMethod,
-            ).createFormElements(
+            ).createBaseFormElements(
                 metadata = PaymentMethodMetadataFactory.create(),
                 arguments = TestUiDefinitionFactoryArgumentsFactory.create(
                     paymentMethodCreateParams = createParams,
