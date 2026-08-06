@@ -53,10 +53,10 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 @Singleton
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Suppress("TooManyFunctions", "UnusedParameter")
+@Suppress("TooManyFunctions")
 class CheckoutController @Inject internal constructor(
-    resultCallback: ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,
+    confirmationResultHandler: CheckoutConfirmationResultHandler,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
@@ -64,16 +64,20 @@ class CheckoutController @Inject internal constructor(
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
 ) {
+    private val mutex = Mutex()
+    private val pendingMutations = AtomicInteger(0)
+
+    private val _isUpdating = MutableStateFlow(false)
+
+    init {
+        confirmationResultHandler.register()
+    }
+
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
      */
     val session: StateFlow<Session?>
         get() = stateHolder.session
-
-    private val mutex = Mutex()
-    private val pendingMutations = AtomicInteger(0)
-
-    private val _isUpdating = MutableStateFlow(false)
 
     /**
      * Whether a mutation is currently in progress.
