@@ -29,6 +29,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.CoroutineScope
@@ -390,6 +391,11 @@ internal class CheckoutControllerTest {
         val confirmationHandler = FakeConfirmationHandler()
         val results = mutableListOf<CheckoutController.Result>()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
+        val confirmationStateUpdater = CheckoutConfirmationStateUpdater(
+            stateHolder = stateHolder,
+            fetchResponse = { _, _ -> Result.failure(AssertionError("Unexpected fetch")) },
+            reloadState = { _ -> },
+        )
         val resultHandler = CheckoutConfirmationResultHandler(
             confirmationHandler = confirmationHandler,
             resultCallback = CheckoutController.ResultCallback { results.add(it) },
@@ -401,6 +407,7 @@ internal class CheckoutControllerTest {
         CheckoutController(
             viewModelScope = backgroundScope,
             confirmationResultHandler = resultHandler,
+            confirmationStateUpdater = confirmationStateUpdater,
             checkoutSessionRepository = mock(),
             checkoutStateLoader = mock(),
             stateHolder = stateHolder,
@@ -979,6 +986,43 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `successful confirmation waits for an in-flight mutation then refreshes state`() =
+        runMutationScenario(assertLoadingConsumed = true) {
+            val holdMutation = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                holdMutation.await(10, TimeUnit.SECONDS)
+                successResponseFactory().invoke(response)
+            }
+            val confirmedResponse = committedState().checkoutSessionResponse.copy(
+                status = CheckoutSessionResponse.Status.COMPLETE,
+            )
+
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+
+            val mutation = async { controller.applyPromotionCode("10OFF") }
+            testScheduler.advanceUntilIdle()
+            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+
+            val confirmation = async {
+                controller.handleConfirmationSucceeded(confirmedResponse)
+            }
+            testScheduler.advanceUntilIdle()
+
+            assertThat(confirmation.isCompleted).isFalse()
+            assertThat(committedStateOrNull()).isNotNull()
+
+            holdMutation.countDown()
+            assertThat(mutation.await().isSuccess).isTrue()
+            confirmation.await()
+
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+            assertThat(committedState().checkoutSessionResponse).isEqualTo(confirmedResponse)
+            assertThat(controller.session.value).isNotNull()
+        }
+
+    @Test
     fun `configure is serialized behind an in-flight mutation and shares its loading window`() =
         runMutationScenario(assertLoadingConsumed = true) {
             val holdMutation = CountDownLatch(1)
@@ -1316,7 +1360,9 @@ internal class CheckoutControllerTest {
 
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
-        fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
+        fun committedState(): CheckoutControllerState = requireNotNull(committedStateOrNull())
+
+        fun committedStateOrNull(): CheckoutControllerState? = stateHolder.state
     }
 
     private companion object {

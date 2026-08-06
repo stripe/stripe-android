@@ -54,6 +54,7 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 class CheckoutController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     confirmationResultHandler: CheckoutConfirmationResultHandler,
+    private val confirmationStateUpdater: CheckoutConfirmationStateUpdater,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
@@ -64,7 +65,7 @@ class CheckoutController @Inject internal constructor(
     private val savedState: CheckoutControllerSavedState,
 ) {
     init {
-        confirmationResultHandler.register()
+        confirmationResultHandler.register(::handleConfirmationSucceeded)
     }
 
     /**
@@ -305,6 +306,15 @@ class CheckoutController @Inject internal constructor(
     private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
         IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
     )
+
+    internal suspend fun handleConfirmationSucceeded(
+        checkoutSessionResponse: CheckoutSessionResponse?,
+    ) {
+        operationCoordinator.runMutation {
+            confirmationStateUpdater.update(checkoutSessionResponse)
+            kotlin.Result.success(Unit)
+        }
+    }
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
         return withCheckoutState { sessionId ->
