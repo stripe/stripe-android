@@ -40,6 +40,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.IconStyle
@@ -627,7 +628,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
+    fun `formElementsForCode preserves Klarna country and full address sections`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -645,15 +646,26 @@ internal class PaymentMethodMetadataTest {
             uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
         )!!
 
-        val countrySection = formElement[4] as SectionElement
-        val countryElement = countrySection.fields[0] as CountryElement
-        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+        val sectionFields = formElement
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+        val countryAddressElements = sectionFields.filterIsInstance<BillingAddressElement>()
+        val fullAddressElements = sectionFields.filterIsInstance<AddressElement>()
 
-        val addressSection = formElement[5] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-        val addressIdentifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element doesn't contain country.
-        assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
+        assertThat(countryAddressElements).hasSize(1)
+        val countryAddressElement = countryAddressElements.single()
+        assertThat(countryAddressElement.identifier).isEqualTo(IdentifierSpec.Country)
+        assertThat(countryAddressElement.countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+        assertThat(countryAddressElement.hiddenIdentifiers.value).containsAtLeast(
+            IdentifierSpec.Line1,
+            IdentifierSpec.City,
+            IdentifierSpec.State,
+            IdentifierSpec.PostalCode,
+        )
+        assertThat(fullAddressElements).hasSize(1)
+        assertThat(fullAddressElements.single().fields.first().map { it.identifier })
+            .doesNotContain(IdentifierSpec.Country)
+        assertThat(sectionFields.filterIsInstance<CountryElement>()).isEmpty()
     }
 
     @Test
