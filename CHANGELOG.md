@@ -6,6 +6,9 @@ NEXT_VERSION_BUMP: MINOR
 ### CryptoOnramp
 * [ADDED] Added `OnrampCoordinator.deleteWalletAddress(walletId:)` to delete a registered wallet address.
 
+### PaymentSheet
+* [FIXED] LinkController (private preview) now returns an error when no funding sources are available for a Link session, rather than silently falling back to card.
+
 ## 23.14.0 - 2026-08-03
 
 ### CryptoOnramp
