@@ -9,6 +9,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.assertCountryOnlyBillingAddressSection
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -35,7 +36,6 @@ import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
-import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -56,6 +56,10 @@ import com.stripe.android.core.R as CoreR
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementsTest {
 
+    private val countrySpec = CountrySpec(
+        allowedCountryCodes = setOf("AT"),
+    )
+
     private val nameSection = NameSpec()
 
     private val emailSection = EmailSpec()
@@ -68,28 +72,23 @@ internal class TransformSpecToElementsTest {
     }
 
     @Test
-    fun `Adding a country section sets up the section and country elements correctly`() =
-        runBlocking {
-            val countrySection = CountrySpec(allowedCountryCodes = setOf("AT"))
-            val formElement = transformSpecToElements.transform(
-                metadata = PaymentMethodMetadataFactory.create(),
-                specs = listOf(element = countrySection),
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            )
+    fun `CountrySpec transforms to a country-only billing address section`() = runTest {
+        val formElements = TransformSpecToElementsFactory.create().transform(
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(countrySpec),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
 
-            val countrySectionElement = formElement.first() as SectionElement
-            val countryElement = countrySectionElement.fields[0] as CountryElement
+        assertThat(formElements).hasSize(1)
+        val section = formElements.single() as SectionElement
+        val billingAddressElement = assertCountryOnlyBillingAddressSection(section = section)
+        val countryElement = billingAddressElement.countryElement
 
-            assertThat(countryElement.controller.displayItems).hasSize(1)
-            assertThat(countryElement.controller.displayItems[0]).isEqualTo("🇦🇹 Austria")
-
-            // Verify the correct config is setup for the controller
-            assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
-
-            assertThat(countrySectionElement.identifier.v1).isEqualTo("billing_details[address][country]_section")
-
-            assertThat(countryElement.identifier.v1).isEqualTo("billing_details[address][country]")
-        }
+        assertThat(countryElement.controller.displayItems).containsExactly("🇦🇹 Austria")
+        assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
+        assertThat(countryElement.getFormFieldValueFlow().first().single().first)
+            .isEqualTo(IdentifierSpec.Country)
+    }
 
     @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() =
@@ -439,7 +438,7 @@ private object TransformSpecToElementsFactory {
 
         return TransformSpecToElements(
             UiDefinitionFactory.Arguments(
-                initialValues = mapOf(),
+                initialValues = emptyMap(),
                 initialLinkUserInput = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
