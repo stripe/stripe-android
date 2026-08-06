@@ -22,6 +22,8 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -44,6 +46,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -335,6 +338,41 @@ internal class CheckoutControllerTest {
 
         assertThat(committedState).isNull()
         assertThat(controller.session.value).isNull()
+    }
+
+    @Test
+    fun `constructing the controller registers the confirmation result handler`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+        val results = mutableListOf<CheckoutController.Result>()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
+        val resultHandler = CheckoutConfirmationResultHandler(
+            confirmationHandler = confirmationHandler,
+            resultCallback = CheckoutController.ResultCallback { results.add(it) },
+            viewModelScope = backgroundScope,
+        )
+
+        // Constructing the controller must start the collector in init; otherwise the emission below
+        // is dropped and no callback fires. Deps the constructor only stores are inert mocks.
+        CheckoutController(
+            viewModelScope = backgroundScope,
+            confirmationResultHandler = resultHandler,
+            checkoutSessionRepository = mock(),
+            checkoutStateLoader = mock(),
+            stateHolder = stateHolder,
+            sheetStateHolder = SheetStateHolder(SavedStateHandle()),
+            checkoutPresenterSubcomponentFactory = mock(),
+            paymentElementCallbackIdentifier = DEFAULT_INTEGRATION_NAME,
+        )
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Canceled(
+                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+            )
+        )
+        testScheduler.runCurrent()
+
+        assertThat(results.single()).isInstanceOf(CheckoutController.Result.Canceled::class.java)
+        confirmationHandler.validate()
     }
 
     @Test
