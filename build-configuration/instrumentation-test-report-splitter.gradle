@@ -3,6 +3,40 @@ import groovy.xml.XmlSlurper
 
 class InstrumentationTestReportSplitter {
     private static final XmlSlurper SLURPER = new XmlSlurper(false, false)
+    private static final String STRIPE_RETRY_INFIX = '_stripe_retry_'
+
+    /**
+     * Returns the base test method name, stripping a Stripe retry suffix such as
+     * {@code _stripe_retry_1} when present.
+     */
+    private static String baseTestName(String testName) {
+        def suffixIndex = testName.indexOf(STRIPE_RETRY_INFIX)
+        if (suffixIndex < 0) {
+            return testName
+        }
+        return testName.substring(0, suffixIndex)
+    }
+
+    private static boolean isRetryAttemptName(String testName) {
+        return testName.contains(STRIPE_RETRY_INFIX)
+    }
+
+    /**
+     * A logical test passes if its base name has a passing result on the original test name.
+     */
+    private static boolean logicalTestPassed(List rows) {
+        return rows.any { tc ->
+            def name = tc.@name?.toString() ?: ''
+            !isRetryAttemptName(name) && tc.failure.isEmpty() && tc.error.isEmpty()
+        }
+    }
+
+    private static int countLogicalFailures(List rows) {
+        def grouped = rows.groupBy { baseTestName(it.@name?.toString() ?: '') }
+        return grouped.count { baseName, attempts ->
+            !logicalTestPassed(attempts)
+        }
+    }
 
     static void split(File moduleDir, File outDir) {
         def resultRoots = [
@@ -124,8 +158,8 @@ class InstrumentationTestReportSplitter {
         mb.testsuite(
                 name: className,
                 tests: rows.size(),
-                failures: rows.count { it.failure.size() > 0 },
-                errors: rows.count { it.error.size() > 0 },
+                failures: countLogicalFailures(rows),
+                errors: rows.count { it.error.size() > 0 && !isRetryAttemptName(it.@name?.toString() ?: '') },
                 skipped: rows.count { it.skipped.size() > 0 },
                 time: String.format(Locale.US, '%.3f', rows.sum { parseTime(it) }),
         ) {
@@ -137,11 +171,11 @@ class InstrumentationTestReportSplitter {
     }
 
     private static void emitTestCase(MarkupBuilder mb, def tc, Map<String, File> logcatByTest, String bucketFqcn) {
-        def testName = tc.@name?.toString() ?: ''
+        def testCaseName = tc.@name?.toString() ?: ''
         def fqcn = tc.@classname?.toString() ?: bucketFqcn
         mb.testcase(
                 classname: fqcn,
-                name: testName,
+                name: testCaseName,
                 time: tc.@time.toString(),
         ) {
             tc.failure.each { f ->
@@ -167,7 +201,7 @@ class InstrumentationTestReportSplitter {
                     mkp.yield(se.text().toString())
                 }
             }
-            def logcatFile = findLogcatFile(logcatByTest, fqcn, testName)
+            def logcatFile = findLogcatFile(logcatByTest, fqcn, testCaseName)
             if (logcatFile?.file) {
                 'system-out' {
                     mkp.yield(logcatFile.getText('UTF-8'))

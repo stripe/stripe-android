@@ -35,7 +35,6 @@ class TestRules private constructor(
                 .around(DetectLeaksAfterTestSuccess())
                 .around(FakeGooglePayRepositoryRule())
                 .around(composeTestRule)
-                .around(RetryRule(5))
                 .around(networkRule)
                 .around(terminalTestRule)
                 .block()

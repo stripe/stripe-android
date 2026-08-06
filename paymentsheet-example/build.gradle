@@ -71,6 +71,7 @@ android {
         versionCode 11
 
         testInstrumentationRunner "com.stripe.android.utils.PaymentSheetTestRunner"
+        testInstrumentationRunnerArguments retryCount: "3"
 
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
         buildConfigField "boolean", "DIRECTLY_TO_PLAYGROUND", "${directlyToPlayground()}"
