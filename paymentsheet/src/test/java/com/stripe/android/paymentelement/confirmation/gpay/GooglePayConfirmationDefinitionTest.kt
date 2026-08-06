@@ -56,6 +56,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as PaymentsCoreR
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationDefinitionTest {
     @get:Rule
