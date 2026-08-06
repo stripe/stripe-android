@@ -6,6 +6,7 @@ NEXT_VERSION_BUMP: PATCH
 ## 23.14.0 - 2026-08-03
 
 ### CryptoOnramp
+* [ADDED][13623](https://github.com/stripe/stripe-android/pull/13623) Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
 * [ADDED] Added Tempo as a supported wallet network and pinned Crypto Onramp internal API calls to the preview API version required by newer networks.
 
 ### PaymentSheet

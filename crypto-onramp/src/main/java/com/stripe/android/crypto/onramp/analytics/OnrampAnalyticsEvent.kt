@@ -10,10 +10,11 @@ import com.stripe.android.utils.filterNotNullValues
  */
 internal sealed class OnrampAnalyticsEvent(
     private val name: String,
-    val params: Map<String, String>? = null,
+    val params: Map<String, Any?>? = null,
+    private val eventPrefix: String = ONRAMP_EVENT_PREFIX,
 ) {
 
-    val eventName = "$EVENT_PREFIX.$name"
+    val eventName = "$eventPrefix.$name"
 
     data object SessionCreated : OnrampAnalyticsEvent(
         name = "session_created"
@@ -174,6 +175,46 @@ internal sealed class OnrampAnalyticsEvent(
         name = "link_logout"
     )
 
+    data object SamsungPayInitialized : OnrampAnalyticsEvent(
+        name = "initialized",
+        eventPrefix = SAMSUNG_PAY_EVENT_PREFIX,
+    )
+
+    class SamsungPayAvailable(
+        available: Boolean,
+        status: Int,
+    ) : OnrampAnalyticsEvent(
+        name = "available",
+        params = mapOf(
+            "available" to available,
+            "status" to status,
+        ),
+        eventPrefix = SAMSUNG_PAY_EVENT_PREFIX,
+    )
+
+    data object SamsungPayPresented : OnrampAnalyticsEvent(
+        name = "presented",
+        eventPrefix = SAMSUNG_PAY_EVENT_PREFIX,
+    )
+
+    data object SamsungPayCanceled : OnrampAnalyticsEvent(
+        name = "canceled",
+        eventPrefix = SAMSUNG_PAY_EVENT_PREFIX,
+    )
+
+    data object SamsungPayObtainCredentialsSuccess : OnrampAnalyticsEvent(
+        name = "obtain_credentials.success",
+        eventPrefix = SAMSUNG_PAY_EVENT_PREFIX,
+    )
+
+    class SamsungPayObtainCredentialsFailed(
+        errorCode: Int,
+    ) : OnrampAnalyticsEvent(
+        name = "obtain_credentials.failed",
+        params = mapOf("error_code" to errorCode),
+        eventPrefix = SAMSUNG_PAY_EVENT_PREFIX,
+    )
+
     class ErrorOccurred(
         operation: Operation,
         error: Throwable
@@ -212,4 +253,5 @@ internal sealed class OnrampAnalyticsEvent(
     }
 }
 
-private const val EVENT_PREFIX = "onramp"
+private const val ONRAMP_EVENT_PREFIX = "onramp"
+private const val SAMSUNG_PAY_EVENT_PREFIX = "samsung_pay"

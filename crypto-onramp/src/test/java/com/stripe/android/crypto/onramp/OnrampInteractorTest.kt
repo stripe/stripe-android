@@ -22,6 +22,8 @@ import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SDKVersion
+import com.stripe.android.crypto.onramp.exception.SamsungPayException
+import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
 import com.stripe.android.crypto.onramp.exception.UncategorizedException
 import com.stripe.android.crypto.onramp.exception.UnsupportedNetworkException
 import com.stripe.android.crypto.onramp.exception.WalletNotFoundException
@@ -56,7 +58,10 @@ import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
+import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.model.UserAttestation
 import com.stripe.android.crypto.onramp.model.WalletOwnershipChallenge
@@ -68,6 +73,8 @@ import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierTyp
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceRegulation
 import com.stripe.android.crypto.onramp.model.compliance.SubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
 import com.stripe.android.crypto.onramp.ui.UserAttestationScreenAction
@@ -1067,6 +1074,175 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun `Samsung Pay credential creates PaymentMethod and crypto payment token`() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+        interactor.onCollectPaymentMethod(PaymentMethodType.SamsungPay)
+
+        val platformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(platformSettings).publishableKey
+        whenever(
+            cryptoApiRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull(),
+            ),
+        ).thenReturn(Result.success(platformSettings))
+        val paymentMethod = createCardPaymentMethod()
+        whenever(
+            cryptoApiRepository.createSamsungPayPaymentMethod(
+                paymentCredential = "{\"method\":\"3DS\"}",
+                platformPublishableKey = "pk_platform_123",
+            ),
+        ).thenReturn(Result.success(paymentMethod))
+        whenever(
+            cryptoApiRepository.createPaymentToken(
+                cryptoCustomerId = "cpt_123",
+                paymentMethod = paymentMethod.id,
+            ),
+        ).thenReturn(Result.success(CreatePaymentTokenResponse(id = "crypto_token_123")))
+
+        val platformPublishableKey = interactor.getOrFetchPlatformKey().getOrThrow()
+        val collectionResult = interactor.handleSamsungPayPaymentResult(
+            SamsungPayResult.Completed("{\"method\":\"3DS\"}"),
+            platformPublishableKey = platformPublishableKey,
+        )
+        val tokenResult = interactor.createCryptoPaymentToken()
+
+        assertThat(collectionResult).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        assertThat((collectionResult as OnrampCollectPaymentMethodResult.Completed).displayData.type)
+            .isEqualTo(PaymentMethodDisplayData.Type.SamsungPay)
+        assertThat(collectionResult.displayData.label).isEqualTo("Samsung Pay")
+        assertThat(collectionResult.displayData.sublabel).isEqualTo("4242")
+        assertThat(interactor.state.value.selectedPaymentSource)
+            .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id))
+        assertThat(tokenResult).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
+        verify(cryptoApiRepository).createSamsungPayPaymentMethod(
+            paymentCredential = "{\"method\":\"3DS\"}",
+            platformPublishableKey = "pk_platform_123",
+        )
+        verify(cryptoApiRepository).createPaymentToken(
+            cryptoCustomerId = "cpt_123",
+            paymentMethod = paymentMethod.id,
+        )
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.CollectPaymentMethodCompleted(PaymentMethodType.SamsungPay),
+        )
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.CryptoPaymentTokenCreated(PaymentMethodType.SamsungPay),
+        )
+    }
+
+    @Test
+    fun `Samsung Pay cancellation returns canceled without creating PaymentMethod`() = runTest {
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayResult.Canceled,
+            platformPublishableKey = null,
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Cancelled::class.java)
+        verify(cryptoApiRepository, org.mockito.kotlin.never())
+            .createSamsungPayPaymentMethod(any(), any())
+    }
+
+    @Test
+    fun `Samsung Pay completion without platform key fails without creating PaymentMethod`() = runTest {
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayResult.Completed("credential"),
+            platformPublishableKey = null,
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
+        val error = (result as OnrampCollectPaymentMethodResult.Failed).error
+        assertThat(error).isInstanceOf(SamsungPayException::class.java)
+        val samsungPayError = error as SamsungPayException
+        assertThat(samsungPayError.reason).isEqualTo(SamsungPayException.Reason.PlatformKeyUnavailable)
+        assertThat(samsungPayError.code).isEqualTo("samsung_pay_platform_key_unavailable")
+        assertThat(samsungPayError.underlyingError?.message)
+            .contains("platform publishable key")
+        verify(cryptoApiRepository, org.mockito.kotlin.never())
+            .createSamsungPayPaymentMethod(any(), any())
+    }
+
+    @Test
+    fun `Samsung Pay SDK failure returns failed collection result`() = runTest {
+        val underlyingError = IllegalStateException("Samsung Pay failed")
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayResult.Failed(underlyingError),
+            platformPublishableKey = null,
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
+        val error = (result as OnrampCollectPaymentMethodResult.Failed).error
+        assertThat(error).isInstanceOf(SamsungPayException::class.java)
+        assertThat(error).isInstanceOf(StripeCryptoOnrampError::class.java)
+        val samsungPayError = error as SamsungPayException
+        assertThat(samsungPayError.reason).isEqualTo(SamsungPayException.Reason.OperationFailed)
+        assertThat(samsungPayError.code).isEqualTo("samsung_pay_operation_failed")
+        assertThat(samsungPayError.underlyingError).isSameInstanceAs(underlyingError)
+        assertThat(samsungPayError.userMessage)
+            .isEqualTo("Samsung Pay couldn't be used. Please choose another payment method or try again.")
+        assertThat(samsungPayError.developerMessage).contains("Samsung Pay failed")
+        assertThat(samsungPayError.developerMessage).contains("Code: samsung_pay_operation_failed")
+        assertThat(samsungPayError.developerMessage).contains("operation: collect_payment_method")
+    }
+
+    @Test
+    fun `Samsung Pay PaymentMethod API failure preserves rich API error`() = runTest {
+        val backendError = APIException(
+            stripeError = StripeError(
+                message = "Token creation failed",
+                code = "token_creation_failed",
+            ),
+        )
+        whenever(
+            cryptoApiRepository.createSamsungPayPaymentMethod(
+                paymentCredential = "credential",
+                platformPublishableKey = "pk_platform_123",
+            ),
+        ).thenReturn(Result.failure(backendError))
+
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayResult.Completed("credential"),
+            platformPublishableKey = "pk_platform_123",
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
+        val error = (result as OnrampCollectPaymentMethodResult.Failed).error
+        assertThat(error).isInstanceOf(UncategorizedException::class.java)
+        assertThat((error as UncategorizedException).underlyingError).isSameInstanceAs(backendError)
+    }
+
+    @Test
+    fun `Samsung Pay unsupported availability returns rich error`() {
+        val result = interactor.handleSamsungPayAvailability(SamsungPayStatus.NotSupported)
+
+        assertThat(result).isInstanceOf(SamsungPayAvailabilityResult.Unavailable::class.java)
+        val error = (result as SamsungPayAvailabilityResult.Unavailable).error
+        assertThat(error.reason).isEqualTo(SamsungPayException.Reason.NotSupported)
+        assertThat(error.code).isEqualTo("samsung_pay_not_supported")
+        assertThat(error.underlyingError).isNull()
+    }
+
+    @Test
+    fun `Samsung Pay ready availability returns available`() {
+        val result = interactor.handleSamsungPayAvailability(SamsungPayStatus.Ready)
+
+        assertThat(result).isInstanceOf(SamsungPayAvailabilityResult.Available::class.java)
+    }
+
+    @Test
+    fun `Samsung Pay analytics use the active Elements session`() {
+        val event = OnrampAnalyticsEvent.SamsungPayInitialized
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        interactor.trackAnalyticsEvent(event)
+
+        testAnalyticsService.assertContainsEvent(event)
+    }
+
+    @Test
     fun testLogOutIsSuccessful() = runTest {
         val mockLogOutSuccess = mock<LinkController.LogOutResult.Success>()
         whenever(linkController.logOut()).thenReturn(mockLogOutSuccess)
@@ -1741,6 +1917,8 @@ class OnrampInteractorTest {
             "This wallet verification request expired. Please try again.",
         invalidWalletOwnershipChallengeUserMessage: String =
             "This wallet verification request is invalid. Please try again.",
+        samsungPayErrorUserMessage: String =
+            "Samsung Pay couldn't be used. Please choose another payment method or try again.",
     ): Application {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 
@@ -1762,6 +1940,8 @@ class OnrampInteractorTest {
                 walletNotFoundUserMessage
             on { getString(R.string.stripe_onramp_unsupported_network_user_message) } doReturn
                 unsupportedNetworkUserMessage
+            on { getString(R.string.stripe_onramp_samsung_pay_error_user_message) } doReturn
+                samsungPayErrorUserMessage
         }
     }
 

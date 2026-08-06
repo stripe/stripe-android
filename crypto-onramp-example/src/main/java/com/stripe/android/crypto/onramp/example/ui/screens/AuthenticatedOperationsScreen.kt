@@ -153,6 +153,7 @@ internal fun AuthenticatedOperationsScreen(
         )
         PaymentSection(
             googlePayIsReady = uiState.googlePayIsReady,
+            samsungPayIsReady = uiState.samsungPayIsReady,
             onCollectPayment = onCollectPayment
         )
         CheckoutSection(

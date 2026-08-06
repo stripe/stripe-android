@@ -37,6 +37,7 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
+    testImplementation testLibs.turbine
 
     androidTestImplementation testLibs.androidx.junit
     androidTestImplementation testLibs.espresso.core
