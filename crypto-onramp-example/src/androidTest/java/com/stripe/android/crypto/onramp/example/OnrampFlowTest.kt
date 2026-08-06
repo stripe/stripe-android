@@ -7,6 +7,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
@@ -24,6 +25,7 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExternalResource
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import kotlin.time.Duration
@@ -40,11 +42,18 @@ class OnrampFlowTest {
         isEnabled = false
     )
 
+    private val clearPreferencesRule = object : ExternalResource() {
+        override fun before() {
+            clearPrefs()
+        }
+    }
+
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
         .around(composeRule)
         .around(attestationFeatureFlagTestRule)
         .around(RetryRule(3))
+        .around(clearPreferencesRule)
         .around(activityRule)
 
     private val defaultTimeout: Duration = 30.seconds
@@ -61,8 +70,6 @@ class OnrampFlowTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testCheckoutFlow() {
-        clearPrefs()
-
         waitForTag(LOGIN_EMAIL_TAG)
 
         // Enter test login credentials previously registered with the demo backend.
@@ -151,7 +158,7 @@ class OnrampFlowTest {
     }
 
     private fun performClickOnNode(tag: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
-        waitForTag(tag = tag, timeoutMs = timeoutMs)
+        waitForEnabledTag(tag = tag, timeoutMs = timeoutMs)
 
         val node = composeRule.onNodeWithTag(tag)
         runCatching { node.performScrollTo() }
@@ -160,6 +167,14 @@ class OnrampFlowTest {
             waitForSnackbarToHide()
         }
         node.performClick()
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun waitForEnabledTag(tag: String, timeoutMs: Long) {
+        composeRule.waitUntilExactlyOneExists(
+            matcher = hasTestTag(tag).and(isEnabled()),
+            timeoutMillis = timeoutMs
+        )
     }
 
     private fun scrollContentUp() {
