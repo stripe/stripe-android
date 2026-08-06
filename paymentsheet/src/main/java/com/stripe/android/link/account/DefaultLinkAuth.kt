@@ -1,6 +1,7 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.common.di.APPLICATION_ID
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkEventException
 import com.stripe.android.link.gate.LinkGate
@@ -62,6 +63,7 @@ internal class DefaultLinkAuth @Inject constructor(
             )
         } else {
             linkRepository.lookupConsumer(
+                requestOptions = config.requestOptions,
                 email = email,
                 linkAuthIntentId = linkAuthIntentId,
                 sessionId = sessionId,
@@ -90,6 +92,7 @@ internal class DefaultLinkAuth @Inject constructor(
             )
         } else {
             linkRepository.consumerSignUp(
+                requestOptions = config.requestOptions,
                 email = email,
                 phone = phoneNumber,
                 country = country,
@@ -105,6 +108,7 @@ internal class DefaultLinkAuth @Inject constructor(
         supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionRefresh> {
         return linkRepository.refreshConsumer(
+            requestOptions = config.requestOptions,
             appId = applicationId,
             consumerSessionClientSecret = consumerSessionClientSecret,
             supportedVerificationTypes = supportedVerificationTypes
@@ -123,6 +127,7 @@ internal class DefaultLinkAuth @Inject constructor(
         return runCatching {
             val verificationToken = integrityRequestManager.requestToken().getOrThrow()
             linkRepository.mobileLookupConsumer(
+                requestOptions = config.requestOptions,
                 verificationToken = verificationToken,
                 appId = applicationId,
                 email = email,
@@ -150,6 +155,7 @@ internal class DefaultLinkAuth @Inject constructor(
         return runCatching {
             val verificationToken = integrityRequestManager.requestToken().getOrThrow()
             linkRepository.mobileSignUp(
+                requestOptions = config.requestOptions,
                 name = name,
                 email = email,
                 phoneNumber = phoneNumber,

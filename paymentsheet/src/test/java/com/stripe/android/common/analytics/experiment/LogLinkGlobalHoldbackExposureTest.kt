@@ -79,6 +79,7 @@ class LogLinkGlobalHoldbackExposureTest {
             retrieveCustomerEmail = retrieveCustomerEmail,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             mode = EventReporter.Mode.Complete,
+            apiConfigProvider = { ApiConfiguration.State("pk_123", null) },
         )
     }
 

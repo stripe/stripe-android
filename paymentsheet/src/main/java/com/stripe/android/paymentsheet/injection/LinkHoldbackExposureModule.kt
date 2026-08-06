@@ -9,7 +9,6 @@ import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.repositories.LinkApiRepository
@@ -86,13 +85,6 @@ internal class LinkHoldbackExposureModule {
             workContext = workContext,
             locale = locale,
             errorReporter = errorReporter,
-            apiRequestOptionsProvider = {
-                val config = apiConfigProvider()
-                ApiRequest.Options(
-                    apiKey = config.publishableKey,
-                    stripeAccount = config.stripeAccountId,
-                )
-            },
         )
     }
 }
