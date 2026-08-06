@@ -2,8 +2,11 @@ package com.stripe.android.paymentsheet.addresselement
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.DefaultStripeTheme
@@ -21,6 +24,7 @@ class InputAddressScreenTest {
     fun clicking_primary_button_triggers_callback_when_enabled() {
         var counter = 0
         setContent(primaryButtonEnabled = true, primaryButtonCallback = { counter++ })
+        composeTestRule.onNodeWithTag(ADDRESS_ELEMENT_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
         composeTestRule.onNodeWithText("Save Address").performClick()
         assertThat(counter).isEqualTo(1)
     }
@@ -29,6 +33,7 @@ class InputAddressScreenTest {
     fun clicking_primary_button_does_not_trigger_callback_when_not_enabled() {
         var counter = 0
         setContent(primaryButtonEnabled = false, primaryButtonCallback = { counter++ })
+        composeTestRule.onNodeWithTag(ADDRESS_ELEMENT_PRIMARY_BUTTON_TEST_TAG).assertIsNotEnabled()
         composeTestRule.onNodeWithText("Save Address").performClick()
         assertThat(counter).isEqualTo(0)
     }

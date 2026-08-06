@@ -29,14 +29,22 @@ class PrimaryButtonScreenshotTest {
     @Test
     fun testEnabled() {
         paparazziRule.snapshot {
-            PrimaryButton(isEnabled = true, label = BUTTON_TEXT, onButtonClick = {})
+            PrimaryButton(
+                isEnabled = true,
+                label = BUTTON_TEXT,
+                onButtonClick = {},
+            )
         }
     }
 
     @Test
     fun testDisabled() {
         paparazziRule.snapshot {
-            PrimaryButton(isEnabled = false, label = BUTTON_TEXT, onButtonClick = {})
+            PrimaryButton(
+                isEnabled = false,
+                label = BUTTON_TEXT,
+                onButtonClick = {},
+            )
         }
     }
 
@@ -47,7 +55,7 @@ class PrimaryButtonScreenshotTest {
                 isEnabled = true,
                 label = BUTTON_TEXT,
                 onButtonClick = {},
-                displayLockIcon = true
+                displayLockIcon = true,
             )
         }
     }

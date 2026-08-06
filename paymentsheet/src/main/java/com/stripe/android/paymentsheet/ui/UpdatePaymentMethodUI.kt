@@ -293,8 +293,8 @@ private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.DisabledSaveButtonPressed)
         },
         modifier = Modifier
-            .testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
-            .testMetadata("isLoading=$isLoading")
+            .testMetadata("isLoading=$isLoading"),
+        testTag = UPDATE_PM_SAVE_BUTTON_TEST_TAG,
     )
 }
 

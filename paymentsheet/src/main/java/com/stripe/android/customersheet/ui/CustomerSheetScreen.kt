@@ -11,7 +11,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.nfcscan.LocalNfcScanEventShownReporter
@@ -190,9 +189,9 @@ internal fun SelectPaymentMethod(
                     viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
                 },
                 modifier = Modifier
-                    .testTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
                     .padding(top = 20.dp)
                     .padding(horizontalPadding),
+                testTag = CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG,
             )
         }
 
@@ -317,9 +316,9 @@ internal fun AddPaymentMethod(
             viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
         },
         modifier = Modifier
-            .testTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG)
             .padding(top = 10.dp)
             .padding(horizontalPadding),
+        testTag = CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG,
     )
 
     if (!viewState.showMandateAbovePrimaryButton) {
