@@ -7,7 +7,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.lpmfoundations.paymentmethod.toCountryOnlyBillingAddressSection
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -44,16 +43,11 @@ private object WeroUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         builder
-            .apply {
-                element(
-                    CountrySpec(
-                        allowedCountryCodes = setOf("DE", "BE", "FR"),
-                    ).toCountryOnlyBillingAddressSection(
-                        initialValues = arguments.initialValues,
-                        initialCountry = null,
-                    ),
-                )
-            }
+            .element(
+                CountrySpec(
+                    allowedCountryCodes = setOf("DE", "BE", "FR"),
+                ).transform(arguments.initialValues)
+            )
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)

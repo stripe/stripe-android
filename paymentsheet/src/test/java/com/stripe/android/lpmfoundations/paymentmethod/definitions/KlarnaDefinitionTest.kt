@@ -178,7 +178,7 @@ class KlarnaDefinitionTest {
     }
 
     @Test
-    fun `createFormElements includes address when full address collection is enabled`() {
+    fun `createFormElements includes one address section when full address collection is enabled`() {
         val formElements = KlarnaDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(
@@ -190,12 +190,33 @@ class KlarnaDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(4)
+        assertThat(formElements).hasSize(3)
 
         checkKlarnaHeaderText(formElements, 0)
         checkEmailField(formElements, 1)
-        checkCountryField(formElements, 2)
-        checkFullAddressField(formElements, 3)
+        checkFullAddressField(formElements, 2)
+    }
+
+    @Test
+    fun `full address updates fields when its country changes`() {
+        val formElements = KlarnaDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(
+                    paymentMethodTypes = listOf("klarna")
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    allowedCountries = setOf("DE", "US"),
+                )
+            )
+        )
+
+        val addressElement = (formElements[2] as SectionElement).fields.single() as AddressElement
+        addressElement.countryElement.controller.onRawValueChange("US")
+        assertThat(addressElement.fields.value.map { it.identifier }).contains(IdentifierSpec.State)
+
+        addressElement.countryElement.controller.onRawValueChange("DE")
+        assertThat(addressElement.fields.value.map { it.identifier }).doesNotContain(IdentifierSpec.State)
     }
 
     @Test
@@ -214,15 +235,14 @@ class KlarnaDefinitionTest {
 
         val formElements = KlarnaDefinition.formElements(metadata = metadata)
 
-        assertThat(formElements).hasSize(7)
+        assertThat(formElements).hasSize(6)
 
         checkKlarnaHeaderText(formElements, 0)
         checkNameField(formElements, 1)
         checkEmailField(formElements, 2)
         checkPhoneField(formElements, 3)
-        checkCountryField(formElements, 4)
-        checkFullAddressField(formElements, 5)
-        checkMandateField(formElements, metadata, 6)
+        checkFullAddressField(formElements, 4)
+        checkMandateField(formElements, metadata, 5)
     }
 
     @Test
@@ -299,7 +319,7 @@ class KlarnaDefinitionTest {
         assertThat(section.identifier.v1).isEqualTo("billing_details[address]_section")
         val addressElement = section.fields.single() as AddressElement
         assertThat(addressElement.fields.value.map { it.identifier })
-            .doesNotContain(IdentifierSpec.Country)
+            .contains(IdentifierSpec.Country)
     }
 
     private fun checkMandateField(

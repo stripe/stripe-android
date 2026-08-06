@@ -9,7 +9,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.lpmfoundations.paymentmethod.toCountryOnlyBillingAddressSection
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -66,28 +65,26 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .ignoreBillingAddressRequirements()
             .apply {
-                element(
-                    CountrySpec(
-                        allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                    ).toCountryOnlyBillingAddressSection(
-                        initialValues = arguments.initialValues,
-                        initialCountry = null,
-                    ),
-                )
-
                 if (
                     metadata.billingDetailsCollectionConfiguration.address ==
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                 ) {
                     AddressSpec(
-                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration
-                            .allowedBillingCountries,
-                        hideCountry = true,
+                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
                     ).transform(
                         initialValues = arguments.initialValues,
                         shippingValues = arguments.shippingValues,
                         autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
-                    ).forEach { element(it) }
+                    ).forEach {
+                        element(it)
+                    }
+                } else {
+                    element(
+                        CountrySpec(
+                            allowedCountryCodes =
+                            metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                        ).transform(arguments.initialValues)
+                    )
                 }
 
                 if (KlarnaDefinition.requiresMandate(metadata)) {
@@ -148,17 +145,15 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
                         stringResId = R.string.stripe_klarna_buy_now_pay_later
                     )
                 )
-                .apply {
-                    element(
-                        CountrySpec(
-                            allowedCountryCodes = arguments.billingDetailsCollectionConfiguration
-                                .allowedBillingCountries,
-                        ).toCountryOnlyBillingAddressSection(
-                            initialValues = arguments.initialValues,
-                            initialCountry = metadata.stripeIntent.countryCode,
-                        ),
+                .element(
+                    CountrySpec(
+                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration
+                            .allowedBillingCountries,
+                    ).transform(
+                        initialValues = arguments.initialValues,
+                        initialCountry = metadata.stripeIntent.countryCode,
                     )
-                }
+                )
         }
 
         if (KlarnaDefinition.requiresMandate(metadata)) {
