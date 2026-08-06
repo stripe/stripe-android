@@ -3,9 +3,9 @@ package com.stripe.android.link.account
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails

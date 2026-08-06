@@ -1,7 +1,6 @@
 package com.stripe.android.common.taptoadd
 
 import android.content.Context
-import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
@@ -68,7 +67,6 @@ internal interface TapToAddConnectionModule {
             errorReporter: ErrorReporter,
             logger: Logger,
             applicationContext: Context,
-            apiConfigProvider: () -> ApiConfiguration.State,
             @IOContext workContext: CoroutineContext,
             callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
             isSimulatedProvider: TapToAddIsSimulatedProvider,
@@ -78,7 +76,6 @@ internal interface TapToAddConnectionModule {
                 isStripeTerminalSdkAvailable = isStripeTerminalSdkAvailable,
                 terminalWrapper = terminalWrapper,
                 errorReporter = errorReporter,
-                apiConfigProvider = apiConfigProvider,
                 isSimulatedProvider = isSimulatedProvider,
                 logger = logger,
                 callbackRetriever = callbackRetriever,

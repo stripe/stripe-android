@@ -116,6 +116,8 @@ internal class DefaultTapToAddCollectionHandler(
         connectionManager.connect(
             config = TapToAddConnectionManager.ConnectionConfig(
                 merchantDisplayName = metadata.merchantName,
+                publishableKey = metadata.apiConfiguration.publishableKey,
+                isLiveMode = metadata.apiConfiguration.isLiveMode(),
             ),
         )
 

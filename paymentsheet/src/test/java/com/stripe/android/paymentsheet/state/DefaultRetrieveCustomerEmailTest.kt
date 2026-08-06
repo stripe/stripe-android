@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.state
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration

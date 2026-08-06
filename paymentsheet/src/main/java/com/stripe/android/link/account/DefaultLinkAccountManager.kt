@@ -3,7 +3,6 @@ package com.stripe.android.link.account
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ConsumerState

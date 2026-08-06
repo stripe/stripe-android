@@ -1,7 +1,6 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.common.di.APPLICATION_ID
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkEventException
 import com.stripe.android.link.gate.LinkGate

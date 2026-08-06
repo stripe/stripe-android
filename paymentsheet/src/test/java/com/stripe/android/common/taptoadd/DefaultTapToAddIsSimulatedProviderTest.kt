@@ -3,11 +3,9 @@ package com.stripe.android.common.taptoadd
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiConfiguration
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import javax.inject.Provider
 
 class DefaultTapToAddIsSimulatedProviderTest {
 
@@ -15,48 +13,36 @@ class DefaultTapToAddIsSimulatedProviderTest {
     fun `get returns true when test mode and application is debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = true),
-            apiConfigProvider = {
-                ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
-             },
         )
 
-        assertThat(provider.get()).isTrue()
+        assertThat(provider.get(isLiveMode = false)).isTrue()
     }
 
     @Test
     fun `get returns false when live mode even if debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = true),
-            apiConfigProvider = {
-                ApiConfiguration.State(publishableKey = "pk_live_123", stripeAccountId = null)
-             },
         )
 
-        assertThat(provider.get()).isFalse()
+        assertThat(provider.get(isLiveMode = true)).isFalse()
     }
 
     @Test
     fun `get returns false when test mode but application is not debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = false),
-            apiConfigProvider = {
-                ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
-            },
         )
 
-        assertThat(provider.get()).isFalse()
+        assertThat(provider.get(isLiveMode = false)).isFalse()
     }
 
     @Test
     fun `get returns false when live mode and not debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = false),
-            apiConfigProvider = {
-                ApiConfiguration.State(publishableKey = "pk_live_123", stripeAccountId = null)
-             },
         )
 
-        assertThat(provider.get()).isFalse()
+        assertThat(provider.get(isLiveMode = true)).isFalse()
     }
 
     private fun context(debuggable: Boolean): Context {
@@ -70,9 +56,5 @@ class DefaultTapToAddIsSimulatedProviderTest {
         whenever(context.applicationInfo).thenReturn(appInfo)
 
         return context
-    }
-
-    private fun provider(block: () -> ApiConfiguration.State): Provider<ApiConfiguration.State> {
-        return Provider { block() }
     }
 }

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.state
 
-import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata

@@ -41,7 +41,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -315,11 +314,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             isLiveMode = apiConfiguration.isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
-            isTapToAddSupported = tapToAddConnectionStarter.isSupported,
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported(
+                apiConfiguration.publishableKey,
+                apiConfiguration.isLiveMode(),
+            ),
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
-        tapToAddConnectionStarter.start(configuration)
+        tapToAddConnectionStarter.start(configuration, apiConfiguration.publishableKey, apiConfiguration.isLiveMode())
 
         val isGooglePaySupportedOnDevice = async {
             durationProvider.measureDuration(
@@ -590,7 +592,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentElementCallbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
         )
 
-        val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(elementsSession, customerMetadata)
+        val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(
+            elementsSession,
+            customerMetadata,
+            apiConfiguration.publishableKey,
+            apiConfiguration.isLiveMode(),
+        )
 
         val analyticsMetadata = analyticsMetadataFactory.create(
             initializationMode = initializationMode,
