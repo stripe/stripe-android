@@ -95,6 +95,7 @@ class USBankAccountFormViewModelTest {
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        requiresBillingAddressForAutomaticTax = false,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -128,6 +129,135 @@ class USBankAccountFormViewModelTest {
                 args = defaultArgs.copy(instantDebits = true),
             )
 
+            assertThat(viewModel.requiredFields.value).isTrue()
+        }
+
+    @Test
+    fun `automatic tax updates US bank account address fields when country changes`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                args = defaultArgs.copy(
+                    requiresBillingAddressForAutomaticTax = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = AddressCollectionMode.Automatic,
+                        )
+                    ),
+                )
+            )
+
+            viewModel.addressElement.countryElement.controller.onRawValueChange("US")
+            assertThat(viewModel.addressHiddenIdentifiers.value).doesNotContain(IdentifierSpec.Line1)
+            assertThat(viewModel.addressHiddenIdentifiers.value).doesNotContain(IdentifierSpec.City)
+            assertThat(viewModel.addressHiddenIdentifiers.value).doesNotContain(IdentifierSpec.State)
+            assertThat(viewModel.addressHiddenIdentifiers.value).doesNotContain(IdentifierSpec.PostalCode)
+
+            viewModel.addressElement.countryElement.controller.onRawValueChange("CA")
+            assertThat(viewModel.addressHiddenIdentifiers.value).contains(IdentifierSpec.Line1)
+            assertThat(viewModel.addressHiddenIdentifiers.value).contains(IdentifierSpec.City)
+            assertThat(viewModel.addressHiddenIdentifiers.value).contains(IdentifierSpec.State)
+            assertThat(viewModel.addressHiddenIdentifiers.value).doesNotContain(IdentifierSpec.PostalCode)
+        }
+
+    @Test
+    fun `automatic tax address is required for US bank account`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                args = defaultArgs.copy(
+                    requiresBillingAddressForAutomaticTax = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = AddressCollectionMode.Automatic,
+                        )
+                    ),
+                )
+            )
+            viewModel.addressElement.countryElement.controller.onRawValueChange("US")
+
+            assertThat(viewModel.requiredFields.value).isFalse()
+
+            val addressValues = Address(
+                line1 = "510 Townsend Street",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US",
+            ).asFormFieldValues()
+            viewModel.addressElement.addressController.value.fieldsFlowable.value.forEach { field ->
+                field.setRawValue(addressValues)
+            }
+
+            assertThat(viewModel.requiredFields.value).isTrue()
+        }
+
+    @Test
+    fun `automatic tax CA address requires only postal code for US bank account`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                args = defaultArgs.copy(
+                    requiresBillingAddressForAutomaticTax = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = AddressCollectionMode.Automatic,
+                        )
+                    ),
+                )
+            )
+            viewModel.addressElement.countryElement.controller.onRawValueChange("CA")
+
+            assertThat(viewModel.requiredFields.value).isFalse()
+
+            val addressValues = Address(
+                postalCode = "M5V 1E3",
+                country = "CA",
+            ).asFormFieldValues()
+            viewModel.addressElement.addressController.value.fieldsFlowable.value.forEach { field ->
+                field.setRawValue(addressValues)
+            }
+
+            assertThat(viewModel.requiredFields.value).isTrue()
+            assertThat(viewModel.address.value?.country).isEqualTo("CA")
+            assertThat(viewModel.address.value?.postalCode).isEqualTo("M5V1E3")
+            assertThat(viewModel.address.value?.line1).isNull()
+        }
+
+    @Test
+    fun `automatic tax country-only address is complete for US bank account`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                args = defaultArgs.copy(
+                    requiresBillingAddressForAutomaticTax = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = AddressCollectionMode.Automatic,
+                        )
+                    ),
+                )
+            )
+
+            viewModel.addressElement.countryElement.controller.onRawValueChange("FR")
+
+            assertThat(viewModel.requiredFields.value).isTrue()
+            assertThat(viewModel.address.value?.country).isEqualTo("FR")
+            assertThat(viewModel.address.value?.postalCode).isNull()
+            assertThat(viewModel.address.value?.line1).isNull()
+        }
+
+    @Test
+    fun `automatic tax disabled keeps automatic US bank account address hidden`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                args = defaultArgs.copy(
+                    requiresBillingAddressForAutomaticTax = false,
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = AddressCollectionMode.Automatic,
+                        )
+                    ),
+                )
+            )
+
+            assertThat(viewModel.collectingAddress).isFalse()
             assertThat(viewModel.requiredFields.value).isTrue()
         }
 

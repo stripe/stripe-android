@@ -205,6 +205,7 @@ internal class AccountPreviewScreenshotTest {
         showCheckboxes: Boolean = false,
     ) {
         paparazzi.snapshot {
+            val addressController = createAddressController(fillAddress = fillAddress)
             BankAccountForm(
                 state = state,
                 instantDebits = instantDebits,
@@ -213,7 +214,11 @@ internal class AccountPreviewScreenshotTest {
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
-                addressController = createAddressController(fillAddress = fillAddress),
+                addressController = addressController,
+                addressValidationController = addressController,
+                addressHiddenIdentifiers = emptySet(),
+                showAddress = formArguments.billingDetailsCollectionConfiguration.address ==
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 sameAsShippingElement = sameAsShippingElement,
                 saveForFutureUseElement = saveForFutureUseElement,
                 setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement,

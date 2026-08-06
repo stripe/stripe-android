@@ -903,6 +903,7 @@ internal class CustomerSheetViewModel(
             sellerBusinessName = null,
             forceSetupFutureUseBehavior = false,
             clientAttributionMetadata = clientAttributionMetadata,
+            requiresBillingAddressForAutomaticTax = false,
         )
     }
 
