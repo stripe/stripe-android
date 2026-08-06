@@ -25,6 +25,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
@@ -66,6 +68,17 @@ internal class PaymentSheetPage(
         if (fillOutZipCode) {
             replaceText("ZIP Code", "12345")
         }
+    }
+
+    fun focusZipCode() {
+        composeTestRule.onNode(hasText("ZIP Code"))
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun enterZipCode() {
+        composeTestRule.onNode(hasText("ZIP Code"))
+            .performTextInput("12345")
     }
 
     fun fillOutBillingCollectionDetails(
@@ -242,6 +255,66 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun assertPrimaryButtonEnabled(enabled: Boolean) {
+        onView(withId(R.id.primary_button)).check { view, _ ->
+            assertThat(view.isEnabled).isEqualTo(enabled)
+        }
+    }
+
+    fun waitForKeyboardToBeVisible() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            primaryButtonPosition().imeBottomInset > 0
+        }
+    }
+
+    fun assertPrimaryButtonVisibleAboveKeyboard() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            primaryButtonPosition().isAboveKeyboard
+        }
+        assertPrimaryButtonPosition(expectedAboveKeyboard = true)
+    }
+
+    fun assertPrimaryButtonBelowKeyboard() {
+        assertPrimaryButtonPosition(expectedAboveKeyboard = false)
+    }
+
+    private fun assertPrimaryButtonPosition(expectedAboveKeyboard: Boolean) {
+        val position = primaryButtonPosition()
+        assertThat(position.imeBottomInset).isGreaterThan(0)
+
+        if (expectedAboveKeyboard) {
+            assertThat(position.buttonBottom).isAtMost(position.keyboardTop)
+        } else {
+            assertThat(position.buttonBottom).isGreaterThan(position.keyboardTop)
+        }
+    }
+
+    private fun primaryButtonPosition(): PrimaryButtonPosition {
+        var position: PrimaryButtonPosition? = null
+        onView(withId(R.id.primary_button)).check { view, _ ->
+            val rootView = view.rootView
+            val imeBottomInset = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(WindowInsetsCompat.Type.ime())
+                ?.bottom
+                ?: 0
+
+            val rootLocation = IntArray(2)
+            rootView.getLocationOnScreen(rootLocation)
+            val buttonLocation = IntArray(2)
+            view.getLocationOnScreen(buttonLocation)
+            val keyboardTop = rootLocation[1] + rootView.height - imeBottomInset
+            val buttonBottom = buttonLocation[1] + view.height
+
+            position = PrimaryButtonPosition(
+                imeBottomInset = imeBottomInset,
+                keyboardTop = keyboardTop,
+                buttonBottom = buttonBottom,
+            )
+        }
+
+        return requireNotNull(position)
+    }
+
     fun assertErrorMessageShown() {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
@@ -255,6 +328,20 @@ internal class PaymentSheetPage(
 
     fun fillCvcRecollection(cvc: String) {
         waitForText("Confirm your CVC")
+        composeTestRule
+            .onNodeWithText("CVC")
+            .performTextInput(cvc)
+    }
+
+    fun focusCvcRecollection() {
+        waitForText("Confirm your CVC")
+        composeTestRule
+            .onNodeWithText("CVC")
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun enterCvcRecollection(cvc: String) {
         composeTestRule
             .onNodeWithText("CVC")
             .performTextInput(cvc)
@@ -540,5 +627,14 @@ internal class PaymentSheetPage(
             ).fetchSemanticsNodes()
                 .isNotEmpty()
         }
+    }
+
+    private data class PrimaryButtonPosition(
+        val imeBottomInset: Int,
+        val keyboardTop: Int,
+        val buttonBottom: Int,
+    ) {
+        val isAboveKeyboard: Boolean
+            get() = imeBottomInset > 0 && buttonBottom <= keyboardTop
     }
 }

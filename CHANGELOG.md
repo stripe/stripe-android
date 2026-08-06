@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [CHANGED][13671](https://github.com/stripe/stripe-android/pull/13671) PaymentSheet now scrolls its primary button into view when a payment-method form or CVC recollection becomes complete while the keyboard is visible.
+
 ## 23.14.0 - 2026-08-03
 
 ### CryptoOnramp
