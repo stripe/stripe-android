@@ -24,14 +24,12 @@ import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.CustomerState
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
-    private val paymentElementConfigurationProvider: Provider<PaymentElement.Configuration.State>,
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
@@ -65,25 +63,15 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
-            }
-            is EmbeddedActivityResult.Cancelled -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-            }
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
+            is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
         }
     }
 
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
-            }
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
         }
@@ -91,17 +79,23 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
-            }
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
             is EmbeddedActivityResult.Cancelled -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                applyCustomerState(result.customerState)
                 clearStaleSelection()
             }
             is EmbeddedActivityResult.Error -> Unit
         }
+    }
+
+    private fun applyCompleteResult(result: EmbeddedActivityResult.Complete) {
+        applyCustomerState(result.customerState)
+        selectionHolder.setPreviousNewSelections(result.previousNewSelections)
+        selectionHolder.setSelection(result.selection)
+    }
+
+    private fun applyCustomerState(customerState: CustomerState?) {
+        customerState?.let { customerStateHolder.setCustomerState(it) }
     }
 
     private fun clearStaleSelection() {
@@ -145,7 +139,6 @@ internal class CheckoutSheetLauncher @Inject constructor(
             promotion = promotion,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
-                paymentMethodLayout = paymentElementConfigurationProvider.get().paymentMethodLayout.asPaymentSheet(),
             ),
         )
         activityLauncher.launch(args)
@@ -202,9 +195,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = null,
-            launchMode = EmbeddedLaunchMode.PaymentOptions(
-                paymentMethodLayout = paymentElementConfigurationProvider.get().paymentMethodLayout.asPaymentSheet(),
-            ),
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         activityLauncher.launch(args)
     }

@@ -182,18 +182,7 @@ class CheckoutController @Inject internal constructor(
         checkoutSessionRepository.updateEmail(sessionId, email?.trim().orEmpty())
     }
 
-    /**
-     * Sets the billing address for this checkout.
-     *
-     * The address is stored locally and used when presenting payment UI. If automatic tax is
-     * enabled and the tax address source is billing, the address is also sent to the server
-     * to compute updated tax amounts.
-     *
-     * @param name The billing name.
-     * @param phoneNumber The billing phone number.
-     * @param address The billing address.
-     */
-    suspend fun updateBillingAddress(
+    internal suspend fun updateBillingAddress(
         name: String?,
         phoneNumber: String?,
         address: Address,
