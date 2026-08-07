@@ -56,7 +56,7 @@ internal class NfcCoilAnimatedInteriorTest {
     }
 
     @Test
-    fun `scanning status shows NFC icon`() {
+    fun `scanning status shows spinner`() {
         composeRule.setContent {
             NfcCoilAnimatedInterior(
                 status = NfcScanningStatus.Scanning,
@@ -67,7 +67,8 @@ internal class NfcCoilAnimatedInteriorTest {
 
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(SPINNER_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertDoesNotExist()
         composeRule.onNodeWithTag(CHECKMARK_TEST_TAG).assertDoesNotExist()
     }
 

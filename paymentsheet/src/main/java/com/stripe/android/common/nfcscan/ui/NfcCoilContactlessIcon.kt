@@ -34,10 +34,9 @@ private const val IDLE_DIM_END_MS = IDLE_ALL_BARS_HOLD_END_MS + IDLE_DIM_DURATIO
 
 @Composable
 internal fun NfcCoilContactlessIcon(
-    status: NfcScanningStatus,
     modifier: Modifier = Modifier,
 ) {
-    if (LocalInspectionMode.current || status !is NfcScanningStatus.Idle) {
+    if (LocalInspectionMode.current) {
         NfcCoilStaticIcon(
             modifier = modifier.testTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG),
         )
