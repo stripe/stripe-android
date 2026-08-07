@@ -8,7 +8,8 @@ import org.json.JSONObject
 
 @Parcelize
 internal data class AutocompletePredictionsResult(
-    val predictions: List<AutocompleteSuggestion>
+    val predictions: List<AutocompleteSuggestion>,
+    val source: String?,
 ) : StripeModel
 
 @Parcelize
@@ -38,6 +39,7 @@ internal object AutocompletePredictionsResponseJsonParser :
     ModelJsonParser<AutocompletePredictionsResult> {
     override fun parse(json: JSONObject): AutocompletePredictionsResult? {
         val suggestionsArray = json.optJSONArray("suggestions") ?: return null
+        val source = StripeJsonUtils.optString(json, "source")
         val predictions = (0 until suggestionsArray.length()).mapNotNull { i ->
             val suggestion = suggestionsArray.optJSONObject(i)
                 ?: return@mapNotNull null
@@ -59,7 +61,7 @@ internal object AutocompletePredictionsResponseJsonParser :
                     ?.let { parseAddress(it) },
             )
         }
-        return AutocompletePredictionsResult(predictions = predictions)
+        return AutocompletePredictionsResult(predictions = predictions, source = source)
     }
 }
 
