@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -86,6 +87,14 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     ) {
         val config = confirmationOption.config
         val intent = confirmationArgs.intent
+        val shippingAddressParameters = if (confirmationArgs.paymentMethodMetadata.shippingAddressRequired) {
+            GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+                allowedCountryCodes = confirmationArgs.paymentMethodMetadata.checkoutSessionResponse?.allowedShippingCountries.orEmpty().toSet(),
+            )
+        } else {
+            null
+        }
 
         launcher.present(
             currencyCode = intent.asPaymentIntent()?.currency
@@ -104,6 +113,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             publishableKey = null,
             displayItems = config.displayItems.map { it.resolve(context) },
             billingEmailOverride = config.billingEmailOverride,
+            // TODO: pass shipping address params here.
         )
     }
 

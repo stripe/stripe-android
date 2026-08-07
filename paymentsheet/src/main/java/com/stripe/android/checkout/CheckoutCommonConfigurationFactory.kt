@@ -40,5 +40,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         opensCardScannerAutomatically = ConfigurationDefaults.opensCardScannerAutomatically,
         userOverrideCountry = ConfigurationDefaults.userOverrideCountry,
         appearance = ConfigurationDefaults.appearance,
+        shippingAddressRequired = configuration.expressCheckoutElementConfiguration.shippingAddressRequired,
     )
 }

@@ -101,6 +101,7 @@ internal data class PaymentMethodMetadata(
     val shouldUseAutocompleteProxyEndpoints: Boolean,
     val checkoutSessionResponse: CheckoutSessionResponse?,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+    val shippingAddressRequired: Boolean,
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
@@ -447,6 +448,7 @@ internal data class PaymentMethodMetadata(
                     (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
                         ?.checkoutSessionResponse,
                 paymentMethodLayout = paymentMethodLayout,
+                shippingAddressRequired = configuration.shippingAddressRequired,
             )
         }
 
@@ -519,6 +521,7 @@ internal data class PaymentMethodMetadata(
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 checkoutSessionResponse = null,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                shippingAddressRequired = false,
             )
         }
     }

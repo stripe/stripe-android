@@ -42,6 +42,7 @@ internal data class CommonConfiguration(
     val opensCardScannerAutomatically: Boolean,
     val userOverrideCountry: String?,
     val appearance: PaymentSheet.Appearance,
+    val shippingAddressRequired: Boolean,
 ) : Parcelable {
 
     fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
@@ -251,6 +252,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    shippingAddressRequired = false,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -276,6 +278,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    shippingAddressRequired = false,
 )
 
 internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -308,6 +311,7 @@ internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonC
     userOverrideCountry = null,
     appearance = PaymentSheet.Appearance(),
     allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
+    shippingAddressRequired = false,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {
