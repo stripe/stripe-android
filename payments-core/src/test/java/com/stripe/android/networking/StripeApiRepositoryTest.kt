@@ -2726,6 +2726,150 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun `confirmPaymentIntent with user key and saved payment method ID injects moto`() = runTest {
+        // Saved-card path: only one network request (confirm), no PM creation step.
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            paymentMethodId = "pm_card_visa",
+            clientSecret = "pi_12345_secret_fake",
+        )
+
+        create().confirmPaymentIntent(
+            confirmPaymentIntentParams = confirmParams,
+            options = DEFAULT_OPTIONS.copy(apiKey = "uk_12345"),
+        )
+
+        // Only one request — no PM creation needed for saved card.
+        verify(stripeNetworkClient, times(1))
+            .executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        with(params) {
+            withNestedParams("payment_method_options") {
+                withNestedParams("card") {
+                    assertThat(this["moto"]).isEqualTo(true)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `confirmPaymentIntent with user key, saved PM ID, and existing card options preserves cvc and injects moto`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            paymentMethodId = "pm_card_visa",
+            clientSecret = "pi_12345_secret_fake",
+            paymentMethodOptions = PaymentMethodOptionsParams.Card(cvc = "123"),
+        )
+
+        create().confirmPaymentIntent(
+            confirmPaymentIntentParams = confirmParams,
+            options = DEFAULT_OPTIONS.copy(apiKey = "uk_12345"),
+        )
+
+        verify(stripeNetworkClient, times(1))
+            .executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        with(params) {
+            withNestedParams("payment_method_options") {
+                withNestedParams("card") {
+                    assertThat(this["moto"]).isEqualTo(true)
+                    assertThat(this["cvc"]).isEqualTo("123")
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `confirmPaymentIntent with publishable key and saved PM ID does not inject moto`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            paymentMethodId = "pm_card_visa",
+            clientSecret = "pi_12345_secret_fake",
+        )
+
+        create().confirmPaymentIntent(
+            confirmPaymentIntentParams = confirmParams,
+            options = DEFAULT_OPTIONS, // standard publishable key
+        )
+
+        verify(stripeNetworkClient, times(1))
+            .executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        // moto should be absent for non-user-key calls
+        assertThat(params.containsKey("payment_method_options")).isFalse()
+    }
+
+    @Test
+    fun `confirmSetupIntent with user key and saved payment method ID injects moto`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val confirmParams = ConfirmSetupIntentParams.create(
+            paymentMethodId = "pm_card_visa",
+            clientSecret = "seti_12345_secret_fake",
+        )
+
+        create().confirmSetupIntent(
+            confirmSetupIntentParams = confirmParams,
+            options = DEFAULT_OPTIONS.copy(apiKey = "uk_12345"),
+        )
+
+        // Only one request — no PM creation needed for saved card.
+        verify(stripeNetworkClient, times(1))
+            .executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        with(params) {
+            withNestedParams("payment_method_options") {
+                withNestedParams("card") {
+                    assertThat(this["moto"]).isEqualTo(true)
+                }
+            }
+        }
+    }
+
+    @Test
     fun `listPaymentDetails() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
