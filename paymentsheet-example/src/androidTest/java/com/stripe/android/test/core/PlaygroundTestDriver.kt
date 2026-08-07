@@ -1261,7 +1261,10 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
         selectors.composeTestRule.waitForIdle()
 
-        selectors.multiStepSelect.waitForEnabled()
+        selectors.multiStepSelect.waitForEnabled(
+            requireClickAction = true,
+            timeout = CHECKOUT_PREPARATION_TIMEOUT,
+        )
         if (clickMultiStep) {
             selectors.multiStepSelect.click()
 
