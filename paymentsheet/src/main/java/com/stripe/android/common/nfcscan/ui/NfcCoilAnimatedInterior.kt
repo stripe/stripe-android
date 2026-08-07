@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -16,7 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.seconds
 
-private val SuccessDelay = 0.9.seconds
+private val StartDelay = 0.15.seconds
+private val Completion = 0.9.seconds
 private val CoilIconSize = 96.dp
 
 @Composable
@@ -37,9 +37,7 @@ internal fun NfcCoilAnimatedInterior(
             val fadeOut = fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium))
 
             if (targetState is NfcScanningStatus.Scanned) {
-                EnterTransition.None + fadeIn(
-                    animationSpec = tween(durationMillis = 0, delayMillis = CHECKMARK_DELAY_START)
-                ) togetherWith fadeOut
+                EnterTransition.None togetherWith fadeOut
             } else {
                 fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) togetherWith fadeOut
             }
@@ -58,7 +56,8 @@ internal fun NfcCoilAnimatedInterior(
                 NfcScanningStatus.Scanning -> Spinner()
                 is NfcScanningStatus.Scanned -> checkmarkStateRetainer.provider {
                     Checkmark(
-                        completionEventDelay = SuccessDelay,
+                        startDelay = StartDelay,
+                        completionDelay = Completion,
                         onAnimationComplete = onSuccessShown,
                         modifier = Modifier,
                     )
@@ -68,5 +67,4 @@ internal fun NfcCoilAnimatedInterior(
     }
 }
 
-private const val CHECKMARK_DELAY_START = 700
 private const val CHECKMARK_STATE_KEY = "CHECKMARK_STATE"

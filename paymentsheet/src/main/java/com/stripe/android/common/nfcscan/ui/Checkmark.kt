@@ -40,7 +40,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 internal fun Checkmark(
-    completionEventDelay: Duration,
+    startDelay: Duration,
+    completionDelay: Duration,
     onAnimationComplete: () -> Unit,
     modifier: Modifier,
 ) {
@@ -61,12 +62,13 @@ internal fun Checkmark(
     }
 
     val savedState = rememberSaveable {
-        mutableStateOf<CheckmarkState>(CheckmarkState.Progressing(CHECKMARK_MIN_PROGRESS))
+        mutableStateOf<CheckmarkState>(CheckmarkState.Init)
     }
 
     val animationManager = remember {
         CheckmarkAnimationManager(
-            delayDuration = completionEventDelay,
+            startDelay = startDelay,
+            completionDelay = completionDelay,
             savedState = savedState,
             onComplete = onAnimationComplete,
         )
@@ -123,11 +125,14 @@ private fun CheckmarkCanvas(
 }
 
 private class CheckmarkAnimationManager(
-    private val delayDuration: Duration,
+    private val startDelay: Duration,
+    private val completionDelay: Duration,
     private val savedState: MutableState<CheckmarkState>,
     private val onComplete: () -> Unit,
 ) {
     val progress = when (val currentState = savedState.value) {
+        is CheckmarkState.Init,
+        is CheckmarkState.Starting -> Animatable(CHECKMARK_MIN_PROGRESS)
         is CheckmarkState.Progressing -> Animatable(
             initialValue = currentState.progress.coerceIn(CHECKMARK_MIN_PROGRESS, CHECKMARK_MAX_PROGRESS),
         )
@@ -140,17 +145,39 @@ private class CheckmarkAnimationManager(
             return
         }
 
+        if (getState() is CheckmarkState.Init) {
+            start()
+        }
+
+        val potentialStartingState = getState()
+
+        if (potentialStartingState is CheckmarkState.Starting) {
+            delay(
+                delay = startDelay,
+                startedAt = potentialStartingState.startedAt,
+                transitionState = CheckmarkState.Progressing(CHECKMARK_MIN_PROGRESS)
+            )
+        }
+
         if (getState() is CheckmarkState.Progressing) {
             progress()
         }
 
-        val currentState = getState()
+        val potentialShowingState = getState()
 
-        if (currentState is CheckmarkState.Showing) {
-            delayBeforeCompletion(currentState)
+        if (potentialShowingState is CheckmarkState.Showing) {
+            delay(
+                delay = completionDelay,
+                startedAt = potentialShowingState.startedAt,
+                transitionState = CheckmarkState.Complete,
+            )
         }
 
         onComplete()
+    }
+
+    private fun start() {
+        savedState.value = CheckmarkState.Starting(startedAt = SystemClock.elapsedRealtime())
     }
 
     private suspend fun progress() = coroutineScope {
@@ -177,24 +204,34 @@ private class CheckmarkAnimationManager(
         }
     }
 
-    private suspend fun delayBeforeCompletion(state: CheckmarkState.Showing) {
-        if (state.startedAt < 0L) {
+    private suspend fun delay(
+        delay: Duration,
+        startedAt: Long,
+        transitionState: CheckmarkState,
+    ) {
+        if (startedAt < 0L) {
             return
         }
 
-        val remainingMs = delayDuration.inWholeMilliseconds - (SystemClock.elapsedRealtime() - state.startedAt)
+        val remainingMs = delay.inWholeMilliseconds - (SystemClock.elapsedRealtime() - startedAt)
 
         if (remainingMs > 0L) {
             delay(remainingMs.milliseconds)
         }
 
-        savedState.value = CheckmarkState.Complete
+        savedState.value = transitionState
     }
 
     private fun getState() = savedState.value
 }
 
 private sealed interface CheckmarkState : Parcelable {
+    @Parcelize
+    data object Init : CheckmarkState
+
+    @Parcelize
+    data class Starting(val startedAt: Long) : CheckmarkState
+
     @Parcelize
     data class Progressing(val progress: Float) : CheckmarkState
 
