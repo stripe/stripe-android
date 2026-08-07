@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.exception.APIException
@@ -216,7 +217,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                                 clientAttributionMetadata = null,
                                 transactionId = selection.transactionId,
                                 label = selection.label,
-                                publishableKey = it
+                                apiConfiguration = ApiConfiguration.State(publishableKey = "pk_123", null)
                             )
                         },
                         onFailure = { error ->

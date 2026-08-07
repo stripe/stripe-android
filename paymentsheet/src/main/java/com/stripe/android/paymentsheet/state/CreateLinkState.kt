@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.CommonConfiguration
@@ -36,6 +37,7 @@ internal interface CreateLinkState {
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): LinkStateResult
 }
 
@@ -80,6 +82,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
@@ -98,6 +101,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             initializationMode = initializationMode,
             customerMetadata = customerMetadata,
             clientAttributionMetadata = clientAttributionMetadata,
+            apiConfiguration = apiConfiguration,
         )
         val accountStatus = accountStatusProvider(linkConfiguration)
         val loginState = accountStatus.toLoginState()
@@ -224,6 +228,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): LinkConfiguration {
         val cardBrandFilter = getCardBrandFilter(
             elementsSession = elementsSession,
@@ -236,6 +241,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             configuration,
             customerMetadata,
             customerEmail = elementsSession.customer?.email,
+            stripeAccountId = apiConfiguration.stripeAccountId,
         )
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
@@ -254,6 +260,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             cardBrandChoice = cardBrandChoice,
             shippingDetails = shippingDetails,
             clientAttributionMetadata = clientAttributionMetadata,
+            apiConfiguration = apiConfiguration,
         )
     }
 
@@ -266,6 +273,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         cardBrandChoice: LinkConfiguration.CardBrandChoice?,
         shippingDetails: AddressDetails?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ) = LinkConfiguration(
         stripeIntent = elementsSession.stripeIntent,
         merchantName = configuration.merchantDisplayName,
@@ -309,6 +317,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
         clientAttributionMetadata = clientAttributionMetadata,
         linkBrand = elementsSession.linkBrand,
+        apiConfiguration = apiConfiguration,
     )
 
     private fun getCardBrandChoice(elementsSession: ElementsSession): LinkConfiguration.CardBrandChoice? {

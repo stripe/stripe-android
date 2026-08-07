@@ -1,6 +1,6 @@
 package com.stripe.android.polling
 
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
@@ -14,8 +14,8 @@ internal fun createIntentStatusPoller(
 ): DefaultIntentStatusPoller {
     return DefaultIntentStatusPoller(
         stripeRepository = FakeStripeRepository(enqueuedStatuses),
-        paymentConfigProvider = {
-            PaymentConfiguration(
+        apiConfigProvider = {
+            ApiConfiguration.State(
                 publishableKey = "key",
                 stripeAccountId = "account_id",
             )

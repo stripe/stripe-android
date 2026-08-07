@@ -2,6 +2,7 @@ package com.stripe.android.payments
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
@@ -38,7 +39,9 @@ internal class SetupIntentFlowResultProcessorTest {
 
     private val processor = SetupIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
-        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        {
+            ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+        },
         mockStripeRepository,
         Logger.noop(),
         testDispatcher,

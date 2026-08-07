@@ -9,5 +9,7 @@ internal class FakeTapToAddAvailabilityFactory(
     override fun isAvailable(
         elementsSession: ElementsSession,
         customerMetadata: CustomerMetadata?,
+        publishableKey: String,
+        isLiveMode: Boolean,
     ): Boolean = isAvailableResult
 }

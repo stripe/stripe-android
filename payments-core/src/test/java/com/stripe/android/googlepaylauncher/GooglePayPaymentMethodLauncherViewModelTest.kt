@@ -178,6 +178,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     ),
                     currencyCode = "usd",
                     amount = 0,
+                    publishableKey = "pk_123",
                     shippingAddressParameters = null,
                 )
             )
@@ -207,6 +208,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     ),
                     currencyCode = "usd",
                     amount = 0,
+                    publishableKey = "pk_123",
                     shippingAddressParameters = null,
                 )
             )
@@ -333,6 +335,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     amount = 1099,
                     label = null,
                     transactionId = null,
+                    publishableKey = "pk_123",
                     shippingAddressParameters = null,
                 )
             )
@@ -385,6 +388,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
                 checkoutSessionId = null,
             ),
+            publishableKey = "pk_123",
             shippingAddressParameters = null,
         )
         val REQUEST_OPTIONS = ApiRequest.Options(

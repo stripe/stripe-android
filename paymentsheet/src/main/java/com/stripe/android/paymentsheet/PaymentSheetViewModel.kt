@@ -266,7 +266,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        eventReporter.onInit()
+        // eventReporter.onInit()
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()

@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.ApiConfiguration
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.ece.ExpressButtonType
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
@@ -754,6 +756,14 @@ class CheckoutController @Inject internal constructor(
                 savedStateHandle = savedStateHandle.checkoutSubHandle(integrationName),
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
+                apiConfigurationProvider = {
+                    PaymentConfiguration.getInstance(application).let {
+                        ApiConfiguration.State(
+                            publishableKey = it.publishableKey,
+                            stripeAccountId = it.stripeAccountId,
+                        )
+                    }
+                },
             )
 
             return component.checkoutController

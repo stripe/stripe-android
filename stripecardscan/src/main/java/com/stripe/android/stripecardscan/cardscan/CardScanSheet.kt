@@ -148,7 +148,7 @@ class CardScanSheet private constructor() {
      * https://paper.dropbox.com/doc/Bouncer-Web-API-Review--BTOclListnApWjHdpv4DoaOuAg-Wy0HGlL0XfwAOz9hHuzS1#:h2=Creating-a-CardImageVerificati
      */
     fun present() {
-        present(CardScanConfiguration(elementsSessionId = null))
+        present(CardScanConfiguration(elementsSessionId = null, publishableKey = ""))
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

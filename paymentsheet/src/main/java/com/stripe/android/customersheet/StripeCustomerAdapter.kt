@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
@@ -32,6 +33,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     private val timeProvider: () -> Long,
     private val customerRepository: CustomerRepository,
     private val prefsRepositoryFactory: (CustomerEphemeralKey) -> PrefsRepository,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerAdapter {
 
@@ -71,6 +73,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 types = requestedTypes,
                 silentlyFail = false,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -88,6 +91,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 customerId = customerEphemeralKey.customerId,
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 paymentMethodId = paymentMethodId,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -105,6 +109,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 customerId = customerEphemeralKey.customerId,
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 paymentMethodId = paymentMethodId,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -124,6 +129,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 paymentMethodId = paymentMethodId,
                 params = params,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,

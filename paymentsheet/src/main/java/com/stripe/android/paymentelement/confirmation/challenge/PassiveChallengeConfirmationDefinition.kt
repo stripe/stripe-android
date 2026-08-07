@@ -2,11 +2,11 @@ package com.stripe.android.paymentelement.confirmation.challenge
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -23,7 +23,7 @@ import javax.inject.Named
 internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
     private val passiveChallengeWarmer: PassiveChallengeWarmer,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
 ) : ConfirmationDefinition<
@@ -43,7 +43,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         val passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams ?: return
         passiveChallengeWarmer.start(
             passiveCaptchaParams = passiveCaptchaParams,
-            publishableKey = publishableKeyProvider(),
+            publishableKey = apiConfigProvider().publishableKey,
             productUsage = productUsage
         )
     }
@@ -105,7 +105,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = PassiveChallengeActivityContract.Args(
                     passiveCaptchaParams,
-                    publishableKey = publishableKeyProvider(),
+                    publishableKey = apiConfigProvider().publishableKey,
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,

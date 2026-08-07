@@ -3,8 +3,7 @@ package com.stripe.android
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
@@ -16,7 +15,6 @@ import org.json.JSONObject
 import java.util.Currency
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -99,13 +97,15 @@ class GooglePayJsonFactory internal constructor(
 
     @Inject
     internal constructor(
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+        apiConfigProvider: () -> ApiConfiguration.State,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
         cardBrandFilter: CardBrandFilter,
         cardFundingFilter: CardFundingFilter
     ) : this(
-        googlePayConfig = GooglePayConfig(publishableKeyProvider(), stripeAccountIdProvider()),
+        googlePayConfig = GooglePayConfig(
+            apiConfigProvider().publishableKey,
+            apiConfigProvider().stripeAccountId
+        ),
         isJcbEnabled = googlePayConfig.isJcbEnabled,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,

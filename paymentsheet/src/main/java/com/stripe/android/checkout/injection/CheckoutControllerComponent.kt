@@ -6,6 +6,7 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
@@ -124,6 +125,7 @@ internal interface CheckoutControllerComponent {
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
+            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
         ): CheckoutControllerComponent
     }
 }

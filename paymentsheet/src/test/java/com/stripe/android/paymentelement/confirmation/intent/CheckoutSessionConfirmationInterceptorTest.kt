@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.core.networking.ApiRequest
@@ -358,10 +359,14 @@ class CheckoutSessionConfirmationInterceptorTest {
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
-                publishableKey = "pk_test_123",
+                publishableKeyProvider = { "pk_test_123" },
             ),
-            publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = "pk_test_123",
+                    stripeAccountId = null,
+                )
+            },
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
@@ -379,7 +384,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             context = applicationContext,
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
-            requestOptions = ApiRequest.Options(apiKey = "pk_test_123"),
+            requestOptionsProvider = { ApiRequest.Options(apiKey = "pk_test_123") },
         )
 
         runTest {

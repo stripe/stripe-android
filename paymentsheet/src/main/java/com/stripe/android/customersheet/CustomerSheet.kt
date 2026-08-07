@@ -11,6 +11,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
@@ -604,6 +605,9 @@ class CustomerSheet internal constructor(
                         imageLoader = DefaultStripeImageLoader(application),
                         errorReporter = ErrorReporter.createFallbackInstance(
                             context = application,
+                            publishableKeyProvider = {
+                                PaymentConfiguration.getInstance(application.applicationContext).publishableKey
+                             },
                             productUsage = setOf("CustomerSheet"),
                         ),
                         context = application,

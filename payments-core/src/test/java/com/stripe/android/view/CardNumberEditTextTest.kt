@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_BIN
@@ -95,7 +96,10 @@ internal class CardNumberEditTextTest {
 
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
     private val analyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        PaymentAnalyticsRequestFactory(
+            context = context,
+            publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY }
+        )
 
     private val cardNumberEditText = CardNumberEditText(
         context,
@@ -1076,7 +1080,13 @@ internal class CardNumberEditTextTest {
         val repository = FakeCardElementConfigRepository()
 
         val cardWidgetViewModel = CardWidgetViewModel(
-            paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
+            apiConfigProvider = {
+                val config = PaymentConfiguration.getInstance(context)
+                ApiConfiguration.State(
+                    publishableKey = config.publishableKey,
+                    stripeAccountId = config.stripeAccountId,
+                )
+            },
             stripeRepository = repository,
             dispatcher = dispatcher
         ).also { viewModelStoreRule.track(it) }

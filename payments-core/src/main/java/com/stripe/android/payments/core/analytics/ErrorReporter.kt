@@ -2,13 +2,12 @@ package com.stripe.android.payments.core.analytics
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -50,12 +49,14 @@ interface ErrorReporter : FraudDetectionErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
+            publishableKeyProvider: () -> String,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .factory()
                 .create(
                     context = context.applicationContext,
+                    publishableKeyProvider = publishableKeyProvider,
                     productUsage = productUsage,
                 )
                 .errorReporter
@@ -434,6 +435,8 @@ internal interface DefaultErrorReporterComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
+            publishableKeyProvider: () -> String,
+            @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
         ): DefaultErrorReporterComponent
@@ -470,9 +473,16 @@ internal interface DefaultErrorReporterModule {
         }
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(context: Context): () -> String {
-            return { PaymentConfiguration.getInstance(context).publishableKey }
+        fun provideApiConfigurationState(publishableKeyProvider: () -> String): ApiConfiguration.State {
+            return ApiConfiguration.State(
+                publishableKey = publishableKeyProvider(),
+                stripeAccountId = null,
+            )
         }
+
+        @Provides
+        fun provideApiConfigurationStateProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiConfiguration.State = { state }
     }
 }

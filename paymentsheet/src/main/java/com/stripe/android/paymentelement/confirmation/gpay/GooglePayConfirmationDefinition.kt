@@ -101,7 +101,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             transactionId = intent.id,
             label = config.customLabel,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = confirmationArgs.paymentMethodMetadata.apiConfiguration,
             displayItems = config.displayItems.map { it.resolve(context) },
             billingEmailOverride = config.billingEmailOverride,
             shippingAddressParameters = config.shippingAddressParameters,

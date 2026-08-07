@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.ApiConfiguration
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.asSingle
 import com.stripe.android.customersheet.CustomerSheetIntegration
@@ -49,6 +51,14 @@ internal object CustomerSheetHacks {
                     .create(
                         application = application,
                         adapter = integration.adapter,
+                        apiConfigurationProvider = {
+                            PaymentConfiguration.getInstance(application).let {
+                                ApiConfiguration.State(
+                                    publishableKey = it.publishableKey,
+                                    stripeAccountId = it.stripeAccountId,
+                                )
+                            }
+                        },
                     )
 
                 _initializationDataSource.value = adapterDataSourceComponent.customerSheetInitializationDataSource
@@ -62,6 +72,14 @@ internal object CustomerSheetHacks {
                     .create(
                         application = application,
                         customerSessionProvider = integration.customerSessionProvider,
+                        apiConfigurationProvider = {
+                            PaymentConfiguration.getInstance(application).let {
+                                ApiConfiguration.State(
+                                    publishableKey = it.publishableKey,
+                                    stripeAccountId = it.stripeAccountId,
+                                )
+                            }
+                        },
                     )
 
                 _initializationDataSource.value =

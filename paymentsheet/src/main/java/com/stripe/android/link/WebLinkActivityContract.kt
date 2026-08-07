@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Base64
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.link.serialization.PopupPayload
 import com.stripe.android.model.PaymentMethod
@@ -21,16 +21,17 @@ import javax.inject.Inject
  */
 internal class WebLinkActivityContract @Inject internal constructor(
     private val stripeRepository: StripeRepository,
-    private val errorReporter: ErrorReporter
+    private val errorReporter: ErrorReporter,
+    private val apiConfigurationProvider: () -> ApiConfiguration.State,
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
-        val paymentConfiguration = PaymentConfiguration.getInstance(context)
+        val apiConfiguration = apiConfigurationProvider()
         val payload = PopupPayload.create(
             configuration = input.configuration,
             context = context,
-            publishableKey = paymentConfiguration.publishableKey,
-            stripeAccount = paymentConfiguration.stripeAccountId,
+            publishableKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
             paymentUserAgent = stripeRepository.buildPaymentUserAgent(),
         )
         return LinkForegroundActivity.createIntent(context, payload.toUrl())

@@ -2,7 +2,7 @@ package com.stripe.android.view
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -10,7 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
-private val paymentConfig = PaymentConfiguration(
+private val apiConfigState = ApiConfiguration.State(
     publishableKey = "pk_test_123",
     stripeAccountId = null,
 )
@@ -28,7 +28,7 @@ class CardWidgetViewModelTest {
             val stripeRepository = FakeCardElementConfigRepository()
 
             val viewModel = CardWidgetViewModel(
-                paymentConfigProvider = { paymentConfig },
+                apiConfigProvider = { apiConfigState },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher
             ).also { viewModelStoreRule.track(it) }
@@ -46,7 +46,7 @@ class CardWidgetViewModelTest {
             val stripeRepository = FakeCardElementConfigRepository()
 
             val viewModel = CardWidgetViewModel(
-                paymentConfigProvider = { paymentConfig },
+                apiConfigProvider = { apiConfigState },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher
             ).also { viewModelStoreRule.track(it) }
@@ -63,7 +63,7 @@ class CardWidgetViewModelTest {
         val stripeRepository = FakeCardElementConfigRepository()
 
         val viewModel = CardWidgetViewModel(
-            paymentConfigProvider = { paymentConfig },
+            apiConfigProvider = { apiConfigState },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher
         ).also { viewModelStoreRule.track(it) }
@@ -80,7 +80,7 @@ class CardWidgetViewModelTest {
         val stripeRepository = FakeCardElementConfigRepository()
 
         val viewModel = CardWidgetViewModel(
-            paymentConfigProvider = { paymentConfig },
+            apiConfigProvider = { apiConfigState },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher
         ).also { viewModelStoreRule.track(it) }
@@ -98,7 +98,7 @@ class CardWidgetViewModelTest {
         val stripeRepository = FakeCardElementConfigRepository()
 
         val viewModel = CardWidgetViewModel(
-            paymentConfigProvider = { paymentConfig },
+            apiConfigProvider = { apiConfigState },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher
         ).also { viewModelStoreRule.track(it) }

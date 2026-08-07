@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
@@ -44,8 +45,12 @@ class CryptoApiRepositoryTest {
     private val cryptoApiRepository = CryptoApiRepository(
         stripeNetworkClient = stripeNetworkClient,
         stripeRepository = stripeRepository,
-        publishableKeyProvider = { "pk_test_vOo1umqsYxSrP5UXfOeL3ecm" },
-        stripeAccountIdProvider = { "TestAccountId" },
+        apiConfigProvider = {
+            ApiConfiguration.State(
+                publishableKey = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm",
+                stripeAccountId = "TestAccountId"
+            )
+        },
         apiVersion = CRYPTO_ONRAMP_API_VERSION,
         sdkVersion = StripeSdkVersion.VERSION,
         appInfo = null,

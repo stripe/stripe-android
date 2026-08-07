@@ -1,12 +1,11 @@
 package com.stripe.android.crypto.onramp.repositories
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -57,7 +56,6 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import org.json.JSONObject
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 /*
@@ -70,8 +68,7 @@ internal class CryptoApiRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
     private val linkController: LinkController,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     apiVersion: String,
     sdkVersion: String = StripeSdkVersion.VERSION,
     appInfo: AppInfo?
@@ -378,15 +375,15 @@ internal class CryptoApiRepository @Inject constructor(
             expandFields = listOf("payment_method"),
             options = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountIdProvider(),
+                stripeAccount = apiConfigProvider().stripeAccountId,
             )
         )
     }
 
     private fun buildRequestOptions(): ApiRequest.Options {
         return ApiRequest.Options(
-            apiKey = publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider(),
+            apiKey = apiConfigProvider().publishableKey,
+            stripeAccount = apiConfigProvider().stripeAccountId,
         )
     }
 

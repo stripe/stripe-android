@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -37,10 +38,14 @@ class CheckoutSessionRepositoryTest {
         analyticsRequestExecutor = analyticsRequestExecutor,
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = ApplicationProvider.getApplicationContext(),
-            publishableKey = "pk_test_123",
+            publishableKeyProvider = { "pk_test_123" },
         ),
-        publishableKeyProvider = { "pk_test_123" },
-        stripeAccountIdProvider = { null },
+        apiConfigurationProvider = {
+            ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            )
+        },
     )
 
     @Test

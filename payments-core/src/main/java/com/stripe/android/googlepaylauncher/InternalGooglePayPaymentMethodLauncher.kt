@@ -3,6 +3,7 @@ package com.stripe.android.googlepaylauncher
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
@@ -28,9 +29,9 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     context: Context,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        PaymentConfiguration.getInstance(context).publishableKey,
-        setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
+        context = context,
+        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+        defaultProductUsageTokens = setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {
@@ -56,7 +57,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
         transactionId: String?,
         label: String?,
         isElements: Boolean,
-        publishableKey: String?,
+        apiConfiguration: ApiConfiguration.State,
         displayItems: List<GooglePayJsonFactory.DisplayItem>,
         billingEmailOverride: String?,
         shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
@@ -72,7 +73,8 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
                 cardFundingFilter = cardFundingFilter,
                 clientAttributionMetadata = clientAttributionMetadata,
                 isElements = isElements,
-                publishableKey = publishableKey,
+                publishableKey = apiConfiguration.publishableKey,
+                stripeAccountId = apiConfiguration.stripeAccountId,
                 displayItems = displayItems,
                 billingEmailOverride = billingEmailOverride,
                 shippingAddressParameters = shippingAddressParameters,

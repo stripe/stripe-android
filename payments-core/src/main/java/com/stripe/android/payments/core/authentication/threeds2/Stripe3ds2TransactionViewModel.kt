@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.instantapps.InstantApps
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.R
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -318,7 +319,12 @@ internal class Stripe3ds2TransactionViewModelFactory(
             .create(
                 context = application,
                 enableLogging = args.enableLogging,
-                publishableKeyProvider = { args.publishableKey },
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.requestOptions.stripeAccount,
+                    )
+                },
                 productUsage = args.productUsage,
                 isInstantApp = InstantApps.isInstantApp(application),
             )

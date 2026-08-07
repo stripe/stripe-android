@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -84,6 +85,10 @@ internal object PaymentMethodMetadataFactory {
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
         checkoutSessionResponse: CheckoutSessionResponse? = null,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        apiConfiguration: ApiConfiguration.State = ApiConfiguration.State(
+            publishableKey = "pk_test_123",
+            stripeAccountId = null,
+        ),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -158,6 +163,7 @@ internal object PaymentMethodMetadataFactory {
             shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             checkoutSessionResponse = checkoutSessionResponse,
             paymentMethodLayout = paymentMethodLayout,
+            apiConfiguration = apiConfiguration,
         )
     }
 

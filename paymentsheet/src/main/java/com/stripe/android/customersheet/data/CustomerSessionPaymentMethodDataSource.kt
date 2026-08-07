@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.data
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.util.filterToSupportedPaymentMethods
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
@@ -15,6 +16,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     private val elementsSessionManager: CustomerSessionElementsSessionManager,
     private val customerRepository: CustomerRepository,
     private val errorReporter: ErrorReporter,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetPaymentMethodDataSource {
     override suspend fun retrievePaymentMethods(): CustomerSheetDataResult<List<PaymentMethod>> {
@@ -42,6 +44,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     paymentMethodId = paymentMethodId,
                     params = params,
+                    stripeAccountId = apiConfigProvider().stripeAccountId,
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }
@@ -66,6 +69,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     paymentMethodId = paymentMethodId,
+                    stripeAccountId = apiConfigProvider().stripeAccountId,
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }

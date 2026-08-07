@@ -1,5 +1,6 @@
 package com.stripe.android.googlepaylauncher.injection
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
 import com.stripe.android.googlepaylauncher.DefaultPaymentsClientFactory
@@ -50,5 +51,10 @@ internal abstract class GooglePayPaymentMethodLauncherModule {
             googlePayConfig: GooglePayPaymentMethodLauncher.Config,
             paymentsClientFactory: PaymentsClientFactory
         ) = paymentsClientFactory.create(googlePayConfig.environment)
+
+        @Provides
+        fun provideApiConfigurationState(
+            apiConfigurationProvider: () -> ApiConfiguration.State
+        ): ApiConfiguration.State = apiConfigurationProvider()
     }
 }

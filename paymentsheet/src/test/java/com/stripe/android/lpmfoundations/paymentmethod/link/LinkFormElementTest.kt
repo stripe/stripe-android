@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfiguration
@@ -185,6 +186,7 @@ class LinkFormElementTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
         )
     }
 

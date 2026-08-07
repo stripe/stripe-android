@@ -3,12 +3,12 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -119,11 +119,10 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         internal fun providesApiOptions(
-            @Named(PUBLISHABLE_KEY) publishableKey: String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?
+            apiConfiguration: ApiConfiguration.State
         ): ApiRequest.Options = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId
         )
 
         @Provides
@@ -181,12 +180,12 @@ internal interface FinancialConnectionsSheetSharedModule {
         @ActivityRetainedScope
         internal fun provideAnalyticsRequestFactory(
             application: Application,
-            @Named(PUBLISHABLE_KEY) publishableKey: String
+            apiConfiguration: ApiConfiguration.State
         ): AnalyticsRequestFactory = AnalyticsRequestFactory(
             packageManager = application.packageManager,
             packageName = application.packageName.orEmpty(),
             packageInfo = application.packageInfo,
-            publishableKeyProvider = { publishableKey },
+            publishableKeyProvider = { apiConfiguration.publishableKey },
             networkTypeProvider = NetworkTypeDetector(application)::invoke,
         )
 

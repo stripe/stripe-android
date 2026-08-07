@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import javax.inject.Inject
@@ -16,18 +16,19 @@ import javax.inject.Inject
 internal class NativeLinkActivityContract @Inject constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val requestSurface: RequestSurface,
+    private val apiConfigurationProvider: () -> ApiConfiguration.State,
 ) :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
-        val paymentConfiguration = PaymentConfiguration.getInstance(context)
+        val apiConfiguration = apiConfigurationProvider()
         return LinkActivity.createIntent(
             context = context,
             args = NativeLinkArgs(
                 configuration = input.configuration,
                 paymentMethodMetadata = input.paymentMethodMetadata,
                 requestSurface = requestSurface,
-                stripeAccountId = paymentConfiguration.stripeAccountId,
-                publishableKey = paymentConfiguration.publishableKey,
+                stripeAccountId = apiConfiguration.stripeAccountId,
+                publishableKey = apiConfiguration.publishableKey,
                 linkExpressMode = input.linkExpressMode,
                 launchMode = input.launchMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,

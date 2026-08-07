@@ -373,8 +373,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                     requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
                     appInfo = appInfo,
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                        context,
-                        { publishableKey },
+                        context = context,
+                        publishableKeyProvider = { publishableKey },
                         defaultProductUsageTokens = setOf("IssuingCardPinService")
                     )
                 ),

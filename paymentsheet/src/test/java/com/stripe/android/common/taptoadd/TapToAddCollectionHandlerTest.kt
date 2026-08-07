@@ -3,8 +3,8 @@ package com.stripe.android.common.taptoadd
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.networking.ApiRequest
@@ -71,7 +71,7 @@ class TapToAddCollectionHandlerTest {
             isStripeTerminalSdkAvailable = { false },
             terminalWrapper = TestTerminalWrapper.noOp(),
             stripeRepository = FakeTapToAddStripeRepository(Result.failure(NotImplementedError())),
-            paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
+            apiConfigurationProvider = { TEST_API_CONFIGURATION },
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true),
             tapToPayUxConfiguration = tapToPayUxConfiguration,
             userFacingLogger = FakeUserFacingLogger(),
@@ -90,7 +90,7 @@ class TapToAddCollectionHandlerTest {
             isStripeTerminalSdkAvailable = { true },
             terminalWrapper = TestTerminalWrapper.noOp(),
             stripeRepository = FakeTapToAddStripeRepository(),
-            paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
+            apiConfigurationProvider = { TEST_API_CONFIGURATION },
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true),
             tapToPayUxConfiguration = tapToPayUxConfiguration,
             userFacingLogger = FakeUserFacingLogger(),
@@ -312,7 +312,7 @@ class TapToAddCollectionHandlerTest {
             assertThat(updateCall.options).isEqualTo(
                 ApiRequest.Options(
                     apiKey = "ek_123",
-                    stripeAccount = TEST_PAYMENT_CONFIGURATION.stripeAccountId,
+                    stripeAccount = TEST_API_CONFIGURATION.stripeAccountId,
                 )
             )
 
@@ -914,7 +914,6 @@ class TapToAddCollectionHandlerTest {
                         handler = DefaultTapToAddCollectionHandler(
                             terminalWrapper = terminalWrapper,
                             stripeRepository = stripeRepository,
-                            paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
                             connectionManager = managerScenario.tapToAddConnectionManager,
                             errorReporter = errorReporter,
                             userFacingLogger = FakeUserFacingLogger(),
@@ -1222,7 +1221,7 @@ class TapToAddCollectionHandlerTest {
         val DEFAULT_CALLBACK = CreateCardPresentSetupIntentCallback {
             CreateIntentResult.Success("si_123_secret")
         }
-        val TEST_PAYMENT_CONFIGURATION = PaymentConfiguration(publishableKey = "pk_test")
+        val TEST_API_CONFIGURATION = ApiConfiguration.State(publishableKey = "pk_test", stripeAccountId = null)
         val DEFAULT_BILLING_DETAILS = PaymentSheet.BillingDetails(
             name = "Jane Doe",
             email = "jane@example.com",

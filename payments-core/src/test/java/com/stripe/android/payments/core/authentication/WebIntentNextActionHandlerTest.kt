@@ -6,6 +6,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
@@ -43,8 +44,8 @@ class WebIntentNextActionHandlerTest {
         mock<(AuthActivityStarterHost) -> PaymentBrowserAuthStarter>()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = context,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -182,7 +183,9 @@ class WebIntentNextActionHandlerTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             enableLogging = false,
             uiContext = testDispatcher,
-            publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            apiConfigProvider = {
+                ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+            },
             isInstantApp = false,
             defaultReturnUrl = DefaultReturnUrl("some_package_name"),
             redirectResolver = redirectResolver,

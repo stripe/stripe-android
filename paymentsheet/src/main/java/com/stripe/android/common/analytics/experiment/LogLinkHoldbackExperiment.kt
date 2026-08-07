@@ -1,11 +1,13 @@
 package com.stripe.android.common.analytics.experiment
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.ProvidedDefaultValues
 import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
@@ -48,7 +50,8 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val mode: EventReporter.Mode,
-    private val logger: Logger
+    private val logger: Logger,
+    private val apiConfigProvider: () -> ApiConfiguration.State
 ) : LogLinkHoldbackExperiment {
 
     override operator fun invoke(
@@ -150,8 +153,14 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
         email: String,
         sessionId: String,
     ): Boolean {
+        val config = apiConfigProvider()
+        val requestOptions = ApiRequest.Options(
+            apiKey = config.publishableKey,
+            stripeAccount = config.stripeAccountId,
+        )
         return linkDisabledApiRepository
             .lookupConsumerWithoutBackendLoggingForExposure(
+                requestOptions = requestOptions,
                 email = email,
                 sessionId = sessionId,
             )
@@ -185,6 +194,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             configuration = config,
             customerMetadata = paymentMethodMetadata.customerMetadata,
             customerEmail = elementsSessionCustomerEmail,
+            stripeAccountId = paymentMethodMetadata.apiConfiguration.stripeAccountId,
         )
     }
 }
