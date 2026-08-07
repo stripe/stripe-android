@@ -914,7 +914,6 @@ class TapToAddCollectionHandlerTest {
                         handler = DefaultTapToAddCollectionHandler(
                             terminalWrapper = terminalWrapper,
                             stripeRepository = stripeRepository,
-                            apiConfigurationProvider = { TEST_API_CONFIGURATION },
                             connectionManager = managerScenario.tapToAddConnectionManager,
                             errorReporter = errorReporter,
                             userFacingLogger = FakeUserFacingLogger(),

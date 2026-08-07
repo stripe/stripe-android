@@ -20,7 +20,8 @@ internal class FakeTapToAddConnectionStarter private constructor(
     }
 
     data class StartCall(
-        val config: CommonConfiguration
+        val config: CommonConfiguration,
+        val publishableKey: String,
     )
 
     class Scenario(
