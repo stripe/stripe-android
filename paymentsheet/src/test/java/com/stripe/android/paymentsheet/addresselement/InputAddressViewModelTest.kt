@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.addresselement
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
@@ -11,7 +10,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -59,12 +57,6 @@ class InputAddressViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
-
-    @get:Rule
-    val inlineAutocompleteRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.inlineAddressAutocompleteEnabled,
-        isEnabled = false,
-    )
 
     @Test
     fun `onScreenShown fires onShow with initial country`() {
@@ -983,14 +975,7 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `isInlineAutocompleteEnabled is false when flag is disabled`() {
-        val viewModel = createViewModel()
-        assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isFalse()
-    }
-
-    @Test
-    fun `isInlineAutocompleteEnabled is true when flag is enabled`() {
-        inlineAutocompleteRule.setEnabled(true)
+    fun `isInlineAutocompleteEnabled is always true`() {
         val viewModel = createViewModel()
         assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
     }
@@ -1003,7 +988,6 @@ class InputAddressViewModelTest {
         googlePlacesApiKey: String = "test_key",
         autocompleteCountries: Set<String> = emptySet(),
     ): InputAddressViewModel {
-        inlineAutocompleteRule.setEnabled(true)
         return InputAddressViewModel(
             AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
