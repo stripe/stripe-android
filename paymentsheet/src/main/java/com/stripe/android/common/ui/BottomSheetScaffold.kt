@@ -13,18 +13,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.stripe.android.uicore.FormScrollContext
-import com.stripe.android.uicore.LocalFormScrollContext
+import com.stripe.android.uicore.FormScrollProvider
 import com.stripe.android.uicore.StripeTheme
 
 @Composable
@@ -58,13 +53,11 @@ internal fun BottomSheetScaffold(
 
         // We provide the IME padding before the vertical scroll modifier to make sure that the
         // content moves up correctly if it's covered by the keyboard when it's being focused.
-        val viewportTopYState = remember { mutableIntStateOf(0) }
-        val scrollContext = remember(scrollState) { FormScrollContext(scrollState, viewportTopYState) }
-        CompositionLocalProvider(LocalFormScrollContext provides scrollContext) {
+        FormScrollProvider(scrollState) { viewportModifier ->
             Column(
                 modifier = Modifier
                     .imePadding()
-                    .onGloballyPositioned { viewportTopYState.intValue = it.positionInRoot().y.toInt() }
+                    .then(viewportModifier)
                     .verticalScroll(scrollState)
             ) {
                 Spacer(Modifier.height(StripeTheme.formInsets.top.dp))

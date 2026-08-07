@@ -6,15 +6,9 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
-import com.stripe.android.uicore.FormScrollContext
-import com.stripe.android.uicore.LocalFormScrollContext
+import com.stripe.android.uicore.FormScrollProvider
 import kotlin.math.min
 
 // https://gist.github.com/ademar111190/34d3de41308389a0d0d8
@@ -83,12 +77,10 @@ internal fun ScrollableColumn(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val scrollState = rememberScrollState()
-    val viewportTopYState = remember { mutableIntStateOf(0) }
-    val scrollContext = remember(scrollState) { FormScrollContext(scrollState, viewportTopYState) }
-    CompositionLocalProvider(LocalFormScrollContext provides scrollContext) {
+    FormScrollProvider(scrollState) { viewportModifier ->
         Box(
             modifier = Modifier
-                .onGloballyPositioned { viewportTopYState.intValue = it.positionInRoot().y.toInt() }
+                .then(viewportModifier)
                 .verticalScroll(scrollState)
         ) {
             Column(

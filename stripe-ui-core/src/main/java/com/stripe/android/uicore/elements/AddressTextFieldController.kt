@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -21,10 +22,11 @@ import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldController(
@@ -118,7 +120,7 @@ class AddressTextFieldController(
             val showingPredictions = shouldShowPredictionsDropdown(predictionsState)
             LaunchedEffect(showingPredictions) {
                 if (showingPredictions && scrollContext != null) {
-                    delay(timeMillis = 300)
+                    snapshotFlow { elementScreenY }.filter { it > 0 }.first()
                     val target = scrollContext.scrollState.value +
                         elementScreenY - scrollContext.viewportTopY
                     scrollContext.scrollState.animateScrollTo(target)
