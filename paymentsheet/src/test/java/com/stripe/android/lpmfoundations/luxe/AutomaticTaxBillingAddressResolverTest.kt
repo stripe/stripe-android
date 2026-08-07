@@ -116,23 +116,44 @@ class AutomaticTaxBillingAddressResolverTest {
     }
 
     @Test
-    fun `resolve leaves specs unchanged unless automatic billing tax collection is enabled`() {
+    fun `resolve leaves country unchanged in Never`() {
         val countrySpec = CountrySpec(allowedCountryCodes = setOf("US"))
 
-        listOf(
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic to false,
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never to true,
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full to true,
-        ).forEach { (addressCollectionMode, requiresBillingAddressForAutomaticTax) ->
-            val result = AutomaticTaxBillingAddressResolver.resolve(
-                specs = listOf(countrySpec),
-                addressCollectionMode = addressCollectionMode,
-                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
-                allowedBillingCountries = setOf("US"),
-            )
+        val result = AutomaticTaxBillingAddressResolver.resolve(
+            specs = listOf(countrySpec),
+            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+            requiresBillingAddressForAutomaticTax = true,
+            allowedBillingCountries = setOf("US"),
+        )
 
-            assertThat(result).containsExactly(countrySpec)
-        }
+        assertThat(result).containsExactly(countrySpec)
+    }
+
+    @Test
+    fun `resolve leaves country unchanged in tax-disabled Automatic`() {
+        val countrySpec = CountrySpec(allowedCountryCodes = setOf("US"))
+
+        val result = AutomaticTaxBillingAddressResolver.resolve(
+            specs = listOf(countrySpec),
+            addressCollectionMode =
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            requiresBillingAddressForAutomaticTax = false,
+            allowedBillingCountries = setOf("US"),
+        )
+
+        assertThat(result).containsExactly(countrySpec)
+    }
+
+    @Test
+    fun `resolve replaces country with full address in Full`() {
+        val result = AutomaticTaxBillingAddressResolver.resolve(
+            specs = listOf(CountrySpec(allowedCountryCodes = setOf("DE", "FR"))),
+            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            requiresBillingAddressForAutomaticTax = false,
+            allowedBillingCountries = setOf("US"),
+        )
+
+        assertThat(result).containsExactly(AddressSpec(allowedCountryCodes = setOf("DE", "FR")))
     }
 
     private fun resolve(

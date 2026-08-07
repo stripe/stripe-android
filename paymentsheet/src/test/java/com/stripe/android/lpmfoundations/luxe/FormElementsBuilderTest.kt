@@ -17,6 +17,7 @@ import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -295,6 +296,42 @@ class FormElementsBuilderTest {
             .fields.single() as BillingAddressElement
         assertThat(billingAddressElement.countryElement.controller.rawFieldValue.value).isEqualTo("DE")
         assertThat(billingAddressElement.countryElement.controller.displayItems).containsExactly(
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
+    }
+
+    @Test
+    fun `build keeps country-only LPM free of card AVS fields when automatic tax is disabled`() {
+        val formElements = formElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(),
+                requiresBillingAddressForAutomaticTax = false,
+                initialValues = mapOf(IdentifierSpec.Country to "GB"),
+            )
+        ).countryOnly(
+            allowedCountryCodes = setOf("GB"),
+        ).build()
+
+        val countryElement = (formElements.single() as SectionElement).fields.single()
+        assertThat(countryElement).isInstanceOf<CountryElement>()
+        assertThat(formElements.filterIsInstance<SameAsShippingElement>()).isEmpty()
+    }
+
+    @Test
+    fun `build replaces country-only source with one full address owner`() {
+        val formElements = formElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+            )
+        ).countryOnly(
+            allowedCountryCodes = setOf("DE", "FR"),
+        ).build()
+
+        val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
             "🇫🇷 France",
             "🇩🇪 Germany",
         ).inOrder()
