@@ -222,8 +222,6 @@
   <string name="stripe_select">Kiválasztás</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Szelfi felvétel kész</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Szelfi készítése</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">szelfi rögítve</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

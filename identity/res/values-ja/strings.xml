@@ -222,8 +222,6 @@
   <string name="stripe_select">選択</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">顔写真の記録が完了しました</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">顔写真の記録</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">1 件の顔写真が記録されました</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

@@ -215,8 +215,6 @@
   <string name="stripe_select">Auswählen</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Die Selfie-Aufnahmen sind abgeschlossen.</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Selfie-Aufnahmen</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">Ein Selfie wurde aufgenommen</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

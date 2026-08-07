@@ -222,8 +222,6 @@
   <string name="stripe_select">เลือก</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">ถ่ายเซลฟีเรียบร้อยแล้ว</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">ถ่ายเซลฟี</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">ถ่ายเซลฟี 1 ภาพแล้ว</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

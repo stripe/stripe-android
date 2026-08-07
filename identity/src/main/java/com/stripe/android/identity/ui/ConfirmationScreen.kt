@@ -2,13 +2,13 @@ package com.stripe.android.identity.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,21 +78,21 @@ internal fun ConfirmationScreen(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .verticalScroll(rememberScrollState())
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 Box(
                     modifier = Modifier
-                        .width(32.dp)
-                        .height(32.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(MaterialTheme.colors.primary),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.stripe_clock_icon),
-                        modifier = Modifier
-                            .width(26.dp)
-                            .height(26.dp),
+                        modifier = Modifier.size(26.dp),
                         contentDescription = stringResource(id = R.string.stripe_description_plus)
                     )
                 }
@@ -106,19 +107,21 @@ internal fun ConfirmationScreen(
                             testTag = CONFIRMATION_TITLE_TAG
                         },
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
 
                 BottomSheetHTML(
                     html = successPage.body,
                     bottomSheets = null,
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                         .semantics {
                             testTag = CONFIRMATION_BODY_TAG
                         },
                     color = MaterialTheme.colors.onBackground,
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
                     urlSpanStyle = SpanStyle(
                         textDecoration = TextDecoration.Underline,
                         color = MaterialTheme.colors.secondary

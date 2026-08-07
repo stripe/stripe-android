@@ -24,7 +24,8 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                 .authority(resources.getResourcePackageName(getBrandLogoResId))
                 .appendPath(resources.getResourceTypeName(getBrandLogoResId))
                 .appendPath(resources.getResourceEntryName(getBrandLogoResId))
-                .build()
+                .build(),
+            brandColor = 0xFF635BFF.toInt()
         )
     }
 

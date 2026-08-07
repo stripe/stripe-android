@@ -191,8 +191,6 @@
   <string name="stripe_select">選擇</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">已完成自拍照拍攝</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">自拍照拍攝</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">拍攝了一張自拍照</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
