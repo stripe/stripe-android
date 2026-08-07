@@ -18,6 +18,8 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalModeForm
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -475,6 +477,93 @@ internal class VerticalModeFormUIScreenshotTest {
             )
             CreateTestScenario(paymentMethodCode = "klarna", metadata = metadata)
         }
+    }
+
+    @Test
+    fun klarnaAutomaticTaxDisabledPreservesCountryOnlyForm() {
+        paparazziRule.snapshot {
+            CreateTestScenario(
+                paymentMethodCode = "klarna",
+                metadata = lpmMetadata(
+                    paymentMethodCode = "klarna",
+                    addressCollectionMode =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    automaticTaxEnabled = false,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun klarnaAutomaticTaxBillingUsesTaxMinimumForm() {
+        paparazziRule.snapshot {
+            CreateTestScenario(
+                paymentMethodCode = "klarna",
+                metadata = lpmMetadata(
+                    paymentMethodCode = "klarna",
+                    addressCollectionMode =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    automaticTaxEnabled = true,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun cashAppAutomaticTaxBillingUsesDirectFactoryForm() {
+        paparazziRule.snapshot {
+            CreateTestScenario(
+                paymentMethodCode = "cashapp",
+                metadata = lpmMetadata(
+                    paymentMethodCode = "cashapp",
+                    addressCollectionMode =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    automaticTaxEnabled = true,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun oxxoAutomaticTaxBillingUsesSharedSpecForm() {
+        paparazziRule.snapshot {
+            CreateTestScenario(
+                paymentMethodCode = "oxxo",
+                metadata = lpmMetadata(
+                    paymentMethodCode = "oxxo",
+                    addressCollectionMode =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    automaticTaxEnabled = true,
+                ),
+            )
+        }
+    }
+
+    private fun lpmMetadata(
+        paymentMethodCode: PaymentMethodCode,
+        addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
+        automaticTaxEnabled: Boolean,
+    ): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf(paymentMethodCode),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = addressCollectionMode,
+                allowedCountries = setOf("US"),
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                address = PaymentSheet.Address(country = "US"),
+            ),
+            checkoutSessionResponse = if (automaticTaxEnabled) {
+                CheckoutSessionResponseFactory.create(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                )
+            } else {
+                null
+            },
+        )
     }
 
     @Composable
