@@ -8,6 +8,7 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator {
 	public final fun configure (Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createCryptoPaymentToken (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createPresenter (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator$Presenter;
+	public final fun deleteWalletAddress (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getWalletOwnershipChallenge (Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun hasLinkAccount (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun logOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -354,6 +355,18 @@ public final class com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaym
 }
 
 public final class com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult$Failed : com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult$Completed : com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult$Failed : com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult {
 	public static final field $stable I
 	public final fun getError ()Ljava/lang/Throwable;
 }
