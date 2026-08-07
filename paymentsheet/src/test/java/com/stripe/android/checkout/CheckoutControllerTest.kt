@@ -388,6 +388,32 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `clearPaymentOption returns failure and preserves selection while a mutation is in flight`() =
+        runMutationScenario {
+            selectPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            val holdResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                holdResponse.await(10, TimeUnit.SECONDS)
+                successResponseFactory().invoke(response)
+            }
+            val mutation = async { controller.applyPromotionCode("10OFF") }
+            testScheduler.advanceUntilIdle()
+
+            val result = controller.clearPaymentOption()
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).hasMessageThat()
+                .isEqualTo("Cannot mutate checkout session while another mutation is in progress.")
+            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+
+            holdResponse.countDown()
+            assertThat(mutation.await().isSuccess).isTrue()
+            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+        }
+
+    @Test
     fun `default integration name is used as the payment element callback identifier`() = runTest {
         val controller = createController()
 
