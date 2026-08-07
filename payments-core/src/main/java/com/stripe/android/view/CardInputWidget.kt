@@ -54,10 +54,11 @@ import kotlin.properties.Delegates
  * The card number, cvc, and expiry date will always be left to right regardless of locale.  Postal
  * code layout direction will be set according to the locale.
  */
-class CardInputWidget @JvmOverloads constructor(
+class CardInputWidget internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    private val cardElementAnalytics: CardElementAnalytics,
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private var customCvcLabel: String? = null
     private val viewBinding = StripeCardInputWidgetBinding.inflate(
@@ -91,10 +92,26 @@ class CardInputWidget @JvmOverloads constructor(
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
-    private val cardValidTextWatcher = object : StripeTextWatcher() {
+
+    private val textFocusWatcher = OnFocusChangeListener { _, hasFocus ->
+        if (hasFocus) {
+            cardElementAnalytics.reportInteraction(context)
+        }
+    }
+
+    private val textInputWatcher = object : StripeTextWatcher() {
         override fun afterTextChanged(s: Editable?) {
             super.afterTextChanged(s)
-            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
+
+            val isComplete = invalidFields.isEmpty()
+
+            cardElementAnalytics.reportInteraction(context)
+
+            if (isComplete) {
+                cardElementAnalytics.reportFormCompleted(context)
+            }
+
+            cardValidCallback?.onInputChanged(isComplete, invalidFields)
         }
     }
 
@@ -340,15 +357,18 @@ class CardInputWidget @JvmOverloads constructor(
             cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
 
             // First remove if it's already added, to make sure it's not added multiple times.
-            postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
-            postalCodeEditText.addTextChangedListener(cardValidTextWatcher)
+            postalCodeEditText.internalFocusChangeListeners.remove(textFocusWatcher)
+            postalCodeEditText.removeTextChangedListener(textInputWatcher)
+            postalCodeEditText.addTextChangedListener(textInputWatcher)
+            postalCodeEditText.internalFocusChangeListeners.add(textFocusWatcher)
         } else {
             postalCodeEditText.isEnabled = false
             postalCodeTextInputLayout.visibility = View.GONE
 
             cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE
 
-            postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
+            postalCodeEditText.internalFocusChangeListeners.remove(textFocusWatcher)
+            postalCodeEditText.removeTextChangedListener(textInputWatcher)
         }
         updatePostalRequired()
     }
@@ -426,6 +446,19 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+    @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
+    ) : this(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        cardElementAnalytics = DefaultCardElementAnalytics(
+            widgetType = CardElementWidgetType.CardInputWidget,
+        ),
+    )
+
     init {
         // This ensures that onRestoreInstanceState is called
         // during rotations.
@@ -450,6 +483,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        cardElementAnalytics.reportShown(context = context)
         lifecycleDelegate.initLifecycle(this)
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
@@ -476,12 +510,6 @@ class CardInputWidget @JvmOverloads constructor(
 
     override fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
-        requiredFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
-
-        // only add the TextWatcher if it will be used
-        if (callback != null) {
-            requiredFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
-        }
 
         // call immediately after setting
         cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
@@ -641,11 +669,14 @@ class CardInputWidget @JvmOverloads constructor(
             STATE_CARD_VIEWED to isShowingFullCard,
             STATE_POSTAL_CODE_ENABLED to postalCodeEnabled,
             STATE_ON_BEHALF_OF to onBehalfOf
-        )
+        ).apply {
+            cardElementAnalytics.saveState(this)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
+            cardElementAnalytics.restoreState(state)
             postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, true)
             isShowingFullCard = state.getBoolean(STATE_CARD_VIEWED, true)
             onBehalfOf = state.getString(STATE_ON_BEHALF_OF)
@@ -796,6 +827,13 @@ class CardInputWidget @JvmOverloads constructor(
         expiryDateEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cardNumberEditText))
         cvcEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
         postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcEditText))
+
+        requiredFields.forEach {
+            it.internalFocusChangeListeners.remove(textFocusWatcher)
+            it.removeTextChangedListener(textInputWatcher)
+            it.addTextChangedListener(textInputWatcher)
+            it.internalFocusChangeListeners.add(textFocusWatcher)
+        }
 
         cvcEditText.internalFocusChangeListeners.add { _, hasFocus ->
             cardBrandView.shouldShowCvc = hasFocus
