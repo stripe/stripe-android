@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -18,7 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-private const val KEYBOARD_VISIBILITY_TIMEOUT_MS = 5_000L
+private const val IME_TRANSITION_TIMEOUT_MS = 5_000L
 
 /** Verifies that the managed device used for keyboard-dependent tests has a working IME. */
 @RequiresIme
@@ -38,10 +39,16 @@ internal class ManagedDeviceImeSmokeTest {
                     modifier = Modifier.testTag(TEXT_FIELD_TAG),
                 )
             }
+            // Managed devices can retain IME visibility between activity launches.
+            WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+                .hide(WindowInsetsCompat.Type.ime())
+        }
+        composeTestRule.waitUntil(IME_TRANSITION_TIMEOUT_MS) {
+            imeBottomInset() == 0
         }
 
         composeTestRule.onNodeWithTag(TEXT_FIELD_TAG).performClick()
-        composeTestRule.waitUntil(KEYBOARD_VISIBILITY_TIMEOUT_MS) {
+        composeTestRule.waitUntil(IME_TRANSITION_TIMEOUT_MS) {
             imeBottomInset() > 0
         }
 
