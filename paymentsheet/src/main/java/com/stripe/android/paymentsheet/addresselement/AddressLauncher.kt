@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
@@ -83,11 +82,11 @@ class AddressLauncher internal constructor(
 
     @JvmOverloads
     fun present(
+        publishableKey: String,
         configuration: Configuration = Configuration()
     ) {
-        val config = PaymentConfiguration.getInstance(application.applicationContext)
         val args = AddressElementActivityContract.Args(
-            publishableKey = config.publishableKey,
+            publishableKey = publishableKey,
             config = configuration,
         )
 
