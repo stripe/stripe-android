@@ -70,6 +70,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessagePromotionList
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
@@ -1972,11 +1973,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
         options: ApiRequest.Options
     ): Result<ConfirmPaymentIntentParams> {
-        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+        if (!options.apiKeyIsUserKey) {
             return Result.success(this)
         }
 
-        // For user key auth, we must create the PM first.
+        // Saved payment method: inject moto directly into existing options.
+        if (paymentMethodCreateParams == null) {
+            return Result.success(withMoto())
+        }
+
+        // New payment method: create the PM first, then build Dashboard params.
         val paymentMethodResult = createPaymentMethod(
             paymentMethodCreateParams = paymentMethodCreateParams,
             options = options,
@@ -1994,11 +2000,23 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmSetupIntentParams.maybeForDashboard(
         options: ApiRequest.Options
     ): Result<ConfirmSetupIntentParams> {
-        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+        if (!options.apiKeyIsUserKey) {
             return Result.success(this)
         }
 
-        // For user key auth, we must create the PM first.
+        // Saved payment method: inject moto by rebuilding Dashboard params with existing PM ID.
+        if (paymentMethodCreateParams == null) {
+            val savedPaymentMethodId = paymentMethodId ?: return Result.success(this)
+            return Result.success(
+                ConfirmSetupIntentParams.createForDashboard(
+                    clientSecret = clientSecret,
+                    paymentMethodId = savedPaymentMethodId,
+                    paymentMethodOptions = paymentMethodOptions,
+                )
+            )
+        }
+
+        // New payment method: create the PM first, then build Dashboard params.
         val paymentMethodResult = createPaymentMethod(
             paymentMethodCreateParams = paymentMethodCreateParams,
             options = options,
@@ -2011,6 +2029,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 paymentMethodOptions = paymentMethodOptions,
             )
         }
+    }
+
+    private fun ConfirmPaymentIntentParams.withMoto(): ConfirmPaymentIntentParams {
+        val existing = paymentMethodOptions as? PaymentMethodOptionsParams.Card
+        paymentMethodOptions = PaymentMethodOptionsParams.Card(
+            cvc = existing?.cvc,
+            network = existing?.network,
+            setupFutureUsage = existing?.setupFutureUsage,
+            moto = true,
+        )
+        return this
     }
 
     private fun Result<StripeResponse<String>>.errorMessage(
