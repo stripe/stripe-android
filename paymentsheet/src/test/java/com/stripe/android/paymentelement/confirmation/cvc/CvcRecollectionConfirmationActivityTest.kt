@@ -71,6 +71,7 @@ internal class CvcRecollectionConfirmationActivityTest {
             assertThat(confirmingWithSavedOptionWithCvc.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = PaymentMethodOptionsParams.Card(cvc = "444"),
                     )
@@ -109,6 +110,7 @@ internal class CvcRecollectionConfirmationActivityTest {
             assertThat(confirmingWithSavedOption.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = null,
                     )
@@ -173,6 +175,7 @@ internal class CvcRecollectionConfirmationActivityTest {
         val PAYMENT_METHOD = PaymentMethodFactory.card(random = true)
 
         val CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PAYMENT_METHOD,
             optionsParams = null,
         )

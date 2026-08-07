@@ -90,6 +90,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
             requireNotNull(it.encodedPaymentMethod.parsePaymentMethod())
         }.map { paymentMethod ->
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = null,
                 originatedFromWallet = true,

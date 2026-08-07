@@ -118,6 +118,7 @@ class LinkConfirmationFlowTest {
         assertThat(result).isEqualTo(
             ConfirmationDefinition.Result.NextStep(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = true,

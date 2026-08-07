@@ -202,6 +202,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         savedConfirmationOption: LinkInlineSignupConfirmationOption.Saved?,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = savedConfirmationOption?.optionsParams,
             originatedFromWallet = false,
@@ -212,6 +213,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption?,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.takeIf {
@@ -253,6 +255,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                 shouldSave = saveOption.shouldSave(),
             )
             is LinkInlineSignupConfirmationOption.Saved -> PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = optionsParams,
             )

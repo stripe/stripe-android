@@ -210,6 +210,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,

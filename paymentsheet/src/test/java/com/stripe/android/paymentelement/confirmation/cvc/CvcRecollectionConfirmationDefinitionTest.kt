@@ -290,6 +290,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         originatedFromWallet: Boolean = false,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = optionsParams,
             originatedFromWallet = originatedFromWallet,

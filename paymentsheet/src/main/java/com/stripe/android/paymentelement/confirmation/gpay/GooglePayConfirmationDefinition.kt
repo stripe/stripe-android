@@ -119,6 +119,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 val nextConfirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = result.paymentMethod,
                     optionsParams = null,
+                    shippingInformation = null,
                     originatedFromWallet = true,
                 )
 
