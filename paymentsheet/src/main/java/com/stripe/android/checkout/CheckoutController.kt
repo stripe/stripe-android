@@ -29,6 +29,7 @@ import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
 import java.util.WeakHashMap
@@ -48,9 +49,8 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 @Singleton
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Suppress("TooManyFunctions", "UnusedParameter")
+@Suppress("TooManyFunctions")
 class CheckoutController @Inject internal constructor(
-    resultCallback: ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
@@ -70,6 +70,12 @@ class CheckoutController @Inject internal constructor(
      * Whether a mutation is currently in progress.
      */
     val isUpdating: StateFlow<Boolean> = operationCoordinator.isUpdating
+
+    init {
+        viewModelScope.launch {
+            operationCoordinator.observeConfirmationResults()
+        }
+    }
 
     /**
      * Loads the Checkout Session identified by [checkoutSessionClientSecret] and prepares the

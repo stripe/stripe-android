@@ -7,6 +7,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -213,9 +214,14 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val errorReporter = FakeErrorReporter()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
         stateHolder.state = state
+        val operationCoordinator = CheckoutOperationCoordinator(
+            confirmationHandler = confirmationHandler,
+            resultCallback = {},
+        )
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,
             confirmationHandler = confirmationHandler,
+            operationCoordinator = operationCoordinator,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             statusBarColor = null,
