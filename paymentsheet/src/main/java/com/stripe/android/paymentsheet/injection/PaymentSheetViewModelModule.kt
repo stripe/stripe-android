@@ -14,6 +14,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.CoroutineContext
 
 @Module
@@ -39,7 +40,7 @@ internal class PaymentSheetViewModelModule {
     @Provides
     @ViewModelScope
     fun provideViewModelScope(): CoroutineScope {
-        return CoroutineScope(Dispatchers.Main)
+        return CoroutineScope(SupervisorJob() + Dispatchers.Main)
     }
 
     @Provides
