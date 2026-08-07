@@ -29,7 +29,6 @@ import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
 import java.util.WeakHashMap
@@ -70,12 +69,6 @@ class CheckoutController @Inject internal constructor(
      * Whether a mutation or confirmation is currently in progress or queued.
      */
     val isUpdating: StateFlow<Boolean> = operationCoordinator.isUpdating
-
-    init {
-        viewModelScope.launch {
-            operationCoordinator.observeConfirmationResults()
-        }
-    }
 
     /**
      * Loads the Checkout Session identified by [checkoutSessionClientSecret] and prepares the

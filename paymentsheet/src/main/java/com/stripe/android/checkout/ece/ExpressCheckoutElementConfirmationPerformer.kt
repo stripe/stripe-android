@@ -31,7 +31,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : ExpressCheckoutElementConfirmationPerformer {
     override fun confirm(expressButton: ExpressButton) {
-        val confirmationArgs = operationCoordinator.tryBeginConfirmation {
+        val operation = operationCoordinator.tryBeginConfirmation {
             val state = stateHolder.state ?: run {
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
@@ -50,19 +50,22 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         } ?: return
 
         viewModelScope.launch {
-            try {
-                confirmationHandler.start(confirmationArgs)
-
-                when (val result = confirmationHandler.awaitResult()) {
-                    is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
-                    is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
-                    is ConfirmationHandler.Result.Canceled,
-                    null -> Unit
-                }
+            val result = try {
+                confirmationHandler.start(operation.arguments)
+                confirmationHandler.awaitResult()
             } catch (error: CancellationException) {
                 throw error
             } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
-                operationCoordinator.failConfirmation(error)
+                operationCoordinator.failConfirmation(operation, error)
+                return@launch
+            }
+
+            // Analytics failures must not be reported to the integrator as confirmation failures.
+            when (result) {
+                is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
+                is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
+                is ConfirmationHandler.Result.Canceled,
+                null -> Unit
             }
         }
     }
