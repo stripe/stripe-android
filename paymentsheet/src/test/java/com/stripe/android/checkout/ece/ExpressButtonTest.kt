@@ -153,6 +153,15 @@ internal class ExpressButtonTest {
     }
 
     @Test
+    fun `GooglePay create uses shipping address requirement`() {
+        val button = createGooglePayExpressButton(
+            shippingAddressRequired = true,
+        )
+
+        assertThat(button.shippingAddressRequired).isTrue()
+    }
+
+    @Test
     fun `GooglePay create uses card brand filter from payment method metadata`() {
         val cardBrandFilter = PaymentSheetCardBrandFilter(
             cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.Allowed(
@@ -225,11 +234,13 @@ internal class ExpressButtonTest {
 
     private fun createGooglePayExpressButton(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration()
+        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration(),
+        shippingAddressRequired: Boolean = false,
     ): ExpressButton.GooglePay {
         return ExpressButton.GooglePay.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            googlePayConfiguration = googlePayConfiguration
+            googlePayConfiguration = googlePayConfiguration,
+            shippingAddressRequired = shippingAddressRequired,
         )
     }
 
