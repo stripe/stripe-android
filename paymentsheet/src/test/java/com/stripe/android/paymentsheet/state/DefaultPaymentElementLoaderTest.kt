@@ -5049,9 +5049,9 @@ internal class DefaultPaymentElementLoaderTest {
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
-            apiConfigurationResolver = ApiConfigurationResolver(
-                { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test_123") }
-            ),
+            apiConfigurationResolver = ApiConfigurationResolver {
+                PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test_123")
+            },
             createCustomerState = CreateCustomerState(
                 paymentMethodFilter = paymentMethodFilter,
                 errorReporter = errorReporter,
@@ -5066,7 +5066,6 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
-            realEventReporter = FakeEventReporter(),
         )
     }
 

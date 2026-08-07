@@ -63,13 +63,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onLoadStarted(initializedViaCompose: Boolean) {
+    override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         durationProvider.start(DurationProvider.Key.Loading)
         fireEvent(
             event = PaymentSheetEvent.LoadStarted(
                 initializedViaCompose = initializedViaCompose
             ),
             paymentMethodMetadata = null, // We don't have these details until load is complete.
+            publishableKey = publishableKey,
         )
     }
 
@@ -95,6 +96,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadFailed(
         error: Throwable,
+        publishableKey: String,
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Loading)
         fireEvent(
@@ -104,6 +106,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
+            publishableKey = publishableKey,
         )
     }
 

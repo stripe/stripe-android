@@ -320,7 +320,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             ),
         )
 
-        eventReporter.onLoadStarted(metadata.initializedViaCompose)
+        eventReporter.onLoadStarted(metadata.initializedViaCompose, apiConfiguration.publishableKey)
         tapToAddConnectionStarter.start(configuration, apiConfiguration.publishableKey, apiConfiguration.isLiveMode())
 
         val isGooglePaySupportedOnDevice = async {
@@ -877,7 +877,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val treatValidationErrorAsFailure = !state.stripeIntent.isConfirmed || isReloadingAfterProcessDeath
 
         if (state.validationError != null && treatValidationErrorAsFailure) {
-            eventReporter.onLoadFailed(state.validationError)
+            eventReporter.onLoadFailed(state.validationError, paymentMethodMetadata.apiConfiguration.publishableKey)
         } else {
             eventReporter.onLoadSucceeded(
                 paymentSelection = state.paymentSelection,
@@ -890,7 +890,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         error: Throwable,
     ) {
         logger.error("Failure loading PaymentSheetState", error)
-        eventReporter.onLoadFailed(error)
+        val publishableKey = runCatching {
+            apiConfigurationResolver.resolve(null).publishableKey
+        }.getOrDefault("")
+        eventReporter.onLoadFailed(error, publishableKey)
     }
 
     private fun logIfMissingExternalPaymentMethods(

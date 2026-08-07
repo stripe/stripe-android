@@ -21,7 +21,7 @@ internal interface LoadingEventReporter {
     /**
      * PaymentSheet or FlowController have started loading.
      */
-    fun onLoadStarted(initializedViaCompose: Boolean)
+    fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String)
 
     /**
      * PaymentSheet or FlowController have successfully loaded the information required to be
@@ -35,7 +35,7 @@ internal interface LoadingEventReporter {
     /**
      * PaymentSheet or FlowController have failed to load.
      */
-    fun onLoadFailed(error: Throwable)
+    fun onLoadFailed(error: Throwable, publishableKey: String)
 
     /**
      * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
