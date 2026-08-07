@@ -82,12 +82,12 @@ internal class NfcCoilAnimatedInteriorTest {
         }
 
         composeRule.waitForIdle()
-        assertThat(composeRule.checkmarkProgress().progress).isEqualTo(0f)
+        assertThat(composeRule.checkmarkProgress()).isEqualTo(0f)
 
         composeRule.mainClock.advanceTimeBy((CHECKMARK_DRAW_DURATION_MS / 2).toLong())
         composeRule.waitForIdle()
 
-        val progressMidAnimation = composeRule.checkmarkProgress().progress
+        val progressMidAnimation = composeRule.checkmarkProgress()
         assertThat(progressMidAnimation).isGreaterThan(0.1f)
         assertThat(progressMidAnimation).isLessThan(0.99f)
 
@@ -134,16 +134,16 @@ internal class NfcCoilAnimatedInteriorTest {
         composeRule.waitForIdle()
 
         val progressBeforeConfigChange = composeRule.checkmarkProgress()
-        assertThat(progressBeforeConfigChange.progress).isGreaterThan(0.1f)
-        assertThat(progressBeforeConfigChange.progress).isLessThan(0.99f)
+        assertThat(progressBeforeConfigChange).isGreaterThan(0.1f)
+        assertThat(progressBeforeConfigChange).isLessThan(0.99f)
 
         composeRule.simulateConfigChange(visible)
 
         val progressAfterConfigChange = composeRule.checkmarkProgress()
-        assertThat(progressAfterConfigChange.progress)
+        assertThat(progressAfterConfigChange)
             .isWithin(PROGRESS_TOLERANCE)
-            .of(progressBeforeConfigChange.progress)
-        assertThat(progressAfterConfigChange.progress).isGreaterThan(0.1f)
+            .of(progressBeforeConfigChange)
+        assertThat(progressAfterConfigChange).isGreaterThan(0.1f)
     }
 
     @Test
@@ -256,11 +256,11 @@ internal class NfcCoilAnimatedInteriorTest {
         waitForIdle()
     }
 
-    private fun assertCheckmarkProgressComplete(progress: CheckmarkProgress) {
-        assertThat(progress.progress).isWithin(PROGRESS_TOLERANCE).of(1f)
+    private fun assertCheckmarkProgressComplete(progress: Float) {
+        assertThat(progress).isWithin(PROGRESS_TOLERANCE).of(1f)
     }
 
-    private fun ComposeContentTestRule.checkmarkProgress(): CheckmarkProgress {
+    private fun ComposeContentTestRule.checkmarkProgress(): Float {
         return onNodeWithTag(CHECKMARK_TEST_TAG)
             .fetchSemanticsNode()
             .config[CheckmarkProgressKey]
