@@ -148,9 +148,12 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `declined card shows error, performs haptic feedback, and keeps activity open`() = test {
+    fun `declined card shows error, performs haptic feedback, and keeps activity open`() = test(
+        autoAdvance = false,
+    ) {
         dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
         assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
+        assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
 
@@ -160,9 +163,10 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `unsupported card shows error and keeps activity open`() = test {
+    fun `unsupported card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
         assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+        assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
 
@@ -172,10 +176,12 @@ internal class NfcScanningActivityTest {
     @Test
     fun `merchant card brand filter rejects visa and keeps activity open`() {
         test(
+            autoAdvance = false,
             paymentMethodMetadata = NfcScanningActivityTestFixtures.paymentMethodMetadataWithVisaDisallowed(),
         ) {
             dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
             assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+            assertErrorDisappears()
 
             isoDep.assertSuccess()
 
@@ -184,9 +190,10 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `expired card shows error and keeps activity open`() = test {
+    fun `expired card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
         assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
+        assertErrorDisappears()
 
         isoDep.assertSuccess()
 
@@ -225,12 +232,14 @@ internal class NfcScanningActivityTest {
     }
 
     private fun test(
+        autoAdvance: Boolean = true,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         block: suspend NfcScanningActivityScenario.() -> Unit,
     ) {
         NfcScanningActivityTestHelpers.launchScenario(
             context = context,
             composeRule = composeRule,
+            autoAdvance = autoAdvance,
             paymentMethodMetadata = paymentMethodMetadata,
             block = block,
         )
