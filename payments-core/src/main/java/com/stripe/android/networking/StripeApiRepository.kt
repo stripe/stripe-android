@@ -2033,13 +2033,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     private fun ConfirmPaymentIntentParams.withMoto(): ConfirmPaymentIntentParams {
         val existing = paymentMethodOptions as? PaymentMethodOptionsParams.Card
-        paymentMethodOptions = PaymentMethodOptionsParams.Card(
-            cvc = existing?.cvc,
-            network = existing?.network,
-            setupFutureUsage = existing?.setupFutureUsage,
-            moto = true,
+        return copy(
+            paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                cvc = existing?.cvc,
+                network = existing?.network,
+                setupFutureUsage = existing?.setupFutureUsage,
+                moto = true,
+            ),
+            useStripeSdk = true,
         )
-        return this
     }
 
     private fun Result<StripeResponse<String>>.errorMessage(
