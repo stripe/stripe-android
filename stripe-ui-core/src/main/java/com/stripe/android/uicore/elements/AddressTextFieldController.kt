@@ -12,9 +12,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInRoot
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.uicore.LocalFormScrollState
+import com.stripe.android.uicore.LocalFormScrollContext
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.collectAsState
@@ -113,19 +113,22 @@ class AddressTextFieldController(
                 )
             }
 
-            val scrollState = LocalFormScrollState.current
-            var columnYPosition by remember { mutableIntStateOf(0) }
-            LaunchedEffect(predictionsState) {
-                if (shouldShowPredictionsDropdown(predictionsState) && scrollState != null) {
+            val scrollContext = LocalFormScrollContext.current
+            var elementScreenY by remember { mutableIntStateOf(0) }
+            val showingPredictions = shouldShowPredictionsDropdown(predictionsState)
+            LaunchedEffect(showingPredictions) {
+                if (showingPredictions && scrollContext != null) {
                     delay(timeMillis = 300)
-                    scrollState.animateScrollTo(columnYPosition)
+                    val target = scrollContext.scrollState.value +
+                        elementScreenY - scrollContext.viewportTopY
+                    scrollContext.scrollState.animateScrollTo(target)
                 }
             }
 
             Column(
                 modifier = modifier
                     .onGloballyPositioned { coordinates ->
-                        columnYPosition = coordinates.positionInParent().y.toInt()
+                        elementScreenY = coordinates.positionInRoot().y.toInt()
                     }
                     .onFocusChanged { state ->
                         if (state.hasFocus) {
