@@ -71,6 +71,10 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                         is CheckoutControllerExampleViewModel.Status.Configured -> {
                             val session = currentStatus.session
                             if (session != null) {
+                                Text(
+                                    text = "Tax status: ${session.tax.status}",
+                                    style = MaterialTheme.typography.body1,
+                                )
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
                                 if (session.isExpressCheckoutElementAvailable) {

@@ -3,13 +3,19 @@ package com.stripe.android.lpmfoundations.luxe
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
+    private val supportsAutomaticTaxBillingAddress: Boolean,
 ) {
     private val headerFormElements: MutableList<FormElement> = mutableListOf()
-    private val uiFormElements: MutableList<FormElement> = mutableListOf()
+    private val uiFormElements: MutableList<UiFormElement> = mutableListOf()
     private val footerFormElements: MutableList<FormElement> = mutableListOf()
 
     private val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> = mutableSetOf()
@@ -54,12 +60,19 @@ internal class FormElementsBuilder(
         if (type in requiredContactInformationCollectionModes) {
             overriddenContactInformationCollectionModes += type
 
-            uiFormElements += type.formElement(arguments.initialValues)
+            uiFormElements += UiFormElement.Existing(type.formElement(arguments.initialValues))
         }
     }
 
     fun element(formElement: FormElement): FormElementsBuilder = apply {
-        uiFormElements += formElement
+        uiFormElements += UiFormElement.Existing(formElement)
+    }
+
+    fun countryOnly(
+        allowedCountryCodes: Set<String>,
+    ): FormElementsBuilder = apply {
+        check(uiFormElements.none { it is UiFormElement.CountryOnly })
+        uiFormElements += UiFormElement.CountryOnly(allowedCountryCodes)
     }
 
     fun ignoreBillingAddressRequirements() = apply {
@@ -83,6 +96,12 @@ internal class FormElementsBuilder(
     }
 
     fun build(): List<FormElement> {
+        val shouldCollectTaxBillingAddress = supportsAutomaticTaxBillingAddress &&
+            arguments.requiresBillingAddressForAutomaticTax &&
+            arguments.billingDetailsCollectionConfiguration.address ==
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+        val promotesCountryOnlyElement = shouldCollectTaxBillingAddress && !requireBillingAddressCollection
+
         return buildList {
             addAll(headerFormElements) // Order headers first.
 
@@ -92,7 +111,11 @@ internal class FormElementsBuilder(
                 }
             }
 
-            addAll(uiFormElements)
+            addAll(
+                uiFormElements.flatMap { item ->
+                    item.createFormElements(promotesCountryOnlyElement)
+                }
+            )
 
             if (requireBillingAddressCollection) {
                 val elements = AddressSpec(allowedCountryCodes = availableCountries).transform(
@@ -104,7 +127,57 @@ internal class FormElementsBuilder(
                 addAll(elements)
             }
 
+            if (
+                shouldCollectTaxBillingAddress &&
+                !requireBillingAddressCollection &&
+                uiFormElements.none { it is UiFormElement.CountryOnly }
+            ) {
+                addAll(
+                    AutomaticTaxBillingAddressFactory(arguments).create(
+                        allowedCountryCodes =
+                        arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                    )
+                )
+            }
+
             addAll(footerFormElements) // Order footers last.
         }
+    }
+
+    private fun UiFormElement.createFormElements(
+        promotesCountryOnlyElement: Boolean,
+    ): List<FormElement> {
+        return when (this) {
+            is UiFormElement.Existing -> listOf(formElement)
+            is UiFormElement.CountryOnly -> {
+                if (promotesCountryOnlyElement) {
+                    AutomaticTaxBillingAddressFactory(arguments).create(
+                        allowedCountryCodes = allowedCountryCodes,
+                    )
+                } else {
+                    listOf(
+                        SectionElement.wrap(
+                            CountryElement(
+                                identifier = IdentifierSpec.Country,
+                                controller = DropdownFieldController(
+                                    config = CountryConfig(allowedCountryCodes),
+                                    initialValue = arguments.initialValues[IdentifierSpec.Country],
+                                ),
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private sealed interface UiFormElement {
+        data class Existing(
+            val formElement: FormElement,
+        ) : UiFormElement
+
+        data class CountryOnly(
+            val allowedCountryCodes: Set<String>,
+        ) : UiFormElement
     }
 }

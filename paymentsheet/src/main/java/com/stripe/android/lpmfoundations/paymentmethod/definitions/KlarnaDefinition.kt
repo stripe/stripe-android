@@ -67,19 +67,8 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .ignoreBillingAddressRequirements()
-            .element(
-                formElement = SectionElement.wrap(
-                    sectionFieldElement = CountryElement(
-                        identifier = IdentifierSpec.Country,
-                        controller = DropdownFieldController(
-                            config = CountryConfig(
-                                onlyShowCountryCodes =
-                                metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                            ),
-                            initialValue = arguments.initialValues[IdentifierSpec.Country],
-                        )
-                    )
-                )
+            .countryOnly(
+                allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
             )
             .apply {
                 if (

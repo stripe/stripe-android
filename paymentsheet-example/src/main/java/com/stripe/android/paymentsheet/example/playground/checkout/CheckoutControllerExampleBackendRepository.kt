@@ -29,6 +29,12 @@ internal class CheckoutControllerExampleBackendRepository(
             .currency("usd")
             .amount(5000)
             .customer("new")
+            .automaticPaymentMethods(false)
+            .supportedPaymentMethods(listOf("klarna"))
+            .automaticTax(true)
+            .setShippingAddress(false)
+            .displayShippingRates(false)
+            .useLink(false)
             .build()
 
         val apiResponse = withContext(Dispatchers.IO) {

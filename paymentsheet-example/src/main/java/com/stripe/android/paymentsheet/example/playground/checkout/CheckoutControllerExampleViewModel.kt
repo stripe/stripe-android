@@ -13,8 +13,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.checkout.GooglePayConfiguration
-import com.stripe.android.checkout.GooglePayConfiguration.Environment
+import com.stripe.android.checkout.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,16 +69,26 @@ internal class CheckoutControllerExampleViewModel(
                 controller.configure(
                     checkoutSessionClientSecret = clientSecret,
                     configuration = CheckoutController.Configuration()
-                        .googlePayConfiguration(
-                            GooglePayConfiguration(
-                                environment = Environment.Test
-                            )
+                        .paymentElement(
+                            PaymentElement.Configuration()
+                                .billingDetailsCollectionConfiguration(
+                                    PaymentElement.Configuration.BillingDetailsCollectionConfiguration()
+                                        .address(
+                                            PaymentElement.Configuration.BillingDetailsCollectionConfiguration
+                                                .AddressCollectionMode.Automatic,
+                                        )
+                                )
                         )
                 ).fold(
                     onSuccess = {
-                        _status.value = Status.Configured(
-                            session = controller.session.value,
-                        )
+                        val session = controller.session.value
+                        if (session?.tax?.status == Session.Tax.Status.RequiresBillingAddress) {
+                            _status.value = Status.Configured(session = session)
+                        } else {
+                            _status.value = Status.Error(
+                                "Expected initial tax status RequiresBillingAddress, was ${session?.tax?.status}"
+                            )
+                        }
                     },
                     onFailure = { error ->
                         Log.e(TAG, "Failed to configure", error)
