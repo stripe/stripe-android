@@ -399,6 +399,11 @@ class GooglePayPaymentMethodLauncher internal constructor(
         internal const val PRODUCT_USAGE_TOKEN = "GooglePayPaymentMethodLauncher"
         internal var HAS_SENT_INIT_ANALYTIC_EVENT: Boolean = false
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun setHasSentInitAnalyticEvent(hasSent: Boolean) {
+            HAS_SENT_INIT_ANALYTIC_EVENT = hasSent
+        }
+
         // Generic internal error
         const val INTERNAL_ERROR = 1
 
