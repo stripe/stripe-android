@@ -144,13 +144,17 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure prefills the default billing address`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaultBillingAddress(
-            CheckoutController.Address()
-                .city(" San Francisco ")
-                .country(" US ")
-                .line1(" 510 Townsend St ")
-                .postalCode(" 94103 ")
-                .state(" CA ")
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutController.Address()
+                        .city(" San Francisco ")
+                        .country(" US ")
+                        .line1(" 510 Townsend St ")
+                        .postalCode(" 94103 ")
+                        .state(" CA ")
+                )
+            )
         ),
     ) {
         result.getOrThrow()
@@ -165,14 +169,18 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaultBillingAddress(
-            CheckoutController.Address()
-                .city("San Francisco")
-                .country("US")
-                .line1("510 Townsend St")
-                .line2("Suite 100")
-                .postalCode("94103")
-                .state("CA")
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutController.Address()
+                        .city("San Francisco")
+                        .country("US")
+                        .line1("510 Townsend St")
+                        .line2("Suite 100")
+                        .postalCode("94103")
+                        .state("CA")
+                )
+            )
         ),
         networkSetup = {
             networkRule.checkoutInit(
@@ -190,6 +198,40 @@ internal class CheckoutControllerTest {
             )
         },
     ) {
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `configure sends the trimmed default email to the checkout session`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().email("  prefill@example.com  ")
+        ),
+        networkSetup = {
+            networkRule.checkoutInit(responseFactory = ::successResponse)
+            networkRule.checkoutUpdate(
+                bodyPart("customer_email", "prefill@example.com"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                responseFactory = successResponseFactory { json ->
+                    json.put("customer_email", "prefill@example.com")
+                },
+            )
+        },
+    ) {
+        result.getOrThrow()
+        // The updated session email flows back through to the exposed session and the billing email.
+        assertThat(controller.session.value?.email).isEqualTo("prefill@example.com")
+        assertThat(committedState?.embeddedConfiguration?.defaultBillingDetails?.email)
+            .isEqualTo("prefill@example.com")
+    }
+
+    @Test
+    fun `configure does not send an email update when the default email is blank`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().email("   ")
+        ),
+    ) {
+        // A blank default email normalizes to null, so no update request fires. Only checkoutInit is
+        // enqueued by the default networkSetup; NetworkRule fails the test on any unmatched request.
         assertThat(result.isSuccess).isTrue()
     }
 

@@ -32,6 +32,8 @@ internal fun CheckoutCollectedDetails.toBillingDetails(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(
     address = billingAddress?.asPaymentSheet(),
+    // The merchant-provided default email is set on the session during configure, so it arrives here
+    // as the session's customer email.
     email = checkoutSessionResponse.customerEmail,
     name = billingName,
     phone = billingPhoneNumber,

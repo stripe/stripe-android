@@ -27,9 +27,7 @@ internal class CheckoutStateLoader @Inject constructor(
         commit(
             configuration = configuration,
             response = checkoutSessionResponse,
-            collectedDetails = CheckoutCollectedDetails(
-                billingAddress = configuration.defaultBillingAddress,
-            ),
+            collectedDetails = configuration.asInitialCollectedDetails(),
             carryForward = CarryForward.initial(),
         )
     }
@@ -136,4 +134,22 @@ internal class CheckoutStateLoader @Inject constructor(
             )
         }
     }
+}
+
+/**
+ * Seeds the initial locally-collected details from the merchant-provided prefill defaults, so the
+ * elements (and the Checkout Session) start prepopulated. `email` is not part of the collected
+ * details here — [CheckoutController.configure] pushes it to the Checkout Session, so it flows back
+ * as the session's customer email.
+ */
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): CheckoutCollectedDetails {
+    return CheckoutCollectedDetails(
+        shippingName = defaults.shippingDetails?.name,
+        billingName = defaults.billingDetails?.name,
+        shippingPhoneNumber = defaults.shippingDetails?.phoneNumber,
+        billingPhoneNumber = defaults.billingDetails?.phoneNumber,
+        shippingAddress = defaults.shippingDetails?.address,
+        billingAddress = defaults.billingDetails?.address,
+    )
 }
