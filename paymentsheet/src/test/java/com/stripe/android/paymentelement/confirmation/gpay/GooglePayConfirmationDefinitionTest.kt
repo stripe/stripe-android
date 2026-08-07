@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCallback
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
@@ -591,7 +592,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = ApiConfiguration.State("pk_test_123", null),
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = shippingAddressParameters,
