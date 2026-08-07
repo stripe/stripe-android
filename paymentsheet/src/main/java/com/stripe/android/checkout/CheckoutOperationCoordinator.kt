@@ -3,6 +3,7 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +15,7 @@ import javax.inject.Singleton
 @Singleton
 internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
+    private val sheetStateHolder: SheetStateHolder,
     private val resultCallback: CheckoutController.ResultCallback,
 ) {
     private val admissionLock = Any()
@@ -21,9 +23,9 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private var confirmationInFlight = confirmationHandler.hasReloadedFromProcessDeath ||
         confirmationHandler.state.value is ConfirmationHandler.State.Confirming
     private var confirmationCompletionClaimed = false
-    private val mutex = Mutex()
+    private val mutex = Mutex(locked = confirmationInFlight)
 
-    private val _isUpdating = MutableStateFlow(false)
+    private val _isUpdating = MutableStateFlow(confirmationInFlight)
     val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
 
     suspend fun <T> runMutation(
@@ -46,13 +48,37 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
-    fun beginConfirmation(
+    fun tryBeginConfirmation(
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
-        return synchronized(admissionLock) {
-            val confirmationArguments = arguments() ?: return@synchronized null
-            confirmationInFlight = true
-            confirmationArguments
+        val admission = synchronized(admissionLock) {
+            when {
+                sheetStateHolder.sheetIsOpen -> ConfirmationAdmission.Rejected(
+                    IllegalStateException("Cannot confirm checkout session while a payment flow is presented.")
+                )
+                pendingMutations > 0 || confirmationInFlight -> ConfirmationAdmission.Rejected(
+                    IllegalStateException("Cannot confirm checkout session while another mutation is in progress.")
+                )
+                else -> {
+                    val confirmationArguments = arguments()
+                        ?: return@synchronized ConfirmationAdmission.NoArguments
+                    check(mutex.tryLock()) {
+                        "Checkout operation gate should be available after confirmation admission."
+                    }
+                    confirmationInFlight = true
+                    updateIsUpdating()
+                    ConfirmationAdmission.Accepted(confirmationArguments)
+                }
+            }
+        }
+
+        return when (admission) {
+            is ConfirmationAdmission.Accepted -> admission.arguments
+            is ConfirmationAdmission.Rejected -> {
+                resultCallback.onResult(CheckoutController.Result.Failed(admission.error))
+                null
+            }
+            is ConfirmationAdmission.NoArguments -> null
         }
     }
 
@@ -85,13 +111,20 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             synchronized(admissionLock) {
                 confirmationInFlight = false
                 confirmationCompletionClaimed = false
+                mutex.unlock()
                 updateIsUpdating()
             }
         }
     }
 
     private fun updateIsUpdating() {
-        _isUpdating.value = pendingMutations > 0
+        _isUpdating.value = confirmationInFlight || pendingMutations > 0
+    }
+
+    private sealed interface ConfirmationAdmission {
+        data class Accepted(val arguments: ConfirmationHandler.Args) : ConfirmationAdmission
+        data class Rejected(val error: Throwable) : ConfirmationAdmission
+        data object NoArguments : ConfirmationAdmission
     }
 }
 
