@@ -7,16 +7,16 @@ import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.MandateSpec
 
-internal object AutomaticTaxBillingAddressResolver {
+internal object BillingAddressSpecResolver {
     /**
-     * Resolves specs to one billing-address owner before transforming them into form elements.
+     * Resolves [CountrySpec] and [AddressSpec] before transforming them into form elements.
      *
      * The configured specs supply an absent, country-only, or normal-address source. Merchant
      * collection mode and billing-sourced automatic tax select whether that source is preserved,
      * normalized to an existing visible-country address, or replaced by a country-only,
      * tax-minimum, or Full address. A replacement keeps the source position and allowed countries;
-     * a missing address is inserted before the first mandate. The result never retains a separate
-     * country owner beside an address selected for Full or tax-minimum collection.
+     * a missing address is inserted before the first mandate. Full and tax-minimum forms contain at
+     * most one element reporting `billing_details[address][country]`.
      */
     fun resolve(
         specs: List<FormItemSpec>,
@@ -27,15 +27,15 @@ internal object AutomaticTaxBillingAddressResolver {
         val addressSpec = specs.filterIsInstance<AddressSpec>().firstOrNull()
         val countrySpecs = specs.filterIsInstance<CountrySpec>()
         val source = when {
-            addressSpec != null -> BillingAddressResolver.Source.NormalAddress(
+            addressSpec != null -> BillingAddressSourceResolver.Source.NormalAddress(
                 hidesCountry = addressSpec.hideCountry,
             )
-            countrySpecs.isNotEmpty() -> BillingAddressResolver.Source.CountryOnly(
+            countrySpecs.isNotEmpty() -> BillingAddressSourceResolver.Source.CountryOnly(
                 allowedCountryCodes = countrySpecs.first().allowedCountryCodes,
             )
-            else -> BillingAddressResolver.Source.Absent
+            else -> BillingAddressSourceResolver.Source.Absent
         }
-        val result = BillingAddressResolver.resolve(
+        val result = BillingAddressSourceResolver.resolve(
             source = source,
             addressCollectionMode = addressCollectionMode,
             requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
@@ -43,19 +43,19 @@ internal object AutomaticTaxBillingAddressResolver {
         )
 
         return when (result) {
-            BillingAddressResolver.Result.PreserveExisting -> specs
-            BillingAddressResolver.Result.UseExistingNormalAddress -> specs.mapNotNull { spec ->
+            BillingAddressSourceResolver.Result.PreserveExisting -> specs
+            BillingAddressSourceResolver.Result.UseExistingNormalAddress -> specs.mapNotNull { spec ->
                 when (spec) {
                     is CountrySpec -> null
                     is AddressSpec -> spec.copy(hideCountry = false)
                     else -> spec
                 }
             }
-            is BillingAddressResolver.Result.CountryOnly -> specs
-            is BillingAddressResolver.Result.TaxMinimum -> specs.replaceCountryOrInsertAddress(
+            is BillingAddressSourceResolver.Result.CountryOnly -> specs
+            is BillingAddressSourceResolver.Result.TaxMinimum -> specs.replaceCountryOrInsertAddress(
                 AutomaticTaxBillingAddressSpec(result.allowedCountryCodes)
             )
-            is BillingAddressResolver.Result.Full -> specs.replaceCountryOrInsertAddress(
+            is BillingAddressSourceResolver.Result.Full -> specs.replaceCountryOrInsertAddress(
                 AddressSpec(allowedCountryCodes = result.allowedCountryCodes)
             )
         }

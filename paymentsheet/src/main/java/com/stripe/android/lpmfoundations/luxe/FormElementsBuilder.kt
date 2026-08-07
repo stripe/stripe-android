@@ -15,7 +15,7 @@ internal class FormElementsBuilder(
     private val supportsAutomaticTaxBillingAddress: Boolean,
 ) {
     private val headerFormElements: MutableList<FormElement> = mutableListOf()
-    private val uiFormElements: MutableList<UiFormElement> = mutableListOf()
+    private val formElements: MutableList<FormElement> = mutableListOf()
     private val footerFormElements: MutableList<FormElement> = mutableListOf()
 
     private val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> = mutableSetOf()
@@ -23,6 +23,7 @@ internal class FormElementsBuilder(
         mutableSetOf()
 
     private var hasNormalAddressSource: Boolean = false
+    private var hasCountryOnlySource: Boolean = false
     private var ignoreBillingAddressCollection: Boolean = false
     private var availableCountries: Set<String> =
         arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
@@ -54,19 +55,26 @@ internal class FormElementsBuilder(
         if (type in requiredContactInformationCollectionModes) {
             overriddenContactInformationCollectionModes += type
 
-            uiFormElements += UiFormElement.Existing(type.formElement(arguments.initialValues))
+            formElements += type.formElement(arguments.initialValues)
         }
     }
 
     fun element(formElement: FormElement): FormElementsBuilder = apply {
-        uiFormElements += UiFormElement.Existing(formElement)
+        formElements += formElement
     }
 
     fun countryOnly(
         allowedCountryCodes: Set<String>,
     ): FormElementsBuilder = apply {
-        check(uiFormElements.none { it is UiFormElement.CountryOnly })
-        uiFormElements += UiFormElement.CountryOnly(allowedCountryCodes)
+        check(!hasCountryOnlySource) {
+            "Only one country-only billing address source can be declared."
+        }
+        check(!hasNormalAddressSource) {
+            "Country-only and normal billing address sources cannot both be declared."
+        }
+        hasCountryOnlySource = true
+
+        formElements += createCountryOnlySourceFormElements(allowedCountryCodes)
     }
 
     fun ignoreBillingAddressRequirements() = apply {
@@ -77,6 +85,9 @@ internal class FormElementsBuilder(
     fun requireBillingAddressIfAllowed(
         availableCountries: Set<String> = this.availableCountries,
     ): FormElementsBuilder = apply {
+        check(!hasCountryOnlySource) {
+            "Country-only and normal billing address sources cannot both be declared."
+        }
         if (arguments.billingDetailsCollectionConfiguration.address
             != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
         ) {
@@ -92,8 +103,6 @@ internal class FormElementsBuilder(
     }
 
     fun build(): List<FormElement> {
-        val resolvedUiFormElements = resolveBillingAddressSource()
-
         return buildList {
             addAll(headerFormElements) // Order headers first.
 
@@ -103,120 +112,103 @@ internal class FormElementsBuilder(
                 }
             }
 
-            addAll(
-                resolvedUiFormElements.flatMap { item ->
-                    item.createFormElements()
-                }
-            )
+            addAll(formElements)
+
+            if (hasNormalAddressSource) {
+                addAll(createFullAddressFormElements(availableCountries))
+            } else if (!hasCountryOnlySource && !ignoreBillingAddressCollection) {
+                addAll(createAbsentSourceFormElements())
+            }
 
             addAll(footerFormElements) // Order footers last.
         }
     }
 
-    private fun resolveBillingAddressSource(): List<UiFormElement> {
-        val declaredElements = buildList {
-            addAll(uiFormElements)
-            if (hasNormalAddressSource) {
-                add(UiFormElement.FullAddress(availableCountries))
-            }
-        }
+    private fun createCountryOnlySourceFormElements(
+        allowedCountryCodes: Set<String>,
+    ): List<FormElement> {
         if (ignoreBillingAddressCollection) {
-            return declaredElements
+            return listOf(createCountryOnlyFormElement(allowedCountryCodes))
         }
 
-        val countryOnly = declaredElements.filterIsInstance<UiFormElement.CountryOnly>().singleOrNull()
-        val fullAddress = declaredElements.filterIsInstance<UiFormElement.FullAddress>().singleOrNull()
-        val source = when {
-            fullAddress != null -> BillingAddressResolver.Source.NormalAddress(
-                hidesCountry = false,
+        return when (
+            val result = BillingAddressSourceResolver.resolve(
+                source = BillingAddressSourceResolver.Source.CountryOnly(allowedCountryCodes),
+                addressCollectionMode = arguments.billingDetailsCollectionConfiguration.address,
+                requiresBillingAddressForAutomaticTax = supportsAutomaticTaxBillingAddress &&
+                    arguments.requiresBillingAddressForAutomaticTax,
+                allowedBillingCountries = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
             )
-            countryOnly != null -> BillingAddressResolver.Source.CountryOnly(countryOnly.allowedCountryCodes)
-            else -> BillingAddressResolver.Source.Absent
+        ) {
+            is BillingAddressSourceResolver.Result.CountryOnly -> {
+                listOf(createCountryOnlyFormElement(result.allowedCountryCodes))
+            }
+            is BillingAddressSourceResolver.Result.TaxMinimum -> {
+                createTaxMinimumAddressFormElements(result.allowedCountryCodes)
+            }
+            is BillingAddressSourceResolver.Result.Full -> {
+                createFullAddressFormElements(result.allowedCountryCodes)
+            }
+            BillingAddressSourceResolver.Result.PreserveExisting,
+            BillingAddressSourceResolver.Result.UseExistingNormalAddress -> {
+                error("A country-only billing address source must produce form elements.")
+            }
         }
-        val result = BillingAddressResolver.resolve(
-            source = source,
-            addressCollectionMode = arguments.billingDetailsCollectionConfiguration.address,
-            requiresBillingAddressForAutomaticTax = supportsAutomaticTaxBillingAddress &&
-                arguments.requiresBillingAddressForAutomaticTax,
-            allowedBillingCountries = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+    }
+
+    private fun createAbsentSourceFormElements(): List<FormElement> {
+        return when (
+            val result = BillingAddressSourceResolver.resolve(
+                source = BillingAddressSourceResolver.Source.Absent,
+                addressCollectionMode = arguments.billingDetailsCollectionConfiguration.address,
+                requiresBillingAddressForAutomaticTax = supportsAutomaticTaxBillingAddress &&
+                    arguments.requiresBillingAddressForAutomaticTax,
+                allowedBillingCountries = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+            )
+        ) {
+            BillingAddressSourceResolver.Result.PreserveExisting -> emptyList()
+            is BillingAddressSourceResolver.Result.TaxMinimum -> {
+                createTaxMinimumAddressFormElements(result.allowedCountryCodes)
+            }
+            is BillingAddressSourceResolver.Result.Full -> {
+                createFullAddressFormElements(result.allowedCountryCodes)
+            }
+            BillingAddressSourceResolver.Result.UseExistingNormalAddress,
+            is BillingAddressSourceResolver.Result.CountryOnly -> {
+                error("An absent billing address source cannot produce this result.")
+            }
+        }
+    }
+
+    private fun createCountryOnlyFormElement(
+        allowedCountryCodes: Set<String>,
+    ): FormElement {
+        return SectionElement.wrap(
+            CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = DropdownFieldController(
+                    config = CountryConfig(allowedCountryCodes),
+                    initialValue = arguments.initialValues[IdentifierSpec.Country],
+                ),
+            )
         )
-
-        return when (result) {
-            BillingAddressResolver.Result.PreserveExisting -> declaredElements
-            BillingAddressResolver.Result.UseExistingNormalAddress -> {
-                declaredElements.filterNot { it is UiFormElement.CountryOnly }
-            }
-            is BillingAddressResolver.Result.CountryOnly -> {
-                declaredElements.replaceCountryOrAppend(UiFormElement.CountryOnly(result.allowedCountryCodes))
-            }
-            is BillingAddressResolver.Result.TaxMinimum -> {
-                declaredElements.replaceCountryOrAppend(UiFormElement.TaxMinimumAddress(result.allowedCountryCodes))
-            }
-            is BillingAddressResolver.Result.Full -> {
-                declaredElements.replaceCountryOrAppend(UiFormElement.FullAddress(result.allowedCountryCodes))
-            }
-        }
     }
 
-    private fun List<UiFormElement>.replaceCountryOrAppend(
-        replacement: UiFormElement,
-    ): List<UiFormElement> {
-        val countryIndex = indexOfFirst { it is UiFormElement.CountryOnly }
-        return if (countryIndex >= 0) {
-            mapIndexedNotNull { index, item ->
-                when {
-                    index == countryIndex -> replacement
-                    item is UiFormElement.CountryOnly -> null
-                    else -> item
-                }
-            }
-        } else {
-            this + replacement
-        }
+    private fun createTaxMinimumAddressFormElements(
+        allowedCountryCodes: Set<String>,
+    ): List<FormElement> {
+        return AutomaticTaxBillingAddressFactory(arguments).create(
+            allowedCountryCodes = allowedCountryCodes,
+        )
     }
 
-    private fun UiFormElement.createFormElements(): List<FormElement> {
-        return when (this) {
-            is UiFormElement.Existing -> listOf(formElement)
-            is UiFormElement.CountryOnly -> {
-                listOf(
-                    SectionElement.wrap(
-                        CountryElement(
-                            identifier = IdentifierSpec.Country,
-                            controller = DropdownFieldController(
-                                config = CountryConfig(allowedCountryCodes),
-                                initialValue = arguments.initialValues[IdentifierSpec.Country],
-                            ),
-                        )
-                    )
-                )
-            }
-            is UiFormElement.TaxMinimumAddress -> AutomaticTaxBillingAddressFactory(arguments).create(
-                allowedCountryCodes = allowedCountryCodes,
-            )
-            is UiFormElement.FullAddress -> AddressSpec(allowedCountryCodes = allowedCountryCodes).transform(
-                initialValues = arguments.initialValues,
-                shippingValues = arguments.shippingValues,
-                autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
-            )
-        }
-    }
-
-    private sealed interface UiFormElement {
-        data class Existing(
-            val formElement: FormElement,
-        ) : UiFormElement
-
-        data class CountryOnly(
-            val allowedCountryCodes: Set<String>,
-        ) : UiFormElement
-
-        data class TaxMinimumAddress(
-            val allowedCountryCodes: Set<String>,
-        ) : UiFormElement
-
-        data class FullAddress(
-            val allowedCountryCodes: Set<String>,
-        ) : UiFormElement
+    private fun createFullAddressFormElements(
+        allowedCountryCodes: Set<String>,
+    ): List<FormElement> {
+        return AddressSpec(allowedCountryCodes = allowedCountryCodes).transform(
+            initialValues = arguments.initialValues,
+            shippingValues = arguments.shippingValues,
+            autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
+        )
     }
 }

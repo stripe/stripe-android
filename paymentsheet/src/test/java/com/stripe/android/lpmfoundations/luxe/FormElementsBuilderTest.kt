@@ -30,6 +30,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class FormElementsBuilderTest {
@@ -319,7 +320,7 @@ class FormElementsBuilderTest {
     }
 
     @Test
-    fun `build replaces country-only source with one full address owner`() {
+    fun `build replaces country-only source with a full address`() {
         val formElements = formElementsBuilder(
             arguments = arguments(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -335,6 +336,46 @@ class FormElementsBuilderTest {
             "🇫🇷 France",
             "🇩🇪 Germany",
         ).inOrder()
+    }
+
+    @Test
+    fun `build inserts resolved country-only source at its declaration position`() {
+        val formElements = formElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(),
+                requiresBillingAddressForAutomaticTax = true,
+            )
+        ).element(
+            EmptyFormElement(identifier = IdentifierSpec.Generic("before"))
+        ).countryOnly(
+            allowedCountryCodes = setOf("US"),
+        ).element(
+            EmptyFormElement(identifier = IdentifierSpec.Generic("after"))
+        ).build()
+
+        assertThat(formElements.map { it.identifier.v1 }).containsExactly(
+            "before",
+            "billing_details[address]_section",
+            "after",
+        ).inOrder()
+    }
+
+    @Test
+    fun `country-only source cannot follow a normal address source`() {
+        assertFailsWith<IllegalStateException> {
+            formElementsBuilder(arguments())
+                .requireBillingAddressIfAllowed()
+                .countryOnly(allowedCountryCodes = setOf("US"))
+        }
+    }
+
+    @Test
+    fun `normal address source cannot follow a country-only source`() {
+        assertFailsWith<IllegalStateException> {
+            formElementsBuilder(arguments())
+                .countryOnly(allowedCountryCodes = setOf("US"))
+                .requireBillingAddressIfAllowed()
+        }
     }
 
     @Test

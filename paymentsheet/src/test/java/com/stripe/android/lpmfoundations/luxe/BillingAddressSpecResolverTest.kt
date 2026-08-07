@@ -17,7 +17,7 @@ import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 
-class AutomaticTaxBillingAddressResolverTest {
+class BillingAddressSpecResolverTest {
     @Test
     fun `resolve replaces country with any API path in place and preserves allowed countries`() {
         val countrySpec = CountrySpec(
@@ -119,7 +119,7 @@ class AutomaticTaxBillingAddressResolverTest {
     fun `resolve leaves country unchanged in Never`() {
         val countrySpec = CountrySpec(allowedCountryCodes = setOf("US"))
 
-        val result = AutomaticTaxBillingAddressResolver.resolve(
+        val result = BillingAddressSpecResolver.resolve(
             specs = listOf(countrySpec),
             addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             requiresBillingAddressForAutomaticTax = true,
@@ -133,7 +133,7 @@ class AutomaticTaxBillingAddressResolverTest {
     fun `resolve leaves country unchanged in tax-disabled Automatic`() {
         val countrySpec = CountrySpec(allowedCountryCodes = setOf("US"))
 
-        val result = AutomaticTaxBillingAddressResolver.resolve(
+        val result = BillingAddressSpecResolver.resolve(
             specs = listOf(countrySpec),
             addressCollectionMode =
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
@@ -146,7 +146,7 @@ class AutomaticTaxBillingAddressResolverTest {
 
     @Test
     fun `resolve replaces country with full address in Full`() {
-        val result = AutomaticTaxBillingAddressResolver.resolve(
+        val result = BillingAddressSpecResolver.resolve(
             specs = listOf(CountrySpec(allowedCountryCodes = setOf("DE", "FR"))),
             addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             requiresBillingAddressForAutomaticTax = false,
@@ -159,7 +159,7 @@ class AutomaticTaxBillingAddressResolverTest {
     private fun resolve(
         specs: List<FormItemSpec>,
     ): List<FormItemSpec> {
-        return AutomaticTaxBillingAddressResolver.resolve(
+        return BillingAddressSpecResolver.resolve(
             specs = specs,
             addressCollectionMode =
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,

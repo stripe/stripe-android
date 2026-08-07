@@ -2,7 +2,7 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.paymentsheet.PaymentSheet
 
-internal object BillingAddressResolver {
+internal object BillingAddressSourceResolver {
     sealed interface Source {
         data object Absent : Source
 
@@ -34,13 +34,13 @@ internal object BillingAddressResolver {
     }
 
     /**
-     * Selects the single billing-address owner before either adapter creates form elements.
+     * Selects one billing-country input before either adapter creates form elements.
      *
      * [source] describes the LPM's configured address input. [addressCollectionMode] and
      * [requiresBillingAddressForAutomaticTax] add merchant and billing-sourced tax requirements.
      * Country-only sources keep their allowlist when they are promoted. Normal addresses are
      * preserved, but Full or tax-minimum collection exposes a hidden country and removes a separate
-     * country owner. Missing sources remain missing unless Full or tax-minimum collection requires one.
+     * country input. Missing sources remain missing unless Full or tax-minimum collection requires one.
      */
     fun resolve(
         source: Source,

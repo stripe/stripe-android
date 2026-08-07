@@ -58,7 +58,7 @@ internal class TransformSpecToElements(
             specs = specs,
             termsDisplay = termsDisplay,
         )
-        val resolvedSpecs = AutomaticTaxBillingAddressResolver.resolve(
+        val resolvedSpecs = BillingAddressSpecResolver.resolve(
             specs = configuredSpecs,
             addressCollectionMode = arguments.billingDetailsCollectionConfiguration.address,
             requiresBillingAddressForAutomaticTax = arguments.requiresBillingAddressForAutomaticTax,
