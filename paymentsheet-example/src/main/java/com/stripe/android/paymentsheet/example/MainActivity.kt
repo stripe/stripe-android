@@ -76,14 +76,14 @@ class MainActivity : AppCompatActivity() {
                 },
             ),
             MenuItem(
-                titleResId = R.string.checkout_controller_oxxo_example_title,
-                subtitleResId = R.string.checkout_controller_oxxo_example_subtitle,
+                titleResId = R.string.checkout_controller_cash_app_example_title,
+                subtitleResId = R.string.checkout_controller_cash_app_example_subtitle,
                 klass = CheckoutControllerExampleActivity::class.java,
                 section = MenuItem.Section.Internal,
                 intentFactory = { context ->
                     CheckoutControllerExampleActivity.createIntent(
                         context = context,
-                        profile = CheckoutControllerExampleProfile.Oxxo,
+                        profile = CheckoutControllerExampleProfile.CashApp,
                     )
                 },
             ),

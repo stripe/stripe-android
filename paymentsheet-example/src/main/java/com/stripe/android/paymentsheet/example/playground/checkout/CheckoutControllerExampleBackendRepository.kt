@@ -69,15 +69,18 @@ internal class CheckoutControllerExampleBackendRepository(
 }
 
 internal enum class CheckoutControllerExampleProfile(
+    val displayName: String,
     val paymentMethodCode: String,
     val currency: String,
 ) {
     Klarna(
+        displayName = "Klarna",
         paymentMethodCode = "klarna",
         currency = "usd",
     ),
-    Oxxo(
-        paymentMethodCode = "oxxo",
-        currency = "mxn",
+    CashApp(
+        displayName = "Cash App Pay",
+        paymentMethodCode = "cashapp",
+        currency = "usd",
     ),
 }

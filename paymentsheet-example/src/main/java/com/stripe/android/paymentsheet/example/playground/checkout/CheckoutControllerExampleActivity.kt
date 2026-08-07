@@ -86,7 +86,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             val session = currentStatus.session
                             if (session != null) {
                                 Text(
-                                    text = "Manual profile: ${viewModel.profile.name}",
+                                    text = "Manual profile: ${viewModel.profile.displayName}",
                                     style = MaterialTheme.typography.body1,
                                 )
                                 Text(
