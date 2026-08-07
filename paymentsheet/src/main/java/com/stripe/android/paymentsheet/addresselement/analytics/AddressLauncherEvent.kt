@@ -64,6 +64,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         private val timeToFetch: Duration?,
         private val resultCount: Int,
         private val sessionElapsed: Duration?,
+        private val source: String?,
     ) : AddressLauncherEvent() {
         override val eventName: String = "mc_address_autocomplete_suggestions"
         override val additionalParams: Map<String, Any>
@@ -73,6 +74,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
                     FIELD_QUERY_LENGTH to queryLength,
                     FIELD_RESULT_COUNT to resultCount,
                 )
+                source?.let { data[FIELD_SOURCE] = it }
                 timeToFetch?.let { data[FIELD_TIME_TO_FETCH] = it.toDouble(DurationUnit.SECONDS) }
                 sessionElapsed?.let { data[FIELD_SESSION_ELAPSED] = it.toDouble(DurationUnit.SECONDS) }
                 return mapOf(FIELD_ADDRESS_DATA_BLOB to data)
@@ -82,7 +84,8 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
     class AutocompleteSelected(
         private val autocompleteSessionToken: String,
         private val queryLength: Int,
-        private val placeId: String,
+        private val placeId: String?,
+        private val source: String?,
         private val sessionElapsed: Duration?,
         private val timeToFetch: Duration?,
     ) : AddressLauncherEvent() {
@@ -92,8 +95,9 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
                 val data = mutableMapOf<String, Any>(
                     FIELD_AUTOCOMPLETE_SESSION_TOKEN to autocompleteSessionToken,
                     FIELD_QUERY_LENGTH to queryLength,
-                    FIELD_PLACE_ID to placeId,
                 )
+                placeId?.let { data[FIELD_PLACE_ID] = it }
+                source?.let { data[FIELD_SOURCE] = it }
                 sessionElapsed?.let { data[FIELD_SESSION_ELAPSED] = it.toDouble(DurationUnit.SECONDS) }
                 timeToFetch?.let { data[FIELD_TIME_TO_FETCH] = it.toDouble(DurationUnit.SECONDS) }
                 return mapOf(FIELD_ADDRESS_DATA_BLOB to data)
@@ -127,5 +131,6 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         const val FIELD_SESSION_ELAPSED = "session_elapsed"
         const val FIELD_QUERY_LENGTH = "query_length"
         const val FIELD_PLACE_ID = "place_id"
+        const val FIELD_SOURCE = "source"
     }
 }
