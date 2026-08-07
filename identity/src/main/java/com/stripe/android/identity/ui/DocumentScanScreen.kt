@@ -181,6 +181,7 @@ internal fun DocumentScanScreen(
                         identityViewModel.uploadManualResult(
                             bitmap = capturedFrame.image,
                             isFront = scanType.isFront(),
+                            isLiveMode = pageAndModelFiles.page.livemode,
                             docCapturePage = pageAndModelFiles.page.documentCapture,
                             uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
                             scanType = scanType

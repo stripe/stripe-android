@@ -62,6 +62,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
+import com.stripe.android.identity.utils.TestModeImage
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.FRONT
 import com.stripe.android.mlcore.base.InterpreterInitializer
@@ -81,6 +82,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.same
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -101,6 +103,7 @@ internal class IdentityViewModelTest {
         on { documentCapture }.thenReturn(DOCUMENT_CAPTURE)
         on { selfieCapture }.thenReturn(SELFIE_CAPTURE)
         on { requirements }.thenReturn(REQUIREMENTS_NO_MISSING)
+        on { livemode }.thenReturn(true)
     }
 
     private val mockIdentityRepository = mock<IdentityRepository> {
@@ -118,11 +121,21 @@ internal class IdentityViewModelTest {
     }
     private val mockIdentityIO = mock<IdentityIO> {
         on { resizeUriAndCreateFileToUpload(any(), any(), any(), any(), any(), any()) }.thenReturn(
-            File(IMAGE_FILE_NAME)
+            IMAGE_FILE
         )
 
         on { resizeBitmapAndCreateFileToUpload(any(), any(), any(), any(), any()) }.thenReturn(
-            File(IMAGE_FILE_NAME)
+            IMAGE_FILE
+        )
+
+        on { createTestModeFileToUpload(TestModeImage.DOCUMENT_FRONT) }.thenReturn(
+            TEST_MODE_DOCUMENT_FRONT_FILE
+        )
+        on { createTestModeFileToUpload(TestModeImage.DOCUMENT_BACK) }.thenReturn(
+            TEST_MODE_DOCUMENT_BACK_FILE
+        )
+        on { createTestModeFileToUpload(TestModeImage.SELFIE) }.thenReturn(
+            TEST_MODE_SELFIE_FILE
         )
 
         on { cropAndPadBitmap(any(), any(), any()) }.thenReturn(
@@ -209,6 +222,52 @@ internal class IdentityViewModelTest {
     }
 
     @Test
+    fun `uploadManualResult test mode front uploads placeholder image`() = runBlocking<Unit> {
+        mockUploadSuccess()
+
+        viewModel.uploadManualResult(
+            uri = mock(),
+            isFront = true,
+            isLiveMode = false,
+            docCapturePage = DOCUMENT_CAPTURE,
+            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+            scanType = IdentityScanState.ScanType.DOC_FRONT
+        )
+
+        verify(mockIdentityIO).createTestModeFileToUpload(TestModeImage.DOCUMENT_FRONT)
+        verify(mockIdentityRepository).uploadImage(
+            eq(VERIFICATION_SESSION_ID),
+            eq(EPHEMERAL_KEY),
+            same(TEST_MODE_DOCUMENT_FRONT_FILE),
+            any(),
+            any()
+        )
+    }
+
+    @Test
+    fun `uploadManualResult test mode back uploads placeholder image`() = runBlocking<Unit> {
+        mockUploadSuccess()
+
+        viewModel.uploadManualResult(
+            uri = mock(),
+            isFront = false,
+            isLiveMode = false,
+            docCapturePage = DOCUMENT_CAPTURE,
+            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+            scanType = IdentityScanState.ScanType.DOC_BACK
+        )
+
+        verify(mockIdentityIO).createTestModeFileToUpload(TestModeImage.DOCUMENT_BACK)
+        verify(mockIdentityRepository).uploadImage(
+            eq(VERIFICATION_SESSION_ID),
+            eq(EPHEMERAL_KEY),
+            same(TEST_MODE_DOCUMENT_BACK_FILE),
+            any(),
+            any()
+        )
+    }
+
+    @Test
     fun `uploadManualResult front failure notifies _documentUploadedState`() {
         testUploadManualFailureResult(true)
     }
@@ -253,6 +312,29 @@ internal class IdentityViewModelTest {
                 testUploadSelfieScanSuccessResult(selfie, isHighRes)
             }
         }
+    }
+
+    @Test
+    fun `uploadScanResult test mode selfie uploads placeholder image`() = runBlocking<Unit> {
+        mockUploadSuccess()
+        val testModeVerificationPage = mock<VerificationPage> {
+            on { selfieCapture }.thenReturn(SELFIE_CAPTURE)
+            on { livemode }.thenReturn(false)
+        }
+
+        viewModel.uploadScanResult(
+            FINAL_FACE_DETECTOR_RESULT,
+            testModeVerificationPage
+        )
+
+        verify(mockIdentityIO, times(6)).createTestModeFileToUpload(TestModeImage.SELFIE)
+        verify(mockIdentityRepository, times(6)).uploadImage(
+            eq(VERIFICATION_SESSION_ID),
+            eq(EPHEMERAL_KEY),
+            same(TEST_MODE_SELFIE_FILE),
+            any(),
+            any()
+        )
     }
 
     @Test
@@ -980,6 +1062,7 @@ internal class IdentityViewModelTest {
         viewModel.uploadManualResult(
             mockUri,
             isFront,
+            true,
             DOCUMENT_CAPTURE,
             DocumentUploadParam.UploadMethod.FILEUPLOAD,
             IdentityScanState.ScanType.DOC_FRONT
@@ -992,6 +1075,14 @@ internal class IdentityViewModelTest {
             eq(if (isFront) FRONT else BACK),
             eq(HIGH_RES_IMAGE_MAX_DIMENSION),
             eq(HIGH_RES_COMPRESSION_QUALITY)
+        )
+        verify(mockIdentityIO, never()).createTestModeFileToUpload(any())
+        verify(mockIdentityRepository).uploadImage(
+            eq(VERIFICATION_SESSION_ID),
+            eq(EPHEMERAL_KEY),
+            same(IMAGE_FILE),
+            any(),
+            any()
         )
 
         verify(mockIdentityAnalyticsRequestFactory).imageUpload(
@@ -1107,6 +1198,7 @@ internal class IdentityViewModelTest {
         viewModel.uploadManualResult(
             bitmap,
             isFront,
+            true,
             DOCUMENT_CAPTURE,
             DocumentUploadParam.UploadMethod.MANUALCAPTURE,
             if (isFront) {
@@ -1223,6 +1315,7 @@ internal class IdentityViewModelTest {
         viewModel.uploadManualResult(
             mock<Uri>(),
             isFront,
+            true,
             DOCUMENT_CAPTURE,
             DocumentUploadParam.UploadMethod.FILEUPLOAD,
             IdentityScanState.ScanType.DOC_FRONT
@@ -1288,6 +1381,10 @@ internal class IdentityViewModelTest {
         const val EPHEMERAL_KEY = "eak_5678"
         val BRAND_LOGO = mock<Uri>()
         const val IMAGE_FILE_NAME = "fileName"
+        val IMAGE_FILE = File(IMAGE_FILE_NAME)
+        val TEST_MODE_DOCUMENT_FRONT_FILE = File("stripe_identity_test_mode_document_front.png")
+        val TEST_MODE_DOCUMENT_BACK_FILE = File("stripe_identity_test_mode_document_back.png")
+        val TEST_MODE_SELFIE_FILE = File("stripe_identity_test_mode_selfie.png")
         const val HIGH_RES_IMAGE_MAX_DIMENSION = 512
         const val HIGH_RES_COMPRESSION_QUALITY = 0.9f
         const val LOW_RES_IMAGE_MAX_DIMENSION = 256
