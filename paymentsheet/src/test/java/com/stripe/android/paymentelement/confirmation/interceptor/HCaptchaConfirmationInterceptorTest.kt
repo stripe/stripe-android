@@ -91,6 +91,7 @@ class HCaptchaConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             intent = SetupIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = null,
                 confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
@@ -134,6 +135,7 @@ class HCaptchaConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = null,
                 confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),

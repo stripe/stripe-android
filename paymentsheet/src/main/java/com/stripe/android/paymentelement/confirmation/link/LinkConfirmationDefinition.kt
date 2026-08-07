@@ -85,6 +85,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
             is LinkActivityResult.PaymentMethodObtained -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = result.paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,

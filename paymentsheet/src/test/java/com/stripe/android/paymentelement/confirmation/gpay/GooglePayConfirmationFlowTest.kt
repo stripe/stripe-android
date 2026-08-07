@@ -111,6 +111,7 @@ class GooglePayConfirmationFlowTest {
         launcherArgs = EmptyConfirmationLauncherArgs,
         definitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = true,

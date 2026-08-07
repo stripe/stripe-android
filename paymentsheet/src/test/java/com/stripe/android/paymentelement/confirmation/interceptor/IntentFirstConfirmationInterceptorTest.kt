@@ -32,6 +32,7 @@ class IntentFirstConfirmationInterceptorTest {
             val nextStep = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),
@@ -75,6 +76,7 @@ class IntentFirstConfirmationInterceptorTest {
             val nextStep = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
@@ -243,6 +245,7 @@ class IntentFirstConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 confirmationChallengeState = challengeState,
@@ -264,6 +267,7 @@ class IntentFirstConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             intent = SetupIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 confirmationChallengeState = challengeState,

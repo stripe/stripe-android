@@ -440,6 +440,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
 
         val SAVED_PM_OPTION = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
         )

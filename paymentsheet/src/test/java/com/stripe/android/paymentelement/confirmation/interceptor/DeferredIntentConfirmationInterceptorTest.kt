@@ -315,6 +315,7 @@ class DeferredIntentConfirmationInterceptorTest {
             interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = paymentMethod,
                     optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
@@ -456,6 +457,7 @@ class DeferredIntentConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = null,
                 confirmationChallengeState = challengeState,

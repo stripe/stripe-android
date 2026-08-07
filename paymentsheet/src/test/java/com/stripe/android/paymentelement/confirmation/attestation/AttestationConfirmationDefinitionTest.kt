@@ -656,6 +656,7 @@ internal class AttestationConfirmationDefinitionTest {
         )
 
         private val PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PAYMENT_INTENT.paymentMethod!!,
             optionsParams = null,
             originatedFromWallet = false,

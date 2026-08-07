@@ -19,8 +19,10 @@ import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLaunch
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -135,6 +137,7 @@ class GooglePayConfirmationDefinitionTest {
             launcherArgs = EmptyConfirmationLauncherArgs,
             result = GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = paymentMethod,
+                shippingInformation = SHIPPING_INFORMATION,
             ),
         )
 
@@ -150,6 +153,7 @@ class GooglePayConfirmationDefinitionTest {
 
         assertThat(savedOption.paymentMethod).isEqualTo(savedOption.paymentMethod)
         assertThat(savedOption.optionsParams).isNull()
+        assertThat(savedOption.shippingInformation).isEqualTo(SHIPPING_INFORMATION)
         assertThat(savedOption.originatedFromWallet).isTrue()
     }
 
@@ -813,5 +817,17 @@ class GooglePayConfirmationDefinitionTest {
 
         private val CONFIRMATION_PARAMETERS =
             com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
+
+        private val SHIPPING_INFORMATION = ShippingInformation(
+            name = "Jenny Rosen",
+            phone = "1-800-555-1234",
+            address = Address(
+                line1 = "510 Townsend St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US",
+            ),
+        )
     }
 }
