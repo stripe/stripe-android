@@ -12,7 +12,7 @@ internal class FakeTapToAddConnectionStarter private constructor(
     override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean = isSupportedValue
 
     override fun start(config: CommonConfiguration, publishableKey: String, isLiveMode: Boolean) {
-        startCalls.add(StartCall(config))
+        startCalls.add(StartCall(config, "pk_123"))
     }
 
     fun ensureAllEventsConsumed() {
