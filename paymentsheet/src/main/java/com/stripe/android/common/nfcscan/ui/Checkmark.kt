@@ -1,5 +1,6 @@
 package com.stripe.android.common.nfcscan.ui
 
+import android.os.Parcelable
 import android.os.SystemClock
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
@@ -9,13 +10,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -52,32 +53,32 @@ internal fun Checkmark(
         }
 
         CheckmarkCanvas(
-            progress = CHECKMARK_STATIC_PROGRESS,
-            modifier = modifier.checkmarkSemantics(progress = CHECKMARK_STATIC_PROGRESS),
+            progress = CHECKMARK_MAX_PROGRESS,
+            modifier = modifier,
         )
 
         return
     }
 
-    var savedState by rememberSaveable(stateSaver = CheckmarkSavedStateSaver) {
-        mutableStateOf(CheckmarkSavedState())
+    val savedState = rememberSaveable {
+        mutableStateOf<CheckmarkState>(CheckmarkState.Progressing(CHECKMARK_MIN_PROGRESS))
     }
 
-    val progress = remember { Animatable(savedState.progress) }
-
-    LaunchedEffect(Unit) {
-        runCheckmarkEffect(
-            progress = progress,
+    val animationManager = remember {
+        CheckmarkAnimationManager(
+            delayDuration = completionEventDelay,
             savedState = savedState,
-            completionEventDelay = completionEventDelay,
-            onSavedStateChange = { savedState = it },
-            onAnimationComplete = { onAnimationComplete() },
+            onComplete = onAnimationComplete,
         )
     }
 
+    LaunchedEffect(Unit) {
+        animationManager.run()
+    }
+
     CheckmarkCanvas(
-        progress = progress.value,
-        modifier = modifier.checkmarkSemantics(progress = progress.value),
+        progress = animationManager.progress.value,
+        modifier = modifier,
     )
 }
 
@@ -88,7 +89,7 @@ private fun CheckmarkCanvas(
 ) {
     val color = PrimaryButtonTheme.colors.onBackground
 
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+    Box(modifier = modifier.checkmarkSemantics(progress = progress), contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.size(48.dp)) {
             val canvasWidth = size.width
 
@@ -103,7 +104,7 @@ private fun CheckmarkCanvas(
 
             measure.getSegment(
                 startDistance = 0f,
-                stopDistance = measure.length * progress.coerceIn(0f, 1f),
+                stopDistance = measure.length * progress.coerceIn(CHECKMARK_MIN_PROGRESS, CHECKMARK_MAX_PROGRESS),
                 destination = drawn,
                 startWithMoveTo = true,
             )
@@ -121,132 +122,100 @@ private fun CheckmarkCanvas(
     }
 }
 
-private fun Modifier.checkmarkSemantics(progress: Float): Modifier {
-    return testTag(CHECKMARK_TEST_TAG)
-        .semantics {
-            checkmarkProgress = CheckmarkProgress(progress = progress)
-        }
-}
-
-private suspend fun runCheckmarkEffect(
-    progress: Animatable<Float, *>,
-    savedState: CheckmarkSavedState,
-    completionEventDelay: Duration,
-    onSavedStateChange: (CheckmarkSavedState) -> Unit,
-    onAnimationComplete: () -> Unit,
+private class CheckmarkAnimationManager(
+    private val delayDuration: Duration,
+    private val savedState: MutableState<CheckmarkState>,
+    private val onComplete: () -> Unit,
 ) {
-    if (savedState.completionEventFired) {
-        progress.snapTo(1f)
-        return
+    val progress = when (val currentState = savedState.value) {
+        is CheckmarkState.Progressing -> Animatable(
+            initialValue = currentState.progress.coerceIn(CHECKMARK_MIN_PROGRESS, CHECKMARK_MAX_PROGRESS),
+        )
+        is CheckmarkState.Showing,
+        is CheckmarkState.Complete -> Animatable(initialValue = CHECKMARK_MAX_PROGRESS)
     }
 
-    progress.snapTo(savedState.progress)
+    suspend fun run() {
+        if (getState() is CheckmarkState.Complete) {
+            return
+        }
 
-    var currentSavedState = savedState
+        if (getState() is CheckmarkState.Progressing) {
+            progress()
+        }
 
-    coroutineScope {
+        val currentState = getState()
+
+        if (currentState is CheckmarkState.Showing) {
+            delayBeforeCompletion(currentState)
+        }
+
+        onComplete()
+    }
+
+    private suspend fun progress() = coroutineScope {
         val progressSaver = launch {
-            snapshotFlow { progress.value }
-                .collect { value ->
-                    currentSavedState = currentSavedState.withProgress(value)
-                    onSavedStateChange(currentSavedState)
-                }
+            snapshotFlow { progress.value }.collect { value ->
+                savedState.value = CheckmarkState.Progressing(value)
+            }
         }
 
         try {
-            if (!currentSavedState.animationComplete) {
-                if (progress.value < 1f) {
-                    progress.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(
-                            durationMillis = CHECKMARK_DRAW_DURATION_MS,
-                            easing = CheckmarkDrawEasing,
-                        ),
-                    )
-                }
-                currentSavedState = currentSavedState.markedAnimationComplete()
-                onSavedStateChange(currentSavedState)
+            if (progress.value < CHECKMARK_MAX_PROGRESS) {
+                progress.animateTo(
+                    targetValue = CHECKMARK_MAX_PROGRESS,
+                    animationSpec = tween(
+                        durationMillis = CHECKMARK_DRAW_DURATION_MS,
+                        easing = CheckmarkDrawEasing,
+                    ),
+                )
             }
+
+            savedState.value = CheckmarkState.Showing(startedAt = SystemClock.elapsedRealtime())
         } finally {
             progressSaver.cancel()
         }
     }
 
-    delayRemainingSuccessTime(
-        delayDuration = completionEventDelay.inWholeMilliseconds,
-        successDelayStartMs = currentSavedState.completionDelayStartMs,
-    )
-    onSavedStateChange(currentSavedState.copy(completionEventFired = true))
-    onAnimationComplete()
+    private suspend fun delayBeforeCompletion(state: CheckmarkState.Showing) {
+        if (state.startedAt < 0L) {
+            return
+        }
+
+        val remainingMs = delayDuration.inWholeMilliseconds - (SystemClock.elapsedRealtime() - state.startedAt)
+
+        if (remainingMs > 0L) {
+            delay(remainingMs.milliseconds)
+        }
+
+        savedState.value = CheckmarkState.Complete
+    }
+
+    private fun getState() = savedState.value
 }
 
-private suspend fun delayRemainingSuccessTime(
-    delayDuration: Long,
-    successDelayStartMs: Long,
-) {
-    if (successDelayStartMs < 0L) {
-        return
-    }
+private sealed interface CheckmarkState : Parcelable {
+    @Parcelize
+    data class Progressing(val progress: Float) : CheckmarkState
 
-    val remainingMs = delayDuration -
-        (SystemClock.elapsedRealtime() - successDelayStartMs)
+    @Parcelize
+    data class Showing(val startedAt: Long) : CheckmarkState
 
-    if (remainingMs > 0L) {
-        delay(remainingMs.milliseconds)
-    }
+    @Parcelize
+    data object Complete : CheckmarkState
 }
 
-internal data class CheckmarkProgress(
-    val progress: Float = 0f,
-)
-
-private data class CheckmarkSavedState(
-    val progress: Float = 0f,
-    val animationComplete: Boolean = false,
-    val completionEventFired: Boolean = false,
-    val completionDelayStartMs: Long = UNSET_COMPLETION_DELAY_START_MS,
-) {
-    fun withProgress(progress: Float): CheckmarkSavedState {
-        return copy(progress = progress)
-    }
-
-    fun markedAnimationComplete(
-        nowMs: Long = SystemClock.elapsedRealtime(),
-    ): CheckmarkSavedState {
-        return copy(
-            progress = 1f,
-            animationComplete = true,
-            completionDelayStartMs = completionDelayStartMs.takeIf { it >= 0L }
-                ?: nowMs,
-        )
-    }
+private fun Modifier.checkmarkSemantics(progress: Float): Modifier {
+    return testTag(CHECKMARK_TEST_TAG)
+        .semantics {
+            checkmarkProgress = progress
+        }
 }
-
-private val CheckmarkSavedStateSaver = listSaver(
-    save = { state ->
-        listOf(
-            state.progress,
-            state.animationComplete,
-            state.completionEventFired,
-            state.completionDelayStartMs,
-        )
-    },
-    restore = { saved ->
-        CheckmarkSavedState(
-            progress = saved[0] as? Float ?: 0f,
-            animationComplete = saved[1] as? Boolean ?: false,
-            completionEventFired = saved[2] as? Boolean ?: false,
-            completionDelayStartMs = saved[3] as? Long ?: UNSET_COMPLETION_DELAY_START_MS,
-        )
-    },
-)
-
-private const val UNSET_COMPLETION_DELAY_START_MS = -1L
 
 internal const val CHECKMARK_TEST_TAG = "nfc_checkmark"
 internal const val CHECKMARK_DRAW_DURATION_MS = 450
 
-internal val CheckmarkProgressKey = SemanticsPropertyKey<CheckmarkProgress>(
+internal val CheckmarkProgressKey = SemanticsPropertyKey<Float>(
     name = "CheckmarkProgress",
     mergePolicy = { _, new -> new },
 )
@@ -260,6 +229,8 @@ private const val CHECKMARK_MIDDLE_Y_FRACTION = 0.72f
 private const val CHECKMARK_END_X_FRACTION = 0.8f
 private const val CHECKMARK_END_Y_FRACTION = 0.28f
 private const val CHECKMARK_STROKE_WIDTH_FRACTION = 5f / 48f
-private const val CHECKMARK_STATIC_PROGRESS = 1f
+
+private const val CHECKMARK_MAX_PROGRESS = 1f
+private const val CHECKMARK_MIN_PROGRESS = 0f
 
 private val CheckmarkDrawEasing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
