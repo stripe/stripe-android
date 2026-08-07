@@ -2,11 +2,14 @@
 
 package com.stripe.android.checkout
 
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
@@ -17,16 +20,24 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val sheetStateHolder: SheetStateHolder,
     private val resultCallback: CheckoutController.ResultCallback,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     private val admissionLock = Any()
     private var pendingMutations = 0
-    private var confirmationInFlight = confirmationHandler.hasReloadedFromProcessDeath ||
+    private val confirmationRestored = confirmationHandler.hasReloadedFromProcessDeath ||
         confirmationHandler.state.value is ConfirmationHandler.State.Confirming
-    private var confirmationCompletionClaimed = false
-    private val mutex = Mutex(locked = confirmationInFlight)
+    private var nextConfirmationId = if (confirmationRestored) 1L else 0L
+    private var activeConfirmationId: Long? = if (confirmationRestored) 0L else null
+    private val mutex = Mutex(locked = activeConfirmationId != null)
 
-    private val _isUpdating = MutableStateFlow(confirmationInFlight)
+    private val _isUpdating = MutableStateFlow(activeConfirmationId != null)
     val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            observeConfirmationResults()
+        }
+    }
 
     suspend fun <T> runMutation(
         block: suspend () -> Result<T>,
@@ -53,7 +64,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     ): Result<T> {
         return synchronized(admissionLock) {
             when {
-                confirmationInFlight -> Result.failure(
+                activeConfirmationId != null -> Result.failure(
                     IllegalStateException("Cannot mutate checkout session while confirmation is in progress.")
                 )
                 pendingMutations > 0 -> Result.failure(
@@ -75,82 +86,81 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 
     fun tryBeginConfirmation(
         arguments: () -> ConfirmationHandler.Args?,
-    ): ConfirmationHandler.Args? {
-        val admission = synchronized(admissionLock) {
-            when {
-                sheetStateHolder.sheetIsOpen -> ConfirmationAdmission.Rejected(
-                    IllegalStateException("Cannot confirm checkout session while a payment flow is presented.")
-                )
-                pendingMutations > 0 || confirmationInFlight -> ConfirmationAdmission.Rejected(
-                    IllegalStateException("Cannot confirm checkout session while another mutation is in progress.")
-                )
-                else -> {
-                    val confirmationArguments = arguments()
-                        ?: return@synchronized ConfirmationAdmission.NoArguments
-                    check(mutex.tryLock()) {
-                        "Checkout operation gate should be available after confirmation admission."
-                    }
-                    confirmationInFlight = true
-                    updateIsUpdating()
-                    ConfirmationAdmission.Accepted(confirmationArguments)
-                }
+    ): ConfirmationOperation? {
+        return synchronized(admissionLock) {
+            if (
+                sheetStateHolder.sheetIsOpen ||
+                pendingMutations > 0 ||
+                activeConfirmationId != null ||
+                confirmationHandler.state.value is ConfirmationHandler.State.Confirming
+            ) {
+                return@synchronized null
             }
-        }
-
-        return when (admission) {
-            is ConfirmationAdmission.Accepted -> admission.arguments
-            is ConfirmationAdmission.Rejected -> {
-                resultCallback.onResult(CheckoutController.Result.Failed(admission.error))
-                null
+            val confirmationArguments = arguments() ?: return@synchronized null
+            check(mutex.tryLock()) {
+                "Checkout operation gate should be available after confirmation admission."
             }
-            is ConfirmationAdmission.NoArguments -> null
+            val operation = ConfirmationOperation(
+                id = nextConfirmationId++,
+                arguments = confirmationArguments,
+            )
+            activeConfirmationId = operation.id
+            updateIsUpdating()
+            operation
         }
     }
 
-    suspend fun observeConfirmationResults() {
+    fun failConfirmation(
+        operation: ConfirmationOperation,
+        error: Throwable,
+    ) {
+        completeConfirmation(
+            result = CheckoutController.Result.Failed(error),
+            expectedConfirmationId = operation.id,
+        )
+    }
+
+    private suspend fun observeConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                completeConfirmation(state.result.asCheckoutResult())
+                completeConfirmation(
+                    result = state.result.asCheckoutResult(),
+                    expectedConfirmationId = null,
+                )
             }
         }
     }
 
-    fun failConfirmation(error: Throwable) {
-        completeConfirmation(CheckoutController.Result.Failed(error))
-    }
-
-    private fun completeConfirmation(result: CheckoutController.Result) {
+    private fun completeConfirmation(
+        result: CheckoutController.Result,
+        expectedConfirmationId: Long?,
+    ) {
         val shouldComplete = synchronized(admissionLock) {
-            if (!confirmationInFlight || confirmationCompletionClaimed) {
+            val activeId = activeConfirmationId
+            val completionIsStale = expectedConfirmationId != null && expectedConfirmationId != activeId
+            if (activeId == null || completionIsStale) {
                 false
             } else {
-                confirmationCompletionClaimed = true
+                activeConfirmationId = null
+                mutex.unlock()
+                updateIsUpdating()
                 true
             }
         }
         if (!shouldComplete) return
 
-        try {
-            resultCallback.onResult(result)
-        } finally {
-            synchronized(admissionLock) {
-                confirmationInFlight = false
-                confirmationCompletionClaimed = false
-                mutex.unlock()
-                updateIsUpdating()
-            }
-        }
+        // The completed operation no longer owns the gate, so the callback may synchronously start another one.
+        resultCallback.onResult(result)
     }
 
     private fun updateIsUpdating() {
-        _isUpdating.value = confirmationInFlight || pendingMutations > 0
+        _isUpdating.value = activeConfirmationId != null || pendingMutations > 0
     }
 
-    private sealed interface ConfirmationAdmission {
-        data class Accepted(val arguments: ConfirmationHandler.Args) : ConfirmationAdmission
-        data class Rejected(val error: Throwable) : ConfirmationAdmission
-        data object NoArguments : ConfirmationAdmission
-    }
+    internal class ConfirmationOperation(
+        internal val id: Long,
+        internal val arguments: ConfirmationHandler.Args,
+    )
 }
 
 private fun ConfirmationHandler.Result.asCheckoutResult(): CheckoutController.Result {

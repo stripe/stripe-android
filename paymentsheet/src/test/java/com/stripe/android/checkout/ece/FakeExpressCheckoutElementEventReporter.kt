@@ -3,7 +3,9 @@ package com.stripe.android.checkout.ece
 import app.cash.turbine.Turbine
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 
-internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementEventReporter {
+internal class FakeExpressCheckoutElementEventReporter(
+    private val paymentSuccessError: Throwable? = null,
+) : ExpressCheckoutElementEventReporter {
     val calls = Turbine<Call>()
 
     override fun onEceDisplayed() {
@@ -16,6 +18,7 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
 
     override fun onEcePaymentSuccess(expressButton: ExpressButton) {
         calls.add(Call.OnEcePaymentSuccess(expressButton))
+        paymentSuccessError?.let { throw it }
     }
 
     override fun onEcePaymentFailure(
