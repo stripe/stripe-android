@@ -12,12 +12,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.crypto.onramp.example.SEAMLESS_SIGN_IN_NOT_ME_BUTTON_TAG
 import android.R as AndroidR
 
 @Composable
@@ -60,7 +62,9 @@ internal fun SeamlessSignInScreen(
 
         Button(
             onClick = onNotMe,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .testTag(SEAMLESS_SIGN_IN_NOT_ME_BUTTON_TAG)
+                .fillMaxWidth()
         ) {
             Text("Not me")
         }

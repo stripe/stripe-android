@@ -13,8 +13,16 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.crypto.onramp.example.IDENTIFIER_SECTION_TAG
+import com.stripe.android.crypto.onramp.example.IDENTIFIER_TYPE_TAG
+import com.stripe.android.crypto.onramp.example.IDENTIFIER_VALUE_TAG
+import com.stripe.android.crypto.onramp.example.MISSING_IDENTIFIERS_SUMMARY_TAG
+import com.stripe.android.crypto.onramp.example.RETRIEVE_MISSING_IDENTIFIERS_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.SUBMIT_IDENTIFIERS_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.SUBMIT_IDENTIFIERS_SUMMARY_TAG
 import com.stripe.android.crypto.onramp.example.model.IdentifierInputEntry
 
 @Composable
@@ -33,6 +41,7 @@ internal fun IdentifierSection(
 ) {
     Row(
         modifier = Modifier
+            .testTag(IDENTIFIER_SECTION_TAG)
             .fillMaxWidth()
             .clickable { onExpandedChange(!isExpanded) }
             .padding(vertical = 20.dp),
@@ -89,6 +98,7 @@ private fun IdentifierInfoScreen(
         Button(
             onClick = onRetrieveMissingIdentifiers,
             modifier = Modifier
+                .testTag(RETRIEVE_MISSING_IDENTIFIERS_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
         ) {
@@ -98,7 +108,9 @@ private fun IdentifierInfoScreen(
         missingIdentifiersSummary?.let { summary ->
             Text(
                 text = "Latest response:\n$summary",
-                modifier = Modifier.padding(bottom = 20.dp)
+                modifier = Modifier
+                    .testTag(MISSING_IDENTIFIERS_SUMMARY_TAG)
+                    .padding(bottom = 20.dp)
             )
         }
 
@@ -122,11 +134,17 @@ private fun IdentifierInfoScreen(
             KycTextField(
                 value = identifierInput.type,
                 label = "Identifier Type (e.g. mt_nic)",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("$IDENTIFIER_TYPE_TAG-$index"),
                 onChange = { onIdentifierTypeChange(index, it) }
             )
             KycTextField(
                 value = identifierInput.value,
                 label = "Identifier Value",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("$IDENTIFIER_VALUE_TAG-$index"),
                 onChange = { onIdentifierValueChange(index, it) }
             )
             TextButton(
@@ -149,6 +167,7 @@ private fun IdentifierInfoScreen(
         Button(
             onClick = onSubmitIdentifiers,
             modifier = Modifier
+                .testTag(SUBMIT_IDENTIFIERS_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
         ) {
@@ -158,7 +177,9 @@ private fun IdentifierInfoScreen(
         submitIdentifiersSummary?.let { summary ->
             Text(
                 text = "Latest submission result:\n$summary",
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier
+                    .testTag(SUBMIT_IDENTIFIERS_SUMMARY_TAG)
+                    .padding(bottom = 24.dp)
             )
         }
     }
