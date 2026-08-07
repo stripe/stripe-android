@@ -19,7 +19,7 @@ data class MandateTextSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("mandate"),
     @StringRes
     val stringResId: Int
-) : FormItemSpec() {
+) : FormItemSpec(), MandateSpec {
 
     fun transform(vararg args: String): FormElement {
         return MandateTextElement(

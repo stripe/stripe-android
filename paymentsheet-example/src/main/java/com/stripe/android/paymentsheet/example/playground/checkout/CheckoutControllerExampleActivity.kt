@@ -2,6 +2,8 @@
 
 package com.stripe.android.paymentsheet.example.playground.checkout
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -33,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.checkout.CheckoutPresenter
+import com.stripe.android.checkout.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
@@ -49,13 +53,23 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         val presenter = viewModel.controller.createPresenter(this)
         val paymentElement = presenter.paymentElement()
 
+        observeCompletedSession()
+        showCheckoutContent(presenter, paymentElement)
+    }
+
+    private fun observeCompletedSession() {
         lifecycleScope.launch {
             viewModel.sessionComplete.collect {
                 Toast.makeText(this@CheckoutControllerExampleActivity, "Payment complete!", Toast.LENGTH_LONG).show()
                 finish()
             }
         }
+    }
 
+    private fun showCheckoutContent(
+        presenter: CheckoutPresenter,
+        paymentElement: PaymentElement,
+    ) {
         setContent {
             val status by viewModel.status.collectAsState()
 
@@ -71,6 +85,14 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                         is CheckoutControllerExampleViewModel.Status.Configured -> {
                             val session = currentStatus.session
                             if (session != null) {
+                                Text(
+                                    text = "Manual profile: ${viewModel.profile.displayName}",
+                                    style = MaterialTheme.typography.body1,
+                                )
+                                Text(
+                                    text = "Tax status: ${session.tax.status}",
+                                    style = MaterialTheme.typography.body1,
+                                )
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
                                 if (session.isExpressCheckoutElementAvailable) {
@@ -101,6 +123,18 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                     }
                 },
             )
+        }
+    }
+
+    companion object {
+        const val PROFILE_EXTRA = "checkout_controller_profile"
+
+        fun createIntent(
+            context: Context,
+            profile: CheckoutControllerExampleProfile,
+        ): Intent {
+            return Intent(context, CheckoutControllerExampleActivity::class.java)
+                .putExtra(PROFILE_EXTRA, profile.name)
         }
     }
 }

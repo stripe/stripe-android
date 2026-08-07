@@ -22,7 +22,7 @@ data class SepaMandateTextSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("sepa_mandate"),
     @StringRes
     val stringResId: Int = R.string.stripe_sepa_mandate
-) : FormItemSpec() {
+) : FormItemSpec(), MandateSpec {
     @IgnoredOnParcel
     @Transient
     private val mandateTextSpec = MandateTextSpec(apiPath, stringResId)

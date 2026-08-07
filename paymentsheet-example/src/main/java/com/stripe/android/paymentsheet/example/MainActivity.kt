@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -34,6 +35,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleActivity
+import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleProfile
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
@@ -66,6 +68,24 @@ class MainActivity : AppCompatActivity() {
                 subtitleResId = R.string.checkout_controller_example_subtitle,
                 klass = CheckoutControllerExampleActivity::class.java,
                 section = MenuItem.Section.Internal,
+                intentFactory = { context ->
+                    CheckoutControllerExampleActivity.createIntent(
+                        context = context,
+                        profile = CheckoutControllerExampleProfile.Klarna,
+                    )
+                },
+            ),
+            MenuItem(
+                titleResId = R.string.checkout_controller_cash_app_example_title,
+                subtitleResId = R.string.checkout_controller_cash_app_example_subtitle,
+                klass = CheckoutControllerExampleActivity::class.java,
+                section = MenuItem.Section.Internal,
+                intentFactory = { context ->
+                    CheckoutControllerExampleActivity.createIntent(
+                        context = context,
+                        profile = CheckoutControllerExampleProfile.CashApp,
+                    )
+                },
             ),
             MenuItem(
                 titleResId = R.string.paymentsheet_title,
@@ -138,6 +158,7 @@ private data class MenuItem(
     val klass: Class<out ComponentActivity>,
     val badge: Badge? = null,
     val section: Section,
+    val intentFactory: ((Context) -> Intent)? = null,
 ) {
     data class Badge(
         val labelResId: Int,
@@ -238,7 +259,11 @@ private fun MenuItemRow(item: MenuItem) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { context.startActivity(Intent(context, item.klass)) }
+            .clickable {
+                context.startActivity(
+                    item.intentFactory?.invoke(context) ?: Intent(context, item.klass)
+                )
+            }
             .padding(16.dp),
     ) {
         Text(
