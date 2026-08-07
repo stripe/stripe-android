@@ -2755,6 +2755,7 @@ internal class StripeApiRepositoryTest {
         val params = requireNotNull(request.params)
 
         with(params) {
+            assertThat(this["use_stripe_sdk"]).isEqualTo(true)
             withNestedParams("payment_method_options") {
                 withNestedParams("card") {
                     assertThat(this["moto"]).isEqualTo(true)
@@ -2792,6 +2793,7 @@ internal class StripeApiRepositoryTest {
         val params = requireNotNull(request.params)
 
         with(params) {
+            assertThat(this["use_stripe_sdk"]).isEqualTo(true)
             withNestedParams("payment_method_options") {
                 withNestedParams("card") {
                     assertThat(this["moto"]).isEqualTo(true)
