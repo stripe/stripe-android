@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
@@ -91,7 +90,6 @@ constructor(
         mandateData: MandateDataParams? = this.mandateData,
         setAsDefaultPaymentMethod: Boolean? = this.setAsDefaultPaymentMethod,
         paymentMethodCode: PaymentMethodCode? = this.paymentMethodCode,
-        paymentMethodOptions: PaymentMethodOptionsParams? = this.paymentMethodOptions,
         radarOptions: RadarOptions? = this.radarOptions,
         clientAttributionMetadata: ClientAttributionMetadata? = this.clientAttributionMetadata,
         confirmationTokenId: String? = this.confirmationTokenId,
@@ -106,7 +104,6 @@ constructor(
             mandateData = mandateData,
             setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
             paymentMethodCode = paymentMethodCode,
-            paymentMethodOptions = paymentMethodOptions,
             radarOptions = radarOptions,
             clientAttributionMetadata = clientAttributionMetadata,
             confirmationTokenId = confirmationTokenId,
@@ -140,10 +137,6 @@ constructor(
         ).plus(
             radarOptions?.let {
                 mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
-            }.orEmpty()
-        ).plus(
-            paymentMethodOptions?.let {
-                mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it.toParamMap())
             }.orEmpty()
         ).plus(
             paymentMethodParamMap

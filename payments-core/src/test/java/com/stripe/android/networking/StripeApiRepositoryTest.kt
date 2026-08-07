@@ -2835,44 +2835,6 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `confirmSetupIntent with user key and saved payment method ID injects moto`() = runTest {
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(
-                StripeResponse(
-                    200,
-                    SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_JSON.toString(),
-                    emptyMap()
-                )
-            )
-
-        val confirmParams = ConfirmSetupIntentParams.create(
-            paymentMethodId = "pm_card_visa",
-            clientSecret = "seti_12345_secret_fake",
-        )
-
-        create().confirmSetupIntent(
-            confirmSetupIntentParams = confirmParams,
-            options = DEFAULT_OPTIONS.copy(apiKey = "uk_12345"),
-        )
-
-        // Only one request — no PM creation needed for saved card.
-        verify(stripeNetworkClient, times(1))
-            .executeRequest(apiRequestArgumentCaptor.capture())
-
-        val request = apiRequestArgumentCaptor.firstValue
-        val params = requireNotNull(request.params)
-
-        with(params) {
-            assertThat(this["use_stripe_sdk"]).isEqualTo(true)
-            withNestedParams("payment_method_options") {
-                withNestedParams("card") {
-                    assertThat(this["moto"]).isEqualTo(true)
-                }
-            }
-        }
-    }
-
-    @Test
     fun `listPaymentDetails() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(

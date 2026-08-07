@@ -5,7 +5,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
@@ -398,6 +397,7 @@ constructor(
     }
 
     companion object {
+        private const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
         private const val PARAM_RECEIPT_EMAIL = "receipt_email"
         private const val PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
         private const val PARAM_SHIPPING = "shipping"
