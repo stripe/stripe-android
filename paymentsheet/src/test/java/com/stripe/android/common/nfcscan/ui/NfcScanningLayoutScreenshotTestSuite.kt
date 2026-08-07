@@ -194,14 +194,16 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
         @Test
         fun scanned() {
-            paparazziRule.gif(end = 2400L) {
+            paparazziRule.gif(end = 2500L) {
                 NfcScanningTheme {
                     var status by remember {
                         mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle(error = null))
                     }
 
                     LaunchedEffect(Unit) {
-                        delay(800L)
+                        delay(600L)
+                        status = NfcScanningStatus.Scanning
+                        delay(400L)
                         status = NfcScanningStatus.Scanned
                     }
 
