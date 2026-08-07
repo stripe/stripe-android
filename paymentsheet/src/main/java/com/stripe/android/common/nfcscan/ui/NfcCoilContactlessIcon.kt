@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import com.stripe.android.paymentsheet.R
 
@@ -37,14 +38,16 @@ internal fun NfcCoilContactlessIcon(
     modifier: Modifier = Modifier,
 ) {
     if (LocalInspectionMode.current || status !is NfcScanningStatus.Idle) {
-        NfcCoilStaticIcon(modifier = modifier)
+        NfcCoilStaticIcon(
+            modifier = modifier.testTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG),
+        )
         return
     }
 
     val barAlphas = rememberIdleBarAlphas()
 
     NfcCoilStaticIcon(
-        modifier = modifier,
+        modifier = modifier.testTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG),
         bar1Alpha = barAlphas.bar1,
         bar2Alpha = barAlphas.bar2,
         bar3Alpha = barAlphas.bar3,
@@ -153,3 +156,5 @@ private data class IdleBarAlphas(
     val bar2: Float,
     val bar3: Float,
 )
+
+internal const val NFC_COIL_CONTACTLESS_ICON_TEST_TAG = "nfc_coil_contactless_icon"
