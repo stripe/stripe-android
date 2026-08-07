@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -47,7 +48,13 @@ internal class ManagedDeviceImeSmokeTest {
             imeBottomInset() == 0
         }
 
-        composeTestRule.onNodeWithTag(TEXT_FIELD_TAG).performClick()
+        composeTestRule.onNodeWithTag(TEXT_FIELD_TAG)
+            .performClick()
+            .assertIsFocused()
+        composeTestRule.activityRule.scenario.onActivity { activity ->
+            WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+                .show(WindowInsetsCompat.Type.ime())
+        }
         composeTestRule.waitUntil(IME_TRANSITION_TIMEOUT_MS) {
             imeBottomInset() > 0
         }
