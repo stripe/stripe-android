@@ -104,6 +104,7 @@ class StripeConnectWebViewContainerViewModelTest {
             clock = androidClock,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
+            webViewLayout = StripeConnectWebViewLayout.FILLS_AVAILABLE_SPACE,
             stripeIntentLauncher = mockStripeIntentLauncher,
             logger = mockLogger,
             createWebView = { _, _, _ -> webView }
@@ -122,6 +123,7 @@ class StripeConnectWebViewContainerViewModelTest {
             clock = androidClock,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
+            webViewLayout = StripeConnectWebViewLayout.FILLS_AVAILABLE_SPACE,
             analyticsService = analyticsService,
             logger = Logger.noop(),
             // Default `createWebView` value
