@@ -1261,7 +1261,10 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
         selectors.composeTestRule.waitForIdle()
 
-        selectors.multiStepSelect.waitForEnabled()
+        selectors.multiStepSelect.waitForEnabled(
+            requireClickAction = true,
+            timeout = CHECKOUT_PREPARATION_TIMEOUT,
+        )
         if (clickMultiStep) {
             selectors.multiStepSelect.click()
 
@@ -1533,24 +1536,38 @@ internal class PlaygroundTestDriver(
     private fun executeUsBankAccountLiteFlow() {
         awaitActivityClass(FINANCIAL_CONNECTIONS_LITE_ACTIVITY)
 
+        val firstPane = onWebView().withElementByAnyTestId(
+            testIds = FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS,
+            timeout = WEBVIEW_ELEMENT_TIMEOUT,
+        )
+        firstPane.interaction.perform(webClick())
+
         onWebView()
-            .withElementByTestId("institution-default")
+            .withElementByTestId(
+                testId = FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS.first { it != firstPane.testId },
+                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+            )
             .perform(webClick())
 
         onWebView()
-            .withElementByTestId("agree-button")
+            .withElementByTestId(
+                testId = "select-button",
+                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+            )
             .perform(webClick())
 
         onWebView()
-            .withElementByTestId(testId = "select-button")
+            .withElementByTestId(
+                testId = "link-not-now-button",
+                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+            )
             .perform(webClick())
 
         onWebView()
-            .withElementByTestId("link-not-now-button")
-            .perform(webClick())
-
-        onWebView()
-            .withElementByTestId("done-button")
+            .withElementByTestId(
+                testId = "done-button",
+                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+            )
             .perform(webClick())
     }
 
@@ -1625,9 +1642,10 @@ internal class PlaygroundTestDriver(
     private fun cancelAchLiteFlowOnLaunch() {
         awaitActivityClass(FINANCIAL_CONNECTIONS_LITE_ACTIVITY)
 
-        onWebView()
-            .withElementByTestId("agree-button")
-            .perform(webClick())
+        onWebView().withElementByAnyTestId(
+            testIds = FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS,
+            timeout = WEBVIEW_ELEMENT_TIMEOUT,
+        )
 
         if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
             selectors.authorizeAction?.click()
@@ -1787,6 +1805,10 @@ internal class PlaygroundTestDriver(
         val CHECKOUT_PREPARATION_TIMEOUT: Duration = 45.seconds
         val FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT: Duration = 60.seconds
         val FINANCIAL_CONNECTIONS_UI_TIMEOUT: Duration = 45.seconds
+        val FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS = listOf(
+            "institution-default",
+            "agree-button",
+        )
         const val ACTIVITY_POLL_INTERVAL_MS = 250L
 
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"

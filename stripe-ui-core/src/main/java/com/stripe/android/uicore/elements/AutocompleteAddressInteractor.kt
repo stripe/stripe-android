@@ -30,6 +30,8 @@ interface AutocompleteAddressInteractor {
 
     fun onEnterManuallyFromInline() = Unit
 
+    fun onSearchActivated() = Unit
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Config(
         val googlePlacesApiKey: String?,

@@ -13,6 +13,10 @@ class AddressTextFieldElementTest {
             identifier = IdentifierSpec.OneLineAddress,
             label = "Address".resolvableString,
             addressInputMode = AddressInputMode.NoAutocomplete(),
+            inlineAutocompleteHandler = null,
+            reportsFormValue = false,
+            initialQuery = "",
+            showEnterManually = true,
         )
 
         element.getTextFieldIdentifiers().test {

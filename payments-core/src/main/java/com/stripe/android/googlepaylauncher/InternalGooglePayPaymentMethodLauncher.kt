@@ -60,6 +60,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
         apiConfiguration: ApiConfiguration.State,
         displayItems: List<GooglePayJsonFactory.DisplayItem>,
         billingEmailOverride: String?,
+        shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
     ) {
         activityResultLauncher.launch(
             GooglePayPaymentMethodLauncherContractV2.Args(
@@ -76,6 +77,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
                 stripeAccountId = apiConfiguration.stripeAccountId,
                 displayItems = displayItems,
                 billingEmailOverride = billingEmailOverride,
+                shippingAddressParameters = shippingAddressParameters,
             )
         )
     }

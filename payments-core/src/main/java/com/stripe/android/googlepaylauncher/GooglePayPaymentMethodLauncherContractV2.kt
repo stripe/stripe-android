@@ -61,6 +61,7 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val stripeAccountId: String? = null,
         internal val displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
         internal val billingEmailOverride: String? = null,
+        internal val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

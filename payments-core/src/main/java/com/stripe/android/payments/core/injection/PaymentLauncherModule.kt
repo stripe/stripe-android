@@ -9,7 +9,9 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.Clock
 import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.payments.SystemClock
 import com.stripe.android.payments.core.authentication.DefaultPaymentNextActionHandlerRegistry
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
 import dagger.Module
@@ -65,4 +67,7 @@ internal class PaymentLauncherModule {
     fun provideDurationProvider(): DurationProvider {
         return DefaultDurationProvider.instance
     }
+
+    @Provides
+    fun provideClock(): Clock = SystemClock
 }

@@ -2,6 +2,7 @@ package com.stripe.android.checkout.ece
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
@@ -77,7 +78,35 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+            val option = args.confirmationOption as GooglePayConfirmationOption
+            assertThat(option.config.shippingAddressParameters).isNull()
             assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+        }
+    }
+
+    @Test
+    fun `confirm requests a Google Pay shipping address for allowed countries`() {
+        val state = googlePayState(
+            allowedShippingCountries = listOf("US", "CA"),
+        )
+
+        runScenario(
+            state = state,
+            expressButton = createGooglePayExpressButton(
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                shippingAddressRequired = true,
+            ),
+        ) {
+            performer.confirm(expressButton)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            val option = args.confirmationOption as GooglePayConfirmationOption
+            assertThat(option.config.shippingAddressParameters).isEqualTo(
+                GooglePayJsonFactory.ShippingAddressParameters(
+                    isRequired = true,
+                    allowedCountryCodes = setOf("US", "CA"),
+                )
+            )
         }
     }
 
@@ -147,23 +176,30 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         assertThat(failureCall.error.cause.message).isEqualTo("Payment failed")
     }
 
-    private fun googlePayState(): CheckoutControllerState {
+    private fun googlePayState(
+        allowedShippingCountries: List<String>? = null,
+    ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
                 .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
                 .build(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                merchantCountry = "US",
+                allowedShippingCountries = allowedShippingCountries,
+            ),
         )
     }
 
     private fun createGooglePayExpressButton(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        shippingAddressRequired: Boolean = false,
     ): ExpressButton.GooglePay {
         return ExpressButton.GooglePay.create(
             paymentMethodMetadata = paymentMethodMetadata,
             googlePayConfiguration = GooglePayConfiguration(
                 GooglePayConfiguration.Environment.Test,
             ).build(),
+            shippingAddressRequired = shippingAddressRequired,
         )
     }
 

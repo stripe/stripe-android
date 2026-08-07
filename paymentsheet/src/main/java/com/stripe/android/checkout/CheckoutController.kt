@@ -30,15 +30,10 @@ import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
 import java.util.WeakHashMap
-import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -63,6 +58,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
+    private val operationCoordinator: CheckoutOperationCoordinator,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
 ) {
@@ -72,15 +68,10 @@ class CheckoutController @Inject internal constructor(
     val session: StateFlow<Session?>
         get() = stateHolder.session
 
-    private val mutex = Mutex()
-    private val pendingMutations = AtomicInteger(0)
-
-    private val _isUpdating = MutableStateFlow(false)
-
     /**
      * Whether a mutation is currently in progress.
      */
-    val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
+    val isUpdating: StateFlow<Boolean> = operationCoordinator.isUpdating
 
     /**
      * Loads the Checkout Session identified by [checkoutSessionClientSecret] and prepares the
@@ -98,7 +89,7 @@ class CheckoutController @Inject internal constructor(
         if (sheetStateHolder.sheetIsOpen) {
             return integrationLaunchedFailure()
         }
-        return runSerialized {
+        return operationCoordinator.runMutation {
             val configurationState = configuration.build()
             val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
 
@@ -242,10 +233,11 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Runs a mutation against the checkout session, serializing it behind [mutex] so mutations run
-     * in sequence. [block] produces the updated [CheckoutSessionResponse]; the result is folded into
-     * a new [CheckoutControllerState] (with any [additionalStateMutations] applied) and handed to
-     * [checkoutStateLoader] to reload the payment element and atomically commit the new state.
+     * Runs a mutation against the checkout session, serializing it behind the operation coordinator
+     * so mutations run in sequence. [block] produces the updated [CheckoutSessionResponse]; the
+     * result is folded into a new [CheckoutControllerState] (with any [additionalStateMutations]
+     * applied) and handed to [checkoutStateLoader] to reload the payment element and atomically
+     * commit the new state.
      *
      * Returns [kotlin.Result.failure] if the session hasn't been configured yet or a payment flow is
      * currently presented.
@@ -263,7 +255,7 @@ class CheckoutController @Inject internal constructor(
                 IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
             )
         }
-        return runSerialized {
+        return operationCoordinator.runMutation {
             runCatching {
                 // Re-read the latest committed state inside the lock so serialized mutations
                 // build on each other's results rather than a stale snapshot.
@@ -294,29 +286,6 @@ class CheckoutController @Inject internal constructor(
     private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
         IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
     )
-
-    /**
-     * Serializes [block] behind [mutex] so configuration and mutations run in sequence, and toggles
-     * [isUpdating] while any serialized work is in flight (tracked via [pendingMutations] so
-     * concurrent callers share a single loading window).
-     */
-    private suspend fun <T> runSerialized(
-        block: suspend () -> kotlin.Result<T>,
-    ): kotlin.Result<T> {
-        if (pendingMutations.incrementAndGet() == 1) {
-            _isUpdating.value = true
-        }
-        return try {
-            // Run network requests with a mutex to ensure events are processed in order.
-            mutex.withLock {
-                block()
-            }
-        } finally {
-            if (pendingMutations.decrementAndGet() == 0) {
-                _isUpdating.value = false
-            }
-        }
-    }
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
         return withCheckoutState { sessionId ->

@@ -392,6 +392,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         testContext.consumePaymentOptionEvent("card", "4242")
 
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+        embeddedContentPage.waitUntilVisible()
 
         validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
         embeddedContentPage.clickViewMore()
@@ -451,6 +452,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         }
         testContext.consumePaymentOptionEvent("card", "4242")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+        embeddedContentPage.waitUntilVisible()
 
         validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
         embeddedContentPage.clickViewMore()
@@ -467,12 +469,14 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         validateAnalyticsRequest(eventName = "mc_embedded_paymentoption_removed")
         editPage.clickRemove()
-//        assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
 
         managePage.waitUntilVisible()
         managePage.waitUntilGone(card1.id)
+        validateAnalyticsRequest(eventName = "mc_dismiss")
         managePage.clickDone()
+        Espresso.pressBack()
+        assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
 
         testContext.markTestSucceeded()
     }

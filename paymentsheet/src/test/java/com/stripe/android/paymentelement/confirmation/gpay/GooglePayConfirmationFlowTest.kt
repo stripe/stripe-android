@@ -92,6 +92,7 @@ class GooglePayConfirmationFlowTest {
                     apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
                     displayItems = emptyList(),
                     billingEmailOverride = null,
+                    shippingAddressParameters = null,
                 )
             }
         }
