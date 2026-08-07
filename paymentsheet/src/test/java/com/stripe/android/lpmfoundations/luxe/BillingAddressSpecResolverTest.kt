@@ -45,6 +45,20 @@ class BillingAddressSpecResolverTest {
     }
 
     @Test
+    fun `resolve replaces multiple countries with one automatic tax billing address`() {
+        val result = resolve(
+            specs = listOf(
+                CountrySpec(allowedCountryCodes = setOf("US", "CA")),
+                NameSpec(),
+                CountrySpec(allowedCountryCodes = setOf("US")),
+            ),
+        )
+
+        assertThat(result.filterIsInstance<CountrySpec>()).isEmpty()
+        assertThat(result.filterIsInstance<AutomaticTaxBillingAddressSpec>()).hasSize(1)
+    }
+
+    @Test
     fun `resolve preserves normal address, exposes its country, and removes separate country`() {
         val normalAddress = AddressSpec(
             allowedCountryCodes = setOf("GB"),

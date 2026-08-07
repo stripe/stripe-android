@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -26,6 +27,7 @@ import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
+import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.filterOutHiddenIdentifiers
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -124,6 +126,23 @@ class KlarnaDefinitionTest {
             IdentifierSpec.PostalCode.v1,
             IdentifierSpec.State.v1,
         )
+    }
+
+    @Test
+    fun `createFormElements preserves same as shipping through Klarna production path`() {
+        val metadata = automaticTaxMetadata().copy(
+            defaultBillingDetails = null,
+            shippingDetails = AddressDetails(
+                address = PaymentSheet.Address(country = "US"),
+                isCheckboxSelected = true,
+            ),
+        )
+
+        val sameAsShippingElement = KlarnaDefinition.formElements(metadata)
+            .filterIsInstance<SameAsShippingElement>()
+            .single()
+
+        assertThat(sameAsShippingElement.controller.value.value).isTrue()
     }
 
     @Test
