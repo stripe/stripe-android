@@ -2,24 +2,10 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
-import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
+import com.stripe.android.ui.core.elements.AutomaticTaxBillingAddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.FormItemSpec
-import com.stripe.android.ui.core.elements.KlarnaMandateTextSpec
-import com.stripe.android.ui.core.elements.MandateTextSpec
-import com.stripe.android.ui.core.elements.SepaMandateTextSpec
-import com.stripe.android.uicore.elements.IdentifierSpec
-
-internal sealed interface ResolvedFormItem {
-    data class ExistingSpec(
-        val spec: FormItemSpec,
-    ) : ResolvedFormItem
-
-    data class BillingAddressSpec(
-        val allowedCountryCodes: Set<String>,
-    ) : ResolvedFormItem
-}
+import com.stripe.android.ui.core.elements.MandateSpec
 
 internal object AutomaticTaxBillingAddressResolver {
     fun resolve(
@@ -27,64 +13,53 @@ internal object AutomaticTaxBillingAddressResolver {
         addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
         requiresBillingAddressForAutomaticTax: Boolean,
         allowedBillingCountries: Set<String>,
-    ): List<ResolvedFormItem> {
+    ): List<FormItemSpec> {
         val shouldCollectTaxBillingAddress =
             addressCollectionMode ==
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic &&
                 requiresBillingAddressForAutomaticTax
 
         if (!shouldCollectTaxBillingAddress) {
-            return specs.map(ResolvedFormItem::ExistingSpec)
+            // Only automatic collection with billing-sourced tax needs a tax-minimum address.
+            return specs
         }
 
         if (specs.any { it is AddressSpec }) {
+            // A normal address remains the owner, so remove a separate country and expose its country field.
             return specs.mapNotNull { spec ->
                 when {
-                    spec is CountrySpec && spec.apiPath == IdentifierSpec.Country -> null
-                    spec is AddressSpec && spec.hideCountry -> {
-                        ResolvedFormItem.ExistingSpec(spec.copy(hideCountry = false))
-                    }
-                    else -> ResolvedFormItem.ExistingSpec(spec)
+                    spec is CountrySpec -> null
+                    spec is AddressSpec && spec.hideCountry -> spec.copy(hideCountry = false)
+                    else -> spec
                 }
             }
         }
 
-        val countrySpecIndex = specs.indexOfFirst { spec ->
-            spec is CountrySpec && spec.apiPath == IdentifierSpec.Country
-        }
+        val countrySpecIndex = specs.indexOfFirst { it is CountrySpec }
         if (countrySpecIndex >= 0) {
             val countrySpec = specs[countrySpecIndex] as CountrySpec
             return specs.mapIndexed { index, spec ->
                 if (index == countrySpecIndex) {
-                    ResolvedFormItem.BillingAddressSpec(
+                    AutomaticTaxBillingAddressSpec(
                         allowedCountryCodes = countrySpec.allowedCountryCodes,
                     )
                 } else {
-                    ResolvedFormItem.ExistingSpec(spec)
+                    spec
                 }
             }
         }
 
-        val resolvedSpecs: MutableList<ResolvedFormItem> = specs
-            .map(ResolvedFormItem::ExistingSpec)
-            .toMutableList()
-        val firstMandateIndex = specs.indexOfFirst(FormItemSpec::isMandate)
+        // Without a country source, add the tax address before the mandate that must remain last.
+        val resolvedSpecs = specs.toMutableList()
+        val firstMandateIndex = specs.indexOfFirst { it is MandateSpec }
             .takeIf { it >= 0 }
             ?: specs.size
         resolvedSpecs.add(
             firstMandateIndex,
-            ResolvedFormItem.BillingAddressSpec(
+            AutomaticTaxBillingAddressSpec(
                 allowedCountryCodes = allowedBillingCountries,
             )
         )
         return resolvedSpecs
     }
-}
-
-private fun FormItemSpec.isMandate(): Boolean {
-    return this is AuBecsDebitMandateTextSpec ||
-        this is CashAppPayMandateTextSpec ||
-        this is KlarnaMandateTextSpec ||
-        this is MandateTextSpec ||
-        this is SepaMandateTextSpec
 }

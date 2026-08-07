@@ -10,6 +10,7 @@ import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
+import com.stripe.android.ui.core.elements.AutomaticTaxBillingAddressSpec
 import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
 import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.BsbSpec
@@ -64,16 +65,7 @@ internal class TransformSpecToElements(
             allowedBillingCountries = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
         )
 
-        return resolvedSpecs.flatMap { resolvedSpec ->
-            when (resolvedSpec) {
-                is ResolvedFormItem.BillingAddressSpec -> {
-                    AutomaticTaxBillingAddressFactory(arguments).create(
-                        allowedCountryCodes = resolvedSpec.allowedCountryCodes,
-                    )
-                }
-                is ResolvedFormItem.ExistingSpec -> transform(resolvedSpec.spec, metadata)
-            }
-        }
+        return resolvedSpecs.flatMap { spec -> transform(spec, metadata) }
     }
 
     @Suppress("CyclomaticComplexMethod")
@@ -82,6 +74,9 @@ internal class TransformSpecToElements(
         metadata: PaymentMethodMetadata?,
     ): List<FormElement> {
         return when (spec) {
+            is AutomaticTaxBillingAddressSpec -> AutomaticTaxBillingAddressFactory(arguments).create(
+                allowedCountryCodes = spec.allowedCountryCodes,
+            )
             is StaticTextSpec -> listOf(spec.transform())
             is AfterpayClearpayTextSpec -> listOf(spec.transform(metadata?.stripeIntent?.currency))
             is AffirmTextSpec -> listOf(spec.transform())

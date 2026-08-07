@@ -1,100 +1,143 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
+import com.stripe.android.ui.core.elements.AutomaticTaxBillingAddressSpec
+import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.FormItemSpec
+import com.stripe.android.ui.core.elements.KlarnaMandateTextSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
+import com.stripe.android.ui.core.elements.SepaMandateTextSpec
+import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 
 class AutomaticTaxBillingAddressResolverTest {
     @Test
-    fun `resolve replaces canonical country in place and preserves allowed countries`() {
+    fun `resolve replaces country with any API path in place and preserves allowed countries`() {
+        val countrySpec = CountrySpec(
+            apiPath = IdentifierSpec.Generic("server_country"),
+            allowedCountryCodes = setOf("DE", "FR"),
+        )
+        val mandate = mandateSpec()
+
         val result = resolve(
             specs = listOf(
                 NameSpec(),
-                CountrySpec(allowedCountryCodes = setOf("DE", "FR")),
-                mandateSpec(),
-            )
+                countrySpec,
+                mandate,
+            ),
         )
 
-        assertThat(result[0]).isInstanceOf(ResolvedFormItem.ExistingSpec::class.java)
-        assertThat(result[1]).isEqualTo(
-            ResolvedFormItem.BillingAddressSpec(
+        assertThat(result).containsExactly(
+            NameSpec(),
+            AutomaticTaxBillingAddressSpec(
                 allowedCountryCodes = setOf("DE", "FR"),
-            )
-        )
-        assertThat(result[2]).isInstanceOf(ResolvedFormItem.ExistingSpec::class.java)
+            ),
+            mandate,
+        ).inOrder()
+        assertThat(result.filterIsInstance<CountrySpec>()).isEmpty()
     }
 
     @Test
-    fun `resolve inserts missing address before mandate`() {
+    fun `resolve preserves normal address, exposes its country, and removes separate country`() {
+        val normalAddress = AddressSpec(
+            allowedCountryCodes = setOf("GB"),
+            hideCountry = true,
+        )
+        val mandate = mandateSpec()
+
+        val result = resolve(
+            specs = listOf(
+                CountrySpec(apiPath = IdentifierSpec.Generic("server_country")),
+                NameSpec(),
+                normalAddress,
+                mandate,
+            ),
+        )
+
+        assertThat(result).containsExactly(
+            NameSpec(),
+            normalAddress.copy(hideCountry = false),
+            mandate,
+        ).inOrder()
+        assertThat(result.filterIsInstance<CountrySpec>()).isEmpty()
+        assertThat(result.filterIsInstance<AutomaticTaxBillingAddressSpec>()).isEmpty()
+    }
+
+    @Test
+    fun `resolve preserves visible normal address without adding another address`() {
+        val addressSpec = AddressSpec(allowedCountryCodes = setOf("GB"))
+        val mandate = mandateSpec()
+
         val result = resolve(
             specs = listOf(
                 NameSpec(),
-                mandateSpec(),
-            )
+                addressSpec,
+                mandate,
+            ),
         )
 
-        assertThat(result.map { it::class.java }).containsExactly(
-            ResolvedFormItem.ExistingSpec::class.java,
-            ResolvedFormItem.BillingAddressSpec::class.java,
-            ResolvedFormItem.ExistingSpec::class.java,
+        assertThat(result).containsExactly(NameSpec(), addressSpec, mandate).inOrder()
+        assertThat(result.filterIsInstance<AutomaticTaxBillingAddressSpec>()).isEmpty()
+    }
+
+    @Test
+    fun `resolve adds missing address before every mandate variant`() {
+        mandateSpecs().forEach { mandateSpec ->
+            val result = resolve(
+                specs = listOf(NameSpec(), mandateSpec),
+            )
+
+            assertWithMessage(mandateSpec::class.simpleName.orEmpty())
+                .that(result)
+                .containsExactly(
+                    NameSpec(),
+                    AutomaticTaxBillingAddressSpec(allowedCountryCodes = setOf("US", "CA")),
+                    mandateSpec,
+                )
+                .inOrder()
+        }
+    }
+
+    @Test
+    fun `resolve adds missing address after fields without mandate`() {
+        val result = resolve(specs = listOf(NameSpec()))
+
+        assertThat(result).containsExactly(
+            NameSpec(),
+            AutomaticTaxBillingAddressSpec(allowedCountryCodes = setOf("US", "CA")),
         ).inOrder()
     }
 
     @Test
-    fun `resolve preserves a normal address without adding another address`() {
-        val addressSpec = AddressSpec(allowedCountryCodes = setOf("GB"))
-
-        val result = resolve(
-            specs = listOf(
-                NameSpec(),
-                addressSpec,
-                mandateSpec(),
-            )
-        )
-
-        assertThat(result.filterIsInstance<ResolvedFormItem.BillingAddressSpec>()).isEmpty()
-        assertThat(result.filterIsInstance<ResolvedFormItem.ExistingSpec>().map { it.spec })
-            .containsExactly(NameSpec(), addressSpec, mandateSpec())
-            .inOrder()
-    }
-
-    @Test
-    fun `resolve removes duplicate canonical country beside normal address`() {
-        val addressSpec = AddressSpec(allowedCountryCodes = setOf("GB"))
-
-        val result = resolve(
-            specs = listOf(
-                CountrySpec(allowedCountryCodes = setOf("GB")),
-                addressSpec,
-            )
-        )
-
-        assertThat(result).containsExactly(ResolvedFormItem.ExistingSpec(addressSpec))
-    }
-
-    @Test
-    fun `resolve leaves specs unchanged when automatic tax billing collection is disabled`() {
+    fun `resolve leaves specs unchanged unless automatic billing tax collection is enabled`() {
         val countrySpec = CountrySpec(allowedCountryCodes = setOf("US"))
 
-        val result = AutomaticTaxBillingAddressResolver.resolve(
-            specs = listOf(countrySpec),
-            addressCollectionMode =
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-            requiresBillingAddressForAutomaticTax = false,
-            allowedBillingCountries = setOf("US"),
-        )
+        listOf(
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic to false,
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never to true,
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full to true,
+        ).forEach { (addressCollectionMode, requiresBillingAddressForAutomaticTax) ->
+            val result = AutomaticTaxBillingAddressResolver.resolve(
+                specs = listOf(countrySpec),
+                addressCollectionMode = addressCollectionMode,
+                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
+                allowedBillingCountries = setOf("US"),
+            )
 
-        assertThat(result).containsExactly(ResolvedFormItem.ExistingSpec(countrySpec))
+            assertThat(result).containsExactly(countrySpec)
+        }
     }
 
     private fun resolve(
-        specs: List<com.stripe.android.ui.core.elements.FormItemSpec>,
-    ): List<ResolvedFormItem> {
+        specs: List<FormItemSpec>,
+    ): List<FormItemSpec> {
         return AutomaticTaxBillingAddressResolver.resolve(
             specs = specs,
             addressCollectionMode =
@@ -106,5 +149,15 @@ class AutomaticTaxBillingAddressResolverTest {
 
     private fun mandateSpec(): MandateTextSpec {
         return MandateTextSpec(stringResId = R.string.stripe_sepa_mandate)
+    }
+
+    private fun mandateSpecs(): List<FormItemSpec> {
+        return listOf(
+            AuBecsDebitMandateTextSpec(),
+            CashAppPayMandateTextSpec(),
+            KlarnaMandateTextSpec(),
+            mandateSpec(),
+            SepaMandateTextSpec(),
+        )
     }
 }

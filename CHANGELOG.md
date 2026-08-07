@@ -6,7 +6,6 @@ NEXT_VERSION_BUMP: MINOR
 ### PaymentSheet
 * [FIXED] LinkController (private preview) now returns an error when no funding sources are available for a Link session, rather than silently falling back to card.
 * [ADDED] Added support for the Agrobank, MBSB Bank, and Bank of China FPX banks, and the FPX bank list is now displayed in alphabetical order.
-* [ADDED] Checkout automatic tax now collects the minimum billing address fields required for new non-card payment method forms rendered by the LPM form system.
 
 ## 23.14.0 - 2026-08-03
 
