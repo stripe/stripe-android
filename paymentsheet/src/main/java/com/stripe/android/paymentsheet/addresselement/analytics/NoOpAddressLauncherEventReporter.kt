@@ -16,6 +16,11 @@ internal object NoOpAddressLauncherEventReporter : AddressLauncherEventReporter 
         source: String?,
     ) = Unit
     override fun onAutocompleteDetailsFetchStarted() = Unit
-    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?, source: String?) = Unit
+    override fun onAutocompleteSelected(
+        sessionToken: String,
+        queryLength: Int,
+        placeId: String?,
+        source: String?,
+    ) = Unit
     override fun onAutocompleteError(sessionToken: String, error: Throwable) = Unit
 }

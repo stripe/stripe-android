@@ -101,16 +101,7 @@ internal class StripeHostedPlacesClientProxy(
                 placeId = placeId,
                 source = source,
             )
-            return Result.success(
-                Address(
-                    line1 = cached.address.line1,
-                    line2 = cached.address.line2,
-                    city = cached.address.city,
-                    state = cached.address.state,
-                    postalCode = cached.address.postalCode,
-                    country = cached.address.country,
-                )
-            )
+            return Result.success(cached.address.toAddress())
         }
         eventReporter.onAutocompleteDetailsFetchStarted()
         return repository.fetchPlaceDetails(
@@ -125,16 +116,7 @@ internal class StripeHostedPlacesClientProxy(
                     }
                 }
             }
-        }.map { result ->
-            Address(
-                line1 = result.address?.line1,
-                line2 = result.address?.line2,
-                city = result.address?.city,
-                state = result.address?.state,
-                postalCode = result.address?.postalCode,
-                country = result.address?.country,
-            )
-        }.onSuccess {
+        }.map { it.address.toAddress() }.onSuccess {
             eventReporter.onAutocompleteSelected(
                 sessionToken = token,
                 queryLength = queryLength,
@@ -150,3 +132,12 @@ internal class StripeHostedPlacesClientProxy(
         fun newSessionToken(): String = UUID.randomUUID().toString()
     }
 }
+
+private fun StripeProxyAddress?.toAddress(): Address = Address(
+    line1 = this?.line1,
+    line2 = this?.line2,
+    city = this?.city,
+    state = this?.state,
+    postalCode = this?.postalCode,
+    country = this?.country,
+)
