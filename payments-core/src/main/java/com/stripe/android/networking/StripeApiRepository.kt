@@ -2004,9 +2004,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return Result.success(this)
         }
 
-        // Saved payment method: inject moto directly into existing options.
         if (paymentMethodCreateParams == null) {
-            return Result.success(withMoto())
+            return Result.success(this)
         }
 
         // New payment method: create the PM first, then build Dashboard params.
@@ -2025,19 +2024,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun ConfirmPaymentIntentParams.withMoto(): ConfirmPaymentIntentParams {
-        val existing = paymentMethodOptions as? PaymentMethodOptionsParams.Card
-        return copy(
-            paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                cvc = existing?.cvc,
-                network = existing?.network,
-                setupFutureUsage = existing?.setupFutureUsage,
-                moto = true,
-            ),
-            useStripeSdk = true,
-        )
-    }
-
-    private fun ConfirmSetupIntentParams.withMoto(): ConfirmSetupIntentParams {
         val existing = paymentMethodOptions as? PaymentMethodOptionsParams.Card
         return copy(
             paymentMethodOptions = PaymentMethodOptionsParams.Card(
