@@ -152,6 +152,7 @@ internal class FlowControllerAnalyticsTest {
             hasQueryParam("duration"),
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
@@ -236,6 +237,7 @@ internal class FlowControllerAnalyticsTest {
             eventName = "mc_custom_payment_newpm_success",
             hasQueryParam("duration")
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
@@ -343,6 +345,7 @@ internal class FlowControllerAnalyticsTest {
             query("is_confirmation_tokens", "true"),
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
         testContext.consumeNullPaymentOptionEventForFlowController()

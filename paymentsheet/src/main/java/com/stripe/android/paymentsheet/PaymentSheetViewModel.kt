@@ -24,7 +24,6 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -682,7 +681,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun persistBillingAnalytics(paymentSelection: PaymentSelection?) {
-        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
         val billingAddress = paymentSelection.billingDetails?.address ?: return
         val filledAddress = autocompleteFilledAddress
@@ -693,7 +691,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
-        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
         val countryCode = paymentSelection.billingDetails?.address?.country ?: return
         val autocompleteUsed = savedStateHandle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true

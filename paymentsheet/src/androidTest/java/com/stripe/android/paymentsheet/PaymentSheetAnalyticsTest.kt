@@ -140,6 +140,7 @@ internal class PaymentSheetAnalyticsTest {
             hasQueryParam("duration"),
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
@@ -217,6 +218,7 @@ internal class PaymentSheetAnalyticsTest {
             eventName = "mc_complete_payment_newpm_success",
             hasQueryParam("duration")
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
@@ -316,6 +318,7 @@ internal class PaymentSheetAnalyticsTest {
             query("is_confirmation_tokens", "true"),
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
         page.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
