@@ -20,7 +20,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     fun confirm() {
-        val arguments = operationCoordinator.beginConfirmation(::confirmationArgs) ?: return
+        val arguments = operationCoordinator.tryBeginConfirmation(::confirmationArgs) ?: return
         viewModelScope.launch {
             try {
                 confirmationHandler.start(arguments)
