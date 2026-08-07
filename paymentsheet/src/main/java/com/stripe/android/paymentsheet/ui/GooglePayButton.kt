@@ -3,9 +3,9 @@ package com.stripe.android.paymentsheet.ui
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,6 +27,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.uicore.stripeThemeIsDark
 import org.json.JSONArray
 
 @Composable
@@ -68,7 +69,7 @@ internal fun GooglePayButton(
         }
     }
 
-    val buttonTheme = if (isSystemInDarkTheme()) {
+    val buttonTheme = if (MaterialTheme.stripeThemeIsDark) {
         ButtonTheme.Light
     } else {
         ButtonTheme.Dark

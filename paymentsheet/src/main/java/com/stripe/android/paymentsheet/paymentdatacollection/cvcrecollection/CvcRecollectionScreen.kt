@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +56,7 @@ import com.stripe.android.uicore.elements.TrailingIcon
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeFormInsets
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -66,27 +66,25 @@ internal fun CvcRecollectionScreen(
     cvcState: CvcState,
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
-    StripeTheme {
-        Column(
-            Modifier
-                .background(MaterialTheme.stripeColors.materialColors.surface)
-                .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
-        ) {
-            CvcRecollectionTopBar(isTestMode) {
-                viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
+    Column(
+        Modifier
+            .background(MaterialTheme.stripeColors.materialColors.surface)
+            .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+    ) {
+        CvcRecollectionTopBar(isTestMode) {
+            viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
+        }
+        CvcRecollectionTitle()
+        CvcRecollectionField(
+            lastFour = lastFour,
+            enabled = true,
+            cvcState = cvcState,
+            onValueChanged = {
+                viewActionHandler(CvcRecollectionViewAction.OnCvcChanged(it))
             }
-            CvcRecollectionTitle()
-            CvcRecollectionField(
-                lastFour = lastFour,
-                enabled = true,
-                cvcState = cvcState,
-                onValueChanged = {
-                    viewActionHandler(CvcRecollectionViewAction.OnCvcChanged(it))
-                }
-            )
-            CvcRecollectionButton(cvcState.isValid) {
-                viewActionHandler.invoke(CvcRecollectionViewAction.OnConfirmPressed)
-            }
+        )
+        CvcRecollectionButton(cvcState.isValid) {
+            viewActionHandler.invoke(CvcRecollectionViewAction.OnConfirmPressed)
         }
     }
 }
@@ -97,20 +95,18 @@ internal fun CvcRecollectionPaymentSheetScreen(
 ) {
     val state by interactor.viewState.collectAsState()
 
-    StripeTheme {
-        Column(
-            Modifier
-                .background(MaterialTheme.stripeColors.materialColors.surface)
-                .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
-        ) {
-            CvcRecollectionTitle()
-            CvcRecollectionField(
-                lastFour = state.lastFour,
-                enabled = state.isEnabled,
-                cvcState = state.cvcState,
-                onValueChanged = interactor::onCvcChanged,
-            )
-        }
+    Column(
+        Modifier
+            .background(MaterialTheme.stripeColors.materialColors.surface)
+            .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+    ) {
+        CvcRecollectionTitle()
+        CvcRecollectionField(
+            lastFour = state.lastFour,
+            enabled = state.isEnabled,
+            cvcState = state.cvcState,
+            onValueChanged = interactor::onCvcChanged,
+        )
     }
 }
 
@@ -123,7 +119,7 @@ internal fun CvcRecollectionField(
     cvcState: CvcState,
     onValueChanged: (String) -> Unit
 ) {
-    val backgroundColor = if (isSystemInDarkTheme()) {
+    val backgroundColor = if (MaterialTheme.stripeThemeIsDark) {
         Color.White.copy(alpha = 0.075f)
     } else {
         Color.Black.copy(alpha = 0.075f)
