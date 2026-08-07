@@ -10,6 +10,7 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -66,6 +67,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     intent = intent,
                     paymentMethod = paymentMethod,
                     savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
+                    shippingInformation = null,
                 )
                 confirmCheckoutSession(params)
             },
@@ -89,6 +91,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
             savePaymentMethod = null,
+            shippingInformation = confirmationOption.shippingInformation,
         )
         return confirmCheckoutSession(params)
     }
@@ -97,6 +100,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
+        shippingInformation: ShippingInformation?,
     ): ConfirmCheckoutSessionParams = when (intent) {
         is PaymentIntent -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
@@ -104,11 +108,13 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             returnUrl = returnUrl,
             expectedAmount = intent.amount,
             savePaymentMethod = savePaymentMethod,
+            shipping = shippingInformation.toCheckoutSessionShipping(),
         )
         else -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
+            shipping = shippingInformation.toCheckoutSessionShipping(),
         )
     }
 
@@ -179,5 +185,14 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): CheckoutSessionConfirmationInterceptor
+    }
+}
+
+private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
+    return this?.let {
+        ConfirmCheckoutSessionParams.Shipping(
+            name = it.name,
+            address = it.address,
+        )
     }
 }
