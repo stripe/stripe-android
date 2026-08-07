@@ -49,6 +49,7 @@ internal class StripeHostedPlacesClientProxy(
             eventReporter.onAutocompleteSessionStarted(token)
         }
         eventReporter.onAutocompleteFetchStarted()
+        var responseSource: String? = null
         return repository.findAutocompletePredictions(
             query = q,
             country = country,
@@ -56,6 +57,7 @@ internal class StripeHostedPlacesClientProxy(
             locale = locale.toLanguageTag(),
         ).map { result ->
             val limitedPredictions = result.predictions.take(limit)
+            responseSource = result.source
             synchronized(lock) {
                 lastSource = result.source
                 limitedPredictions.forEach { predictionCache[it.placeId] = it }
@@ -70,12 +72,11 @@ internal class StripeHostedPlacesClientProxy(
                 }
             )
         }.onSuccess { response ->
-            val source = synchronized(lock) { lastSource }
             eventReporter.onAutocompleteSuggestionsReturned(
                 sessionToken = token,
                 queryLength = q.length,
                 resultCount = response.autocompletePredictions.size,
-                source = source,
+                source = responseSource,
             )
         }.onFailure { error ->
             eventReporter.onAutocompleteError(sessionToken = token, error = error)
