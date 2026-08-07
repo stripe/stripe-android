@@ -28,6 +28,14 @@ internal class CheckoutControllerExampleViewModel(
     savedStateHandle: SavedStateHandle,
     application: Application,
 ) : ViewModel() {
+    val profile: CheckoutControllerExampleProfile = savedStateHandle
+        .get<String>(CheckoutControllerExampleActivity.PROFILE_EXTRA)
+        ?.let { savedProfile ->
+            CheckoutControllerExampleProfile.entries.firstOrNull { profile ->
+                profile.name == savedProfile
+            }
+        }
+        ?: CheckoutControllerExampleProfile.Klarna
 
     private val _status = MutableStateFlow<Status>(Status.Loading)
     val status: StateFlow<Status> = _status.asStateFlow()
@@ -64,7 +72,7 @@ internal class CheckoutControllerExampleViewModel(
     }
 
     private suspend fun fetchAndConfigure() {
-        repository.fetchCheckoutSessionClientSecret().fold(
+        repository.fetchCheckoutSessionClientSecret(profile).fold(
             onSuccess = { clientSecret ->
                 controller.configure(
                     checkoutSessionClientSecret = clientSecret,

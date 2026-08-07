@@ -20,6 +20,8 @@
     <string name="playground_subtitle">Testing playground for Stripe engineers</string>
     <string name="checkout_controller_example_title">CheckoutController Example</string>
     <string name="checkout_controller_example_subtitle">Simple CheckoutController integration</string>
+    <string name="checkout_controller_oxxo_example_title">CheckoutController OXXO Automatic Tax</string>
+    <string name="checkout_controller_oxxo_example_subtitle">OXXO and MXN without phone verification</string>
     <string name="onramp_title">Onramp Coordinator</string>
     <string name="onramp_subtitle">Test the OnrampCoordinator functionality</string>
     <string name="action_settings">Settings</string>
