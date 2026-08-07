@@ -60,7 +60,6 @@ import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SectionValidationMessage
@@ -68,6 +67,7 @@ import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -644,7 +644,7 @@ internal fun CvcRecollectionField(
         Column(
             Modifier
                 .padding(top = 20.dp)
-                .padding(StripeTheme.getOuterFormInsets())
+                .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
@@ -675,9 +675,10 @@ internal fun CvcRecollectionField(
     }
 }
 
+@Composable
 private fun getSavedPaymentMethodTabLayoutPaddingValues() = PaddingValues(
-    start = (StripeTheme.formInsets.start - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp),
-    end = (StripeTheme.formInsets.end - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp)
+    start = (MaterialTheme.stripeFormInsets.start - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp),
+    end = (MaterialTheme.stripeFormInsets.end - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp)
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

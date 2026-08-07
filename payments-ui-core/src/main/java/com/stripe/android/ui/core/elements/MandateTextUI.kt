@@ -14,8 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
 
@@ -49,7 +49,7 @@ fun Mandate(
             style = caption.copy(
                 textAlign = textAlign,
                 lineHeight = lineHeight,
-                fontSize = 11.sp * StripeTheme.typographyMutable.fontSizeMultiplier,
+                fontSize = 11.sp * MaterialTheme.stripeTypography.fontSizeMultiplier,
                 fontWeight = FontWeight.Normal
             ),
             modifier = modifier
