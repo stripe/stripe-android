@@ -835,6 +835,7 @@ internal class PlaygroundTestDriver(
         )
 
         isSelectPaymentMethodScreen()
+        selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
         teardown()
