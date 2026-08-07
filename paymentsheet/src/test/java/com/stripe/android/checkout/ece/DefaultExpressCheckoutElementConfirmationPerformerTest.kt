@@ -20,6 +20,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -212,10 +213,12 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeExpressCheckoutElementEventReporter()
         val errorReporter = FakeErrorReporter()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
+            sheetStateHolder = SheetStateHolder(savedStateHandle),
             resultCallback = {},
         )
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(

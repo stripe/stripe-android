@@ -31,12 +31,12 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : ExpressCheckoutElementConfirmationPerformer {
     override fun confirm(expressButton: ExpressButton) {
-        val confirmationArgs = operationCoordinator.beginConfirmation {
+        val confirmationArgs = operationCoordinator.tryBeginConfirmation {
             val state = stateHolder.state ?: run {
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
                 )
-                return@beginConfirmation null
+                return@tryBeginConfirmation null
             }
             getConfirmationArgs(
                 state = state,
