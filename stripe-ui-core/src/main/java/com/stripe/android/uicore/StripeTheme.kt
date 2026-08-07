@@ -491,6 +491,9 @@ val LocalTextFieldInsets = staticCompositionLocalOf { StripeTheme.textFieldInset
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 private val LocalStripeThemeIsDark = staticCompositionLocalOf<Boolean?> { null }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalFormScrollState = staticCompositionLocalOf<androidx.compose.foundation.ScrollState?> { null }
+
 /**
  * Base Theme for Stripe Composables.
  * CAUTION: This theme is mutable by merchant configurations. You shouldn't be passing colors,
