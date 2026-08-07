@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,7 +41,7 @@ internal class NfcScanningViewModel @Inject constructor(
     private val _viewState = MutableStateFlow(
         NfcScanningViewState(
             tapZone = tapZone,
-            status = NfcScanningStatus.Idle(error = null),
+            status = NfcScanningStatus.Idle,
         )
     )
     val viewState: StateFlow<NfcScanningViewState> = _viewState.asStateFlow()
@@ -80,7 +81,7 @@ internal class NfcScanningViewModel @Inject constructor(
                         _viewState.emit(
                             NfcScanningViewState(
                                 tapZone = tapZone,
-                                status = NfcScanningStatus.Idle(error = error.userMessage),
+                                status = NfcScanningStatus.Error(error.userMessage),
                             )
                         )
 
@@ -144,6 +145,11 @@ internal class NfcScanningViewModel @Inject constructor(
                             )
                         )
                     }
+                }
+            }
+            is NfcScanningViewAction.ErrorShown -> {
+                _viewState.update { state ->
+                    state.copy(status = NfcScanningStatus.Idle)
                 }
             }
         }
