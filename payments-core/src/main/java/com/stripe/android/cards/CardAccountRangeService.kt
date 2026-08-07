@@ -11,6 +11,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -83,7 +84,7 @@ class DefaultCardAccountRangeService(
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     private val accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener? = null,
-    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext)
+    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext + SupervisorJob())
 ) : CardAccountRangeService {
 
     private val needsRemoteQueryForFunding = CardFunding.entries.any {
