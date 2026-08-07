@@ -330,11 +330,19 @@ class CheckoutController @Inject internal constructor(
     /**
      * Clears the customer's selected payment option, resetting it to `null`.
      *
-     * Returns [kotlin.Result.failure] if the session hasn't been configured yet or a payment flow is
-     * currently presented.
+     * Returns [kotlin.Result.failure] if the session hasn't been configured yet, a payment flow is
+     * currently presented, or another mutation or confirmation is in progress.
      */
     fun clearPaymentOption(): kotlin.Result<Unit> {
-        return requireMutableState().map { stateHolder.clearSelection() }
+        return requireMutableState().fold(
+            onSuccess = {
+                operationCoordinator.runSynchronousMutation {
+                    stateHolder.clearSelection()
+                    kotlin.Result.success(Unit)
+                }
+            },
+            onFailure = { kotlin.Result.failure(it) },
+        )
     }
 
     /**
