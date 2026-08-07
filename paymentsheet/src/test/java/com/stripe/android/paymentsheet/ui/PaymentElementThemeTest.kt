@@ -62,6 +62,7 @@ internal class PaymentElementThemeTest {
         assertThat(textFieldInsets).isEqualTo(FormInsets(start = 5f, top = 6f, end = 7f, bottom = 8f))
         assertThat(iconStyle).isEqualTo(IconStyle.Outlined)
         assertThat(verticalModeRowPadding).isEqualTo(9f)
+        assertThat(iconUrl).isEqualTo(DARK_ICON_URL)
     }
 
     @Test
@@ -73,6 +74,7 @@ internal class PaymentElementThemeTest {
         assertThat(contextIsDark).isFalse()
         assertThat(colors.materialColors.primary).isEqualTo(LIGHT_PRIMARY)
         assertThat(primaryButtonStyle.colorsLight.background).isEqualTo(LIGHT_BUTTON)
+        assertThat(iconUrl).isEqualTo(LIGHT_ICON_URL)
     }
 
     @Test
@@ -130,6 +132,10 @@ internal class PaymentElementThemeTest {
                     textFieldInsets = LocalTextFieldInsets.current,
                     iconStyle = LocalIconStyle.current,
                     verticalModeRowPadding = MaterialTheme.stripeVerticalModeRowPadding,
+                    iconUrl = IconHelper.iconUrl(
+                        lightThemeIconUrl = LIGHT_ICON_URL,
+                        darkThemeIconUrl = DARK_ICON_URL,
+                    ),
                 )
             }
         }
@@ -194,6 +200,7 @@ internal class PaymentElementThemeTest {
         val textFieldInsets: FormInsets,
         val iconStyle: IconStyle,
         val verticalModeRowPadding: Float,
+        val iconUrl: String?,
     )
 
     private companion object {
@@ -201,5 +208,7 @@ internal class PaymentElementThemeTest {
         val DARK_PRIMARY = Color(0xFF654321)
         val LIGHT_BUTTON = Color(0xFFABCDEF)
         val DARK_BUTTON = Color(0xFFFEDCBA)
+        const val LIGHT_ICON_URL = "light_icon_url"
+        const val DARK_ICON_URL = "dark_icon_url"
     }
 }
