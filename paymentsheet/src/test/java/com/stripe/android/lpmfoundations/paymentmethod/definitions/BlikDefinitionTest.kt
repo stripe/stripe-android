@@ -4,7 +4,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 
@@ -42,5 +46,28 @@ class BlikDefinitionTest {
         assertThat(formElements[2].identifier.v1).isEqualTo("billing_details[email]_section")
         assertThat(formElements[3].identifier.v1).isEqualTo("blik[code]_section")
         assertThat(formElements[4].identifier.v1).isEqualTo("billing_details[address]_section")
+    }
+
+    @Test
+    fun `createFormElements adds automatic tax billing address after payment fields`() {
+        val formElements = BlikDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf(PaymentMethod.Type.Blik.code),
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            ),
+        )
+
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements[0].identifier.v1).isEqualTo("blik[code]_section")
+        assertThat((formElements[1] as SectionElement).fields.single())
+            .isInstanceOf(BillingAddressElement::class.java)
     }
 }
