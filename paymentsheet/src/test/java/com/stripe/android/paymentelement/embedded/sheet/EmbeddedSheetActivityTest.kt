@@ -67,7 +67,7 @@ internal class EmbeddedSheetActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(RetryRule(3))
+        .around(RetryRule())
 
     @Test
     fun `when launched without args should finish with error result`() {

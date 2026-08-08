@@ -192,7 +192,7 @@ internal class PaymentSheetViewModelTest {
         .around(SessionTestRule())
         .around(PaymentElementCallbackTestRule())
         .around(ResetMockRule(eventReporter))
-        .around(RetryRule(3))
+        .around(RetryRule())
 
     @BeforeTest
     fun setup() {

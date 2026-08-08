@@ -76,7 +76,7 @@ class TapToAddActivityTest {
         .around(imageLoaderTestRule)
         .around(FeatureFlagTestRule(FeatureFlags.forceTapToAddWithTerminal, isEnabled = true))
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(RetryRule(3))
+        .around(RetryRule())
         .around(intentsRule)
 
     private val linkHelper = TapToAddLinkTestHelper(composeTestRule, networkRule)

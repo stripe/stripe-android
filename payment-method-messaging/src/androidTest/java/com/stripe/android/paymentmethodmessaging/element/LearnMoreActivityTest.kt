@@ -26,7 +26,7 @@ internal class LearnMoreActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
     @get:Rule
-    val retryRule = RetryRule(3)
+    val retryRule = RetryRule()
 
     @Test
     fun loadsUrl() {

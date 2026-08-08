@@ -44,7 +44,7 @@ class OnrampFlowTest {
     val rule = RuleChain.emptyRuleChain()
         .around(composeRule)
         .around(attestationFeatureFlagTestRule)
-        .around(RetryRule(3))
+        .around(RetryRule())
         .around(activityRule)
 
     private val defaultTimeout: Duration = 30.seconds

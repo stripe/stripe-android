@@ -25,7 +25,7 @@ class SSDOcrTest {
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
     @get:Rule
-    val retryRule = RetryRule(3)
+    val retryRule = RetryRule()
 
     @Before
     fun initializeTfLite() {
