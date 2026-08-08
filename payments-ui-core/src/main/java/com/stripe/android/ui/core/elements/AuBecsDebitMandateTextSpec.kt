@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 data class AuBecsDebitMandateTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("au_becs_mandate")
-) : FormItemSpec() {
+) : FormItemSpec(), MandateSpec {
     fun transform(merchantName: String): FormElement =
         AuBecsDebitMandateTextElement(
             this.apiPath,
