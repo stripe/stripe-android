@@ -42,7 +42,9 @@ private object WeroUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         builder
-            .countryOnly(allowedCountryCodes = setOf("DE", "BE", "FR"))
+            .countryOnly(
+                allowedCountryCodes = setOf("DE", "BE", "FR"),
+            )
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
