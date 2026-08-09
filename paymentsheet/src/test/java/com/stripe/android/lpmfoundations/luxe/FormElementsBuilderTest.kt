@@ -34,7 +34,7 @@ import org.robolectric.RobolectricTestRunner
 class FormElementsBuilderTest {
     @Test
     fun `build returns an emptyList`() {
-        assertThat(FormElementsBuilder(arguments()).build()).isEmpty()
+        assertThat(formElementsBuilder(arguments()).build()).isEmpty()
     }
 
     @Test
@@ -47,7 +47,7 @@ class FormElementsBuilderTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
-        val formElements = FormElementsBuilder(arguments).build()
+        val formElements = formElementsBuilder(arguments).build()
         assertThat(formElements).hasSize(4)
         assertThat(formElements[0].identifier.v1).isEqualTo("billing_details[name]_section")
         assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[phone]_section")
@@ -57,7 +57,7 @@ class FormElementsBuilderTest {
 
     @Test
     fun `build orders fields correctly`() {
-        val formElements = FormElementsBuilder(arguments())
+        val formElements = formElementsBuilder(arguments())
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
             .header(EmptyFormElement(identifier = IdentifierSpec(v1 = "header")))
             .footer(EmptyFormElement(identifier = IdentifierSpec(v1 = "footer")))
@@ -86,7 +86,7 @@ class FormElementsBuilderTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .billingAddressPolicy(
                 PaymentMethodBillingAddressPolicy.FullAddressIfAllowed(
                     allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
@@ -101,7 +101,7 @@ class FormElementsBuilderTest {
 
     @Test
     fun `build returns fields in the order they were added`() {
-        val formElements = FormElementsBuilder(arguments())
+        val formElements = formElementsBuilder(arguments())
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element1")))
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element2")))
             .footer(EmptyFormElement(identifier = IdentifierSpec(v1 = "footer1")))
@@ -120,7 +120,7 @@ class FormElementsBuilderTest {
 
     @Test
     fun `build uses the latest payment method billing address policy`() {
-        val formElements = FormElementsBuilder(arguments())
+        val formElements = formElementsBuilder(arguments())
             .billingAddressPolicy(PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("US")))
             .billingAddressPolicy(PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("CA")))
             .build()
@@ -137,7 +137,7 @@ class FormElementsBuilderTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
             .billingAddressPolicy(PaymentMethodBillingAddressPolicy.Suppressed)
             .build()
@@ -154,7 +154,7 @@ class FormElementsBuilderTest {
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
             .ignoreContactInformationRequirements()
             .build()
@@ -173,7 +173,7 @@ class FormElementsBuilderTest {
             }
         )
 
-        val formElements = FormElementsBuilder(arguments).build()
+        val formElements = formElementsBuilder(arguments).build()
 
         assertThat(formElements).hasSize(1)
         assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
@@ -195,7 +195,7 @@ class FormElementsBuilderTest {
                 allowedCountries = emptySet()
             )
         )
-        val formElements = FormElementsBuilder(arguments).build()
+        val formElements = formElementsBuilder(arguments).build()
 
         assertThat(formElements).hasSize(1)
         assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
@@ -223,7 +223,7 @@ class FormElementsBuilderTest {
                 allowedCountries = setOf("US", "CA")
             )
         )
-        val formElements = FormElementsBuilder(arguments).build()
+        val formElements = formElementsBuilder(arguments).build()
 
         assertThat(formElements).hasSize(1)
         assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
@@ -253,7 +253,7 @@ class FormElementsBuilderTest {
                 allowedCountries = setOf("US", "CA")
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
@@ -282,7 +282,7 @@ class FormElementsBuilderTest {
                 allowedCountries = setOf("US", "CA")
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .build()
@@ -301,7 +301,7 @@ class FormElementsBuilderTest {
 
     @Test
     fun `build keeps country-only source for automatic address collection`() {
-        val formElements = FormElementsBuilder(
+        val formElements = formElementsBuilder(
             arguments(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
@@ -322,7 +322,7 @@ class FormElementsBuilderTest {
 
     @Test
     fun `build propagates initial shipping and autocomplete values to resolved full address`() = runTest {
-        val formElements = FormElementsBuilder(
+        val formElements = formElementsBuilder(
             arguments(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
@@ -355,15 +355,41 @@ class FormElementsBuilderTest {
     }
 
     @Test
+    fun `build initializes automatic tax same as shipping to false`() {
+        val formElements = automaticTaxFormElements(
+            shippingValues = mapOf(IdentifierSpec.SameAsShipping to "false"),
+        )
+
+        val sameAsShippingElement = formElements.filterIsInstance<SameAsShippingElement>().single()
+        assertThat(sameAsShippingElement.controller.value.value).isFalse()
+    }
+
+    @Test
+    fun `build omits automatic tax same as shipping without a value`() {
+        val formElements = automaticTaxFormElements(shippingValues = emptyMap())
+
+        assertThat(formElements.filterIsInstance<SameAsShippingElement>()).isEmpty()
+    }
+
+    @Test
+    fun `build omits automatic tax same as shipping for malformed value`() {
+        val formElements = automaticTaxFormElements(
+            shippingValues = mapOf(IdentifierSpec.SameAsShipping to "yes"),
+        )
+
+        assertThat(formElements.filterIsInstance<SameAsShippingElement>()).isEmpty()
+    }
+
+    @Test
     fun `build renders billing address after UI elements regardless of policy order`() {
         val policy = PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("US"))
         val builderArguments = arguments()
 
-        val policyFirst = FormElementsBuilder(builderArguments)
+        val policyFirst = formElementsBuilder(builderArguments)
             .billingAddressPolicy(policy)
             .element(EmptyFormElement(identifier = IdentifierSpec.Generic("element")))
             .build()
-        val policyLast = FormElementsBuilder(builderArguments)
+        val policyLast = formElementsBuilder(builderArguments)
             .element(EmptyFormElement(identifier = IdentifierSpec.Generic("element")))
             .billingAddressPolicy(policy)
             .build()
@@ -375,6 +401,50 @@ class FormElementsBuilderTest {
         assertThat(policyLast.map { it.identifier.v1 }).isEqualTo(
             policyFirst.map { it.identifier.v1 },
         )
+    }
+
+    @Test
+    fun `build promotes country-only source to address-last automatic tax fields`() {
+        val formElements = formElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
+                initialValues = mapOf(IdentifierSpec.Country to "US"),
+                requiresBillingAddressForAutomaticTax = true,
+            ),
+        ).billingAddressPolicy(
+            PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("US", "CA")),
+        ).element(
+            EmptyFormElement(identifier = IdentifierSpec.Generic("element")),
+        ).build()
+
+        assertThat(formElements.map { it.identifier.v1 }).containsExactly(
+            "element",
+            "billing_details[address]_section",
+        ).inOrder()
+    }
+
+    @Test
+    fun `build adds absent automatic tax source before footer`() {
+        val formElements = formElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
+                requiresBillingAddressForAutomaticTax = true,
+            ),
+        ).element(
+            EmptyFormElement(identifier = IdentifierSpec.Generic("element")),
+        ).footer(
+            EmptyFormElement(identifier = IdentifierSpec.Generic("footer")),
+        ).build()
+
+        assertThat(formElements.map { it.identifier.v1 }).containsExactly(
+            "element",
+            "billing_details[address]_section",
+            "footer",
+        ).inOrder()
     }
 
     private inline fun <reified T : SectionFieldElement> SectionElement.assertSingleElementInSection() {
@@ -399,6 +469,7 @@ class FormElementsBuilderTest {
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
         initialValues: Map<IdentifierSpec, String?> = emptyMap(),
         shippingValues: Map<IdentifierSpec, String?>? = emptyMap(),
+        requiresBillingAddressForAutomaticTax: Boolean = false,
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
@@ -410,7 +481,7 @@ class FormElementsBuilderTest {
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            requiresBillingAddressForAutomaticTax = false,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             requiresMandate = false,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
@@ -420,5 +491,30 @@ class FormElementsBuilderTest {
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             linkInlineHandler = null,
         )
+    }
+
+    private fun formElementsBuilder(
+        arguments: UiDefinitionFactory.Arguments,
+    ): FormElementsBuilder {
+        return FormElementsBuilder(
+            arguments = arguments,
+            supportsAutomaticTaxBillingAddress = true,
+        )
+    }
+
+    private fun automaticTaxFormElements(
+        shippingValues: Map<IdentifierSpec, String?>,
+    ): List<FormElement> {
+        return formElementsBuilder(
+            arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
+                shippingValues = shippingValues,
+                requiresBillingAddressForAutomaticTax = true,
+            ),
+        ).billingAddressPolicy(
+            PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("US")),
+        ).build()
     }
 }

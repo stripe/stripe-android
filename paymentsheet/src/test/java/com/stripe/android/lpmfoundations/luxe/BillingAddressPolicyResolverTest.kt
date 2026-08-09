@@ -77,6 +77,34 @@ class BillingAddressPolicyResolverTest {
             .isEqualTo(ResolvedBillingAddress.Suppressed)
     }
 
+    @Test
+    fun `automatic tax promotes absent to tax minimum using merchant countries`() {
+        assertThat(resolveWithAutomaticTax(policy = null, mode = Mode.Automatic))
+            .isEqualTo(ResolvedBillingAddress.TaxMinimum(MERCHANT_COUNTRIES))
+    }
+
+    @Test
+    fun `automatic tax promotes country-only to tax minimum using policy countries`() {
+        assertThat(resolveWithAutomaticTax(policy = countryOnly(), mode = Mode.Automatic))
+            .isEqualTo(ResolvedBillingAddress.TaxMinimum(POLICY_COUNTRIES))
+    }
+
+    @Test
+    fun `automatic tax preserves full address`() {
+        assertThat(resolveWithAutomaticTax(policy = fullAddressIfAllowed(), mode = Mode.Automatic))
+            .isEqualTo(ResolvedBillingAddress.Full(POLICY_COUNTRIES))
+    }
+
+    @Test
+    fun `automatic tax preserves suppressed`() {
+        assertThat(
+            resolveWithAutomaticTax(
+                policy = PaymentMethodBillingAddressPolicy.Suppressed,
+                mode = Mode.Automatic,
+            )
+        ).isEqualTo(ResolvedBillingAddress.Suppressed)
+    }
+
     private fun resolve(
         policy: PaymentMethodBillingAddressPolicy?,
         mode: Mode,
@@ -84,6 +112,19 @@ class BillingAddressPolicyResolverTest {
         return BillingAddressPolicyResolver(
             policy = policy,
             addressCollectionMode = mode,
+            requiresBillingAddressForAutomaticTax = false,
+            merchantAllowedCountryCodes = MERCHANT_COUNTRIES,
+        ).resolve()
+    }
+
+    private fun resolveWithAutomaticTax(
+        policy: PaymentMethodBillingAddressPolicy?,
+        mode: Mode,
+    ): ResolvedBillingAddress {
+        return BillingAddressPolicyResolver(
+            policy = policy,
+            addressCollectionMode = mode,
+            requiresBillingAddressForAutomaticTax = true,
             merchantAllowedCountryCodes = MERCHANT_COUNTRIES,
         ).resolve()
     }

@@ -627,6 +627,57 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `formElementsForCode does not add automatic tax address to external payment method`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            ),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        )
+
+        val formElements = metadata.formElementsForCode(
+            code = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC.type,
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        val addressElements = formElements.filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<AddressElement>()
+        assertThat(addressElements).isEmpty()
+    }
+
+    @Test
+    fun `formElementsForCode does not add automatic tax address to custom payment method`() = runTest {
+        val customPaymentMethod = PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD.copy(
+            doesNotCollectBillingDetails = false,
+        )
+        val metadata = PaymentMethodMetadataFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            ),
+            displayableCustomPaymentMethods = listOf(customPaymentMethod),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        )
+
+        val formElements = metadata.formElementsForCode(
+            code = customPaymentMethod.id,
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        val addressElements = formElements.filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<AddressElement>()
+        assertThat(addressElements).isEmpty()
+    }
+
+    @Test
     fun `formElementsForCode uses one address owner for Full address collection`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -646,11 +697,11 @@ internal class PaymentMethodMetadataTest {
         )!!
 
         assertThat(formElement).hasSize(5)
-
         val addressSection = formElement[4] as SectionElement
         val addressElement = addressSection.fields[0] as AddressElement
         val addressIdentifiers = addressElement.fields.first().map { it.identifier }
         assertThat(addressIdentifiers).contains(IdentifierSpec.Country)
+        assertThat(addressIdentifiers.count { it == IdentifierSpec.Country }).isEqualTo(1)
         assertThat(
             formElement.filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
