@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 
@@ -23,6 +24,8 @@ class BoletoDefinitionTest {
         assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[email]_section")
         assertThat(formElements[2].identifier.v1).isEqualTo("boleto[tax_id]_section")
         assertThat(formElements[3].identifier.v1).isEqualTo("billing_details[address]_section")
+        val addressElement = (formElements[3] as SectionElement).fields.single() as AddressElement
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly("🇧🇷 Brazil")
         val confirmationNumberSection = formElements[2] as SectionElement
         assertThat(confirmationNumberSection.fields[0].identifier.v1).isEqualTo("boleto[tax_id]")
     }

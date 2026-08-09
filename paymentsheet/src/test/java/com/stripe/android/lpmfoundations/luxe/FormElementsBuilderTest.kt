@@ -16,10 +16,12 @@ import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
+import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -59,7 +61,11 @@ class FormElementsBuilderTest {
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
             .header(EmptyFormElement(identifier = IdentifierSpec(v1 = "header")))
             .footer(EmptyFormElement(identifier = IdentifierSpec(v1 = "footer")))
-            .requireBillingAddressIfAllowed()
+            .billingAddressPolicy(
+                PaymentMethodBillingAddressPolicy.FullAddressIfAllowed(
+                    allowedCountryCodes = emptySet(),
+                )
+            )
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .build()
         assertThat(formElements).hasSize(5)
@@ -81,7 +87,11 @@ class FormElementsBuilderTest {
             )
         )
         val formElements = FormElementsBuilder(arguments)
-            .requireBillingAddressIfAllowed()
+            .billingAddressPolicy(
+                PaymentMethodBillingAddressPolicy.FullAddressIfAllowed(
+                    allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                )
+            )
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Phone)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
@@ -109,7 +119,19 @@ class FormElementsBuilderTest {
     }
 
     @Test
-    fun `build returns no billing address fields if ignored`() {
+    fun `build uses the latest payment method billing address policy`() {
+        val formElements = FormElementsBuilder(arguments())
+            .billingAddressPolicy(PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("US")))
+            .billingAddressPolicy(PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("CA")))
+            .build()
+
+        val countryElement = (formElements.single() as SectionElement).fields.single() as CountryElement
+        assertThat(countryElement.controller.displayItems)
+            .containsExactly("🇨🇦 Canada")
+    }
+
+    @Test
+    fun `build returns no billing address fields if suppressed`() {
         val arguments = arguments(
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
@@ -117,7 +139,7 @@ class FormElementsBuilderTest {
         )
         val formElements = FormElementsBuilder(arguments)
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
-            .ignoreBillingAddressRequirements()
+            .billingAddressPolicy(PaymentMethodBillingAddressPolicy.Suppressed)
             .build()
         assertThat(formElements).hasSize(1)
         assertThat(formElements[0].identifier.v1).isEqualTo("element")
@@ -277,6 +299,84 @@ class FormElementsBuilderTest {
         nameSection.assertSingleElementInSection<SimpleTextElement>()
     }
 
+    @Test
+    fun `build keeps country-only source for automatic address collection`() {
+        val formElements = FormElementsBuilder(
+            arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
+                initialValues = mapOf(IdentifierSpec.Country to "DE"),
+            )
+        ).billingAddressPolicy(
+            PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("DE", "FR")),
+        ).build()
+
+        val countryElement = (formElements.single() as SectionElement).fields.single() as CountryElement
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("DE")
+        assertThat(countryElement.controller.displayItems).containsExactly(
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
+    }
+
+    @Test
+    fun `build propagates initial shipping and autocomplete values to resolved full address`() = runTest {
+        val formElements = FormElementsBuilder(
+            arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+                autocompleteAddressInteractorFactory = { TestAutocompleteAddressInteractor.noOp() },
+                initialValues = mapOf(IdentifierSpec.Country to "DE"),
+                shippingValues = mapOf(IdentifierSpec.SameAsShipping to "true"),
+            )
+        ).element(
+            EmptyFormElement(identifier = IdentifierSpec.Generic("before")),
+        ).billingAddressPolicy(
+            PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("DE", "FR")),
+        ).element(
+            EmptyFormElement(identifier = IdentifierSpec.Generic("after")),
+        ).build()
+
+        assertThat(formElements.map { it.identifier.v1 }).containsExactly(
+            "before",
+            "after",
+            "billing_details[address]_section",
+            "same_as_shipping",
+        ).inOrder()
+        val addressElement = (formElements[2] as SectionElement).fields.single() as AutocompleteAddressElement
+        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("DE")
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
+        assertThat((formElements[3] as SameAsShippingElement).controller.value.value).isTrue()
+    }
+
+    @Test
+    fun `build renders billing address after UI elements regardless of policy order`() {
+        val policy = PaymentMethodBillingAddressPolicy.CountryOnly(allowedCountryCodes = setOf("US"))
+        val builderArguments = arguments()
+
+        val policyFirst = FormElementsBuilder(builderArguments)
+            .billingAddressPolicy(policy)
+            .element(EmptyFormElement(identifier = IdentifierSpec.Generic("element")))
+            .build()
+        val policyLast = FormElementsBuilder(builderArguments)
+            .element(EmptyFormElement(identifier = IdentifierSpec.Generic("element")))
+            .billingAddressPolicy(policy)
+            .build()
+
+        assertThat(policyFirst.map { it.identifier.v1 }).containsExactly(
+            "element",
+            "billing_details[address][country]_section",
+        ).inOrder()
+        assertThat(policyLast.map { it.identifier.v1 }).isEqualTo(
+            policyFirst.map { it.identifier.v1 },
+        )
+    }
+
     private inline fun <reified T : SectionFieldElement> SectionElement.assertSingleElementInSection() {
         assertThat(fields).hasSize(1)
         assertThat(fields[0]).isInstanceOf<T>()
@@ -297,12 +397,14 @@ class FormElementsBuilderTest {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
+        shippingValues: Map<IdentifierSpec, String?>? = emptyMap(),
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
-            initialValues = emptyMap(),
+            initialValues = initialValues,
             initialLinkUserInput = null,
-            shippingValues = emptyMap(),
+            shippingValues = shippingValues,
             saveForFutureUseInitialValue = false,
             merchantName = "Example Inc.",
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),

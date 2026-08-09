@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodBillingAddressPolicy
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -41,7 +42,7 @@ internal class CustomPaymentMethodUiDefinitionFactory(
 
         if (displayableCustomPaymentMethod.doesNotCollectBillingDetails) {
             builder.ignoreContactInformationRequirements()
-            builder.ignoreBillingAddressRequirements()
+            builder.billingAddressPolicy(PaymentMethodBillingAddressPolicy.Suppressed)
         }
     }
 }

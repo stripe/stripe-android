@@ -627,7 +627,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
+    fun `formElementsForCode uses one address owner for Full address collection`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -645,15 +645,17 @@ internal class PaymentMethodMetadataTest {
             uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
         )!!
 
-        val countrySection = formElement[4] as SectionElement
-        val countryElement = countrySection.fields[0] as CountryElement
-        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+        assertThat(formElement).hasSize(5)
 
-        val addressSection = formElement[5] as SectionElement
+        val addressSection = formElement[4] as SectionElement
         val addressElement = addressSection.fields[0] as AddressElement
         val addressIdentifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element doesn't contain country.
-        assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
+        assertThat(addressIdentifiers).contains(IdentifierSpec.Country)
+        assertThat(
+            formElement.filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<CountryElement>(),
+        ).isEmpty()
     }
 
     @Test
