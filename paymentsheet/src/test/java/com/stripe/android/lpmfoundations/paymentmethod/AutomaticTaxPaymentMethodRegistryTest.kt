@@ -16,7 +16,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AutomaticTaxPaymentMethodRegistryTest {
     @Test
-    fun `normal registry definitions have one billing country controller for automatic tax`() {
+    fun `direct registry definitions have one billing country controller for automatic tax`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = PaymentMethodRegistry.all.map { it.type.code },
@@ -33,7 +33,7 @@ class AutomaticTaxPaymentMethodRegistryTest {
 
         PaymentMethodRegistry.all.forEach { definition ->
             val uiDefinitionFactory = definition.uiDefinitionFactory(metadata)
-            if (uiDefinitionFactory is UiDefinitionFactory.Custom) {
+            if (uiDefinitionFactory !is UiDefinitionFactory.Simple) {
                 return@forEach
             }
             val formElements = requireNotNull(
