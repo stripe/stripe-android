@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.AutomaticTaxBillingAddressSpec
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -115,7 +114,7 @@ internal class FormElementsBuilder(
                 autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
             )
             is ResolvedBillingAddress.TaxMinimum -> AutomaticTaxBillingAddressFactory(arguments).create(
-                spec = AutomaticTaxBillingAddressSpec(allowedCountryCodes),
+                allowedCountryCodes = allowedCountryCodes,
             )
         }
     }
