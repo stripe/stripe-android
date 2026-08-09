@@ -152,6 +152,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             val LANDSCAPE_LEFT_TOP_START_CLOSE_TAP_ZONE = TapZone(xBias = 0.1f, yBias = 0.5f)
             val LANDSCAPE_RIGHT_TOP_END_CLOSE_TAP_ZONE = TapZone(xBias = 0.2f, yBias = 0.85f)
             val LANDSCAPE_RIGHT_TOP_START_CLOSE_TAP_ZONE = TapZone(xBias = 0.1f, yBias = 0.5f)
+            val LANDSCAPE_LEFT_BOTTOM_TEXT_LIMIT_TAP_ZONE = TapZone(xBias = 0.59f, yBias = 0.5f)
 
             val LANDSCAPE_CORNER_CASES = arrayOf(
                 arrayOf(
@@ -203,6 +204,24 @@ internal class NfcScanningLayoutScreenshotTestSuite {
                     DeviceRotation.Portrait,
                     LOW_TAP_ZONE,
                     Orientation.Portrait,
+                    NfcScanningScreenshotStatus.Error(ERROR_TEXT),
+                ),
+                arrayOf(
+                    DeviceRotation.LandscapeLeft,
+                    LANDSCAPE_LEFT_TOP_END_CLOSE_TAP_ZONE,
+                    Orientation.Landscape,
+                    NfcScanningScreenshotStatus.Error(ERROR_TEXT),
+                ),
+                arrayOf(
+                    DeviceRotation.LandscapeLeft,
+                    LANDSCAPE_LEFT_TOP_START_CLOSE_TAP_ZONE,
+                    Orientation.Landscape,
+                    NfcScanningScreenshotStatus.Error(ERROR_TEXT),
+                ),
+                arrayOf(
+                    DeviceRotation.LandscapeLeft,
+                    LANDSCAPE_LEFT_BOTTOM_TEXT_LIMIT_TAP_ZONE,
+                    Orientation.Landscape,
                     NfcScanningScreenshotStatus.Error(ERROR_TEXT),
                 ),
             )

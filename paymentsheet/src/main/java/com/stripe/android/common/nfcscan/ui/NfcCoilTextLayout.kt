@@ -1,62 +1,64 @@
 package com.stripe.android.common.nfcscan.ui
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.Icon
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.common.nfcscan.tapzone.TapZone
-import com.stripe.android.common.ui.InlineContentTemplateBuilder
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.strings.resolve
 import kotlin.math.roundToInt
-import com.stripe.payments.model.R as PaymentsModelR
 
-private val TextAboveCoilBottomMargin = 22.5.dp
-private val BottomTextOffset = 30.dp
+private val PortraitTopTextOffset = 40.5.dp
+private val PortraitBottomTextOffset = 48.dp
+private val LandscapeTopTextOffset = 22.5.dp
+private val LandscapeBottomTextOffset = 30.dp
 private val InstructionTextEdgePadding = 20.dp
 private val ErrorTextTopSpacing = 8.dp
 
 @Composable
 internal fun NfcCoilTextLayout(
+    text: ResolvableString,
+    subtitle: ResolvableString?,
     containerWidth: Dp,
     containerHeight: Dp,
     tapZone: TapZone,
     coilSize: Dp,
+    deviceRotation: DeviceRotation,
     shouldRenderTextAboveCoil: Boolean,
-    canShow: Boolean,
-    error: ResolvableString?,
 ) {
     Layout(
         content = {
-            NfcCoilInstructionText(canShow = canShow)
-            if (error != null) {
-                NfcCoilErrorText(
-                    message = error,
-                    canShow = canShow,
-                )
-            }
+            NfcText(text, subtitle)
         },
     ) { measurables, constraints ->
         placeCoilTextElements(
@@ -66,6 +68,7 @@ internal fun NfcCoilTextLayout(
             coilSize = coilSize,
             shouldRenderTextAboveCoil = shouldRenderTextAboveCoil,
             measurables = measurables,
+            deviceRotation = deviceRotation,
             constraints = constraints,
         )
     }
@@ -78,6 +81,7 @@ private fun MeasureScope.placeCoilTextElements(
     coilSize: Dp,
     measurables: List<Measurable>,
     constraints: Constraints,
+    deviceRotation: DeviceRotation,
     shouldRenderTextAboveCoil: Boolean,
 ): MeasureResult {
     val horizontalBias = tapZone.xBias * 2 - 1
@@ -106,9 +110,9 @@ private fun MeasureScope.placeCoilTextElements(
     val instructionY = if (shouldRenderTextAboveCoil) {
         val textBlockHeight = instructionPlaceable.height +
             (errorPlaceable?.let { it.height + ErrorTextTopSpacing.roundToPx() } ?: 0)
-        coilBoxTop - TextAboveCoilBottomMargin.roundToPx() - textBlockHeight
+        coilBoxTop - aboveCoilPadding(deviceRotation).roundToPx() - textBlockHeight
     } else {
-        coilBoxTop + coilSizePx + BottomTextOffset.roundToPx()
+        coilBoxTop + coilSizePx + bottomCoilPadding(deviceRotation).roundToPx()
     }
 
     return layout(containerWidthPx, containerHeightPx) {
@@ -144,6 +148,24 @@ private fun MeasureScope.placeCoilTextElements(
     }
 }
 
+private fun aboveCoilPadding(deviceRotation: DeviceRotation): Dp {
+    return when (deviceRotation) {
+        DeviceRotation.Portrait,
+        DeviceRotation.UpsideDown -> PortraitTopTextOffset
+        DeviceRotation.LandscapeLeft,
+        DeviceRotation.LandscapeRight -> LandscapeTopTextOffset
+    }
+}
+
+private fun bottomCoilPadding(deviceRotation: DeviceRotation): Dp {
+    return when (deviceRotation) {
+        DeviceRotation.Portrait,
+        DeviceRotation.UpsideDown -> PortraitBottomTextOffset
+        DeviceRotation.LandscapeLeft,
+        DeviceRotation.LandscapeRight -> LandscapeBottomTextOffset
+    }
+}
+
 private fun clampedTextX(
     placeable: Placeable,
     coilCenterX: Int,
@@ -158,66 +180,103 @@ private fun clampedTextX(
 }
 
 @Composable
-private fun NfcCoilInstructionText(
-    canShow: Boolean,
+internal fun NfcText(
+    text: ResolvableString,
+    subtitle: ResolvableString?,
+    modifier: Modifier = Modifier,
 ) {
-    AnimatedVisibility(
-        visible = canShow,
-        enter = fadeIn(),
-        exit = fadeOut(),
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = stringResource(R.string.stripe_nfc_scan_hold_card_behind_phone),
-            color = MaterialTheme.colors.onSurface,
-            style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Bold),
-            textAlign = TextAlign.Center,
-        )
+        Rolodex(
+            text = text.resolve(),
+            modifier = modifier,
+        ) { text, modifier ->
+            Text(
+                text = text,
+                color = MaterialTheme.colors.onSurface,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.3.sp,
+                textAlign = TextAlign.Center,
+                modifier = modifier,
+            )
+        }
+
+        Spacer(Modifier.size(8.dp))
+
+        Rolodex(
+            text = subtitle?.resolve() ?: "",
+            modifier = modifier,
+        ) { text, modifier ->
+            Text(
+                text = text,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                fontSize = 16.sp,
+                fontFamily = FontFamily.SansSerif,
+                textAlign = TextAlign.Center,
+                modifier = modifier,
+            )
+        }
     }
 }
 
 @Composable
-private fun NfcCoilErrorText(
-    message: ResolvableString,
-    canShow: Boolean,
+private fun Rolodex(
+    text: String,
+    modifier: Modifier = Modifier,
+    textContent: @Composable (text: String, modifier: Modifier) -> Unit,
 ) {
-    AnimatedVisibility(
-        visible = canShow,
-        enter = fadeIn(),
-        exit = fadeOut(),
-    ) {
-        val textStyle = MaterialTheme.typography.body1
-        val fontSize = textStyle.fontSize
+    AnimatedContent(
+        targetState = text,
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+        transitionSpec = {
+            val enterTransition = slideInVertically(
+                animationSpec = RolodexEnterOffsetAnimationSpec,
+                initialOffsetY = { fullHeight ->
+                    -(fullHeight * ROLODEX_OFFSET_FRACTION).toInt()
+                },
+            ) + fadeIn(animationSpec = RolodexEnterAlphaAnimationSpec)
 
-        Text(
-            text = buildAnnotatedString {
-                appendInlineContent(ERROR_ICON_ID)
-                appendInlineContent(ERROR_SPACER_ID)
-                append(message.resolve())
+            val exitTransition = slideOutVertically(
+                animationSpec = RolodexExitOffsetAnimationSpec,
+                targetOffsetY = { fullHeight ->
+                    (fullHeight * ROLODEX_OFFSET_FRACTION).toInt()
+                },
+            ) + fadeOut(animationSpec = RolodexExitAlphaAnimationSpec)
+
+            enterTransition togetherWith exitTransition using SizeTransform(
+                sizeAnimationSpec = { _, _ ->
+                    snap(delayMillis = DURATION_MILLIS)
+                },
+                clip = false,
+            )
+        },
+        label = "RolodexAnimation",
+    ) { content ->
+        textContent(
+            content,
+            Modifier.graphicsLayer {
+                rotationX = ROTATION_X
+                cameraDistance = CAMERA_DISTANCE * density
             },
-            inlineContent = InlineContentTemplateBuilder()
-                .add(
-                    id = ERROR_ICON_ID,
-                    width = fontSize,
-                    height = fontSize,
-                    align = PlaceholderVerticalAlign.TextCenter
-                ) {
-                    Icon(
-                        painter = painterResource(PaymentsModelR.drawable.stripe_ic_error),
-                        contentDescription = null,
-                        tint = MaterialTheme.colors.error,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-                .addSpacer(ERROR_SPACER_ID, ERROR_SPACER_WIDTH)
-                .build(),
-            color = MaterialTheme.colors.error,
-            style = textStyle,
-            textAlign = TextAlign.Center,
         )
     }
 }
 
-private const val ERROR_SPACER_ID = "ERROR_SPACER"
-private val ERROR_SPACER_WIDTH = 5.sp
+private val RolodexEasing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
 
-private const val ERROR_ICON_ID = "ERROR_ICON_ID"
+private val RolodexExitOffsetAnimationSpec: FiniteAnimationSpec<IntOffset> =
+    tween(durationMillis = DURATION_MILLIS, easing = RolodexEasing)
+private val RolodexEnterOffsetAnimationSpec: FiniteAnimationSpec<IntOffset> =
+    tween(durationMillis = DURATION_MILLIS, delayMillis = DURATION_MILLIS, easing = RolodexEasing)
+private val RolodexExitAlphaAnimationSpec: FiniteAnimationSpec<Float> =
+    tween(durationMillis = DURATION_MILLIS, easing = RolodexEasing)
+private val RolodexEnterAlphaAnimationSpec: FiniteAnimationSpec<Float> =
+    tween(durationMillis = DURATION_MILLIS, delayMillis = DURATION_MILLIS, easing = RolodexEasing)
+
+private const val ROTATION_X = 0f
+private const val ROLODEX_OFFSET_FRACTION = 0.235f
+private const val DURATION_MILLIS = 400
+private const val CAMERA_DISTANCE = 12f

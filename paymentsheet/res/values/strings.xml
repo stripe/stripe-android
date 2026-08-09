@@ -112,6 +112,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_error_mobile_wallet">Mobile wallets are not supported. Try a physical card.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Hold card behind phone</string>
+  <!-- Text shown below the NFC coil while the card the user is holding against their device is being read -->
+  <string name="stripe_nfc_scan_reading_card_details">Reading card details</string>
+  <!-- Text shown below the NFC coil after the user's card details have been read -->
+  <string name="stripe_nfc_scan_card_details_added">Card details added</string>
   <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
   <string name="stripe_nfc_scan_internal_error_message">Something went wrong. Try another card.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->

@@ -36,8 +36,6 @@ internal fun NfcCoilLayout(
         onLandscape = { tapZone.yBias > 0.6 },
     )
 
-    val canShowInstructionText = status !is NfcScanningStatus.Scanned
-
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -58,13 +56,14 @@ internal fun NfcCoilLayout(
         }
 
         NfcCoilTextLayout(
+            text = status.title,
+            subtitle = status.subtitle,
             containerWidth = maxWidth,
             containerHeight = maxHeight,
             tapZone = tapZone,
             shouldRenderTextAboveCoil = shouldRenderTextAboveCoil,
+            deviceRotation = deviceRotation,
             coilSize = CoilCircleSize,
-            canShow = canShowInstructionText,
-            error = (status as? NfcScanningStatus.Error)?.message,
         )
     }
 }
