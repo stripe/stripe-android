@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.15.0 - 2026-08-10
 
 ### PaymentSheet
 * [FIXED] LinkController (private preview) now returns an error when no funding sources are available for a Link session, rather than silently falling back to card.
