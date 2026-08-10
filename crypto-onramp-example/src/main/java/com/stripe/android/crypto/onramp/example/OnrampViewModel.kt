@@ -1183,8 +1183,11 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(googlePayIsReady = isReady) }
     }
 
-    private fun samsungPayIsReady(isReady: Boolean, result: SamsungPayAvailabilityResult) {
-        _uiState.update { it.copy(samsungPayIsReady = isReady, samsungPayResult = result) }
+    private fun samsungPayIsReady(
+        isReady: Boolean,
+        @Suppress("UNUSED_PARAMETER") result: SamsungPayAvailabilityResult,
+    ) {
+        _uiState.update { it.copy(samsungPayIsReady = isReady) }
     }
 
     private fun buildIdentifiersRequest(state: OnrampUiState): List<ComplianceIdentifier>? {

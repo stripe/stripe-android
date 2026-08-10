@@ -6,7 +6,6 @@ import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
-import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
@@ -38,7 +37,6 @@ internal data class OnrampUiState(
     val sourceCurrency: SourceCurrency = SourceCurrency.USD,
     val googlePayIsReady: Boolean = false,
     val samsungPayIsReady: Boolean = false,
-    val samsungPayResult: SamsungPayAvailabilityResult? = null,
     val kycFirstName: String = "",
     val kycLastName: String = "",
     val kycBirthCountry: String = "",
