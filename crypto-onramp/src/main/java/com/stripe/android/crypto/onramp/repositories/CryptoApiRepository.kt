@@ -30,6 +30,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRefreshRequest
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
+import com.stripe.android.crypto.onramp.model.SamsungPayTokenParams
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.model.UserAttestation
@@ -47,6 +48,8 @@ import com.stripe.android.crypto.onramp.model.compliance.toRequest
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.utils.filterNotNullValues
 import kotlinx.serialization.KSerializer
@@ -331,6 +334,35 @@ internal class CryptoApiRepository @Inject constructor(
             url = paymentToken,
             paramsJson = json.encodeToJsonElement(params).jsonObject,
             responseSerializer = CreatePaymentTokenResponse.serializer()
+        )
+    }
+
+    /**
+     * Exchanges a Samsung Pay payment credential for a Stripe token, then creates a card
+     * PaymentMethod from that token. Both requests use the onramp platform publishable key.
+     */
+    suspend fun createSamsungPayPaymentMethod(
+        paymentCredential: String,
+        platformPublishableKey: String,
+    ): Result<PaymentMethod> {
+        val options = ApiRequest.Options(
+            apiKey = platformPublishableKey,
+            stripeAccount = stripeAccountIdProvider(),
+        )
+
+        return stripeRepository.createToken(
+            tokenParams = SamsungPayTokenParams(paymentCredential),
+            options = options,
+        ).fold(
+            onSuccess = { token ->
+                stripeRepository.createPaymentMethod(
+                    paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                        card = PaymentMethodCreateParams.Card.create(token.id),
+                    ),
+                    options = options,
+                )
+            },
+            onFailure = { Result.failure(it) },
         )
     }
 

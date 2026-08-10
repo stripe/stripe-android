@@ -59,7 +59,8 @@ class PaymentMethodDisplayData internal constructor(
     enum class Type {
         Card,
         BankAccount,
-        GooglePay
+        GooglePay,
+        SamsungPay,
     }
 
     val icon: Drawable by lazy {

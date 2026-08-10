@@ -176,6 +176,7 @@ internal fun AuthenticatedOperationsScreen(
         )
         PaymentSection(
             googlePayIsReady = uiState.googlePayIsReady,
+            samsungPayIsReady = uiState.samsungPayIsReady,
             sourceCurrency = uiState.sourceCurrency,
             onSelectSourceCurrency = onSelectSourceCurrency,
             onCollectPayment = onCollectPayment
