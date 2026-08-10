@@ -41,6 +41,7 @@ class IntentConfirmationDefinitionTest {
         DummyActivityResultCaller.test {
             val createdLauncher = definition.createLauncher(
                 activityResultCaller = activityResultCaller,
+                lifecycleOwner = fakeLifecycleOwner(),
                 onResult = {},
             )
 

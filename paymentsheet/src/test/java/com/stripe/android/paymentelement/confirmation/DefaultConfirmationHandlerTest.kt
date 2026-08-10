@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
@@ -17,7 +16,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CleanupTestRule
-import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
@@ -27,7 +25,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
@@ -39,9 +36,6 @@ import kotlin.time.Duration.Companion.seconds
 
 class DefaultConfirmationHandlerTest {
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
-
-    @get:Rule
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
@@ -49,10 +43,11 @@ class DefaultConfirmationHandlerTest {
         assertThat(confirmationHandler.hasReloadedFromProcessDeath).isFalse()
 
         val activityResultCaller = mock<ActivityResultCaller>()
+        val lifecycleOwner = fakeLifecycleOwner()
 
         confirmationHandler.register(
             activityResultCaller = activityResultCaller,
-            lifecycleOwner = TestLifecycleOwner(),
+            lifecycleOwner = lifecycleOwner,
         )
 
         val someDefinitionCreateLauncherCall = someDefinitionScenario.createLauncherCalls.awaitItem()
@@ -60,6 +55,8 @@ class DefaultConfirmationHandlerTest {
 
         assertThat(someDefinitionCreateLauncherCall.activityResultCaller).isEqualTo(activityResultCaller)
         assertThat(someOtherDefinitionCreateLauncherCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(someDefinitionCreateLauncherCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+        assertThat(someOtherDefinitionCreateLauncherCall.lifecycleOwner).isEqualTo(lifecycleOwner)
     }
 
     @Test
@@ -75,17 +72,18 @@ class DefaultConfirmationHandlerTest {
         ),
     ) {
         val activityResultCaller = mock<ActivityResultCaller>()
-        val lifecycleOwner = TestLifecycleOwner(
-            coroutineDispatcher = UnconfinedTestDispatcher(),
-        )
+        val lifecycleOwner = fakeLifecycleOwner()
 
         confirmationHandler.register(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
         )
 
-        assertThat(someDefinitionScenario.createLauncherCalls.awaitItem()).isNotNull()
-        assertThat(someOtherDefinitionScenario.createLauncherCalls.awaitItem()).isNotNull()
+        val someDefinitionCreateLauncherCall = someDefinitionScenario.createLauncherCalls.awaitItem()
+        val someOtherDefinitionCreateLauncherCall = someOtherDefinitionScenario.createLauncherCalls.awaitItem()
+
+        assertThat(someDefinitionCreateLauncherCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+        assertThat(someOtherDefinitionCreateLauncherCall.lifecycleOwner).isEqualTo(lifecycleOwner)
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
@@ -797,10 +795,11 @@ class DefaultConfirmationHandlerTest {
                 ).apply {
                     if (shouldRegister) {
                         val activityResultCaller = DummyActivityResultCaller.noOp()
+                        val lifecycleOwner = fakeLifecycleOwner()
 
                         register(
                             activityResultCaller = activityResultCaller,
-                            lifecycleOwner = TestLifecycleOwner(),
+                            lifecycleOwner = lifecycleOwner,
                         )
 
                         val someDefinitionCreateLauncherCall = someDefinitionScenario
@@ -814,6 +813,10 @@ class DefaultConfirmationHandlerTest {
                             .isEqualTo(activityResultCaller)
                         assertThat(someOtherDefinitionCreateLauncherCall.activityResultCaller)
                             .isEqualTo(activityResultCaller)
+                        assertThat(someDefinitionCreateLauncherCall.lifecycleOwner)
+                            .isEqualTo(lifecycleOwner)
+                        assertThat(someOtherDefinitionCreateLauncherCall.lifecycleOwner)
+                            .isEqualTo(lifecycleOwner)
 
                         someDefinitionOnResult = someDefinitionCreateLauncherCall.onResult
                         someOtherDefinitionOnResult = someOtherDefinitionCreateLauncherCall.onResult
