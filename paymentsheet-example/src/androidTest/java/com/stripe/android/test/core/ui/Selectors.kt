@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject
 import androidx.test.uiautomator.UiSelector
@@ -204,8 +205,11 @@ internal class Selectors(
             }
         }
 
-        if (browser == BrowserUI.Chrome && launchedActivity?.contains(CHROME_FIRST_RUN_ACTIVITY) == true) {
-            dismissChromeFirstRunWithInput()
+        if (browser == BrowserUI.Chrome) {
+            sleep(CHROME_ACTIVITY_TRANSITION_MS)
+            if (currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == true) {
+                dismissChromeFirstRunWithInput()
+            }
         }
     }
 
@@ -218,31 +222,31 @@ internal class Selectors(
     }
 
     private fun dismissChromeFirstRunWithInput() {
-        // The API 33 google_apis image has two fixed first-run screens. Accessibility remains
-        // attached to the PaymentSheet window while Chrome is foreground, so use proportional
-        // coordinates for its bottom action buttons.
-        val (displayWidth, displayHeight) = physicalDisplaySize()
-        val buttonY = displayHeight * 9 / 10
-        device.click(displayWidth / 2, buttonY)
-        sleep(CHROME_FIRST_RUN_SCREEN_TRANSITION_MS)
-        device.click(displayWidth / 8, buttonY)
-    }
+        val chrome = BrowserUI.Chrome.packageName
+        repeat(CHROME_FIRST_RUN_MAX_SCREENS) {
+            if (currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == false) {
+                return
+            }
 
-    private fun physicalDisplaySize(): Pair<Int, Int> {
-        val dimensions = runCatching {
-            device.executeShellCommand("wm size")
-                .lineSequence()
-                .first { it.startsWith("Physical size:") }
-                .substringAfter(':')
-                .trim()
-                .split('x')
-        }.getOrNull()
-        val width = dimensions?.getOrNull(0)?.toIntOrNull()
-        val height = dimensions?.getOrNull(1)?.toIntOrNull()
-        return if (width != null && height != null) {
-            width to height
-        } else {
-            device.displayWidth to device.displayHeight
+            var buttonId: String? = null
+            composeTestRule.waitUntil(
+                conditionDescription = "Chrome first-run dismissal button to appear",
+                timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+            ) {
+                buttonId = CHROME_FIRST_RUN_BUTTON_IDS.firstOrNull { id ->
+                    device.hasObject(By.res("$chrome:id/$id"))
+                }
+                buttonId != null
+            }
+            device.findObject(By.res("$chrome:id/${checkNotNull(buttonId)}")).click()
+            sleep(CHROME_ACTIVITY_TRANSITION_MS)
+        }
+
+        composeTestRule.waitUntil(
+            conditionDescription = "Chrome first-run onboarding to close",
+            timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+        ) {
+            currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == false
         }
     }
 
@@ -460,9 +464,17 @@ internal class Selectors(
 
     companion object {
         private const val BROWSER_LAUNCH_TIMEOUT_MS = 60_000L
-        private const val CHROME_FIRST_RUN_SCREEN_TRANSITION_MS = 2_000L
+        private const val CHROME_ACTIVITY_TRANSITION_MS = 2_000L
+        private const val CHROME_FIRST_RUN_MAX_SCREENS = 8
         private const val CHROME_FIRST_RUN_ACTIVITY =
             "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
+        private val CHROME_FIRST_RUN_BUTTON_IDS = listOf(
+            "signin_fre_dismiss_button",
+            "negative_button",
+            "button_secondary",
+            "terms_accept",
+            "next_button",
+        )
 
         fun browserWindow(device: UiDevice, browser: BrowserUI): UiObject? =
             device.findObject(

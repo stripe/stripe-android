@@ -89,7 +89,7 @@ internal class NfcScanningActivityAnalyticsTest {
             ),
         )
 
-        launchScenario {
+        launchScenario(autoAdvance = false) {
             dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
             assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
             isoDep.assertUntilPpseSelectionCommand()
@@ -109,7 +109,7 @@ internal class NfcScanningActivityAnalyticsTest {
             ),
         )
 
-        launchScenario {
+        launchScenario(autoAdvance = false) {
             dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
             assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
             isoDep.assertUntilPpseSelectionCommand()
@@ -132,7 +132,7 @@ internal class NfcScanningActivityAnalyticsTest {
             ),
         )
 
-        launchScenario {
+        launchScenario(autoAdvance = false) {
             dispatchCardRead(NfcScanningActivityTestFixtures.selectApplicationFailureResponses())
             assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
             isoDep.assertConnect()
@@ -150,7 +150,7 @@ internal class NfcScanningActivityAnalyticsTest {
             errorCode = "expiredCard",
         )
 
-        launchScenario {
+        launchScenario(autoAdvance = false) {
             dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
             assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
             isoDep.assertSuccess()
@@ -158,11 +158,13 @@ internal class NfcScanningActivityAnalyticsTest {
     }
 
     private fun launchScenario(
+        autoAdvance: Boolean = true,
         block: suspend NfcScanningActivityScenario.() -> Unit,
     ) {
         NfcScanningActivityTestHelpers.launchScenario(
             context = context,
             composeRule = composeRule,
+            autoAdvance = autoAdvance,
             block = block,
         )
     }

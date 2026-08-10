@@ -325,7 +325,6 @@ internal class DefaultVerticalModeFormInteractorTest {
             customerStateHolder = FakeCustomerStateHolder(),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = paymentMethodCode,
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             ),
         )
         val formHelperFactory = EmbeddedFormHelperFactory(

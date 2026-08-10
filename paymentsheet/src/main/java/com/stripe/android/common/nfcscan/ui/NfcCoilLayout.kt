@@ -1,5 +1,6 @@
 package com.stripe.android.common.nfcscan.ui
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -9,14 +10,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.nfcscan.tapzone.TapZone
+import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 
-internal val CoilCircleSize = 200.dp
+internal val CoilCircleSize = 160.dp
 private val ShadowElevation = 8.dp
 
 @Composable
@@ -25,6 +28,7 @@ internal fun NfcCoilLayout(
     tapZone: TapZone,
     deviceRotation: DeviceRotation,
     onSuccessShown: () -> Unit,
+    onErrorShown: () -> Unit,
 ) {
     val shouldRenderTextAboveCoil = rememberOrientationValues(
         deviceRotation = deviceRotation,
@@ -42,9 +46,14 @@ internal fun NfcCoilLayout(
                 verticalBias = tapZone.yBias * 2 - 1,
             ),
         ) {
+            if (status is NfcScanningStatus.Idle) {
+                PulseRings(coilSize = CoilCircleSize)
+            }
+
             NfcCoil(
                 status = status,
                 onSuccessShown = onSuccessShown,
+                onErrorShown = onErrorShown,
             )
         }
 
@@ -55,7 +64,7 @@ internal fun NfcCoilLayout(
             shouldRenderTextAboveCoil = shouldRenderTextAboveCoil,
             coilSize = CoilCircleSize,
             canShow = canShowInstructionText,
-            error = (status as? NfcScanningStatus.Idle)?.error,
+            error = (status as? NfcScanningStatus.Error)?.message,
         )
     }
 }
@@ -64,9 +73,19 @@ internal fun NfcCoilLayout(
 private fun NfcCoil(
     status: NfcScanningStatus,
     onSuccessShown: () -> Unit,
+    onErrorShown: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isDarkTheme = isSystemInDarkTheme()
+
+    val animatedColor by animateColorAsState(
+        targetValue = if (status is NfcScanningStatus.Error) {
+            MaterialTheme.colors.error
+        } else {
+            PrimaryButtonTheme.colors.background
+        },
+        label = "colorAnimation"
+    )
 
     val shadow = if (isDarkTheme) {
         Modifier
@@ -78,12 +97,13 @@ private fun NfcCoil(
         modifier = modifier
             .size(CoilCircleSize)
             .then(shadow)
-            .background(color = MaterialTheme.colors.primary, shape = CircleShape),
+            .background(color = animatedColor, shape = CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         NfcCoilAnimatedInterior(
             status = status,
             onSuccessShown = onSuccessShown,
+            onErrorShown = onErrorShown,
             modifier = Modifier.fillMaxSize(),
         )
     }

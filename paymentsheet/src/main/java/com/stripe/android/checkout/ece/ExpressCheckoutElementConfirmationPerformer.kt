@@ -1,7 +1,9 @@
 package com.stripe.android.checkout.ece
 
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
@@ -9,7 +11,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItems
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,48 +24,64 @@ internal interface ExpressCheckoutElementConfirmationPerformer {
 internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val confirmationHandler: ConfirmationHandler,
+    private val operationCoordinator: CheckoutOperationCoordinator,
     private val eventReporter: ExpressCheckoutElementEventReporter,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : ExpressCheckoutElementConfirmationPerformer {
     override fun confirm(expressButton: ExpressButton) {
-        val state = stateHolder.state ?: run {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
-            )
-            return
-        }
-        val paymentSelection = expressButton.toSelection()
-
-        val confirmationArgs = getConfirmationArgs(
-            state = state,
-            paymentSelection = paymentSelection,
-        ) ?: run {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
-            )
-            return
-        }
+        val confirmationArgs = operationCoordinator.tryBeginConfirmation {
+            val state = stateHolder.state ?: run {
+                errorReporter.report(
+                    ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
+                )
+                return@tryBeginConfirmation null
+            }
+            getConfirmationArgs(
+                state = state,
+                expressButton = expressButton,
+            ) ?: run {
+                errorReporter.report(
+                    ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+                )
+                null
+            }
+        } ?: return
 
         viewModelScope.launch {
-            confirmationHandler.start(confirmationArgs)
+            try {
+                confirmationHandler.start(confirmationArgs)
 
-            when (val result = confirmationHandler.awaitResult()) {
-                is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
-                is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
-                is ConfirmationHandler.Result.Canceled,
-                null -> Unit
+                when (val result = confirmationHandler.awaitResult()) {
+                    is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
+                    is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
+                    is ConfirmationHandler.Result.Canceled,
+                    null -> Unit
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
+                operationCoordinator.failConfirmation(error)
             }
         }
     }
 
     private fun getConfirmationArgs(
         state: CheckoutControllerState,
-        paymentSelection: PaymentSelection,
+        expressButton: ExpressButton,
     ): ConfirmationHandler.Args? {
         val configuration = state.commonConfiguration
-        val confirmationOption = paymentSelection.toConfirmationOption(
+        val shippingAddressRequired = (expressButton as? ExpressButton.GooglePay)?.shippingAddressRequired == true
+        val shippingAddressParameters = if (shippingAddressRequired) {
+            GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+                allowedCountryCodes = state.checkoutSessionResponse.allowedShippingCountries.orEmpty().toSet(),
+            )
+        } else {
+            null
+        }
+        val confirmationOption = expressButton.toSelection().toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
@@ -72,6 +90,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                 configuration = configuration,
                 paymentMethodMetadata = state.paymentMethodMetadata,
             ),
+            googlePayShippingAddressParameters = shippingAddressParameters,
         ) ?: return null
 
         return ConfirmationHandler.Args(

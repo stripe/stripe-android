@@ -671,6 +671,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             configuration = EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName = "Test Merchant")
                 .build(),
             isRowSelectionImmediateAction = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         )
         val resultMap = createAnalyticsMetadata(
             configuration = configuration
@@ -705,6 +706,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 )
                 .build(),
             isRowSelectionImmediateAction = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         )
         val resultMap = createAnalyticsMetadata(
             configuration = configuration

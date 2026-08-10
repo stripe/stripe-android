@@ -2,10 +2,12 @@ package com.stripe.android.checkout.ece
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -18,6 +20,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -77,7 +80,35 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+            val option = args.confirmationOption as GooglePayConfirmationOption
+            assertThat(option.config.shippingAddressParameters).isNull()
             assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+        }
+    }
+
+    @Test
+    fun `confirm requests a Google Pay shipping address for allowed countries`() {
+        val state = googlePayState(
+            allowedShippingCountries = listOf("US", "CA"),
+        )
+
+        runScenario(
+            state = state,
+            expressButton = createGooglePayExpressButton(
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                shippingAddressRequired = true,
+            ),
+        ) {
+            performer.confirm(expressButton)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            val option = args.confirmationOption as GooglePayConfirmationOption
+            assertThat(option.config.shippingAddressParameters).isEqualTo(
+                GooglePayJsonFactory.ShippingAddressParameters(
+                    isRequired = true,
+                    allowedCountryCodes = setOf("US", "CA"),
+                )
+            )
         }
     }
 
@@ -147,23 +178,30 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         assertThat(failureCall.error.cause.message).isEqualTo("Payment failed")
     }
 
-    private fun googlePayState(): CheckoutControllerState {
+    private fun googlePayState(
+        allowedShippingCountries: List<String>? = null,
+    ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
                 .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
                 .build(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                merchantCountry = "US",
+                allowedShippingCountries = allowedShippingCountries,
+            ),
         )
     }
 
     private fun createGooglePayExpressButton(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        shippingAddressRequired: Boolean = false,
     ): ExpressButton.GooglePay {
         return ExpressButton.GooglePay.create(
             paymentMethodMetadata = paymentMethodMetadata,
             googlePayConfiguration = GooglePayConfiguration(
                 GooglePayConfiguration.Environment.Test,
             ).build(),
+            shippingAddressRequired = shippingAddressRequired,
         )
     }
 
@@ -175,11 +213,18 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeExpressCheckoutElementEventReporter()
         val errorReporter = FakeErrorReporter()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
+        val operationCoordinator = CheckoutOperationCoordinator(
+            confirmationHandler = confirmationHandler,
+            sheetStateHolder = SheetStateHolder(savedStateHandle),
+            resultCallback = {},
+        )
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,
             confirmationHandler = confirmationHandler,
+            operationCoordinator = operationCoordinator,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             statusBarColor = null,

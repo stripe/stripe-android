@@ -17,11 +17,11 @@ internal fun Throwable.toCryptoOnrampError(
 ): Throwable {
     if (this is StripeCryptoOnrampError) return this
 
-    val diagnosticContext = DiagnosticContext(
-        sdkVersions = listOf(SDKVersion.stripeAndroid) + additionalSdkVersions,
-        operation = operation.value,
-        appPackageName = context.packageName,
-        mode = publishableKey.toMode(),
+    val diagnosticContext = createDiagnosticContext(
+        context = context,
+        operation = operation,
+        publishableKey = publishableKey,
+        additionalSdkVersions = additionalSdkVersions,
     )
 
     if (this is LinkAppAttestationException) {
@@ -125,6 +125,20 @@ internal fun Throwable.toCryptoOnrampError(
             )
         }
     }
+}
+
+internal fun createDiagnosticContext(
+    context: Context,
+    operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
+    publishableKey: String?,
+    additionalSdkVersions: List<SDKVersion>,
+): DiagnosticContext {
+    return DiagnosticContext(
+        sdkVersions = listOf(SDKVersion.stripeAndroid) + additionalSdkVersions,
+        operation = operation.value,
+        appPackageName = context.packageName,
+        mode = publishableKey.toMode(),
+    )
 }
 
 private fun Throwable.toCryptoOnrampErrorIfAppAttestationApiError(

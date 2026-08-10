@@ -23,6 +23,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 
 @Module(includes = [PaymentConfigurationModule::class])
@@ -78,7 +79,7 @@ internal interface PaymentMethodMessagingModule {
         @Provides
         @ViewModelScope
         fun provideViewModelScope(): CoroutineScope {
-            return CoroutineScope(Dispatchers.Main)
+            return CoroutineScope(SupervisorJob() + Dispatchers.Main)
         }
     }
 }

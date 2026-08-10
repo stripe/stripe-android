@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
@@ -55,6 +56,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as PaymentsCoreR
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationDefinitionTest {
     @get:Rule
@@ -385,6 +387,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -421,6 +424,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -458,6 +462,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -496,6 +501,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -550,6 +556,45 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = resolvedDisplayItems,
             billingEmailOverride = null,
+            shippingAddressParameters = null,
+        )
+    }
+
+    @Test
+    fun `On 'launch', should pass shipping address parameters to present`() = runTest {
+        val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
+        val definition = createGooglePayConfirmationDefinition()
+        val shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+            isRequired = true,
+            allowedCountryCodes = setOf("US", "CA"),
+            phoneNumberRequired = true,
+        )
+
+        definition.launch(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                    shippingAddressParameters = shippingAddressParameters,
+                ),
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            arguments = EmptyConfirmationLauncherArgs,
+            launcher = launcher,
+        )
+
+        verify(launcher).present(
+            currencyCode = "usd",
+            amount = 1000L,
+            config = launcherConfig(),
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+            transactionId = "pi_12345",
+            label = null,
+            isElements = true,
+            publishableKey = null,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+            shippingAddressParameters = shippingAddressParameters,
         )
     }
 
@@ -626,6 +671,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -658,6 +704,7 @@ class GooglePayConfirmationDefinitionTest {
             publishableKey = null,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 

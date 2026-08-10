@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -25,10 +24,12 @@ import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
+import com.stripe.android.paymentsheet.utils.addPaymentMethodTitle
 import com.stripe.android.paymentsheet.utils.isOnlyOneNonCardPaymentMethod
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
@@ -48,7 +49,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.io.Closeable
 import javax.inject.Inject
-import com.stripe.android.R as PaymentsCoreR
 
 internal class EmbeddedNavigator private constructor(
     private val eventReporter: EventReporter,
@@ -206,11 +206,9 @@ internal class EmbeddedNavigator private constructor(
             private val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
-                PaymentSheetTopBarState(
-                    showTestModeLabel = !formInteractor.isLiveMode,
-                    showEditMenu = false,
-                    isEditing = false,
-                    onEditIconPressed = {},
+                PaymentSheetTopBarStateFactory.create(
+                    isLiveMode = formInteractor.isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
 
@@ -288,11 +286,9 @@ internal class EmbeddedNavigator private constructor(
             private val onContinueClick: () -> Unit,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
-                PaymentSheetTopBarState(
-                    showTestModeLabel = !isLiveMode,
-                    showEditMenu = false,
-                    isEditing = false,
-                    onEditIconPressed = {},
+                PaymentSheetTopBarStateFactory.create(
+                    isLiveMode = isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
 
@@ -329,20 +325,17 @@ internal class EmbeddedNavigator private constructor(
             private val onContinueClick: () -> Unit,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
-                PaymentSheetTopBarState(
-                    showTestModeLabel = !interactor.isLiveMode,
-                    showEditMenu = false,
-                    isEditing = false,
-                    onEditIconPressed = {},
+                PaymentSheetTopBarStateFactory.create(
+                    isLiveMode = interactor.isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
 
             override fun title(): StateFlow<ResolvableString?> = interactor.state.mapAsStateFlow { state ->
-                when {
-                    state.supportedPaymentMethods.isOnlyOneNonCardPaymentMethod() -> null
-                    state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code ->
-                        PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
-                    else -> R.string.stripe_paymentsheet_choose_payment_method.resolvableString
+                if (state.supportedPaymentMethods.isOnlyOneNonCardPaymentMethod()) {
+                    null
+                } else {
+                    state.supportedPaymentMethods.addPaymentMethodTitle()
                 }
             }
 

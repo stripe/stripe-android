@@ -37,7 +37,8 @@ class StripeHostedPlacesClientProxyTest {
                         AutocompleteSuggestion("p1", "Result 1", "City, CA", null),
                         AutocompleteSuggestion("p2", "Result 2", "City, CA", null),
                         AutocompleteSuggestion("p3", "Result 3", "City, CA", null),
-                    )
+                    ),
+                    source = "google",
                 )
             )
         }
@@ -125,7 +126,8 @@ class StripeHostedPlacesClientProxyTest {
                 AutocompletePredictionsResult(
                     predictions = listOf(
                         AutocompleteSuggestion("place_123", "123 Main St", "SF, CA", inlineAddress)
-                    )
+                    ),
+                    source = "google",
                 )
             )
         }
@@ -163,7 +165,8 @@ class StripeHostedPlacesClientProxyTest {
                 AutocompletePredictionsResult(
                     predictions = listOf(
                         AutocompleteSuggestion("place_jp", "Kameido", "Koto City, Tokyo", inlineAddress)
-                    )
+                    ),
+                    source = "google",
                 )
             )
         }
@@ -194,7 +197,8 @@ class StripeHostedPlacesClientProxyTest {
         val repository = FakeStripeAutocompleteRepository().apply {
             predictionsResult = Result.success(
                 AutocompletePredictionsResult(
-                    predictions = listOf(AutocompleteSuggestion("place_123", "123 Main St", "", inlineAddress))
+                    predictions = listOf(AutocompleteSuggestion("place_123", "123 Main St", "", inlineAddress)),
+                    source = "google",
                 )
             )
         }
@@ -267,7 +271,8 @@ class StripeHostedPlacesClientProxyTest {
             AutocompletePredictionsResult(
                 predictions = listOf(
                     AutocompleteSuggestion("place_123", "123 Main St", "San Francisco, CA", null)
-                )
+                ),
+                source = "google",
             )
         )
         detailsResult = Result.success(
@@ -421,7 +426,8 @@ class StripeHostedPlacesClientProxyTest {
         val repository = FakeStripeAutocompleteRepository().apply {
             predictionsResult = Result.success(
                 AutocompletePredictionsResult(
-                    predictions = listOf(AutocompleteSuggestion("place_123", "123 Main St", "SF, CA", inlineAddress))
+                    predictions = listOf(AutocompleteSuggestion("place_123", "123 Main St", "SF, CA", inlineAddress)),
+                    source = "google",
                 )
             )
         }

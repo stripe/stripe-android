@@ -13,12 +13,14 @@ import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
@@ -54,11 +56,13 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
         isImmediateAction: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
     ): PaymentMethodVerticalLayoutInteractor {
+        val interactorScope = coroutineScope.childScope(Dispatchers.Default)
+        val formHelperScope = interactorScope.childScope(Dispatchers.Main)
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
         )
         val formHelper = embeddedFormHelperFactory.createForVerticalLayout(
-            coroutineScope = coroutineScope,
+            coroutineScope = formHelperScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             selectionUpdater = {
@@ -138,8 +142,9 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             },
             // Embedded renders mandate text through its own path, not the mandate-above-button handler.
             updateMandateText = null,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             linkAccount = linkAccountHolder.linkAccountInfo,
+            coroutineScope = interactorScope,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
 }

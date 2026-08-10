@@ -27,6 +27,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -86,7 +87,7 @@ internal interface LinkControllerModule {
         @Singleton
         @ViewModelScope
         fun provideCoroutineScope(): CoroutineScope {
-            return CoroutineScope(Dispatchers.Main)
+            return CoroutineScope(SupervisorJob() + Dispatchers.Main)
         }
     }
 }

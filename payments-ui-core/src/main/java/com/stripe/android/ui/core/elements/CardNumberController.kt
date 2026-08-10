@@ -43,6 +43,7 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -79,7 +80,7 @@ internal class DefaultCardNumberController(
     cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
-    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
+    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext + SupervisorJob()),
     private val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
         cardAccountRangeRepository,
         uiContext,

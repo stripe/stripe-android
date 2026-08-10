@@ -91,6 +91,7 @@ class GooglePayConfirmationFlowTest {
                     publishableKey = null,
                     displayItems = emptyList(),
                     billingEmailOverride = null,
+                    shippingAddressParameters = null,
                 )
             }
         }

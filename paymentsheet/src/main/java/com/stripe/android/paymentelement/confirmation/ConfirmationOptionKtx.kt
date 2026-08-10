@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
@@ -22,6 +23,7 @@ internal fun PaymentSelection.toConfirmationOption(
     googlePayDisplayItems: List<GooglePayDisplayItem> = emptyList(),
     googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
     googlePayBillingEmailOverride: String? = null,
+    googlePayShippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
@@ -36,6 +38,7 @@ internal fun PaymentSelection.toConfirmationOption(
             googlePayDisplayItems,
             isEmailRequired = googlePayIsEmailRequired,
             billingEmailOverride = googlePayBillingEmailOverride,
+            shippingAddressParameters = googlePayShippingAddressParameters,
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
     }
@@ -130,6 +133,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
     displayItems: List<GooglePayDisplayItem>,
     isEmailRequired: Boolean,
     billingEmailOverride: String?,
+    shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -147,6 +151,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 displayItems = displayItems,
                 isEmailRequired = isEmailRequired,
                 billingEmailOverride = billingEmailOverride,
+                shippingAddressParameters = shippingAddressParameters,
             ),
         )
     }

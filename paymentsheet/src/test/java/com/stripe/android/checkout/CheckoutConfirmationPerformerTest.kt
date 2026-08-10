@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -95,11 +96,18 @@ internal class CheckoutConfirmationPerformerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
+        val operationCoordinator = CheckoutOperationCoordinator(
+            confirmationHandler = confirmationHandler,
+            sheetStateHolder = SheetStateHolder(savedStateHandle),
+            resultCallback = {},
+        )
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
             stateHolder = stateHolder,
+            operationCoordinator = operationCoordinator,
             statusBarColor = statusBarColor,
             viewModelScope = backgroundScope,
         )

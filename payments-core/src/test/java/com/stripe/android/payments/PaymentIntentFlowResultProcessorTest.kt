@@ -1181,6 +1181,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         Logger.noop(),
         testDispatcher,
         pollingAnalyticsEventReporter,
+        Clock { testDispatcher.scheduler.currentTime },
     )
 
     private class FakeStripeRepository(

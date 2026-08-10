@@ -9,11 +9,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Before
 import org.junit.Rule
@@ -39,66 +41,67 @@ internal class NfcCoilAnimatedInteriorTest {
     }
 
     @Test
-    fun `idle status keeps ring progress at zero`() {
+    fun `idle status shows NFC icon`() {
         composeRule.setContent {
             NfcCoilAnimatedInterior(
-                status = NfcScanningStatus.Idle(error = null),
+                status = NfcScanningStatus.Idle,
                 onSuccessShown = {},
+                onErrorShown = {},
                 modifier = Modifier.size(CoilSize),
             )
         }
 
         composeRule.waitForIdle()
 
-        assertThat(composeRule.ringProgress()).isEqualTo(NfcCoilRingProgress.Zero)
+        composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(CHECKMARK_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
-    fun `scanning status keeps ring progress at zero`() {
+    fun `scanning status shows spinner`() {
         composeRule.setContent {
             NfcCoilAnimatedInterior(
                 status = NfcScanningStatus.Scanning,
                 onSuccessShown = {},
+                onErrorShown = {},
                 modifier = Modifier.size(CoilSize),
             )
         }
 
         composeRule.waitForIdle()
 
-        assertThat(composeRule.ringProgress()).isEqualTo(NfcCoilRingProgress.Zero)
+        composeRule.onNodeWithTag(SPINNER_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(CHECKMARK_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
-    fun `scanned status animates arc before checkmark`() {
+    fun `scanned status animates checkmark draw`() {
         composeRule.setContent {
             NfcCoilAnimatedInterior(
                 status = NfcScanningStatus.Scanned,
                 onSuccessShown = {},
+                onErrorShown = {},
                 modifier = Modifier.size(CoilSize),
             )
         }
 
         composeRule.waitForIdle()
-        assertThat(composeRule.ringProgress().arcProgress).isEqualTo(0f)
+        assertThat(composeRule.checkmarkProgress()).isEqualTo(0f)
 
-        composeRule.mainClock.advanceTimeBy(ARC_COMPLETE_DURATION_MS.toLong() + FRAME_BUFFER_MS)
-        composeRule.waitForIdle()
+        composeRule.advanceTimeBy(CHECKMARK_START_DELAY_MS + (CHECKMARK_DRAW_DURATION_MS / 2).toLong())
 
-        assertThat(composeRule.ringProgress().arcProgress).isWithin(PROGRESS_TOLERANCE).of(1f)
-        assertThat(composeRule.ringProgress().checkmarkProgress).isEqualTo(0f)
+        val progressMidAnimation = composeRule.checkmarkProgress()
+        assertThat(progressMidAnimation).isGreaterThan(0.1f)
+        assertThat(progressMidAnimation).isLessThan(0.99f)
 
-        composeRule.mainClock.advanceTimeBy(
-            (CHECKMARK_ALPHA_DURATION_MS + CHECKMARK_DRAW_DELAY_MS).toLong(),
+        composeRule.advanceTimeBy(
+            (CHECKMARK_DRAW_DURATION_MS / 2).toLong() + FRAME_BUFFER_MS,
         )
-        composeRule.waitForIdle()
 
-        assertThat(composeRule.ringProgress().checkmarkAlpha).isWithin(PROGRESS_TOLERANCE).of(1f)
-        assertThat(composeRule.ringProgress().checkmarkProgress).isEqualTo(0f)
-
-        composeRule.mainClock.advanceTimeBy(CHECKMARK_DRAW_DURATION_MS.toLong() + FRAME_BUFFER_MS)
-        composeRule.waitForIdle()
-
-        assertRingProgressComplete(composeRule.ringProgress())
+        assertCheckmarkProgressComplete(composeRule.checkmarkProgress())
     }
 
     @Test
@@ -111,6 +114,7 @@ internal class NfcCoilAnimatedInteriorTest {
             NfcCoilAnimatedInterior(
                 status = NfcScanningStatus.Scanned,
                 onSuccessShown = { successShownCount++ },
+                onErrorShown = {},
                 modifier = Modifier.size(CoilSize),
             )
         }
@@ -123,7 +127,99 @@ internal class NfcCoilAnimatedInteriorTest {
     }
 
     @Test
-    fun `config change during arc animation resumes from saved progress`() {
+    fun `error status shows error cross`() {
+        composeRule.setContent {
+            NfcCoilAnimatedInterior(
+                status = NfcScanningStatus.Error(ERROR_MESSAGE),
+                onSuccessShown = {},
+                onErrorShown = {},
+                modifier = Modifier.size(CoilSize),
+            )
+        }
+
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(SPINNER_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(CHECKMARK_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun `error status invokes onErrorShown after delay`() {
+        var errorShownCount by mutableIntStateOf(0)
+
+        composeRule.mainClock.autoAdvance = true
+
+        composeRule.setContent {
+            NfcCoilAnimatedInterior(
+                status = NfcScanningStatus.Error(ERROR_MESSAGE),
+                onSuccessShown = {},
+                onErrorShown = { errorShownCount++ },
+                modifier = Modifier.size(CoilSize),
+            )
+        }
+
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            errorShownCount == 1
+        }
+
+        assertThat(errorShownCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `config change during error delay resumes remaining delay`() {
+        var errorShownCount by mutableIntStateOf(0)
+        val visible = mutableStateOf(true)
+
+        composeRule.setNfcCoilContent(
+            visible = visible,
+            status = NfcScanningStatus.Error(ERROR_MESSAGE),
+            onErrorShown = { errorShownCount++ },
+        )
+
+        composeRule.waitForIdle()
+
+        val elapsedDelayMs = ERROR_SHOWN_DELAY_MS / 2
+        composeRule.advanceErrorDelayBy(elapsedDelayMs)
+        assertThat(errorShownCount).isEqualTo(0)
+
+        composeRule.simulateConfigChange(visible)
+        assertThat(errorShownCount).isEqualTo(0)
+
+        val remainingDelayMs = ERROR_SHOWN_DELAY_MS - elapsedDelayMs
+        composeRule.advanceErrorDelayBy(remainingDelayMs / 2)
+        assertThat(errorShownCount).isEqualTo(0)
+
+        composeRule.advanceErrorDelayBy(remainingDelayMs / 2 + FRAME_BUFFER_MS)
+        assertThat(errorShownCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `config change after error shown does not invoke onErrorShown again`() {
+        var errorShownCount by mutableIntStateOf(0)
+        val visible = mutableStateOf(true)
+
+        composeRule.mainClock.autoAdvance = true
+        composeRule.setNfcCoilContent(
+            visible = visible,
+            status = NfcScanningStatus.Error(ERROR_MESSAGE),
+            onErrorShown = { errorShownCount++ },
+        )
+
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            errorShownCount == 1
+        }
+
+        composeRule.simulateConfigChange(visible)
+        composeRule.waitForIdle()
+
+        assertThat(errorShownCount).isEqualTo(1)
+        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun `config change during checkmark animation resumes from saved progress`() {
         val visible = mutableStateOf(true)
 
         composeRule.setNfcCoilContent(
@@ -132,20 +228,19 @@ internal class NfcCoilAnimatedInteriorTest {
         )
 
         composeRule.waitForIdle()
-        composeRule.mainClock.advanceTimeBy((ARC_COMPLETE_DURATION_MS / 2).toLong())
-        composeRule.waitForIdle()
+        composeRule.advanceTimeBy(CHECKMARK_START_DELAY_MS + (CHECKMARK_DRAW_DURATION_MS / 2).toLong())
 
-        val progressBeforeConfigChange = composeRule.ringProgress()
-        assertThat(progressBeforeConfigChange.arcProgress).isGreaterThan(0.1f)
-        assertThat(progressBeforeConfigChange.arcProgress).isLessThan(0.99f)
+        val progressBeforeConfigChange = composeRule.checkmarkProgress()
+        assertThat(progressBeforeConfigChange).isGreaterThan(0.1f)
+        assertThat(progressBeforeConfigChange).isLessThan(0.99f)
 
         composeRule.simulateConfigChange(visible)
 
-        val progressAfterConfigChange = composeRule.ringProgress()
-        assertThat(progressAfterConfigChange.arcProgress)
+        val progressAfterConfigChange = composeRule.checkmarkProgress()
+        assertThat(progressAfterConfigChange)
             .isWithin(PROGRESS_TOLERANCE)
-            .of(progressBeforeConfigChange.arcProgress)
-        assertThat(progressAfterConfigChange.arcProgress).isGreaterThan(0.1f)
+            .of(progressBeforeConfigChange)
+        assertThat(progressAfterConfigChange).isGreaterThan(0.1f)
     }
 
     @Test
@@ -159,11 +254,11 @@ internal class NfcCoilAnimatedInteriorTest {
 
         composeRule.waitForIdle()
         composeRule.advanceThroughSuccessAnimation()
-        assertRingProgressComplete(composeRule.ringProgress())
+        assertCheckmarkProgressComplete(composeRule.checkmarkProgress())
 
         composeRule.simulateConfigChange(visible)
 
-        assertRingProgressComplete(composeRule.ringProgress())
+        assertCheckmarkProgressComplete(composeRule.checkmarkProgress())
     }
 
     @Test
@@ -186,7 +281,7 @@ internal class NfcCoilAnimatedInteriorTest {
         composeRule.waitForIdle()
 
         assertThat(successShownCount).isEqualTo(1)
-        assertRingProgressComplete(composeRule.ringProgress())
+        assertCheckmarkProgressComplete(composeRule.checkmarkProgress())
     }
 
     @Test
@@ -211,19 +306,29 @@ internal class NfcCoilAnimatedInteriorTest {
         assertThat(successShownCount).isEqualTo(0)
 
         val remainingDelayMs = SUCCESS_SHOWN_DELAY_MS - elapsedDelayMs
-        composeRule.advanceSuccessDelayBy(remainingDelayMs - FRAME_BUFFER_MS)
+        composeRule.advanceSuccessDelayBy(remainingDelayMs / 2)
         assertThat(successShownCount).isEqualTo(0)
 
-        composeRule.advanceSuccessDelayBy(FRAME_BUFFER_MS)
+        composeRule.advanceSuccessDelayBy(remainingDelayMs / 2 + FRAME_BUFFER_MS)
         assertThat(successShownCount).isEqualTo(1)
     }
 
     private fun ComposeContentTestRule.advanceThroughSuccessAnimation() {
-        mainClock.advanceTimeBy(SUCCESS_ANIMATION_DURATION_MS.toLong() + FRAME_BUFFER_MS)
-        waitForIdle()
+        val durationMs = CHECKMARK_START_DELAY_MS + CHECKMARK_DRAW_DURATION_MS + FRAME_BUFFER_MS
+        advanceTimeBy(durationMs)
     }
 
     private fun ComposeContentTestRule.advanceSuccessDelayBy(durationMs: Long) {
+        advanceTimeBy(durationMs)
+    }
+
+    private fun ComposeContentTestRule.advanceTimeBy(durationMs: Long) {
+        ShadowSystemClock.advanceBy(durationMs, TimeUnit.MILLISECONDS)
+        mainClock.advanceTimeBy(durationMs)
+        waitForIdle()
+    }
+
+    private fun ComposeContentTestRule.advanceErrorDelayBy(durationMs: Long) {
         ShadowSystemClock.advanceBy(durationMs, TimeUnit.MILLISECONDS)
         mainClock.advanceTimeBy(durationMs)
         waitForIdle()
@@ -233,6 +338,7 @@ internal class NfcCoilAnimatedInteriorTest {
         visible: MutableState<Boolean>,
         status: NfcScanningStatus,
         onSuccessShown: () -> Unit = {},
+        onErrorShown: () -> Unit = {},
     ) {
         setContent {
             val saveableStateHolder = rememberSaveableStateHolder()
@@ -242,6 +348,7 @@ internal class NfcCoilAnimatedInteriorTest {
                     NfcCoilAnimatedInterior(
                         status = status,
                         onSuccessShown = onSuccessShown,
+                        onErrorShown = onErrorShown,
                         modifier = Modifier.size(CoilSize),
                     )
                 }
@@ -256,16 +363,14 @@ internal class NfcCoilAnimatedInteriorTest {
         waitForIdle()
     }
 
-    private fun assertRingProgressComplete(progress: NfcCoilRingProgress) {
-        assertThat(progress.arcProgress).isWithin(PROGRESS_TOLERANCE).of(1f)
-        assertThat(progress.checkmarkProgress).isWithin(PROGRESS_TOLERANCE).of(1f)
-        assertThat(progress.checkmarkAlpha).isWithin(PROGRESS_TOLERANCE).of(1f)
+    private fun assertCheckmarkProgressComplete(progress: Float) {
+        assertThat(progress).isWithin(PROGRESS_TOLERANCE).of(1f)
     }
 
-    private fun ComposeContentTestRule.ringProgress(): NfcCoilRingProgress {
-        return onNodeWithTag(NFC_COIL_ANIMATED_INTERIOR_TEST_TAG)
+    private fun ComposeContentTestRule.checkmarkProgress(): Float {
+        return onNodeWithTag(CHECKMARK_TEST_TAG)
             .fetchSemanticsNode()
-            .config[NfcCoilRingProgressKey]
+            .config[CheckmarkProgressKey]
     }
 
     private companion object {
@@ -273,17 +378,9 @@ internal class NfcCoilAnimatedInteriorTest {
         const val FRAME_BUFFER_MS = 32L
         val CoilSize = 200.dp
         const val PROGRESS_TOLERANCE = 0.02f
-
-        const val ARC_COMPLETE_DURATION_MS = 270
-        const val CHECKMARK_ALPHA_DURATION_MS = 144
-        const val CHECKMARK_DRAW_DELAY_MS = 48
-        const val CHECKMARK_DRAW_DURATION_MS = 168
+        const val CHECKMARK_START_DELAY_MS = 150L
         const val SUCCESS_SHOWN_DELAY_MS = 900L
-
-        const val SUCCESS_ANIMATION_DURATION_MS =
-            ARC_COMPLETE_DURATION_MS +
-                CHECKMARK_ALPHA_DURATION_MS +
-                CHECKMARK_DRAW_DELAY_MS +
-                CHECKMARK_DRAW_DURATION_MS
+        const val ERROR_SHOWN_DELAY_MS = 1_700L
+        val ERROR_MESSAGE = "Card expired. Try another card.".resolvableString
     }
 }
