@@ -18,6 +18,10 @@ import kotlinx.coroutines.launch
 internal interface CardElementAnalytics {
     fun reportShown(context: Context)
 
+    fun reportInteraction(context: Context)
+
+    fun reportFormCompleted(context: Context)
+
     fun saveState(outState: Bundle)
 
     fun restoreState(savedState: Bundle)
@@ -35,6 +39,8 @@ internal class DefaultCardElementAnalytics internal constructor(
     )
 
     private var hasReportedShown: Boolean = false
+    private var hasReportedInteraction: Boolean = false
+    private var hasReportedFormCompleted: Boolean = false
 
     override fun reportShown(context: Context) {
         if (hasReportedShown) {
@@ -48,11 +54,37 @@ internal class DefaultCardElementAnalytics internal constructor(
         )
     }
 
+    override fun reportInteraction(context: Context) {
+        if (hasReportedInteraction) {
+            return
+        }
+        hasReportedInteraction = true
+        fire(
+            context = context,
+            event = PaymentAnalyticsEvent.MobileCardElementInteraction,
+            params = mapOf(PARAM_WIDGET_TYPE to widgetType.analyticsValue),
+        )
+    }
+
+    override fun reportFormCompleted(context: Context) {
+        if (hasReportedFormCompleted) {
+            return
+        }
+        hasReportedFormCompleted = true
+        fire(
+            context = context,
+            event = PaymentAnalyticsEvent.MobileCardElementFormCompleted,
+            params = mapOf(PARAM_WIDGET_TYPE to widgetType.analyticsValue),
+        )
+    }
+
     override fun saveState(outState: Bundle) {
         outState.putBundle(
             STATE_CARD_ELEMENT_ANALYTICS,
             bundleOf(
                 KEY_HAS_REPORTED_SHOWN to hasReportedShown,
+                KEY_HAS_REPORTED_INTERACTION to hasReportedInteraction,
+                KEY_HAS_REPORTED_FORM_COMPLETED to hasReportedFormCompleted,
             )
         )
     }
@@ -61,6 +93,8 @@ internal class DefaultCardElementAnalytics internal constructor(
         val state = savedState.getBundle(STATE_CARD_ELEMENT_ANALYTICS)
 
         hasReportedShown = state?.getBoolean(KEY_HAS_REPORTED_SHOWN) ?: false
+        hasReportedInteraction = state?.getBoolean(KEY_HAS_REPORTED_INTERACTION) ?: false
+        hasReportedFormCompleted = state?.getBoolean(KEY_HAS_REPORTED_FORM_COMPLETED) ?: false
     }
 
     private fun fire(
@@ -79,11 +113,21 @@ internal class DefaultCardElementAnalytics internal constructor(
         const val STATE_CARD_ELEMENT_ANALYTICS = "stripe_card_element_analytics_state"
 
         const val KEY_HAS_REPORTED_SHOWN = "stripe_card_element_has_reported_shown"
+        const val KEY_HAS_REPORTED_INTERACTION = "stripe_card_element_has_reported_interaction"
+        const val KEY_HAS_REPORTED_FORM_COMPLETED = "stripe_card_element_has_reported_form_completed"
     }
 }
 
 internal object NoOpCardElementCardElementAnalytics : CardElementAnalytics {
     override fun reportShown(context: Context) {
+        // No-op
+    }
+
+    override fun reportInteraction(context: Context) {
+        // No-op
+    }
+
+    override fun reportFormCompleted(context: Context) {
         // No-op
     }
 

@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.Editable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -94,12 +93,16 @@ class CardFormView internal constructor(
                 ).toSet()
         }
 
-    private val cardValidTextWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
-            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
-        }
-    }
+    private val cardElementWatchers = CardElementWatchers(
+        context = context,
+        cardElementAnalytics = cardElementAnalytics,
+        invalidFieldProviders = { invalidFields },
+        cardValidCallbackProvider = { cardValidCallback },
+    )
+
+    private val textFocusWatcher = cardElementWatchers.textFocusWatcher
+
+    private val textInputWatcher = cardElementWatchers.textInputWatcher
 
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null
 
@@ -222,6 +225,19 @@ class CardFormView internal constructor(
             }
         }
 
+    @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0,
+    ) : this(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        cardElementAnalytics = DefaultCardElementAnalytics(
+            widgetType = CardElementWidgetType.CardFormView,
+        ),
+    )
+
     init {
         orientation = VERTICAL
 
@@ -246,33 +262,21 @@ class CardFormView internal constructor(
             postalCodeContainer.setBackgroundColor(Color.TRANSPARENT)
         }
 
+        allEditTextFields.forEach {
+            it.internalFocusChangeListeners.remove(textFocusWatcher)
+            it.removeTextChangedListener(textInputWatcher)
+            it.addTextChangedListener(textInputWatcher)
+            it.internalFocusChangeListeners.add(textFocusWatcher)
+        }
+
         when (style) {
             Style.Standard -> applyStandardStyle()
             Style.Borderless -> applyBorderlessStyle()
         }
     }
 
-    @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0,
-    ) : this(
-        context = context,
-        attrs = attrs,
-        defStyleAttr = defStyleAttr,
-        cardElementAnalytics = DefaultCardElementAnalytics(
-            widgetType = CardElementWidgetType.CardFormView,
-        ),
-    )
-
     fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
-        allEditTextFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
-
-        // only add the TextWatcher if it will be used
-        if (callback != null) {
-            allEditTextFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
-        }
         // call immediately after setting
         cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
     }

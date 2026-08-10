@@ -514,6 +514,37 @@ internal class CardFormViewTest {
     @Test
     fun `reportShown is called when card form attaches`() = runCardFormViewAnalyticsTest {
         assertThat(analytics.awaitShown()).isNotNull()
+        assertThat(analytics.awaitInteraction()).isNotNull()
+    }
+
+    @Test
+    fun `reportInteraction called when postal focus`() = runCardFormViewAnalyticsTest {
+        assertThat(analytics.awaitShown()).isNotNull()
+
+        binding.postalCode.getParentOnFocusChangeListener()
+            .onFocusChange(binding.postalCode, true)
+
+        idleLooper()
+
+        repeat(2) { assertThat(analytics.awaitInteraction()).isNotNull() }
+    }
+
+    @Test
+    fun `reports form completed when form valid`() = runCardFormViewAnalyticsTest {
+        assertThat(analytics.awaitShown()).isNotNull()
+
+        binding.populate(
+            VISA_WITH_SPACES,
+            VALID_MONTH,
+            VALID_YEAR,
+            VALID_CVC,
+            VALID_US_ZIP,
+        )
+
+        idleLooper()
+
+        repeat(9) { assertThat(analytics.awaitInteraction()).isNotNull() }
+        assertThat(analytics.awaitFormCompleted()).isNotNull()
     }
 
     private data class AnalyticsScenario(

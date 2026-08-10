@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -94,12 +93,18 @@ class CardMultilineWidget internal constructor(
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
-    private val cardValidTextWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
-            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
-        }
-    }
+
+    private val cardElementWatchers = CardElementWatchers(
+        context = context,
+        cardElementAnalytics = cardElementAnalytics,
+        invalidFieldProviders = { invalidFields },
+        cardValidCallbackProvider = { cardValidCallback },
+    )
+
+    private val textFocusWatcher = cardElementWatchers.textFocusWatcher
+
+    private val textInputWatcher = cardElementWatchers.textInputWatcher
+
     internal val invalidFields: Set<CardValidCallback.Fields>
         get() {
             return listOfNotNull(
@@ -479,6 +484,11 @@ class CardMultilineWidget internal constructor(
         updateBrandUi()
 
         allFields.forEach { field ->
+            field.internalFocusChangeListeners.remove(textFocusWatcher)
+            field.removeTextChangedListener(textInputWatcher)
+            field.addTextChangedListener(textInputWatcher)
+            field.internalFocusChangeListeners.add(textFocusWatcher)
+
             field.doAfterTextChanged {
                 shouldShowErrorIcon = false
             }
@@ -550,12 +560,6 @@ class CardMultilineWidget internal constructor(
 
     override fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
-        allFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
-
-        // only add the TextWatcher if it will be used
-        if (callback != null) {
-            allFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
-        }
 
         // call immediately after setting
         cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
