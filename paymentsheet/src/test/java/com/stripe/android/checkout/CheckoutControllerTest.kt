@@ -146,13 +146,17 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure prefills the default billing address`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaultBillingAddress(
-            CheckoutController.Address()
-                .city(" San Francisco ")
-                .country(" US ")
-                .line1(" 510 Townsend St ")
-                .postalCode(" 94103 ")
-                .state(" CA ")
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutController.Address()
+                        .city(" San Francisco ")
+                        .country(" US ")
+                        .line1(" 510 Townsend St ")
+                        .postalCode(" 94103 ")
+                        .state(" CA ")
+                )
+            )
         ),
     ) {
         result.getOrThrow()
@@ -167,14 +171,18 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaultBillingAddress(
-            CheckoutController.Address()
-                .city("San Francisco")
-                .country("US")
-                .line1("510 Townsend St")
-                .line2("Suite 100")
-                .postalCode("94103")
-                .state("CA")
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutController.Address()
+                        .city("San Francisco")
+                        .country("US")
+                        .line1("510 Townsend St")
+                        .line2("Suite 100")
+                        .postalCode("94103")
+                        .state("CA")
+                )
+            )
         ),
         networkSetup = {
             networkRule.checkoutInit(

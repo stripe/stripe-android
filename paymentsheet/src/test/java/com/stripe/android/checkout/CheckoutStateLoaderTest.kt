@@ -80,7 +80,12 @@ internal class CheckoutStateLoaderTest {
 
         loader.loadInitial(
             configuration = CheckoutController.Configuration()
-                .defaultBillingAddress(address)
+                .defaults(
+                    CheckoutController.Configuration.Defaults()
+                        .billingDetails(
+                            CheckoutController.Configuration.Defaults.ContactDetails().address(address),
+                        ),
+                )
                 .build(),
             checkoutSessionResponse = response(),
         )
