@@ -9,6 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
@@ -121,9 +122,9 @@ internal interface CheckoutControllerComponent {
     interface Factory {
         fun create(
             @BindsInstance application: Application,
-            @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
+            @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
         ): CheckoutControllerComponent
     }
 }
@@ -209,6 +210,13 @@ internal interface CheckoutControllerModule {
     ): AvailableExpressButtonTypesFactory
 
     companion object {
+        @Provides
+        fun provideSavedStateHandle(
+            checkoutControllerSavedState: CheckoutControllerSavedState,
+        ): SavedStateHandle {
+            return checkoutControllerSavedState.handle
+        }
+
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
