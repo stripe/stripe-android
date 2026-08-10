@@ -19,6 +19,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
