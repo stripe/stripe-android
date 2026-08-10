@@ -27,14 +27,14 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Camera permission</string>
   <string name="stripe_camera_permission_rationale">This app uses the camera to scan your identification documents and takes photos to verify your identity.</string>
-  <!-- Instructional text during selfie is being captured -->
-  <string name="stripe_capturing">Capturing…</string>
   <!-- Status text displayed when the front selfie has been captured -->
   <string name="stripe_captured_front_selfie">Captured front</string>
   <!-- Status text displayed when the left side selfie has been captured -->
   <string name="stripe_captured_left_selfie">Captured left</string>
   <!-- Status text displayed when the right side selfie has been captured -->
   <string name="stripe_captured_right_selfie">Captured right</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="stripe_capturing">Capturing…</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="stripe_check_mark">Check mark to indicate document capture success</string>
   <!-- Text for choosing a photo from gallery -->
@@ -51,11 +51,11 @@
   <string name="stripe_could_not_capture_body2">You can either try again or upload an image from your device.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Could not capture image</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Decline</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Details not visible</string>
   <string name="stripe_decrease_lighting_2">Move to a darker area</string>
-  <!-- Button text to decline optional training consent -->
-  <string name="stripe_decline">Decline</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">camera icon</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -234,26 +234,28 @@
   <string name="stripe_select">Select</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Selfie captures are complete</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_captures">Selfie captures</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Great! Checking your images....</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_title">Selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">one selfie captured</string>
   <!-- Status text instructing the user to turn left for selfie capture -->
   <string name="stripe_selfie_look_left">Turn head left</string>
   <!-- Status text instructing the user to turn right for selfie capture -->
   <string name="stripe_selfie_look_right">Turn head right</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Move closer</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Your selfie images have not been saved. Do you want to leave?</string>
   <!-- Status text instructing the user to place their face inside the selfie guide -->
   <string name="stripe_selfie_place_face">Place your face within the frame</string>
-  <!-- Status text displayed when the user's face is too far from the camera -->
-  <string name="stripe_selfie_move_closer">Move closer</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Selfie</string>
   <!-- Title for the optional training consent section on the selfie warmup page -->
   <string name="stripe_selfie_training_consent_title">Help us improve verifications</string>
   <!-- Body for selfie warmup page -->
-  <string name="stripe_selfie_warmup_body">Follow the instructions to take selfies to compare against the image on your photo ID.</string>
+  <string name="stripe_selfie_warmup_body">A few photos will be taken automatically on the next step to verify it\'s you</string>
   <!-- Title for selfie warmup page -->
   <string name="stripe_selfie_warmup_title">Get ready to take a selfie</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
