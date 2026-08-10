@@ -103,12 +103,20 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).mapCatching { response ->
-                if (configurationState.defaultBillingAddress != null &&
+                val defaultBillingAddress = configurationState.defaults.billingDetails?.address
+                if (defaultBillingAddress != null &&
                     response.automaticTaxEnabled &&
                     response.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING
                 ) {
-                    checkoutSessionRepository.updateTaxRegion(sessionId, configurationState.defaultBillingAddress)
+                    checkoutSessionRepository.updateTaxRegion(sessionId, defaultBillingAddress)
                         .getOrThrow()
+                } else {
+                    response
+                }
+            }.mapCatching { response ->
+                val defaultEmail = configurationState.defaults.email
+                if (defaultEmail != null) {
+                    checkoutSessionRepository.updateEmail(sessionId, defaultEmail).getOrThrow()
                 } else {
                     response
                 }
@@ -884,9 +892,6 @@ class CheckoutController @Inject internal constructor(
         internal data class State(
             val adaptivePricingAllowed: Boolean,
             val apiConfiguration: ApiConfiguration.State?,
-            // Compatibility field for the existing billing-address consumers. The implementation
-            // layer removes this after migrating them to [defaults].
-            val defaultBillingAddress: Address.State?,
             val merchantDisplayName: String?,
             val googlePayConfiguration: GooglePayConfiguration.State?,
             val defaults: Defaults.State,
@@ -901,7 +906,6 @@ class CheckoutController @Inject internal constructor(
             return State(
                 adaptivePricingAllowed = adaptivePricingAllowed,
                 apiConfiguration = apiConfiguration?.build(),
-                defaultBillingAddress = defaultsState.billingDetails?.address,
                 merchantDisplayName = merchantDisplayName,
                 paymentElementConfiguration = paymentElementConfiguration.build(),
                 currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),

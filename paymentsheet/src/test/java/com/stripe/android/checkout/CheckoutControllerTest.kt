@@ -204,6 +204,37 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure sends the trimmed default email to the checkout session`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().email("  prefill@example.com  ")
+        ),
+        networkSetup = {
+            networkRule.checkoutInit(responseFactory = ::successResponse)
+            networkRule.checkoutUpdate(
+                bodyPart("customer_email", "prefill@example.com"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                responseFactory = successResponseFactory { json ->
+                    json.put("customer_email", "prefill@example.com")
+                },
+            )
+        },
+    ) {
+        result.getOrThrow()
+        assertThat(controller.session.value?.email).isEqualTo("prefill@example.com")
+        assertThat(committedState?.embeddedConfiguration?.defaultBillingDetails?.email)
+            .isEqualTo("prefill@example.com")
+    }
+
+    @Test
+    fun `configure does not send an email update when the default email is blank`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().email("   ")
+        ),
+    ) {
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
     fun `configure defaults merchant display name to the checkout session business name`() =
         runConfigureScenario {
             result.getOrThrow()
