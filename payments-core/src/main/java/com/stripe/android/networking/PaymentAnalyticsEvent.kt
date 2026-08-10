@@ -113,7 +113,10 @@ enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     CardMetadataMissingRange("card_metadata_missing_range"),
     CardMetadataExpectedExtraDigitsButUserEntered16ThenSwitchedFields(
         "card_metadata.expected_extra_digits_but_user_entered_16_then_switched_fields"
-    );
+    ),
+
+    // Card Element
+    MobileCardElementShown("mobile_card_element_shown");
 
     @Keep
     override fun toString(): String {

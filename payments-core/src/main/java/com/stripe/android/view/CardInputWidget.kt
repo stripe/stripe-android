@@ -54,10 +54,11 @@ import kotlin.properties.Delegates
  * The card number, cvc, and expiry date will always be left to right regardless of locale.  Postal
  * code layout direction will be set according to the locale.
  */
-class CardInputWidget @JvmOverloads constructor(
+class CardInputWidget internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    private val cardElementAnalytics: CardElementAnalytics,
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private var customCvcLabel: String? = null
     private val viewBinding = StripeCardInputWidgetBinding.inflate(
@@ -426,6 +427,19 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+    @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
+    ) : this(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        cardElementAnalytics = DefaultCardElementAnalytics(
+            widgetType = CardElementWidgetType.CardInputWidget,
+        ),
+    )
+
     init {
         // This ensures that onRestoreInstanceState is called
         // during rotations.
@@ -450,6 +464,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        cardElementAnalytics.reportShown(context = context)
         lifecycleDelegate.initLifecycle(this)
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
@@ -641,11 +656,14 @@ class CardInputWidget @JvmOverloads constructor(
             STATE_CARD_VIEWED to isShowingFullCard,
             STATE_POSTAL_CODE_ENABLED to postalCodeEnabled,
             STATE_ON_BEHALF_OF to onBehalfOf
-        )
+        ).apply {
+            cardElementAnalytics.saveState(this)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
+            cardElementAnalytics.restoreState(state)
             postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, true)
             isShowingFullCard = state.getBoolean(STATE_CARD_VIEWED, true)
             onBehalfOf = state.getString(STATE_ON_BEHALF_OF)

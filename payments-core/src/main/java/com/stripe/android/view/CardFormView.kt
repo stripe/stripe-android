@@ -43,10 +43,11 @@ import com.stripe.payments.model.R as PaymentsModelR
  * To access the [CardParams], see details in [cardParams] property.
  * To get notified if the current card params are valid, set a [CardValidCallback] object with [setCardValidCallback].
  */
-class CardFormView @JvmOverloads constructor(
+class CardFormView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    private val cardElementAnalytics: CardElementAnalytics,
 ) : LinearLayout(context, attrs, defStyleAttr) {
     private val layoutInflater = LayoutInflater.from(context)
     private val viewBinding = StripeCardFormViewBinding.inflate(layoutInflater, this)
@@ -251,6 +252,19 @@ class CardFormView @JvmOverloads constructor(
         }
     }
 
+    @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0,
+    ) : this(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        cardElementAnalytics = DefaultCardElementAnalytics(
+            widgetType = CardElementWidgetType.CardFormView,
+        ),
+    )
+
     fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
         allEditTextFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
@@ -438,11 +452,14 @@ class CardFormView @JvmOverloads constructor(
             STATE_SUPER_STATE to super.onSaveInstanceState(),
             STATE_ENABLED to isEnabled,
             STATE_ON_BEHALF_OF to onBehalfOf,
-        )
+        ).apply {
+            cardElementAnalytics.saveState(this)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         if (state is Bundle) {
+            cardElementAnalytics.restoreState(state)
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
             isEnabled = state.getBoolean(STATE_ENABLED)
             onBehalfOf = state.getString(STATE_ON_BEHALF_OF)
@@ -453,6 +470,7 @@ class CardFormView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        cardElementAnalytics.reportShown(context = context)
         lifecycleOwnerDelegate.initLifecycle(this)
         // Merchant could set onBehalfOf before view is attached to window.
         // Check and set if needed.
