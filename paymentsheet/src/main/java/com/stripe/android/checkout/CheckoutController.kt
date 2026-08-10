@@ -68,7 +68,7 @@ class CheckoutController @Inject internal constructor(
         get() = stateHolder.session
 
     /**
-     * Whether a mutation is currently in progress.
+     * Whether a mutation or confirmation is currently in progress or queued.
      */
     val isUpdating: StateFlow<Boolean> = operationCoordinator.isUpdating
 
