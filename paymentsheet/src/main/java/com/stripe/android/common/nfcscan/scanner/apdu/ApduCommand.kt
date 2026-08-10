@@ -93,7 +93,7 @@ internal abstract class ApduCommand<TResponseData> {
                 } ?: Result.failure(ApduResponseError.Invalid(rawData))
             },
             onFailure = { cause ->
-                Result.failure(ApduResponseError.Parsing(rawData, cause))
+                Result.failure(ApduResponseError.Parsing(cause))
             }
         )
     }
