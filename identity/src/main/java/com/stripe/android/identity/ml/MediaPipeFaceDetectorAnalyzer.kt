@@ -110,7 +110,7 @@ internal class MediaPipeFaceDetectorAnalyzer(
         private const val DEFAULT_FACE_PRESENCE_CONFIDENCE = 0.5f
         private const val DEFAULT_NUM_FACES = 1
         private const val MEDIA_PIPE_FACE_SCORE = 1f
-        private const val MAX_LANDMARK_RESULT_DECIMALS = 4
+        private const val MAX_POSE_DECIMALS = 4
         private val EMPTY_BOUNDING_BOX = BoundingBox(0f, 0f, 0f, 0f)
         fun assertAvailable(context: Context) {
             createFaceLandmarker(context).close()
@@ -210,9 +210,9 @@ internal class MediaPipeFaceDetectorAnalyzer(
             val sy = sqrt(r00 * r00 + r10 * r10)
 
             return FacePose(
-                yaw = atan2(-r20, sy).toDegrees().roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS),
-                pitch = atan2(r21, r22).toDegrees().roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS),
-                roll = atan2(r10, r00).toDegrees().roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS)
+                yaw = atan2(-r20, sy).toDegrees().roundToMaxDecimals(MAX_POSE_DECIMALS),
+                pitch = atan2(r21, r22).toDegrees().roundToMaxDecimals(MAX_POSE_DECIMALS),
+                roll = atan2(r10, r00).toDegrees().roundToMaxDecimals(MAX_POSE_DECIMALS)
             )
         }
 
@@ -221,11 +221,6 @@ internal class MediaPipeFaceDetectorAnalyzer(
         private fun FaceLandmarkerResult.encodedFaceLandmarkResult(): String {
             val payload = JSONObject()
                 .put(CATEGORIES, faceBlendshapes().orElse(emptyList()).firstOrNull().categoriesToJsonArray())
-                .put(FACE_LANDMARKS, faceLandmarks().firstOrNull().landmarksToJsonArray())
-                .put(
-                    FACIAL_TRANSFORMATION_MATRIXES,
-                    facialTransformationMatrixes().orElse(emptyList()).toMatrixJsonArray()
-                )
                 .toString()
             return Base64.encodeToString(
                 payload.toByteArray(Charsets.UTF_8),
@@ -247,44 +242,14 @@ internal class MediaPipeFaceDetectorAnalyzer(
             return categories
         }
 
-        private fun List<NormalizedLandmark>?.landmarksToJsonArray(): JSONArray {
-            val landmarks = JSONArray()
-            this?.forEach { landmark ->
-                landmarks.put(
-                    JSONObject()
-                        .put(X, landmark.x().roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS))
-                        .put(Y, landmark.y().roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS))
-                        .put(Z, landmark.z().roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS))
-                )
-            }
-            return landmarks
-        }
-
-        private fun List<FloatArray>.toMatrixJsonArray(): JSONArray {
-            val matrices = JSONArray()
-            forEach { matrix ->
-                val values = JSONArray()
-                matrix.forEach { value ->
-                    values.put(value.roundToMaxDecimals(MAX_LANDMARK_RESULT_DECIMALS))
-                }
-                matrices.put(values)
-            }
-            return matrices
-        }
-
         private fun columnMajorIndex(row: Int, column: Int): Int = column * MATRIX_WIDTH + row
 
         private const val MATRIX_WIDTH = 4
         private const val MATRIX_SIZE = 16
         private const val CATEGORIES = "categories"
-        private const val FACE_LANDMARKS = "face_landmarks"
-        private const val FACIAL_TRANSFORMATION_MATRIXES = "facial_transformation_matrixes"
         private const val CATEGORY_NAME = "category_name"
         private const val DISPLAY_NAME = "display_name"
         private const val SCORE = "score"
         private const val INDEX = "index"
-        private const val X = "x"
-        private const val Y = "y"
-        private const val Z = "z"
     }
 }
