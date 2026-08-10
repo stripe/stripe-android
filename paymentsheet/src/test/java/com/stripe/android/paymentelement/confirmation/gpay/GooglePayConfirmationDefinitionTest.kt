@@ -38,6 +38,7 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
@@ -98,6 +99,7 @@ class GooglePayConfirmationDefinitionTest {
             DummyActivityResultCaller.test {
                 definition.createLauncher(
                     activityResultCaller = activityResultCaller,
+                    lifecycleOwner = fakeLifecycleOwner(),
                     onResult = onResult,
                 )
 

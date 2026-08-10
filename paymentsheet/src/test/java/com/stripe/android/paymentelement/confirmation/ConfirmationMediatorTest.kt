@@ -93,15 +93,18 @@ class ConfirmationMediatorTest {
         )
 
         val activityResultCaller = mock<ActivityResultCaller>()
+        val lifecycleOwner = fakeLifecycleOwner()
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
             onResult = {},
         )
 
         val createLauncherCall = createLauncherCalls.awaitItem()
 
         assertThat(createLauncherCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(createLauncherCall.lifecycleOwner).isEqualTo(lifecycleOwner)
     }
 
     @Test
@@ -115,6 +118,7 @@ class ConfirmationMediatorTest {
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = {
                 throw NotImplementedError("'onResult' should not be called!")
             },
@@ -260,6 +264,7 @@ class ConfirmationMediatorTest {
         ).apply {
             register(
                 activityResultCaller = mock(),
+                lifecycleOwner = fakeLifecycleOwner(),
                 onResult = {}
             )
         }
@@ -320,6 +325,7 @@ class ConfirmationMediatorTest {
             ).apply {
                 register(
                     activityResultCaller = mock(),
+                    lifecycleOwner = fakeLifecycleOwner(),
                     onResult = {}
                 )
             }
@@ -391,6 +397,7 @@ class ConfirmationMediatorTest {
 
         mediator.register(
             activityResultCaller = mock(),
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = {}
         )
         mediator.unregister()
@@ -443,6 +450,7 @@ class ConfirmationMediatorTest {
 
         mediator.register(
             activityResultCaller = mock(),
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = { result ->
                 receivedResult = result
 
@@ -511,6 +519,7 @@ class ConfirmationMediatorTest {
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = { result ->
                 assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
 

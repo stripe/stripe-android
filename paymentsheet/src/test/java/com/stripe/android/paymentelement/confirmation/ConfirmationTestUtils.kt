@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCallback
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -10,6 +11,7 @@ import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -30,6 +32,7 @@ internal fun <
     DummyActivityResultCaller.test {
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = {}
         )
 
@@ -90,6 +93,7 @@ internal fun <
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = {
                 result = it
 
@@ -108,6 +112,10 @@ internal fun <
         assertThat(result).isEqualTo(definitionResult)
     }
 }
+
+internal fun fakeLifecycleOwner() = TestLifecycleOwner(
+    coroutineDispatcher = UnconfinedTestDispatcher(),
+)
 
 @Suppress("UNCHECKED_CAST")
 internal fun <T : ConfirmationHandler.Option> ConfirmationHandler.Option.asOption(): T {
