@@ -768,9 +768,9 @@ class CheckoutController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var adaptivePricingAllowed: Boolean = false
-        private var defaultBillingAddress: Address? = null
         private var merchantDisplayName: String? = null
         private var googlePayConfiguration: GooglePayConfiguration? = null
+        private var defaults: Defaults = Defaults()
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
             CurrencySelectorElement.Configuration()
@@ -786,18 +786,6 @@ class CheckoutController @Inject internal constructor(
             adaptivePricingAllowed: Boolean
         ): Configuration = apply {
             this.adaptivePricingAllowed = adaptivePricingAllowed
-        }
-
-        /**
-         * Sets the customer's known billing address.
-         *
-         * The address is used to prefill payment method forms. When automatic tax uses the billing
-         * address, Checkout can also use it to calculate an initial tax estimate.
-         */
-        fun defaultBillingAddress(
-            defaultBillingAddress: Address,
-        ): Configuration = apply {
-            this.defaultBillingAddress = defaultBillingAddress
         }
 
         /**
@@ -857,28 +845,122 @@ class CheckoutController @Inject internal constructor(
             this.googlePayConfiguration = configuration
         }
 
+        /**
+         * Prefill values for the customer's details. If known up front, these prepopulate the
+         * elements (and the Checkout Session) so the customer doesn't re-enter them.
+         */
+        fun defaults(
+            defaults: Defaults
+        ): Configuration = apply {
+            this.defaults = defaults
+        }
+
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
+            // Compatibility field for the existing billing-address consumers. The implementation
+            // layer removes this after migrating them to [defaults].
             val defaultBillingAddress: Address.State?,
             val merchantDisplayName: String?,
             val googlePayConfiguration: GooglePayConfiguration.State?,
+            val defaults: Defaults.State,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
             val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
         ) : Parcelable
 
-        internal fun build(): State = State(
-            adaptivePricingAllowed = adaptivePricingAllowed,
-            defaultBillingAddress = defaultBillingAddress?.build(),
-            merchantDisplayName = merchantDisplayName,
-            paymentElementConfiguration = paymentElementConfiguration.build(),
-            currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
-            shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
-            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
-            googlePayConfiguration = googlePayConfiguration?.build(),
-        )
+        internal fun build(): State {
+            val defaultsState = defaults.build()
+            return State(
+                adaptivePricingAllowed = adaptivePricingAllowed,
+                defaultBillingAddress = defaultsState.billingDetails?.address,
+                merchantDisplayName = merchantDisplayName,
+                paymentElementConfiguration = paymentElementConfiguration.build(),
+                currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
+                shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
+                expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
+                googlePayConfiguration = googlePayConfiguration?.build(),
+                defaults = defaultsState,
+            )
+        }
+
+        /**
+         * Prefill values for the customer's billing/shipping details and email.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Defaults {
+            private var billingDetails: ContactDetails? = null
+            private var shippingDetails: ContactDetails? = null
+            private var email: String? = null
+
+            /**
+             * The customer's known billing contact details.
+             */
+            fun billingDetails(billingDetails: ContactDetails): Defaults = apply {
+                this.billingDetails = billingDetails
+            }
+
+            /**
+             * The customer's known shipping contact details.
+             */
+            fun shippingDetails(shippingDetails: ContactDetails): Defaults = apply {
+                this.shippingDetails = shippingDetails
+            }
+
+            /**
+             * The customer's known email address.
+             */
+            fun email(email: String?): Defaults = apply {
+                this.email = email
+            }
+
+            @Parcelize
+            internal data class State(
+                val billingDetails: ContactDetails.State?,
+                val shippingDetails: ContactDetails.State?,
+                val email: String?,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                billingDetails = billingDetails?.build(),
+                shippingDetails = shippingDetails?.build(),
+                email = email?.trim()?.takeIf { it.isNotEmpty() },
+            )
+
+            /**
+             * A name, phone number, and postal address for a customer.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class ContactDetails {
+                private var name: String? = null
+                private var phoneNumber: String? = null
+                private var address: Address? = null
+
+                fun name(name: String?): ContactDetails = apply { this.name = name }
+
+                fun phoneNumber(phoneNumber: String?): ContactDetails = apply {
+                    this.phoneNumber = phoneNumber
+                }
+
+                fun address(address: Address): ContactDetails = apply { this.address = address }
+
+                @Parcelize
+                internal data class State(
+                    val name: String?,
+                    val phoneNumber: String?,
+                    val address: Address.State?,
+                ) : Parcelable
+
+                internal fun build(): State = State(
+                    name = name,
+                    phoneNumber = phoneNumber,
+                    address = address?.build(),
+                )
+            }
+        }
     }
 
     /**
