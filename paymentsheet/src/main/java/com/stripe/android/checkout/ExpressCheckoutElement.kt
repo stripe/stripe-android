@@ -1,9 +1,12 @@
 package com.stripe.android.checkout
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.checkout.ece.ExpressCheckoutElementContent
 import com.stripe.android.checkout.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -34,6 +37,83 @@ class ExpressCheckoutElement @Inject internal constructor(
 
     @CheckoutSessionPreview
     class Configuration {
+
+        /**
+         * Configuration for how billing details are collected during checkout.
+         */
+        class BillingDetailsCollectionConfiguration {
+            /**
+             * Billing details fields collection options.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class CollectionMode {
+                /**
+                 * The field will be collected depending on the Payment Method's requirements.
+                 */
+                Automatic,
+
+                /**
+                 * The field will never be collected.
+                 * If this field is required by the Payment Method, you must provide it as part of
+                 * the default billing details.
+                 */
+                Never,
+
+                /**
+                 * The field will always be collected, even if it isn't required for the Payment
+                 * Method.
+                 */
+                Always,
+            }
+
+            /**
+             * Billing address collection options.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class AddressCollectionMode {
+                /**
+                 * Only the fields required by the Payment Method will be collected, this may be
+                 * none.
+                 */
+                Automatic,
+
+                /**
+                 * Collect the full billing address, regardless of the Payment Method requirements.
+                 */
+                Full,
+
+                // Note: a `Never` mode is intentionally omitted for the CheckoutSession private
+                // preview — suppressing billing collection is not supported with a CheckoutSession.
+                // It can be added at public preview/GA if that use case is supported.
+            }
+
+            private var name: CollectionMode = CollectionMode.Automatic
+            private var phone: CollectionMode = CollectionMode.Automatic
+            private var email: CollectionMode = CollectionMode.Automatic
+            private var address: AddressCollectionMode = AddressCollectionMode.Automatic
+
+            /** How to collect the name field. */
+            fun name(name: CollectionMode): BillingDetailsCollectionConfiguration = apply {
+                this.name = name
+            }
+
+            /** How to collect the phone field. */
+            fun phone(phone: CollectionMode): BillingDetailsCollectionConfiguration = apply {
+                this.phone = phone
+            }
+
+            /** How to collect the email field. */
+            fun email(email: CollectionMode): BillingDetailsCollectionConfiguration = apply {
+                this.email = email
+            }
+
+            /** How to collect the billing address. */
+            fun address(address: AddressCollectionMode): BillingDetailsCollectionConfiguration = apply {
+                this.address = address
+            }
+        }
 
 
         private var paymentMethods: PaymentMethods = PaymentMethods()
@@ -164,6 +244,18 @@ class ExpressCheckoutElement @Inject internal constructor(
                 internal fun build(): State = State(maxColumns = maxColumns, maxRows = maxRows)
             }
 
+            /** Themes for express buttons. */
+            enum class ButtonTheme {
+                /** Light theme which contrasts with a dark background. */
+                Light,
+
+                /** Dark theme which contrasts with a light background. */
+                Dark,
+
+                /** Automatic theme which contrasts with background depending on system theme. */
+                Automatic,
+            }
+
             // TODO: do we need a corner radius or padding appearance params?
 
             // TODO: add a button type here? No -- but call out in API review.
@@ -179,6 +271,10 @@ class ExpressCheckoutElement @Inject internal constructor(
             /** Sets the layout of the express buttons. */
             fun buttonLayout(buttonLayout: ButtonLayout): Appearance = apply {
                 this.buttonLayout = buttonLayout
+            }
+
+            fun buttonTheme(buttonTheme: ButtonTheme): Appearance {
+                throw NotImplementedError()
             }
 
             @Parcelize
