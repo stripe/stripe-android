@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.linkinline
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
@@ -93,6 +94,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val onResult: (LinkInlineSignupConfirmationDefinition.Result) -> Unit = {}
 
         val launcher = definition.createLauncher(
+            lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = activityResultCaller,
             onResult = onResult,
         )

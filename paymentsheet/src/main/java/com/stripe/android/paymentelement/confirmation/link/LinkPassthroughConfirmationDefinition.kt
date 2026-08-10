@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.link
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.model.PaymentMethod
@@ -50,6 +51,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
     }
 
     override fun createLauncher(
+        lifecycleOwner: LifecycleOwner,
         activityResultCaller: ActivityResultCaller,
         onResult: (Result) -> Unit
     ): Launcher {

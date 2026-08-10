@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.epms
 
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -65,6 +66,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
     }
 
     override fun createLauncher(
+        lifecycleOwner: LifecycleOwner,
         activityResultCaller: ActivityResultCaller,
         onResult: (PaymentResult) -> Unit
     ): ActivityResultLauncher<ExternalPaymentMethodInput> {

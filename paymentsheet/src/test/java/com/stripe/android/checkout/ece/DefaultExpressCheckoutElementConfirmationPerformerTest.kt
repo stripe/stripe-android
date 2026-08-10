@@ -95,7 +95,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             state = state,
             expressButton = createGooglePayExpressButton(
                 paymentMethodMetadata = state.paymentMethodMetadata,
-                shippingAddressRequired = true,
             ),
         ) {
             performer.confirm(expressButton)

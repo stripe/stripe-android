@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
@@ -41,11 +42,13 @@ internal class ConfirmationMediator<
     }
 
     fun register(
+        lifecycleOwner: LifecycleOwner,
         activityResultCaller: ActivityResultCaller,
         onResult: (ConfirmationDefinition.Result) -> Unit,
     ) {
         launcher = definition.createLauncher(
-            activityResultCaller
+            lifecycleOwner = lifecycleOwner,
+            activityResultCaller = activityResultCaller,
         ) { result ->
             val confirmationResult = persistedParameters?.let { params ->
                 persistedParameters = null

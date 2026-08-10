@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -40,6 +41,7 @@ class IntentConfirmationDefinitionTest {
 
         DummyActivityResultCaller.test {
             val createdLauncher = definition.createLauncher(
+                lifecycleOwner = TestLifecycleOwner(),
                 activityResultCaller = activityResultCaller,
                 onResult = {},
             )

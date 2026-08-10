@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.challenge
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
@@ -80,6 +81,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     }
 
     override fun createLauncher(
+        lifecycleOwner: LifecycleOwner,
         activityResultCaller: ActivityResultCaller,
         onResult: (PassiveChallengeActivityResult) -> Unit
     ): ActivityResultLauncher<PassiveChallengeActivityContract.Args> {

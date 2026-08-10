@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -9,10 +10,12 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.callback.GooglePayPaymentDataChangedCallback
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
@@ -20,12 +23,15 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
+import javax.inject.Provider
 import com.stripe.android.R as PaymentsCoreR
 
 internal class GooglePayConfirmationDefinition @Inject constructor(
+    @PaymentElementCallbackIdentifier private val callbackIdentifier: String,
     private val context: Context,
     private val googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory,
     private val userFacingLogger: UserFacingLogger?,
+    private val googlePayUpdateCallbackProvider: Provider<GooglePayPaymentDataChangedCallback?>
 ) : ConfirmationDefinition<
     GooglePayConfirmationOption,
     InternalGooglePayPaymentMethodLauncher,
@@ -65,6 +71,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     }
 
     override fun createLauncher(
+        lifecycleOwner: LifecycleOwner,
         activityResultCaller: ActivityResultCaller,
         onResult: (GooglePayPaymentMethodLauncher.Result) -> Unit
     ): InternalGooglePayPaymentMethodLauncher {
@@ -74,6 +81,9 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         )
 
         return googlePayPaymentMethodLauncherFactory.create(
+            instanceId = callbackIdentifier,
+            lifecycleOwner = lifecycleOwner,
+            onPaymentDataChangedCallback = googlePayUpdateCallbackProvider.get(),
             activityResultLauncher = activityResultLauncher,
         )
     }
@@ -105,6 +115,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             displayItems = config.displayItems.map { it.resolve(context) },
             billingEmailOverride = config.billingEmailOverride,
             shippingAddressParameters = config.shippingAddressParameters,
+            shippingOptionsParameters = config.shippingOptionsParameters,
         )
     }
 

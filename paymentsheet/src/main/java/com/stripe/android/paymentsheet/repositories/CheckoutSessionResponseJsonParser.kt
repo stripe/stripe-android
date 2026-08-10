@@ -46,7 +46,11 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
         val taxContext = json.optJSONObject(FIELD_TAX_CONTEXT)
         val automaticTaxEnabled = taxContext?.optBoolean(FIELD_AUTOMATIC_TAX_ENABLED, false) ?: false
-        val taxAddressSource = parseTaxAddressSource(taxContext)
+        val hasShippingAddressCollection = json.optJSONObject(FIELD_SHIPPING_ADDRESS_COLLECTION) != null
+        val taxAddressSource = parseTaxAddressSource(
+            taxContext = taxContext,
+            hasShippingAddressCollection = hasShippingAddressCollection,
+        )
         val taxStatus = parseTaxStatusFromMeta(
             taxMeta = json.optJSONObject(FIELD_TAX_META),
             taxAddressSource = taxAddressSource,
@@ -156,15 +160,23 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
 
     private fun parseTaxAddressSource(
         taxContext: JSONObject?,
+        hasShippingAddressCollection: Boolean,
     ): CheckoutSessionResponse.TaxAddressSource? {
         val raw = taxContext?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE)
             ?.takeIf { it.isNotEmpty() }
             ?.let { if (it.startsWith("session.")) it.removePrefix("session.") else it }
-            ?: return null
-        return when (raw) {
+        val parsed = when (raw) {
             "shipping" -> CheckoutSessionResponse.TaxAddressSource.SHIPPING
             "billing" -> CheckoutSessionResponse.TaxAddressSource.BILLING
             else -> null
+        }
+        if (parsed != null) {
+            return parsed
+        }
+        return if (hasShippingAddressCollection) {
+            CheckoutSessionResponse.TaxAddressSource.SHIPPING
+        } else {
+            null
         }
     }
 

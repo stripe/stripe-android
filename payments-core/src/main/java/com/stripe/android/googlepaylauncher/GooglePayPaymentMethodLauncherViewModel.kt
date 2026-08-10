@@ -19,6 +19,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.googlepaylauncher.callback.GooglePayPaymentDataCallbackRegistry
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
@@ -51,6 +52,16 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     private val _googleResult = MutableStateFlow<GooglePayPaymentMethodLauncher.Result?>(null)
     internal val googlePayResult = _googleResult.asStateFlow()
 
+    init {
+        args.dynamicCallbackId?.let { dynamicCallbackId ->
+            GooglePayPaymentDataCallbackRegistry.select(dynamicCallbackId)
+        }
+    }
+
+    override fun onCleared() {
+        GooglePayPaymentDataCallbackRegistry.deselect()
+    }
+
     fun updateResult(result: GooglePayPaymentMethodLauncher.Result) {
         _googleResult.value = result
     }
@@ -76,6 +87,8 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             ),
             billingAddressParameters = args.config.billingAddressConfig.convert(),
             shippingAddressParameters = args.shippingAddressParameters,
+            shippingOptionParameters = args.shippingOptionsParameters,
+            hasDynamicCallbacks = args.dynamicCallbackId != null,
             isEmailRequired = args.config.isEmailRequired,
             allowCreditCards = args.config.allowCreditCards
         )

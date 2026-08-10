@@ -75,6 +75,8 @@ class CheckoutRequest private constructor(
     val adjustableQuantity: Boolean?,
     @SerialName("automatic_tax")
     val automaticTax: Boolean?,
+    @SerialName("shipping_address_collection")
+    val shippingAddressCollection: Boolean?,
     @SerialName("adaptive_pricing")
     val adaptivePricing: Boolean?,
     @SerialName("display_shipping_rates")
@@ -132,6 +134,7 @@ class CheckoutRequest private constructor(
         private var allowPromotionCodes: Boolean? = null
         private var adjustableQuantity: Boolean? = null
         private var automaticTax: Boolean? = null
+        private var shippingAddressCollection: Boolean? = null
         private var adaptivePricing: Boolean? = null
         private var displayShippingRates: Boolean? = null
         private var customerEmail: String? = null
@@ -273,6 +276,10 @@ class CheckoutRequest private constructor(
             this.automaticTax = automaticTax
         }
 
+        fun shippingAddressCollection(shippingAddressCollection: Boolean?) = apply {
+            this.shippingAddressCollection = shippingAddressCollection
+        }
+
         fun adaptivePricing(adaptivePricing: Boolean?) = apply {
             this.adaptivePricing = adaptivePricing
         }
@@ -326,6 +333,7 @@ class CheckoutRequest private constructor(
                 allowPromotionCodes = allowPromotionCodes,
                 adjustableQuantity = adjustableQuantity,
                 automaticTax = automaticTax,
+                shippingAddressCollection = shippingAddressCollection,
                 adaptivePricing = adaptivePricing,
                 displayShippingRates = displayShippingRates,
                 customerEmail = customerEmail,

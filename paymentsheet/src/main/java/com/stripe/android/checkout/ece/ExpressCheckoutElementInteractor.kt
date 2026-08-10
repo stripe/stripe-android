@@ -3,6 +3,7 @@
 package com.stripe.android.checkout.ece
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -62,8 +63,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
                         googlePayConfiguration = expressButtonType.googlePayConfiguration,
-                        shippingAddressRequired =
-                            state.configuration.expressCheckoutElementConfiguration.shippingAddressRequired,
+                        shippingAddressRequired = isShippingAddressCollectionEnabled(state),
                     )
                 }
             },
@@ -88,5 +88,10 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
 
     private companion object {
         const val KEY_ECE_DISPLAYED = "express_checkout_element_displayed"
+
+        private fun isShippingAddressCollectionEnabled(state: CheckoutControllerState): Boolean {
+            return state.configuration.expressCheckoutElementConfiguration.shippingAddressRequired ||
+                !state.checkoutSessionResponse.allowedShippingCountries.isNullOrEmpty()
+        }
     }
 }

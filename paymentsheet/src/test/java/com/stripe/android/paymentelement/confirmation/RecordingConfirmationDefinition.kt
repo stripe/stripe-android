@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -69,12 +70,13 @@ internal class RecordingConfirmationDefinition<
     }
 
     override fun createLauncher(
+        lifecycleOwner: LifecycleOwner,
         activityResultCaller: ActivityResultCaller,
         onResult: (TLauncherResult) -> Unit
     ): TLauncher {
-        createLauncherCalls.add(CreateLauncherCall(activityResultCaller, onResult))
+        createLauncherCalls.add(CreateLauncherCall(lifecycleOwner, activityResultCaller, onResult))
 
-        return definition.createLauncher(activityResultCaller, onResult)
+        return definition.createLauncher(lifecycleOwner, activityResultCaller, onResult)
     }
 
     override fun unregister(launcher: TLauncher) {
@@ -124,6 +126,7 @@ internal class RecordingConfirmationDefinition<
     )
 
     class CreateLauncherCall<TLauncherResult>(
+        val lifecycleOwner: LifecycleOwner,
         val activityResultCaller: ActivityResultCaller,
         val onResult: (TLauncherResult) -> Unit
     )

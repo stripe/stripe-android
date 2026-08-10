@@ -38,7 +38,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
@@ -96,7 +95,7 @@ import javax.inject.Singleton
     modules = [
         CheckoutControllerModule::class,
         CheckoutModule::class,
-        ExtendedPaymentElementConfirmationModule::class,
+        CheckoutExtendedPaymentElementConfirmationModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         ElementsSessionClientParamsModule::class,

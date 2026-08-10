@@ -357,6 +357,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CHECKOUT_SELECTION_SET_BEFORE_LOAD(
             partialEventName = "checkout.selection_set_before_load"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_NOT_REGISTERED(
+            partialEventName = "google_pay.dynamic_callback.not_registered"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_FAILURE(
+            partialEventName = "google_pay.dynamic_callback.failure"
         );
 
         override val eventName: String

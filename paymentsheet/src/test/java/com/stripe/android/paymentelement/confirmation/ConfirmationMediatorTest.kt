@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -95,6 +96,7 @@ class ConfirmationMediatorTest {
         val activityResultCaller = mock<ActivityResultCaller>()
 
         mediator.register(
+            lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = activityResultCaller,
             onResult = {},
         )
@@ -114,6 +116,7 @@ class ConfirmationMediatorTest {
         val activityResultCaller = mock<ActivityResultCaller>()
 
         mediator.register(
+            lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = activityResultCaller,
             onResult = {
                 throw NotImplementedError("'onResult' should not be called!")
@@ -259,6 +262,7 @@ class ConfirmationMediatorTest {
             definition = definition
         ).apply {
             register(
+                lifecycleOwner = TestLifecycleOwner(),
                 activityResultCaller = mock(),
                 onResult = {}
             )
@@ -319,6 +323,7 @@ class ConfirmationMediatorTest {
                 definition = definition
             ).apply {
                 register(
+                    lifecycleOwner = TestLifecycleOwner(),
                     activityResultCaller = mock(),
                     onResult = {}
                 )
@@ -390,6 +395,7 @@ class ConfirmationMediatorTest {
         )
 
         mediator.register(
+            lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = mock(),
             onResult = {}
         )
@@ -442,6 +448,7 @@ class ConfirmationMediatorTest {
         var receivedResult: ConfirmationDefinition.Result? = null
 
         mediator.register(
+            lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = mock(),
             onResult = { result ->
                 receivedResult = result
@@ -510,6 +517,7 @@ class ConfirmationMediatorTest {
         val activityResultCaller = mock<ActivityResultCaller>()
 
         mediator.register(
+            lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = activityResultCaller,
             onResult = { result ->
                 assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()

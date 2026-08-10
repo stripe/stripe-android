@@ -179,6 +179,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     currencyCode = "usd",
                     amount = 0,
                     shippingAddressParameters = null,
+                    shippingOptionsParameters = null,
                 )
             )
             assertThat(transactionInfo)
@@ -208,6 +209,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     currencyCode = "usd",
                     amount = 0,
                     shippingAddressParameters = null,
+                    shippingOptionsParameters = null,
                 )
             )
             assertThat(transactionInfo)
@@ -316,6 +318,42 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentDataRequest() should include shipping option parameters and callback intents`() {
+        val viewModel = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(
+                dynamicCallbackId = "callback-id",
+                shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                    isRequired = true,
+                    allowedCountryCodes = setOf("US"),
+                ),
+                shippingOptionsParameters = GooglePayJsonFactory.ShippingOptionParameters(
+                    defaultSelectedOptionId = "standard",
+                    shippingOptions = listOf(
+                        GooglePayJsonFactory.ShippingOption(
+                            id = "standard",
+                            label = "Standard shipping",
+                        ),
+                    ),
+                ),
+            ),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        ).also { viewModelStoreRule.track(it) }
+
+        val paymentDataRequest = viewModel.createPaymentDataRequest()
+
+        assertThat(paymentDataRequest.getJSONObject("shippingOptionParameters")).isNotNull()
+        val callbackIntents = paymentDataRequest.getJSONArray("callbackIntents")
+        assertThat(listOf(callbackIntents.getString(0), callbackIntents.getString(1)))
+            .containsExactly("SHIPPING_ADDRESS", "SHIPPING_OPTION")
+    }
+
+    @Test
     fun `Factory gets initialized with fallback when no Injector is available`() {
         scenario.onFragment { fragment ->
             val application = ApplicationProvider.getApplicationContext<Application>()
@@ -334,6 +372,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     label = null,
                     transactionId = null,
                     shippingAddressParameters = null,
+                    shippingOptionsParameters = null,
                 )
             )
 
@@ -386,6 +425,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 checkoutSessionId = null,
             ),
             shippingAddressParameters = null,
+            shippingOptionsParameters = null,
         )
         val REQUEST_OPTIONS = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

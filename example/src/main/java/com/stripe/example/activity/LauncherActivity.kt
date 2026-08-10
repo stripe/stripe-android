@@ -49,6 +49,10 @@ class LauncherActivity : AppCompatActivity() {
                 CreateCardPaymentMethodActivity::class.java
             ),
             Item(
+                activity.getString(R.string.googlepay_dynamic_callbacks_example),
+                GooglePayDynamicCallbacksExampleActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.googlepaylauncher_example),
                 GooglePayLauncherIntegrationActivity::class.java
             ),

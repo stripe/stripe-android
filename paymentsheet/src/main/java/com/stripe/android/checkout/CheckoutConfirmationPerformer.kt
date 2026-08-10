@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.checkout.gpay.CheckoutGooglePayShippingConfigurationFactory
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -35,6 +36,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     private fun confirmationArgs(): ConfirmationHandler.Args? {
         val state = stateHolder.state ?: return null
         val configuration = state.commonConfiguration
+        val shippingConfiguration = CheckoutGooglePayShippingConfigurationFactory.create(state)
         val confirmationOption = state.paymentSelection?.toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
@@ -44,6 +46,8 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
                 configuration = configuration,
                 paymentMethodMetadata = state.paymentMethodMetadata,
             ),
+            googlePayShippingAddressParameters = shippingConfiguration?.shippingAddressParameters,
+            googlePayShippingOptionsParameters = shippingConfiguration?.shippingOptionsParameters,
         ) ?: return null
 
         return ConfirmationHandler.Args(

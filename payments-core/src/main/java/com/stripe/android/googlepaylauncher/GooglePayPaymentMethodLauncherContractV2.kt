@@ -61,6 +61,8 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
         internal val billingEmailOverride: String? = null,
         internal val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
+        internal val shippingOptionsParameters: GooglePayJsonFactory.ShippingOptionParameters?,
+        internal val dynamicCallbackId: String? = null,
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

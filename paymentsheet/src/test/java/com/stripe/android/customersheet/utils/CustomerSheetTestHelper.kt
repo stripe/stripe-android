@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.utils
 
 import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
@@ -22,6 +23,7 @@ import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataS
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.callback.GooglePayPaymentDataChangedCallback
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -149,6 +151,9 @@ internal interface CustomerSheetTestHelper {
                     },
                     googlePayPaymentMethodLauncherFactory = object : InternalGooglePayPaymentMethodLauncherFactory {
                         override fun create(
+                            instanceId: String,
+                            lifecycleOwner: LifecycleOwner,
+                            onPaymentDataChangedCallback: GooglePayPaymentDataChangedCallback?,
                             activityResultLauncher:
                             ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
                         ): InternalGooglePayPaymentMethodLauncher = mock()

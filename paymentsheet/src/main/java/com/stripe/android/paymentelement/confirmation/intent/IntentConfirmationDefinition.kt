@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -71,6 +72,7 @@ internal class IntentConfirmationDefinition(
     }
 
     override fun createLauncher(
+        lifecycleOwner: LifecycleOwner,
         activityResultCaller: ActivityResultCaller,
         onResult: (InternalPaymentResult) -> Unit
     ): ActivityResultLauncher<PaymentLauncherContract.Args> {

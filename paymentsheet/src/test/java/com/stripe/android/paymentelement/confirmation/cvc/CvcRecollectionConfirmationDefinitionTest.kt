@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.cvc
 
 import androidx.activity.result.ActivityResultCallback
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethodFixtures
@@ -111,6 +112,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         DummyActivityResultCaller.test {
             definition.createLauncher(
+                lifecycleOwner = TestLifecycleOwner(),
                 activityResultCaller = activityResultCaller,
                 onResult = onResult,
             )

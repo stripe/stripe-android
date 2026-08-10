@@ -43,6 +43,7 @@
         </activity>
 
         <activity android:name=".activity.CreateCardPaymentMethodActivity" />
+        <activity android:name=".activity.GooglePayDynamicCallbacksExampleActivity" />
         <activity android:name=".activity.GooglePayLauncherIntegrationActivity" />
         <activity android:name=".activity.GooglePayLauncherPlaygroundActivity" />
         <activity android:name=".activity.GooglePayLauncherComposeActivity" />

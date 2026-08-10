@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.callback.GooglePayPaymentDataChangedCallback
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import kotlinx.coroutines.test.runTest
 
@@ -14,14 +16,27 @@ internal class RecordingInternalGooglePayPaymentMethodLauncherFactory private co
     private val calls = Turbine<Call>()
 
     override fun create(
+        instanceId: String,
+        lifecycleOwner: LifecycleOwner,
+        onPaymentDataChangedCallback: GooglePayPaymentDataChangedCallback?,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     ): InternalGooglePayPaymentMethodLauncher {
-        calls.add(Call(activityResultLauncher))
+        calls.add(
+            Call(
+                instanceId = instanceId,
+                lifecycleOwner = lifecycleOwner,
+                onPaymentDataChangedCallback = onPaymentDataChangedCallback,
+                activityResultLauncher = activityResultLauncher,
+            )
+        )
 
         return launcher
     }
 
     data class Call(
+        val instanceId: String,
+        val lifecycleOwner: LifecycleOwner,
+        val onPaymentDataChangedCallback: GooglePayPaymentDataChangedCallback?,
         val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     )
 

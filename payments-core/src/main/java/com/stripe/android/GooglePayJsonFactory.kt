@@ -200,6 +200,8 @@ class GooglePayJsonFactory internal constructor(
         merchantInfo: MerchantInfo,
         billingAddressParameters: BillingAddressParameters? = null,
         shippingAddressParameters: ShippingAddressParameters? = null,
+        shippingOptionParameters: ShippingOptionParameters? = null,
+        hasDynamicCallbacks: Boolean = false,
         isEmailRequired: Boolean = false,
         allowCreditCards: Boolean? = null,
     ): JSONObject {
@@ -227,6 +229,24 @@ class GooglePayJsonFactory internal constructor(
                     )
                 }
 
+                shippingOptionParameters?.let {
+                    put("shippingOptionParameters", createShippingOptionParameters(it))
+                }
+
+                if (hasDynamicCallbacks) {
+                    val intents = listOfNotNull(
+                        "SHIPPING_ADDRESS".takeIf { shippingAddressParameters?.isRequired == true },
+                        "SHIPPING_OPTION".takeIf { shippingOptionParameters != null }
+                    )
+
+                    if (intents.isNotEmpty()) {
+                        put(
+                            "callbackIntents",
+                            JSONArray(intents)
+                        )
+                    }
+                }
+
                 put(
                     "merchantInfo",
                     JSONObject().apply {
@@ -243,6 +263,18 @@ class GooglePayJsonFactory internal constructor(
                     }
                 )
             }
+    }
+
+    internal fun createTransactionInfoJson(
+        transactionInfo: TransactionInfo,
+    ): JSONObject {
+        return createTransactionInfo(transactionInfo)
+    }
+
+    internal fun createShippingOptionParametersJson(
+        shippingOptionParameters: ShippingOptionParameters,
+    ): JSONObject {
+        return createShippingOptionParameters(shippingOptionParameters)
     }
 
     private fun createTransactionInfo(
@@ -315,6 +347,34 @@ class GooglePayJsonFactory internal constructor(
                 "phoneNumberRequired",
                 shippingAddressParameters.phoneNumberRequired
             )
+    }
+
+    private fun createShippingOptionParameters(
+        shippingOptionParameters: ShippingOptionParameters,
+    ): JSONObject {
+        return JSONObject().apply {
+            shippingOptionParameters.defaultSelectedOptionId?.let {
+                put("defaultSelectedOptionId", it)
+            }
+
+            put(
+                "shippingOptions",
+                JSONArray().apply {
+                    shippingOptionParameters.shippingOptions.forEach { shippingOption ->
+                        put(
+                            JSONObject()
+                                .put("id", shippingOption.id)
+                                .put("label", shippingOption.label)
+                                .apply {
+                                    shippingOption.description?.let { description ->
+                                        put("description", description)
+                                    }
+                                }
+                        )
+                    }
+                }
+            )
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -443,6 +503,7 @@ class GooglePayJsonFactory internal constructor(
             totalPrice: Int? = null,
             totalPriceLabel: String? = null,
             checkoutOption: CheckoutOption? = null,
+            displayItems: List<DisplayItem> = emptyList(),
         ) : this(
             currencyCode = currencyCode,
             totalPriceStatus = totalPriceStatus,
@@ -451,7 +512,7 @@ class GooglePayJsonFactory internal constructor(
             totalPrice = totalPrice?.toLong(),
             totalPriceLabel = totalPriceLabel,
             checkoutOption = checkoutOption,
-            displayItems = emptyList(),
+            displayItems = displayItems,
         )
 
         /**
@@ -561,6 +622,30 @@ class GooglePayJsonFactory internal constructor(
             }
         }
     }
+
+    /**
+     * [ShippingOptionParameters](https://developers.google.com/pay/api/android/reference/request-objects#
+     * ShippingOptionParameters)
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    @Poko
+    class ShippingOptionParameters @JvmOverloads constructor(
+        val defaultSelectedOptionId: String? = null,
+        val shippingOptions: List<ShippingOption> = emptyList(),
+    ) : Parcelable
+
+    /**
+     * [SelectionOption](https://developers.google.com/pay/api/android/reference/request-objects#SelectionOption)
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    @Poko
+    class ShippingOption @JvmOverloads constructor(
+        val id: String,
+        val label: String,
+        val description: String? = null,
+    ) : Parcelable
 
     @Parcelize
     @Poko

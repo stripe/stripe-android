@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 
@@ -43,6 +44,7 @@ internal abstract class FakeConfirmationDefinition<
     }
 
     override fun createLauncher(
+        lifecycleOwner: LifecycleOwner,
         activityResultCaller: ActivityResultCaller,
         onResult: (TLauncherResult) -> Unit
     ): TLauncher {

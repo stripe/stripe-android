@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCallback
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -29,6 +30,7 @@ internal fun <
 
     DummyActivityResultCaller.test {
         mediator.register(
+            lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = activityResultCaller,
             onResult = {}
         )
@@ -89,6 +91,7 @@ internal fun <
         var result: ConfirmationDefinition.Result? = null
 
         mediator.register(
+            lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = activityResultCaller,
             onResult = {
                 result = it

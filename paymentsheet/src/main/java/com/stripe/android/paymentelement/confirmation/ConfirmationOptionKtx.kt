@@ -24,6 +24,7 @@ internal fun PaymentSelection.toConfirmationOption(
     googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
     googlePayBillingEmailOverride: String? = null,
     googlePayShippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,
+    googlePayShippingOptionsParameters: GooglePayJsonFactory.ShippingOptionParameters? = null,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
@@ -39,6 +40,7 @@ internal fun PaymentSelection.toConfirmationOption(
             isEmailRequired = googlePayIsEmailRequired,
             billingEmailOverride = googlePayBillingEmailOverride,
             shippingAddressParameters = googlePayShippingAddressParameters,
+            shippingOptionsParameters = googlePayShippingOptionsParameters,
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
     }
@@ -134,6 +136,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
     isEmailRequired: Boolean,
     billingEmailOverride: String?,
     shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
+    shippingOptionsParameters: GooglePayJsonFactory.ShippingOptionParameters?,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -152,6 +155,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 isEmailRequired = isEmailRequired,
                 billingEmailOverride = billingEmailOverride,
                 shippingAddressParameters = shippingAddressParameters,
+                shippingOptionsParameters = shippingOptionsParameters,
             ),
         )
     }

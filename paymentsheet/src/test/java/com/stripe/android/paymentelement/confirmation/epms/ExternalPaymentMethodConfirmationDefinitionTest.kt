@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.epms
 
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -63,6 +64,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val onResult: (PaymentResult) -> Unit = { onResultCalled = true }
         DummyActivityResultCaller.test {
             val launcher = definition.createLauncher(
+                lifecycleOwner = TestLifecycleOwner(),
                 activityResultCaller = activityResultCaller,
                 onResult = onResult,
             )

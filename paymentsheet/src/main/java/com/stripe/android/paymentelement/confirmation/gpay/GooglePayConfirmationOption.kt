@@ -28,5 +28,6 @@ internal data class GooglePayConfirmationOption(
         val isEmailRequired: Boolean = billingDetailsCollectionConfiguration.collectsEmail,
         val billingEmailOverride: String? = null,
         val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,
+        val shippingOptionsParameters: GooglePayJsonFactory.ShippingOptionParameters? = null,
     ) : Parcelable
 }

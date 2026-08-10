@@ -4,6 +4,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
+import com.stripe.android.checkout.gpay.CheckoutGooglePayShippingConfigurationFactory
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
@@ -72,15 +73,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         expressButton: ExpressButton,
     ): ConfirmationHandler.Args? {
         val configuration = state.commonConfiguration
-        val shippingAddressRequired = (expressButton as? ExpressButton.GooglePay)?.shippingAddressRequired == true
-        val shippingAddressParameters = if (shippingAddressRequired) {
-            GooglePayJsonFactory.ShippingAddressParameters(
-                isRequired = true,
-                allowedCountryCodes = state.checkoutSessionResponse.allowedShippingCountries.orEmpty().toSet(),
-            )
-        } else {
-            null
-        }
+        val shippingConfiguration = CheckoutGooglePayShippingConfigurationFactory.create(state)
+        val shippingAddressParameters = shippingConfiguration?.shippingAddressParameters
+        val shippingOptionsParameters = shippingConfiguration?.shippingOptionsParameters
         val confirmationOption = expressButton.toSelection().toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
@@ -91,6 +86,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                 paymentMethodMetadata = state.paymentMethodMetadata,
             ),
             googlePayShippingAddressParameters = shippingAddressParameters,
+            googlePayShippingOptionsParameters = shippingOptionsParameters,
         ) ?: return null
 
         return ConfirmationHandler.Args(

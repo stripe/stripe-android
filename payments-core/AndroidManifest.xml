@@ -58,6 +58,15 @@
             android:theme="@style/StripeGooglePayDefaultTheme"
             android:exported="false" />
 
+        <service
+            android:name=".googlepaylauncher.callback.StripeGooglePayPaymentDataCallbacksService"
+            android:permission="com.google.android.gms.permission.BIND_PAYMENTS_CALLBACK_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wallet.callback.PAYMENT_DATA_CALLBACKS" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".payments.paymentlauncher.PaymentLauncherConfirmationActivity"
             android:theme="@style/StripePayLauncherDefaultTheme"

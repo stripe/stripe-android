@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.attestation
 
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
@@ -120,6 +121,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         DummyActivityResultCaller.test {
             definition.createLauncher(
+                lifecycleOwner = TestLifecycleOwner(),
                 activityResultCaller = activityResultCaller,
                 onResult = onResult,
             )

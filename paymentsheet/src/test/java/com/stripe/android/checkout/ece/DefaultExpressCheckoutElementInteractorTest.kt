@@ -18,6 +18,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -63,6 +64,20 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             .shippingAddressRequired(true),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.GooglePay),
+        ),
+    ) {
+        val googlePayButton = interactor.state.value.expressButtons.single() as ExpressButton.GooglePay
+
+        assertThat(googlePayButton.shippingAddressRequired).isTrue()
+    }
+
+    @Test
+    fun `state requires Google Pay shipping address when session collects shipping`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.GooglePay),
+        ),
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            allowedShippingCountries = listOf("US", "CA"),
         ),
     ) {
         val googlePayButton = interactor.state.value.expressButtons.single() as ExpressButton.GooglePay
@@ -199,6 +214,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
         googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration(),
+        checkoutSessionResponse: com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse =
+            CheckoutSessionResponseFactory.create(),
         availableExpressButtonTypes: List<ExpressButtonType> = paymentMethodMetadata.availableWallets.map {
             when (it) {
                 WalletType.Link -> ExpressButtonType.Link
@@ -218,6 +235,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 availableExpressButtonTypes = availableExpressButtonTypes,
                 savedStateHandle = savedStateHandle,
                 configuration = configuration,
+                checkoutSessionResponse = checkoutSessionResponse,
             )
 
             DefaultExpressCheckoutElementInteractor(
@@ -248,6 +266,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         availableExpressButtonTypes: List<ExpressButtonType>,
         savedStateHandle: SavedStateHandle,
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+        checkoutSessionResponse: com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse =
+            CheckoutSessionResponseFactory.create(),
     ): CheckoutControllerStateHolder {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
@@ -259,6 +279,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         )
         stateHolder.state = CheckoutControllerStateFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,
+            checkoutSessionResponse = checkoutSessionResponse,
             configuration = CheckoutController.Configuration()
                 .expressCheckoutElement(configuration)
                 .build(),

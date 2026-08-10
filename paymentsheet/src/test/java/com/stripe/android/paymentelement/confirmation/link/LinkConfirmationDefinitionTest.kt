@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.link
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -72,6 +73,7 @@ internal class LinkConfirmationDefinitionTest {
         val onResult: (LinkActivityResult) -> Unit = {}
 
         definition.createLauncher(
+            lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = activityResultCaller,
             onResult = onResult,
         )

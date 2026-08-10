@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.checkout.GooglePayConfiguration.Environment
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -70,6 +71,10 @@ internal class CheckoutControllerExampleViewModel(
                 controller.configure(
                     checkoutSessionClientSecret = clientSecret,
                     configuration = CheckoutController.Configuration()
+                        .expressCheckoutElement(
+                            ExpressCheckoutElement.Configuration()
+                                .shippingAddressRequired(shippingAddressRequired = true)
+                        )
                         .googlePayConfiguration(
                             GooglePayConfiguration(
                                 environment = Environment.Test

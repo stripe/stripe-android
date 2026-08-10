@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.cpms
 
 import androidx.activity.result.ActivityResultCallback
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -53,6 +54,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         DummyActivityResultCaller.test {
             definition.createLauncher(
+                lifecycleOwner = TestLifecycleOwner(),
                 activityResultCaller = activityResultCaller,
                 onResult = onResult,
             )

@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
@@ -80,11 +81,13 @@ internal interface ConfirmationDefinition<
     /**
      * Creates the launcher used to launch into the primary confirmation flow defined by the definition.
      *
+     * @param lifecycleOwner owner of the lifecycle the launcher will be registered to
      * @param activityResultCaller caller used to create & register activity result launchers onto the Android
      *   lifecycle provider
      * @param onResult the launcher result callback to provide when registering the activity result launcher if needed
      */
     fun createLauncher(
+        lifecycleOwner: LifecycleOwner,
         activityResultCaller: ActivityResultCaller,
         onResult: (TLauncherResult) -> Unit,
     ): TLauncher

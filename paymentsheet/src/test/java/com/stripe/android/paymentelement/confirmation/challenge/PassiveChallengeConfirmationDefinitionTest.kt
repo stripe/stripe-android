@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
@@ -133,6 +134,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         DummyActivityResultCaller.test {
             definition.createLauncher(
+                lifecycleOwner = TestLifecycleOwner(),
                 activityResultCaller = activityResultCaller,
                 onResult = onResult,
             )
@@ -160,6 +162,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         DummyActivityResultCaller.test {
             definition.createLauncher(
+                lifecycleOwner = TestLifecycleOwner(),
                 activityResultCaller = activityResultCaller,
                 onResult = {},
             )

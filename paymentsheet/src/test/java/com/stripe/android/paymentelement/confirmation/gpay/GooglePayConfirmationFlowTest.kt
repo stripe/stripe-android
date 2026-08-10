@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
@@ -29,6 +30,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationFlowTest {
@@ -43,12 +45,15 @@ class GooglePayConfirmationFlowTest {
                     savedStateHandle = savedStateHandle,
                     definition = GooglePayConfirmationDefinition(
                         context = ApplicationProvider.getApplicationContext<Context>(),
+                        callbackIdentifier = "GooglePayConfirmationFlowTest",
                         googlePayPaymentMethodLauncherFactory = factory,
                         userFacingLogger = null,
+                        googlePayUpdateCallbackProvider = Provider { null },
                     ),
                 )
 
                 mediator.register(
+                    lifecycleOwner = TestLifecycleOwner(),
                     activityResultCaller = activityResultCaller,
                     onResult = {}
                 )
@@ -92,6 +97,7 @@ class GooglePayConfirmationFlowTest {
                     displayItems = emptyList(),
                     billingEmailOverride = null,
                     shippingAddressParameters = null,
+                    shippingOptionsParameters = null,
                 )
             }
         }
@@ -102,10 +108,12 @@ class GooglePayConfirmationFlowTest {
         confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = GooglePayConfirmationDefinition(
+            callbackIdentifier = "GooglePayConfirmationFlowTest",
             context = ApplicationProvider.getApplicationContext<Context>(),
             googlePayPaymentMethodLauncherFactory =
                 RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(mock()),
             userFacingLogger = null,
+            googlePayUpdateCallbackProvider = Provider { null },
         ),
         launcherResult = GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHOD),
         launcherArgs = EmptyConfirmationLauncherArgs,

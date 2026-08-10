@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingInternalGooglePayPaymentMethodLauncherFactory
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -54,6 +55,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 import com.stripe.android.R as PaymentsCoreR
 
 @Suppress("LargeClass")
@@ -95,6 +97,7 @@ class GooglePayConfirmationDefinitionTest {
             val onResult: (GooglePayPaymentMethodLauncher.Result) -> Unit = { onResultCalled = true }
             DummyActivityResultCaller.test {
                 definition.createLauncher(
+                    lifecycleOwner = TestLifecycleOwner(),
                     activityResultCaller = activityResultCaller,
                     onResult = onResult,
                 )
@@ -388,6 +391,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            shippingOptionsParameters = null,
         )
     }
 
@@ -425,6 +429,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            shippingOptionsParameters = null,
         )
     }
 
@@ -463,6 +468,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            shippingOptionsParameters = null,
         )
     }
 
@@ -502,6 +508,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            shippingOptionsParameters = null,
         )
     }
 
@@ -557,6 +564,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = resolvedDisplayItems,
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            shippingOptionsParameters = null,
         )
     }
 
@@ -595,6 +603,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = shippingAddressParameters,
+            shippingOptionsParameters = null,
         )
     }
 
@@ -672,6 +681,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            shippingOptionsParameters = null,
         )
     }
 
@@ -705,6 +715,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            shippingOptionsParameters = null,
         )
     }
 
@@ -772,9 +783,11 @@ class GooglePayConfirmationDefinitionTest {
         context: Context = ApplicationProvider.getApplicationContext(),
     ): GooglePayConfirmationDefinition {
         return GooglePayConfirmationDefinition(
+            callbackIdentifier = "GooglePayConfirmationDefinitionTest",
             context = context,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             userFacingLogger = userFacingLogger,
+            googlePayUpdateCallbackProvider = Provider { null },
         )
     }
 
