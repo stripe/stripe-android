@@ -1184,7 +1184,6 @@ internal class OnrampViewModel(
     }
 
     private fun samsungPayIsReady(isReady: Boolean, result: SamsungPayAvailabilityResult) {
-        result.toString()
         _uiState.update { it.copy(samsungPayIsReady = isReady) }
     }
 
