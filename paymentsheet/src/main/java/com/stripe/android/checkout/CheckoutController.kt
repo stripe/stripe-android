@@ -17,6 +17,7 @@ import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
+import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
