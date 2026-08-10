@@ -28,7 +28,9 @@ class PaymentMethodCreateParamsTest {
     @Test
     fun createFromGooglePay_withBillingEmailOverride_overridesGooglePayEmail() {
         val params = PaymentMethodCreateParams.createFromGooglePay(
-            googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS,
+            googlePayResult = GooglePayResult.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS
+            ),
             clientAttributionMetadata = null,
             billingEmailOverride = "checkout@example.com",
         )
@@ -39,7 +41,9 @@ class PaymentMethodCreateParamsTest {
     @Test
     fun createFromGooglePay_withBillingEmailOverride_usedWhenGooglePayHasNoEmail() {
         val params = PaymentMethodCreateParams.createFromGooglePay(
-            googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS,
+            googlePayResult = GooglePayResult.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
+            ),
             clientAttributionMetadata = null,
             billingEmailOverride = "checkout@example.com",
         )
@@ -50,7 +54,9 @@ class PaymentMethodCreateParamsTest {
     @Test
     fun createFromGooglePay_withNullOverride_keepsGooglePayEmail() {
         val params = PaymentMethodCreateParams.createFromGooglePay(
-            googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS,
+            googlePayResult = GooglePayResult.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS
+            ),
             clientAttributionMetadata = null,
             billingEmailOverride = null,
         )

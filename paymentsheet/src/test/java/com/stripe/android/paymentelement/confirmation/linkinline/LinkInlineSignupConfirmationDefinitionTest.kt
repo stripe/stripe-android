@@ -318,6 +318,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val launcher = LinkInlineSignupConfirmationDefinition.Launcher(onResultScenario.onResult)
 
         val nextOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFactory.card(random = true),
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
@@ -343,6 +344,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val definition = createLinkInlineSignupConfirmationDefinition(linkStore = storeScenario.linkStore)
 
         val nextOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFactory.card(random = true),
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,

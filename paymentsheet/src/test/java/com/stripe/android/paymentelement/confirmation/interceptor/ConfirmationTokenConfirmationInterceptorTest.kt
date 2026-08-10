@@ -496,6 +496,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             val nextStep = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = PaymentMethodFixtures.AU_BECS_DEBIT,
                     optionsParams = null,
                 ),
@@ -775,6 +776,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             optionsParams = null,
         )
@@ -821,6 +823,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
         )
@@ -875,6 +878,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
         )
@@ -929,6 +933,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
         )
@@ -984,6 +989,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
         )
@@ -1094,6 +1100,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
         ) { interceptor ->
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = "test_token"),
@@ -1201,6 +1208,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
         ) { interceptor ->
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 confirmationChallengeState = challengeState,

@@ -119,6 +119,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
