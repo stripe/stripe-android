@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import javax.inject.Inject
 import javax.inject.Provider
