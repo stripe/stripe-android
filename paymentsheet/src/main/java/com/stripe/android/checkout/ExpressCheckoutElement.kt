@@ -92,38 +92,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         }
 
 
-        /** Determines how express buttons are arranged. */
-        class ButtonLayout {
-            private var maxColumns: Int? = null
-            private var maxRows: Int? = null
-
-            /** Defines the maximum number of columns the Express Checkout Element can use to render.
-             *
-             * Defaults to null, meaning unlimited. */
-            fun maxColumns(
-                maxColumns: Int?
-            ): ButtonLayout = apply {
-                this.maxColumns = maxColumns
-            }
-
-            /** Defines the maximum number of rows the Express Checkout Element can use to render.
-             *
-             * Defaults to null, meaning unlimited. */
-            fun maxRows(
-                maxRows: Int?
-            ): ButtonLayout = apply {
-                this.maxRows = maxRows
-            }
-
-            @Parcelize
-            internal data class State(
-                val maxColumns: Int?,
-                val maxRows: Int?,
-            ) : Parcelable
-
-            internal fun build(): State = State(maxColumns = maxColumns, maxRows = maxRows)
-        }
-
         @CheckoutSessionPreview
         /** By default, the Express Checkout Element displays all payment methods possible as a result of your Dashboard configuration and device capabilities. This is the auto behavior.
          *
@@ -163,6 +131,38 @@ class ExpressCheckoutElement @Inject internal constructor(
         class Appearance {
             private var buttonHeight: Dp? = null
             private var buttonLayout: ButtonLayout = ButtonLayout()
+
+            /** Determines how express buttons are arranged. */
+            class ButtonLayout {
+                private var maxColumns: Int? = null
+                private var maxRows: Int? = null
+
+                /** Defines the maximum number of columns the Express Checkout Element can use to render.
+                 *
+                 * Defaults to null, meaning unlimited. */
+                fun maxColumns(
+                    maxColumns: Int?
+                ): ButtonLayout = apply {
+                    this.maxColumns = maxColumns
+                }
+
+                /** Defines the maximum number of rows the Express Checkout Element can use to render.
+                 *
+                 * Defaults to null, meaning unlimited. */
+                fun maxRows(
+                    maxRows: Int?
+                ): ButtonLayout = apply {
+                    this.maxRows = maxRows
+                }
+
+                @Parcelize
+                internal data class State(
+                    val maxColumns: Int?,
+                    val maxRows: Int?,
+                ) : Parcelable
+
+                internal fun build(): State = State(maxColumns = maxColumns, maxRows = maxRows)
+            }
 
             // TODO: do we need a corner radius or padding appearance params?
 

@@ -20,14 +20,14 @@ public final class com/stripe/android/checkout/ExpressCheckoutElement$Configurat
 	public static final field $stable I
 	public fun <init> ()V
 	public final fun buttonHeight-0680j_4 (F)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance;
-	public final fun buttonLayout (Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$ButtonLayout;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance;
+	public final fun buttonLayout (Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance$ButtonLayout;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance;
 }
 
-public final class com/stripe/android/checkout/ExpressCheckoutElement$Configuration$ButtonLayout {
+public final class com/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance$ButtonLayout {
 	public static final field $stable I
 	public fun <init> ()V
-	public final fun maxColumns (Ljava/lang/Integer;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$ButtonLayout;
-	public final fun maxRows (Ljava/lang/Integer;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$ButtonLayout;
+	public final fun maxColumns (Ljava/lang/Integer;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance$ButtonLayout;
+	public final fun maxRows (Ljava/lang/Integer;)Lcom/stripe/android/checkout/ExpressCheckoutElement$Configuration$Appearance$ButtonLayout;
 }
 
 public final class com/stripe/android/checkout/ExpressCheckoutElement$Configuration$PaymentMethods {
@@ -2392,4 +2392,3 @@ public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingle
 	public fun <init> ()V
 	public final fun getLambda$-301581598$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
-
