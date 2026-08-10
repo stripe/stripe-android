@@ -5,8 +5,8 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.CollectMissingLinkBillingDetailsPreview
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.checkout.ece.ExpressCheckoutElementContent
 import com.stripe.android.checkout.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -115,8 +115,162 @@ class ExpressCheckoutElement @Inject internal constructor(
             }
         }
 
+        /** Configuration related to Link. */
+        class LinkConfiguration {
+            /**
+             * Display configuration for Link
+             */
+            enum class Display {
+                /**
+                 * Link will be displayed when available.
+                 */
+                Automatic,
 
-        private var paymentMethods: PaymentMethods = PaymentMethods()
+                /**
+                 * Link will never be displayed.
+                 */
+                Never,
+            }
+
+            /** Configures the display configuration for Link. */
+            fun display(display: Display): LinkConfiguration = apply {
+                throw NotImplementedError()
+            }
+
+            // TODO: javadoc
+            @CollectMissingLinkBillingDetailsPreview
+            fun collectMissingBillingDetailsForExistingPaymentMethods(
+                collectMissingBillingDetailsForExistingPaymentMethods: Boolean
+            ): LinkConfiguration = apply {
+                throw NotImplementedError()
+            }
+
+            // TODO: javadoc
+            @LinkDisallowFundingSourceCreationPreview
+            fun disallowFundingSourceCreation(disallowFundingSourceCreation: Set<String>): LinkConfiguration = apply {
+                throw NotImplementedError()
+            }
+        }
+
+        /**
+         * Configuration related to Google Pay.
+         *
+         * @param environment The Google Pay environment to use. See
+         * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
+         * for more information.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class GooglePayConfiguration(
+            private val environment: Environment,
+        ) {
+            private var label: String? = null
+            private var buttonType: ButtonType = ButtonType.Pay
+            private var additionalEnabledNetworks: List<String> = emptyList()
+
+            /**
+             * @param label An optional label to display with the amount. Google Pay may or may not display
+             * this label depending on its own internal logic. Defaults to a generic label if none is
+             * provided.
+             */
+            fun label(label: String): GooglePayConfiguration = apply {
+                this.label = label
+            }
+
+            /**
+             * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
+             * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
+             * for more information on button types.
+             */
+            fun buttonType(buttonType: ButtonType): GooglePayConfiguration = apply {
+                this.buttonType = buttonType
+            }
+
+            /**
+             * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to
+             * display additional enabled networks (e.g. 'INTERAC')
+             */
+            fun additionalEnabledNetworks(
+                additionalEnabledNetworks: List<String>
+            ): GooglePayConfiguration = apply {
+                this.additionalEnabledNetworks = additionalEnabledNetworks
+            }
+
+            @Parcelize
+            internal data class State(
+                val environment: Environment,
+                val label: String?,
+                val buttonType: ButtonType,
+                val additionalEnabledNetworks: List<String>,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                environment = environment,
+                label = label,
+                buttonType = buttonType,
+                additionalEnabledNetworks = additionalEnabledNetworks.toList(),
+            )
+
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Environment {
+                Production,
+                Test,
+            }
+
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            /**
+             * Google Pay button type options
+             *
+             * See
+             * [Google's documentation](https://developers.google.com/pay/api/android/reference/request-objects#ButtonOptions)
+             * for more information on button types.
+             */
+            enum class ButtonType {
+                /**
+                 * Displays "Buy with" alongside the Google Pay logo.
+                 */
+                Buy,
+
+                /**
+                 * Displays "Book with" alongside the Google Pay logo.
+                 */
+                Book,
+
+                /**
+                 * Displays "Checkout with" alongside the Google Pay logo.
+                 */
+                Checkout,
+
+                /**
+                 * Displays "Donate with" alongside the Google Pay logo.
+                 */
+                Donate,
+
+                /**
+                 * Displays "Order with" alongside the Google Pay logo.
+                 */
+                Order,
+
+                /**
+                 * Displays "Pay with" alongside the Google Pay logo.
+                 */
+                Pay,
+
+                /**
+                 * Displays "Subscribe with" alongside the Google Pay logo.
+                 */
+                Subscribe,
+
+                /**
+                 * Displays only the Google Pay logo.
+                 */
+                Plain
+            }
+        }
+
+
         private var paymentMethodOrder: List<PaymentMethod> = emptyList()
         private var shippingAddressRequired: Boolean = false
         // TODO: note on API review that this is different from the web ECE API.
@@ -137,19 +291,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         }
 
         /**
-         * Configures which payment methods are displayed.
-         *
-         * By default, the Express Checkout Element displays all payment methods possible as a result of your Dashboard
-         * configuration and device capabilities. This is the auto behavior.
-         *
-         * If you don't want to show a given payment method as a payment option, set its property in paymentMethods to
-         * never.
-         */
-        fun paymentMethods(paymentMethods: PaymentMethods): Configuration = apply {
-            this.paymentMethods = paymentMethods
-        }
-
-        /**
          * Configures the order express payment methods are displayed in.
          *
          * By default, the Express Checkout Element uses a dynamic ordering that optimizes payment method display for
@@ -165,48 +306,26 @@ class ExpressCheckoutElement @Inject internal constructor(
             this.paymentMethodOrder = paymentMethodOrder
         }
 
+        /**
+         * Configuration related to Google Pay.
+         *
+         * Required to display Google Pay.
+         */
+        fun googlePayConfiguration(googlePayConfiguration: GooglePayConfiguration): Configuration {
+            throw NotImplementedError()
+        }
+
+        /** Configuration related to Link. */
+        fun linkConfiguration(linkConfiguration: LinkConfiguration): Configuration {
+            throw NotImplementedError()
+        }
+
         fun appearance(
             appearance: Appearance
         ): Configuration = apply {
             this.appearance = appearance
         }
 
-
-        @CheckoutSessionPreview
-        /** By default, the Express Checkout Element displays all payment methods possible as a result of your Dashboard configuration and device capabilities. This is the auto behavior.
-         *
-         * If you don't want to show a given payment method as a payment option, set its visibility in paymentMethods to never. */
-        class PaymentMethods {
-
-            enum class LinkVisibility {
-                Auto,
-                Never,
-            }
-
-            enum class GooglePayVisibility {
-                Auto,
-                Never,
-            }
-
-            private var link: LinkVisibility = LinkVisibility.Auto
-            private var googlePay: GooglePayVisibility = GooglePayVisibility.Auto
-
-            fun link(visibility: LinkVisibility): PaymentMethods = apply {
-                link = visibility
-            }
-
-            fun googlePay(visibility: GooglePayVisibility): PaymentMethods = apply {
-                googlePay = visibility
-            }
-
-            @Parcelize
-            internal data class State(
-                val link: LinkVisibility,
-                val googlePay: GooglePayVisibility,
-            ) : Parcelable
-
-            internal fun build(): State = State(link = link, googlePay = googlePay)
-        }
 
         class Appearance {
             private var buttonHeight: Dp? = null
@@ -292,14 +411,12 @@ class ExpressCheckoutElement @Inject internal constructor(
 
         @Parcelize
         internal data class State(
-            val paymentMethods: PaymentMethods.State,
             val paymentMethodOrder: List<PaymentMethod>,
             val shippingAddressRequired: Boolean,
             val appearance: Appearance.State,
         ) : Parcelable
 
         internal fun build(): State = State(
-            paymentMethods = paymentMethods.build(),
             paymentMethodOrder = paymentMethodOrder,
             shippingAddressRequired = shippingAddressRequired,
             appearance = appearance.build(),
