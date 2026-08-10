@@ -64,7 +64,8 @@ class CheckoutController @Inject internal constructor(
     private val savedState: CheckoutControllerSavedState,
 ) {
     /**
-     * The latest [Session] data, or `null` until [configure] has completed successfully.
+     * The latest [Session] data, or `null` until [configure] completes successfully and once a
+     * payment flow completes successfully.
      */
     val session: StateFlow<Session?>
         get() = stateHolder.session
@@ -333,7 +334,7 @@ class CheckoutController @Inject internal constructor(
      */
     fun destroy() {
         viewModelScope.cancel()
-        stateHolder.state = null
+        checkoutStateLoader.clear()
         savedState.clear()
     }
 
@@ -1081,7 +1082,8 @@ class CheckoutController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface Result {
         /**
-         * The customer completed the payment flow.
+         * The customer completed the payment flow. The controller's loaded [session] is cleared
+         * before this result is delivered.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

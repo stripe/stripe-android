@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
@@ -271,7 +270,7 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNotNull()
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
-                ConfirmationHandler.Result.Canceled.Action.None
+                ConfirmationHandler.Result.Canceled.Action.InformCancellation
             )
         )
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
@@ -307,7 +306,7 @@ internal class CheckoutOperationCoordinatorTest {
 
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Canceled(
-                    ConfirmationHandler.Result.Canceled.Action.None
+                    ConfirmationHandler.Result.Canceled.Action.InformCancellation
                 )
             )
             assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
@@ -319,19 +318,7 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `successful confirmation is delivered as completed`() = runScenario {
-        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
-
-        confirmationState.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
-        )
-
-        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
-        assertThat(coordinator.isUpdating.value).isFalse()
-    }
-
-    @Test
-    fun `canceled confirmation is delivered as canceled`() = runScenario {
+    fun `canceled with ModifyPaymentDetails does not invoke callback and releases gate`() = runScenario {
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
         confirmationState.value = ConfirmationHandler.State.Complete(
@@ -339,27 +326,34 @@ internal class CheckoutOperationCoordinatorTest {
                 ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails
             )
         )
+        runCurrent()
 
-        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
+        resultTurbine.expectNoEvents()
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
     @Test
-    fun `failed confirmation preserves its cause`() = runScenario {
-        val expected = IllegalStateException("Confirmation failed")
+    fun `canceled with None does not invoke callback and releases gate`() = runScenario {
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        val mutationStarted = CompletableDeferred<Unit>()
+        val mutation = async {
+            coordinator.runMutation {
+                mutationStarted.complete(Unit)
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+        assertThat(mutationStarted.isCompleted).isFalse()
 
         confirmationState.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Failed(
-                cause = expected,
-                message = "Confirmation failed".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            ConfirmationHandler.Result.Canceled(
+                ConfirmationHandler.Result.Canceled.Action.None
             )
         )
+        mutation.await()
 
-        val result = resultTurbine.awaitItem()
-        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
+        resultTurbine.expectNoEvents()
+        assertThat(mutationStarted.isCompleted).isTrue()
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
@@ -532,14 +526,20 @@ internal class CheckoutOperationCoordinatorTest {
             hasReloadedFromProcessDeath = hasReloadedFromProcessDeath,
             state = confirmationState,
         )
-        val sheetStateHolder = SheetStateHolder(SavedStateHandle()).apply {
+        val savedStateHandle = SavedStateHandle()
+        val sheetStateHolder = SheetStateHolder(savedStateHandle).apply {
             this.sheetIsOpen = sheetIsOpen
         }
+        val checkoutStateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         val resultTurbine = Turbine<CheckoutController.Result>()
         val coordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
-            resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
+            confirmationResultProcessor =
+                CheckoutControllerStateFactory.createConfirmationResultProcessor(checkoutStateHolder),
+            resultCallback = resultCallback ?: CheckoutController.ResultCallback { result ->
+                resultTurbine.add(result)
+            },
         )
         backgroundScope.launch {
             coordinator.observeConfirmationResults()

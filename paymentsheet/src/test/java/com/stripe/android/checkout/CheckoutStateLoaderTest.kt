@@ -138,6 +138,19 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `clear removes controller and customer state`() = runScenario(
+        customer = savedCustomer(),
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        loader.clear()
+
+        assertThat(stateHolder.state).isNull()
+        assertThat(customerStateHolder.customer.value).isNull()
+        assertThat(customerStateHolder.paymentMethods.value).isEmpty()
+    }
+
+    @Test
     fun `loadInitial leaves the customer state holder empty when the session has no customer`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 

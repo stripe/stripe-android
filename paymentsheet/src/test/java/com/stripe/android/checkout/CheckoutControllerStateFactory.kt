@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -62,6 +63,18 @@ internal object CheckoutControllerStateFactory {
             errorReporter = errorReporter,
             paymentOptionFactory = paymentOptionFactory,
             availableExpressButtonTypesFactory = availableExpressButtonTypesFactory,
+        )
+    }
+
+    fun createConfirmationResultProcessor(
+        stateHolder: CheckoutControllerStateHolder,
+    ): CheckoutConfirmationResultProcessor {
+        return CheckoutConfirmationResultProcessor(
+            stateHolder = stateHolder,
+            fetchResponse = { _, _ -> Result.failure(AssertionError("Unexpected fetch")) },
+            reloadState = { _ -> },
+            clearState = { stateHolder.state = null },
+            logger = Logger.noop(),
         )
     }
 }

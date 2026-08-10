@@ -16,12 +16,14 @@ import javax.inject.Singleton
 internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val sheetStateHolder: SheetStateHolder,
+    private val confirmationResultProcessor: CheckoutConfirmationResultProcessor,
     private val resultCallback: CheckoutController.ResultCallback,
 ) {
     private val admissionLock = Any()
     private var pendingMutations = 0
     private var confirmationInFlight = confirmationHandler.hasReloadedFromProcessDeath ||
         confirmationHandler.state.value is ConfirmationHandler.State.Confirming
+    private var confirmationWasRestored = confirmationHandler.hasReloadedFromProcessDeath
     private var confirmationCompletionClaimed = false
     private val mutex = Mutex(locked = confirmationInFlight)
 
@@ -91,6 +93,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                         "Checkout operation gate should be available after confirmation admission."
                     }
                     confirmationInFlight = true
+                    confirmationWasRestored = false
                     updateIsUpdating()
                     ConfirmationAdmission.Accepted(confirmationArguments)
                 }
@@ -110,31 +113,36 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun observeConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                completeConfirmation(state.result.asCheckoutResult())
+                completeConfirmation { confirmationWasRestored ->
+                    confirmationResultProcessor.process(state.result, confirmationWasRestored)
+                }
             }
         }
     }
 
-    fun failConfirmation(error: Throwable) {
-        completeConfirmation(CheckoutController.Result.Failed(error))
+    suspend fun failConfirmation(error: Throwable) {
+        completeConfirmation {
+            confirmationResultProcessor.processFailure(error)
+        }
     }
 
-    private fun completeConfirmation(result: CheckoutController.Result) {
-        val shouldComplete = synchronized(admissionLock) {
+    private suspend fun completeConfirmation(
+        processResult: suspend (confirmationWasRestored: Boolean) -> CheckoutController.Result?,
+    ) {
+        val wasRestored = synchronized(admissionLock) {
             if (!confirmationInFlight || confirmationCompletionClaimed) {
-                false
-            } else {
-                confirmationCompletionClaimed = true
-                true
+                return
             }
+            confirmationCompletionClaimed = true
+            confirmationWasRestored
         }
-        if (!shouldComplete) return
 
         try {
-            resultCallback.onResult(result)
+            processResult(wasRestored)?.let(resultCallback::onResult)
         } finally {
             synchronized(admissionLock) {
                 confirmationInFlight = false
+                confirmationWasRestored = false
                 confirmationCompletionClaimed = false
                 mutex.unlock()
                 updateIsUpdating()
@@ -150,13 +158,5 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         data class Accepted(val arguments: ConfirmationHandler.Args) : ConfirmationAdmission
         data class Rejected(val error: Throwable) : ConfirmationAdmission
         data object NoArguments : ConfirmationAdmission
-    }
-}
-
-private fun ConfirmationHandler.Result.asCheckoutResult(): CheckoutController.Result {
-    return when (this) {
-        is ConfirmationHandler.Result.Succeeded -> CheckoutController.Result.Completed()
-        is ConfirmationHandler.Result.Canceled -> CheckoutController.Result.Canceled()
-        is ConfirmationHandler.Result.Failed -> CheckoutController.Result.Failed(cause)
     }
 }

@@ -102,6 +102,7 @@ internal class CheckoutConfirmationPerformerTest {
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
+            confirmationResultProcessor = CheckoutControllerStateFactory.createConfirmationResultProcessor(stateHolder),
             resultCallback = {},
         )
         val performer = CheckoutConfirmationPerformer(

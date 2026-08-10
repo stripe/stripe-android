@@ -35,7 +35,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -78,8 +77,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat((completeAction.intent as PaymentIntent).status).isEqualTo(StripeIntent.Status.Succeeded)
         assertThat(completeAction.metadata[DeferredIntentConfirmationTypeKey])
             .isEqualTo(DeferredIntentConfirmationType.Server)
-        assertThat(completeAction.metadata[CheckoutSessionResponseKey]?.status)
-            .isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -215,8 +212,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat((completeAction.intent as PaymentIntent).status).isEqualTo(StripeIntent.Status.Succeeded)
         assertThat(completeAction.metadata[DeferredIntentConfirmationTypeKey])
             .isEqualTo(DeferredIntentConfirmationType.Server)
-        assertThat(completeAction.metadata[CheckoutSessionResponseKey]?.status)
-            .isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
