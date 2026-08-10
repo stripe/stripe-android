@@ -24,6 +24,7 @@ class RetryRule(private val attempts: Int) : TestRule {
                             if (isLast || error is AssumptionViolatedException || error is NoLeakAssertionFailedError) {
                                 throw error
                             }
+                            Log.d("STRIPE_INSTRUMENTATION_TEST_RETRY_MARKER", attempt.toString())
                             Log.d(logTag, "Failed attempt $attempt out of $attempts with error")
                         }
                     }
