@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -11,26 +10,17 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.FakeIsNfcScanningAvailable
-import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
-import com.stripe.android.utils.FakeSavedPaymentMethodRepository
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -56,7 +46,7 @@ internal class DefaultEmbeddedContentHelperTest {
     }
 
     @Test
-    fun `embeddedContent emits null when state is set to null`() = testScenario {
+    fun `clearing content closes the current interactor and emits null`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
             state.value = EmbeddedContentHelperStateHolder.State(
@@ -66,8 +56,33 @@ internal class DefaultEmbeddedContentHelperTest {
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             assertThat(awaitItem()).isNotNull()
+            val interactor = verticalLayoutInteractors.single()
+
             state.value = null
+
             assertThat(awaitItem()).isNull()
+            interactor.closeCalls.awaitItem()
+        }
+    }
+
+    @Test
+    fun `replacing content closes only the previous interactor`() = testScenario {
+        embeddedContentHelper.embeddedContent.test {
+            assertThat(awaitItem()).isNull()
+            state.value = EmbeddedContentHelperStateFactory.create(
+                appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
+            )
+            assertThat(awaitItem()).isNotNull()
+            val previousInteractor = verticalLayoutInteractors.single()
+
+            state.value = EmbeddedContentHelperStateFactory.create(
+                appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
+            )
+
+            assertThat(awaitItem()).isNotNull()
+            val replacementInteractor = verticalLayoutInteractors.last()
+            previousInteractor.closeCalls.awaitItem()
+            replacementInteractor.closeCalls.expectNoEvents()
         }
     }
 
@@ -137,6 +152,7 @@ internal class DefaultEmbeddedContentHelperTest {
         val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
         val sheetStateHolder: SheetStateHolder,
         val errorReporter: FakeErrorReporter,
+        val verticalLayoutInteractors: List<FakePaymentMethodVerticalLayoutInteractor>,
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -148,20 +164,7 @@ internal class DefaultEmbeddedContentHelperTest {
     ) = runTest(UnconfinedTestDispatcher()) {
         val savedStateHandle = SavedStateHandle().apply { setup() }
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
-        val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            embeddedSelectionHolder = selectionHolder,
-            savedStateHandle = savedStateHandle,
-            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
-        )
-        val confirmationHandler = FakeConfirmationHandler()
-        val eventReporter = FakeEventReporter()
         val errorReporter = FakeErrorReporter()
-        val immediateActionHandler = DefaultEmbeddedRowSelectionImmediateActionHandler(
-            coroutineScope = backgroundScope,
-            internalRowSelectionCallback = { null }
-        )
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = selectionHolder.selection,
@@ -170,33 +173,15 @@ internal class DefaultEmbeddedContentHelperTest {
             ),
             paymentMethodMetadataFlow = stateFlowOf(null),
         )
-        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
 
         val state = MutableStateFlow(initialState)
-        val savedPaymentMethodMutatorFactory = EmbeddedContentSavedPaymentMethodMutatorFactory(
-            eventReporter = eventReporter,
-            workContext = Dispatchers.Unconfined,
-            uiContext = Dispatchers.Unconfined,
-            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
-            selectionHolder = selectionHolder,
-            customerStateHolder = customerStateHolder,
-            linkAccountHolder = linkAccountHolder,
-            coroutineScope = backgroundScope,
-            sheetStateHolder = sheetStateHolder,
-        )
-        val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
-            eventReporter = eventReporter,
-            embeddedFormHelperFactory = embeddedFormHelperFactory,
-            confirmationHandler = confirmationHandler,
-            selectionHolder = selectionHolder,
-            customerStateHolder = customerStateHolder,
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-            rowSelectionImmediateActionHandler = immediateActionHandler,
-            coroutineScope = backgroundScope,
-            sheetStateHolder = sheetStateHolder,
-            savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
-        )
+        val verticalLayoutInteractors = mutableListOf<FakePaymentMethodVerticalLayoutInteractor>()
+        val verticalLayoutInteractorFactory = EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
+            paymentMethodMetadata, _, _, _, _ ->
+            FakePaymentMethodVerticalLayoutInteractor.create(paymentMethodMetadata)
+                .also(verticalLayoutInteractors::add)
+        }
 
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = backgroundScope,
@@ -214,9 +199,9 @@ internal class DefaultEmbeddedContentHelperTest {
             state = state,
             sheetStateHolder = sheetStateHolder,
             errorReporter = errorReporter,
+            verticalLayoutInteractors = verticalLayoutInteractors,
         ).block()
-        confirmationHandler.validate()
-        eventReporter.validate()
+        verticalLayoutInteractors.forEach(FakePaymentMethodVerticalLayoutInteractor::validate)
     }
 
     private class RecordingEmbeddedSheetLauncher : EmbeddedSheetLauncher {

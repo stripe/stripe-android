@@ -51,9 +51,23 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             ),
             ExpressButton.GooglePay.create(
                 paymentMethodMetadata = paymentMethodMetadata,
-                googlePayConfiguration = googlePayConfiguration
+                googlePayConfiguration = googlePayConfiguration,
+                shippingAddressRequired = false,
             ),
         )
+    }
+
+    @Test
+    fun `state propagates shipping address requirement to Google Pay button`() = runScenario(
+        configuration = ExpressCheckoutElement.Configuration()
+            .shippingAddressRequired(true),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.GooglePay),
+        ),
+    ) {
+        val googlePayButton = interactor.state.value.expressButtons.single() as ExpressButton.GooglePay
+
+        assertThat(googlePayButton.shippingAddressRequired).isTrue()
     }
 
     @Test
@@ -108,7 +122,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `state reflects available express button types from checkoutSession`() {
+    fun `state reflects available express button types from session`() {
         val googlePayConfiguration = createGooglePayConfiguration(
             buttonType = GooglePayConfiguration.ButtonType.Checkout,
             additionalEnabledNetworks = listOf("INTERAC"),
@@ -131,6 +145,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 ExpressButton.GooglePay.create(
                     paymentMethodMetadata = paymentMethodMetadata,
                     googlePayConfiguration = googlePayConfiguration,
+                    shippingAddressRequired = false,
                 ),
             )
         }

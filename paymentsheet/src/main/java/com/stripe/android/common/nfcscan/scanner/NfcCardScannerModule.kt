@@ -1,10 +1,10 @@
 package com.stripe.android.common.nfcscan.scanner
 
-import com.stripe.android.common.nfcscan.scanner.apdu.ApduErrorCreator
+import com.stripe.android.common.nfcscan.scanner.apdu.pdol.PdolModule
 import dagger.Binds
 import dagger.Module
 
-@Module
+@Module(includes = [PdolModule::class])
 internal interface NfcCardScannerModule {
     @Binds
     fun bindsNfcCardScanner(scanner: DefaultNfcCardScanner): NfcCardScanner
@@ -16,9 +16,6 @@ internal interface NfcCardScannerModule {
 
     @Binds
     fun bindsNfcCardReader(reader: ApduCardReader): NfcCardReader
-
-    @Binds
-    fun bindsNfcCardReaderErrorCreator(errorMapper: ApduErrorCreator): NfcCardReader.ErrorCreator
 
     @Binds
     fun bindsNfcCardDataParser(parser: DefaultNfcCardDataParser): NfcCardDataParser

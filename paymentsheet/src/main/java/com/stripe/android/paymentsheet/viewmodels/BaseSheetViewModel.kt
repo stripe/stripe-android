@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceCont
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -72,6 +73,7 @@ internal abstract class BaseSheetViewModel(
     val placesClient: PlacesClientProxy?,
     val linkAccountHolder: LinkAccountHolder,
     stripeAutocompleteRepository: StripeAutocompleteRepository,
+    addressLauncherEventReporter: AddressLauncherEventReporter,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -87,21 +89,27 @@ internal abstract class BaseSheetViewModel(
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
 
+    private val paymentElementAutocompleteFactory = PaymentElementAutocompleteAddressInteractor.Factory(
+        launcher = autocompleteLauncher,
+        autocompleteConfig = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = config.googlePlacesApiKey,
+            autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+            isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+        ),
+        placesClient = placesClient,
+        stripeAutocompleteRepository = stripeAutocompleteRepository,
+        coroutineScope = viewModelScope,
+        shouldUseAutocompleteProxyEndpointsProvider = {
+            _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
+        },
+        eventReporter = addressLauncherEventReporter,
+    )
+
     val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory =
-        PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = autocompleteLauncher,
-            autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = config.googlePlacesApiKey,
-                autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
-            ),
-            placesClient = placesClient,
-            stripeAutocompleteRepository = stripeAutocompleteRepository,
-            coroutineScope = viewModelScope,
-            shouldUseAutocompleteProxyEndpointsProvider = {
-                _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
-            },
-        )
+        paymentElementAutocompleteFactory
+
+    val autocompleteFilledAddress: com.stripe.android.model.Address?
+        get() = paymentElementAutocompleteFactory.autocompleteFilledAddress
 
     internal val validationRequested = MutableSharedFlow<Unit>()
 

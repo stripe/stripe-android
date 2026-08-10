@@ -106,8 +106,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_error_declined_card">카드가 거절되었습니다. 다른 카드를 사용해 주십시오.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
   <string name="stripe_nfc_scan_error_expired_card">카드가 만료되었습니다. 다른 카드를 사용해 주십시오.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">간편결제는 지원되지 않습니다. 실물 카드를 사용해 보십시오.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">휴대폰 뒷면에 카드를 대십시오</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">문제가 발생했습니다. 다른 카드를 사용해 보세요.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">지원되지 않는 카드입니다. 다른 카드를 사용해 주십시오.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->

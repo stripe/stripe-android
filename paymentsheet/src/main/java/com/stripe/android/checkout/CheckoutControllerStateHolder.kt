@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -18,7 +19,7 @@ import javax.inject.Singleton
 /**
  * Owns [CheckoutController]'s [CheckoutControllerState] — the single source of truth for the
  * controller — persisting it in [SavedStateHandle] so it survives process death. All observable
- * projections (e.g. [checkoutSession]) are derived from the one [stateFlow]. Kept separate from the
+ * projections (e.g. [session]) are derived from the one [stateFlow]. Kept separate from the
  * controller so [CheckoutStateLoader] can commit loaded state directly rather than reaching back
  * into the controller.
  */
@@ -39,7 +40,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     val stateFlow: StateFlow<CheckoutControllerState?> =
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
-    val checkoutSession: StateFlow<CheckoutSession?> =
+    val session: StateFlow<Session?> =
         stateFlow.mapAsStateFlow {
             it?.asCheckoutSession(
                 paymentOptionFactory,

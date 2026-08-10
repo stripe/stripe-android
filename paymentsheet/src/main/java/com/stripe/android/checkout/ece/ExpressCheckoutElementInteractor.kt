@@ -46,14 +46,14 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = combineAsStateFlow(
         linkAccountHolder.linkAccountInfo,
         stateHolder.stateFlow,
-        stateHolder.checkoutSession,
-    ) { linkAccountInfo, state, checkoutSession, ->
-        if (state == null || checkoutSession == null) {
+        stateHolder.session,
+    ) { linkAccountInfo, state, session, ->
+        if (state == null || session == null) {
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(expressButtons = emptyList())
         }
 
         ExpressCheckoutElementInteractor.State(
-            expressButtons = checkoutSession.availableExpressButtonTypes.map { expressButtonType ->
+            expressButtons = session.availableExpressButtonTypes.map { expressButtonType ->
                 when (expressButtonType) {
                     ExpressButtonType.Link -> ExpressButton.Link.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
@@ -62,6 +62,8 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
                         googlePayConfiguration = expressButtonType.googlePayConfiguration,
+                        shippingAddressRequired =
+                            state.configuration.expressCheckoutElementConfiguration.shippingAddressRequired,
                     )
                 }
             },

@@ -5,13 +5,14 @@ import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -26,6 +27,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -63,6 +65,22 @@ class InputAddressViewModelTest {
         featureFlag = FeatureFlags.inlineAddressAutocompleteEnabled,
         isEnabled = false,
     )
+
+    @Test
+    fun `onScreenShown fires onShow with initial country`() {
+        val viewModel = createViewModel(
+            address = AddressDetails(address = PaymentSheet.Address(country = "US"))
+        )
+        viewModel.onScreenShown()
+        verify(eventReporter).onShow(eq("US"))
+    }
+
+    @Test
+    fun `onScreenShown fires onShow with empty string when no initial country`() {
+        val viewModel = createViewModel()
+        viewModel.onScreenShown()
+        verify(eventReporter).onShow(eq(""))
+    }
 
     @Test
     fun `no autocomplete address passed has an empty address to start`() = runTest(UnconfinedTestDispatcher()) {
@@ -945,6 +963,26 @@ class InputAddressViewModelTest {
     }
 
     @Test
+    fun `clickPrimaryButton with null triggers validation errors without dismissing`() = runTest {
+        val viewModel = createViewModel()
+
+        val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
+        val autocompleteElement = sectionElement.fields[0] as AutocompleteAddressElement
+        val controller = autocompleteElement.sectionFieldErrorController()
+
+        assertThat(controller.validationMessage.value).isNull()
+
+        viewModel.clickPrimaryButton(
+            completedFormValues = null,
+            checkboxChecked = false
+        )
+
+        assertThat(controller.validationMessage.value).isNotNull()
+        assertThat(viewModel.formEnabled.value).isTrue()
+        verify(navigator, never()).dismiss(any())
+    }
+
+    @Test
     fun `isInlineAutocompleteEnabled is false when flag is disabled`() {
         val viewModel = createViewModel()
         assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isFalse()
@@ -961,8 +999,6 @@ class InputAddressViewModelTest {
     // Core controller logic (predictions, debouncing, selection, suppression, dismissal)
     // is tested in InlineAutocompleteControllerTest.
 
-    private val mockPlacesClient = mock<PlacesClientProxy>()
-
     private fun createInlineViewModel(
         googlePlacesApiKey: String = "test_key",
         autocompleteCountries: Set<String> = emptySet(),
@@ -978,19 +1014,46 @@ class InputAddressViewModelTest {
             ),
             navigator,
             eventReporter,
-            placesClient = mockPlacesClient,
+            placesClient = FakePlacesClientProxy(
+                findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+                fetchPlaceResult = Result.success(Address()),
+            ),
         ).also { viewModelStoreRule.track(it) }
     }
 
     @Test
-    fun `onEnterManuallyFromInline emits OnExpandForm event`() = runTest {
+    fun `onEnterManuallyFromInline emits OnExpandForm with null values when query is empty`() = runTest {
         val viewModel = createInlineViewModel()
         var emittedEvent: AutocompleteAddressInteractor.Event? = null
         viewModel.register { emittedEvent = it }
 
         viewModel.onEnterManuallyFromInline()
 
-        assertThat(emittedEvent).isInstanceOf<AutocompleteAddressInteractor.Event.OnExpandForm>()
+        assertThat(emittedEvent)
+            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+    }
+
+    @Test
+    fun `onEnterManuallyFromInline pre-fills Line1 with typed inline query`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createInlineViewModel()
+        var emittedEvent: AutocompleteAddressInteractor.Event? = null
+        viewModel.register { emittedEvent = it }
+
+        val queryFlow = MutableStateFlow("")
+        val countryFlow = MutableStateFlow<String?>("US")
+        viewModel.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main St"
+        viewModel.onEnterManuallyFromInline()
+
+        assertThat(emittedEvent).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main St",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
     }
 
     private fun createShowState(isChecked: Boolean) =

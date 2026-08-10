@@ -177,7 +177,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         merchantName = "Widget, Inc."
                     ),
                     currencyCode = "usd",
-                    amount = 0
+                    amount = 0,
+                    shippingAddressParameters = null,
                 )
             )
             assertThat(transactionInfo)
@@ -205,7 +206,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         merchantName = "Widget, Inc."
                     ),
                     currencyCode = "usd",
-                    amount = 0
+                    amount = 0,
+                    shippingAddressParameters = null,
                 )
             )
             assertThat(transactionInfo)
@@ -285,6 +287,35 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentDataRequest() should include shipping address parameters`() {
+        val viewModel = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(
+                shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                    isRequired = true,
+                    allowedCountryCodes = setOf("US", "CA"),
+                    phoneNumberRequired = true,
+                ),
+            ),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        ).also { viewModelStoreRule.track(it) }
+
+        val paymentDataRequest = viewModel.createPaymentDataRequest()
+
+        assertThat(paymentDataRequest.getBoolean("shippingAddressRequired")).isTrue()
+        val shippingAddressParameters = paymentDataRequest.getJSONObject("shippingAddressParameters")
+        val allowedCountryCodes = shippingAddressParameters.getJSONArray("allowedCountryCodes")
+        assertThat(listOf(allowedCountryCodes.getString(0), allowedCountryCodes.getString(1)))
+            .containsExactly("US", "CA")
+        assertThat(shippingAddressParameters.getBoolean("phoneNumberRequired")).isTrue()
+    }
+
+    @Test
     fun `Factory gets initialized with fallback when no Injector is available`() {
         scenario.onFragment { fragment ->
             val application = ApplicationProvider.getApplicationContext<Application>()
@@ -302,6 +333,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     amount = 1099,
                     label = null,
                     transactionId = null,
+                    shippingAddressParameters = null,
                 )
             )
 
@@ -352,7 +384,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
                 checkoutSessionId = null,
-            )
+            ),
+            shippingAddressParameters = null,
         )
         val REQUEST_OPTIONS = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

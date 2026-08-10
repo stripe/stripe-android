@@ -8,7 +8,7 @@ import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -835,6 +835,7 @@ internal class PlaygroundTestDriver(
         )
 
         isSelectPaymentMethodScreen()
+        selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
         teardown()
@@ -850,9 +851,15 @@ internal class PlaygroundTestDriver(
             selectors.customPaymentMethodFailButton,
         )
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG))
-            .assertIsDisplayed()
-            .assertTextEquals(CustomPaymentMethodActivity.FAILED_DISPLAY_MESSAGE)
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodes(
+                    hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG)
+                        .and(hasText(CustomPaymentMethodActivity.FAILED_DISPLAY_MESSAGE))
+                )
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
 
         teardown()
     }
@@ -884,17 +891,6 @@ internal class PlaygroundTestDriver(
             },
             afterCollectingBankInfo = afterAuthorization,
             confirmIntent = true,
-        )
-    }
-
-    fun confirmCustomUSBankAccount(
-        testParameters: TestParameters,
-        afterAuthorization: (Selectors) -> Unit = {},
-    ) {
-        confirmBankAccountInCustomFlow(
-            testParameters = testParameters,
-            executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
-            afterCollectingBankInfo = afterAuthorization,
         )
     }
 
@@ -996,17 +992,6 @@ internal class PlaygroundTestDriver(
         )
     }
 
-    fun confirmInstantDebitsInCustomFlow(
-        testParameters: TestParameters,
-        afterAuthorization: (Selectors) -> Unit = {},
-    ) {
-        confirmBankAccountInCustomFlow(
-            testParameters = testParameters,
-            executeFlow = { doInstantDebitsFlow(testParameters.authorizationAction) },
-            afterCollectingBankInfo = afterAuthorization,
-        )
-    }
-
     private fun confirmBankAccount(
         testParameters: TestParameters,
         executeFlow: () -> Unit,
@@ -1034,9 +1019,22 @@ internal class PlaygroundTestDriver(
 
         val result = playgroundState
 
+        val paymentSheetActivity = checkNotNull(currentActivity) {
+            "PaymentSheet activity was not resumed before bank account collection"
+        }
+
         pressBuy()
 
         executeFlow()
+
+        composeTestRule.waitUntil(
+            conditionDescription = "PaymentSheet to resume after bank account collection",
+            timeoutMillis = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT.inWholeMilliseconds,
+        ) {
+            currentActivity === paymentSheetActivity
+        }
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
 
         afterCollectingBankInfo(selectors, populator)
 
@@ -1094,62 +1092,8 @@ internal class PlaygroundTestDriver(
         teardown()
     }
 
-    private fun waitForScreenToLoad(testParameters: TestParameters) {
-        when (testParameters.playgroundSettingsSnapshot[CustomerSettingsDefinition]) {
-            is CustomerType.GUEST, is CustomerType.NEW -> {
-                composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-                    composeTestRule.onAllNodesWithText("Card number")
-                        .fetchSemanticsNodes()
-                        .size == 1
-                }
-
-                val collectionMode = testParameters.playgroundSettingsSnapshot[CollectAddressSettingsDefinition]
-
-                if (collectionMode != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never) {
-                    composeTestRule.waitUntil {
-                        composeTestRule.onAllNodesWithText("Country or region")
-                            .fetchSemanticsNodes()
-                            .size == 1
-                    }
-                }
-            }
-            is CustomerType.Existing, is CustomerType.RETURNING, is CustomerType.CUSTOM -> {
-                composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-                    composeTestRule.onAllNodesWithTag("AddCard")
-                        .fetchSemanticsNodes()
-                        .size == 1
-                }
-            }
-        }
-    }
-
     private fun pressBuy() {
         selectors.buyButton.click()
-    }
-
-    internal fun pressSelection() {
-        composeTestRule.waitForIdle()
-
-        clickPaymentSelection()
-    }
-
-    internal fun scrollToBottom() {
-        composeTestRule.waitForIdle()
-
-        selectors.buyButton.scrollTo()
-    }
-
-    internal fun pressEdit() {
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            composeTestRule
-                .onAllNodesWithText("EDIT")
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
-
-        composeTestRule
-            .onNodeWithText("EDIT")
-            .performClick()
     }
 
     private fun clickPaymentSelection() {
@@ -1214,14 +1158,35 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
     }
 
+    private fun awaitActivity(
+        description: String,
+        timeout: Duration = ACTIVITY_TRANSITION_TIMEOUT,
+        onPoll: () -> Unit = {},
+        predicate: (Activity?) -> Boolean,
+    ) {
+        val deadline = System.currentTimeMillis() + timeout.inWholeMilliseconds
+        while (!predicate(currentActivity)) {
+            check(System.currentTimeMillis() < deadline) {
+                "Timed out after $timeout waiting for $description; " +
+                    "current activity was ${currentActivity?.javaClass?.name}"
+            }
+            onPoll()
+            TimeUnit.MILLISECONDS.sleep(ACTIVITY_POLL_INTERVAL_MS)
+        }
+    }
+
+    private fun awaitActivityClass(className: String) {
+        awaitActivity(description = className) { it?.javaClass?.name == className }
+    }
+
     /**
      * Here we wait for an activity different from the playground to be in view.  We
      * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
      * that would require exposing the activities publicly.
      */
     private fun waitForNotPlaygroundActivity() {
-        while (currentActivity is PaymentSheetPlaygroundActivity) {
-            TimeUnit.MILLISECONDS.sleep(250)
+        awaitActivity(description = "an activity other than the playground") {
+            it !is PaymentSheetPlaygroundActivity
         }
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -1231,10 +1196,10 @@ internal class PlaygroundTestDriver(
      * Here we wait for the Playground to come back into view.
      */
     private fun waitForPlaygroundActivity() {
-        while (currentActivity !is PaymentSheetPlaygroundActivity) {
-            composeTestRule.waitForIdle()
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivity(
+            description = "the playground activity to return to the foreground",
+            onPoll = { composeTestRule.waitForIdle() },
+        ) { it is PaymentSheetPlaygroundActivity }
         Espresso.onIdle()
         composeTestRule.waitForIdle()
         if (!awaitWindowFocus()) {
@@ -1250,9 +1215,7 @@ internal class PlaygroundTestDriver(
     private fun waitForPollingToFinish(timeout: Duration = 60.seconds) {
         val className =
             "com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
-        while (currentActivity?.componentName?.className != className) {
-            Thread.sleep(10)
-        }
+        awaitActivity(description = className) { it?.componentName?.className == className }
 
         composeTestRule.waitUntil(timeoutMillis = timeout.inWholeMilliseconds) {
             try {
@@ -1260,7 +1223,7 @@ internal class PlaygroundTestDriver(
                     .onAllNodesWithText("Approve payment")
                     .fetchSemanticsNodes()
                     .isEmpty()
-            } catch (e: IllegalStateException) {
+            } catch (_: IllegalStateException) {
                 // PollingActivity was closed
                 true
             }
@@ -1289,7 +1252,10 @@ internal class PlaygroundTestDriver(
 
     private fun launchComplete() {
         selectors.reload.click()
-        selectors.complete.waitForEnabled()
+        selectors.complete.waitForEnabled(
+            requireClickAction = true,
+            timeout = CHECKOUT_PREPARATION_TIMEOUT,
+        )
         selectors.complete.click()
 
         // PaymentSheetActivity is now on screen
@@ -1301,7 +1267,10 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
         selectors.composeTestRule.waitForIdle()
 
-        selectors.multiStepSelect.waitForEnabled()
+        selectors.multiStepSelect.waitForEnabled(
+            requireClickAction = true,
+            timeout = CHECKOUT_PREPARATION_TIMEOUT,
+        )
         if (clickMultiStep) {
             selectors.multiStepSelect.click()
 
@@ -1338,14 +1307,7 @@ internal class PlaygroundTestDriver(
                     // select the first browser found
                     val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
-                    // Chrome's first-run onboarding blocks the auth page; dismiss it if present.
-                    dismissChromeFirstRunIfPresent()
-
-                    // If there are multiple browser there is a browser selector window
-                    selectBrowserPrompt.wait(4000)
-                    if (selectBrowserPrompt.exists()) {
-                        browserIconAtPrompt(selectedBrowser).click()
-                    }
+                    awaitBrowserAndDismissFirstRun(selectedBrowser)
 
                     blockUntilAuthorizationPageLoaded(isSetup = testParameters.isSetupMode)
                 }
@@ -1569,9 +1531,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun cancelInstantDebitsFlowOnLaunch() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -1580,37 +1540,50 @@ internal class PlaygroundTestDriver(
     }
 
     private fun executeUsBankAccountLiteFlow() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_LITE_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_LITE_ACTIVITY)
+
+        val firstPane = onWebView().withElementByAnyTestId(
+            testIds = FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS,
+            timeout = WEBVIEW_ELEMENT_TIMEOUT,
+        )
+        firstPane.interaction.perform(webClick())
 
         onWebView()
-            .withElementByTestId("institution-default")
+            .withElementByTestId(
+                testId = FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS.first { it != firstPane.testId },
+                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+            )
             .perform(webClick())
 
         onWebView()
-            .withElementByTestId("agree-button")
+            .withElementByTestId(
+                testId = "select-button",
+                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+            )
             .perform(webClick())
 
         onWebView()
-            .withElementByTestId(testId = "select-button")
+            .withElementByTestId(
+                testId = "link-not-now-button",
+                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+            )
             .perform(webClick())
 
         onWebView()
-            .withElementByTestId("link-not-now-button")
-            .perform(webClick())
-
-        onWebView()
-            .withElementByTestId("done-button")
+            .withElementByTestId(
+                testId = "done-button",
+                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+            )
             .perform(webClick())
     }
 
     private fun executeUsBankAccountFlow() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+        composeTestRule.waitUntil(
+            conditionDescription = "Financial Connections consent screen to appear",
+            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
             composeTestRule
                 .onAllNodesWithTag("consent_cta")
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -1619,23 +1592,26 @@ internal class PlaygroundTestDriver(
 
         clickButtonWithTag("consent_cta")
         waitUntilTag("loaded_picker_title")
-        // TODO: Replace with institution ID tag when available
         scrollToAndClick("Test (Non-OAuth)")
 
-        // Verifies bank in web view so Compose hierarchy can detach. Button should be available
-        // after web view verification.
+        // Verifies the bank in a browser, during which the Compose hierarchy can detach. This wait
+        // yields through the Compose rule so the asynchronous browser launch can progress.
+        selectors.awaitBrowserAndDismissFirstRun(
+            getBrowser(BrowserUI.convert(testParameters.useBrowser))
+        )
         clickButtonWithTag("connect_account_button", composeCanDetach = true)
 
         clickButtonWithTag("skip_cta")
         clickButtonWithTag("done_button")
     }
 
-    private fun executeEntireInstantDebitsFlow() = with(device) {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+    private fun executeEntireInstantDebitsFlow() {
+        awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+        composeTestRule.waitUntil(
+            conditionDescription = "Financial Connections consent screen to appear",
+            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
             composeTestRule
                 .onAllNodesWithTag("consent_cta")
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -1647,11 +1623,10 @@ internal class PlaygroundTestDriver(
         clickButtonWithTag("test_mode_fill_button")
 
         waitUntilTag("loaded_picker_title")
-        // TODO: Replace with institution ID tag when available
         scrollToAndClick("Success")
 
         clickButtonWithTag("link_account_picker_cta")
-        clickButtonWithTag("done_button")
+        return clickButtonWithTag("done_button")
     }
 
     private fun doUSBankAccountAuthorization(authAction: AuthorizeAction?) {
@@ -1671,13 +1646,12 @@ internal class PlaygroundTestDriver(
     }
 
     private fun cancelAchLiteFlowOnLaunch() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_LITE_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_LITE_ACTIVITY)
 
-        onWebView()
-            .withElementByTestId("agree-button")
-            .perform(webClick())
+        onWebView().withElementByAnyTestId(
+            testIds = FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS,
+            timeout = WEBVIEW_ELEMENT_TIMEOUT,
+        )
 
         if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
             selectors.authorizeAction?.click()
@@ -1689,9 +1663,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun cancelAchFlowOnLaunch() {
-        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
-            TimeUnit.MILLISECONDS.sleep(250)
-        }
+        awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
@@ -1706,10 +1678,13 @@ internal class PlaygroundTestDriver(
     }
 
     private fun waitUntilTag(tag: String) {
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+        composeTestRule.waitUntil(
+            conditionDescription = "node with test tag '$tag' to appear",
+            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
             composeTestRule
                 .onAllNodesWithTag(tag)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
@@ -1722,14 +1697,18 @@ internal class PlaygroundTestDriver(
     }
 
     private fun clickButtonWithTag(tag: String, composeCanDetach: Boolean = false) {
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+        val matcher = hasTestTag(tag).and(isEnabled()).and(hasClickAction())
+        composeTestRule.waitUntil(
+            conditionDescription = "enabled button with test tag '$tag' to appear",
+            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
             composeTestRule
-                .onAllNodesWithTag(tag)
+                .onAllNodes(matcher)
                 .fetchSemanticsNodes(atLeastOneRootRequired = !composeCanDetach)
                 .isNotEmpty()
         }
 
-        composeTestRule.onNodeWithTag(tag).performClick()
+        composeTestRule.onNode(matcher).performClick()
     }
 
     internal fun setup(testParameters: TestParameters) {
@@ -1826,6 +1805,18 @@ internal class PlaygroundTestDriver(
     }
 
     private companion object {
+        // Generous upper bound on activity transitions (activity resume is fast; this only bounds the
+        // failure path). Kept well under the 90s per-test Timeout so a hang surfaces a clear message.
+        val ACTIVITY_TRANSITION_TIMEOUT: Duration = 45.seconds
+        val CHECKOUT_PREPARATION_TIMEOUT: Duration = 45.seconds
+        val FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT: Duration = 60.seconds
+        val FINANCIAL_CONNECTIONS_UI_TIMEOUT: Duration = 45.seconds
+        val FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS = listOf(
+            "institution-default",
+            "agree-button",
+        )
+        const val ACTIVITY_POLL_INTERVAL_MS = 250L
+
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
             "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"

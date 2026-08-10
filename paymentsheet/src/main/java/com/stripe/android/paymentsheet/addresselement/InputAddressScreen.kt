@@ -9,6 +9,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -36,6 +37,7 @@ internal fun InputAddressScreen(
     primaryButtonText: String,
     title: String,
     onPrimaryButtonClick: () -> Unit,
+    onDisabledButtonClick: () -> Unit,
     onCloseClick: () -> Unit,
     topContent: @Composable ColumnScope.() -> Unit,
     formContent: @Composable ColumnScope.() -> Unit,
@@ -78,6 +80,11 @@ internal fun InputAddressScreen(
                         focusManager.clearFocus()
                         onPrimaryButtonClick()
                     },
+                    canClickWhileDisabled = true,
+                    onDisabledButtonClick = {
+                        focusManager.clearFocus()
+                        onDisabledButtonClick()
+                    },
                     modifier = Modifier.padding(vertical = 16.dp),
                 )
             }
@@ -94,6 +101,10 @@ internal fun InputAddressScreen(
             inputAddressViewModelSubcomponentFactoryProvider
         )
     )
+    LaunchedEffect(Unit) {
+        viewModel.onScreenShown()
+    }
+
     val formController = viewModel.addressFormController
 
     val completeValues by formController.completeFormValues.collectAsState()
@@ -115,6 +126,12 @@ internal fun InputAddressScreen(
             viewModel.clickPrimaryButton(
                 completeValues,
                 checkboxChecked
+            )
+        },
+        onDisabledButtonClick = {
+            viewModel.clickPrimaryButton(
+                completedFormValues = null,
+                checkboxChecked = checkboxChecked
             )
         },
         onCloseClick = { viewModel.navigator.dismiss() },

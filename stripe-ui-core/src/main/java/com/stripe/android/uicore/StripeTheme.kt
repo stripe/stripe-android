@@ -488,6 +488,9 @@ val LocalSectionStyle = staticCompositionLocalOf { StripeTheme.sectionStyle }
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalTextFieldInsets = staticCompositionLocalOf { StripeTheme.textFieldInsets }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+private val LocalStripeThemeIsDark = staticCompositionLocalOf<Boolean?> { null }
+
 /**
  * Base Theme for Stripe Composables.
  * CAUTION: This theme is mutable by merchant configurations. You shouldn't be passing colors,
@@ -504,6 +507,35 @@ fun StripeTheme(
     textFieldInsets: FormInsets = StripeTheme.textFieldInsets,
     iconStyle: IconStyle = StripeTheme.iconStyle,
     content: @Composable () -> Unit
+) {
+    StripeTheme(
+        isDark = isSystemInDarkTheme(),
+        colors = colors,
+        shapes = shapes,
+        typography = typography,
+        sectionSpacing = sectionSpacing,
+        sectionStyle = sectionStyle,
+        textFieldInsets = textFieldInsets,
+        iconStyle = iconStyle,
+        content = content,
+    )
+}
+
+/**
+ * Base Theme for Stripe Composables whose light or dark appearance is supplied by their integration.
+ */
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StripeTheme(
+    isDark: Boolean,
+    colors: StripeColors,
+    shapes: StripeShapes,
+    typography: StripeTypography,
+    sectionSpacing: Float?,
+    sectionStyle: SectionStyle,
+    textFieldInsets: FormInsets,
+    iconStyle: IconStyle,
+    content: @Composable () -> Unit,
 ) {
     val isRobolectricTest = runCatching {
         BuildConfig.DEBUG && Build.FINGERPRINT.lowercase() == "robolectric"
@@ -528,6 +560,7 @@ fun StripeTheme(
         LocalSectionSpacing provides sectionSpacing,
         LocalSectionStyle provides sectionStyle,
         LocalTextFieldInsets provides textFieldInsets,
+        LocalStripeThemeIsDark provides isDark,
         LocalIconStyle provides iconStyle,
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
@@ -557,14 +590,16 @@ fun StripeTheme(
 fun DefaultStripeTheme(
     content: @Composable () -> Unit
 ) {
-    val colors = StripeThemeDefaults.colors(isSystemInDarkTheme())
+    val isDark = isSystemInDarkTheme()
+    val colors = StripeThemeDefaults.colors(isDark)
     val shapes = StripeThemeDefaults.shapes
     val typography = StripeThemeDefaults.typography
 
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalShapes provides shapes,
-        LocalTypography provides typography
+        LocalTypography provides typography,
+        LocalStripeThemeIsDark provides isDark,
     ) {
         MaterialTheme(
             colors = colors.materialColors,
@@ -593,6 +628,13 @@ val MaterialTheme.stripeTypography: StripeTypography
     @Composable
     @ReadOnlyComposable
     get() = LocalTypography.current
+
+@Suppress("UnusedReceiverParameter")
+val MaterialTheme.stripeThemeIsDark: Boolean
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalStripeThemeIsDark.current ?: isSystemInDarkTheme()
 
 @Composable
 @ReadOnlyComposable

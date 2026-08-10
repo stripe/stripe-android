@@ -1,7 +1,9 @@
 package com.stripe.android.common.nfcscan.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.nfcscan.scanner.GenericNfcScanningError
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
@@ -24,10 +26,10 @@ internal class DefaultNfcScanningEventReporterTest {
     }
 
     @Test
-    fun `onNfcScanSucceeded ends duration and fires event with duration`() = runScenario {
+    fun `onNfcScanSucceeded ends duration and fires event with duration and number of attempts`() = runScenario {
         durationProvider.start(DurationProvider.Key.NfcScan)
 
-        reporter.onNfcScanSucceeded()
+        reporter.onNfcScanSucceeded(numberOfAttempts = 2)
 
         assertThat(
             durationProvider.has(
@@ -38,6 +40,7 @@ internal class DefaultNfcScanningEventReporterTest {
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_success")
         assertThat(loggedParams).containsEntry("duration", 1.0f)
+        assertThat(loggedParams).containsEntry("number_of_attempts", 2)
     }
 
     @Test
@@ -73,7 +76,12 @@ internal class DefaultNfcScanningEventReporterTest {
     fun `onNfcScanAttemptFailed ends duration and fires event with duration and error code`() = runScenario {
         durationProvider.start(DurationProvider.Key.NfcScanAttempt)
 
-        reporter.onNfcScanAttemptFailed(errorCode = "expiredCard")
+        reporter.onNfcScanAttemptFailed(
+            error = GenericNfcScanningError(
+                errorCode = "expiredCard",
+                userMessage = resolvableString("Expired card"),
+            ),
+        )
 
         assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt)))
             .isTrue()
@@ -85,18 +93,44 @@ internal class DefaultNfcScanningEventReporterTest {
     }
 
     @Test
-    fun `onNfcScanCancelled ends duration and fires event with cancellation reason`() = runScenario {
-        reporter.onNfcScanCancelled(NfcScanCancellationReason.Timeout)
+    fun `onNfcScanAttemptFailed includes parameters in analytics event`() = runScenario {
+        durationProvider.start(DurationProvider.Key.NfcScanAttempt)
 
-        assertThat(
-            durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScan))
-        ).isTrue()
+        reporter.onNfcScanAttemptFailed(
+            error = GenericNfcScanningError(
+                errorCode = "nfcCardReadFailed",
+                userMessage = resolvableString("Read failed"),
+                parameters = mapOf(
+                    "sw1" to "64",
+                    "sw2" to "00",
+                ),
+            ),
+        )
 
         val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_canceled")
-        assertThat(loggedParams).containsEntry("duration", 1.0f)
-        assertThat(loggedParams).containsEntry("cancellation_reason", "scanning_timeout")
+        assertThat(loggedParams).containsEntry("error_code", "nfcCardReadFailed")
+        assertThat(loggedParams).containsEntry("sw1", "64")
+        assertThat(loggedParams).containsEntry("sw2", "00")
     }
+
+    @Test
+    fun `onNfcScanCancelled ends duration and fires event with cancellation reason and number of attempts`() =
+        runScenario {
+            reporter.onNfcScanCancelled(
+                reason = NfcScanCancellationReason.Timeout,
+                numberOfAttempts = 3,
+            )
+
+            assertThat(
+                durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScan))
+            ).isTrue()
+
+            val loggedParams = executor.getExecutedRequests().single().params
+            assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_canceled")
+            assertThat(loggedParams).containsEntry("duration", 1.0f)
+            assertThat(loggedParams).containsEntry("cancellation_reason", "scanning_timeout")
+            assertThat(loggedParams).containsEntry("number_of_attempts", 3)
+        }
 
     private class Scenario(
         val reporter: NfcScanningEventReporter,

@@ -14,7 +14,7 @@ internal class OnrampUserDataStore(
         ONRAMP_PREFS_NAME,
         Context.MODE_PRIVATE
     ),
-    private val json: Json = Json,
+    private val json: Json = Json { ignoreUnknownKeys = true },
 ) {
     fun save(userData: OnrampUserData) {
         prefs.edit {

@@ -147,6 +147,17 @@ class UploadScreenTest {
         }
     }
 
+    @Test
+    fun `when requireLiveCapture, front upload dialog only shows take photo`() {
+        // verificationPageRequireLiveCapture has requireLiveCapture = true and camera permission is granted
+        testUploadScreen {
+            onNodeWithTag(FRONT_ROW_TAG).onChildAt(1).performClick()
+
+            onNodeWithTag(SHOULD_SHOW_TAKE_PHOTO_TAG).assertExists()
+            onNodeWithTag(SHOULD_SHOW_CHOOSE_PHOTO_TAG).assertDoesNotExist()
+        }
+    }
+
     // Test UploadImageDialog
     @Test
     fun `when shouldShowTakePhoto is true and shouldShowChoosePhoto is false UI is correct`() {

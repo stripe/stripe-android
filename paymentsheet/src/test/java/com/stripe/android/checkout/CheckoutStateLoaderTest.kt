@@ -58,6 +58,44 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `loadInitial commits common configuration derived from the controller configuration`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
+                .build(),
+            checkoutSessionResponse = response(merchantCountry = "US"),
+        )
+
+        assertThat(stateHolder.state?.commonConfiguration?.googlePay?.countryCode).isEqualTo("US")
+    }
+
+    @Test
+    fun `loadInitial seeds collected details with default billing address`() = runScenario {
+        val address = CheckoutController.Address()
+            .city(" San Francisco ")
+            .country(" US ")
+            .line1(" 510 Townsend St ")
+            .postalCode(" 94103 ")
+            .state(" CA ")
+
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .defaultBillingAddress(address)
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        val billingAddress = requireNotNull(stateHolder.state?.collectedDetails?.billingAddress)
+        assertThat(billingAddress.city).isEqualTo("San Francisco")
+        assertThat(billingAddress.country).isEqualTo("US")
+        assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
+        assertThat(billingAddress.postalCode).isEqualTo("94103")
+        assertThat(billingAddress.state).isEqualTo("CA")
+        assertThat(stateHolder.state?.embeddedConfiguration?.defaultBillingDetails?.address?.postalCode)
+            .isEqualTo("94103")
+    }
+
+    @Test
     fun `loadInitial populates the customer state holder from the loaded customer`() = runScenario(
         customer = savedCustomer(),
     ) {
@@ -149,7 +187,7 @@ internal class CheckoutStateLoaderTest {
     fun `loadInitial commits state that exposes the checkout session`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
-        assertThat(stateHolder.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(stateHolder.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         // No adaptive pricing in the response, so no flag images are resolved.
         assertThat(stateHolder.state?.flagImages).isNull()
     }
@@ -240,6 +278,11 @@ internal class CheckoutStateLoaderTest {
         collectedDetails = CheckoutCollectedDetails(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        commonConfiguration = CheckoutCommonConfigurationFactory(appName = "Example, Inc.").create(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = CheckoutCollectedDetails(),
+        ),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
@@ -261,7 +304,6 @@ internal class CheckoutStateLoaderTest {
     )
 
     private fun runScenario(
-        merchantDisplayName: String = "Example, Inc.",
         loaderSelection: PaymentSelection? = null,
         chosenSelection: PaymentSelection? = null,
         shouldFail: Boolean = false,
@@ -301,7 +343,8 @@ internal class CheckoutStateLoaderTest {
             customer = customer,
         )
         val loader = CheckoutStateLoader(
-            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(merchantDisplayName),
+            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
+            commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
             flagImageResolver = flagImageResolver,
             paymentElementLoader = paymentElementLoader,
             selectionChooser = chooser,

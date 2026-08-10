@@ -1,6 +1,8 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
+import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.checkout.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -11,13 +13,13 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
     flagImages: Map<String, Bitmap>?,
     paymentOptionDisplayData: PaymentOptionDisplayData?,
     availableExpressButtonTypes: List<ExpressButtonType>,
-): CheckoutSession {
-    return CheckoutSession(
+): Session {
+    return Session(
         id = id,
         status = status.asStatus(),
         liveMode = liveMode,
         currency = currency,
-        customerEmail = customerEmail,
+        email = customerEmail,
         tax = taxStatus.asTax(),
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },
@@ -32,37 +34,37 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.Status.asStatus(): CheckoutSession.Status {
+private fun CheckoutSessionResponse.Status.asStatus(): Session.Status {
     return when (this) {
-        CheckoutSessionResponse.Status.OPEN -> CheckoutSession.Status.Open
-        CheckoutSessionResponse.Status.COMPLETE -> CheckoutSession.Status.Complete
-        CheckoutSessionResponse.Status.EXPIRED -> CheckoutSession.Status.Expired
-        CheckoutSessionResponse.Status.UNKNOWN -> CheckoutSession.Status.Unknown
+        CheckoutSessionResponse.Status.OPEN -> Session.Status.Open
+        CheckoutSessionResponse.Status.COMPLETE -> Session.Status.Complete
+        CheckoutSessionResponse.Status.EXPIRED -> Session.Status.Expired
+        CheckoutSessionResponse.Status.UNKNOWN -> Session.Status.Unknown
     }
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.TaxStatus.asTax(): CheckoutSession.Tax {
+private fun CheckoutSessionResponse.TaxStatus.asTax(): Session.Tax {
     val status = when (this) {
         CheckoutSessionResponse.TaxStatus.READY -> {
-            CheckoutSession.Tax.Status.Ready
+            Session.Tax.Status.Ready
         }
         CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS -> {
-            CheckoutSession.Tax.Status.RequiresShippingAddress
+            Session.Tax.Status.RequiresShippingAddress
         }
         CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS -> {
-            CheckoutSession.Tax.Status.RequiresBillingAddress
+            Session.Tax.Status.RequiresBillingAddress
         }
         CheckoutSessionResponse.TaxStatus.UNKNOWN -> {
-            CheckoutSession.Tax.Status.Unknown
+            Session.Tax.Status.Unknown
         }
     }
-    return CheckoutSession.Tax(status = status)
+    return Session.Tax(status = status)
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.TotalSummaryResponse.asTotalSummary(): CheckoutSession.TotalSummary {
-    return CheckoutSession.TotalSummary(
+private fun CheckoutSessionResponse.TotalSummaryResponse.asTotalSummary(): Session.TotalSummary {
+    return Session.TotalSummary(
         subtotal = subtotal,
         totalDueToday = totalDueToday,
         totalAmountDue = totalAmountDue,
@@ -74,16 +76,16 @@ private fun CheckoutSessionResponse.TotalSummaryResponse.asTotalSummary(): Check
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.DiscountAmount.asDiscountAmount(): CheckoutSession.DiscountAmount {
-    return CheckoutSession.DiscountAmount(
+private fun CheckoutSessionResponse.DiscountAmount.asDiscountAmount(): Session.DiscountAmount {
+    return Session.DiscountAmount(
         amount = amount,
         displayName = displayName,
     )
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.TaxAmount.asTaxAmount(): CheckoutSession.TaxAmount {
-    return CheckoutSession.TaxAmount(
+private fun CheckoutSessionResponse.TaxAmount.asTaxAmount(): Session.TaxAmount {
+    return Session.TaxAmount(
         amount = amount,
         inclusive = inclusive,
         displayName = displayName,
@@ -92,8 +94,8 @@ private fun CheckoutSessionResponse.TaxAmount.asTaxAmount(): CheckoutSession.Tax
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.ShippingRate.asShippingRate(): CheckoutSession.ShippingRate {
-    return CheckoutSession.ShippingRate(
+private fun CheckoutSessionResponse.ShippingRate.asShippingRate(): Session.ShippingRate {
+    return Session.ShippingRate(
         id = id,
         amount = amount,
         displayName = displayName,
@@ -102,8 +104,8 @@ private fun CheckoutSessionResponse.ShippingRate.asShippingRate(): CheckoutSessi
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.LineItem.asLineItem(): CheckoutSession.LineItem {
-    return CheckoutSession.LineItem(
+private fun CheckoutSessionResponse.LineItem.asLineItem(): Session.LineItem {
+    return Session.LineItem(
         id = id,
         name = name,
         quantity = quantity,

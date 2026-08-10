@@ -350,7 +350,9 @@ class DefaultSheetActivityStateHolderTest {
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                        launchMode = EmbeddedLaunchMode.Form(
+                            selectedPaymentMethodCode = "card",
+                        ),
                     )
                 )
             }
@@ -375,7 +377,9 @@ class DefaultSheetActivityStateHolderTest {
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                        launchMode = EmbeddedLaunchMode.Form(
+                            selectedPaymentMethodCode = "card",
+                        ),
                     )
                 )
             }
@@ -406,7 +410,9 @@ class DefaultSheetActivityStateHolderTest {
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                        launchMode = EmbeddedLaunchMode.Form(
+                            selectedPaymentMethodCode = "card",
+                        ),
                     )
                 )
             }
@@ -453,7 +459,9 @@ class DefaultSheetActivityStateHolderTest {
         config: EmbeddedPaymentElement.Configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
         tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
         customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.Form(
+            selectedPaymentMethodCode = "card",
+        ),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)

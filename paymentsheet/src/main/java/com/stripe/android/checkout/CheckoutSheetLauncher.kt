@@ -6,6 +6,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
@@ -24,6 +25,7 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import javax.inject.Inject
 import javax.inject.Named
 
+@OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
@@ -61,25 +63,15 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
-            }
-            is EmbeddedActivityResult.Cancelled -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-            }
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
+            is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
         }
     }
 
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
-            }
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
         }
@@ -87,17 +79,23 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
-            }
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
             is EmbeddedActivityResult.Cancelled -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                applyCustomerState(result.customerState)
                 clearStaleSelection()
             }
             is EmbeddedActivityResult.Error -> Unit
         }
+    }
+
+    private fun applyCompleteResult(result: EmbeddedActivityResult.Complete) {
+        applyCustomerState(result.customerState)
+        selectionHolder.setPreviousNewSelections(result.previousNewSelections)
+        selectionHolder.setSelection(result.selection)
+    }
+
+    private fun applyCustomerState(customerState: CustomerState?) {
+        customerState?.let { customerStateHolder.setCustomerState(it) }
     }
 
     private fun clearStaleSelection() {
@@ -139,7 +137,9 @@ internal class CheckoutSheetLauncher @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = promotion,
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = code),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = code,
+            ),
         )
         activityLauncher.launch(args)
     }

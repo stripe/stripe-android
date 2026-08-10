@@ -6,6 +6,23 @@ internal interface AddressLauncherEventReporter {
     fun onCompleted(
         country: String,
         autocompleteResultSelected: Boolean,
-        editDistance: Int?
+        editDistance: Int?,
     )
+
+    fun onAutocompleteSessionStarted(sessionToken: String)
+
+    fun onAutocompleteFetchStarted()
+
+    fun onAutocompleteSuggestionsReturned(
+        sessionToken: String,
+        queryLength: Int,
+        resultCount: Int,
+        source: String?,
+    )
+
+    fun onAutocompleteDetailsFetchStarted()
+
+    fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?, source: String?)
+
+    fun onAutocompleteError(sessionToken: String, error: Throwable)
 }

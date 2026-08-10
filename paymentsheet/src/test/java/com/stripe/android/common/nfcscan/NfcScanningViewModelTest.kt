@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.analytics.FakeNfcScanningEventReporter
 import com.stripe.android.common.nfcscan.analytics.NfcScanCancellationReason
 import com.stripe.android.common.nfcscan.scanner.FakeNfcCardScanner
+import com.stripe.android.common.nfcscan.scanner.GenericNfcScanningError
 import com.stripe.android.common.nfcscan.scanner.NfcCardScanner
 import com.stripe.android.common.nfcscan.scanner.ScannedCardData
 import com.stripe.android.common.nfcscan.tapzone.FakeTapZoneResolver
@@ -49,7 +50,7 @@ internal class NfcScanningViewModelTest {
         assertThat(viewModel.viewState.value).isEqualTo(
             NfcScanningViewState(
                 tapZone = TapZone(xBias = 0.3f, yBias = 0.7f),
-                status = NfcScanningStatus.Idle(error = null),
+                status = NfcScanningStatus.Idle,
             ),
         )
     }
@@ -68,23 +69,39 @@ internal class NfcScanningViewModelTest {
             assertThat(resultEvent.result).isEqualTo(NfcScanningContract.Result.Canceled)
         }
 
-        assertThat(fakeEventReporter.onNfcScanCancelledCalls.awaitItem())
-            .isEqualTo(NfcScanCancellationReason.UserInitiated)
+        assertThat(fakeEventReporter.onNfcScanCancelledCalls.awaitItem()).isEqualTo(
+            FakeNfcScanningEventReporter.NfcScanCancelledCall(
+                reason = NfcScanCancellationReason.UserInitiated,
+                numberOfAttempts = 0,
+            ),
+        )
 
         assertThat(fakeTimeoutManager.cancelCalls.awaitItem()).isNotNull()
     }
 
     @Test
     fun `card scanner failed reports attempt failed with error code`() = runScenario {
-        scannerState.emit(
-            NfcCardScanner.State.Failed(
-                error = NfcCardScanner.Error(
-                    code = "expiredCard",
-                    userMessage = R.string.stripe_nfc_expired_error.resolvableString,
-                ),
+        val error = GenericNfcScanningError(
+            errorCode = "expiredCard",
+            userMessage = R.string.stripe_nfc_expired_error.resolvableString,
+        )
+        scannerState.emit(NfcCardScanner.State.Failed(error = error))
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(error)
+    }
+
+    @Test
+    fun `card scanner failed reports attempt failed with error parameters`() = runScenario {
+        val error = GenericNfcScanningError(
+            errorCode = "nfcCardReadFailed",
+            userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+            parameters = mapOf(
+                "sw1" to "64",
+                "sw2" to "00",
             ),
         )
-        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("expiredCard")
+        scannerState.emit(NfcCardScanner.State.Failed(error = error))
+
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(error)
     }
 
     @Test
@@ -99,7 +116,7 @@ internal class NfcScanningViewModelTest {
     @Test
     fun `card scanner in scanning status updates the view model state to scanning`() = runScenario {
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle)
             scannerState.emit(NfcCardScanner.State.Scanning)
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanning)
         }
@@ -111,7 +128,7 @@ internal class NfcScanningViewModelTest {
     @Test
     fun `card scanner in scanned status updates the view model state to scanned`() = runScenario {
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle)
 
             scannerState.emit(
                 NfcCardScanner.State.Complete(
@@ -131,44 +148,38 @@ internal class NfcScanningViewModelTest {
     }
 
     @Test
-    fun `card scanner in failed status updates the view model state to idle with error`() = runScenario {
+    fun `card scanner in failed status updates the view model state to error`() = runScenario {
         val errorMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString
+        val error = GenericNfcScanningError(
+            errorCode = "unknown",
+            userMessage = errorMessage,
+        )
 
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle)
 
-            scannerState.emit(
-                NfcCardScanner.State.Failed(
-                    error = NfcCardScanner.Error(
-                        code = "unknown",
-                        userMessage = errorMessage,
-                    ),
-                ),
-            )
+            scannerState.emit(NfcCardScanner.State.Failed(error = error))
 
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
-            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("unknown")
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Error(errorMessage))
+            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(error)
             assertThat(fakeTimeoutManager.resetCalls.awaitItem()).isNotNull()
         }
     }
 
     @Test
-    fun `card scanner in scanning status clears idle error`() = runScenario {
+    fun `card scanner in scanning status clears error`() = runScenario {
         val errorMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString
+        val error = GenericNfcScanningError(
+            errorCode = "unknown",
+            userMessage = errorMessage,
+        )
 
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle)
 
-            scannerState.emit(
-                NfcCardScanner.State.Failed(
-                    error = NfcCardScanner.Error(
-                        code = "unknown",
-                        userMessage = errorMessage,
-                    ),
-                ),
-            )
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
-            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("unknown")
+            scannerState.emit(NfcCardScanner.State.Failed(error = error))
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Error(errorMessage))
+            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(error)
 
             scannerState.emit(NfcCardScanner.State.Scanning)
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanning)
@@ -177,7 +188,29 @@ internal class NfcScanningViewModelTest {
     }
 
     @Test
+    fun `handleViewAction ErrorShown updates status to idle`() = runScenario {
+        val errorMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString
+        val error = GenericNfcScanningError(
+            errorCode = "unknown",
+            userMessage = errorMessage,
+        )
+
+        scannerState.emit(NfcCardScanner.State.Failed(error = error))
+
+        assertThat(viewModel.viewState.value.status).isEqualTo(NfcScanningStatus.Error(errorMessage))
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(error)
+
+        viewModel.handleViewAction(NfcScanningViewAction.ErrorShown)
+
+        assertThat(viewModel.viewState.value.status).isEqualTo(NfcScanningStatus.Idle)
+    }
+
+    @Test
     fun `card scanner Complete state emits Complete result after success animation`() = runScenario {
+        scannerState.emit(NfcCardScanner.State.Scanning)
+
+        assertThat(fakeEventReporter.onNfcScanAttemptStartedCalls.awaitItem()).isNotNull()
+
         viewModel.event.test {
             scannerState.emit(
                 NfcCardScanner.State.Complete(
@@ -211,27 +244,25 @@ internal class NfcScanningViewModelTest {
         }
 
         assertThat(fakeEventReporter.onNfcScanAttemptSucceededCalls.awaitItem()).isNotNull()
-        assertThat(fakeEventReporter.onNfcScanSucceededCalls.awaitItem()).isNotNull()
+        assertThat(fakeEventReporter.onNfcScanSucceededCalls.awaitItem()).isEqualTo(1)
     }
 
     @Test
     fun `card scanner failed emits failed haptic feedback event`() = runScenario {
+        val error = GenericNfcScanningError(
+            errorCode = "expiredCard",
+            userMessage = R.string.stripe_nfc_expired_error.resolvableString,
+        )
+
         viewModel.event.test {
-            scannerState.emit(
-                NfcCardScanner.State.Failed(
-                    error = NfcCardScanner.Error(
-                        code = "expiredCard",
-                        userMessage = R.string.stripe_nfc_expired_error.resolvableString,
-                    ),
-                ),
-            )
+            scannerState.emit(NfcCardScanner.State.Failed(error = error))
 
             assertThat(awaitItem()).isEqualTo(
                 NfcScanningEvent.TriggerHapticFeedback(HapticFeedbackType.Failed),
             )
         }
 
-        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("expiredCard")
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo(error)
     }
 
     @Test
@@ -269,8 +300,12 @@ internal class NfcScanningViewModelTest {
             assertThat(resultEvent.result).isEqualTo(NfcScanningContract.Result.Canceled)
         }
 
-        assertThat(fakeEventReporter.onNfcScanCancelledCalls.awaitItem())
-            .isEqualTo(NfcScanCancellationReason.Timeout)
+        assertThat(fakeEventReporter.onNfcScanCancelledCalls.awaitItem()).isEqualTo(
+            FakeNfcScanningEventReporter.NfcScanCancelledCall(
+                reason = NfcScanCancellationReason.Timeout,
+                numberOfAttempts = 0,
+            ),
+        )
         assertThat(fakeTimeoutManager.cancelCalls.awaitItem()).isNotNull()
     }
 
@@ -293,6 +328,66 @@ internal class NfcScanningViewModelTest {
             fakeTimeoutManager.emitTimeout()
             expectNoEvents()
         }
+    }
+
+    @Test
+    fun `A successful scan reports number of attempts`() = runScenario {
+        scannerState.emit(NfcCardScanner.State.Scanning)
+        assertThat(fakeEventReporter.onNfcScanAttemptStartedCalls.awaitItem()).isNotNull()
+
+        scannerState.emit(
+            NfcCardScanner.State.Failed(
+                error = GenericNfcScanningError(
+                    errorCode = "expiredCard",
+                    userMessage = R.string.stripe_nfc_expired_error.resolvableString,
+                ),
+            ),
+        )
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
+
+        scannerState.emit(NfcCardScanner.State.Scanning)
+        assertThat(fakeEventReporter.onNfcScanAttemptStartedCalls.awaitItem()).isNotNull()
+
+        scannerState.emit(
+            NfcCardScanner.State.Complete(
+                ScannedCardData(
+                    cardNumber = "4242424242424242",
+                    expirationMonth = 12,
+                    expirationYear = 2030,
+                ),
+            ),
+        )
+        assertThat(fakeEventReporter.onNfcScanAttemptSucceededCalls.awaitItem()).isNotNull()
+
+        viewModel.handleViewAction(NfcScanningViewAction.SuccessShown)
+
+        assertThat(fakeEventReporter.onNfcScanSucceededCalls.awaitItem()).isEqualTo(2)
+    }
+
+    @Test
+    fun `Cancellation reports number of attempts`() = runScenario {
+        repeat(5) {
+            scannerState.emit(NfcCardScanner.State.Scanning)
+            assertThat(fakeEventReporter.onNfcScanAttemptStartedCalls.awaitItem()).isNotNull()
+
+            scannerState.emit(
+                NfcCardScanner.State.Failed(
+                    error = GenericNfcScanningError(
+                        errorCode = "expiredCard",
+                        userMessage = R.string.stripe_nfc_expired_error.resolvableString,
+                    ),
+                ),
+            )
+
+            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
+        }
+
+        viewModel.handleViewAction(NfcScanningViewAction.Close)
+
+        val cancelledEventCall = fakeEventReporter.onNfcScanCancelledCalls.awaitItem()
+
+        assertThat(cancelledEventCall.reason).isEqualTo(NfcScanCancellationReason.UserInitiated)
+        assertThat(cancelledEventCall.numberOfAttempts).isEqualTo(5)
     }
 
     @Test

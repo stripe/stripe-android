@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.stashNewSelection
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -46,7 +47,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
-        assertThat(cancelled.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(cancelled.launchMode).isEqualTo(
+            EmbeddedLaunchMode.PaymentOptions
+        )
     }
 
     @Test
@@ -70,7 +73,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
         val complete = result as EmbeddedActivityResult.Complete
-        assertThat(complete.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(complete.launchMode).isEqualTo(
+            EmbeddedLaunchMode.PaymentOptions
+        )
     }
 
     @Test
@@ -85,7 +90,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
-        assertThat(cancelled.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(cancelled.launchMode).isEqualTo(
+            EmbeddedLaunchMode.PaymentOptions
+        )
     }
 
     @Test
@@ -117,7 +124,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         scenario.onActivity { activity ->
             assertThat(activity.embeddedNavigator.canGoBack).isFalse()
             assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.PaymentOptions>()
+                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         }
     }
 
@@ -141,7 +148,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    ),
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",

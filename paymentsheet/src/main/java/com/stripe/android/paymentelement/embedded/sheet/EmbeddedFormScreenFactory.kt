@@ -12,6 +12,10 @@ internal class DefaultEmbeddedFormScreenFactory @Inject constructor(
     private val formFactory: EmbeddedNavigator.Screen.Form.Factory,
 ) : EmbeddedFormScreenFactory {
     override fun createFormScreen(code: PaymentMethodCode): EmbeddedNavigator.Screen.Form {
-        return formFactory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = code))
+        return formFactory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = code,
+            )
+        )
     }
 }

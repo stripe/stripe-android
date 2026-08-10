@@ -1,20 +1,41 @@
 package com.stripe.android.common.nfcscan.scanner
 
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
 import kotlin.collections.joinToString
 
 internal interface NfcCardDataParser {
-    fun canParse(records: Map<String, ByteArray>): Boolean
+    fun parse(records: Map<String, ByteArray>): Result
 
-    fun parse(records: Map<String, ByteArray>): ScannedCardData?
+    sealed interface Result {
+        data class Success(val cardData: ScannedCardData) : Result
+        data class Error(val error: NfcScanningError) : Result
+    }
 }
 
 internal class DefaultNfcCardDataParser @Inject constructor() : NfcCardDataParser {
-    override fun canParse(records: Map<String, ByteArray>): Boolean {
-        return TAG_TRACK2 in records || (TAG_PAN in records && TAG_EXPIRY in records)
+    override fun parse(records: Map<String, ByteArray>): NfcCardDataParser.Result {
+        if (isMobileWallet(records)) {
+            return NfcCardDataParser.Result.Error(
+                GenericNfcScanningError(
+                    errorCode = MOBILE_WALLET_UNSUPPORTED_ERROR_CODE,
+                    userMessage = R.string.stripe_nfc_scan_error_mobile_wallet.resolvableString,
+                )
+            )
+        }
+
+        if (isTokenized(records)) {
+            return unsupportedCardError()
+        }
+
+        return when (val cardData = extractCardData(records)) {
+            is ScannedCardData -> NfcCardDataParser.Result.Success(cardData)
+            null -> unsupportedCardError()
+        }
     }
 
-    override fun parse(records: Map<String, ByteArray>): ScannedCardData? {
+    private fun extractCardData(records: Map<String, ByteArray>): ScannedCardData? {
         // Tag 0x57 — Track 2 Equivalent Data. Preferred when present because it encodes PAN and
         // expiry together in the same format used on magnetic-stripe Track 2.
         records[TAG_TRACK2]?.let {
@@ -35,6 +56,24 @@ internal class DefaultNfcCardDataParser @Inject constructor() : NfcCardDataParse
             expirationMonth = month,
             expirationYear = year,
         )
+    }
+
+    /*
+     * Checks whether the card came from a mobile wallet but looking at Byte 2, Bit 7 of the Application Interchange
+     * Profile (AIP, Tag 82) which indicates whether the transaction originates from a contactless mobile device
+     * (such as a smartphone or digital wallet)
+     */
+    private fun isMobileWallet(records: Map<String, ByteArray>): Boolean {
+        val aip = records[TAG_AIP]?.takeIf { it.size >= 2 } ?: return false
+        return (aip[1].toSingleByte() and AIP_ON_DEVICE_CVM_SUPPORTED_MASK) != 0
+    }
+
+    /*
+     * A tokenized (non-mobile-wallet) credential is identified by the presence of a Token Requestor
+     * ID (0x9F19).
+     */
+    private fun isTokenized(records: Map<String, ByteArray>): Boolean {
+        return records[TAG_TOKEN_REQUESTOR_ID] != null
     }
 
     private fun parseFromTrack2(bytes: ByteArray): ScannedCardData? {
@@ -76,6 +115,15 @@ internal class DefaultNfcCardDataParser @Inject constructor() : NfcCardDataParse
         return month to year
     }
 
+    private fun unsupportedCardError(): NfcCardDataParser.Result.Error {
+        return NfcCardDataParser.Result.Error(
+            GenericNfcScanningError(
+                errorCode = CARD_UNSUPPORTED_ERROR_CODE,
+                userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+            )
+        )
+    }
+
     private fun ByteArray.toReadableString(): String {
         return joinToString("") { "%02X".format(it) }
     }
@@ -85,9 +133,17 @@ internal class DefaultNfcCardDataParser @Inject constructor() : NfcCardDataParse
         (this shr FIRST_DIGIT_SHIFT) * FIRST_DIGIT_MULTIPLIER + (this and LAST_DIGIT_MASK)
 
     private companion object {
+        const val MOBILE_WALLET_UNSUPPORTED_ERROR_CODE = "mobileWalletUnsupportedByNfc"
+        const val CARD_UNSUPPORTED_ERROR_CODE = "cardUnsupportedByNfc"
+
         const val TAG_TRACK2 = "57"
         const val TAG_PAN = "5A"
         const val TAG_EXPIRY = "5F24"
+
+        const val TAG_AIP = "82"
+        const val TAG_TOKEN_REQUESTOR_ID = "9F19"
+
+        const val AIP_ON_DEVICE_CVM_SUPPORTED_MASK = 0x40
 
         const val TRACK2_SEPARATOR = 'D'
         const val EXPIRATION_YEAR_START = 2000

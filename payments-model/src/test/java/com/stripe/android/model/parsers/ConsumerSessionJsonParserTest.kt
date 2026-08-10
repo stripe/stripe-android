@@ -27,6 +27,7 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
                 ),
+                supportedPaymentDetailsTypes = listOf("CARD"),
             )
         )
     }
@@ -49,6 +50,7 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Verified
                     )
                 ),
+                supportedPaymentDetailsTypes = listOf("CARD"),
             )
         )
     }
@@ -90,6 +92,7 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
                 ),
+                supportedPaymentDetailsTypes = listOf("CARD"),
             )
         )
     }
@@ -161,5 +164,44 @@ class ConsumerSessionJsonParserTest {
         )
         val result = ConsumerSessionJsonParser().parse(json)
         assertThat(result?.linkBrand).isNull()
+    }
+
+    @Test
+    fun `Parse consumer with support_payment_details_types`() {
+        val json = JSONObject(
+            """
+                {
+                  "consumer_session": {
+                    "client_secret": "secret_123",
+                    "email_address": "test@stripe.com",
+                    "redacted_phone_number": "+1********56",
+                    "redacted_formatted_phone_number": "(***) *** **56",
+                    "verification_sessions": [],
+                    "support_payment_details_types": ["CARD", "BANK_ACCOUNT"]
+                  }
+                }
+            """.trimIndent()
+        )
+        val result = ConsumerSessionJsonParser().parse(json)
+        assertThat(result?.supportedPaymentDetailsTypes).containsExactly("CARD", "BANK_ACCOUNT")
+    }
+
+    @Test
+    fun `Parse consumer without support_payment_details_types returns empty list`() {
+        val json = JSONObject(
+            """
+                {
+                  "consumer_session": {
+                    "client_secret": "secret_123",
+                    "email_address": "test@stripe.com",
+                    "redacted_phone_number": "+1********56",
+                    "redacted_formatted_phone_number": "(***) *** **56",
+                    "verification_sessions": []
+                  }
+                }
+            """.trimIndent()
+        )
+        val result = ConsumerSessionJsonParser().parse(json)
+        assertThat(result?.supportedPaymentDetailsTypes).isEmpty()
     }
 }

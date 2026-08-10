@@ -9,7 +9,9 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.R
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -72,6 +74,21 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             awaitItem().run {
                 assertThat(isProcessing).isTrue()
             }
+        }
+    }
+
+    @Test
+    fun state_usesLinkAccountBrand() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link),
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Link)
+
+            linkAccountSource.value = LinkAccountUpdate.Value(
+                LinkAccount(TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink)),
+            )
+
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Onelink)
         }
     }
 
@@ -1745,24 +1762,83 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun visibilityTracker_doesNotEmitWhenCancellingTracking() = runScenario(
-        initialPaymentMethods = PaymentMethodFixtures.createCards(1)
+    fun visibilityTracker_doesNotEmitWhenCancellingPendingTracking() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            )
+        ),
     ) {
-        val fakeLayoutCoordinates = FakeLayoutCoordinatesFixtures.FULLY_HIDDEN_COORDINATES
+        val fakeLayoutCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
         interactor.handleViewAction(
-            ViewAction.UpdatePaymentMethodVisibility("saved", fakeLayoutCoordinates)
+            ViewAction.UpdatePaymentMethodVisibility("card", fakeLayoutCoordinates)
+        )
+        interactor.handleViewAction(
+            ViewAction.UpdatePaymentMethodVisibility("card", fakeLayoutCoordinates)
         )
 
-        // Resets tracking so the second action should not emit an event
+        interactor.handleViewAction(
+            ViewAction.CancelPaymentMethodVisibilityTracking
+        )
+
+        testScope.testScheduler.advanceUntilIdle()
+
+        visibilitySnapshotTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun visibilityTracker_emitsAfterCancellingAndRestartingTracking() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            )
+        ),
+    ) {
+        val fakeLayoutCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
+
+        interactor.handleViewAction(
+            ViewAction.UpdatePaymentMethodVisibility("card", fakeLayoutCoordinates)
+        )
+        interactor.handleViewAction(
+            ViewAction.UpdatePaymentMethodVisibility("card", fakeLayoutCoordinates)
+        )
         interactor.handleViewAction(
             ViewAction.CancelPaymentMethodVisibilityTracking
         )
 
         interactor.handleViewAction(
-            ViewAction.UpdatePaymentMethodVisibility("saved", fakeLayoutCoordinates)
+            ViewAction.UpdatePaymentMethodVisibility("card", fakeLayoutCoordinates)
+        )
+        interactor.handleViewAction(
+            ViewAction.UpdatePaymentMethodVisibility("card", fakeLayoutCoordinates)
         )
 
+        testScope.testScheduler.advanceUntilIdle()
+
+        assertThat(visibilitySnapshotTurbine.awaitItem()).isEqualTo(
+            Pair(listOf("card"), emptyList<String>())
+        )
+    }
+
+    @Test
+    fun visibilityTracker_doesNotEmitPendingEventAfterClose() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            )
+        ),
+    ) {
+        val fakeLayoutCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
+
+        interactor.handleViewAction(
+            ViewAction.UpdatePaymentMethodVisibility("card", fakeLayoutCoordinates)
+        )
+        interactor.handleViewAction(
+            ViewAction.UpdatePaymentMethodVisibility("card", fakeLayoutCoordinates)
+        )
+
+        interactor.close()
         testScope.testScheduler.advanceUntilIdle()
 
         visibilitySnapshotTurbine.expectNoEvents()
@@ -1897,6 +1973,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> =
             MutableStateFlow(initialMostRecentlySelectedSavedPaymentMethod)
         val walletsState = MutableStateFlow(initialWalletsState)
+        val linkAccount = MutableStateFlow(LinkAccountUpdate.Value(account = null))
         val canRemove = MutableStateFlow(true)
         val isCurrentScreen: MutableStateFlow<Boolean> = MutableStateFlow(initialIsCurrentScreen)
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(incentive)
@@ -1947,7 +2024,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 onUpdatePaymentMethodTurbine.add(paymentMethod)
             },
             shouldUpdateVerticalModeSelection = shouldUpdateVerticalModeSelection,
-            dispatcher = testDispatcher,
+            coroutineScope = TestScope(testDispatcher),
             mainDispatcher = testDispatcher,
             invokeRowSelectionCallback = invokeRowSelectionCallback,
             displaysMandatesInFormScreen = displaysMandatesInFormScreen,
@@ -1957,6 +2034,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 )
             },
             updateMandateText = updateMandateText,
+            linkAccount = linkAccount,
             paymentMethodMessagePromotionsHelper = promotionsHelper
         )
         closeInteractorRule.track(interactor)
@@ -1971,6 +2049,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             mostRecentlySelectedSavedPaymentMethodSource = mostRecentlySelectedSavedPaymentMethod,
             paymentMethodsSource = paymentMethods,
             walletsState = walletsState,
+            linkAccountSource = linkAccount,
             interactor = interactor,
             canRemove = canRemove,
             transitionToManageScreenTurbine = transitionToManageScreenTurbine,
@@ -1998,6 +2077,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val mostRecentlySelectedSavedPaymentMethodSource: MutableStateFlow<PaymentMethod?>,
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>>,
         val walletsState: MutableStateFlow<WalletsState?>,
+        val linkAccountSource: MutableStateFlow<LinkAccountUpdate.Value>,
         val canRemove: MutableStateFlow<Boolean>,
         val interactor: PaymentMethodVerticalLayoutInteractor,
         val transitionToManageScreenTurbine: ReceiveTurbine<Unit>,

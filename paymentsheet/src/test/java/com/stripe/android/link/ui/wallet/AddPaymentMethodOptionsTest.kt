@@ -99,11 +99,10 @@ class AddPaymentMethodOptionsTest {
     }
 
     @Test
-    fun `values handles empty funding sources with card fallback`() {
+    fun `values handles empty funding sources with no options`() {
         val options = createOptions(fundingSources = emptyList())
 
-        assertThat(options.values).hasSize(1)
-        assertThat(options.values).containsExactly(AddPaymentMethodOption.Card)
+        assertThat(options.values).isEmpty()
     }
 
     @Test
@@ -150,10 +149,10 @@ class AddPaymentMethodOptionsTest {
     }
 
     @Test
-    fun `default returns card when no funding sources supported`() {
+    fun `default returns null when no funding sources supported`() {
         val options = createOptions(fundingSources = emptyList())
 
-        assertThat(options.default).isEqualTo(AddPaymentMethodOption.Card)
+        assertThat(options.default).isNull()
     }
 
     @Test

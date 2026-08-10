@@ -74,7 +74,7 @@ internal data class PaymentMethodMetadata(
     val isGooglePayReady: Boolean,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
     val linkMode: LinkMode?,
-    val linkBrand: LinkBrand,
+    private val linkBrand: LinkBrand,
     val linkStateResult: LinkStateResult?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
@@ -99,10 +99,12 @@ internal data class PaymentMethodMetadata(
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
     val shouldUseAutocompleteProxyEndpoints: Boolean,
-    val requiresBillingAddressForAutomaticTax: Boolean,
     val checkoutSessionResponse: CheckoutSessionResponse?,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
 ) : Parcelable {
+
+    val requiresBillingAddressForAutomaticTax: Boolean
+        get() = checkoutSessionResponse?.collectsTaxFromBillingAddress == true
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
         return when (paymentMethodLayout) {
@@ -441,7 +443,6 @@ internal data class PaymentMethodMetadata(
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
-                requiresBillingAddressForAutomaticTax = initializationMode.requiresBillingAddressForAutomaticTax(),
                 checkoutSessionResponse =
                     (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
                         ?.checkoutSessionResponse,
@@ -516,7 +517,6 @@ internal data class PaymentMethodMetadata(
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
-                requiresBillingAddressForAutomaticTax = false,
                 checkoutSessionResponse = null,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             )

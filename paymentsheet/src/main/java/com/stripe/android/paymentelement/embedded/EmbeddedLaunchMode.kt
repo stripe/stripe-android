@@ -6,7 +6,9 @@ import kotlinx.parcelize.Parcelize
 
 internal sealed interface EmbeddedLaunchMode : Parcelable {
     @Parcelize
-    data class Form(val selectedPaymentMethodCode: PaymentMethodCode) : EmbeddedLaunchMode
+    data class Form(
+        val selectedPaymentMethodCode: PaymentMethodCode,
+    ) : EmbeddedLaunchMode
 
     @Parcelize
     data object Manage : EmbeddedLaunchMode

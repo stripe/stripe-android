@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -12,13 +13,14 @@ import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
-import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
@@ -43,6 +45,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val sheetStateHolder: SheetStateHolder,
     private val savedPaymentMethodMutatorFactory: EmbeddedContentSavedPaymentMethodMutatorFactory,
+    private val linkAccountHolder: LinkAccountHolder,
 ) : EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
 
     @Suppress("LongMethod")
@@ -53,23 +56,20 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
         isImmediateAction: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
     ): PaymentMethodVerticalLayoutInteractor {
+        val interactorScope = coroutineScope.childScope(Dispatchers.Default)
+        val formHelperScope = interactorScope.childScope(Dispatchers.Main)
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
         )
-        val formHelper = embeddedFormHelperFactory.create(
-            coroutineScope = coroutineScope,
+        val formHelper = embeddedFormHelperFactory.createForVerticalLayout(
+            coroutineScope = formHelperScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            // Card scan auto-launch is only relevant in the form, not the list (as the form helper is used in here).
-            automaticallyLaunchedCardScanFormDataHelper = null,
-            tapToAddHelper = null,
             selectionUpdater = {
                 selectionHolder.setSelection(it)
                 rowSelectionImmediateActionHandler.invoke()
             },
-            // Not important for determining formType so set to default value
-            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
         val savedPaymentMethodMutator = savedPaymentMethodMutatorFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -142,7 +142,9 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             },
             // Embedded renders mandate text through its own path, not the mandate-above-button handler.
             updateMandateText = null,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            linkAccount = linkAccountHolder.linkAccountInfo,
+            coroutineScope = interactorScope,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
 }

@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -76,6 +77,14 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (::webView.isInitialized) {
+            (webView.parent as? ViewGroup)?.removeView(webView)
+            webView.destroy()
+        }
+        super.onDestroy()
     }
 
     private fun handleEdgeToEdge() {

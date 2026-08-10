@@ -77,7 +77,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             isEnabled = false,
             processingState = PrimaryButtonProcessingState.Idle(null),
             isProcessing = false,
-            shouldDisplayLockIcon = launchMode != EmbeddedLaunchMode.PaymentOptions &&
+            shouldDisplayLockIcon = launchMode !is EmbeddedLaunchMode.PaymentOptions &&
                 configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
             savedPaymentSelectionToConfirm = null,
         )
@@ -253,7 +253,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
         val amount = amount(stripeIntent.amount, stripeIntent.currency)
         val label = configuration.primaryButtonLabel
         val isForPaymentIntent = stripeIntent is PaymentIntent
-        if (launchMode == EmbeddedLaunchMode.PaymentOptions) {
+        if (launchMode is EmbeddedLaunchMode.PaymentOptions) {
             return continueButtonLabel(label)
         }
         return when (configuration.formSheetAction) {

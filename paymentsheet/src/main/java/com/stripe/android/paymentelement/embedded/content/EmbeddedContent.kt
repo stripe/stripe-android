@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodEmbeddedLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.uicore.StripeTheme
+import java.io.Closeable
 
 @Immutable
 internal data class EmbeddedContent(
@@ -17,7 +18,11 @@ internal data class EmbeddedContent(
     private val embeddedViewDisplaysMandateText: Boolean,
     private val appearance: Embedded,
     private val isImmediateAction: Boolean,
-) {
+) : Closeable {
+    override fun close() {
+        interactor.close()
+    }
+
     @Composable
     fun Content() {
         /**

@@ -33,9 +33,9 @@ class CurrencySelectorElement @Inject internal constructor(
         )
         val state by stateHolder.stateFlow.collectAsState()
         val appearanceState = state?.configuration?.currencySelectorElementConfiguration?.appearance ?: return
-        val isLoading by checkoutController.isLoading.collectAsState()
-        val checkoutSession by checkoutController.checkoutSession.collectAsState()
-        val currencySelectorOptions = checkoutSession?.currencySelectorOptions ?: return
+        val isUpdating by checkoutController.isUpdating.collectAsState()
+        val session by checkoutController.session.collectAsState()
+        val currencySelectorOptions = session?.currencySelectorOptions ?: return
         val showCurrencyCode = appearanceState.labelContent == Appearance.LabelContent.CURRENCY_CODE
         val errorMessage by viewModel.errorMessage.collectAsState()
         CurrencySelectorToggle(
@@ -43,7 +43,7 @@ class CurrencySelectorElement @Inject internal constructor(
             onCurrencySelected = { currencyOption ->
                 viewModel.onCurrencySelected(currencyOption.code)
             },
-            isEnabled = !isLoading,
+            isEnabled = !isUpdating,
             showCurrencyCode = showCurrencyCode,
             errorMessage = errorMessage?.resolve(),
             appearance = appearanceState,

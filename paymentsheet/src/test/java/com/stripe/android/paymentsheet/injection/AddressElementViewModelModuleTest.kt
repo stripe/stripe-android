@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import org.junit.Test
 import org.mockito.kotlin.mock
 
@@ -23,6 +24,7 @@ class AddressElementViewModelModuleTest {
             ),
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
             googlePlacesClient = null,
+            addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
         )
 
         assertThat(placesClient).isNotNull()

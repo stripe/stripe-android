@@ -43,6 +43,7 @@ internal class SetupIntentFlowResultProcessorTest {
         Logger.noop(),
         testDispatcher,
         pollingAnalyticsEventReporter,
+        Clock { testDispatcher.scheduler.currentTime },
     )
 
     @Test

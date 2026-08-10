@@ -51,12 +51,24 @@ class AutocompleteAddressController(
                     interactor.onDismissed()
                 }
 
+                override fun onFocusLost() {
+                    interactor.onFocusLost()
+                }
+
+                override fun onFocusGained() {
+                    interactor.onFocusGained()
+                }
+
                 override fun onEnterManually() {
                     interactor.onEnterManuallyFromInline()
                 }
 
                 override fun getAttributionDrawable(isDarkTheme: Boolean): Int? {
                     return R.drawable.stripe_google_maps_logo
+                }
+
+                override fun onSearchActivated() {
+                    interactor.onSearchActivated()
                 }
             }
         } else {
@@ -145,6 +157,11 @@ class AutocompleteAddressController(
         values: Map<IdentifierSpec, String?>,
         addressInputMode: AddressInputMode,
     ): AddressElement {
+        val handler = if (isCountrySupported(values[IdentifierSpec.Country])) {
+            inlineAutocompleteHandler
+        } else {
+            null
+        }
         return AddressElement(
             _identifier = identifier,
             rawValuesMap = values,
@@ -154,8 +171,14 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
-            inlineAutocompleteHandler = inlineAutocompleteHandler,
+            inlineAutocompleteHandler = handler,
         )
+    }
+
+    private fun isCountrySupported(country: String?): Boolean {
+        if (country.isNullOrBlank()) return true
+        val supported = config.autocompleteCountries
+        return supported.isEmpty() || supported.any { it.equals(country, ignoreCase = true) }
     }
 
     private fun toAddressInputMode(
@@ -163,8 +186,11 @@ class AutocompleteAddressController(
         values: Map<IdentifierSpec, String?>
     ): AddressInputMode {
         val googlePlacesApiKey = config.googlePlacesApiKey
+        val countrySupported = isCountrySupported(values[IdentifierSpec.Country])
 
-        return if (inlineAutocompleteActive && !expandForm && values[IdentifierSpec.Line1] == null) {
+        val showInline = inlineAutocompleteActive && !expandForm &&
+            countrySupported && values[IdentifierSpec.Line1].isNullOrEmpty()
+        return if (showInline) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,

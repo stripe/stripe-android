@@ -65,6 +65,7 @@ internal sealed interface ExpressButton {
         val cardBrandFilter: CardBrandFilter,
         val cardFundingFilter: CardFundingFilter,
         val additionalEnabledNetworks: List<String>,
+        val shippingAddressRequired: Boolean,
     ) : ExpressButton {
 
         override fun toSelection(): PaymentSelection = PaymentSelection.GooglePay
@@ -75,6 +76,7 @@ internal sealed interface ExpressButton {
             fun create(
                 paymentMethodMetadata: PaymentMethodMetadata,
                 googlePayConfiguration: GooglePayConfiguration.State,
+                shippingAddressRequired: Boolean,
             ): GooglePay {
                 return GooglePay(
                     allowCreditCards = paymentMethodMetadata.cardFundingFilter.isAccepted(CardFunding.Credit),
@@ -84,6 +86,7 @@ internal sealed interface ExpressButton {
                     billingAddressParameters = paymentMethodMetadata.billingDetailsCollectionConfiguration
                         .toBillingAddressParameters(),
                     additionalEnabledNetworks = googlePayConfiguration.additionalEnabledNetworks,
+                    shippingAddressRequired = shippingAddressRequired,
                 )
             }
         }

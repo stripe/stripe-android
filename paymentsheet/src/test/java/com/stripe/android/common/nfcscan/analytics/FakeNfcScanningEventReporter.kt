@@ -1,14 +1,20 @@
 package com.stripe.android.common.nfcscan.analytics
 
 import app.cash.turbine.Turbine
+import com.stripe.android.common.nfcscan.scanner.NfcScanningError
 
 internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
     val onNfcScanStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptSucceededCalls = Turbine<Unit>()
-    val onNfcScanAttemptFailedCalls = Turbine<String>()
-    val onNfcScanSucceededCalls = Turbine<Unit>()
-    val onNfcScanCancelledCalls = Turbine<NfcScanCancellationReason>()
+    val onNfcScanAttemptFailedCalls = Turbine<NfcScanningError>()
+    val onNfcScanSucceededCalls = Turbine<Int>()
+    val onNfcScanCancelledCalls = Turbine<NfcScanCancelledCall>()
+
+    data class NfcScanCancelledCall(
+        val reason: NfcScanCancellationReason,
+        val numberOfAttempts: Int,
+    )
 
     override fun onNfcScanStarted() {
         onNfcScanStartedCalls.add(Unit)
@@ -22,16 +28,24 @@ internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
         onNfcScanAttemptSucceededCalls.add(Unit)
     }
 
-    override fun onNfcScanAttemptFailed(errorCode: String) {
-        onNfcScanAttemptFailedCalls.add(errorCode)
+    override fun onNfcScanAttemptFailed(error: NfcScanningError) {
+        onNfcScanAttemptFailedCalls.add(error)
     }
 
-    override fun onNfcScanSucceeded() {
-        onNfcScanSucceededCalls.add(Unit)
+    override fun onNfcScanSucceeded(numberOfAttempts: Int) {
+        onNfcScanSucceededCalls.add(numberOfAttempts)
     }
 
-    override fun onNfcScanCancelled(reason: NfcScanCancellationReason) {
-        onNfcScanCancelledCalls.add(reason)
+    override fun onNfcScanCancelled(
+        reason: NfcScanCancellationReason,
+        numberOfAttempts: Int,
+    ) {
+        onNfcScanCancelledCalls.add(
+            NfcScanCancelledCall(
+                reason = reason,
+                numberOfAttempts = numberOfAttempts,
+            ),
+        )
     }
 
     fun ensureAllEventsConsumed() {

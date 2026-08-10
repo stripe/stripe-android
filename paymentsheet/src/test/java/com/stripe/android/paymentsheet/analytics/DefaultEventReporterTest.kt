@@ -1395,6 +1395,44 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onBillingAddressCompleted fires event with address data blob`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onBillingAddressCompleted(
+            addressCountryCode = "US",
+            autocompleteResultSelected = true,
+            editDistance = 5,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_billing_address_completed")
+        @Suppress("UNCHECKED_CAST")
+        val blob = request.params["address_data_blob"] as Map<String, Any>
+        assertThat(blob).containsEntry("address_country_code", "US")
+        assertThat(blob).containsEntry("auto_complete_result_selected", true)
+        assertThat(blob).containsEntry("edit_distance", 5)
+    }
+
+    @Test
+    fun `onBillingAddressCompleted omits edit distance when null`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onBillingAddressCompleted(
+            addressCountryCode = "CA",
+            autocompleteResultSelected = false,
+            editDistance = null,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_billing_address_completed")
+        @Suppress("UNCHECKED_CAST")
+        val blob = request.params["address_data_blob"] as Map<String, Any>
+        assertThat(blob).containsEntry("address_country_code", "CA")
+        assertThat(blob).containsEntry("auto_complete_result_selected", false)
+        assertThat(blob).doesNotContainKey("edit_distance")
+    }
+
+    @Test
     fun `onPaymentMethodMessagePromotionDisplayed fires event with duration`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
         durationProvider.elapsedCalls.push(

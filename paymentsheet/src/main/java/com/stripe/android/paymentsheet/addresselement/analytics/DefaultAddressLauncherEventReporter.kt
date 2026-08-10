@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.addresselement.analytics
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.utils.DurationProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -13,10 +14,12 @@ import kotlin.coroutines.CoroutineContext
 internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val durationProvider: DurationProvider,
     @IOContext private val workContext: CoroutineContext
 ) : AddressLauncherEventReporter {
 
     override fun onShow(country: String) {
+        durationProvider.start(DurationProvider.Key.AddressElementCompletion, reset = true)
         fireEvent(
             AddressLauncherEvent.Show(
                 country = country
@@ -27,13 +30,76 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
     override fun onCompleted(
         country: String,
         autocompleteResultSelected: Boolean,
-        editDistance: Int?
+        editDistance: Int?,
     ) {
+        val timeToComplete = durationProvider.end(DurationProvider.Key.AddressElementCompletion)
         fireEvent(
             AddressLauncherEvent.Completed(
                 country = country,
                 autocompleteResultSelected = autocompleteResultSelected,
-                editDistance = editDistance
+                editDistance = editDistance,
+                timeToComplete = timeToComplete,
+            )
+        )
+    }
+
+    override fun onAutocompleteSessionStarted(sessionToken: String) {
+        durationProvider.start(DurationProvider.Key.AddressAutocompleteSession, reset = true)
+        fireEvent(
+            AddressLauncherEvent.AutocompleteStarted(
+                autocompleteSessionToken = sessionToken
+            )
+        )
+    }
+
+    override fun onAutocompleteFetchStarted() {
+        durationProvider.start(DurationProvider.Key.AddressAutocompleteFetch, reset = true)
+    }
+
+    override fun onAutocompleteDetailsFetchStarted() {
+        durationProvider.start(DurationProvider.Key.AddressAutocompleteDetailsFetch, reset = true)
+    }
+
+    override fun onAutocompleteSuggestionsReturned(
+        sessionToken: String,
+        queryLength: Int,
+        resultCount: Int,
+        source: String?,
+    ) {
+        val fetchDuration = durationProvider.end(DurationProvider.Key.AddressAutocompleteFetch)
+        val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
+        fireEvent(
+            AddressLauncherEvent.AutocompleteSuggestions(
+                autocompleteSessionToken = sessionToken,
+                queryLength = queryLength,
+                timeToFetch = fetchDuration,
+                resultCount = resultCount,
+                sessionElapsed = sessionElapsed,
+                source = source,
+            )
+        )
+    }
+
+    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?, source: String?) {
+        val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
+        val timeToFetch = durationProvider.end(DurationProvider.Key.AddressAutocompleteDetailsFetch)
+        fireEvent(
+            AddressLauncherEvent.AutocompleteSelected(
+                autocompleteSessionToken = sessionToken,
+                queryLength = queryLength,
+                placeId = placeId,
+                source = source,
+                sessionElapsed = sessionElapsed,
+                timeToFetch = timeToFetch,
+            )
+        )
+    }
+
+    override fun onAutocompleteError(sessionToken: String, error: Throwable) {
+        fireEvent(
+            AddressLauncherEvent.AutocompleteError(
+                autocompleteSessionToken = sessionToken,
+                error = error,
             )
         )
     }

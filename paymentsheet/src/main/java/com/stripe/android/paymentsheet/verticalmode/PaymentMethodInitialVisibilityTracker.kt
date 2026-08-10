@@ -7,13 +7,10 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Tracks stability of payment method positioning and dispatches analytics when stable
@@ -28,7 +25,7 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentMethodInitialVisibilityTracker(
     private var expectedItems: List<String> = emptyList(),
     private val renderedLpmCallback: (List<String>, List<String>) -> Unit,
-    dispatcher: CoroutineContext = Dispatchers.Default,
+    private val coroutineScope: CoroutineScope,
 ) {
     private data class CoordinateSnapshot(
         val positionInWindow: Offset,
@@ -41,7 +38,6 @@ internal class PaymentMethodInitialVisibilityTracker(
     private val coordinateStabilityMap = mutableMapOf<String, Boolean>()
     private var hasDispatched = false
 
-    private val coroutineScope = CoroutineScope(dispatcher)
     private var dispatchEventJob: Job? = null
 
     fun updateExpectedItems(items: List<String>) {
@@ -182,7 +178,7 @@ internal class PaymentMethodInitialVisibilityTracker(
         visibilityMap.clear()
         hasDispatched = false
         dispatchEventJob?.cancel()
-        coroutineScope.cancel() // Cancel the entire scope
+        dispatchEventJob = null
     }
 
     companion object {

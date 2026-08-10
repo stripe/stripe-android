@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -82,7 +83,7 @@ internal class CurrencySelectorViewModelTest {
         viewModel.errorMessage.test {
             assertThat(awaitItem()).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
 
-            checkoutSessionFlow.value = CheckoutSessionResponseFactory.create(currency = "eur")
+            sessionFlow.value = CheckoutSessionResponseFactory.create(currency = "eur")
                 .asCheckoutSession(
                     flagImages = null,
                     paymentOptionDisplayData = null,
@@ -124,7 +125,7 @@ internal class CurrencySelectorViewModelTest {
     ) = runTest(dispatcher) {
         val application = ApplicationProvider.getApplicationContext<Application>()
         val fakeAnalyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val checkoutSessionFlow = MutableStateFlow(
+        val sessionFlow = MutableStateFlow(
             CheckoutSessionResponseFactory.create().asCheckoutSession(
                 flagImages = null,
                 paymentOptionDisplayData = null,
@@ -135,7 +136,7 @@ internal class CurrencySelectorViewModelTest {
         val updateCurrencyResult = Turbine<Result<Unit>>()
 
         val viewModel = CurrencySelectorViewModel(
-            checkoutSession = checkoutSessionFlow,
+            session = sessionFlow,
             updateCurrency = { code ->
                 updateCurrencyCalls.add(code)
                 updateCurrencyResult.awaitItem()
@@ -150,7 +151,7 @@ internal class CurrencySelectorViewModelTest {
 
         Scenario(
             fakeAnalyticsRequestExecutor = fakeAnalyticsRequestExecutor,
-            checkoutSessionFlow = checkoutSessionFlow,
+            sessionFlow = sessionFlow,
             updateCurrencyCalls = updateCurrencyCalls,
             updateCurrencyResult = updateCurrencyResult,
             viewModel = viewModel,
@@ -162,7 +163,7 @@ internal class CurrencySelectorViewModelTest {
 
     private class Scenario(
         val fakeAnalyticsRequestExecutor: FakeAnalyticsRequestExecutor,
-        val checkoutSessionFlow: MutableStateFlow<CheckoutSession>,
+        val sessionFlow: MutableStateFlow<Session>,
         val updateCurrencyCalls: Turbine<String>,
         val updateCurrencyResult: Turbine<Result<Unit>>,
         val viewModel: CurrencySelectorViewModel,

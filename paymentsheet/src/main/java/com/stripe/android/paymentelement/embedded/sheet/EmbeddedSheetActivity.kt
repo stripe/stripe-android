@@ -220,7 +220,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             is EmbeddedLaunchMode.Manage, null -> {
                 setManageResult(shouldInvokeSelectionCallback = false)
             }
-            EmbeddedLaunchMode.PaymentOptions -> {
+            is EmbeddedLaunchMode.PaymentOptions -> {
                 setCancelledPaymentOptionsResult()
             }
         }

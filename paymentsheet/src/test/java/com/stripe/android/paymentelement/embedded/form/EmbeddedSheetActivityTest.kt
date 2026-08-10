@@ -95,7 +95,9 @@ internal class EmbeddedSheetActivityTest {
                     hasBeenConfirmed = true,
                     customerState = null,
                     shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+                    launchMode = EmbeddedLaunchMode.Form(
+                        selectedPaymentMethodCode = "card",
+                    ),
                 )
             )
         }
@@ -117,7 +119,11 @@ internal class EmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         assertThat((result as EmbeddedActivityResult.Cancelled).launchMode)
-            .isEqualTo(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+            .isEqualTo(
+                EmbeddedLaunchMode.Form(
+                    selectedPaymentMethodCode = "card",
+                )
+            )
     }
 
     @Test
@@ -135,7 +141,11 @@ internal class EmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         assertThat((result as EmbeddedActivityResult.Cancelled).launchMode)
-            .isEqualTo(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"))
+            .isEqualTo(
+                EmbeddedLaunchMode.Form(
+                    selectedPaymentMethodCode = "cashapp",
+                )
+            )
     }
 
     private fun launch(
@@ -157,7 +167,9 @@ internal class EmbeddedSheetActivityTest {
                     previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),
                     promotion = null,
-                    launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = selectedPaymentMethodCode),
+                    launchMode = EmbeddedLaunchMode.Form(
+                        selectedPaymentMethodCode = selectedPaymentMethodCode,
+                    ),
                 ),
             )
         ).use { scenario ->

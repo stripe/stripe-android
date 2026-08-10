@@ -7,7 +7,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -185,7 +185,7 @@ internal fun createTestConfirmationHandlerFactory(
     savedStateHandle: SavedStateHandle,
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
-    googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory,
     cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     linkLauncher: LinkPaymentLauncher,
@@ -212,6 +212,7 @@ internal fun createTestConfirmationHandlerFactory(
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 ),
                 GooglePayConfirmationDefinition(
+                    context = ApplicationProvider.getApplicationContext(),
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                     userFacingLogger = FakeUserFacingLogger(),
                 ),

@@ -23,6 +23,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 
+@Suppress("TooManyFunctions")
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
@@ -74,7 +75,19 @@ internal class InputAddressViewModel @Inject constructor(
 
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
-        autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
+        // If merchant is opting into Stripe-hosted autocomplete and the caller did not
+        // override the launcher default countries, use the extended Stripe-hosted list.
+        // Otherwise, honor the caller-provided set (or empty set if explicitly set).
+        autocompleteCountries = run {
+            val provided = args.config?.autocompleteCountries
+            if (args.config?.useStripeHostedAutocomplete == true &&
+                provided == AUTOCOMPLETE_DEFAULT_COUNTRIES
+            ) {
+                AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES
+            } else {
+                provided ?: emptySet()
+            }
+        },
         isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
         shouldUseStripeHostedAutocomplete = args.config?.useStripeHostedAutocomplete == true,
     )
@@ -107,7 +120,12 @@ internal class InputAddressViewModel @Inject constructor(
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
+    fun onScreenShown() {
+        eventReporter.onShow(_collectedAddress.value?.address?.country.orEmpty())
+    }
+
     init {
+
         viewModelScope.launch {
             navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
                 AddressElementNavigator.AutocompleteEvent.KEY
@@ -190,6 +208,10 @@ internal class InputAddressViewModel @Inject constructor(
         completedFormValues: Map<IdentifierSpec, FormFieldEntry>?,
         checkboxChecked: Boolean
     ) {
+        if (completedFormValues == null) {
+            addressFormController.elements.forEach { it.onValidationStateChanged(true) }
+            return
+        }
         _formEnabled.value = false
         dismissWithAddress(
             AddressDetails(
@@ -250,7 +272,7 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     override fun onEnterManuallyFromInline() {
-        onEnterManually()
+        inlineAutocompleteController?.expandFormFromInline() ?: onEnterManually()
     }
 
     private fun canUseShippingSameAsBilling(): Boolean {
@@ -289,12 +311,24 @@ internal class InputAddressViewModel @Inject constructor(
         }
     }
 
+    override fun onSearchActivated() {
+        inlineAutocompleteController?.onSearchActivated()
+    }
+
     override fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
         inlineAutocompleteController?.observeQueryChanges(query, country)
     }
 
     override fun onDismissed() {
         inlineAutocompleteController?.onDismissed()
+    }
+
+    override fun onFocusLost() {
+        inlineAutocompleteController?.onFocusLost()
+    }
+
+    override fun onFocusGained() {
+        inlineAutocompleteController?.onFocusGained()
     }
 
     override fun onPredictionSelected(predictionId: String) {

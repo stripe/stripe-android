@@ -3,22 +3,19 @@ package com.stripe.android.common.nfcscan.scanner
 import app.cash.turbine.Turbine
 
 internal class FakeNfcCardDataParser(
-    private val parseResult: ScannedCardData? = null,
-    private val canParseResult: Boolean? = null,
+    private val parseResult: ScannedCardData,
+    private val parseError: NfcScanningError? = null,
 ) : NfcCardDataParser {
     val parseCalls = Turbine<Map<String, ByteArray>>()
-    val canParseCalls = Turbine<Map<String, ByteArray>>()
 
-    private val defaultParser = DefaultNfcCardDataParser()
-
-    override fun canParse(records: Map<String, ByteArray>): Boolean {
-        canParseCalls.add(records)
-        return canParseResult ?: defaultParser.canParse(records)
-    }
-
-    override fun parse(records: Map<String, ByteArray>): ScannedCardData? {
+    override fun parse(records: Map<String, ByteArray>): NfcCardDataParser.Result {
         parseCalls.add(records)
-        return parseResult
+
+        if (parseError != null) {
+            return NfcCardDataParser.Result.Error(parseError)
+        }
+
+        return NfcCardDataParser.Result.Success(parseResult)
     }
 
     fun ensureAllEventsConsumed() {
