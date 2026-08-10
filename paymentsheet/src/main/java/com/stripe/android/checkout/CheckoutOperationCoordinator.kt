@@ -48,6 +48,31 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
+    fun <T> runSynchronousMutation(
+        block: () -> Result<T>,
+    ): Result<T> {
+        return synchronized(admissionLock) {
+            when {
+                confirmationInFlight -> Result.failure(
+                    IllegalStateException("Cannot mutate checkout session while confirmation is in progress.")
+                )
+                pendingMutations > 0 -> Result.failure(
+                    IllegalStateException("Cannot mutate checkout session while another mutation is in progress.")
+                )
+                else -> {
+                    check(mutex.tryLock()) {
+                        "Checkout operation gate should be available after synchronous mutation admission."
+                    }
+                    try {
+                        block()
+                    } finally {
+                        mutex.unlock()
+                    }
+                }
+            }
+        }
+    }
+
     fun tryBeginConfirmation(
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
