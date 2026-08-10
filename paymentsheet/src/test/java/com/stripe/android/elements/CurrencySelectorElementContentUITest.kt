@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.elements
 
 import android.app.Application
 import androidx.activity.ComponentActivity
@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate

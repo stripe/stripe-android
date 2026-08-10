@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.elements
 
 import android.os.Parcelable
 import androidx.annotation.ColorInt
@@ -9,6 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CurrencySelectorViewModel
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
 import com.stripe.android.uicore.strings.resolve

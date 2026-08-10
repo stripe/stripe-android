@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.checkout.CurrencySelectorElement
+import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
