@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.Editable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -94,27 +93,16 @@ class CardFormView internal constructor(
                 ).toSet()
         }
 
-    private val textFocusWatcher = OnFocusChangeListener { _, hasFocus ->
-        if (hasFocus) {
-            cardElementAnalytics.reportInteraction(context)
-        }
-    }
+    private val cardElementWatchers = CardElementWatchers(
+        context = context,
+        cardElementAnalytics = cardElementAnalytics,
+        invalidFieldProviders = { invalidFields },
+        cardValidCallbackProvider = { cardValidCallback },
+    )
 
-    private val textInputWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
+    private val textFocusWatcher = cardElementWatchers.textFocusWatcher
 
-            cardElementAnalytics.reportInteraction(context)
-
-            val isComplete = invalidFields.isEmpty()
-
-            if (isComplete) {
-                cardElementAnalytics.reportFormCompleted(context)
-            }
-
-            cardValidCallback?.onInputChanged(isComplete, invalidFields)
-        }
-    }
+    private val textInputWatcher = cardElementWatchers.textInputWatcher
 
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null
 

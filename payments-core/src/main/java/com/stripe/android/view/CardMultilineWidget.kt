@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -95,27 +94,16 @@ class CardMultilineWidget internal constructor(
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
 
-    private val textFocusWatcher = OnFocusChangeListener { _, hasFocus ->
-        if (hasFocus) {
-            cardElementAnalytics.reportInteraction(context)
-        }
-    }
+    private val cardElementWatchers = CardElementWatchers(
+        context = context,
+        cardElementAnalytics = cardElementAnalytics,
+        invalidFieldProviders = { invalidFields },
+        cardValidCallbackProvider = { cardValidCallback },
+    )
 
-    private val textInputWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
+    private val textFocusWatcher = cardElementWatchers.textFocusWatcher
 
-            cardElementAnalytics.reportInteraction(context)
-
-            val isComplete = invalidFields.isEmpty()
-
-            if (isComplete) {
-                cardElementAnalytics.reportFormCompleted(context)
-            }
-
-            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
-        }
-    }
+    private val textInputWatcher = cardElementWatchers.textInputWatcher
 
     internal val invalidFields: Set<CardValidCallback.Fields>
         get() {

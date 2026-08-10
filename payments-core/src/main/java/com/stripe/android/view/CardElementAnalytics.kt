@@ -83,7 +83,7 @@ internal class DefaultCardElementAnalytics internal constructor(
             STATE_CARD_ELEMENT_ANALYTICS,
             bundleOf(
                 KEY_HAS_REPORTED_SHOWN to hasReportedShown,
-                    KEY_HAS_REPORTED_INTERACTION to hasReportedInteraction,
+                KEY_HAS_REPORTED_INTERACTION to hasReportedInteraction,
                 KEY_HAS_REPORTED_FORM_COMPLETED to hasReportedFormCompleted,
             )
         )
