@@ -34,13 +34,13 @@ internal class VerificationPageTest {
     }
 
     @Test
-    fun `enable3DFaceCapture is true when pose sequence includes a side pose`() {
+    fun `enable3DFaceCapture is false when only pose sequence includes a side pose`() {
         val page = verificationPageWith(
             selfieCapture = selfieCapturePageWithPoseSequence(listOf("front", "left")),
             experiments = emptyList()
         )
 
-        assertThat(page.enable3DFaceCapture()).isTrue()
+        assertThat(page.enable3DFaceCapture()).isFalse()
     }
 
     @Test
@@ -64,13 +64,13 @@ internal class VerificationPageTest {
     }
 
     @Test
-    fun `shouldSubmit3DFaceCaptureData is true when pose sequence includes a side pose`() {
+    fun `shouldSubmit3DFaceCaptureData is false when only pose sequence includes a side pose`() {
         val page = verificationPageWith(
             selfieCapture = selfieCapturePageWithPoseSequence(listOf("right")),
             experiments = emptyList()
         )
 
-        assertThat(page.shouldSubmit3DFaceCaptureData()).isTrue()
+        assertThat(page.shouldSubmit3DFaceCaptureData()).isFalse()
     }
 
     @Test
