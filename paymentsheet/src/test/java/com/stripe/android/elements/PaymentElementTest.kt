@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.elements
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule

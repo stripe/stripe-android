@@ -37,6 +37,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     private val logger: Logger,
     private val workContext: CoroutineContext,
     private val pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
+    private val clock: Clock,
 ) {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
@@ -52,7 +53,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             stripeAccount = result.stripeAccountId
         )
 
-        val initialRetrieveIntentStartTime = System.currentTimeMillis()
+        val initialRetrieveIntentStartTime = clock.currentTimeMillis()
 
         val requestId = unvalidatedResult.exception?.requestId
 
@@ -253,15 +254,15 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         val timeRemaining = getPollingDurationForPaymentMethod(originalIntent) -
-            (System.currentTimeMillis() - initialRetrieveIntentStartTime)
+            (clock.currentTimeMillis() - initialRetrieveIntentStartTime)
 
         withTimeoutOrNull(timeRemaining) {
             stripeIntentResult = retrieveAndTrackStatus()
             while (shouldRetry(stripeIntentResult)) {
                 // We want to delay a maximum of 1s between requests, including the time the request took.
                 // e.g. if the previous request took 250ms, the delay will be 750ms
-                delay(POLLING_DELAY - (System.currentTimeMillis() - timeOfLastRequest))
-                timeOfLastRequest = System.currentTimeMillis()
+                delay(POLLING_DELAY - (clock.currentTimeMillis() - timeOfLastRequest))
+                timeOfLastRequest = clock.currentTimeMillis()
                 stripeIntentResult = retrieveAndTrackStatus()
             }
         }
@@ -331,6 +332,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
     logger: Logger,
     @IOContext workContext: CoroutineContext,
     pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
+    clock: Clock,
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
     context,
     publishableKeyProvider,
@@ -338,6 +340,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
     logger,
     workContext,
     pollingAnalyticsEventReporter,
+    clock,
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -397,6 +400,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
     logger: Logger,
     @IOContext workContext: CoroutineContext,
     pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
+    clock: Clock,
 ) : PaymentFlowResultProcessor<SetupIntent, SetupIntentResult>(
     context,
     publishableKeyProvider,
@@ -404,6 +408,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
     logger,
     workContext,
     pollingAnalyticsEventReporter,
+    clock,
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,

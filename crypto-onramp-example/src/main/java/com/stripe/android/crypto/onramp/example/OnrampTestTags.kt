@@ -41,6 +41,7 @@ internal const val START_IDENTITY_VERIFICATION_BUTTON_TAG = "StartIdentityVerifi
 internal const val USER_ATTESTATION_BUTTON_TAG = "UserAttestationButtonTag"
 internal const val COLLECT_CARD_BUTTON_TAG = "CollectCardButtonTag"
 internal const val COLLECT_BANK_ACCOUNT_BUTTON_TAG = "CollectBankAccountButtonTag"
+internal const val COLLECT_SAMSUNG_PAY_BUTTON_TAG = "CollectSamsungPayButtonTag"
 internal const val CREATE_CRYPTO_TOKEN_BUTTON_TAG = "CreateCryptoTokenButtonTag"
 internal const val CREATE_SESSION_BUTTON_TAG = "CreateSessionButtonTag"
 internal const val CHECKOUT_BUTTON_TAG = "CheckoutButtonTag"

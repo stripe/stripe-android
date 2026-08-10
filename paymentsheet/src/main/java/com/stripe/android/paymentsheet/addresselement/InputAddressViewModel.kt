@@ -311,6 +311,10 @@ internal class InputAddressViewModel @Inject constructor(
         }
     }
 
+    override fun onSearchActivated() {
+        inlineAutocompleteController?.onSearchActivated()
+    }
+
     override fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
         inlineAutocompleteController?.observeQueryChanges(query, country)
     }

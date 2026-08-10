@@ -53,16 +53,19 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         sessionToken: String,
         queryLength: Int,
         resultCount: Int,
+        source: String?,
     ) {
-        _autocompleteSuggestionsReturnedCalls.add(SuggestionsReturnedCall(sessionToken, queryLength, resultCount))
+        _autocompleteSuggestionsReturnedCalls.add(
+            SuggestionsReturnedCall(sessionToken, queryLength, resultCount, source)
+        )
     }
 
     override fun onAutocompleteDetailsFetchStarted() {
         _autocompleteDetailsFetchStartedCalls.add(Unit)
     }
 
-    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String) {
-        _autocompleteSelectedCalls.add(SelectedCall(sessionToken, queryLength, placeId))
+    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?, source: String?) {
+        _autocompleteSelectedCalls.add(SelectedCall(sessionToken, queryLength, placeId, source))
     }
 
     override fun onAutocompleteError(sessionToken: String, error: Throwable) {
@@ -86,9 +89,14 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
         val editDistance: Int?,
     )
 
-    data class SuggestionsReturnedCall(val sessionToken: String, val queryLength: Int, val resultCount: Int)
+    data class SuggestionsReturnedCall(
+        val sessionToken: String,
+        val queryLength: Int,
+        val resultCount: Int,
+        val source: String?,
+    )
 
-    data class SelectedCall(val sessionToken: String, val queryLength: Int, val placeId: String)
+    data class SelectedCall(val sessionToken: String, val queryLength: Int, val placeId: String?, val source: String?)
 
     data class ErrorCall(val sessionToken: String, val error: Throwable)
 }

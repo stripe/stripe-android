@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
@@ -205,11 +206,9 @@ internal class EmbeddedNavigator private constructor(
             private val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
-                PaymentSheetTopBarState(
-                    showTestModeLabel = !formInteractor.isLiveMode,
-                    showEditMenu = false,
-                    isEditing = false,
-                    onEditIconPressed = {},
+                PaymentSheetTopBarStateFactory.create(
+                    isLiveMode = formInteractor.isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
 
@@ -287,11 +286,9 @@ internal class EmbeddedNavigator private constructor(
             private val onContinueClick: () -> Unit,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
-                PaymentSheetTopBarState(
-                    showTestModeLabel = !isLiveMode,
-                    showEditMenu = false,
-                    isEditing = false,
-                    onEditIconPressed = {},
+                PaymentSheetTopBarStateFactory.create(
+                    isLiveMode = isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
 
@@ -328,11 +325,9 @@ internal class EmbeddedNavigator private constructor(
             private val onContinueClick: () -> Unit,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
-                PaymentSheetTopBarState(
-                    showTestModeLabel = !interactor.isLiveMode,
-                    showEditMenu = false,
-                    isEditing = false,
-                    onEditIconPressed = {},
+                PaymentSheetTopBarStateFactory.create(
+                    isLiveMode = interactor.isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
 

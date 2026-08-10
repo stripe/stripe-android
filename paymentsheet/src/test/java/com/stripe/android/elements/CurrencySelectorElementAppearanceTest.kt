@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.elements
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb

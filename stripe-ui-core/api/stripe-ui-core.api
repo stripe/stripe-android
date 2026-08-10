@@ -69,6 +69,12 @@ public final class com/stripe/android/uicore/elements/AddressFieldConfiguration$
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/uicore/elements/ComposableSingletons$AddressTextFieldUIKt {
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$AddressTextFieldUIKt;
+	public fun <init> ()V
+	public final fun getLambda$-704858027$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt;
 	public fun <init> ()V

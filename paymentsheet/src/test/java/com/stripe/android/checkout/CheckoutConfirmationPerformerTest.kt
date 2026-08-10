@@ -97,9 +97,14 @@ internal class CheckoutConfirmationPerformerTest {
         val confirmationHandler = FakeConfirmationHandler()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
         stateHolder.state = state
+        val operationCoordinator = CheckoutOperationCoordinator(
+            confirmationHandler = confirmationHandler,
+            resultCallback = {},
+        )
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
             stateHolder = stateHolder,
+            operationCoordinator = operationCoordinator,
             statusBarColor = statusBarColor,
             viewModelScope = backgroundScope,
         )

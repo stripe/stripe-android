@@ -22,24 +22,32 @@ import kotlinx.coroutines.flow.asStateFlow
 class AddressTextFieldController(
     label: ResolvableString,
     addressInputMode: AddressInputMode,
-    private val inlineAutocompleteHandler: InlineAutocompleteHandler? = null,
+    private val inlineAutocompleteHandler: InlineAutocompleteHandler?,
+    private val reportsFormValue: Boolean,
+    initialQuery: String,
+    private val showEnterManually: Boolean,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
-    private val _inlineQuery = MutableStateFlow("")
+    private val _inlineQuery = MutableStateFlow(initialQuery)
     private val onNavigation = (addressInputMode as? AddressInputMode.AutocompleteCondensed)?.onNavigation
 
-    val isEditable = addressInputMode is AddressInputMode.AutocompleteInline
+    val isEditable = inlineAutocompleteHandler != null
     val inlineQuery: StateFlow<String> = _inlineQuery.asStateFlow()
 
     override val showOptionalLabel: Boolean = false
     override val label = stateFlowOf(label)
-    override val fieldValue: StateFlow<String> = stateFlowOf("")
-    override val rawFieldValue: StateFlow<String> = stateFlowOf("")
-    override val isComplete: StateFlow<Boolean> = stateFlowOf(false)
+    override val fieldValue: StateFlow<String> =
+        if (reportsFormValue) inlineQuery else stateFlowOf("")
+    override val rawFieldValue: StateFlow<String> = fieldValue
+    override val isComplete: StateFlow<Boolean> =
+        if (reportsFormValue) _inlineQuery.mapAsStateFlow { it.isNotBlank() } else stateFlowOf(false)
 
-    override val validationMessage: StateFlow<FieldValidationMessage?> = _isValidating.mapAsStateFlow { isValidating ->
-        FieldValidationMessage.Error(R.string.stripe_blank_and_required).takeIf { isValidating }
-    }
+    override val validationMessage: StateFlow<FieldValidationMessage?> =
+        combineAsStateFlow(_isValidating, _inlineQuery) { isValidating, query ->
+            FieldValidationMessage.Error(R.string.stripe_blank_and_required).takeIf {
+                isValidating && (!reportsFormValue || query.isBlank())
+            }
+        }
 
     override val formFieldValue: StateFlow<FormFieldEntry> =
         combineAsStateFlow(isComplete, rawFieldValue) { complete, value ->
@@ -47,7 +55,9 @@ class AddressTextFieldController(
         }
 
     override fun onRawValueChange(rawValue: String) {
-        // No-op, this field does not support direct input manipulation
+        if (reportsFormValue) {
+            _inlineQuery.value = rawValue
+        }
     }
 
     fun onInlineQueryChanged(query: String) {
@@ -60,6 +70,15 @@ class AddressTextFieldController(
         _isValidating.value = isValidating
     }
 
+    private fun onPredictionsDismissed() {
+        // Inline mode clears the field on dismiss; expanded mode keeps the typed
+        // text so the user doesn't lose their in-progress input.
+        if (!reportsFormValue) {
+            _inlineQuery.value = ""
+        }
+        inlineAutocompleteHandler?.onDismissed()
+    }
+
     @Composable
     override fun ComposeUI(
         enabled: Boolean,
@@ -69,12 +88,22 @@ class AddressTextFieldController(
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
         if (inlineAutocompleteHandler != null) {
-            val onClear = {
-                _inlineQuery.value = ""
-                inlineAutocompleteHandler.onDismissed()
-            }
             val predictionsState by inlineAutocompleteHandler.predictionsState.collectAsState()
             val isDarkTheme = isSystemInDarkTheme()
+
+            val predictions = @Composable {
+                InlineAddressPredictionsUI(
+                    state = predictionsState,
+                    attributionDrawable = inlineAutocompleteHandler.getAttributionDrawable(isDarkTheme),
+                    onPredictionSelected = inlineAutocompleteHandler::onPredictionSelected,
+                    onClear = ::onPredictionsDismissed,
+                    onEnterManually = if (showEnterManually) {
+                        inlineAutocompleteHandler::onEnterManually
+                    } else {
+                        null
+                    },
+                )
+            }
 
             Column(
                 modifier = modifier.onFocusChanged { state ->
@@ -88,17 +117,12 @@ class AddressTextFieldController(
                 AddressTextFieldUI(
                     controller = this@AddressTextFieldController,
                     enabled = enabled,
+                    onSearchActivated = if (reportsFormValue) inlineAutocompleteHandler::onSearchActivated else null,
                 )
-                InlineAddressPredictionsUI(
-                    state = predictionsState,
-                    attributionDrawable = inlineAutocompleteHandler.getAttributionDrawable(isDarkTheme),
-                    onPredictionSelected = inlineAutocompleteHandler::onPredictionSelected,
-                    onClear = onClear,
-                    onEnterManually = inlineAutocompleteHandler::onEnterManually,
-                )
+                predictions()
             }
         } else {
-            AddressTextFieldUI(controller = this, enabled = enabled, modifier = modifier)
+            AddressTextFieldUI(controller = this, enabled = enabled, onSearchActivated = null, modifier = modifier)
         }
     }
 

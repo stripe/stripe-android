@@ -18,6 +18,7 @@ internal class StripeHostedPlacesClientProxy(
     private var sessionToken: String = newSessionToken()
     private var lastQueryLength: Int = 0
     private var sessionStartReported: Boolean = false
+    private var lastSource: String? = null
     private val predictionCache = mutableMapOf<String, AutocompleteSuggestion>()
 
     override fun resetSession() {
@@ -25,6 +26,7 @@ internal class StripeHostedPlacesClientProxy(
             sessionToken = newSessionToken()
             lastQueryLength = 0
             sessionStartReported = false
+            lastSource = null
             predictionCache.clear()
         }
     }
@@ -47,6 +49,7 @@ internal class StripeHostedPlacesClientProxy(
             eventReporter.onAutocompleteSessionStarted(token)
         }
         eventReporter.onAutocompleteFetchStarted()
+        var responseSource: String? = null
         return repository.findAutocompletePredictions(
             query = q,
             country = country,
@@ -54,7 +57,9 @@ internal class StripeHostedPlacesClientProxy(
             locale = locale.toLanguageTag(),
         ).map { result ->
             val limitedPredictions = result.predictions.take(limit)
+            responseSource = result.source
             synchronized(lock) {
+                lastSource = result.source
                 limitedPredictions.forEach { predictionCache[it.placeId] = it }
             }
             FindAutocompletePredictionsResponse(
@@ -71,6 +76,7 @@ internal class StripeHostedPlacesClientProxy(
                 sessionToken = token,
                 queryLength = q.length,
                 resultCount = response.autocompletePredictions.size,
+                source = responseSource,
             )
         }.onFailure { error ->
             eventReporter.onAutocompleteError(sessionToken = token, error = error)
@@ -81,23 +87,21 @@ internal class StripeHostedPlacesClientProxy(
         val cached: AutocompleteSuggestion?
         val token: String
         val queryLength: Int
+        val source: String?
         synchronized(lock) {
             cached = predictionCache[placeId]
             token = sessionToken
             queryLength = lastQueryLength
+            source = lastSource
         }
         if (cached?.address != null) {
-            eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
-            return Result.success(
-                Address(
-                    line1 = cached.address.line1,
-                    line2 = cached.address.line2,
-                    city = cached.address.city,
-                    state = cached.address.state,
-                    postalCode = cached.address.postalCode,
-                    country = cached.address.country,
-                )
+            eventReporter.onAutocompleteSelected(
+                sessionToken = token,
+                queryLength = queryLength,
+                placeId = placeId,
+                source = source,
             )
+            return Result.success(cached.address.toAddress())
         }
         eventReporter.onAutocompleteDetailsFetchStarted()
         return repository.fetchPlaceDetails(
@@ -112,17 +116,13 @@ internal class StripeHostedPlacesClientProxy(
                     }
                 }
             }
-        }.map { result ->
-            Address(
-                line1 = result.address?.line1,
-                line2 = result.address?.line2,
-                city = result.address?.city,
-                state = result.address?.state,
-                postalCode = result.address?.postalCode,
-                country = result.address?.country,
+        }.map { it.address.toAddress() }.onSuccess {
+            eventReporter.onAutocompleteSelected(
+                sessionToken = token,
+                queryLength = queryLength,
+                placeId = placeId,
+                source = source,
             )
-        }.onSuccess {
-            eventReporter.onAutocompleteSelected(sessionToken = token, queryLength = queryLength, placeId = placeId)
         }.onFailure { error ->
             eventReporter.onAutocompleteError(sessionToken = token, error = error)
         }
@@ -132,3 +132,12 @@ internal class StripeHostedPlacesClientProxy(
         fun newSessionToken(): String = UUID.randomUUID().toString()
     }
 }
+
+private fun StripeProxyAddress?.toAddress(): Address = Address(
+    line1 = this?.line1,
+    line2 = this?.line2,
+    city = this?.city,
+    state = this?.state,
+    postalCode = this?.postalCode,
+    country = this?.country,
+)
