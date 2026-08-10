@@ -6,6 +6,9 @@ NEXT_VERSION_BUMP: PATCH
 ### PaymentSheet
 * [FIXED] LinkController (private preview) now returns an error when no funding sources are available for a Link session, rather than silently falling back to card.
 
+### Identity
+* [CHANGED][13176](https://github.com/stripe/stripe-android/pull/13176) Stripe Identity now requires Android API 24 or later to support MediaPipe-based 3D selfie capture.
+
 ## 23.14.0 - 2026-08-03
 
 ### CryptoOnramp
