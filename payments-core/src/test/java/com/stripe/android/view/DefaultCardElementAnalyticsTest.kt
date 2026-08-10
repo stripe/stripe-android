@@ -36,6 +36,40 @@ internal class DefaultCardElementAnalyticsTest {
     }
 
     @Test
+    fun `reportInteraction sends event once per session`() = test {
+        analytics.reportInteraction(context)
+        analytics.reportInteraction(context)
+
+        assertThat(executor.awaitReportCall()).isEqualTo(
+            FakeCardElementAnalyticsRequestExecutor.ReportCall(
+                event = PaymentAnalyticsEvent.MobileCardElementInteraction,
+                params = mapOf(
+                    DefaultCardElementAnalytics.PARAM_WIDGET_TYPE to
+                        CardElementWidgetType.CardFormView.analyticsValue,
+                ),
+            ),
+        )
+        executor.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `reportFormCompleted sends event once per session`() = test {
+        analytics.reportFormCompleted(context)
+        analytics.reportFormCompleted(context)
+
+        assertThat(executor.awaitReportCall()).isEqualTo(
+            FakeCardElementAnalyticsRequestExecutor.ReportCall(
+                event = PaymentAnalyticsEvent.MobileCardElementFormCompleted,
+                params = mapOf(
+                    DefaultCardElementAnalytics.PARAM_WIDGET_TYPE to
+                        CardElementWidgetType.CardFormView.analyticsValue,
+                ),
+            ),
+        )
+        executor.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `reportShown uses multiline widget type`() = test(
         widgetType = CardElementWidgetType.CardMultilineWidget,
     ) {
@@ -63,9 +97,15 @@ internal class DefaultCardElementAnalyticsTest {
         )
 
         first.reportShown(context)
+        first.reportInteraction(context)
+        first.reportFormCompleted(context)
 
         assertThat(executor.awaitReportCall().event)
             .isEqualTo(PaymentAnalyticsEvent.MobileCardElementShown)
+        assertThat(executor.awaitReportCall().event)
+            .isEqualTo(PaymentAnalyticsEvent.MobileCardElementInteraction)
+        assertThat(executor.awaitReportCall().event)
+            .isEqualTo(PaymentAnalyticsEvent.MobileCardElementFormCompleted)
 
         val bundle = Bundle()
         first.saveState(bundle)
@@ -78,6 +118,8 @@ internal class DefaultCardElementAnalyticsTest {
         second.restoreState(bundle)
 
         second.reportShown(context)
+        second.reportInteraction(context)
+        second.reportFormCompleted(context)
 
         executor.expectNoEvents()
     }

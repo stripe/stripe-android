@@ -94,12 +94,29 @@ class CardMultilineWidget internal constructor(
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
-    private val cardValidTextWatcher = object : StripeTextWatcher() {
+
+    private val textFocusWatcher = OnFocusChangeListener { _, hasFocus ->
+        if (hasFocus) {
+            cardElementAnalytics.reportInteraction(context)
+        }
+    }
+
+    private val textInputWatcher = object : StripeTextWatcher() {
         override fun afterTextChanged(s: Editable?) {
             super.afterTextChanged(s)
+
+            cardElementAnalytics.reportInteraction(context)
+
+            val isComplete = invalidFields.isEmpty()
+
+            if (isComplete) {
+                cardElementAnalytics.reportFormCompleted(context)
+            }
+
             cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
         }
     }
+
     internal val invalidFields: Set<CardValidCallback.Fields>
         get() {
             return listOfNotNull(
@@ -479,6 +496,11 @@ class CardMultilineWidget internal constructor(
         updateBrandUi()
 
         allFields.forEach { field ->
+            field.internalFocusChangeListeners.remove(textFocusWatcher)
+            field.removeTextChangedListener(textInputWatcher)
+            field.addTextChangedListener(textInputWatcher)
+            field.internalFocusChangeListeners.add(textFocusWatcher)
+
             field.doAfterTextChanged {
                 shouldShowErrorIcon = false
             }
@@ -550,12 +572,6 @@ class CardMultilineWidget internal constructor(
 
     override fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
-        allFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
-
-        // only add the TextWatcher if it will be used
-        if (callback != null) {
-            allFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
-        }
 
         // call immediately after setting
         cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)

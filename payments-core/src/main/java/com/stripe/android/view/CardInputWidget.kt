@@ -92,10 +92,26 @@ class CardInputWidget internal constructor(
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
-    private val cardValidTextWatcher = object : StripeTextWatcher() {
+
+    private val textFocusWatcher = OnFocusChangeListener { _, hasFocus ->
+        if (hasFocus) {
+            cardElementAnalytics.reportInteraction(context)
+        }
+    }
+
+    private val textInputWatcher = object : StripeTextWatcher() {
         override fun afterTextChanged(s: Editable?) {
             super.afterTextChanged(s)
-            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
+
+            val isComplete = invalidFields.isEmpty()
+
+            cardElementAnalytics.reportInteraction(context)
+
+            if (isComplete) {
+                cardElementAnalytics.reportFormCompleted(context)
+            }
+
+            cardValidCallback?.onInputChanged(isComplete, invalidFields)
         }
     }
 
@@ -341,15 +357,18 @@ class CardInputWidget internal constructor(
             cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
 
             // First remove if it's already added, to make sure it's not added multiple times.
-            postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
-            postalCodeEditText.addTextChangedListener(cardValidTextWatcher)
+            postalCodeEditText.internalFocusChangeListeners.remove(textFocusWatcher)
+            postalCodeEditText.removeTextChangedListener(textInputWatcher)
+            postalCodeEditText.addTextChangedListener(textInputWatcher)
+            postalCodeEditText.internalFocusChangeListeners.add(textFocusWatcher)
         } else {
             postalCodeEditText.isEnabled = false
             postalCodeTextInputLayout.visibility = View.GONE
 
             cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE
 
-            postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
+            postalCodeEditText.internalFocusChangeListeners.remove(textFocusWatcher)
+            postalCodeEditText.removeTextChangedListener(textInputWatcher)
         }
         updatePostalRequired()
     }
@@ -491,12 +510,6 @@ class CardInputWidget internal constructor(
 
     override fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
-        requiredFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
-
-        // only add the TextWatcher if it will be used
-        if (callback != null) {
-            requiredFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
-        }
 
         // call immediately after setting
         cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
@@ -814,6 +827,13 @@ class CardInputWidget internal constructor(
         expiryDateEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cardNumberEditText))
         cvcEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
         postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcEditText))
+
+        requiredFields.forEach {
+            it.internalFocusChangeListeners.remove(textFocusWatcher)
+            it.removeTextChangedListener(textInputWatcher)
+            it.addTextChangedListener(textInputWatcher)
+            it.internalFocusChangeListeners.add(textFocusWatcher)
+        }
 
         cvcEditText.internalFocusChangeListeners.add { _, hasFocus ->
             cardBrandView.shouldShowCvc = hasFocus
