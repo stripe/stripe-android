@@ -10,12 +10,12 @@ internal sealed interface ExpressButtonType {
     val paymentMethodType: ExpressCheckoutElement.PaymentMethod
 
     data object Link : ExpressButtonType {
-        override val paymentMethodType: ExpressCheckoutElement.PaymentMethod = ExpressCheckoutElement.PaymentMethod.Link
+        override val paymentMethodType: ExpressCheckoutElement.PaymentMethod = ExpressCheckoutElement.PaymentMethod.Link()
     }
 
     data class GooglePay(
         val googlePayConfiguration: GooglePayConfiguration.State,
     ) : ExpressButtonType {
-        override val paymentMethodType: ExpressCheckoutElement.PaymentMethod = ExpressCheckoutElement.PaymentMethod.GooglePay
+        override val paymentMethodType: ExpressCheckoutElement.PaymentMethod = ExpressCheckoutElement.PaymentMethod.GooglePay()
     }
 }
