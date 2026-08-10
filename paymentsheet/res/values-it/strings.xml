@@ -110,6 +110,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_error_mobile_wallet">I wallet mobili non sono supportati. Prova con una carta fisica.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Tieni la carta dietro al telefono</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">Si è verificato un errore. Prova un\'altra carta.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">Carta non supportata. Prova con un\'altra carta.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
@@ -294,7 +296,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Fornendo il tuo indirizzo email, accetti di creare un account Link e salvare i tuoi dati di pagamento su Link conformemente ai <terms>Termini</terms> e all\'<privacy>Informativa sulla privacy di Link </privacy>.]]></string>
   <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Fornendo il tuo indirizzo email, accetti di creare un account %1$s e salvare i tuoi dati di pagamento su %1$s, in base ai <terms>Termini</terms> di %1$s e all\'<privacy>Informativa sulla privacy</privacy>.]]></string>
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Fornendo il tuo indirizzo email, accetti di creare un account %1$s e salvare i tuoi dati di pagamento su %1$s, in base ai <terms>Termini</terms> di %1$s e all\\'<privacy>Informativa sulla privacy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Fornendo il tuo numero di telefono, accetti di creare un account Link e salvare i tuoi dati di pagamento su Link conformemente ai <terms>Termini</terms> e all\'<privacy>Informativa sulla privacy di Link</privacy>.]]></string>
   <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
