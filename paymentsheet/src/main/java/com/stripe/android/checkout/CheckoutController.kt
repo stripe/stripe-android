@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.graphics.drawable.Drawable
-import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
@@ -34,7 +33,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
-import java.util.WeakHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -61,6 +59,7 @@ class CheckoutController @Inject internal constructor(
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
+    private val savedState: CheckoutControllerSavedState,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -325,6 +324,7 @@ class CheckoutController @Inject internal constructor(
     fun destroy() {
         viewModelScope.cancel()
         stateHolder.state = null
+        savedState.clear()
     }
 
     /**
@@ -751,11 +751,15 @@ class CheckoutController @Inject internal constructor(
          * Builds a [CheckoutController] from the current configuration.
          */
         fun build(): CheckoutController {
+            val checkoutControllerSavedState = CheckoutControllerSavedState(
+                parentHandle = savedStateHandle,
+                integrationName = integrationName,
+            )
             val component = DaggerCheckoutControllerComponent.factory().create(
                 application = application,
-                savedStateHandle = savedStateHandle.checkoutSubHandle(integrationName),
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
+                checkoutControllerSavedState = checkoutControllerSavedState,
             )
 
             return component.checkoutController
@@ -1005,31 +1009,3 @@ class CheckoutController @Inject internal constructor(
         fun onResult(result: Result)
     }
 }
-
-/**
- * Caches the child handle derived for each (parent, integrationName) pair so repeated derivations
- * return the same instance. Every [CheckoutController] key lives inside its own child, so multiple
- * controllers sharing one parent handle never clobber one another, and the shared instance means
- * writes are observable across every reference within a process. Weak keys let a parent — and the
- * children scoped to it — be collected once the parent goes away.
- */
-private val checkoutChildHandles = WeakHashMap<SavedStateHandle, MutableMap<String, SavedStateHandle>>()
-
-/**
- * Derives a child [SavedStateHandle] namespaced under [integrationName] within this parent handle.
- * The child folds its contents back into the parent through [SavedStateHandle.setSavedStateProvider],
- * so they persist with the parent and are restored from the parent's bundle after process death.
- *
- * [SavedStateHandle.savedStateProvider] is the only way to snapshot a whole handle — there is no
- * public equivalent — so the RestrictedApi suppression is intentional.
- */
-@Suppress("RestrictedApi")
-internal fun SavedStateHandle.checkoutSubHandle(integrationName: String): SavedStateHandle =
-    synchronized(checkoutChildHandles) {
-        val children = checkoutChildHandles.getOrPut(this) { mutableMapOf() }
-        children.getOrPut(integrationName) {
-            val subHandle = SavedStateHandle.createHandle(get<Bundle>(integrationName), null)
-            setSavedStateProvider(integrationName) { subHandle.savedStateProvider().saveState() }
-            subHandle
-        }
-    }
