@@ -70,7 +70,7 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial seeds collected details with default billing address`() = runScenario {
+    fun `loadInitial seeds collected details with the defaults billing address`() = runScenario {
         val address = CheckoutController.Address()
             .city(" San Francisco ")
             .country(" US ")
@@ -98,6 +98,33 @@ internal class CheckoutStateLoaderTest {
         assertThat(billingAddress.state).isEqualTo("CA")
         assertThat(stateHolder.state?.embeddedConfiguration?.defaultBillingDetails?.address?.postalCode)
             .isEqualTo("94103")
+    }
+
+    @Test
+    fun `loadInitial seeds collected details from configuration defaults`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .defaults(
+                CheckoutController.Configuration.Defaults()
+                    .billingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("Jane Billing")
+                            .phoneNumber("5559876543")
+                            .address(CheckoutController.Address().country("US").city("Denver")),
+                    )
+                    .shippingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails().name("John Shipping"),
+                    ),
+            )
+            .build()
+
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+        val collected = requireNotNull(stateHolder.state).collectedDetails
+        assertThat(collected.billingName).isEqualTo("Jane Billing")
+        assertThat(collected.billingPhoneNumber).isEqualTo("5559876543")
+        assertThat(collected.billingAddress?.country).isEqualTo("US")
+        assertThat(collected.billingAddress?.city).isEqualTo("Denver")
+        assertThat(collected.shippingName).isEqualTo("John Shipping")
     }
 
     @Test
