@@ -378,7 +378,7 @@ internal class NfcCoilAnimatedInteriorTest {
         const val FRAME_BUFFER_MS = 32L
         val CoilSize = 200.dp
         const val PROGRESS_TOLERANCE = 0.02f
-        const val CHECKMARK_START_DELAY_MS = 100L
+        const val CHECKMARK_START_DELAY_MS = 150L
         const val SUCCESS_SHOWN_DELAY_MS = 900L
         const val ERROR_SHOWN_DELAY_MS = 1_700L
         val ERROR_MESSAGE = "Card expired. Try another card.".resolvableString
