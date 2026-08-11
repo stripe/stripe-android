@@ -43,11 +43,12 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onAutocompleteSessionStarted(sessionToken: String) {
+    override fun onAutocompleteSessionStarted(country: String, sessionToken: String) {
         durationProvider.start(DurationProvider.Key.AddressAutocompleteSession, reset = true)
         fireEvent(
             AddressLauncherEvent.AutocompleteStarted(
-                autocompleteSessionToken = sessionToken
+                country = country,
+                autocompleteSessionToken = sessionToken,
             )
         )
     }
@@ -61,8 +62,8 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
     }
 
     override fun onAutocompleteSuggestionsReturned(
+        country: String,
         sessionToken: String,
-        queryLength: Int,
         resultCount: Int,
         source: String?,
     ) {
@@ -70,8 +71,8 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
         fireEvent(
             AddressLauncherEvent.AutocompleteSuggestions(
+                country = country,
                 autocompleteSessionToken = sessionToken,
-                queryLength = queryLength,
                 timeToFetch = fetchDuration,
                 resultCount = resultCount,
                 sessionElapsed = sessionElapsed,
@@ -80,11 +81,18 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?, source: String?) {
+    override fun onAutocompleteSelected(
+        country: String,
+        sessionToken: String,
+        queryLength: Int,
+        placeId: String?,
+        source: String?,
+    ) {
         val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
         val timeToFetch = durationProvider.end(DurationProvider.Key.AddressAutocompleteDetailsFetch)
         fireEvent(
             AddressLauncherEvent.AutocompleteSelected(
+                country = country,
                 autocompleteSessionToken = sessionToken,
                 queryLength = queryLength,
                 placeId = placeId,
@@ -95,11 +103,14 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onAutocompleteError(sessionToken: String, error: Throwable) {
+    override fun onAutocompleteError(country: String, sessionToken: String, error: Throwable) {
+        val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
         fireEvent(
             AddressLauncherEvent.AutocompleteError(
+                country = country,
                 autocompleteSessionToken = sessionToken,
                 error = error,
+                sessionElapsed = sessionElapsed,
             )
         )
     }

@@ -7,20 +7,21 @@ internal object NoOpAddressLauncherEventReporter : AddressLauncherEventReporter 
         autocompleteResultSelected: Boolean,
         editDistance: Int?,
     ) = Unit
-    override fun onAutocompleteSessionStarted(sessionToken: String) = Unit
+    override fun onAutocompleteSessionStarted(country: String, sessionToken: String) = Unit
     override fun onAutocompleteFetchStarted() = Unit
     override fun onAutocompleteSuggestionsReturned(
+        country: String,
         sessionToken: String,
-        queryLength: Int,
         resultCount: Int,
         source: String?,
     ) = Unit
     override fun onAutocompleteDetailsFetchStarted() = Unit
     override fun onAutocompleteSelected(
+        country: String,
         sessionToken: String,
         queryLength: Int,
         placeId: String?,
         source: String?,
     ) = Unit
-    override fun onAutocompleteError(sessionToken: String, error: Throwable) = Unit
+    override fun onAutocompleteError(country: String, sessionToken: String, error: Throwable) = Unit
 }
