@@ -502,7 +502,7 @@ private class CaptureConfirmationSoundPlayer(context: Context) {
                 playLoadedSound()
             }
         }
-        soundId = soundPool.load(context, R.raw.selfie_capture_confirmed, 1)
+        soundId = soundPool.load(context, R.raw.stripe_selfie_capture_confirmed, 1)
     }
 
     fun play() {
