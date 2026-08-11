@@ -1,7 +1,7 @@
 package com.stripe.android.common.model
 
 import android.os.Parcelable
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.link.LinkAppearance

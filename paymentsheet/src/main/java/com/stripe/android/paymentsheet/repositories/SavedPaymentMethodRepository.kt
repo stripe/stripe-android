@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod

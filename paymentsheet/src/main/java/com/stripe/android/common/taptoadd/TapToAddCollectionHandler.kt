@@ -1,6 +1,6 @@
 package com.stripe.android.common.taptoadd
 
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.ApiRequest

@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.common.analytics.experiment.DefaultLogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.DefaultLogLinkHoldbackExperiment

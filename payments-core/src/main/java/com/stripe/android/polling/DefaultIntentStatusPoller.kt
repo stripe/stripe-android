@@ -1,7 +1,7 @@
 package com.stripe.android.polling
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository

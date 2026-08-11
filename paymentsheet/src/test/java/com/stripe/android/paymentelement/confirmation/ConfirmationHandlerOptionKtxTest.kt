@@ -1,7 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.asCommonConfiguration
@@ -182,6 +182,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     cvc = "505"
@@ -591,6 +592,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
             )
@@ -611,6 +613,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
             )

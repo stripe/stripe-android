@@ -41,6 +41,7 @@ class IntentConfirmationDefinitionTest {
         DummyActivityResultCaller.test {
             val createdLauncher = definition.createLauncher(
                 activityResultCaller = activityResultCaller,
+                lifecycleOwner = fakeLifecycleOwner(),
                 onResult = {},
             )
 
@@ -556,6 +557,7 @@ class IntentConfirmationDefinitionTest {
 
     private companion object {
         private val SAVED_PAYMENT_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(
                 cvc = "505",

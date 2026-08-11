@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.core.exception.safeAnalyticsMessage

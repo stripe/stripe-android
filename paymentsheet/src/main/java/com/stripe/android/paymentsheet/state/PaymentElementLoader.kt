@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview

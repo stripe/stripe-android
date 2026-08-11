@@ -4,7 +4,7 @@ package com.stripe.android.paymentmethodmessaging.element
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventReporter

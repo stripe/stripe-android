@@ -2,7 +2,7 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import com.google.android.instantapps.InstantApps
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext

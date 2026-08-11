@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository

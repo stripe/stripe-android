@@ -1,159 +1,127 @@
 package com.stripe.android.common.nfcscan.ui
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import com.stripe.android.paymentsheet.R
-
-private const val IDLE_ANIMATION_CYCLE_MS = 1_470
-private const val IDLE_BAR_RISE_MS = 112
-private const val IDLE_BAR_INTER_HOLD_MS = 70
-private const val IDLE_ALL_BARS_HOLD_MS = 350
-private const val IDLE_DIM_DURATION_MS = 140
-private const val IDLE_BAR_DIM_ALPHA = 0.2f
-private const val IDLE_BAR_BRIGHT_ALPHA = 1f
-private const val IDLE_BAR1_RISE_END_MS = IDLE_BAR_RISE_MS
-private const val IDLE_BAR2_RISE_START_MS = IDLE_BAR1_RISE_END_MS + IDLE_BAR_INTER_HOLD_MS
-private const val IDLE_BAR2_RISE_END_MS = IDLE_BAR2_RISE_START_MS + IDLE_BAR_RISE_MS
-private const val IDLE_BAR3_RISE_START_MS = IDLE_BAR2_RISE_END_MS + IDLE_BAR_INTER_HOLD_MS
-private const val IDLE_BAR3_RISE_END_MS = IDLE_BAR3_RISE_START_MS + IDLE_BAR_RISE_MS
-private const val IDLE_ALL_BARS_HOLD_END_MS = IDLE_BAR3_RISE_END_MS + IDLE_ALL_BARS_HOLD_MS
-private const val IDLE_DIM_END_MS = IDLE_ALL_BARS_HOLD_END_MS + IDLE_DIM_DURATION_MS
+import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 
 @Composable
 internal fun NfcCoilContactlessIcon(
     modifier: Modifier = Modifier,
 ) {
+    val tintColor = PrimaryButtonTheme.colors.onBackground
+
     if (LocalInspectionMode.current) {
-        NfcCoilStaticIcon(
+        IconCanvas(
             modifier = modifier.testTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG),
+            progress = MAX_PROGRESS_VALUE,
+            tintColor = tintColor,
         )
         return
     }
 
-    val barAlphas = rememberIdleBarAlphas()
+    val transition = rememberInfiniteTransition(label = "nfc_icon_shimmer")
+    val progress by transition.animateFloat(
+        initialValue = MIN_PROGRESS_VALUE,
+        targetValue = MAX_PROGRESS_VALUE,
+        animationSpec = infiniteRepeatable(
+            animation = tween(ANIMATION_TIME_MS, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "nfc_icon_shimmer_progress",
+    )
 
-    NfcCoilStaticIcon(
+    IconCanvas(
         modifier = modifier.testTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG),
-        bar1Alpha = barAlphas.bar1,
-        bar2Alpha = barAlphas.bar2,
-        bar3Alpha = barAlphas.bar3,
+        progress = progress,
+        tintColor = tintColor,
     )
 }
 
 @Composable
-private fun rememberIdleBarAlphas(): IdleBarAlphas {
-    val infiniteTransition = rememberInfiniteTransition(label = "nfc_coil_idle")
-
-    val bar1Alpha by infiniteTransition.animateFloat(
-        initialValue = IDLE_BAR_DIM_ALPHA,
-        targetValue = IDLE_BAR_DIM_ALPHA,
-        animationSpec = infiniteRepeatable(
-            animation = idleBarAlphaKeyframes(
-                riseStartMs = 0,
-                riseEndMs = IDLE_BAR1_RISE_END_MS,
-            ),
-        ),
-        label = "nfc_coil_idle_bar1",
-    )
-    val bar2Alpha by infiniteTransition.animateFloat(
-        initialValue = IDLE_BAR_DIM_ALPHA,
-        targetValue = IDLE_BAR_DIM_ALPHA,
-        animationSpec = infiniteRepeatable(
-            animation = idleBarAlphaKeyframes(
-                riseStartMs = IDLE_BAR2_RISE_START_MS,
-                riseEndMs = IDLE_BAR2_RISE_END_MS,
-            ),
-        ),
-        label = "nfc_coil_idle_bar2",
-    )
-    val bar3Alpha by infiniteTransition.animateFloat(
-        initialValue = IDLE_BAR_DIM_ALPHA,
-        targetValue = IDLE_BAR_DIM_ALPHA,
-        animationSpec = infiniteRepeatable(
-            animation = idleBarAlphaKeyframes(
-                riseStartMs = IDLE_BAR3_RISE_START_MS,
-                riseEndMs = IDLE_BAR3_RISE_END_MS,
-            ),
-        ),
-        label = "nfc_coil_idle_bar3",
-    )
-
-    return IdleBarAlphas(
-        bar1 = bar1Alpha,
-        bar2 = bar2Alpha,
-        bar3 = bar3Alpha,
-    )
-}
-
-@Composable
-private fun NfcCoilStaticIcon(
-    modifier: Modifier = Modifier,
-    bar1Alpha: Float = 1f,
-    bar2Alpha: Float = 1f,
-    bar3Alpha: Float = 1f,
+private fun IconCanvas(
+    modifier: Modifier,
+    progress: Float,
+    tintColor: Color,
 ) {
-    Box(modifier = modifier) {
-        Image(
-            painter = painterResource(R.drawable.stripe_ic_material_nfc_coil_circle),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-        )
-        Image(
-            painter = painterResource(R.drawable.stripe_ic_material_nfc_coil_bar1),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer { alpha = bar1Alpha },
-        )
-        Image(
-            painter = painterResource(R.drawable.stripe_ic_material_nfc_coil_bar2),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer { alpha = bar2Alpha },
-        )
-        Image(
-            painter = painterResource(R.drawable.stripe_ic_material_nfc_coil_bar3),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer { alpha = bar3Alpha },
-        )
+    val colorFilter = remember(tintColor) { ColorFilter.tint(tintColor) }
+    val barPainters = BARS_WITH_LOBE_STOPS.map { painterResource(it.barRes) }
+
+    Canvas(modifier = modifier) {
+        BARS_WITH_LOBE_STOPS.forEachIndexed { index, data ->
+            with(barPainters[index]) {
+                draw(
+                    size = size,
+                    alpha = piecewise(progress, data.stops, data.values),
+                    colorFilter = colorFilter,
+                )
+            }
+        }
     }
 }
 
-private fun idleBarAlphaKeyframes(
-    riseStartMs: Int,
-    riseEndMs: Int,
-) = keyframes {
-    durationMillis = IDLE_ANIMATION_CYCLE_MS
-    IDLE_BAR_DIM_ALPHA at 0 using LinearEasing
-    if (riseStartMs > 0) {
-        IDLE_BAR_DIM_ALPHA at riseStartMs using LinearEasing
+private fun piecewise(t: Float, stops: FloatArray, values: FloatArray): Float {
+    if (t <= stops.first()) return values.first()
+    if (t >= stops.last()) return values.last()
+
+    for (i in 0 until stops.size - 1) {
+        if (t >= stops[i] && t <= stops[i + 1]) {
+            val f = (t - stops[i]) / (stops[i + 1] - stops[i])
+            return values[i] + (values[i + 1] - values[i]) * f
+        }
     }
-    IDLE_BAR_BRIGHT_ALPHA at riseEndMs using LinearEasing
-    IDLE_BAR_BRIGHT_ALPHA at IDLE_ALL_BARS_HOLD_END_MS using LinearEasing
-    IDLE_BAR_DIM_ALPHA at IDLE_DIM_END_MS using LinearEasing
-    IDLE_BAR_DIM_ALPHA at IDLE_ANIMATION_CYCLE_MS
+
+    return values.last()
 }
 
-private data class IdleBarAlphas(
-    val bar1: Float,
-    val bar2: Float,
-    val bar3: Float,
+private class BarAnimationData(
+    @DrawableRes val barRes: Int,
+    val stops: FloatArray,
+    val values: FloatArray,
+)
+
+// Per-lobe shimmer keyframes for each NFC bar — heavily overlapping for a flowing wave feel.
+// Higher base opacity (0.45) so lobes never fully dim; gentle peak (1.0).
+// Each lobe is offset by ~0.2 of the cycle — close enough to blur together.
+private val BARS_WITH_LOBE_STOPS = listOf(
+    // Lobe 1 (innermost): peaks at ~0.15, wraps around end
+    BarAnimationData(
+        barRes = R.drawable.stripe_ic_material_nfc_coil_bar1,
+        stops = floatArrayOf(0f, 0.15f, 0.40f, 0.70f, 0.90f, 1f),
+        values = floatArrayOf(1f, 1f, 0.50f, 0.45f, 0.65f, 1f),
+    ),
+    // Lobe 2 (middle): peaks at ~0.35
+    BarAnimationData(
+        barRes = R.drawable.stripe_ic_material_nfc_coil_bar2,
+        stops = floatArrayOf(0f, 0.10f, 0.35f, 0.60f, 0.85f, 1f),
+        values = floatArrayOf(0.55f, 0.65f, 1f, 0.55f, 0.45f, 0.55f),
+    ),
+    // Lobe 3 (outermost): peaks at ~0.55
+    BarAnimationData(
+        barRes = R.drawable.stripe_ic_material_nfc_coil_bar3,
+        stops = floatArrayOf(0f, 0.15f, 0.35f, 0.55f, 0.75f, 1f),
+        values = floatArrayOf(0.45f, 0.45f, 0.65f, 1f, 0.60f, 0.45f),
+    ),
 )
 
 internal const val NFC_COIL_CONTACTLESS_ICON_TEST_TAG = "nfc_coil_contactless_icon"
+
+private const val ANIMATION_TIME_MS = 2000
+
+private const val MIN_PROGRESS_VALUE = 0f
+private const val MAX_PROGRESS_VALUE = 1f

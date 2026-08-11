@@ -4,7 +4,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.element.DefaultPaymentMethodMessagingCoordinator
 import com.stripe.android.paymentmethodmessaging.element.FakeStripeRepository

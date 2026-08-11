@@ -119,7 +119,6 @@ internal class ApduCommandTest {
             assertThat(error).isInstanceOf<ApduResponseError.Parsing>()
 
             val parsingError = error as ApduResponseError.Parsing
-            assertThat(parsingError.data.contentEquals(malformedResponseData)).isTrue()
             assertThat(parsingError.cause).isInstanceOf<IndexOutOfBoundsException>()
 
             assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()

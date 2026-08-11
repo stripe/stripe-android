@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling.di
 
 import android.app.Application
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule

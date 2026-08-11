@@ -3,7 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.core.networking.ApiRequest
@@ -13,6 +13,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentCreationFlow
@@ -22,20 +23,20 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
-import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -64,7 +65,9 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with succeeded payment intent returns Complete action`() = runScenario {
         networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile("checkout-session-confirm.json")
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.put("status", "complete")
+            }
         }
 
         val result = interceptNewPm()
@@ -74,21 +77,19 @@ class CheckoutSessionConfirmationInterceptorTest {
         val completeAction = result as ConfirmationDefinition.Action.Complete
         assertThat(completeAction.intent).isInstanceOf<PaymentIntent>()
         assertThat((completeAction.intent as PaymentIntent).status).isEqualTo(StripeIntent.Status.Succeeded)
-        assertThat(completeAction.metadata).isEqualTo(
-            MutableConfirmationMetadata().apply {
-                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
-            }
-        )
+        assertThat(completeAction.metadata[DeferredIntentConfirmationTypeKey])
+            .isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(completeAction.metadata[CheckoutSessionResponseKey]?.status)
+            .isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
     @Test
     fun `intercept with requires_action payment intent returns Launch action`() = runScenario {
         networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile(
-                "checkout-session-confirm.json",
-                listOf(REQUIRES_ACTION_REPLACEMENT),
-            )
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.getJSONObject("payment_intent").put("status", "requires_action")
+            }
         }
 
         val result = interceptNewPm()
@@ -96,8 +97,8 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
 
         val launchAction = result as ConfirmationDefinition.Action.Launch
-        assertThat(launchAction.launcherArguments).isInstanceOf<IntentConfirmationDefinition.Args.NextAction>()
-        assertThat(launchAction.launcherArguments.deferredIntentConfirmationType)
+        val nextAction = launchAction.launcherArguments as IntentConfirmationDefinition.Args.NextAction
+        assertThat(nextAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.Server)
         assertThat(launchAction.receivesResultInProcess).isFalse()
     }
@@ -182,10 +183,9 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with requires_action setup intent returns Launch action`() = runScenario {
         networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile(
-                "checkout-session-confirm-setup.json",
-                listOf(REQUIRES_ACTION_REPLACEMENT),
-            )
+            response.testBodyFromFile("checkout-session-confirm-setup.json") { json ->
+                json.getJSONObject("setup_intent").put("status", "requires_action")
+            }
         }
 
         val result = interceptNewPm()
@@ -202,7 +202,9 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with saved payment method and succeeded payment intent returns Complete action`() = runScenario {
         networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile("checkout-session-confirm.json")
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.put("status", "complete")
+            }
         }
 
         val result = interceptSavedPm()
@@ -212,11 +214,10 @@ class CheckoutSessionConfirmationInterceptorTest {
         val completeAction = result as ConfirmationDefinition.Action.Complete
         assertThat(completeAction.intent).isInstanceOf<PaymentIntent>()
         assertThat((completeAction.intent as PaymentIntent).status).isEqualTo(StripeIntent.Status.Succeeded)
-        assertThat(completeAction.metadata).isEqualTo(
-            MutableConfirmationMetadata().apply {
-                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
-            }
-        )
+        assertThat(completeAction.metadata[DeferredIntentConfirmationTypeKey])
+            .isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(completeAction.metadata[CheckoutSessionResponseKey]?.status)
+            .isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -224,10 +225,9 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with saved payment method and requires_action payment intent returns Launch action`() =
         runScenario {
             networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile(
-                    "checkout-session-confirm.json",
-                    listOf(REQUIRES_ACTION_REPLACEMENT),
-                )
+                response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                    json.getJSONObject("payment_intent").put("status", "requires_action")
+                }
             }
 
             val result = interceptSavedPm()
@@ -341,6 +341,20 @@ class CheckoutSessionConfirmationInterceptorTest {
         interceptSavedPm()
     }
 
+    @Test
+    fun `intercept with saved payment method passes shipping information`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("shipping[name]", "Jenny Rosen"),
+            bodyPart("shipping[address][line1]", "510 Townsend St"),
+            bodyPart("shipping[address][postal_code]", "94103"),
+            not(hasBodyPart("shipping[phone]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(shippingInformation = SHIPPING_INFORMATION)
+    }
+
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
@@ -410,10 +424,11 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         suspend fun interceptSavedPm(
             intent: StripeIntent = PaymentIntentFactory.create(),
+            shippingInformation: ShippingInformation? = null,
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             interceptor.intercept(
                 intent = intent,
-                confirmationOption = SAVED_PM_OPTION,
+                confirmationOption = SAVED_PM_OPTION.copy(shippingInformation = shippingInformation),
                 shippingValues = null,
             )
     }
@@ -432,11 +447,6 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     private companion object {
-        val REQUIRES_ACTION_REPLACEMENT = ResponseReplacement(
-            original = "\"status\": \"succeeded\"",
-            new = "\"status\": \"requires_action\"",
-        )
-
         val NEW_PM_OPTION = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,
@@ -445,8 +455,21 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
 
         val SAVED_PM_OPTION = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
+        )
+
+        val SHIPPING_INFORMATION = ShippingInformation(
+            name = "Jenny Rosen",
+            phone = "1-800-555-1234",
+            address = Address(
+                line1 = "510 Townsend St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US",
+            ),
         )
 
         val SAVE_ENABLED_CUSTOMER_METADATA = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(

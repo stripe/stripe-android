@@ -2,7 +2,7 @@ package com.stripe.android.payments.core.analytics
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException

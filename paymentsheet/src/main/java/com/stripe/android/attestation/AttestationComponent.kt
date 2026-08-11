@@ -1,7 +1,7 @@
 package com.stripe.android.attestation
 
 import android.app.Application
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.link.injection.PaymentsIntegrityModule

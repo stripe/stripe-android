@@ -2,7 +2,7 @@ package com.stripe.android.payments.paymentlauncher
 
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.assisted.Assisted

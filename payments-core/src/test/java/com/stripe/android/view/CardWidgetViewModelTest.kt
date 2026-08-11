@@ -2,7 +2,7 @@ package com.stripe.android.view
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

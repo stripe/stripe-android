@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository

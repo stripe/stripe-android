@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.financialconnections.BuildConfig

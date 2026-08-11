@@ -1,6 +1,6 @@
 package com.stripe.android.common.taptoadd
 
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview

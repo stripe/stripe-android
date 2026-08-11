@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCallback
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
@@ -20,8 +20,10 @@ import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLaunch
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -37,6 +39,7 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
@@ -97,6 +100,7 @@ class GooglePayConfirmationDefinitionTest {
             DummyActivityResultCaller.test {
                 definition.createLauncher(
                     activityResultCaller = activityResultCaller,
+                    lifecycleOwner = fakeLifecycleOwner(),
                     onResult = onResult,
                 )
 
@@ -136,6 +140,7 @@ class GooglePayConfirmationDefinitionTest {
             launcherArgs = EmptyConfirmationLauncherArgs,
             result = GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = paymentMethod,
+                shippingInformation = SHIPPING_INFORMATION,
             ),
         )
 
@@ -151,6 +156,7 @@ class GooglePayConfirmationDefinitionTest {
 
         assertThat(savedOption.paymentMethod).isEqualTo(savedOption.paymentMethod)
         assertThat(savedOption.optionsParams).isNull()
+        assertThat(savedOption.shippingInformation).isEqualTo(SHIPPING_INFORMATION)
         assertThat(savedOption.originatedFromWallet).isTrue()
     }
 
@@ -814,5 +820,17 @@ class GooglePayConfirmationDefinitionTest {
 
         private val CONFIRMATION_PARAMETERS =
             com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
+
+        private val SHIPPING_INFORMATION = ShippingInformation(
+            name = "Jenny Rosen",
+            phone = "1-800-555-1234",
+            address = Address(
+                line1 = "510 Townsend St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US",
+            ),
+        )
     }
 }

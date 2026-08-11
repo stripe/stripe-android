@@ -3,7 +3,7 @@ package com.stripe.android.payments.paymentlauncher
 import android.graphics.Color
 import android.util.Base64
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import org.junit.Test

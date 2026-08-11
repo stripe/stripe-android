@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.DaggerAddressElementViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent

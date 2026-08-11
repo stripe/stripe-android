@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import javax.inject.Inject
 import javax.inject.Provider

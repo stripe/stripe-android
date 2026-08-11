@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.CommonConfiguration

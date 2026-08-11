@@ -7,13 +7,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
@@ -22,6 +23,12 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayLauncher
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayPresentation
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityArgs
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityContract
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
@@ -48,7 +55,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
     private val coroutineScope: CoroutineScope,
-    private val onrampCallbackIdentifier: String
+    private val onrampCallbackIdentifier: String,
+    private val samsungPayLauncherFactory: SamsungPayLauncher.Factory,
 ) {
     private val onrampCallbacksState: OnrampCallbacks.State
         get() = OnrampCallbackReferences[onrampCallbackIdentifier]
@@ -90,6 +98,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
     }
 
+    private var samsungPayLauncher: SamsungPayLauncher? = null
+
     private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.activityResultRegistry.register(
             key = "OnrampPresenterCoordinator_VerifyKycResultLauncher($onrampCallbackIdentifier)",
@@ -109,6 +119,9 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         lifecycleOwner.lifecycleScope.launch {
             linkControllerState.collect { state ->
                 interactor.onLinkControllerState(state)
+                if (state.elementsSessionId != null && samsungPayLauncher == null) {
+                    initializeSamsungPay()
+                }
             }
         }
 
@@ -125,6 +138,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     googlePayActivityResultLauncher.unregister()
+                    samsungPayLauncher?.destroy()
                     verifyKycResultLauncher.unregister()
                     userAttestationResultLauncher.unregister()
 
@@ -228,6 +242,49 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     )
                 }
             }
+            is PaymentMethodSelection.SamsungPay -> {
+                presentSamsungPay(selection)
+            }
+        }
+    }
+
+    private fun presentSamsungPay(selection: PaymentMethodSelection.SamsungPay) {
+        coroutineScope.launch {
+            val launcher = samsungPayLauncher
+            if (launcher == null) {
+                handleSamsungPayPaymentSelection(
+                    SamsungPayResult.Failed(
+                        SamsungPaySdkException(
+                            message = "Samsung Pay is not configured for this onramp coordinator.",
+                            cause = null,
+                            errorCode = null,
+                            reason = Reason.NotConfigured,
+                        ),
+                    ),
+                    platformPublishableKey = null,
+                )
+                return@launch
+            }
+
+            interactor.getOrFetchPlatformKey().fold(
+                onSuccess = { platformPublishableKey ->
+                    launcher.present(
+                        presentation = SamsungPayPresentation(
+                            currencyCode = selection.currencyCode,
+                            amount = selection.amount,
+                            orderNumber = selection.orderNumber,
+                        ),
+                        callback = { result ->
+                            handleSamsungPayPaymentSelection(result, platformPublishableKey)
+                        },
+                    )
+                },
+                onFailure = { error ->
+                    onrampCallbacksState.collectPaymentCallback.onResult(
+                        interactor.handleSamsungPayPlatformKeyFailure(error),
+                    )
+                },
+            )
         }
     }
 
@@ -326,6 +383,18 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun googlePayConfig(): GooglePayPaymentMethodLauncher.Config? =
         interactor.state.value.configurationState?.googlePayConfig
 
+    private fun initializeSamsungPay() {
+        val onrampConfiguration = interactor.state.value.configurationState ?: return
+        val configuration = onrampConfiguration.samsungPayConfig ?: return
+        samsungPayLauncher = samsungPayLauncherFactory.create(
+            context = activity.applicationContext,
+            configuration = configuration,
+            merchantDisplayName = onrampConfiguration.merchantDisplayName,
+        ).also { launcher ->
+            launcher.getStatus(::handleSamsungPayStatus)
+        }
+    }
+
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
@@ -377,9 +446,32 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
+    private fun handleSamsungPayPaymentSelection(
+        result: SamsungPayResult,
+        platformPublishableKey: String?,
+    ) {
+        coroutineScope.launch {
+            onrampCallbacksState.collectPaymentCallback.onResult(
+                interactor.handleSamsungPayPaymentResult(result, platformPublishableKey),
+            )
+        }
+    }
+
     private fun handleGooglePayIsReady(isReady: Boolean) {
         coroutineScope.launch {
             onrampCallbacksState.googlePayIsReadyCallback?.let { it(isReady) }
+        }
+    }
+
+    private fun handleSamsungPayStatus(status: SamsungPayStatus) {
+        coroutineScope.launch {
+            onrampCallbacksState.samsungPayIsReadyCallback?.let { callback ->
+                val availability = interactor.handleSamsungPayAvailability(status)
+                callback(
+                    availability is SamsungPayAvailabilityResult.Available,
+                    availability,
+                )
+            }
         }
     }
 }
@@ -390,6 +482,7 @@ private fun PaymentMethodType.toLinkType(): List<LinkController.PaymentMethodTyp
         PaymentMethodType.BankAccount -> listOf(LinkController.PaymentMethodType.BankAccount)
         PaymentMethodType.CardAndBankAccount -> null
         PaymentMethodType.GooglePay -> error("Google Pay is not supported in LinkController")
+        PaymentMethodType.SamsungPay -> error("Samsung Pay is not supported in LinkController")
     }
 
 private fun PaymentMethodType.requiresNameCollection(): Boolean =

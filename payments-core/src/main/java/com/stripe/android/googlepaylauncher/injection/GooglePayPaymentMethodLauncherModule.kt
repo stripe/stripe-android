@@ -1,6 +1,6 @@
 package com.stripe.android.googlepaylauncher.injection
 
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
 import com.stripe.android.googlepaylauncher.DefaultPaymentsClientFactory

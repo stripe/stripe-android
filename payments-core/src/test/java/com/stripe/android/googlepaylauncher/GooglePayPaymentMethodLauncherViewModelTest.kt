@@ -20,6 +20,7 @@ import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.GooglePayFixtures
 import com.stripe.android.model.PaymentIntentCreationFlow
@@ -27,6 +28,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.testing.fakeCreationExtras
@@ -91,6 +93,27 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
+    }
+
+    @Test
+    fun `createPaymentMethod() should return shipping information`() = runTest {
+        val result = viewModel.createPaymentMethod(
+            PaymentData.fromJson(GooglePayFixtures.RESULT_WITH_SHIPPING_ADDRESS.toString())
+        ) as GooglePayPaymentMethodLauncher.Result.Completed
+
+        assertThat(result.shippingInformation).isEqualTo(
+            ShippingInformation(
+                name = "Jenny Rosen",
+                phone = "1-800-555-1234",
+                address = Address(
+                    line1 = "510 Townsend St",
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94103",
+                    country = "US",
+                ),
+            )
+        )
     }
 
     @Test

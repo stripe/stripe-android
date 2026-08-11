@@ -1,7 +1,7 @@
 package com.stripe.android.challenge.passive
 
 import android.content.Context
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.hcaptcha.HCaptchaModule

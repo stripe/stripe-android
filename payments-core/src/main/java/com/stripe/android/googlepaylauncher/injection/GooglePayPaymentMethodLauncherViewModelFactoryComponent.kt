@@ -1,7 +1,7 @@
 package com.stripe.android.googlepaylauncher.injection
 
 import android.content.Context
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.core.injection.CoreCommonModule

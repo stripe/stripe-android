@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Base64
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.link.serialization.PopupPayload
 import com.stripe.android.model.PaymentMethod

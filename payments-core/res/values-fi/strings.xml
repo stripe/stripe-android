@@ -156,6 +156,10 @@
   <string name="stripe_fpx_bank_offline">%s - Offline-tilassa</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Maksutapasi on hylätty.</string>
+  <!-- Google Pay line item showing the amount before exclusive taxes. -->
+  <string name="stripe_google_pay_cost_excluding_tax">Kustannus ilman veroa</string>
+  <!-- Google Pay total label when the final tax may change with the selected billing address. -->
+  <string name="stripe_google_pay_estimated_total">Arvioitu loppusumma (lopullinen vero voi vaihdella)</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">Yhteensä</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->

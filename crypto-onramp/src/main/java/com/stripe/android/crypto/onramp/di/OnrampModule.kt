@@ -3,7 +3,7 @@ package com.stripe.android.crypto.onramp.di
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.BuildConfig
 import com.stripe.android.Stripe
 import com.stripe.android.common.di.MobileSessionIdModule

@@ -9,10 +9,12 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
-import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
+import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -144,13 +146,17 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure prefills the default billing address`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaultBillingAddress(
-            CheckoutController.Address()
-                .city(" San Francisco ")
-                .country(" US ")
-                .line1(" 510 Townsend St ")
-                .postalCode(" 94103 ")
-                .state(" CA ")
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutController.Address()
+                        .city(" San Francisco ")
+                        .country(" US ")
+                        .line1(" 510 Townsend St ")
+                        .postalCode(" 94103 ")
+                        .state(" CA ")
+                )
+            )
         ),
     ) {
         result.getOrThrow()
@@ -165,14 +171,18 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaultBillingAddress(
-            CheckoutController.Address()
-                .city("San Francisco")
-                .country("US")
-                .line1("510 Townsend St")
-                .line2("Suite 100")
-                .postalCode("94103")
-                .state("CA")
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutController.Address()
+                        .city("San Francisco")
+                        .country("US")
+                        .line1("510 Townsend St")
+                        .line2("Suite 100")
+                        .postalCode("94103")
+                        .state("CA")
+                )
+            )
         ),
         networkSetup = {
             networkRule.checkoutInit(
@@ -189,6 +199,37 @@ internal class CheckoutControllerTest {
                 responseFactory = successResponseFactory(automaticTaxFor("billing")),
             )
         },
+    ) {
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `configure sends the trimmed default email to the checkout session`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().email("  prefill@example.com  ")
+        ),
+        networkSetup = {
+            networkRule.checkoutInit(responseFactory = ::successResponse)
+            networkRule.checkoutUpdate(
+                bodyPart("customer_email", "prefill@example.com"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                responseFactory = successResponseFactory { json ->
+                    json.put("customer_email", "prefill@example.com")
+                },
+            )
+        },
+    ) {
+        result.getOrThrow()
+        assertThat(controller.session.value?.email).isEqualTo("prefill@example.com")
+        assertThat(committedState?.embeddedConfiguration?.defaultBillingDetails?.email)
+            .isEqualTo("prefill@example.com")
+    }
+
+    @Test
+    fun `configure does not send an email update when the default email is blank`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().email("   ")
+        ),
     ) {
         assertThat(result.isSuccess).isTrue()
     }
@@ -290,10 +331,9 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `session is null before configure`() = runTest {
-        val savedStateHandle = SavedStateHandle()
-        val controller = createController(savedStateHandle)
-        assertThat(controller.session.value).isNull()
-        assertThat(committedStateFor(savedStateHandle)).isNull()
+        val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
+        assertThat(setup.controller.session.value).isNull()
+        assertThat(setup.stateHolder.state).isNull()
     }
 
     @Test
@@ -318,14 +358,18 @@ internal class CheckoutControllerTest {
 
         // Persisting and restoring the handle simulates the controller being rebuilt after process
         // death: the committed state is read back from the restored namespaced child.
-        val state = committedStateFor(savedStateHandle.simulateProcessDeath())
+        val recreated = createControllerSetup(
+            savedStateHandle.simulateProcessDeath(),
+            DEFAULT_INTEGRATION_NAME,
+        )
+        val state = recreated.stateHolder.state
         assertThat(state).isNotNull()
         assertThat(state!!.embeddedConfiguration.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
     }
 
     @Test
-    fun `destroy clears the committed state`() = runConfigureScenario {
+    fun `destroy clears persisted state`() = runConfigureScenario {
         result.getOrThrow()
         // Pre-condition: configure committed a non-null state so the clear is observable.
         assertThat(committedState).isNotNull()
@@ -334,13 +378,13 @@ internal class CheckoutControllerTest {
 
         assertThat(committedState).isNull()
         assertThat(controller.session.value).isNull()
+        assertThat(savedStateHandle.keys()).doesNotContain(DEFAULT_INTEGRATION_NAME)
+        assertThat(createController(savedStateHandle.simulateProcessDeath()).session.value).isNull()
     }
 
     @Test
     fun `clearPaymentOption clears paymentOptionDisplayData`() = runTest {
-        val savedStateHandle = SavedStateHandle()
-        // Seed the controller's namespaced child before building; the controller reuses that child.
-        savedStateHandle.checkoutSubHandle(DEFAULT_INTEGRATION_NAME)[CheckoutControllerStateHolder.STATE_KEY] =
+        val savedStateHandle = parentHandleWithState(
             CheckoutControllerStateFactory.create(
                 paymentSelection = PaymentSelection.GooglePay,
                 temporarySelection = "card",
@@ -348,6 +392,7 @@ internal class CheckoutControllerTest {
                     putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
                 },
             )
+        )
 
         val controller = createController(savedStateHandle)
         controller.session.test {
@@ -373,10 +418,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `clearPaymentOption returns failure and preserves selection when a payment flow is presented`() =
-        runMutationScenario {
-            selectPaymentMethod(PaymentSelection.GooglePay)
-            markIntegrationLaunched()
-
+        runMutationScenario(paymentSelection = PaymentSelection.GooglePay, sheetIsOpen = true) {
             val result = controller.clearPaymentOption()
 
             assertThat(result.isFailure).isTrue()
@@ -384,6 +426,31 @@ internal class CheckoutControllerTest {
             assertThat(result.exceptionOrNull()).hasMessageThat()
                 .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
             // The rejected clear leaves the selection intact.
+            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+        }
+
+    @Test
+    fun `clearPaymentOption returns failure and preserves selection while a mutation is in flight`() =
+        runMutationScenario(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION) {
+            val holdResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                holdResponse.await(10, TimeUnit.SECONDS)
+                successResponseFactory().invoke(response)
+            }
+            val mutation = async { controller.applyPromotionCode("10OFF") }
+            testScheduler.advanceUntilIdle()
+
+            val result = controller.clearPaymentOption()
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).hasMessageThat()
+                .isEqualTo("Cannot mutate checkout session while another mutation is in progress.")
+            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+
+            holdResponse.countDown()
+            assertThat(mutation.await().isSuccess).isTrue()
             assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
         }
 
@@ -798,9 +865,9 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `mutation returns failure when a payment flow is presented`() = runMutationScenario {
-        markIntegrationLaunched()
-
+    fun `mutation returns failure when a payment flow is presented`() = runMutationScenario(
+        sheetIsOpen = true
+    ) {
         val result = controller.applyPromotionCode("10OFF")
 
         assertThat(result.isFailure).isTrue()
@@ -810,9 +877,9 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `runServerUpdate returns failure when a payment flow is presented`() = runMutationScenario {
-        markIntegrationLaunched()
-
+    fun `runServerUpdate returns failure when a payment flow is presented`() = runMutationScenario(
+        sheetIsOpen = true
+    ) {
         val result = controller.runServerUpdate { Result.success(Unit) }
 
         assertThat(result.isFailure).isTrue()
@@ -821,9 +888,9 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure returns failure when a payment flow is presented`() = runMutationScenario {
-        markIntegrationLaunched()
-
+    fun `configure returns failure when a payment flow is presented`() = runMutationScenario(
+        sheetIsOpen = true
+    ) {
         val result = controller.configure(DEFAULT_CLIENT_SECRET)
 
         assertThat(result.isFailure).isTrue()
@@ -834,9 +901,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure does not open a loading window when a payment flow is presented`() =
-        runMutationScenario(assertLoadingConsumed = true) {
-            markIntegrationLaunched()
-
+        runMutationScenario(sheetIsOpen = true, assertLoadingConsumed = true) {
             // The guard fast-fails before entering the coordinator, so isUpdating never flips true.
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
@@ -1080,12 +1145,15 @@ internal class CheckoutControllerTest {
     private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
         SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
 
-    // Reads the CheckoutControllerState the controller committed into its namespaced child of [parent].
-    private fun committedStateFor(
-        parent: SavedStateHandle,
-        integrationName: String = DEFAULT_INTEGRATION_NAME,
-    ): CheckoutControllerState? =
-        CheckoutControllerStateFactory.createStateHolder(parent.checkoutSubHandle(integrationName)).state
+    @Suppress("RestrictedApi")
+    private fun parentHandleWithState(state: CheckoutControllerState): SavedStateHandle {
+        val childHandle = SavedStateHandle(
+            mapOf(CheckoutControllerStateHolder.STATE_KEY to state)
+        )
+        return SavedStateHandle(
+            mapOf(DEFAULT_INTEGRATION_NAME to childHandle.savedStateProvider().saveState())
+        )
+    }
 
     private fun createController(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
@@ -1099,6 +1167,35 @@ internal class CheckoutControllerTest {
         )
     }
 
+    private fun createControllerSetup(
+        savedStateHandle: SavedStateHandle,
+        integrationName: String,
+    ): ControllerSetup {
+        val controllerSavedState = CheckoutControllerSavedState(
+            parentHandle = savedStateHandle,
+            integrationName = integrationName,
+        )
+        val controller = destroyControllerRule.track(
+            DaggerCheckoutControllerComponent.factory().create(
+                application = applicationContext,
+                paymentElementCallbackIdentifier = integrationName,
+                resultCallback = CheckoutController.ResultCallback {},
+                checkoutControllerSavedState = controllerSavedState,
+            ).checkoutController
+        )
+        return ControllerSetup(
+            controller = controller,
+            stateHolder = CheckoutControllerStateFactory.createStateHolder(controllerSavedState.handle),
+            sheetStateHolder = SheetStateHolder(controllerSavedState.handle),
+        )
+    }
+
+    private class ControllerSetup(
+        val controller: CheckoutController,
+        val stateHolder: CheckoutControllerStateHolder,
+        val sheetStateHolder: SheetStateHolder,
+    )
+
     private fun runConfigureScenario(
         clientSecret: String = DEFAULT_CLIENT_SECRET,
         configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
@@ -1107,50 +1204,48 @@ internal class CheckoutControllerTest {
     ) = runTest {
         networkSetup()
         val savedStateHandle = SavedStateHandle()
-        val controller = createController(savedStateHandle)
-        val result = controller.configure(clientSecret, configuration)
-        block(Scenario(controller, result, savedStateHandle))
+        val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
+        val result = setup.controller.configure(clientSecret, configuration)
+        block(Scenario(setup.controller, result, savedStateHandle, setup.stateHolder))
     }
 
     private class Scenario(
         val controller: CheckoutController,
         val result: Result<Unit>,
-        private val savedStateHandle: SavedStateHandle,
+        val savedStateHandle: SavedStateHandle,
+        private val stateHolder: CheckoutControllerStateHolder,
     ) {
-        // Reads the state the controller committed by re-deriving its namespaced child of the handle.
         val committedState: CheckoutControllerState?
-            get() = CheckoutControllerStateFactory
-                .createStateHolder(savedStateHandle.checkoutSubHandle(DEFAULT_INTEGRATION_NAME))
-                .state
+            get() = stateHolder.state
     }
 
-    // Configures a controller from a fresh init, then hands it to [block] alongside the shared
-    // SavedStateHandle (used to read committed state and simulate a presented payment flow) and an
-    // isUpdating Turbine.
+    // Configures a controller from a fresh init, seeds the requested scenario state, then hands it
+    // to [block] alongside an isUpdating Turbine.
     //
     // Set [assertLoadingConsumed] for tests that verify loading behavior: the block must consume
     // every isUpdating emission and this asserts none are left over. Tests that don't care about
     // loading leave it false, and any unconsumed emissions are ignored.
     private fun runMutationScenario(
         initModifier: (JSONObject) -> Unit = {},
+        paymentSelection: PaymentSelection? = null,
+        sheetIsOpen: Boolean = false,
         assertLoadingConsumed: Boolean = false,
         block: suspend MutationScenario.() -> Unit,
     ) = runTest {
         networkRule.checkoutInit(responseFactory = successResponseFactory(initModifier))
         val savedStateHandle = SavedStateHandle()
-        val controller = createController(savedStateHandle)
+        val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
+        val controller = setup.controller
         controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        paymentSelection?.let(setup.stateHolder::setSelection)
+        setup.sheetStateHolder.sheetIsOpen = sheetIsOpen
 
         turbineScope {
             val isUpdatingTurbine = controller.isUpdating.testIn(backgroundScope)
-            // Re-derive the controller's own child handle so writes made here (selection, sheet-open)
-            // are observed by the controller and vice versa.
-            val childHandle = savedStateHandle.checkoutSubHandle(DEFAULT_INTEGRATION_NAME)
             block(
                 MutationScenario(
                     controller = controller,
-                    stateHolder = CheckoutControllerStateFactory.createStateHolder(childHandle),
-                    sheetStateHolder = SheetStateHolder(childHandle),
+                    stateHolder = setup.stateHolder,
                     testScope = this@runTest,
                     isUpdatingTurbine = isUpdatingTurbine,
                 )
@@ -1166,7 +1261,6 @@ internal class CheckoutControllerTest {
     private class MutationScenario(
         val controller: CheckoutController,
         private val stateHolder: CheckoutControllerStateHolder,
-        private val sheetStateHolder: SheetStateHolder,
         private val testScope: TestScope,
         val isUpdatingTurbine: ReceiveTurbine<Boolean>,
     ) : CoroutineScope by testScope {
@@ -1183,18 +1277,6 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
-
-        // Simulates a presented payment flow by opening the sheet through the SheetStateHolder backed
-        // by the shared SavedStateHandle, which the mutation guard reads back through the same holder.
-        fun markIntegrationLaunched() {
-            sheetStateHolder.sheetIsOpen = true
-        }
-
-        // Simulates a payment method already being selected via the same setSelection path the
-        // production embedded selection flow uses.
-        fun selectPaymentMethod(selection: PaymentSelection) {
-            stateHolder.setSelection(selection)
-        }
     }
 
     private companion object {

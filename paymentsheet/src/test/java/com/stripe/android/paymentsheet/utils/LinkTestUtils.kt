@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
-import com.stripe.android.ApiConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
