@@ -81,10 +81,9 @@ internal sealed class ApduResponseError(
     }
 
     class Parsing(
-        val data: ByteArray,
         override val cause: Throwable?,
     ) : ApduResponseError(
-        message = "Failed to parse response data: ${data.toHexString()}"
+        message = "Failed to parse response data!"
     ) {
         override val errorCode: String = "apduParsingIssue"
         override val userMessage: ResolvableString = R.string.stripe_nfc_scan_internal_error_message.resolvableString

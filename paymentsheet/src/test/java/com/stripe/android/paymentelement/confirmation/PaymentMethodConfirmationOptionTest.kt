@@ -13,6 +13,7 @@ class PaymentMethodConfirmationOptionTest {
     @Test
     fun `shouldSaveAsDefault returns false for Saved payment method`() {
         val option = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
         )

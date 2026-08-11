@@ -52,7 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import com.stripe.android.checkout.CurrencySelectorElement
+import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import androidx.compose.ui.R as ComposeR
 import com.stripe.android.uicore.R as StripeUiCoreR

@@ -39,6 +39,9 @@ internal fun NfcScanningScreen(
         onSuccessShown = {
             viewActionHandler(NfcScanningViewAction.SuccessShown)
         },
+        onErrorShown = {
+            viewActionHandler(NfcScanningViewAction.ErrorShown)
+        },
     )
 }
 
@@ -49,6 +52,7 @@ internal fun NfcScanningLayout(
     deviceRotation: DeviceRotation,
     onClose: () -> Unit,
     onSuccessShown: () -> Unit,
+    onErrorShown: () -> Unit,
 ) {
     val tapZone = remember(deviceRotation, tapZone) {
         createNormalizedTapZone(deviceRotation, tapZone)
@@ -61,7 +65,13 @@ internal fun NfcScanningLayout(
             .fillMaxSize()
             .background(MaterialTheme.colors.surface),
     ) {
-        NfcCoilLayout(status, tapZone, deviceRotation, onSuccessShown)
+        NfcCoilLayout(
+            status = status,
+            tapZone = tapZone,
+            deviceRotation = deviceRotation,
+            onSuccessShown = onSuccessShown,
+            onErrorShown = onErrorShown,
+        )
         CloseButtonLayout(canShowCloseButton, tapZone, deviceRotation, onClose)
     }
 }

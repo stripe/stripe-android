@@ -11,6 +11,7 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
 * [Features](#Features)
 * [Getting started](#Getting-started)
    * [Integration](#Integration)
+   * [Samsung Pay](#Samsung-Pay)
    * [Example](#Example)
 
 <!--te-->
@@ -32,7 +33,7 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
 
 **Wallets and payment methods**:
 - Register and delete crypto wallets with `registerWalletAddress(walletAddress:network:)` and `deleteWalletAddress(walletId:)`
-- Collect payment methods via Link (card, bank account) or Apple Pay with `collectPaymentMethod(type:)`
+- Collect payment methods via Link (card, bank account), Google Pay, or Samsung Pay with `collectPaymentMethod(...)`
 - Create crypto payment tokens with `createCryptoPaymentToken()`
 
 **Checkout handling**: 
@@ -47,6 +48,61 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
 ### Integration
 
 Get started with Embedded components onramp [📚 Android integration guide](https://docs.stripe.com/crypto/onramp/embedded-components) and [example project](../crypto-onramp-example).
+
+### Samsung Pay
+
+Samsung Pay support was added using the the Samsung Pay SDK version `2.22.00`. The SDK is not included in
+the Stripe Android SDK or its dependency metadata. Past or future versions may have compatibility issues. 
+Obtain the JAR from Samsung, add it to the client application's `libs` directory, and declare it in the application module:
+
+```kotlin
+dependencies {
+    implementation(files("libs/samsungpay_2.22.00.jar"))
+}
+```
+
+Opt in while configuring the coordinator. The merchant display name is used as the Samsung Pay
+merchant name unless one is supplied explicitly. The Samsung merchant ID is only sent
+when provided in `SamsungPayConfig`:
+
+```kotlin
+val configuration = OnrampConfiguration()
+    .merchantDisplayName("Example merchant")
+    .publishableKey("pk_test_...")
+    .samsungPayConfig(
+        OnrampConfiguration.SamsungPayConfig(
+            serviceId = "your-samsung-service-id",
+        )
+    )
+```
+
+Use the readiness callback to decide whether to show Samsung Pay. The availability result includes
+a rich error with recovery guidance when Samsung Pay is unavailable.
+
+```kotlin
+val callbacks = OnrampCallbacks()
+    // Configure the other required onramp callbacks.
+    .samsungPayIsReadyCallback { isReady, availabilityResult ->
+        samsungPayButton.isVisible = isReady
+    }
+```
+
+Present Samsung Pay with an ISO 4217 currency code, a positive amount in that currency's minor
+unit, and a required order identifier:
+
+```kotlin
+presenter.collectPaymentMethod(
+    PaymentMethodSelection.SamsungPay(
+        currencyCode = "USD",
+        amount = 1_099,
+        orderNumber = "order-123",
+    )
+)
+```
+
+The resulting Samsung payment credential is exchanged for a Stripe token and then a card
+PaymentMethod using the onramp platform publishable key. An absent SDK or payment failure is
+delivered through the existing `OnrampCollectPaymentMethodResult.Failed` callback.
 
 ### Example
 

@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.stripe.android.uicore.FormScrollProvider
 import com.stripe.android.uicore.StripeTheme
 
 @Composable
@@ -52,14 +53,17 @@ internal fun BottomSheetScaffold(
 
         // We provide the IME padding before the vertical scroll modifier to make sure that the
         // content moves up correctly if it's covered by the keyboard when it's being focused.
-        Column(
-            modifier = Modifier
-                .imePadding()
-                .verticalScroll(scrollState)
-        ) {
-            Spacer(Modifier.height(StripeTheme.formInsets.top.dp))
-            content()
-            Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+        FormScrollProvider(scrollState) { viewportModifier ->
+            Column(
+                modifier = Modifier
+                    .imePadding()
+                    .then(viewportModifier)
+                    .verticalScroll(scrollState)
+            ) {
+                Spacer(Modifier.height(StripeTheme.formInsets.top.dp))
+                content()
+                Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+            }
         }
     }
 }

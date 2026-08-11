@@ -8,7 +8,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.common.nfcscan.tapzone.TapZone
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -27,7 +26,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
         private val deviceRotation: DeviceRotation,
         private val tapZone: TapZone,
         paparazziOrientation: Orientation,
-        private val error: Error,
+        private val screenshotStatus: NfcScanningScreenshotStatus,
     ) {
         @get:Rule
         val paparazziRule = PaparazziRule(
@@ -42,12 +41,29 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             paparazziRule.snapshot {
                 NfcScanningTheme {
                     NfcScanningLayout(
-                        status = NfcScanningStatus.Idle(error.error()),
+                        status = screenshotStatus.status,
                         tapZone = tapZone,
                         deviceRotation = deviceRotation,
                         onClose = {},
                         onSuccessShown = {},
+                        onErrorShown = {},
                     )
+                }
+            }
+        }
+
+        sealed interface NfcScanningScreenshotStatus {
+            val status: NfcScanningStatus
+
+            data object Idle : NfcScanningScreenshotStatus {
+                override val status = NfcScanningStatus.Idle
+            }
+
+            data class Error(val message: String) : NfcScanningScreenshotStatus {
+                override val status = NfcScanningStatus.Error(message.resolvableString)
+
+                override fun toString(): String {
+                    return "withError(${message.filter { !it.isWhitespace() }})"
                 }
             }
         }
@@ -56,7 +72,12 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             @JvmStatic
             @Parameterized.Parameters(name = "{0}_{1}_{2}_{3}")
             fun parameters(): List<Array<out Any?>> = listOf(
-                arrayOf(DeviceRotation.Portrait, DEFAULT_TAP_ZONE, Orientation.Portrait, Error.None),
+                arrayOf(
+                    DeviceRotation.Portrait,
+                    DEFAULT_TAP_ZONE,
+                    Orientation.Portrait,
+                    NfcScanningScreenshotStatus.Idle
+                ),
                 *HIGH_LOW_CASES,
                 *CLOSE_START_END_CASES,
                 *LANDSCAPE_CORNER_CASES,
@@ -69,10 +90,30 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             val LOW_TAP_ZONE = TapZone(xBias = 0.2f, yBias = 0.85f)
 
             val HIGH_LOW_CASES = arrayOf(
-                arrayOf(DeviceRotation.Portrait, HIGH_TAP_ZONE, Orientation.Portrait, Error.None),
-                arrayOf(DeviceRotation.Portrait, LOW_TAP_ZONE, Orientation.Portrait, Error.None),
-                arrayOf(DeviceRotation.UpsideDown, HIGH_TAP_ZONE, Orientation.Portrait, Error.None),
-                arrayOf(DeviceRotation.UpsideDown, LOW_TAP_ZONE, Orientation.Portrait, Error.None),
+                arrayOf(
+                    DeviceRotation.Portrait,
+                    HIGH_TAP_ZONE,
+                    Orientation.Portrait,
+                    NfcScanningScreenshotStatus.Idle
+                ),
+                arrayOf(
+                    DeviceRotation.Portrait,
+                    LOW_TAP_ZONE,
+                    Orientation.Portrait,
+                    NfcScanningScreenshotStatus.Idle
+                ),
+                arrayOf(
+                    DeviceRotation.UpsideDown,
+                    HIGH_TAP_ZONE,
+                    Orientation.Portrait,
+                    NfcScanningScreenshotStatus.Idle
+                ),
+                arrayOf(
+                    DeviceRotation.UpsideDown,
+                    LOW_TAP_ZONE,
+                    Orientation.Portrait,
+                    NfcScanningScreenshotStatus.Idle
+                ),
             )
 
             val PORTRAIT_CLOSE_START_TAP_ZONE = TapZone(xBias = 0.05f, yBias = 0.3f)
@@ -85,25 +126,25 @@ internal class NfcScanningLayoutScreenshotTestSuite {
                     DeviceRotation.Portrait,
                     PORTRAIT_CLOSE_START_TAP_ZONE,
                     Orientation.Portrait,
-                    Error.None,
+                    NfcScanningScreenshotStatus.Idle,
                 ),
                 arrayOf(
                     DeviceRotation.Portrait,
                     PORTRAIT_CLOSE_END_TAP_ZONE,
                     Orientation.Portrait,
-                    Error.None,
+                    NfcScanningScreenshotStatus.Idle,
                 ),
                 arrayOf(
                     DeviceRotation.LandscapeRight,
                     LANDSCAPE_CLOSE_START_TAP_ZONE,
                     Orientation.Landscape,
-                    Error.None,
+                    NfcScanningScreenshotStatus.Idle,
                 ),
                 arrayOf(
                     DeviceRotation.LandscapeRight,
                     LANDSCAPE_CLOSE_END_TAP_ZONE,
                     Orientation.Landscape,
-                    Error.None,
+                    NfcScanningScreenshotStatus.Idle,
                 ),
             )
 
@@ -117,54 +158,52 @@ internal class NfcScanningLayoutScreenshotTestSuite {
                     DeviceRotation.LandscapeLeft,
                     LANDSCAPE_LEFT_TOP_END_CLOSE_TAP_ZONE,
                     Orientation.Landscape,
-                    Error.None,
+                    NfcScanningScreenshotStatus.Idle,
                 ),
                 arrayOf(
                     DeviceRotation.LandscapeLeft,
                     LANDSCAPE_LEFT_TOP_START_CLOSE_TAP_ZONE,
                     Orientation.Landscape,
-                    Error.None,
+                    NfcScanningScreenshotStatus.Idle,
                 ),
                 arrayOf(
                     DeviceRotation.LandscapeRight,
                     LANDSCAPE_RIGHT_TOP_END_CLOSE_TAP_ZONE,
                     Orientation.Landscape,
-                    Error.None,
+                    NfcScanningScreenshotStatus.Idle,
                 ),
                 arrayOf(
                     DeviceRotation.LandscapeRight,
                     LANDSCAPE_RIGHT_TOP_START_CLOSE_TAP_ZONE,
                     Orientation.Landscape,
-                    Error.None,
+                    NfcScanningScreenshotStatus.Idle,
                 ),
             )
-
-            const val ERROR_TEXT = "Card expired. Try another card."
 
             val ERROR_CASES = arrayOf(
                 arrayOf(
                     DeviceRotation.Portrait,
                     DEFAULT_TAP_ZONE,
                     Orientation.Portrait,
-                    Error.Message(ERROR_TEXT),
+                    NfcScanningScreenshotStatus.Error(ERROR_TEXT),
                 ),
                 arrayOf(
                     DeviceRotation.Portrait,
                     PORTRAIT_CLOSE_START_TAP_ZONE,
                     Orientation.Portrait,
-                    Error.Message(ERROR_TEXT),
+                    NfcScanningScreenshotStatus.Error(ERROR_TEXT),
                 ),
                 arrayOf(
                     DeviceRotation.Portrait,
                     PORTRAIT_CLOSE_END_TAP_ZONE,
                     Orientation.Portrait,
-                    Error.Message(ERROR_TEXT),
+                    NfcScanningScreenshotStatus.Error(ERROR_TEXT),
                 ),
                 arrayOf(
                     DeviceRotation.Portrait,
                     LOW_TAP_ZONE,
                     Orientation.Portrait,
-                    Error.Message(ERROR_TEXT),
+                    NfcScanningScreenshotStatus.Error(ERROR_TEXT),
                 ),
             )
         }
@@ -182,11 +221,37 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             paparazziRule.gif(end = 1500L) {
                 NfcScanningTheme {
                     NfcScanningLayout(
-                        status = NfcScanningStatus.Idle(error = null),
+                        status = NfcScanningStatus.Idle,
                         tapZone = TapZone(xBias = 0.5f, yBias = 0.35f),
                         deviceRotation = DeviceRotation.Portrait,
                         onClose = {},
                         onSuccessShown = {},
+                        onErrorShown = {},
+                    )
+                }
+            }
+        }
+
+        @Test
+        fun error() {
+            paparazziRule.gif(end = 1500L) {
+                NfcScanningTheme {
+                    var status by remember {
+                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle)
+                    }
+
+                    LaunchedEffect(Unit) {
+                        delay(800L)
+                        status = NfcScanningStatus.Error(ERROR_TEXT.resolvableString)
+                    }
+
+                    NfcScanningLayout(
+                        status = status,
+                        tapZone = TapZone(xBias = 0.5f, yBias = 0.35f),
+                        deviceRotation = DeviceRotation.Portrait,
+                        onClose = {},
+                        onSuccessShown = {},
+                        onErrorShown = {},
                     )
                 }
             }
@@ -194,14 +259,16 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
         @Test
         fun scanned() {
-            paparazziRule.gif(end = 2400L) {
+            paparazziRule.gif(end = 2500L) {
                 NfcScanningTheme {
                     var status by remember {
-                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle(error = null))
+                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle)
                     }
 
                     LaunchedEffect(Unit) {
-                        delay(800L)
+                        delay(600L)
+                        status = NfcScanningStatus.Scanning
+                        delay(400L)
                         status = NfcScanningStatus.Scanned
                     }
 
@@ -211,23 +278,14 @@ internal class NfcScanningLayoutScreenshotTestSuite {
                         deviceRotation = DeviceRotation.Portrait,
                         onClose = {},
                         onSuccessShown = {},
+                        onErrorShown = {},
                     )
                 }
             }
         }
     }
 
-    sealed interface Error {
-        fun error(): ResolvableString?
-
-        data object None : Error {
-            override fun error() = null
-            override fun toString() = "noError"
-        }
-
-        data class Message(val message: String) : Error {
-            override fun error() = message.resolvableString
-            override fun toString() = "withError"
-        }
+    private companion object {
+        const val ERROR_TEXT = "Card expired. Try another card."
     }
 }

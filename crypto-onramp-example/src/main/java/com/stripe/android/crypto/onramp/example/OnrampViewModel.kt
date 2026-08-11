@@ -51,6 +51,7 @@ import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierAlternativeGroup
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirement
@@ -85,6 +86,7 @@ internal class OnrampViewModel(
         .authorizeCallback(callback = ::onAuthorizeResult)
         .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
         .googlePayIsReadyCallback(callback = ::googlePayIsReady)
+        .samsungPayIsReadyCallback { isReady, result -> samsungPayIsReady(isReady, result) }
         .userAttestationCallback(callback = ::onUserAttestationResult)
 
     val onrampCoordinator: OnrampCoordinator =
@@ -284,6 +286,7 @@ internal class OnrampViewModel(
 
     fun onBackToLoginSignup() {
         val googlePayIsReady = _uiState.value.googlePayIsReady
+        val samsungPayIsReady = _uiState.value.samsungPayIsReady
         val savedUser = userDataStore.load()
 
         _uiState.value = savedUser?.let {
@@ -291,11 +294,13 @@ internal class OnrampViewModel(
                 email = it.email,
                 authToken = it.authToken,
                 screen = Screen.SeamlessSignIn,
-                googlePayIsReady = googlePayIsReady
+                googlePayIsReady = googlePayIsReady,
+                samsungPayIsReady = samsungPayIsReady,
             )
         } ?: OnrampUiState(
             screen = Screen.LoginSignup,
-            googlePayIsReady = googlePayIsReady
+            googlePayIsReady = googlePayIsReady,
+            samsungPayIsReady = samsungPayIsReady,
         )
     }
 
@@ -939,6 +944,7 @@ internal class OnrampViewModel(
             PaymentMethodDisplayData.Type.BankAccount -> currentState.settlementSpeed
             PaymentMethodDisplayData.Type.Card,
             PaymentMethodDisplayData.Type.GooglePay,
+            PaymentMethodDisplayData.Type.SamsungPay,
             null -> SettlementSpeed.INSTANT
         }
 
@@ -1239,6 +1245,13 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(googlePayIsReady = isReady) }
     }
 
+    private fun samsungPayIsReady(
+        isReady: Boolean,
+        @Suppress("UNUSED_PARAMETER") result: SamsungPayAvailabilityResult,
+    ) {
+        _uiState.update { it.copy(samsungPayIsReady = isReady) }
+    }
+
     private fun buildIdentifiersRequest(state: OnrampUiState): List<ComplianceIdentifier>? {
         val identifiers = mutableListOf<ComplianceIdentifier>()
 
@@ -1341,7 +1354,8 @@ internal class OnrampViewModel(
         _uiState.update { currentState ->
             OnrampUiState(
                 screen = Screen.LoginSignup,
-                googlePayIsReady = currentState.googlePayIsReady
+                googlePayIsReady = currentState.googlePayIsReady,
+                samsungPayIsReady = currentState.samsungPayIsReady,
             )
         }
     }

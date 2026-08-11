@@ -106,7 +106,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
             settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
             settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
-        }
+        }.copy(resetCustomer = true)
 
         testDriver.confirmCustomUSBankAccountAndBuy(
             testParameters = testParameters,

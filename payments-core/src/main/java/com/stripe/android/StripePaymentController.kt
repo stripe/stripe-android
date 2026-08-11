@@ -30,6 +30,7 @@ import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
+import com.stripe.android.payments.SystemClock
 import com.stripe.android.payments.core.authentication.DefaultPaymentNextActionHandlerRegistry
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
 import com.stripe.android.polling.DefaultPollingAnalyticsEventReporter
@@ -72,6 +73,7 @@ constructor(
         Logger.getInstance(enableLogging),
         workContext,
         pollingAnalyticsEventReporter,
+        SystemClock,
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
@@ -80,6 +82,7 @@ constructor(
         Logger.getInstance(enableLogging),
         workContext,
         pollingAnalyticsEventReporter,
+        SystemClock,
     )
 
     private val defaultReturnUrl = DefaultReturnUrl.create(context)

@@ -420,6 +420,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
@@ -494,6 +495,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
@@ -521,6 +523,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = SEPA_DEBIT_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -990,6 +993,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
             )
@@ -1042,6 +1046,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
             )
@@ -1992,6 +1997,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -2029,6 +2035,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -2110,6 +2117,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = null,
             )
@@ -2143,6 +2151,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -2180,6 +2189,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -2217,6 +2227,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -3014,6 +3025,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = false,

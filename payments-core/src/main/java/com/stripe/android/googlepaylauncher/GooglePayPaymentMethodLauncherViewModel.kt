@@ -20,6 +20,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
+import com.stripe.android.model.GooglePayResult
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,6 +76,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 )
             ),
             billingAddressParameters = args.config.billingAddressConfig.convert(),
+            shippingAddressParameters = args.shippingAddressParameters,
             isEmailRequired = args.config.isEmailRequired,
             allowCreditCards = args.config.allowCreditCards
         )
@@ -141,16 +143,20 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         paymentData: PaymentData
     ): GooglePayPaymentMethodLauncher.Result {
         val paymentDataJson = JSONObject(paymentData.toJson())
+        val googlePayResult = GooglePayResult.fromJson(paymentDataJson)
 
         val params = PaymentMethodCreateParams.createFromGooglePay(
-            googlePayPaymentData = paymentDataJson,
+            googlePayResult = googlePayResult,
             clientAttributionMetadata = args.clientAttributionMetadata,
             billingEmailOverride = args.billingEmailOverride,
         )
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(
             onSuccess = {
-                GooglePayPaymentMethodLauncher.Result.Completed(it)
+                GooglePayPaymentMethodLauncher.Result.Completed(
+                    paymentMethod = it,
+                    shippingInformation = googlePayResult.shippingInformation,
+                )
             },
             onFailure = {
                 GooglePayPaymentMethodLauncher.Result.Failed(

@@ -2,11 +2,12 @@ package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
-import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
-import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory

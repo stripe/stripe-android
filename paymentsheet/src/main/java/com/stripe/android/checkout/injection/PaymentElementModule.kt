@@ -2,7 +2,7 @@ package com.stripe.android.checkout.injection
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutSheetLauncher
-import com.stripe.android.checkout.PaymentElement
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler

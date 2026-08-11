@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.stripe.android.uicore.FormScrollProvider
 import kotlin.math.min
 
 // https://gist.github.com/ademar111190/34d3de41308389a0d0d8
@@ -75,13 +76,18 @@ internal fun ScrollableColumn(
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Box(
-        modifier = Modifier.verticalScroll(rememberScrollState())
-    ) {
-        Column(
-            modifier = modifier,
-            horizontalAlignment = horizontalAlignment,
-            content = content
-        )
+    val scrollState = rememberScrollState()
+    FormScrollProvider(scrollState) { viewportModifier ->
+        Box(
+            modifier = Modifier
+                .then(viewportModifier)
+                .verticalScroll(scrollState)
+        ) {
+            Column(
+                modifier = modifier,
+                horizontalAlignment = horizontalAlignment,
+                content = content
+            )
+        }
     }
 }

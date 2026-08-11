@@ -59,6 +59,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
         publishableKey: String?,
         displayItems: List<GooglePayJsonFactory.DisplayItem>,
         billingEmailOverride: String?,
+        shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
     ) {
         activityResultLauncher.launch(
             GooglePayPaymentMethodLauncherContractV2.Args(
@@ -74,6 +75,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
                 publishableKey = publishableKey,
                 displayItems = displayItems,
                 billingEmailOverride = billingEmailOverride,
+                shippingAddressParameters = shippingAddressParameters,
             )
         )
     }

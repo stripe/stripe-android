@@ -56,6 +56,10 @@ internal class BillingInlineAutocompleteAddressInteractor(
     val autocompleteFilledAddress: Address?
         get() = inlineController.autocompleteFilledAddress
 
+    override fun onSearchActivated() {
+        inlineController.onSearchActivated()
+    }
+
     fun dispose() {
         inlineController.dispose()
     }

@@ -1,4 +1,4 @@
-package com.stripe.android.common.nfcscan
+ package com.stripe.android.common.nfcscan
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -18,8 +18,11 @@ internal object NfcScanningActivityTestHelpers {
         context: Context,
         composeRule: ComposeTestRule,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        autoAdvance: Boolean = true,
         block: suspend NfcScanningActivityScenario.() -> Unit,
     ) {
+        composeRule.mainClock.autoAdvance = autoAdvance
+
         shadowOf(context.packageManager).setSystemFeature(PackageManager.FEATURE_NFC, true)
 
         val nfcAdapter = NfcAdapter.getDefaultAdapter(context)

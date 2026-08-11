@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
@@ -96,7 +97,10 @@ class PaymentOption internal constructor(
      */
     val iconPainter: Painter
         @Composable
-        get() = rememberDrawablePainter(icon())
+        get() {
+            val drawable = remember(this) { icon() }
+            return rememberDrawablePainter(drawable)
+        }
 
     /**
      * Fetches the icon associated with this [PaymentOption].

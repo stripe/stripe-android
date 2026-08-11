@@ -47,6 +47,7 @@ import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNew
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -94,6 +95,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         val launcher = definition.createLauncher(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = onResult,
         )
 
@@ -318,6 +320,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val launcher = LinkInlineSignupConfirmationDefinition.Launcher(onResultScenario.onResult)
 
         val nextOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFactory.card(random = true),
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
@@ -343,6 +346,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val definition = createLinkInlineSignupConfirmationDefinition(linkStore = storeScenario.linkStore)
 
         val nextOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFactory.card(random = true),
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
