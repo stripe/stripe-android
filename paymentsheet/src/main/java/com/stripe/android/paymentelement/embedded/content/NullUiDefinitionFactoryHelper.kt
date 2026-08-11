@@ -6,6 +6,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 
 internal object NullUiDefinitionFactoryHelper {
@@ -17,7 +19,10 @@ internal object NullUiDefinitionFactoryHelper {
         onLinkInlineSignupStateChanged = {
             throw IllegalStateException("Not possible.")
         },
-        paymentMethodMessagingPromotionsHelper = null
+        paymentMethodMessagingPromotionsHelper = null,
+        // These arguments are only used to read static form information, never to drive UI, so hand
+        // out an already cancelled scope. Anything launched in it is a no-op and nothing leaks.
+        coroutineScope = CoroutineScope(Job().apply { cancel() }),
     )
 }
 

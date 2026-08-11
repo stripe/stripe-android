@@ -485,6 +485,7 @@ internal class CustomerSheetViewModel(
                         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
                         paymentMethodMessagingPromotionsHelper = null,
                         isNfcScanningAvailable = isNfcScanningAvailable,
+                        coroutineScope = viewModelScope,
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -834,6 +835,7 @@ internal class CustomerSheetViewModel(
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
                 paymentMethodMessagingPromotionsHelper = null,
                 isNfcScanningAvailable = isNfcScanningAvailable,
+                coroutineScope = viewModelScope,
             )
         ) ?: emptyList()
 

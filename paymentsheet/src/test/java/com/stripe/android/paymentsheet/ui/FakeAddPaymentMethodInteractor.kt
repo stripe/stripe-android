@@ -10,6 +10,8 @@ import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import org.mockito.kotlin.mock
 
@@ -50,6 +52,7 @@ internal class FakeAddPaymentMethodInteractor(
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
                 autocompleteAddressInteractorFactory = null,
                 linkInlineHandler = null,
+                coroutineScope = CoroutineScope(SupervisorJob()),
             )
 
             return AddPaymentMethodInteractor.State(

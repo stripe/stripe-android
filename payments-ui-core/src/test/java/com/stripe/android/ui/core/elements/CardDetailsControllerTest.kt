@@ -21,6 +21,8 @@ import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.isInstanceOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -34,6 +36,8 @@ class CardDetailsControllerTest {
     val coroutineTestRule = CoroutineTestRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+
+    private val parentCoroutineScope = CoroutineScope(SupervisorJob())
 
     @Test
     fun `Validation message uses comparator to determine which message to show`() = runTest {
@@ -395,6 +399,7 @@ class CardDetailsControllerTest {
                     }
                 }
             },
+            parentCoroutineScope = parentCoroutineScope,
         )
     }
 

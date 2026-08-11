@@ -43,6 +43,8 @@ import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -456,6 +458,7 @@ private object TransformSpecToElementsFactory {
                 setAsDefaultMatchesSaveForFutureUse = false,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 linkInlineHandler = null,
+                coroutineScope = CoroutineScope(SupervisorJob()),
             )
         )
     }

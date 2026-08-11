@@ -17,8 +17,12 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 
 internal object TestUiDefinitionFactoryArgumentsFactory {
+    private val coroutineScope = CoroutineScope(SupervisorJob())
+
     fun create(
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
@@ -53,6 +57,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             tapToAddHelper = tapToAddHelper,
             paymentMethodMessagingPromotionsHelper = paymentMethodMessagePromotionsHelper,
             isNfcScanningAvailable = isNfcScanningAvailable,
+            coroutineScope = coroutineScope,
         )
     }
 

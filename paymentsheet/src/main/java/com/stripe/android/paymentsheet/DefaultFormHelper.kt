@@ -253,6 +253,7 @@ internal class DefaultFormHelper(
             tapToAddHelper = tapToAddHelper,
             paymentMethodMessagingPromotionsHelper = paymentMethodMessagePromotionsHelper,
             isNfcScanningAvailable = isNfcScanningAvailable,
+            coroutineScope = coroutineScope,
         )
     }
 }

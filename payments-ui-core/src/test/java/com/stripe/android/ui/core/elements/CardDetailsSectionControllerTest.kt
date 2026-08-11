@@ -8,6 +8,8 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -21,6 +23,8 @@ class CardDetailsSectionControllerTest {
     val coroutineTestRule = CoroutineTestRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+
+    private val parentCoroutineScope = CoroutineScope(SupervisorJob())
 
     @Test
     fun `shouldHideHeader is false when card pill is not shown`() = runTest {
@@ -76,5 +80,6 @@ class CardDetailsSectionControllerTest {
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         cardBrandFilter = DefaultCardBrandFilter,
         cardDetailsAction = null,
+        parentCoroutineScope = parentCoroutineScope,
     )
 }

@@ -6,6 +6,8 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import org.mockito.Mockito.mock
 
@@ -40,6 +42,7 @@ internal class FakeVerticalModeFormInteractor private constructor(
                 linkInlineHandler = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
                 autocompleteAddressInteractorFactory = null,
+                coroutineScope = CoroutineScope(SupervisorJob()),
             )
 
             return FakeVerticalModeFormInteractor(

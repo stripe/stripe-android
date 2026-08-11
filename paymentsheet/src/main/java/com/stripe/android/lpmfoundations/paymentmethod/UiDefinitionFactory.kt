@@ -30,6 +30,7 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.coroutines.CoroutineScope
 
 internal sealed interface UiDefinitionFactory {
     class Arguments(
@@ -56,6 +57,7 @@ internal sealed interface UiDefinitionFactory {
         val tapToAddHelper: TapToAddHelper? = null,
         val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
         val isNfcScanningAvailable: IsNfcScanningAvailable? = null,
+        val coroutineScope: CoroutineScope,
     ) {
         interface Factory {
             fun create(
@@ -82,6 +84,7 @@ internal sealed interface UiDefinitionFactory {
                 private val tapToAddHelper: TapToAddHelper? = null,
                 private val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
                 private val isNfcScanningAvailable: IsNfcScanningAvailable? = null,
+                private val coroutineScope: CoroutineScope,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -115,6 +118,7 @@ internal sealed interface UiDefinitionFactory {
                         tapToAddHelper = tapToAddHelper,
                         paymentMethodMessagingPromotionsHelper = paymentMethodMessagingPromotionsHelper,
                         isNfcScanningAvailable = isNfcScanningAvailable,
+                        coroutineScope = coroutineScope,
                     )
                 }
 

@@ -37,6 +37,8 @@ import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -128,7 +130,8 @@ internal class CustomerSheetScreenshotTest {
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = {},
                 autocompleteAddressInteractorFactory = null,
-                linkInlineHandler = null
+                linkInlineHandler = null,
+                coroutineScope = CoroutineScope(SupervisorJob()),
             )
         ) ?: listOf(),
         formArguments = FormArguments(

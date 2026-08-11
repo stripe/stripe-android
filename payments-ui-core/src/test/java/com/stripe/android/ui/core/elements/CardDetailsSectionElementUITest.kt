@@ -90,6 +90,7 @@ internal class CardDetailsSectionElementUITest {
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             cardBrandFilter = DefaultCardBrandFilter,
             cardDetailsAction = cardDetailsAction,
+            parentCoroutineScope = this,
         )
 
         composeTestRule.setContent {

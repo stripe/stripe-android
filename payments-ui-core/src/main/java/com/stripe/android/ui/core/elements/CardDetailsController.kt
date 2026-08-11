@@ -28,6 +28,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,7 +50,8 @@ internal class CardDetailsController(
     ),
     cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
     dateConfig: TextFieldConfig = DateConfig(),
-    private val validationMessageComparator: FieldValidationMessageComparator = DefaultFieldValidationMessageComparator
+    private val validationMessageComparator: FieldValidationMessageComparator = DefaultFieldValidationMessageComparator,
+    parentCoroutineScope: CoroutineScope,
 ) : SectionFieldValidationController, SectionFieldComposable {
     private val initialCardNumber = initialValues[IdentifierSpec.CardNumber]
 
@@ -103,7 +105,8 @@ internal class CardDetailsController(
                 is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
             },
             cardBrandFilter = cardBrandFilter,
-            cardFundingFilter = cardFundingFilter
+            cardFundingFilter = cardFundingFilter,
+            parentCoroutineScope = parentCoroutineScope,
         )
     )
 

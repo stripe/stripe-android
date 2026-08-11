@@ -38,6 +38,9 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -67,6 +70,8 @@ internal class CardNumberControllerTest {
     val composeCleanupRule = createComposeCleanupRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
+
+    private val parentCoroutineScope = CoroutineScope(SupervisorJob() + testDispatcher)
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
@@ -893,10 +898,26 @@ internal class CardNumberControllerTest {
         }
     }
 
+    @Test
+    fun `Cancelling parent coroutine scope cancels controller scope`() = runTest {
+        val parentJob = Job()
+        createController(
+            parentCoroutineScope = CoroutineScope(parentJob + testDispatcher),
+        )
+
+        val controllerJob = parentJob.children.single()
+        assertThat(controllerJob.isActive).isTrue()
+
+        parentJob.cancel()
+
+        assertThat(controllerJob.isActive).isFalse()
+    }
+
     private fun createController(
         initialValue: String? = null,
         cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        parentCoroutineScope: CoroutineScope = this.parentCoroutineScope,
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
             cardTextFieldConfig = CardNumberConfig(
@@ -908,7 +929,8 @@ internal class CardNumberControllerTest {
             workContext = testDispatcher,
             initialValue = initialValue,
             cardBrandChoiceConfig = cardBrandChoiceConfig,
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            parentCoroutineScope = parentCoroutineScope,
         )
     }
 

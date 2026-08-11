@@ -17,6 +17,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -31,14 +32,16 @@ internal class CardDetailsElement(
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+    parentCoroutineScope: CoroutineScope,
     val controller: CardDetailsController = CardDetailsController(
         cardAccountRangeRepositoryFactory,
         initialValues,
         collectName,
         cbcEligibility,
         cardBrandFilter = cardBrandFilter,
-        cardFundingFilter = cardFundingFilter
-    )
+        cardFundingFilter = cardFundingFilter,
+        parentCoroutineScope = parentCoroutineScope,
+    ),
 ) : SectionMultiFieldElement(identifier) {
 
     override val allowsUserInteraction: Boolean = true

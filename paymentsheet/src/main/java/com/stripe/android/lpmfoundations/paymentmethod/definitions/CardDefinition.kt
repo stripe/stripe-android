@@ -131,7 +131,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
                     cardFundingFilter = arguments.cardFundingFilter,
-                    cardDetailsAction = createCardDetailsAction(metadata, arguments)
+                    cardDetailsAction = createCardDetailsAction(metadata, arguments),
+                    parentCoroutineScope = arguments.coroutineScope,
                 )
             )
 

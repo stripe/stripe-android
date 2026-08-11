@@ -17,7 +17,9 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -130,6 +132,7 @@ internal class PaymentMethodScreenScreenshotTest {
             linkInlineHandler = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
             autocompleteAddressInteractorFactory = null,
+            coroutineScope = CoroutineScope(SupervisorJob()),
         )
         val formElements = metadata.formElementsForCode(
             code = paymentMethodCode,

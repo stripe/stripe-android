@@ -23,6 +23,8 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SimpleTextElement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -317,6 +319,7 @@ class FormElementsBuilderTest {
             setAsDefaultMatchesSaveForFutureUse = false,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             linkInlineHandler = null,
+            coroutineScope = CoroutineScope(SupervisorJob()),
         )
     }
 }
