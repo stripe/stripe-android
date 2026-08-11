@@ -161,12 +161,27 @@ class ExpressCheckoutElement @Inject internal constructor(
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class GooglePayConfiguration(
-            private val environment: Environment,
-        ) {
+        class GooglePayConfiguration {
+
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Environment {
+                Production,
+                Test,
+            }
+
+            enum class Display {
+                Automatic,
+                Never
+            }
+
             private var label: String? = null
             private var buttonType: ButtonType = ButtonType.Pay
             private var additionalEnabledNetworks: List<String> = emptyList()
+
+            private var environment: Environment? = null
+
+            private var display: Display = Display.Automatic
 
             /**
              * @param label An optional label to display with the amount. Google Pay may or may not display
@@ -175,6 +190,24 @@ class ExpressCheckoutElement @Inject internal constructor(
              */
             fun label(label: String): GooglePayConfiguration = apply {
                 this.label = label
+            }
+
+            /**
+             * @param environment  The Google Pay environment to use. See
+             * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
+             * for more information.
+             *
+             * If not set, we will use [Environment.Test] in test mode and [Environment.Production] otherwise.
+             */
+            fun environment(environment: Environment): GooglePayConfiguration = apply {
+                this.environment = environment
+            }
+
+            /**
+             * @param display The display configuration for Google Pay.
+             */
+            fun display(display: Display): GooglePayConfiguration = apply {
+                this.display = display
             }
 
             /**
@@ -205,18 +238,12 @@ class ExpressCheckoutElement @Inject internal constructor(
             ) : Parcelable
 
             internal fun build(): State = State(
-                environment = environment,
+                environment = environment ?: Environment.Production, // TODO: we'd really infer this during PEL based on intent live mode or test mode.
                 label = label,
                 buttonType = buttonType,
                 additionalEnabledNetworks = additionalEnabledNetworks.toList(),
             )
 
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            enum class Environment {
-                Production,
-                Test,
-            }
 
             @CheckoutSessionPreview
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
