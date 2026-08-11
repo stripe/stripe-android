@@ -344,7 +344,7 @@ internal class CryptoApiRepository @Inject constructor(
     ): Result<PaymentMethod> {
         val options = ApiRequest.Options(
             apiKey = platformPublishableKey,
-            stripeAccount = stripeAccountIdProvider(),
+            stripeAccount = apiConfigProvider().stripeAccountId,
         )
 
         return stripeRepository.createToken(

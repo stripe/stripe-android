@@ -46,82 +46,82 @@ internal class LinkTest {
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType
 
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkSignUp() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-//        }
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetails()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//        page.fillOutLinkPhone()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            /*
-//             * Make sure card number is included
-//             */
-//            bodyPart("card[number]", "4242424242424242"),
-//            /*
-//             * Make sure card expiration month is included
-//             */
-//            bodyPart("card[exp_month]", "12"),
-//            /*
-//             * Ensures we are passing the full expiration year and not the
-//             * 2-digit shorthand (should send "2034", not "34")
-//             */
-//            bodyPart("card[exp_year]", "2034"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            linkInformation(),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUp() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            /*
+             * Make sure card number is included
+             */
+            bodyPart("card[number]", "4242424242424242"),
+            /*
+             * Make sure card expiration month is included
+             */
+            bodyPart("card[exp_month]", "12"),
+            /*
+             * Ensures we are passing the full expiration year and not the
+             * 2-digit shorthand (should send "2034", not "34")
+             */
+            bodyPart("card[exp_year]", "2034"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
 
     @Test
     fun testSuccessfulCardPaymentWithLinkSignUpAndSaveForFutureUsage() =
@@ -232,982 +232,982 @@ internal class LinkTest {
             testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice_Selector() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
-//        }
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetailsWithCardBrandChoiceSelector()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//        page.fillOutLinkPhone()
-//        page.fillOutLinkName()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            /*
-//             * Ensures card number is included
-//             */
-//            bodyPart("card[number]", "4000002500001001"),
-//            /*
-//             * Ensures card expiration month is included
-//             */
-//            bodyPart("card[exp_month]", "12"),
-//            /*
-//             * Ensures we are passing the full expiration year and not the
-//             * 2-digit shorthand (should send "2034", not "34")
-//             */
-//            bodyPart("card[exp_year]", "2034"),
-//            /*
-//             * Ensures card brand choice is passed properly.
-//             */
-//            bodyPart("card[preferred_network]", "cartes_bancaires"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            linkInformation(),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "1001")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkSignUpAndLinkPassthroughMode() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
-//        }
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetails()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//        page.fillOutLinkPhone()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            /*
-//             * Make sure card number is included
-//             */
-//            bodyPart("card[number]", "4242424242424242"),
-//            /*
-//             * Make sure card expiration month is included
-//             */
-//            bodyPart("card[exp_month]", "12"),
-//            /*
-//             * Ensures we are passing the full expiration year and not the
-//             * 2-digit shorthand (should send "2034", not "34")
-//             */
-//            bodyPart("card[exp_year]", "2034"),
-//            /*
-//             * In passthrough mode, this needs to be true
-//             */
-//            bodyPart("active", "true"),
-//            /*
-//             * In passthrough mode, should use the publishable key from base configuration
-//             */
-//            header("Authorization", "Bearer pk_test_123"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details/share"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-share-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            bodyPart("payment_method", "pm_1234"),
-//            not(linkInformation()),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkSignUpAndLinkPassthroughModeAndSaveForFutureUsage() =
-//        runProductIntegrationTest(
-//            networkRule = networkRule,
-//            integrationType = integrationType,
-//            resultCallback = ::assertCompleted,
-//        ) { testContext ->
-//            networkRule.elementsSession { response ->
-//                response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
-//            }
-//
-//            networkRule.enqueue(
-//                host("api.stripe.com"),
-//                method("GET"),
-//                path("/v1/customers/cus_1"),
-//            ) { response ->
-//                response.testBodyFromFile("customer-get-success.json")
-//            }
-//
-//            networkRule.enqueue(
-//                host("api.stripe.com"),
-//                method("GET"),
-//                path("/v1/payment_methods"),
-//                query("type", PaymentMethod.Type.Card.code)
-//            ) { response ->
-//                response.testBodyFromFile("payment-methods-get-success-empty.json")
-//            }
-//
-//            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
-//            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
-//
-//            networkRule.enqueue(
-//                method("POST"),
-//                path("/v1/consumers/sessions/lookup"),
-//            ) { response ->
-//                response.testBodyFromFile("consumer-session-lookup-success.json")
-//            }
-//
-//            testContext.launch(
-//                configuration = PaymentSheet.Configuration(
-//                    merchantDisplayName = "Merchant, Inc.",
-//                    customer = PaymentSheet.CustomerConfiguration(
-//                        id = "cus_1",
-//                        ephemeralKeySecret = "ek_123"
-//                    ),
-//                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-//                )
-//            )
-//
-//            page.fillOutCardDetails()
-//            page.clickOnSaveForFutureUsage()
-//
-//            closeSoftKeyboard()
-//
-//            networkRule.enqueue(
-//                method("POST"),
-//                path("/v1/consumers/sessions/lookup"),
-//            ) { response ->
-//                response.testBodyFromFile("consumer-session-lookup-success.json")
-//            }
-//
-//            page.fillOutLinkPhone()
-//
-//            closeSoftKeyboard()
-//
-//            networkRule.enqueue(
-//                method("POST"),
-//                path("/v1/consumers/sessions/lookup"),
-//            ) { response ->
-//                response.testBodyFromFile("consumer-session-lookup-success.json")
-//            }
-//
-//            networkRule.enqueue(
-//                method("POST"),
-//                path("/v1/consumers/accounts/sign_up"),
-//            ) { response ->
-//                response.testBodyFromFile("consumer-accounts-signup-success.json")
-//            }
-//
-//            networkRule.enqueue(
-//                method("POST"),
-//                path("/v1/consumers/payment_details"),
-//                topLevelClientAttributionMetadataParams(),
-//            ) { response ->
-//                response.testBodyFromFile("consumer-payment-details-success.json")
-//            }
-//
-//            networkRule.enqueue(
-//                method("POST"),
-//                path("/v1/consumers/payment_details/share"),
-//                topLevelClientAttributionMetadataParams(),
-//            ) { response ->
-//                response.testBodyFromFile("consumer-payment-details-share-success.json")
-//            }
-//
-//            networkRule.enqueue(
-//                method("POST"),
-//                path("/v1/payment_intents/pi_example/confirm"),
-//                bodyPart("payment_method_options[card][setup_future_usage]", "off_session"),
-//                topLevelClientAttributionMetadataParams(),
-//            ) { response ->
-//                response.testBodyFromFile("payment-intent-confirm.json")
-//            }
-//
-//            networkRule.enqueue(
-//                method("POST"),
-//                path("/v1/consumers/sessions/log_out"),
-//            ) { response ->
-//                response.testBodyFromFile("consumer-session-logout-success.json")
-//            }
-//
-//            page.clickPrimaryButton()
-//
-//            testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//            testContext.consumeNullPaymentOptionEventForFlowController()
-//        }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice_Selector() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode_and_cbc.json")
-//        }
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetailsWithCardBrandChoiceSelector()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//        page.fillOutLinkPhone()
-//        page.fillOutLinkName()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            /*
-//             * Make sure card number is included
-//             */
-//            bodyPart("card[number]", "4000002500001001"),
-//            /*
-//             * Make sure card expiration month is included
-//             */
-//            bodyPart("card[exp_month]", "12"),
-//            /*
-//             * Ensures we are passing the full expiration year and not the
-//             * 2-digit shorthand (should send "2034", not "34")
-//             */
-//            bodyPart("card[exp_year]", "2034"),
-//            /*
-//             * Ensures card brand choice is passed properly.
-//             */
-//            bodyPart("card[preferred_network]", "cartes_bancaires"),
-//            /*
-//             * In passthrough mode, this needs to be true
-//             */
-//            bodyPart("active", "true"),
-//            /*
-//             * In passthrough mode, should use the publishable key from base configuration
-//             */
-//            header("Authorization", "Bearer pk_test_123"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details/share"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-share-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            bodyPart("payment_method", "pm_1234"),
-//            not(linkInformation()),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "1001")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkSignUpFailure() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-//        }
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetails()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//        page.fillOutLinkPhone()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.setResponseCode(500)
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            not(linkInformation()),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkSignUpFailureInPassthroughMode() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
-//        }
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetails()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//        page.fillOutLinkPhone()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.setResponseCode(500)
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            not(bodyPart("payment_method", "pm_1234")),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkSignUpShareFailureInPassthroughMode() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
-//        }
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetails()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//        page.fillOutLinkPhone()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details/share"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.setResponseCode(500)
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            not(bodyPart("payment_method", "pm_1234")),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithExistingLinkEmailUsed() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-//        }
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetails()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-exists-success.json")
-//        }
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-exists-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            not(linkInformation()),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkPreviouslyUsed() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-//        }
-//
-//        DefaultLinkStore(ApplicationProvider.getApplicationContext()).markLinkAsUsed()
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetails()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            not(linkInformation()),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testLogoutAfterLinkTransaction() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        val configuration = PaymentSheet.Configuration(
-//            merchantDisplayName = "Merchant, Inc.",
-//            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-//        )
-//
-//        testContext.launch(configuration)
-//
-//        page.fillOutCardDetails()
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//        page.fillOutLinkPhone()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            linkInformation(),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithLinkSignUpWithAlbaniaPhoneNumber() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-//        }
-//
-//        testContext.launch()
-//
-//        page.fillOutCardDetails()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        page.clickOnLinkCheckbox()
-//        page.fillOutLinkEmail()
-//        page.selectPhoneNumberCountry("Albania")
-//        page.fillOutLinkPhone("888888888")
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//            bodyPart(
-//                name = "email_address",
-//                value = "email%40email.com"
-//            ),
-//            bodyPart(
-//                name = "phone_number",
-//                value = "%2B355888888888"
-//            ),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            linkInformation(),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    @Test
-//    fun testSuccessfulCardPaymentWithCustomerSessionInPassthroughMode() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        testContext.launch(
-//            configuration = PaymentSheet.Configuration(
-//                merchantDisplayName = "Merchant, Inc.",
-//                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-//                    id = "cus_1",
-//                    clientSecret = "cuss_654321",
-//                ),
-//                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-//            )
-//        )
-//
-//        page.fillOutCardDetails()
-//        page.clickOnSaveForFutureUsage()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        page.fillOutLinkPhone()
-//
-//        closeSoftKeyboard()
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/accounts/sign_up"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-accounts-signup-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/payment_details/share"),
-//            bodyPart("allow_redisplay", "always"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-payment-details-share-success.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/payment_intents/pi_example/confirm"),
-//            bodyPart("payment_method_options[card][setup_future_usage]", "off_session"),
-//            topLevelClientAttributionMetadataParams(),
-//        ) { response ->
-//            response.testBodyFromFile("payment-intent-confirm.json")
-//        }
-//
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/log_out"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-logout-success.json")
-//        }
-//
-//        page.clickPrimaryButton()
-//
-//        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-//        testContext.consumeNullPaymentOptionEventForFlowController()
-//    }
-//
-//    private fun linkInformation(): RequestMatcher {
-//        return composite(
-//            bodyPart(
-//                name = "payment_method_data[link][card][cvc]",
-//                value = "123"
-//            ),
-//            bodyPart(
-//                name = "payment_method_data[link][payment_details_id]",
-//                value = "QAAAKJ6"
-//            ),
-//            bodyPart(
-//                name = "payment_method_data[link][credentials][consumer_session_client_secret]",
-//                value = "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND"
-//            ),
-//        )
-//    }
-//
-//    @Test
-//    fun testSingleConsumerLookupWithLinkEnabled() = runProductIntegrationTest(
-//        networkRule = networkRule,
-//        integrationType = integrationType,
-//        resultCallback = ::assertCompleted,
-//    ) { testContext ->
-//        networkRule.elementsSession { response ->
-//            response.testBodyFromFile(
-//                filename = "elements-sessions-requires_payment_method_with_horizontal_mode_experiment.json",
-//                replacements = listOf(
-//                    ResponseReplacement(
-//                        "[EXPERIMENT_ASSIGNMENTS_HERE]",
-//                        """{ "link_global_holdback": "control" }"""
-//                    ),
-//                )
-//            )
-//        }
-//
-//        // Only ONE lookup should happen (during Link initialization).
-//        // The holdback experiment should NOT trigger a second lookup.
-//        networkRule.enqueue(
-//            method("POST"),
-//            path("/v1/consumers/sessions/lookup"),
-//        ) { response ->
-//            response.testBodyFromFile("consumer-session-lookup-success.json")
-//        }
-//
-//        testContext.launch(
-//            configuration = PaymentSheet.Configuration(
-//                merchantDisplayName = "Example, Inc.",
-//                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-//                defaultBillingDetails = PaymentSheet.BillingDetails(
-//                    email = "test@example.com",
-//                ),
-//            )
-//        )
-//
-//        // PaymentSheet loaded successfully with only one lookup call.
-//        // networkRule.validate() (called by the test harness) will fail if
-//        // a second consumers/sessions/lookup was attempted.
-//        page.waitForCardForm()
-//
-//        testContext.markTestSucceeded()
-//    }
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice_Selector() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+        page.fillOutLinkName()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            /*
+             * Ensures card number is included
+             */
+            bodyPart("card[number]", "4000002500001001"),
+            /*
+             * Ensures card expiration month is included
+             */
+            bodyPart("card[exp_month]", "12"),
+            /*
+             * Ensures we are passing the full expiration year and not the
+             * 2-digit shorthand (should send "2034", not "34")
+             */
+            bodyPart("card[exp_year]", "2034"),
+            /*
+             * Ensures card brand choice is passed properly.
+             */
+            bodyPart("card[preferred_network]", "cartes_bancaires"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "1001")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpAndLinkPassthroughMode() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            /*
+             * Make sure card number is included
+             */
+            bodyPart("card[number]", "4242424242424242"),
+            /*
+             * Make sure card expiration month is included
+             */
+            bodyPart("card[exp_month]", "12"),
+            /*
+             * Ensures we are passing the full expiration year and not the
+             * 2-digit shorthand (should send "2034", not "34")
+             */
+            bodyPart("card[exp_year]", "2034"),
+            /*
+             * In passthrough mode, this needs to be true
+             */
+            bodyPart("active", "true"),
+            /*
+             * In passthrough mode, should use the publishable key from base configuration
+             */
+            header("Authorization", "Bearer pk_test_123"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-share-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart("payment_method", "pm_1234"),
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpAndLinkPassthroughModeAndSaveForFutureUsage() =
+        runProductIntegrationTest(
+            networkRule = networkRule,
+            integrationType = integrationType,
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            networkRule.elementsSession { response ->
+                response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
+            }
+
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("GET"),
+                path("/v1/customers/cus_1"),
+            ) { response ->
+                response.testBodyFromFile("customer-get-success.json")
+            }
+
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("GET"),
+                path("/v1/payment_methods"),
+                query("type", PaymentMethod.Type.Card.code)
+            ) { response ->
+                response.testBodyFromFile("payment-methods-get-success-empty.json")
+            }
+
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-lookup-success.json")
+            }
+
+            testContext.launch(
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ek_123"
+                    ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                )
+            )
+
+            page.fillOutCardDetails()
+            page.clickOnSaveForFutureUsage()
+
+            closeSoftKeyboard()
+
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-lookup-success.json")
+            }
+
+            page.fillOutLinkPhone()
+
+            closeSoftKeyboard()
+
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-lookup-success.json")
+            }
+
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/accounts/sign_up"),
+            ) { response ->
+                response.testBodyFromFile("consumer-accounts-signup-success.json")
+            }
+
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/payment_details"),
+                topLevelClientAttributionMetadataParams(),
+            ) { response ->
+                response.testBodyFromFile("consumer-payment-details-success.json")
+            }
+
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/payment_details/share"),
+                topLevelClientAttributionMetadataParams(),
+            ) { response ->
+                response.testBodyFromFile("consumer-payment-details-share-success.json")
+            }
+
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/payment_intents/pi_example/confirm"),
+                bodyPart("payment_method_options[card][setup_future_usage]", "off_session"),
+                topLevelClientAttributionMetadataParams(),
+            ) { response ->
+                response.testBodyFromFile("payment-intent-confirm.json")
+            }
+
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/log_out"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-logout-success.json")
+            }
+
+            page.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController("card", "4242")
+            testContext.consumeNullPaymentOptionEventForFlowController()
+        }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice_Selector() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode_and_cbc.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+        page.fillOutLinkName()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            /*
+             * Make sure card number is included
+             */
+            bodyPart("card[number]", "4000002500001001"),
+            /*
+             * Make sure card expiration month is included
+             */
+            bodyPart("card[exp_month]", "12"),
+            /*
+             * Ensures we are passing the full expiration year and not the
+             * 2-digit shorthand (should send "2034", not "34")
+             */
+            bodyPart("card[exp_year]", "2034"),
+            /*
+             * Ensures card brand choice is passed properly.
+             */
+            bodyPart("card[preferred_network]", "cartes_bancaires"),
+            /*
+             * In passthrough mode, this needs to be true
+             */
+            bodyPart("active", "true"),
+            /*
+             * In passthrough mode, should use the publishable key from base configuration
+             */
+            header("Authorization", "Bearer pk_test_123"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-share-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart("payment_method", "pm_1234"),
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "1001")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpFailure() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.setResponseCode(500)
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpFailureInPassthroughMode() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.setResponseCode(500)
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(bodyPart("payment_method", "pm_1234")),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpShareFailureInPassthroughMode() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.setResponseCode(500)
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(bodyPart("payment_method", "pm_1234")),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithExistingLinkEmailUsed() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-exists-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-exists-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkPreviouslyUsed() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        DefaultLinkStore(ApplicationProvider.getApplicationContext()).markLinkAsUsed()
+
+        testContext.launch()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testLogoutAfterLinkTransaction() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        val configuration = PaymentSheet.Configuration(
+            merchantDisplayName = "Merchant, Inc.",
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        )
+
+        testContext.launch(configuration)
+
+        page.fillOutCardDetails()
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpWithAlbaniaPhoneNumber() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.selectPhoneNumberCountry("Albania")
+        page.fillOutLinkPhone("888888888")
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+            bodyPart(
+                name = "email_address",
+                value = "email%40email.com"
+            ),
+            bodyPart(
+                name = "phone_number",
+                value = "%2B355888888888"
+            ),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithCustomerSessionInPassthroughMode() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        testContext.launch(
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant, Inc.",
+                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "cuss_654321",
+                ),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            )
+        )
+
+        page.fillOutCardDetails()
+        page.clickOnSaveForFutureUsage()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.fillOutLinkPhone()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/share"),
+            bodyPart("allow_redisplay", "always"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-share-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart("payment_method_options[card][setup_future_usage]", "off_session"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
+    }
+
+    private fun linkInformation(): RequestMatcher {
+        return composite(
+            bodyPart(
+                name = "payment_method_data[link][card][cvc]",
+                value = "123"
+            ),
+            bodyPart(
+                name = "payment_method_data[link][payment_details_id]",
+                value = "QAAAKJ6"
+            ),
+            bodyPart(
+                name = "payment_method_data[link][credentials][consumer_session_client_secret]",
+                value = "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND"
+            ),
+        )
+    }
+
+    @Test
+    fun testSingleConsumerLookupWithLinkEnabled() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile(
+                filename = "elements-sessions-requires_payment_method_with_horizontal_mode_experiment.json",
+                replacements = listOf(
+                    ResponseReplacement(
+                        "[EXPERIMENT_ASSIGNMENTS_HERE]",
+                        """{ "link_global_holdback": "control" }"""
+                    ),
+                )
+            )
+        }
+
+        // Only ONE lookup should happen (during Link initialization).
+        // The holdback experiment should NOT trigger a second lookup.
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        testContext.launch(
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Example, Inc.",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    email = "test@example.com",
+                ),
+            )
+        )
+
+        // PaymentSheet loaded successfully with only one lookup call.
+        // networkRule.validate() (called by the test harness) will fail if
+        // a second consumers/sessions/lookup was attempted.
+        page.waitForCardForm()
+
+        testContext.markTestSucceeded()
+    }
 }
