@@ -807,6 +807,28 @@ class InlineAutocompleteControllerTest {
         }
 
     @Test
+    fun `onSearchActivated fetches even when field is unfocused`() =
+        runScenario {
+            fakePlacesClient.findPredictionsResult = Result.success(
+                FindAutocompletePredictionsResponse(emptyList())
+            )
+            delegate.observeQueryChanges(queryFlow, countryFlow)
+            delegate.onSearchActivated()
+            queryFlow.value = "123 Main St"
+            advanceTimeBy(500)
+            fakePlacesClient.findPredictionsCalls.awaitItem()
+
+            delegate.onFocusLost()
+            advanceTimeBy(100)
+
+            delegate.onSearchActivated()
+            advanceTimeBy(100)
+
+            val call = fakePlacesClient.findPredictionsCalls.awaitItem()
+            assertThat(call.query).isEqualTo("123 Main St")
+        }
+
+    @Test
     fun `onSearchActivated does not double-fetch when debounce catches up`() =
         runScenario {
             fakePlacesClient.findPredictionsResult = Result.success(
