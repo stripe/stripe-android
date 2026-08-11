@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
@@ -82,10 +83,12 @@ internal interface ConfirmationDefinition<
      *
      * @param activityResultCaller caller used to create & register activity result launchers onto the Android
      *   lifecycle provider
+     * @param lifecycleOwner the owner of an observable lifecycle to attach the launcher to
      * @param onResult the launcher result callback to provide when registering the activity result launcher if needed
      */
     fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (TLauncherResult) -> Unit,
     ): TLauncher
 

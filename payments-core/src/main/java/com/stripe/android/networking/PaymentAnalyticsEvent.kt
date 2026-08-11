@@ -116,7 +116,9 @@ enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     ),
 
     // Card Element
-    MobileCardElementShown("mobile_card_element_shown");
+    MobileCardElementShown("mobile_card_element_shown"),
+    MobileCardElementInteraction("mobile_card_element_interaction"),
+    MobileCardElementFormCompleted("mobile_card_element_form_completed");
 
     @Keep
     override fun toString(): String {

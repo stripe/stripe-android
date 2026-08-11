@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.elements
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo

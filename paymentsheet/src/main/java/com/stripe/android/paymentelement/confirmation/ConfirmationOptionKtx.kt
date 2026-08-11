@@ -56,6 +56,7 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(): PaymentMe
         // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
         // we can just use the already created object here.
         PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = instantDebits.paymentMethod,
             optionsParams = paymentMethodOptionsParams,
         )
@@ -81,6 +82,7 @@ internal fun PaymentSelection.Saved.toConfirmationOption(
         )
     } else {
         PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
         )

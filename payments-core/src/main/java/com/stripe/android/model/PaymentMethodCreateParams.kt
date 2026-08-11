@@ -1045,7 +1045,7 @@ constructor(
             googlePayPaymentData: JSONObject
         ): PaymentMethodCreateParams {
             return createFromGooglePay(
-                googlePayPaymentData = googlePayPaymentData,
+                googlePayResult = GooglePayResult.fromJson(googlePayPaymentData),
                 clientAttributionMetadata = null,
                 billingEmailOverride = null,
             )
@@ -1053,11 +1053,10 @@ constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createFromGooglePay(
-            googlePayPaymentData: JSONObject,
+            googlePayResult: GooglePayResult,
             clientAttributionMetadata: ClientAttributionMetadata?,
             billingEmailOverride: String?,
         ): PaymentMethodCreateParams {
-            val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
             val token = googlePayResult.token
             val tokenId = token?.id.orEmpty()
 

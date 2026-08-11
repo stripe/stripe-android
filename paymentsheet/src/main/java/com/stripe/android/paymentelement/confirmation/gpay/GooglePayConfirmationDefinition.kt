@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -66,6 +67,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (GooglePayPaymentMethodLauncher.Result) -> Unit
     ): InternalGooglePayPaymentMethodLauncher {
         val activityResultLauncher = activityResultCaller.registerForActivityResult(
@@ -119,6 +121,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 val nextConfirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = result.paymentMethod,
                     optionsParams = null,
+                    shippingInformation = result.shippingInformation,
                     originatedFromWallet = true,
                 )
 

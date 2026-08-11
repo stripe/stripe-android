@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 
 /**
@@ -15,6 +16,7 @@ internal data class ConfirmCheckoutSessionParams(
     private val returnUrl: String,
     private val expectedAmount: Long? = null,
     private val savePaymentMethod: Boolean? = null,
+    private val shipping: Shipping?,
 ) {
     fun toParamMap(): Map<String, Any> {
         return buildMap {
@@ -26,6 +28,25 @@ internal data class ConfirmCheckoutSessionParams(
             }
             if (savePaymentMethod != null) {
                 put("save_payment_method", savePaymentMethod)
+            }
+            if (shipping != null) {
+                put("shipping", shipping.toParamMap())
+            }
+        }
+    }
+
+    internal data class Shipping(
+        private val name: String?,
+        private val address: Address?,
+    ) {
+        fun toParamMap(): Map<String, Any> {
+            return buildMap {
+                if (name != null) {
+                    put("name", name)
+                }
+                if (address != null) {
+                    put("address", address.toParamMap())
+                }
             }
         }
     }

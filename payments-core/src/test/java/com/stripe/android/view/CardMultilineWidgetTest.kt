@@ -1345,6 +1345,47 @@ internal class CardMultilineWidgetTest {
     fun `reportShown is called on attach`() =
         runCardMultilineWidgetAnalyticsTest {
             assertThat(cardAnalytics.awaitShown()).isNotNull()
+            assertThat(cardAnalytics.awaitInteraction()).isNotNull()
+        }
+
+    @Test
+    fun `reportInteraction called on text focus`() =
+        runCardMultilineWidgetAnalyticsTest {
+            assertThat(cardAnalytics.awaitShown()).isNotNull()
+
+            with(widgetGroup) {
+                cardNumberEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(cardNumberEditText, true)
+                expiryDateEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(expiryDateEditText, true)
+                cvcEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(cvcEditText, true)
+                postalCodeEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(postalCodeEditText, true)
+            }
+
+            idleLooper()
+
+            repeat(5) { assertThat(cardAnalytics.awaitInteraction()).isNotNull() }
+        }
+
+    @Test
+    fun `reports form completed when multiline inputs valid`() =
+        runCardMultilineWidgetAnalyticsTest {
+            assertThat(cardAnalytics.awaitShown()).isNotNull()
+
+            with(widgetGroup) {
+                cardNumberEditText.setText(VISA_WITH_SPACES)
+                expiryDateEditText.append("12")
+                expiryDateEditText.append("50")
+                cvcEditText.append("123")
+                postalCodeEditText.append("94103")
+            }
+
+            idleLooper()
+
+            repeat(9) { assertThat(cardAnalytics.awaitInteraction()).isNotNull() }
+            repeat(2) { assertThat(cardAnalytics.awaitFormCompleted()).isNotNull() }
         }
 
     private data class AnalyticsScenario(

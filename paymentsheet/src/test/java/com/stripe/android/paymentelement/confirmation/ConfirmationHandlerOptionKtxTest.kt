@@ -181,6 +181,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     cvc = "505"
@@ -590,6 +591,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
             )
@@ -610,6 +612,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
             )

@@ -23,8 +23,8 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkStore
@@ -32,7 +32,6 @@ import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
@@ -40,9 +39,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
 internal class LinkConfirmationDefinitionTest {
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
-
     @Test
     fun `'key' should be 'Link'`() {
         val definition = createLinkConfirmationDefinition()
@@ -73,6 +69,7 @@ internal class LinkConfirmationDefinitionTest {
 
         definition.createLauncher(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = onResult,
         )
 
