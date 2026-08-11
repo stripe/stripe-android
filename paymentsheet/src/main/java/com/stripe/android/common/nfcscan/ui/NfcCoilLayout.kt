@@ -63,6 +63,7 @@ internal fun NfcCoilLayout(
             tapZone = tapZone,
             shouldRenderTextAboveCoil = shouldRenderTextAboveCoil,
             coilSize = CoilCircleSize,
+            deviceRotation = deviceRotation,
             canShow = canShowInstructionText,
             error = (status as? NfcScanningStatus.Error)?.message,
         )

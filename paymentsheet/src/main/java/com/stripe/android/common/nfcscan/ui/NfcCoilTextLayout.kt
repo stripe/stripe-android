@@ -33,8 +33,10 @@ import com.stripe.android.uicore.strings.resolve
 import kotlin.math.roundToInt
 import com.stripe.payments.model.R as PaymentsModelR
 
-private val TextAboveCoilBottomMargin = 22.5.dp
-private val BottomTextOffset = 30.dp
+private val PortraitTopTextOffset = 40.5.dp
+private val PortraitBottomTextOffset = 48.dp
+private val LandscapeTopTextOffset = 22.5.dp
+private val LandscapeBottomTextOffset = 30.dp
 private val InstructionTextEdgePadding = 20.dp
 private val ErrorTextTopSpacing = 8.dp
 
@@ -44,6 +46,7 @@ internal fun NfcCoilTextLayout(
     containerHeight: Dp,
     tapZone: TapZone,
     coilSize: Dp,
+    deviceRotation: DeviceRotation,
     shouldRenderTextAboveCoil: Boolean,
     canShow: Boolean,
     error: ResolvableString?,
@@ -64,6 +67,7 @@ internal fun NfcCoilTextLayout(
             containerHeight = containerHeight,
             tapZone = tapZone,
             coilSize = coilSize,
+            deviceRotation = deviceRotation,
             shouldRenderTextAboveCoil = shouldRenderTextAboveCoil,
             measurables = measurables,
             constraints = constraints,
@@ -76,6 +80,7 @@ private fun MeasureScope.placeCoilTextElements(
     containerHeight: Dp,
     tapZone: TapZone,
     coilSize: Dp,
+    deviceRotation: DeviceRotation,
     measurables: List<Measurable>,
     constraints: Constraints,
     shouldRenderTextAboveCoil: Boolean,
@@ -106,9 +111,9 @@ private fun MeasureScope.placeCoilTextElements(
     val instructionY = if (shouldRenderTextAboveCoil) {
         val textBlockHeight = instructionPlaceable.height +
             (errorPlaceable?.let { it.height + ErrorTextTopSpacing.roundToPx() } ?: 0)
-        coilBoxTop - TextAboveCoilBottomMargin.roundToPx() - textBlockHeight
+        coilBoxTop - aboveCoilPadding(deviceRotation).roundToPx() - textBlockHeight
     } else {
-        coilBoxTop + coilSizePx + BottomTextOffset.roundToPx()
+        coilBoxTop + coilSizePx + bottomCoilPadding(deviceRotation).roundToPx()
     }
 
     return layout(containerWidthPx, containerHeightPx) {
@@ -141,6 +146,24 @@ private fun MeasureScope.placeCoilTextElements(
                 )
             }
         }
+    }
+}
+
+private fun aboveCoilPadding(deviceRotation: DeviceRotation): Dp {
+    return when (deviceRotation) {
+        DeviceRotation.Portrait,
+        DeviceRotation.UpsideDown -> PortraitTopTextOffset
+        DeviceRotation.LandscapeLeft,
+        DeviceRotation.LandscapeRight -> LandscapeTopTextOffset
+    }
+}
+
+private fun bottomCoilPadding(deviceRotation: DeviceRotation): Dp {
+    return when (deviceRotation) {
+        DeviceRotation.Portrait,
+        DeviceRotation.UpsideDown -> PortraitBottomTextOffset
+        DeviceRotation.LandscapeLeft,
+        DeviceRotation.LandscapeRight -> LandscapeBottomTextOffset
     }
 }
 
