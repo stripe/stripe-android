@@ -114,7 +114,9 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends adaptive_pricing allowed true when configured`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().adaptivePricingAllowed(true),
+        configuration = CheckoutController.Configuration().adaptivePricing(
+            CheckoutController.Configuration.AdaptivePricing().allowed(true),
+        ),
         networkSetup = {
             networkRule.checkoutInit(
                 bodyPart("adaptive_pricing[allowed]", "true"),
