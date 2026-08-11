@@ -1,8 +1,8 @@
 package com.stripe.android.payments.core.injection
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import dagger.Module
 import dagger.Provides

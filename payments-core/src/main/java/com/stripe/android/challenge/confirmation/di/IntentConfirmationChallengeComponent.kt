@@ -1,9 +1,9 @@
 package com.stripe.android.challenge.confirmation.di
 
 import android.content.Context
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.challenge.confirmation.IntentConfirmationChallengeArgs
 import com.stripe.android.challenge.confirmation.IntentConfirmationChallengeViewModel
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule

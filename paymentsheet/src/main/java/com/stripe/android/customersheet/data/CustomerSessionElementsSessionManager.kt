@@ -1,7 +1,7 @@
 package com.stripe.android.customersheet.data
 
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerSheet

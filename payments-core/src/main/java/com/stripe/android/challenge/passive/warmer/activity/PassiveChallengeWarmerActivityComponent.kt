@@ -1,8 +1,8 @@
 package com.stripe.android.challenge.passive.warmer.activity
 
 import android.content.Context
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.challenge.passive.PassiveChallengeModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.hcaptcha.HCaptchaModule

@@ -1,8 +1,8 @@
 package com.stripe.android.customersheet.data
 
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter

@@ -4,8 +4,8 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent

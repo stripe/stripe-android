@@ -1,13 +1,13 @@
 package com.stripe.android.payments
 
 import android.content.Context
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripeIntentResult.Outcome.Companion.CANCELED
 import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest

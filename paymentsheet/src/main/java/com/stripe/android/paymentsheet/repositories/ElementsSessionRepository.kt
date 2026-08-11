@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.repositories
 
 import android.app.Application
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser

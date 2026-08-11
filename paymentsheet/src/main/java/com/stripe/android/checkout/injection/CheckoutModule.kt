@@ -2,8 +2,8 @@ package com.stripe.android.checkout.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.common.di.DisplayDensity
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.ApiRequest

@@ -1,10 +1,10 @@
 package com.stripe.android.common.analytics.experiment
 
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.ProvidedDefaultValues
 import com.stripe.android.common.di.MOBILE_SESSION_ID
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest

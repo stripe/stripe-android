@@ -1,8 +1,8 @@
 package com.stripe.android.customersheet.data.injection
 
 import android.app.Application
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.customersheet.CustomerAdapter

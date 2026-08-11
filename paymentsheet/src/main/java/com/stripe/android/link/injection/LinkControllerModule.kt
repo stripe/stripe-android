@@ -2,8 +2,8 @@ package com.stripe.android.link.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope

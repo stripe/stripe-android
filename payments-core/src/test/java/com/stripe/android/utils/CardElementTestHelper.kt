@@ -2,8 +2,8 @@ package com.stripe.android.utils
 
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.MobileCardElementConfig
 import com.stripe.android.testing.AbsFakeStripeRepository

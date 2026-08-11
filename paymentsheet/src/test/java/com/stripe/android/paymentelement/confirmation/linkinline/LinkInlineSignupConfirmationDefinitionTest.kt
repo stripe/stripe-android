@@ -3,8 +3,8 @@ package com.stripe.android.paymentelement.confirmation.linkinline
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration

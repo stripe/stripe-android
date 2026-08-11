@@ -2,8 +2,8 @@ package com.stripe.android.customersheet.injection
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetContract
 import com.stripe.android.customersheet.CustomerSheetIntegration

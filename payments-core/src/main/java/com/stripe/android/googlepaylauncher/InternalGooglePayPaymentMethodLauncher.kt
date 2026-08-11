@@ -3,11 +3,11 @@ package com.stripe.android.googlepaylauncher
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ClientAttributionMetadata

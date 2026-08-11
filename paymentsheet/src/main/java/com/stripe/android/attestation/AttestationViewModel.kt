@@ -7,9 +7,9 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.attestation.AttestationActivity.Companion.getArgs
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.analytics.ErrorReporter
