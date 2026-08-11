@@ -8,17 +8,16 @@ import kotlin.time.DurationUnit
 internal sealed class AddressLauncherEvent : AnalyticsEvent {
     abstract val additionalParams: Map<String, Any>
 
+    protected fun addressDataBlob(country: String): Map<String, Any> = buildMap {
+        if (country.isNotEmpty()) put(FIELD_ADDRESS_COUNTRY_CODE, country)
+    }
+
     class Show(
         val country: String
     ) : AddressLauncherEvent() {
         override val eventName: String = "mc_address_show"
         override val additionalParams: Map<String, Any>
-            get() {
-                val data = buildMap<String, Any> {
-                    if (country.isNotEmpty()) put(FIELD_ADDRESS_COUNTRY_CODE, country)
-                }
-                return mapOf(FIELD_ADDRESS_DATA_BLOB to data)
-            }
+            get() = mapOf(FIELD_ADDRESS_DATA_BLOB to addressDataBlob(country))
     }
 
     class Completed(
@@ -53,15 +52,10 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
     ) : AddressLauncherEvent() {
         override val eventName: String = "mc_address_autocomplete_start"
         override val additionalParams: Map<String, Any>
-            get() = buildMap {
-                put(
-                    FIELD_ADDRESS_DATA_BLOB,
-                    buildMap {
-                        if (country.isNotEmpty()) put(FIELD_ADDRESS_COUNTRY_CODE, country)
-                    },
-                )
-                put(FIELD_AUTOCOMPLETE_SESSION_TOKEN, autocompleteSessionToken)
-            }
+            get() = mapOf(
+                FIELD_ADDRESS_DATA_BLOB to addressDataBlob(country),
+                FIELD_AUTOCOMPLETE_SESSION_TOKEN to autocompleteSessionToken,
+            )
     }
 
     class AutocompleteSuggestions(
@@ -75,12 +69,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         override val eventName: String = "mc_address_autocomplete_suggestions"
         override val additionalParams: Map<String, Any>
             get() = buildMap {
-                put(
-                    FIELD_ADDRESS_DATA_BLOB,
-                    buildMap {
-                        if (country.isNotEmpty()) put(FIELD_ADDRESS_COUNTRY_CODE, country)
-                    },
-                )
+                put(FIELD_ADDRESS_DATA_BLOB, addressDataBlob(country))
                 put(FIELD_AUTOCOMPLETE_SESSION_TOKEN, autocompleteSessionToken)
                 put(FIELD_RESULT_COUNT, resultCount)
                 source?.let { put(FIELD_SOURCE, it) }
@@ -101,12 +90,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         override val eventName: String = "mc_address_autocomplete_selected"
         override val additionalParams: Map<String, Any>
             get() = buildMap {
-                put(
-                    FIELD_ADDRESS_DATA_BLOB,
-                    buildMap {
-                        if (country.isNotEmpty()) put(FIELD_ADDRESS_COUNTRY_CODE, country)
-                    },
-                )
+                put(FIELD_ADDRESS_DATA_BLOB, addressDataBlob(country))
                 put(FIELD_AUTOCOMPLETE_SESSION_TOKEN, autocompleteSessionToken)
                 put(FIELD_QUERY_LENGTH, queryLength)
                 placeId?.let { put(FIELD_PLACE_ID, it) }
@@ -125,12 +109,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         override val eventName: String = "mc_address_autocomplete_error"
         override val additionalParams: Map<String, Any>
             get() = buildMap {
-                put(
-                    FIELD_ADDRESS_DATA_BLOB,
-                    buildMap {
-                        if (country.isNotEmpty()) put(FIELD_ADDRESS_COUNTRY_CODE, country)
-                    },
-                )
+                put(FIELD_ADDRESS_DATA_BLOB, addressDataBlob(country))
                 put(FIELD_AUTOCOMPLETE_SESSION_TOKEN, autocompleteSessionToken)
                 putAll(ErrorReporter.getAdditionalParamsFromError(error))
                 sessionElapsed?.let { put(FIELD_MS_SESSION_ELAPSED, it.toDouble(DurationUnit.MILLISECONDS)) }
