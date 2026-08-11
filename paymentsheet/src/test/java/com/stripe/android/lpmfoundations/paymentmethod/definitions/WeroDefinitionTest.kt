@@ -4,8 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
@@ -47,10 +49,10 @@ class WeroDefinitionTest {
 
         assertThat(formElements).hasSize(4)
 
-        checkCountryField(formElements, 0)
-        checkNameField(formElements, 1)
-        checkEmailField(formElements, 2)
-        checkPhoneField(formElements, 3)
+        checkNameField(formElements, 0)
+        checkEmailField(formElements, 1)
+        checkPhoneField(formElements, 2)
+        checkCountryField(formElements, 3)
     }
 
     @Test
@@ -69,13 +71,38 @@ class WeroDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(5)
+        assertThat(formElements).hasSize(4)
 
-        checkCountryField(formElements, 0)
-        checkNameField(formElements, 1)
-        checkEmailField(formElements, 2)
-        checkPhoneField(formElements, 3)
-        checkBillingField(formElements, 4)
+        checkNameField(formElements, 0)
+        checkEmailField(formElements, 1)
+        checkPhoneField(formElements, 2)
+        checkBillingField(formElements, 3)
+    }
+
+    @Test
+    fun `createFormElements promotes country source for automatic tax`() {
+        val formElements = WeroDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(
+                    paymentMethodTypes = listOf("wero"),
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            )
+        )
+
+        val billingAddressElement = (formElements.single() as SectionElement).fields.single()
+            as BillingAddressElement
+        assertThat(billingAddressElement.countryElement.controller.displayItems).containsExactly(
+            "🇧🇪 Belgium",
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
     }
 
     @Test
@@ -103,6 +130,10 @@ class WeroDefinitionTest {
 
         val section = element as SectionElement
         assertThat(section.fields).hasSize(1)
-        assertThat(section.fields[0]).isInstanceOf(CountryElement::class.java)
+        val billingAddressElement = section.fields[0]
+        assertThat(billingAddressElement).isInstanceOf(BillingAddressElement::class.java)
+        assertThat((billingAddressElement as BillingAddressElement).countryElement.controller.displayItems)
+            .containsExactly("🇧🇪 Belgium", "🇫🇷 France", "🇩🇪 Germany")
+            .inOrder()
     }
 }

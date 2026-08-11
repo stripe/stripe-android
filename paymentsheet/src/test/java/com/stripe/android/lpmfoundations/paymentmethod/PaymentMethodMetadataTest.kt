@@ -40,11 +40,10 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.IconStyle
-import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
@@ -512,11 +511,8 @@ internal class PaymentMethodMetadataTest {
         assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
 
         val addressSection = formElement[3] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-
-        val identifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        val addressElement = addressSection.fields[0] as BillingAddressElement
+        assertThat(addressElement.countryElement.identifier).isEqualTo(IdentifierSpec.Country)
     }
 
     @Test
@@ -602,11 +598,8 @@ internal class PaymentMethodMetadataTest {
         assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
 
         val addressSection = formElement[3] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-
-        val identifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        val addressElement = addressSection.fields[0] as BillingAddressElement
+        assertThat(addressElement.countryElement.identifier).isEqualTo(IdentifierSpec.Country)
     }
 
     @Test
@@ -624,6 +617,107 @@ internal class PaymentMethodMetadataTest {
         )!!
 
         assertThat(formElement.isEmpty()).isTrue()
+    }
+
+    @Test
+    fun `formElementsForCode does not add automatic tax address to external payment method`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            ),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        )
+
+        val formElements = requireNotNull(
+            metadata.formElementsForCode(
+                code = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC.type,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            )
+        )
+
+        assertThat(formElements.billingAddressElements()).isEmpty()
+    }
+
+    @Test
+    fun `formElementsForCode adds automatic tax address to suppressed custom payment method`() = runTest {
+        val customPaymentMethod = PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD.copy(
+            doesNotCollectBillingDetails = true,
+        )
+        val metadata = PaymentMethodMetadataFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            ),
+            displayableCustomPaymentMethods = listOf(customPaymentMethod),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        )
+
+        val formElements = requireNotNull(
+            metadata.formElementsForCode(
+                code = customPaymentMethod.id,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            )
+        )
+
+        assertThat(formElements.billingAddressElements()).hasSize(1)
+    }
+
+    @Test
+    fun `formElementsForCode adds tax minimum to suppressed custom payment method for full collection`() = runTest {
+        val customPaymentMethod = PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD.copy(
+            doesNotCollectBillingDetails = true,
+        )
+        val metadata = PaymentMethodMetadataFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
+            displayableCustomPaymentMethods = listOf(customPaymentMethod),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        )
+
+        val formElements = requireNotNull(
+            metadata.formElementsForCode(
+                code = customPaymentMethod.id,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            )
+        )
+
+        assertThat(formElements.billingAddressElements()).hasSize(1)
+    }
+
+    @Test
+    fun `formElementsForCode adds automatic tax address to dynamic custom payment method`() = runTest {
+        val customPaymentMethod = PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD.copy(
+            doesNotCollectBillingDetails = false,
+        )
+        val metadata = PaymentMethodMetadataFactory.create(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            ),
+            displayableCustomPaymentMethods = listOf(customPaymentMethod),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        )
+
+        val formElements = requireNotNull(
+            metadata.formElementsForCode(
+                code = customPaymentMethod.id,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            )
+        )
+
+        assertThat(formElements.billingAddressElements()).hasSize(1)
     }
 
     @Test
@@ -645,15 +739,17 @@ internal class PaymentMethodMetadataTest {
             uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
         )!!
 
-        val countrySection = formElement[4] as SectionElement
-        val countryElement = countrySection.fields[0] as CountryElement
-        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+        assertThat(formElement).hasSize(5)
+        val billingAddressElement = formElement.billingAddressElements().single()
+        assertThat(billingAddressElement.identifier).isEqualTo(IdentifierSpec.BillingAddress)
+        assertThat(billingAddressElement.countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+    }
 
-        val addressSection = formElement[5] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-        val addressIdentifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element doesn't contain country.
-        assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
+    private fun List<com.stripe.android.uicore.elements.FormElement>.billingAddressElements():
+        List<BillingAddressElement> {
+        return filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<BillingAddressElement>()
     }
 
     @Test

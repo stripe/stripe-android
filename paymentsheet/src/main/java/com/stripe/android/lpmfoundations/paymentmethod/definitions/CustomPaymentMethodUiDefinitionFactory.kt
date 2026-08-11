@@ -41,7 +41,7 @@ internal class CustomPaymentMethodUiDefinitionFactory(
 
         if (displayableCustomPaymentMethod.doesNotCollectBillingDetails) {
             builder.ignoreContactInformationRequirements()
-            builder.ignoreBillingAddressRequirements()
+            builder.suppressBillingAddressRequirements()
         }
     }
 }

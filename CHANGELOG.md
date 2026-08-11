@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED] Locally authored non-card payment method forms now collect the billing address fields required for automatic tax.
+
 ## 23.15.0 - 2026-08-10
 
 ### PaymentSheet

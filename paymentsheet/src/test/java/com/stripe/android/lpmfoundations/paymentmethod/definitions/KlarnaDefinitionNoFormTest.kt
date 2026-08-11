@@ -9,10 +9,12 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
-import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Rule
@@ -42,7 +44,7 @@ class KlarnaDefinitionNoFormTest {
         assertThat(formElements).hasSize(3)
         assertThat(formElements[0].identifier.v1).isEqualTo("klarna_header_text")
         assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[email]_section")
-        assertThat(formElements[2].identifier.v1).isEqualTo("billing_details[address][country]_section")
+        assertThat(formElements[2].identifier.v1).isEqualTo("billing_details[address]_section")
     }
 
     @Test
@@ -87,7 +89,7 @@ class KlarnaDefinitionNoFormTest {
         assertThat(formElements[0].identifier.v1)
             .isEqualTo("klarna_header_text")
         assertThat(formElements[1].identifier.v1)
-            .isEqualTo("billing_details[address][country]_section")
+            .isEqualTo("billing_details[address]_section")
         assertThat(formElements[2].identifier.v1).isEqualTo("mandate")
     }
 
@@ -136,10 +138,32 @@ class KlarnaDefinitionNoFormTest {
             .isEqualTo("mandate")
     }
 
+    @Test
+    fun `createFormElements adds automatic tax address when form removal is enabled`() {
+        val formElements = KlarnaDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                stripeIntent = getPaymentIntent(
+                    setupFutureUsage = StripeIntent.Usage.OneTime,
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    allowedCountries = setOf("US"),
+                ),
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            )
+        )
+
+        val billingAddressElement = (formElements.single() as SectionElement).fields.single()
+        assertThat(billingAddressElement).isInstanceOf(BillingAddressElement::class.java)
+    }
+
     private fun assertThatFullAddressElementIsPresent(
         sectionElement: SectionElement
     ) {
-        val addressElement = (sectionElement).fields[0] as AddressElement
+        val addressElement = ((sectionElement).fields[0] as BillingAddressElement).addressElement
 
         val billingElements = addressElement.addressController.value.fieldsFlowable.value
         assertThat(billingElements.size).isEqualTo(5)
