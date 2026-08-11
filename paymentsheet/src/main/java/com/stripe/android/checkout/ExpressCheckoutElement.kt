@@ -402,18 +402,6 @@ class ExpressCheckoutElement @Inject internal constructor(
                 Automatic,
             }
 
-            // TODO: do we need a corner radius or padding appearance params?
-
-            // TODO: add a button type here? No -- but call out in API review.
-            // TODO: also note that we're going to skip button theme.
-            // TODO: we need to add button theme just for light and dark modes.
-
-            /** Sets the height of express buttons. */
-            fun buttonHeight(buttonHeight: Dp): Appearance = apply {
-                require(buttonHeight > 0.dp) { "buttonHeight must be greater than zero." }
-                this.buttonHeight = buttonHeight
-            }
-
             /** Sets the layout of the express buttons. */
             fun buttonLayout(buttonLayout: ButtonLayout): Appearance = apply {
                 this.buttonLayout = buttonLayout
