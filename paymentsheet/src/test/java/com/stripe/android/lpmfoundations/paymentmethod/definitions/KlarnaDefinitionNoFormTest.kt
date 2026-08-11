@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -42,7 +43,7 @@ class KlarnaDefinitionNoFormTest {
         assertThat(formElements).hasSize(3)
         assertThat(formElements[0].identifier.v1).isEqualTo("klarna_header_text")
         assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[email]_section")
-        assertThat(formElements[2].identifier.v1).isEqualTo("billing_details[address][country]_section")
+        assertThat(formElements[2].identifier.v1).isEqualTo("billing_details[address]_section")
     }
 
     @Test
@@ -87,8 +88,24 @@ class KlarnaDefinitionNoFormTest {
         assertThat(formElements[0].identifier.v1)
             .isEqualTo("klarna_header_text")
         assertThat(formElements[1].identifier.v1)
-            .isEqualTo("billing_details[address][country]_section")
+            .isEqualTo("billing_details[address]_section")
         assertThat(formElements[2].identifier.v1).isEqualTo("mandate")
+    }
+
+    @Test
+    fun `createFormElements uses setup intent country for country-only collection`() {
+        val formElements = KlarnaDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFactory.create(
+                    countryCode = "DE",
+                    paymentMethodTypes = listOf("card", "klarna"),
+                ),
+            ),
+        )
+
+        val billingAddressElement = (formElements[1] as SectionElement)
+            .fields.single() as BillingAddressElement
+        assertThat(billingAddressElement.countryElement.controller.rawFieldValue.value).isEqualTo("DE")
     }
 
     @Test

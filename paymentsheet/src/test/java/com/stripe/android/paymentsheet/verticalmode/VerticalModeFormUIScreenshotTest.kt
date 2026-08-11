@@ -444,6 +444,58 @@ internal class VerticalModeFormUIScreenshotTest {
     }
 
     @Test
+    fun klarnaFullBillingAddressForm() {
+        paparazziRule.snapshot {
+            CreateTestScenario(
+                paymentMethodCode = "klarna",
+                metadata = lpmMetadata(
+                    paymentMethodCode = "klarna",
+                    collectContacts = false,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun weroFullBillingAddressFormWithContacts() {
+        paparazziRule.snapshot {
+            CreateTestScenario(
+                paymentMethodCode = "wero",
+                metadata = lpmMetadata(
+                    paymentMethodCode = "wero",
+                    collectContacts = true,
+                ),
+            )
+        }
+    }
+
+    private fun lpmMetadata(
+        paymentMethodCode: PaymentMethodCode,
+        collectContacts: Boolean,
+    ): PaymentMethodMetadata {
+        val contactMode = if (collectContacts) {
+            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        } else {
+            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+        }
+        return PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf(paymentMethodCode),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = contactMode,
+                email = contactMode,
+                phone = contactMode,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                allowedCountries = setOf("DE", "FR"),
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                address = PaymentSheet.Address(country = "DE"),
+            ),
+        )
+    }
+
+    @Test
     fun cashappShowsBillingFields() {
         paparazziRule.snapshot {
             val metadata = PaymentMethodMetadataFactory.create(

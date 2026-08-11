@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [CHANGED] Klarna and Wero payment-method forms now use a single billing address element for country and full address collection.
+
 ## 23.15.0 - 2026-08-10
 
 ### PaymentSheet

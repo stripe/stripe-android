@@ -5,7 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
@@ -47,10 +47,10 @@ class WeroDefinitionTest {
 
         assertThat(formElements).hasSize(4)
 
-        checkCountryField(formElements, 0)
-        checkNameField(formElements, 1)
-        checkEmailField(formElements, 2)
-        checkPhoneField(formElements, 3)
+        checkNameField(formElements, 0)
+        checkEmailField(formElements, 1)
+        checkPhoneField(formElements, 2)
+        checkCountryField(formElements, 3)
     }
 
     @Test
@@ -69,13 +69,12 @@ class WeroDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(5)
+        assertThat(formElements).hasSize(4)
 
-        checkCountryField(formElements, 0)
-        checkNameField(formElements, 1)
-        checkEmailField(formElements, 2)
-        checkPhoneField(formElements, 3)
-        checkBillingField(formElements, 4)
+        checkNameField(formElements, 0)
+        checkEmailField(formElements, 1)
+        checkPhoneField(formElements, 2)
+        assertThat(checkCountryField(formElements, 3).hiddenIdentifiers.value).isEmpty()
     }
 
     @Test
@@ -97,12 +96,18 @@ class WeroDefinitionTest {
     private fun checkCountryField(
         formElements: List<FormElement>,
         position: Int,
-    ) {
+    ): BillingAddressElement {
         val element = formElements[position]
         assertThat(element).isInstanceOf(SectionElement::class.java)
 
         val section = element as SectionElement
         assertThat(section.fields).hasSize(1)
-        assertThat(section.fields[0]).isInstanceOf(CountryElement::class.java)
+        val billingAddressElement = section.fields.single() as BillingAddressElement
+        assertThat(billingAddressElement.countryElement.controller.displayItems).containsExactly(
+            "🇧🇪 Belgium",
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
+        return billingAddressElement
     }
 }
