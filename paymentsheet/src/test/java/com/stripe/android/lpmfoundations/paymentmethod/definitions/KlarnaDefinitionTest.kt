@@ -72,11 +72,11 @@ class KlarnaDefinitionTest {
         checkKlarnaHeaderText(formElements, 0)
         checkEmailField(formElements, 1)
 
-        val billingAddressSection = formElements[2] as SectionElement
-        assertThat(billingAddressSection.identifier).isEqualTo(
-            IdentifierSpec.Generic("billing_details[address]_section"),
+        val countrySection = formElements[2] as SectionElement
+        assertThat(countrySection.identifier).isEqualTo(
+            IdentifierSpec.Generic("billing_details[address][country]_section"),
         )
-        val billingAddressElement = billingAddressSection.fields.single() as BillingAddressElement
+        val billingAddressElement = countrySection.fields.single() as BillingAddressElement
         assertThat(billingAddressElement.countryElement.controller.displayItems).containsExactly(
             "🇫🇷 France",
             "🇩🇪 Germany",
@@ -86,8 +86,7 @@ class KlarnaDefinitionTest {
             formElements.filterIsInstance<SectionElement>().flatMap { it.fields }
                 .filterIsInstance<BillingAddressElement>(),
         ).hasSize(1)
-        assertThat(billingAddressSection.fields.map { it.identifier })
-            .containsExactly(IdentifierSpec.BillingAddress)
+        assertThat(countrySection.fields.map { it.identifier }).containsExactly(IdentifierSpec.Country)
     }
 
     @Test
@@ -282,7 +281,7 @@ class KlarnaDefinitionTest {
     ) {
         val element = formElements[position]
 
-        assertThat(element.identifier.v1).isEqualTo("billing_details[address]_section")
+        assertThat(element.identifier.v1).isEqualTo("billing_details[address][country]_section")
         assertThat(element).isInstanceOf<SectionElement>()
 
         val countrySection = element as SectionElement

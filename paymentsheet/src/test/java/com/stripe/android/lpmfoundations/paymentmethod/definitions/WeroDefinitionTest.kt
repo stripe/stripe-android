@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -74,7 +75,7 @@ class WeroDefinitionTest {
         checkNameField(formElements, 0)
         checkEmailField(formElements, 1)
         checkPhoneField(formElements, 2)
-        assertThat(checkCountryField(formElements, 3).hiddenIdentifiers.value).isEmpty()
+        assertThat(checkBillingAddressField(formElements, 3).hiddenIdentifiers.value).isEmpty()
     }
 
     @Test
@@ -101,8 +102,30 @@ class WeroDefinitionTest {
         assertThat(element).isInstanceOf(SectionElement::class.java)
 
         val section = element as SectionElement
+        assertThat(section.identifier.v1).isEqualTo("billing_details[address][country]_section")
         assertThat(section.fields).hasSize(1)
         val billingAddressElement = section.fields.single() as BillingAddressElement
+        assertThat(billingAddressElement.identifier).isEqualTo(IdentifierSpec.Country)
+        assertThat(billingAddressElement.countryElement.controller.displayItems).containsExactly(
+            "🇧🇪 Belgium",
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
+        return billingAddressElement
+    }
+
+    private fun checkBillingAddressField(
+        formElements: List<FormElement>,
+        position: Int,
+    ): BillingAddressElement {
+        val element = formElements[position]
+        assertThat(element).isInstanceOf(SectionElement::class.java)
+
+        val section = element as SectionElement
+        assertThat(section.identifier.v1).isEqualTo("billing_details[address]_section")
+        assertThat(section.fields).hasSize(1)
+        val billingAddressElement = section.fields.single() as BillingAddressElement
+        assertThat(billingAddressElement.identifier).isEqualTo(IdentifierSpec.BillingAddress)
         assertThat(billingAddressElement.countryElement.controller.displayItems).containsExactly(
             "🇧🇪 Belgium",
             "🇫🇷 France",

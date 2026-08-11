@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.EmptyFormElement
-import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.EmailElement
@@ -226,7 +225,7 @@ class FormElementsBuilderTest {
     }
 
     @Test
-    fun `build should return AutocompleteAddressElement if factory is provided`() = runTest {
+    fun `build returns a billing address with autocomplete if factory is provided`() = runTest {
         val arguments = arguments(
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
@@ -243,8 +242,8 @@ class FormElementsBuilderTest {
 
         val sectionElement = formElements.first() as SectionElement
 
-        assertThat(sectionElement.fields.size).isEqualTo(1)
-        assertThat(sectionElement.fields.firstOrNull()).isInstanceOf<AutocompleteAddressElement>()
+        val billingAddressElement = sectionElement.fields.single() as BillingAddressElement
+        assertThat(billingAddressElement.addressElement).isInstanceOf<AutocompleteAddressElement>()
     }
 
     @Test
@@ -267,9 +266,9 @@ class FormElementsBuilderTest {
         val sectionFields = sectionElement.fields
 
         assertThat(sectionFields.size).isEqualTo(1)
-        assertThat(sectionFields.firstOrNull()).isInstanceOf<AddressElement>()
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-        val addressElement = sectionFields.first() as AddressElement
+        val addressElement = (sectionFields.first() as BillingAddressElement).addressElement
 
         assertThat(addressElement.countryElement.controller.displayItems)
             .hasSize(CountryUtils.supportedBillingCountries.size)
@@ -295,9 +294,9 @@ class FormElementsBuilderTest {
         val sectionFields = sectionElement.fields
 
         assertThat(sectionFields.size).isEqualTo(1)
-        assertThat(sectionFields.firstOrNull()).isInstanceOf<AddressElement>()
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-        val addressElement = sectionFields.first() as AddressElement
+        val addressElement = (sectionFields.first() as BillingAddressElement).addressElement
 
         assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
             "\uD83C\uDDFA\uD83C\uDDF8 United States",
