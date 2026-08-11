@@ -76,33 +76,6 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         )
                     )
                 }
-                shouldRefreshOrPollIntent(stripeIntent, result.flowOutcome) -> {
-                    val intent = if (shouldCallRefreshIntent(stripeIntent)) {
-                        refreshStripeIntent(
-                            clientSecret = result.clientSecret,
-                            requestOptions = requestOptions,
-                            expandFields = EXPAND_PAYMENT_METHOD
-                        ).getOrThrow()
-                    } else {
-                        pollStripeIntentUntilTerminalState(
-                            originalIntent = stripeIntent,
-                            clientSecret = result.clientSecret,
-                            requestOptions = requestOptions,
-                            initialRetrieveIntentStartTime = initialRetrieveIntentStartTime
-                        ).getOrThrow()
-                    }
-
-                    val flowOutcome = determineFlowOutcome(intent, result.flowOutcome)
-                    createStripeIntentResult(
-                        intent,
-                        flowOutcome,
-                        failureMessageFactory.create(
-                            intent = intent,
-                            requestId = requestId,
-                            outcome = result.flowOutcome
-                        )
-                    )
-                }
                 shouldCancelIntentSource(stripeIntent, result.canCancelSource) -> {
                     val sourceId = result.sourceId.orEmpty()
                     logger.debug(
@@ -125,6 +98,33 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     createStripeIntentResult(
                         intent,
                         result.flowOutcome,
+                        failureMessageFactory.create(
+                            intent = intent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
+                    )
+                }
+                shouldRefreshOrPollIntent(stripeIntent, result.flowOutcome) -> {
+                    val intent = if (shouldCallRefreshIntent(stripeIntent)) {
+                        refreshStripeIntent(
+                            clientSecret = result.clientSecret,
+                            requestOptions = requestOptions,
+                            expandFields = EXPAND_PAYMENT_METHOD
+                        ).getOrThrow()
+                    } else {
+                        pollStripeIntentUntilTerminalState(
+                            originalIntent = stripeIntent,
+                            clientSecret = result.clientSecret,
+                            requestOptions = requestOptions,
+                            initialRetrieveIntentStartTime = initialRetrieveIntentStartTime
+                        ).getOrThrow()
+                    }
+
+                    val flowOutcome = determineFlowOutcome(intent, result.flowOutcome)
+                    createStripeIntentResult(
+                        intent,
+                        flowOutcome,
                         failureMessageFactory.create(
                             intent = intent,
                             requestId = requestId,
