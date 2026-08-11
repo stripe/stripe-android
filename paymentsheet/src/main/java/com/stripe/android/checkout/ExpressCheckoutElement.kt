@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.checkout.ece.ExpressCheckoutElementContent
@@ -132,12 +131,14 @@ class ExpressCheckoutElement @Inject internal constructor(
                 Never,
             }
 
-            /** Configures the display configuration for Link. */
+            /** Sets the display configuration for Link. */
             fun display(display: Display): LinkConfiguration = apply {
                 throw NotImplementedError()
             }
 
-            // TODO: javadoc
+            /**
+             * Sets whether Link collects missing billing details for existing payment methods.
+             */
             @CollectMissingLinkBillingDetailsPreview
             fun collectMissingBillingDetailsForExistingPaymentMethods(
                 collectMissingBillingDetailsForExistingPaymentMethods: Boolean
@@ -145,7 +146,9 @@ class ExpressCheckoutElement @Inject internal constructor(
                 throw NotImplementedError()
             }
 
-            // TODO: javadoc
+            /**
+             * Sets the funding source types that Link must not create.
+             */
             @LinkDisallowFundingSourceCreationPreview
             fun disallowFundingSourceCreation(disallowFundingSourceCreation: Set<String>): LinkConfiguration = apply {
                 throw NotImplementedError()
@@ -184,6 +187,8 @@ class ExpressCheckoutElement @Inject internal constructor(
             private var display: Display = Display.Automatic
 
             /**
+             * Sets the label displayed with the amount.
+             *
              * @param label An optional label to display with the amount. Google Pay may or may not display
              * this label depending on its own internal logic. Defaults to a generic label if none is
              * provided.
@@ -204,6 +209,8 @@ class ExpressCheckoutElement @Inject internal constructor(
             }
 
             /**
+             * Sets the display configuration for Google Pay.
+             *
              * @param display The display configuration for Google Pay.
              */
             fun display(display: Display): GooglePayConfiguration = apply {
@@ -211,6 +218,8 @@ class ExpressCheckoutElement @Inject internal constructor(
             }
 
             /**
+             * Sets the Google Pay button type.
+             *
              * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
              * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
              * for more information on button types.
@@ -220,6 +229,8 @@ class ExpressCheckoutElement @Inject internal constructor(
             }
 
             /**
+             * Sets additional card networks that Google Pay can display.
+             *
              * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to
              * display additional enabled networks (e.g. 'INTERAC')
              */
@@ -305,12 +316,18 @@ class ExpressCheckoutElement @Inject internal constructor(
             BillingDetailsCollectionConfiguration()
         private var appearance: Appearance = Appearance()
 
+        /**
+         * Sets whether a shipping address is required.
+         *
+         * @param shippingAddressRequired If true, the customer's shipping address will be collected.
+         * */
         fun shippingAddressRequired(
             shippingAddressRequired: Boolean,
         ): Configuration = apply {
             this.shippingAddressRequired = shippingAddressRequired
         }
 
+        /** Sets how billing details are collected when displaying payment methods. */
         fun billingDetailsCollectionConfiguration(
             billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
         ): Configuration = apply {
@@ -318,7 +335,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         }
 
         /**
-         * Configures the order express payment methods are displayed in.
+         * Sets the order in which express payment methods are displayed.
          *
          * By default, the Express Checkout Element uses a dynamic ordering that optimizes payment method display for
          * each user.
@@ -334,7 +351,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         }
 
         /**
-         * Configuration related to Google Pay.
+         * Sets the configuration for Google Pay.
          *
          * Required to display Google Pay.
          */
@@ -342,11 +359,12 @@ class ExpressCheckoutElement @Inject internal constructor(
             throw NotImplementedError()
         }
 
-        /** Configuration related to Link. */
+        /** Sets the configuration for Link. */
         fun linkConfiguration(linkConfiguration: LinkConfiguration): Configuration {
             throw NotImplementedError()
         }
 
+        /** Sets the appearance of the Express Checkout Element. */
         fun appearance(
             appearance: Appearance
         ): Configuration = apply {
@@ -363,7 +381,7 @@ class ExpressCheckoutElement @Inject internal constructor(
                 private var maxColumns: Int? = null
                 private var maxRows: Int? = null
 
-                /** Defines the maximum number of columns the Express Checkout Element can use to render.
+                /** Sets the maximum number of columns the Express Checkout Element can use to render.
                  *
                  * Defaults to null, meaning unlimited. */
                 fun maxColumns(
@@ -372,7 +390,7 @@ class ExpressCheckoutElement @Inject internal constructor(
                     this.maxColumns = maxColumns
                 }
 
-                /** Defines the maximum number of rows the Express Checkout Element can use to render.
+                /** Sets the maximum number of rows the Express Checkout Element can use to render.
                  *
                  * Defaults to null, meaning unlimited. */
                 fun maxRows(
@@ -407,6 +425,7 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.buttonLayout = buttonLayout
             }
 
+            /** Sets the theme of the express buttons. */
             fun buttonTheme(buttonTheme: ButtonTheme): Appearance {
                 throw NotImplementedError()
             }
