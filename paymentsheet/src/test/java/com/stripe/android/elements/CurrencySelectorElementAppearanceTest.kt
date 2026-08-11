@@ -12,7 +12,7 @@ class CurrencySelectorElementAppearanceTest {
 
     @Test
     fun `default build produces expected defaults`() {
-        val state = CurrencySelectorElement.Appearance().build()
+        val state = CurrencySelectorElement.Configuration.Appearance().build()
 
         assertThat(state.contentVerticalPaddingDp).isEqualTo(4f)
         assertThat(state.cornerRadiusDp).isNull()
@@ -27,12 +27,12 @@ class CurrencySelectorElementAppearanceTest {
         assertThat(state.fontResId).isNull()
         assertThat(state.sizeScaleFactor).isEqualTo(1.0f)
         assertThat(state.labelContent)
-            .isEqualTo(CurrencySelectorElement.Appearance.LabelContent.AUTOMATIC)
+            .isEqualTo(CurrencySelectorElement.Configuration.Appearance.LabelContent.AUTOMATIC)
     }
 
     @Test
     fun `all properties can be set via builder`() {
-        val state = CurrencySelectorElement.Appearance()
+        val state = CurrencySelectorElement.Configuration.Appearance()
             .contentVerticalPaddingDp(12f)
             .cornerRadiusDp(8f)
             .borderWidthDp(2f)
@@ -45,7 +45,7 @@ class CurrencySelectorElementAppearanceTest {
             .dangerColor(Color.Magenta)
             .fontResId(123)
             .sizeScaleFactor(1.5f)
-            .labelContent(CurrencySelectorElement.Appearance.LabelContent.CURRENCY_CODE)
+            .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
             .build()
 
         assertThat(state.contentVerticalPaddingDp).isEqualTo(12f)
@@ -61,12 +61,12 @@ class CurrencySelectorElementAppearanceTest {
         assertThat(state.fontResId).isEqualTo(123)
         assertThat(state.sizeScaleFactor).isEqualTo(1.5f)
         assertThat(state.labelContent)
-            .isEqualTo(CurrencySelectorElement.Appearance.LabelContent.CURRENCY_CODE)
+            .isEqualTo(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
     }
 
     @Test
     fun `textSecondaryColor alpha is clamped to 0_5 minimum`() {
-        val state = CurrencySelectorElement.Appearance()
+        val state = CurrencySelectorElement.Configuration.Appearance()
             .textSecondaryColor(Color.Red.copy(alpha = 0.2f))
             .build()
 
@@ -77,7 +77,7 @@ class CurrencySelectorElementAppearanceTest {
 
     @Test
     fun `textSecondaryColor alpha above 0_5 is preserved`() {
-        val state = CurrencySelectorElement.Appearance()
+        val state = CurrencySelectorElement.Configuration.Appearance()
             .textSecondaryColor(Color.Red.copy(alpha = 0.8f))
             .build()
 
@@ -87,7 +87,7 @@ class CurrencySelectorElementAppearanceTest {
 
     @Test
     fun `textSecondaryColor alpha exactly 0_5 is preserved`() {
-        val state = CurrencySelectorElement.Appearance()
+        val state = CurrencySelectorElement.Configuration.Appearance()
             .textSecondaryColor(Color.Red.copy(alpha = 0.5f))
             .build()
 
@@ -98,7 +98,7 @@ class CurrencySelectorElementAppearanceTest {
     @Test
     fun `sizeScaleFactor of zero throws`() {
         assertFailsWith<IllegalArgumentException> {
-            CurrencySelectorElement.Appearance()
+            CurrencySelectorElement.Configuration.Appearance()
                 .sizeScaleFactor(0f)
         }
     }
@@ -106,7 +106,7 @@ class CurrencySelectorElementAppearanceTest {
     @Test
     fun `sizeScaleFactor of negative value throws`() {
         assertFailsWith<IllegalArgumentException> {
-            CurrencySelectorElement.Appearance()
+            CurrencySelectorElement.Configuration.Appearance()
                 .sizeScaleFactor(-1f)
         }
     }
@@ -114,7 +114,7 @@ class CurrencySelectorElementAppearanceTest {
     @Test
     fun `sizeScaleFactor of infinite value throws`() {
         assertFailsWith<IllegalArgumentException> {
-            CurrencySelectorElement.Appearance()
+            CurrencySelectorElement.Configuration.Appearance()
                 .sizeScaleFactor(Float.POSITIVE_INFINITY)
         }
     }
@@ -122,7 +122,7 @@ class CurrencySelectorElementAppearanceTest {
     @Test
     fun `negative contentVerticalPaddingDp throws`() {
         assertFailsWith<IllegalArgumentException> {
-            CurrencySelectorElement.Appearance()
+            CurrencySelectorElement.Configuration.Appearance()
                 .contentVerticalPaddingDp(-1f)
         }
     }
@@ -130,7 +130,7 @@ class CurrencySelectorElementAppearanceTest {
     @Test
     fun `infinite contentVerticalPaddingDp throws`() {
         assertFailsWith<IllegalArgumentException> {
-            CurrencySelectorElement.Appearance()
+            CurrencySelectorElement.Configuration.Appearance()
                 .contentVerticalPaddingDp(Float.POSITIVE_INFINITY)
         }
     }
@@ -138,7 +138,7 @@ class CurrencySelectorElementAppearanceTest {
     @Test
     fun `negative cornerRadiusDp throws`() {
         assertFailsWith<IllegalArgumentException> {
-            CurrencySelectorElement.Appearance()
+            CurrencySelectorElement.Configuration.Appearance()
                 .cornerRadiusDp(-1f)
         }
     }
@@ -146,7 +146,7 @@ class CurrencySelectorElementAppearanceTest {
     @Test
     fun `infinite cornerRadiusDp throws`() {
         assertFailsWith<IllegalArgumentException> {
-            CurrencySelectorElement.Appearance()
+            CurrencySelectorElement.Configuration.Appearance()
                 .cornerRadiusDp(Float.POSITIVE_INFINITY)
         }
     }
@@ -154,7 +154,7 @@ class CurrencySelectorElementAppearanceTest {
     @Test
     fun `negative borderWidthDp throws`() {
         assertFailsWith<IllegalArgumentException> {
-            CurrencySelectorElement.Appearance()
+            CurrencySelectorElement.Configuration.Appearance()
                 .borderWidthDp(-1f)
         }
     }
@@ -162,14 +162,14 @@ class CurrencySelectorElementAppearanceTest {
     @Test
     fun `infinite borderWidthDp throws`() {
         assertFailsWith<IllegalArgumentException> {
-            CurrencySelectorElement.Appearance()
+            CurrencySelectorElement.Configuration.Appearance()
                 .borderWidthDp(Float.POSITIVE_INFINITY)
         }
     }
 
     @Test
     fun `builder methods are chainable`() {
-        val appearance = CurrencySelectorElement.Appearance()
+        val appearance = CurrencySelectorElement.Configuration.Appearance()
             .contentVerticalPaddingDp(10f)
             .cornerRadiusDp(20f)
             .borderWidthDp(1f)
@@ -182,7 +182,7 @@ class CurrencySelectorElementAppearanceTest {
 
     @Test
     fun `fontResId null clears font`() {
-        val state = CurrencySelectorElement.Appearance()
+        val state = CurrencySelectorElement.Configuration.Appearance()
             .fontResId(123)
             .fontResId(null)
             .build()
@@ -194,13 +194,13 @@ class CurrencySelectorElementAppearanceTest {
     fun `configuration default build uses default appearance`() {
         val state = CurrencySelectorElement.Configuration().build()
 
-        assertThat(state.appearance).isEqualTo(CurrencySelectorElement.Appearance().build())
+        assertThat(state.appearance).isEqualTo(CurrencySelectorElement.Configuration.Appearance().build())
     }
 
     @Test
     fun `configuration carries the supplied appearance`() {
-        val appearance = CurrencySelectorElement.Appearance()
-            .labelContent(CurrencySelectorElement.Appearance.LabelContent.CURRENCY_CODE)
+        val appearance = CurrencySelectorElement.Configuration.Appearance()
+            .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
             .cornerRadiusDp(8f)
 
         val state = CurrencySelectorElement.Configuration()

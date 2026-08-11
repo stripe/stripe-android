@@ -23,7 +23,7 @@ internal class CurrencySelectorToggleScreenshotTest {
         boxModifier = Modifier.padding(all = 16.dp),
     )
 
-    private val defaultAppearance = CurrencySelectorElement.Appearance().build()
+    private val defaultAppearance = CurrencySelectorElement.Configuration.Appearance().build()
 
     private val options = CurrencySelectorOptions(
         first = CurrencyOption(code = "USD", formattedAmount = "$50.99", flag = FlagContent.Emoji("🇺🇸")),
