@@ -74,7 +74,7 @@ internal class EmbeddedFormPage(
         }
     }
 
-    fun clickPrimaryButton() {
+    fun clickPrimaryButton(waitTilEmpty: Boolean = true) {
         waitUntilVisible()
 
         composeTestRule.waitUntil {
@@ -87,10 +87,12 @@ internal class EmbeddedFormPage(
             .performScrollTo()
             .performClick()
 
-        composeTestRule.waitUntil(5.seconds.inWholeMilliseconds) {
-            composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isEmpty()
+        if (waitTilEmpty) {
+            composeTestRule.waitUntil(5.seconds.inWholeMilliseconds) {
+                composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                    .isEmpty()
+            }
         }
 
         composeTestRule.waitForIdle()
