@@ -174,7 +174,7 @@ internal class CurrencySelectorToggleUITest {
                 isEnabled = isEnabled,
                 showCurrencyCode = showCurrencyCode,
                 errorMessage = errorMessage,
-                appearance = CurrencySelectorElement.Appearance().build(),
+                appearance = CurrencySelectorElement.Configuration.Appearance().build(),
             )
         }
 

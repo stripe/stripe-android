@@ -84,8 +84,8 @@ internal class CurrencySelectorElementContentUITest {
     fun currencySelectorConfiguredWithCurrencyCodeLabel_displaysCurrencyCodes() = runScenario(
         configuration = CheckoutController.Configuration().currencySelectorElement(
             CurrencySelectorElement.Configuration().appearance(
-                CurrencySelectorElement.Appearance()
-                    .labelContent(CurrencySelectorElement.Appearance.LabelContent.CURRENCY_CODE)
+                CurrencySelectorElement.Configuration.Appearance()
+                    .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
             )
         ),
     ) {
@@ -107,8 +107,8 @@ internal class CurrencySelectorElementContentUITest {
                 DEFAULT_CLIENT_SECRET,
                 CheckoutController.Configuration().currencySelectorElement(
                     CurrencySelectorElement.Configuration().appearance(
-                        CurrencySelectorElement.Appearance()
-                            .labelContent(CurrencySelectorElement.Appearance.LabelContent.CURRENCY_CODE)
+                        CurrencySelectorElement.Configuration.Appearance()
+                            .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
                     )
                 ),
             ).getOrThrow()
