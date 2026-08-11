@@ -17,8 +17,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
-import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.FormElement
@@ -249,7 +249,7 @@ internal fun checkBillingField(
 ) {
     val billingSection = checkSectionField(formElements, "billing_details[address]_section", position)
     assertThat(billingSection.fields).hasSize(1)
-    assertThat(billingSection.fields[0]).isInstanceOf<AddressElement>()
+    assertThat(billingSection.fields[0]).isInstanceOf<BillingAddressElement>()
 }
 
 internal fun checkSectionField(

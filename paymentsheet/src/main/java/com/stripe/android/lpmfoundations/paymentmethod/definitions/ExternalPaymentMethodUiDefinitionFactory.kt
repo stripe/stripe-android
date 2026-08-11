@@ -9,6 +9,8 @@ import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 internal class ExternalPaymentMethodUiDefinitionFactory(
     private val externalPaymentMethodSpec: ExternalPaymentMethodSpec
 ) : UiDefinitionFactory.Simple() {
+    override val allowsBillingAddressForAutomaticTax: Boolean = false
+
     override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = externalPaymentMethodSpec.type,

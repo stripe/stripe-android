@@ -18,6 +18,8 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalModeForm
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -441,6 +443,90 @@ internal class VerticalModeFormUIScreenshotTest {
                 PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
             }
         }
+    }
+
+    @Test
+    fun klarnaFullBillingAddressForm() {
+        paparazziRule.snapshot {
+            CreateTestScenario(
+                paymentMethodCode = "klarna",
+                metadata = lpmMetadata(
+                    paymentMethodCode = "klarna",
+                    addressCollectionMode =
+                        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    automaticTaxEnabled = false,
+                    collectContacts = false,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun weroFullBillingAddressFormWithContacts() {
+        paparazziRule.snapshot {
+            CreateTestScenario(
+                paymentMethodCode = "wero",
+                metadata = lpmMetadata(
+                    paymentMethodCode = "wero",
+                    addressCollectionMode =
+                        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    automaticTaxEnabled = false,
+                    collectContacts = true,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun cashAppAutomaticTaxBillingAddressForm() {
+        paparazziRule.snapshot {
+            CreateTestScenario(
+                paymentMethodCode = "cashapp",
+                metadata = lpmMetadata(
+                    paymentMethodCode = "cashapp",
+                    addressCollectionMode =
+                        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    automaticTaxEnabled = true,
+                    collectContacts = false,
+                ),
+            )
+        }
+    }
+
+    private fun lpmMetadata(
+        paymentMethodCode: PaymentMethodCode,
+        addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
+        automaticTaxEnabled: Boolean,
+        collectContacts: Boolean,
+    ): PaymentMethodMetadata {
+        val contactMode = if (collectContacts) {
+            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        } else {
+            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+        }
+        return PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf(paymentMethodCode),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = contactMode,
+                email = contactMode,
+                phone = contactMode,
+                address = addressCollectionMode,
+                allowedCountries = setOf("US"),
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                address = PaymentSheet.Address(country = "US"),
+            ),
+            checkoutSessionResponse = if (automaticTaxEnabled) {
+                CheckoutSessionResponseFactory.create(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                )
+            } else {
+                null
+            },
+        )
     }
 
     @Test

@@ -10,13 +10,15 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.ui.core.elements.StaticTextElement
-import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -74,9 +76,11 @@ class KlarnaDefinitionTest {
 
         val countrySection = formElements[2] as SectionElement
         assertThat(countrySection.identifier).isEqualTo(
-            IdentifierSpec.Generic("billing_details[address][country]_section"),
+            IdentifierSpec.Generic("billing_details[address]_section"),
         )
-        val countryElement = countrySection.fields.single() as CountryElement
+        val billingAddressElement = countrySection.fields.single() as BillingAddressElement
+        val countryElement = billingAddressElement.countryElement
+        assertThat(billingAddressElement.identifier).isEqualTo(IdentifierSpec.BillingAddress)
         assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
         assertThat(countryElement.controller.displayItems).containsExactly(
             "🇫🇷 France",
@@ -86,9 +90,38 @@ class KlarnaDefinitionTest {
         assertThat(
             formElements.filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
-                .filterIsInstance<CountryElement>(),
+                .filterIsInstance<BillingAddressElement>(),
         ).hasSize(1)
-        assertThat(countrySection.fields.map { it.identifier }).containsExactly(IdentifierSpec.Country)
+        assertThat(countrySection.fields.map { it.identifier }).containsExactly(IdentifierSpec.BillingAddress)
+    }
+
+    @Test
+    fun `createFormElements promotes country-only source for automatic tax`() {
+        val formElements = KlarnaDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(
+                    paymentMethodTypes = listOf(PaymentMethod.Type.Klarna.code),
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    allowedCountries = setOf("US"),
+                ),
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(country = "US"),
+                ),
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            )
+        )
+
+        val billingAddressElements = formElements.filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<BillingAddressElement>()
+        assertThat(billingAddressElements).hasSize(1)
+        assertThat(billingAddressElements.single().countryElement.controller.displayItems)
+            .containsExactly("🇺🇸 United States")
     }
 
     @Test
@@ -192,12 +225,11 @@ class KlarnaDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(4)
+        assertThat(formElements).hasSize(3)
 
         checkKlarnaHeaderText(formElements, 0)
         checkEmailField(formElements, 1)
-        checkCountryField(formElements, 2)
-        checkBillingField(formElements, 3)
+        checkBillingField(formElements, 2)
     }
 
     @Test
@@ -216,15 +248,14 @@ class KlarnaDefinitionTest {
 
         val formElements = KlarnaDefinition.formElements(metadata = metadata)
 
-        assertThat(formElements).hasSize(7)
+        assertThat(formElements).hasSize(6)
 
         checkKlarnaHeaderText(formElements, 0)
         checkNameField(formElements, 1)
         checkEmailField(formElements, 2)
         checkPhoneField(formElements, 3)
-        checkCountryField(formElements, 4)
-        checkBillingField(formElements, 5)
-        checkMandateField(formElements, metadata, 6)
+        checkBillingField(formElements, 4)
+        checkMandateField(formElements, metadata, 5)
     }
 
     @Test
@@ -285,13 +316,16 @@ class KlarnaDefinitionTest {
     ) {
         val element = formElements[position]
 
-        assertThat(element.identifier.v1).isEqualTo("billing_details[address][country]_section")
+        assertThat(element.identifier.v1).isEqualTo("billing_details[address]_section")
         assertThat(element).isInstanceOf<SectionElement>()
 
         val countrySection = element as SectionElement
 
         assertThat(countrySection.fields).hasSize(1)
-        assertThat(countrySection.fields[0]).isInstanceOf<CountryElement>()
+        val billingAddressElement = countrySection.fields[0]
+        assertThat(billingAddressElement).isInstanceOf<BillingAddressElement>()
+        assertThat((billingAddressElement as BillingAddressElement).countryElement.identifier)
+            .isEqualTo(IdentifierSpec.Country)
     }
 
     private fun checkMandateField(

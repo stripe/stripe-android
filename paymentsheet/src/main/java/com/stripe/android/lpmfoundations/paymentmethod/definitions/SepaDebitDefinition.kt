@@ -63,7 +63,9 @@ private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
                     )
                 )
             )
-            .requireBillingAddressIfAllowed()
+            .requireBillingAddressIfAllowed(
+                availableCountries = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+            )
             .apply {
                 val elements = mutableListOf<FormElement>()
 
