@@ -9,12 +9,11 @@ internal interface AddressLauncherEventReporter {
         editDistance: Int?,
     )
 
-    fun onAutocompleteSessionStarted(country: String, sessionToken: String)
+    fun onAutocompleteSessionStarted(sessionToken: String)
 
     fun onAutocompleteFetchStarted()
 
     fun onAutocompleteSuggestionsReturned(
-        country: String,
         sessionToken: String,
         resultCount: Int,
         source: String?,
@@ -22,13 +21,7 @@ internal interface AddressLauncherEventReporter {
 
     fun onAutocompleteDetailsFetchStarted()
 
-    fun onAutocompleteSelected(
-        country: String,
-        sessionToken: String,
-        queryLength: Int,
-        placeId: String?,
-        source: String?,
-    )
+    fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?, source: String?)
 
-    fun onAutocompleteError(country: String, sessionToken: String, error: Throwable)
+    fun onAutocompleteError(sessionToken: String, error: Throwable)
 }

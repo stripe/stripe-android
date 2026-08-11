@@ -304,9 +304,8 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
 
-        val call = eventReporter.autocompleteSessionStartedCalls.awaitItem()
-        assertThat(call.sessionToken).isNotEmpty()
-        assertThat(call.country).isEqualTo("US")
+        val token = eventReporter.autocompleteSessionStartedCalls.awaitItem()
+        assertThat(token).isNotEmpty()
         repository.findPredictionsCalls.awaitItem()
         eventReporter.autocompleteFetchStartedCalls.awaitItem()
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
@@ -342,7 +341,7 @@ class StripeHostedPlacesClientProxyTest {
         val proxy = createProxy(repository = repository, eventReporter = eventReporter)
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
-        val initialCall = eventReporter.autocompleteSessionStartedCalls.awaitItem()
+        val initialToken = eventReporter.autocompleteSessionStartedCalls.awaitItem()
         repository.findPredictionsCalls.awaitItem()
         eventReporter.autocompleteFetchStartedCalls.awaitItem()
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
@@ -350,8 +349,8 @@ class StripeHostedPlacesClientProxyTest {
         proxy.resetSession()
 
         proxy.findAutocompletePredictions(query = "456 Oak", country = "US", limit = 4)
-        val newCall = eventReporter.autocompleteSessionStartedCalls.awaitItem()
-        assertThat(newCall.sessionToken).isNotEqualTo(initialCall.sessionToken)
+        val newToken = eventReporter.autocompleteSessionStartedCalls.awaitItem()
+        assertThat(newToken).isNotEqualTo(initialToken)
         repository.findPredictionsCalls.awaitItem()
         eventReporter.autocompleteFetchStartedCalls.awaitItem()
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
@@ -372,7 +371,6 @@ class StripeHostedPlacesClientProxyTest {
 
         val suggestionsCall = eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
         assertThat(suggestionsCall.resultCount).isEqualTo(1)
-        assertThat(suggestionsCall.country).isEqualTo("US")
         repository.ensureAllEventsConsumed()
         eventReporter.validate()
     }
