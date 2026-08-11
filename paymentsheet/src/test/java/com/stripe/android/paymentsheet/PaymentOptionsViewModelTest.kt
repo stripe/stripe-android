@@ -15,6 +15,7 @@ import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -70,6 +71,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -112,6 +114,12 @@ internal class PaymentOptionsViewModelTest {
 
     @get:Rule
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @get:Rule
+    val enableKlarnaFormRemovalRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableKlarnaFormRemoval,
+        isEnabled = true,
+    )
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val standardTestDispatcher = StandardTestDispatcher()
@@ -767,6 +775,68 @@ internal class PaymentOptionsViewModelTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `updateSelection retains each new selection by payment method code`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateSelection(NEW_CARD_PAYMENT_SELECTION)
+        viewModel.updateSelection(PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION)
+
+        assertThat(viewModel.getPreviousNewSelection("card")).isEqualTo(NEW_CARD_PAYMENT_SELECTION)
+        assertThat(viewModel.getPreviousNewSelection("us_bank_account"))
+            .isEqualTo(PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `previous new selections survive view model reconstruction`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val originalViewModel = createViewModel(savedStateHandle = savedStateHandle)
+
+        originalViewModel.updateSelection(NEW_CARD_PAYMENT_SELECTION)
+        originalViewModel.updateSelection(PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION)
+
+        val restoredViewModel = createViewModel(savedStateHandle = savedStateHandle)
+
+        assertThat(restoredViewModel.getPreviousNewSelection("card"))
+            .isEqualTo(NEW_CARD_PAYMENT_SELECTION)
+        assertThat(restoredViewModel.getPreviousNewSelection("us_bank_account"))
+            .isEqualTo(PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `form helper restores a previous new selection for a different payment method`() = runTest {
+        val viewModel = createViewModel(args = formHelperArgs())
+        val formHelper = DefaultFormHelper.create(
+            viewModel = viewModel,
+            coroutineScope = viewModel.viewModelScope,
+            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+        )
+
+        viewModel.updateSelection(klarnaSelection(email = "klarna@example.com"))
+        viewModel.updateSelection(NEW_CARD_PAYMENT_SELECTION)
+
+        assertThat(formHelper.formElementsForCode("klarna")[0].getFormFieldValueFlow().value[0].second.value)
+            .isEqualTo("klarna@example.com")
+    }
+
+    @Test
+    fun `form helper prefers a current matching new selection over a previous selection`() = runTest {
+        val viewModel = createViewModel(args = formHelperArgs())
+        val formHelper = DefaultFormHelper.create(
+            viewModel = viewModel,
+            coroutineScope = viewModel.viewModelScope,
+            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+        )
+        viewModel.updateSelection(klarnaSelection(email = "previous@example.com"))
+        viewModel.updateSelection(NEW_CARD_PAYMENT_SELECTION)
+        viewModel.newPaymentSelection = NewPaymentOptionSelection.New(
+            klarnaSelection(email = "current@example.com")
+        )
+
+        assertThat(formHelper.formElementsForCode("klarna")[0].getFormFieldValueFlow().value[0].second.value)
+            .isEqualTo("current@example.com")
     }
 
     @Test
@@ -1451,7 +1521,11 @@ internal class PaymentOptionsViewModelTest {
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customerStateHolder: CustomerStateHolder? = null,
-    ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+    ) = TestViewModelFactory.create(
+        linkConfigurationCoordinator = linkConfigurationCoordinator,
+        savedStateHandle = savedStateHandle,
+    ) { linkHandler, thisSavedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
                 state = args.state.copy(
@@ -1464,7 +1538,7 @@ internal class PaymentOptionsViewModelTest {
             eventReporter = eventReporter,
             savedPaymentMethodRepository = savedPaymentMethodRepository,
             workContext = workContext,
-            savedStateHandle = savedStateHandle,
+            savedStateHandle = thisSavedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkGateFactory = FakeLinkGate.Factory(linkGate),
@@ -1515,6 +1589,39 @@ internal class PaymentOptionsViewModelTest {
             CardBrand.Discover,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
+
+        private fun formHelperArgs(): PaymentOptionContract.Args {
+            return PAYMENT_OPTION_CONTRACT_ARGS.copy(
+                state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PAYMENT_INTENT.copy(
+                            paymentMethodTypes = listOf("card", "klarna"),
+                        ),
+                        billingDetailsCollectionConfiguration =
+                        PaymentSheet.BillingDetailsCollectionConfiguration(
+                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        ),
+                    ),
+                ),
+            )
+        }
+
+        private fun klarnaSelection(email: String): PaymentSelection.New.GenericPaymentMethod {
+            return PaymentSelection.New.GenericPaymentMethod(
+                label = "Klarna".resolvableString,
+                iconResource = 0,
+                iconResourceNight = null,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                paymentMethodCreateParams = PaymentMethodCreateParams.createKlarna(
+                    billingDetails = PaymentMethod.BillingDetails(email = email),
+                ),
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+            )
+        }
+
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,

@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder.Companion.EMBEDDED_TEMPORARY_SELECTION_KEY
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.model.previousNewSelection
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 

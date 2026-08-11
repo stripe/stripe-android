@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.previousNewSelection
+import com.stripe.android.paymentsheet.model.stashNewSelection
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton

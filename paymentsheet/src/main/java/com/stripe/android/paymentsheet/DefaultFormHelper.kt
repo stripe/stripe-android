@@ -65,8 +65,9 @@ internal class DefaultFormHelper(
                 linkInlineHandler = linkInlineHandler,
                 cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
-                newPaymentSelectionProvider = {
-                    viewModel.newPaymentSelection
+                newPaymentSelectionProvider = { code ->
+                    viewModel.newPaymentSelection?.takeIf { it.getPaymentMethodCode() == code }
+                        ?: viewModel.getPreviousNewSelection(code)?.let { NewPaymentOptionSelection.New(it) }
                 },
                 linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
                 selectionUpdater = {

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import android.os.Bundle
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -30,6 +31,8 @@ import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.previousNewSelection
+import com.stripe.android.paymentsheet.model.stashNewSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
@@ -118,6 +121,11 @@ internal abstract class BaseSheetViewModel(
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
+
+    private val previousNewSelections: Bundle = savedStateHandle[PREVIOUS_NEW_SELECTIONS]
+        ?: Bundle().also {
+            savedStateHandle[PREVIOUS_NEW_SELECTIONS] = it
+        }
 
     val processing: StateFlow<Boolean> = savedStateHandle
         .getStateFlow(SAVE_PROCESSING, false)
@@ -223,9 +231,15 @@ internal abstract class BaseSheetViewModel(
         }
 
         savedStateHandle[SAVE_SELECTION] = selection
+        previousNewSelections.stashNewSelection(selection)
+        savedStateHandle[PREVIOUS_NEW_SELECTIONS] = previousNewSelections
 
         updateCvcFlows(selection)
         clearErrorMessages()
+    }
+
+    fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New? {
+        return previousNewSelections.previousNewSelection(code)
     }
 
     private fun updateCvcFlows(selection: PaymentSelection?) {
@@ -267,5 +281,6 @@ internal abstract class BaseSheetViewModel(
     companion object {
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_PROCESSING = "processing"
+        internal const val PREVIOUS_NEW_SELECTIONS = "previous_new_selections"
     }
 }

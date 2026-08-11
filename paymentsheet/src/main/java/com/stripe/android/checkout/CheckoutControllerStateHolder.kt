@@ -7,10 +7,10 @@ import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.previousNewSelection
-import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.previousNewSelection
+import com.stripe.android.paymentsheet.model.stashNewSelection
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject

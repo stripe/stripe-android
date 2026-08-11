@@ -1,9 +1,7 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentsheet.model
 
 import android.os.Bundle
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.paymentMethodType
 
 internal fun Bundle.stashNewSelection(selection: PaymentSelection?) {
     if (selection is PaymentSelection.New) {
