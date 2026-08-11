@@ -1,6 +1,5 @@
 package com.stripe.android.common.nfcscan.ui
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -8,9 +7,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
@@ -53,7 +50,6 @@ internal fun NfcCoilLayout(
             NfcCoil(
                 status = status,
                 onSuccessShown = onSuccessShown,
-                onErrorShown = onErrorShown,
             )
         }
 
@@ -65,7 +61,10 @@ internal fun NfcCoilLayout(
             coilSize = CoilCircleSize,
             deviceRotation = deviceRotation,
             canShow = canShowInstructionText,
-            error = (status as? NfcScanningStatus.Error)?.message,
+            error = NfcCoilError(
+                message = (status as? NfcScanningStatus.Idle)?.message,
+                onShown = onErrorShown,
+            ),
         )
     }
 }
@@ -74,19 +73,9 @@ internal fun NfcCoilLayout(
 private fun NfcCoil(
     status: NfcScanningStatus,
     onSuccessShown: () -> Unit,
-    onErrorShown: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isDarkTheme = isSystemInDarkTheme()
-
-    val animatedColor by animateColorAsState(
-        targetValue = if (status is NfcScanningStatus.Error) {
-            MaterialTheme.colors.error
-        } else {
-            PrimaryButtonTheme.colors.background
-        },
-        label = "colorAnimation"
-    )
 
     val shadow = if (isDarkTheme) {
         Modifier
@@ -98,13 +87,12 @@ private fun NfcCoil(
         modifier = modifier
             .size(CoilCircleSize)
             .then(shadow)
-            .background(color = animatedColor, shape = CircleShape),
+            .background(color = PrimaryButtonTheme.colors.background, shape = CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         NfcCoilAnimatedInterior(
             status = status,
             onSuccessShown = onSuccessShown,
-            onErrorShown = onErrorShown,
             modifier = Modifier.fillMaxSize(),
         )
     }
