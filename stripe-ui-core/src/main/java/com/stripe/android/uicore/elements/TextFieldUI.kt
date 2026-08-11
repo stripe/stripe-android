@@ -72,7 +72,9 @@ import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.compat.CompatTextField
+import com.stripe.android.uicore.isComponentColorDark
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -428,7 +430,7 @@ fun TextFieldColors(
     focusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = disabledIndicatorColor,
     unfocusedIndicatorColor = Color.Transparent,
-    cursorColor = MaterialTheme.stripeColors.textCursor,
+    cursorColor = StripeTheme.getColors(isComponentColorDark()).textCursor,
     errorCursorColor = when (fieldDisplayState) {
         FieldDisplayState.ERROR -> MaterialTheme.colors.error
         FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> MaterialTheme.stripeColors.textCursor
