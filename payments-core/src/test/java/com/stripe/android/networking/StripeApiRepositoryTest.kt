@@ -2765,7 +2765,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `confirmPaymentIntent with user key, saved PM ID, and existing card options preserves cvc and injects moto`() = runTest {
+    fun `confirmPaymentIntent with user key, saved PM ID, and options preserves cvc and injects moto`() = runTest {
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(
                 StripeResponse(
