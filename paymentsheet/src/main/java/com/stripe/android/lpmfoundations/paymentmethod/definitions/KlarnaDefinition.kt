@@ -11,6 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
@@ -114,17 +115,20 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
         builder: FormElementsBuilder
     ) {
         if (metadata.stripeIntent is SetupIntent) {
-            builder
-                .countryOnlyHeader(
+            if (arguments.billingDetailsCollectionConfiguration.address !=
+                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            ) {
+                builder.header(
                     StaticTextElement(
                         IdentifierSpec.Generic("klarna_header_text"),
                         stringResId = R.string.stripe_klarna_buy_now_pay_later
                     )
                 )
-                .countryOnly(
-                    allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                    initialValue = metadata.stripeIntent.countryCode,
-                )
+            }
+            builder.countryOnly(
+                allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                initialValue = metadata.stripeIntent.countryCode,
+            )
         }
 
         if (KlarnaDefinition.requiresMandate(metadata)) {

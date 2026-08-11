@@ -16,7 +16,6 @@ internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
 ) {
     private val headerFormElements: MutableList<FormElement> = mutableListOf()
-    private val countryOnlyHeaderFormElements: MutableList<FormElement> = mutableListOf()
     private val uiFormElements: MutableList<FormElement> = mutableListOf()
     private val footerFormElements: MutableList<FormElement> = mutableListOf()
 
@@ -49,10 +48,6 @@ internal class FormElementsBuilder(
 
     fun header(formElement: FormElement): FormElementsBuilder = apply {
         headerFormElements += formElement
-    }
-
-    fun countryOnlyHeader(formElement: FormElement): FormElementsBuilder = apply {
-        countryOnlyHeaderFormElements += formElement
     }
 
     fun ignoreContactInformationRequirements() = apply {
@@ -113,9 +108,6 @@ internal class FormElementsBuilder(
     fun build(): List<FormElement> {
         return buildList {
             addAll(headerFormElements) // Order headers first.
-            if (isCountryOnlyCollection()) {
-                addAll(countryOnlyHeaderFormElements)
-            }
 
             for (collectionMode in requiredContactInformationCollectionModes) {
                 if (collectionMode !in overriddenContactInformationCollectionModes) {
@@ -124,28 +116,18 @@ internal class FormElementsBuilder(
             }
 
             addAll(uiFormElements)
-            addAll(
-                createBillingAddressElements(
-                    countryOnlyBillingAddress = countryOnlyBillingAddress,
-                    addressCollectionMode = addressCollectionMode,
-                    requireBillingAddressCollection = requireBillingAddressCollection,
-                ),
-            )
+            addAll(createBillingAddressElements())
 
             addAll(footerFormElements) // Order footers last.
         }
     }
 
-    private fun createBillingAddressElements(
-        countryOnlyBillingAddress: CountryOnlyBillingAddress?,
-        addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
-        requireBillingAddressCollection: Boolean,
-    ): List<FormElement> {
+    private fun createBillingAddressElements(): List<FormElement> {
+        val countryOnlyBillingAddress = countryOnlyBillingAddress
         val collectionMode = when {
-            isCountryOnlyCollection(
-                countryOnlyBillingAddress = countryOnlyBillingAddress,
-                addressCollectionMode = addressCollectionMode,
-            ) -> {
+            countryOnlyBillingAddress != null &&
+                addressCollectionMode !=
+                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
                 BillingAddressCollectionMode.Country(emptyMap())
             }
             countryOnlyBillingAddress != null || requireBillingAddressCollection -> {
@@ -153,35 +135,6 @@ internal class FormElementsBuilder(
             }
             else -> return emptyList()
         }
-
-        return createBillingAddressElements(
-            collectionMode = collectionMode,
-            allowedCountryCodes = countryOnlyBillingAddress?.allowedCountryCodes ?: availableCountries,
-            initialCountry = countryOnlyBillingAddress?.initialValue,
-        )
-    }
-
-    private fun isCountryOnlyCollection(): Boolean {
-        return isCountryOnlyCollection(
-            countryOnlyBillingAddress = countryOnlyBillingAddress,
-            addressCollectionMode = addressCollectionMode,
-        )
-    }
-
-    private fun isCountryOnlyCollection(
-        countryOnlyBillingAddress: CountryOnlyBillingAddress?,
-        addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
-    ): Boolean {
-        return countryOnlyBillingAddress != null &&
-            addressCollectionMode !=
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-    }
-
-    private fun createBillingAddressElements(
-        collectionMode: BillingAddressCollectionMode,
-        allowedCountryCodes: Set<String>,
-        initialCountry: String?,
-    ): List<FormElement> {
         val sameAsShippingElement = collectionMode.takeIf {
             it == BillingAddressCollectionMode.Full
         }?.let {
@@ -194,7 +147,7 @@ internal class FormElementsBuilder(
                     )
                 }
         }
-        val rawValues = initialCountry?.let {
+        val rawValues = countryOnlyBillingAddress?.initialValue?.let {
             arguments.initialValues + (IdentifierSpec.Country to it)
         } ?: arguments.initialValues
         val billingAddressElement = BillingAddressElement(
@@ -204,7 +157,7 @@ internal class FormElementsBuilder(
                 BillingAddressCollectionMode.Never -> IdentifierSpec.BillingAddress
             },
             rawValuesMap = rawValues,
-            countryCodes = allowedCountryCodes,
+            countryCodes = countryOnlyBillingAddress?.allowedCountryCodes ?: availableCountries,
             autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = arguments.shippingValues,
