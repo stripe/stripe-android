@@ -32,7 +32,7 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
 - Present identification document verification using `verifyIdentity()`
 
 **Wallets and payment methods**:
-- Register crypto wallet addresses with `registerWalletAddress(walletAddress:network:)`
+- Register and delete crypto wallets with `registerWalletAddress(walletAddress:network:)` and `deleteWalletAddress(walletId:)`
 - Collect payment methods via Link (card, bank account), Google Pay, or Samsung Pay with `collectPaymentMethod(...)`
 - Create crypto payment tokens with `createCryptoPaymentToken()`
 
