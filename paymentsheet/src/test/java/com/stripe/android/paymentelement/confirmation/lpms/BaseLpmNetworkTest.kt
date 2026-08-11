@@ -16,7 +16,7 @@ import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.M
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.PublishableKeyFetcher
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ShampooRule
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -40,7 +40,7 @@ internal open class BaseLpmNetworkTest(
         .around(createTestActivityRule<LpmNetworkTestActivity>())
         .around(IntentsRule())
         .around(PaymentElementCallbackTestRule())
-        .around(RetryRule(attempts = 3))
+        .around(ShampooRule(iterations = 5))
 
     fun test(
         testType: TestType,
