@@ -1,28 +1,17 @@
 package com.stripe.android.checkout
 
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.Modifier
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
-import com.stripe.android.checkouttesting.checkoutInit
-import com.stripe.android.elements.PaymentElement
+import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.utils.TestRules
-import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -44,46 +33,12 @@ internal class CheckoutPaymentElementTest {
 
     @Test
     fun testBackingOutOfFormPreservesPreviouslySelectedPaymentMethod() {
-        networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-init.json") { json ->
-                json.put("customer_email", "checkout@example.com")
-                json.getJSONObject("elements_session").remove("link_settings")
-            }
-        }
-
-        var checkoutResult: CheckoutController.Result? = null
-
-        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            scenario.moveToState(Lifecycle.State.CREATED)
-
-            lateinit var controller: CheckoutController
-            scenario.onActivity { activity ->
-                PaymentConfiguration.init(activity, "pk_test_123")
-                controller = CheckoutController.Builder(
-                    application = activity.application,
-                    savedStateHandle = SavedStateHandle(),
-                ).resultCallback { result ->
-                    checkoutResult = result
-                }.build()
-            }
-
-            runBlocking {
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            setup = { controller ->
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
-            }
-            controller.clearPaymentOption().getOrThrow()
-
-            lateinit var paymentElement: PaymentElement
-            scenario.onActivity { activity ->
-                paymentElement = controller.createPresenter(activity).paymentElement()
-                activity.setContent {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        paymentElement.PaymentOptionsContent()
-                    }
-                }
-            }
-
-            scenario.moveToState(Lifecycle.State.RESUMED)
-
+            },
+        ) { context ->
             // Open the card form, then back out without entering any details.
             contentPage.clickOnLpm("card")
             formPage.waitUntilVisible()
@@ -102,10 +57,32 @@ internal class CheckoutPaymentElementTest {
 
             // Backing out of the form must not clear the previously selected payment method.
             contentPage.assertHasSelectedLpm("cashapp")
-            assertThat(checkoutResult).isNull()
-
-            controller.destroy()
+            context.markTestSucceeded()
         }
+    }
+
+    @Test
+    fun testSuccessfulCardPayment() {
+        var checkoutResult: CheckoutController.Result? = null
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            setup = { controller ->
+                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+            },
+        ) { context ->
+            networkRule.createPaymentMethod()
+            networkRule.checkoutConfirm { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            contentPage.clickOnLpm("card")
+            formPage.fillOutCardDetails()
+            formPage.clickPrimaryButton()
+            context.confirm()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
     }
 
     private companion object {
