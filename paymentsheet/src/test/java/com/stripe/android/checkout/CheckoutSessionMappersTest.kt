@@ -279,6 +279,34 @@ class CheckoutSessionMappersTest {
         assertThat(session.shippingOptions).isEmpty()
     }
 
+    @Test
+    fun `currency selector is unavailable when adaptive pricing is absent`() {
+        val session = createSession()
+
+        assertThat(session.isCurrencySelectorAvailable).isFalse()
+    }
+
+    @Test
+    fun `currency selector is available when adaptive pricing has a local currency option`() {
+        val session = createSession(
+            adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+                activePresentmentCurrency = "usd",
+                integrationAmount = 5099L,
+                integrationCurrency = "eur",
+                localCurrencyOptions = listOf(
+                    CheckoutSessionResponse.LocalCurrencyOption(
+                        amount = 6106L,
+                        conversionMarkupBps = 150,
+                        currency = "usd",
+                        presentmentExchangeRate = "1.19749",
+                    ),
+                ),
+            ),
+        )
+
+        assertThat(session.isCurrencySelectorAvailable).isTrue()
+    }
+
     private fun createSession(
         id: String = DEFAULT_CHECKOUT_SESSION_ID,
         status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
@@ -289,6 +317,7 @@ class CheckoutSessionMappersTest {
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
+        adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
     ): Session {
         return CheckoutSessionResponseFactory.create(
             id = id,
@@ -300,6 +329,7 @@ class CheckoutSessionMappersTest {
             totalSummary = totalSummary,
             lineItems = lineItems,
             shippingOptions = shippingOptions,
+            adaptivePricingInfo = adaptivePricingInfo,
         ).asCheckoutSession(
             flagImages = null,
             paymentOptionDisplayData = null,

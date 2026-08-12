@@ -415,6 +415,11 @@ class CheckoutController @Inject internal constructor(
         val isExpressCheckoutElementAvailable: Boolean = availableExpressButtonTypes.isNotEmpty()
 
         /**
+         * Whether Currency Selector Element has content to display for this checkout session.
+         */
+        val isCurrencySelectorAvailable: Boolean = currencySelectorOptions != null
+
+        /**
          * The status of a checkout session.
          */
         @CheckoutSessionPreview
