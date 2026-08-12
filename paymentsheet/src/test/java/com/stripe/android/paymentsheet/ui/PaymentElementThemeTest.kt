@@ -49,6 +49,7 @@ internal class PaymentElementThemeTest {
     @Config(qualifiers = "notnight")
     fun `always dark provides dark appearance independently of system theme`() = runScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+        colorsDark = DEFAULT_DARK_COLORS,
     ) {
         assertThat(isDark).isTrue()
         assertThat(contextIsDark).isTrue()
@@ -62,17 +63,30 @@ internal class PaymentElementThemeTest {
         assertThat(textFieldInsets).isEqualTo(FormInsets(start = 5f, top = 6f, end = 7f, bottom = 8f))
         assertThat(iconStyle).isEqualTo(IconStyle.Outlined)
         assertThat(verticalModeRowPadding).isEqualTo(9f)
+        assertThat(iconUrl).isEqualTo(DARK_ICON_URL)
     }
 
     @Test
     @Config(qualifiers = "night")
     fun `always light provides light appearance independently of system theme`() = runScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+        colorsDark = DEFAULT_DARK_COLORS,
     ) {
         assertThat(isDark).isFalse()
         assertThat(contextIsDark).isFalse()
         assertThat(colors.materialColors.primary).isEqualTo(LIGHT_PRIMARY)
         assertThat(primaryButtonStyle.colorsLight.background).isEqualTo(LIGHT_BUTTON)
+        assertThat(iconUrl).isEqualTo(LIGHT_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `always dark with light component uses light icon for contrast`() = runScenario(
+        themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+        colorsDark = LIGHT_COMPONENT_DARK_COLORS,
+    ) {
+        assertThat(isDark).isTrue()
+        assertThat(iconUrl).isEqualTo(LIGHT_ICON_URL)
     }
 
     @Test
@@ -87,7 +101,10 @@ internal class PaymentElementThemeTest {
 
     @Test
     fun `parse appearance applies immutable values to legacy theme`() {
-        val appearance = createAppearance(PaymentSheet.ThemeMode.Automatic)
+        val appearance = createAppearance(
+            themeMode = PaymentSheet.ThemeMode.Automatic,
+            colorsDark = DEFAULT_DARK_COLORS,
+        )
         val expected = appearance.toPaymentElementThemeValues()
 
         try {
@@ -112,12 +129,18 @@ internal class PaymentElementThemeTest {
 
     private fun runScenario(
         themeMode: PaymentSheet.ThemeMode,
+        colorsDark: PaymentSheet.Colors,
         block: ThemeSnapshot.() -> Unit,
     ) {
         var snapshot: ThemeSnapshot? = null
 
         composeRule.setContent {
-            PaymentElementTheme(appearance = createAppearance(themeMode)) {
+            PaymentElementTheme(
+                appearance = createAppearance(
+                    themeMode = themeMode,
+                    colorsDark = colorsDark,
+                )
+            ) {
                 snapshot = ThemeSnapshot(
                     isDark = MaterialTheme.stripeThemeIsDark,
                     contextIsDark = androidx.compose.ui.platform.LocalContext.current.isSystemDarkTheme(),
@@ -130,6 +153,10 @@ internal class PaymentElementThemeTest {
                     textFieldInsets = LocalTextFieldInsets.current,
                     iconStyle = LocalIconStyle.current,
                     verticalModeRowPadding = MaterialTheme.stripeVerticalModeRowPadding,
+                    iconUrl = IconHelper.iconUrl(
+                        lightThemeIconUrl = LIGHT_ICON_URL,
+                        darkThemeIconUrl = DARK_ICON_URL,
+                    ),
                 )
             }
         }
@@ -138,10 +165,13 @@ internal class PaymentElementThemeTest {
         requireNotNull(snapshot).apply(block)
     }
 
-    private fun createAppearance(themeMode: PaymentSheet.ThemeMode): PaymentSheet.Appearance {
+    private fun createAppearance(
+        themeMode: PaymentSheet.ThemeMode,
+        colorsDark: PaymentSheet.Colors,
+    ): PaymentSheet.Appearance {
         return PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = LIGHT_PRIMARY),
-            colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = DARK_PRIMARY),
+            colorsDark = colorsDark,
             themeMode = themeMode,
             shapes = PaymentSheet.Shapes(
                 cornerRadiusDp = 12f,
@@ -194,6 +224,7 @@ internal class PaymentElementThemeTest {
         val textFieldInsets: FormInsets,
         val iconStyle: IconStyle,
         val verticalModeRowPadding: Float,
+        val iconUrl: String?,
     )
 
     private companion object {
@@ -201,5 +232,14 @@ internal class PaymentElementThemeTest {
         val DARK_PRIMARY = Color(0xFF654321)
         val LIGHT_BUTTON = Color(0xFFABCDEF)
         val DARK_BUTTON = Color(0xFFFEDCBA)
+        val DEFAULT_DARK_COLORS = PaymentSheet.Colors.Builder.dark()
+            .primary(DARK_PRIMARY)
+            .build()
+        val LIGHT_COMPONENT_DARK_COLORS = PaymentSheet.Colors.Builder.dark()
+            .primary(DARK_PRIMARY)
+            .component(Color.Yellow)
+            .build()
+        const val LIGHT_ICON_URL = "light_icon_url"
+        const val DARK_ICON_URL = "dark_icon_url"
     }
 }
