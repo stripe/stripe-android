@@ -2765,43 +2765,46 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `confirmPaymentIntent with user key, saved PM ID, and options preserves cvc and injects moto`() = runTest {
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(
-                StripeResponse(
-                    200,
-                    PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
-                    emptyMap()
+    fun `confirmPaymentIntent with user key, saved PM ID, and options preserves setupFutureUsage and injects moto`() =
+        runTest {
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                        emptyMap()
+                    )
                 )
+
+            val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                paymentMethodId = "pm_card_visa",
+                clientSecret = "pi_12345_secret_fake",
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                ),
             )
 
-        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
-            paymentMethodId = "pm_card_visa",
-            clientSecret = "pi_12345_secret_fake",
-            paymentMethodOptions = PaymentMethodOptionsParams.Card(cvc = "123"),
-        )
+            create().confirmPaymentIntent(
+                confirmPaymentIntentParams = confirmParams,
+                options = DEFAULT_OPTIONS.copy(apiKey = "uk_12345"),
+            )
 
-        create().confirmPaymentIntent(
-            confirmPaymentIntentParams = confirmParams,
-            options = DEFAULT_OPTIONS.copy(apiKey = "uk_12345"),
-        )
+            verify(stripeNetworkClient, times(1))
+                .executeRequest(apiRequestArgumentCaptor.capture())
 
-        verify(stripeNetworkClient, times(1))
-            .executeRequest(apiRequestArgumentCaptor.capture())
+            val request = apiRequestArgumentCaptor.firstValue
+            val params = requireNotNull(request.params)
 
-        val request = apiRequestArgumentCaptor.firstValue
-        val params = requireNotNull(request.params)
-
-        with(params) {
-            assertThat(this["use_stripe_sdk"]).isEqualTo(true)
-            withNestedParams("payment_method_options") {
-                withNestedParams("card") {
-                    assertThat(this["moto"]).isEqualTo(true)
-                    assertThat(this["cvc"]).isEqualTo("123")
+            with(params) {
+                assertThat(this["use_stripe_sdk"]).isEqualTo(true)
+                withNestedParams("payment_method_options") {
+                    withNestedParams("card") {
+                        assertThat(this["moto"]).isEqualTo(true)
+                        assertThat(this["setup_future_usage"]).isEqualTo("off_session")
+                    }
                 }
             }
         }
-    }
 
     @Test
     fun `confirmPaymentIntent with publishable key and saved PM ID does not inject moto`() = runTest {

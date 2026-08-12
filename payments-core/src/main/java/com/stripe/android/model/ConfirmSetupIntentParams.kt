@@ -8,7 +8,6 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDAT
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
@@ -91,7 +90,6 @@ constructor(
         mandateData: MandateDataParams? = this.mandateData,
         setAsDefaultPaymentMethod: Boolean? = this.setAsDefaultPaymentMethod,
         paymentMethodCode: PaymentMethodCode? = this.paymentMethodCode,
-        paymentMethodOptions: PaymentMethodOptionsParams? = this.paymentMethodOptions,
         radarOptions: RadarOptions? = this.radarOptions,
         clientAttributionMetadata: ClientAttributionMetadata? = this.clientAttributionMetadata,
         confirmationTokenId: String? = this.confirmationTokenId,
@@ -106,7 +104,6 @@ constructor(
             mandateData = mandateData,
             setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
             paymentMethodCode = paymentMethodCode,
-            paymentMethodOptions = paymentMethodOptions,
             radarOptions = radarOptions,
             clientAttributionMetadata = clientAttributionMetadata,
             confirmationTokenId = confirmationTokenId,
@@ -140,10 +137,6 @@ constructor(
         ).plus(
             radarOptions?.let {
                 mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
-            }.orEmpty()
-        ).plus(
-            paymentMethodOptions?.let {
-                mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it.toParamMap())
             }.orEmpty()
         ).plus(
             paymentMethodParamMap

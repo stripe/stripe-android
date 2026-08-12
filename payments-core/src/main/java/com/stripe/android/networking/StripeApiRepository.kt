@@ -70,7 +70,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessagePromotionList
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
@@ -1977,21 +1976,22 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return Result.success(this)
         }
 
-        // Saved payment method: inject moto directly into existing options.
-        if (paymentMethodCreateParams == null) {
-            return Result.success(withMoto())
+        val paymentMethodIdResult = if (paymentMethodId != null) {
+            Result.success(paymentMethodId)
+        } else if (paymentMethodCreateParams != null) {
+            // New payment method: create the PM first, then build Dashboard params.
+            createPaymentMethod(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                options = options,
+            ).map { it.id }
+        } else {
+            return Result.success(this)
         }
 
-        // New payment method: create the PM first, then build Dashboard params.
-        val paymentMethodResult = createPaymentMethod(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            options = options,
-        )
-
-        return paymentMethodResult.mapCatching { paymentMethod ->
+        return paymentMethodIdResult.mapCatching { paymentMethod ->
             ConfirmPaymentIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id,
+                paymentMethodId = paymentMethod,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }
@@ -2004,36 +2004,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return Result.success(this)
         }
 
-        if (paymentMethodCreateParams == null) {
+        val paymentMethodIdResult = if (paymentMethodId != null) {
+            Result.success(paymentMethodId)
+        } else if (paymentMethodCreateParams != null) {
+            // New payment method: create the PM first, then build Dashboard params.
+            createPaymentMethod(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                options = options,
+            ).map { it.id }
+        } else {
             return Result.success(this)
         }
 
-        // New payment method: create the PM first, then build Dashboard params.
-        val paymentMethodResult = createPaymentMethod(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            options = options,
-        )
-
-        return paymentMethodResult.mapCatching { paymentMethod ->
+        return paymentMethodIdResult.mapCatching { paymentMethod ->
             ConfirmSetupIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id,
+                paymentMethodId = paymentMethod,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }
-    }
-
-    private fun ConfirmPaymentIntentParams.withMoto(): ConfirmPaymentIntentParams {
-        val existing = paymentMethodOptions as? PaymentMethodOptionsParams.Card
-        return copy(
-            paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                cvc = existing?.cvc,
-                network = existing?.network,
-                setupFutureUsage = existing?.setupFutureUsage,
-                moto = true,
-            ),
-            useStripeSdk = true,
-        )
     }
 
     private fun Result<StripeResponse<String>>.errorMessage(
