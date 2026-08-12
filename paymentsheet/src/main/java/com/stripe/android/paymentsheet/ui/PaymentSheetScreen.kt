@@ -79,11 +79,13 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
+import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
+import com.stripe.android.uicore.stripePrimaryButtonStyle
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 
@@ -336,7 +338,7 @@ private fun PaymentSheetContent(
     mandateText: MandateText?,
     modifier: Modifier
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
@@ -419,7 +421,7 @@ internal fun Wallet(
     cardBrandFilter: CardBrandFilter,
     cardFundingFilter: CardFundingFilter
 ) {
-    val padding = StripeTheme.getOuterFormInsets()
+    val padding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     Column(modifier = modifier.padding(padding)) {
         WalletHeader(
@@ -498,7 +500,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState by viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
-        .padding(StripeTheme.getOuterFormInsets())
+        .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button
@@ -513,6 +515,9 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     }
 
     val context = LocalContext.current
+    val primaryButtonStyle = MaterialTheme.stripePrimaryButtonStyle
+    val primaryButtonTextStyle = primaryButtonStyle.getComposeTextStyle()
+    val isDark = MaterialTheme.stripeThemeIsDark
 
     Box {
         AndroidViewBinding(
@@ -521,13 +526,14 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
                 val primaryButton = binding.primaryButton
                 button = primaryButton
                 primaryButton.setAppearanceConfiguration(
-                    StripeTheme.primaryButtonStyle,
+                    primaryButtonStyle = primaryButtonStyle,
+                    labelTextStyle = primaryButtonTextStyle,
                     tintList = ColorStateList.valueOf(
-                        if (context.isSystemDarkTheme()) {
+                        if (isDark) {
                             viewModel.config.appearance.primaryButton.colorsDark.background
                         } else {
                             viewModel.config.appearance.primaryButton.colorsLight.background
-                        } ?: StripeTheme.primaryButtonStyle.getBackgroundColor(context)
+                        } ?: primaryButtonStyle.getBackgroundColor(context)
                     )
                 )
                 binding

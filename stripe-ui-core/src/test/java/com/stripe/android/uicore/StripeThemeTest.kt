@@ -72,10 +72,13 @@ internal class StripeThemeTest {
                 colors = StripeThemeDefaults.colors(isDark),
                 shapes = StripeThemeDefaults.shapes,
                 typography = StripeThemeDefaults.typography,
+                primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle,
+                formInsets = StripeThemeDefaults.formInsets,
                 sectionSpacing = StripeThemeDefaults.sectionSpacing,
                 sectionStyle = StripeThemeDefaults.sectionStyle,
                 textFieldInsets = StripeThemeDefaults.textFieldInsets,
                 iconStyle = StripeThemeDefaults.iconStyle,
+                verticalModeRowPadding = StripeThemeDefaults.verticalModeRowPadding,
             ) {
                 providedIsDark = MaterialTheme.stripeThemeIsDark
             }
