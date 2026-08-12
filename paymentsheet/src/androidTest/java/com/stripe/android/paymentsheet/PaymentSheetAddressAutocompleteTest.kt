@@ -188,7 +188,7 @@ class PaymentSheetAddressAutocompleteTest {
     }
 
     private fun fillOutAutocompletePage() {
-        paymentSheetPage.fillOutFieldWithLabel(label = "Address", "Main Street")
+        paymentSheetPage.clickAndFillField(label = "Address", text = "Main Street")
         paymentSheetPage.waitForText(text = "Enter address manually")
 
         paymentSheetPage.waitForText(SELECTING_ADDRESS_SECONDARY_TEXT)

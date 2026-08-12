@@ -122,6 +122,16 @@ internal class PaymentSheetPage(
         replaceText(label, text)
     }
 
+    fun clickAndFillField(label: String, text: String) {
+        waitForText(label)
+        composeTestRule.onNode(hasText(label))
+            .performScrollTo()
+            .performTextReplacement(text)
+        composeTestRule.waitForIdle()
+        composeTestRule.onNode(hasText(text))
+            .performClick()
+    }
+
     fun clickSavedCard(last4: String) {
         val savedCardTagMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
             .and(hasText(last4, substring = true))
