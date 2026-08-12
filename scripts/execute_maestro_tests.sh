@@ -52,6 +52,7 @@ export MAESTRO_VERSION=2.6.1
 # Retry mechanism for Maestro installation
 MAX_RETRIES=5
 RETRY_COUNT=0
+FAILED_TESTS=()
 
 while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
     curl -Ls "https://get.maestro.mobile.dev" | bash &&
@@ -109,8 +110,9 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
         fi
         echo "Maestro test attempt $ATTEMPT failed. Retrying..."
         if [ "$ATTEMPT" -eq "$MAX_RETRIES" ]; then
-          echo "Maestro tests failed after $MAX_RETRIES attempts."
-          exit 1
+          echo "Maestro test $TEST_NAME failed after $MAX_RETRIES attempts."
+          FAILED_TESTS+=("$TEST_NAME")
+          break
         fi
       done
     else
@@ -118,3 +120,8 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
     fi
   fi
 done
+
+if [ "${#FAILED_TESTS[@]}" -gt 0 ]; then
+  printf 'Maestro flows failed after retries: %s\n' "${FAILED_TESTS[*]}"
+  exit 1
+fi
