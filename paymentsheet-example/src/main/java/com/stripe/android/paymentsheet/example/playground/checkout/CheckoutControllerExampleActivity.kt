@@ -76,7 +76,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                 if (session.isExpressCheckoutElementAvailable) {
                                     presenter.expressCheckoutElement().Content()
                                 }
-                                paymentElement.PaymentOptionsContent()
+                                paymentElement.Content()
                             }
                         }
                     }
@@ -86,7 +86,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                     PaymentOptionRow(configured?.session?.paymentOptionDisplayData)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = { paymentElement.presentPaymentOptions() },
+                        onClick = { paymentElement.present() },
                         enabled = configured != null,
                         modifier = Modifier.fillMaxWidth(),
                     ) {

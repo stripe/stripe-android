@@ -80,7 +80,7 @@ internal fun runCheckoutPaymentElementTest(
             val paymentElement = presenter.paymentElement()
             activity.setContent {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    paymentElement.PaymentOptionsContent()
+                    paymentElement.Content()
                 }
             }
         }
