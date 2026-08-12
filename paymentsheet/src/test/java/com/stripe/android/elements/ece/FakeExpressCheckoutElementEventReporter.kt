@@ -1,4 +1,4 @@
-package com.stripe.android.checkout.ece
+package com.stripe.android.elements.ece
 
 import app.cash.turbine.Turbine
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler

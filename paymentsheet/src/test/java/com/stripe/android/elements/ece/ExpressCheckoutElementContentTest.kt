@@ -1,4 +1,4 @@
-package com.stripe.android.checkout.ece
+package com.stripe.android.elements.ece
 
 import android.content.Context
 import androidx.compose.ui.test.junit4.createComposeRule

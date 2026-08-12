@@ -1,4 +1,4 @@
-package com.stripe.android.checkout.ece
+package com.stripe.android.elements.ece
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

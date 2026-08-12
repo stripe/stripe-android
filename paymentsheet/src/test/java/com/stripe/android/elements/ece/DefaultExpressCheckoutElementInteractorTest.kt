@@ -1,4 +1,4 @@
-package com.stripe.android.checkout.ece
+package com.stripe.android.elements.ece
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
@@ -8,8 +8,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
-import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder

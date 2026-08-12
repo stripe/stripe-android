@@ -1,10 +1,10 @@
-package com.stripe.android.checkout
+package com.stripe.android.elements
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
-import com.stripe.android.checkout.ece.ExpressCheckoutElementContent
-import com.stripe.android.checkout.ece.ExpressCheckoutElementInteractor
+import com.stripe.android.elements.ece.ExpressCheckoutElementContent
+import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject

@@ -1,6 +1,6 @@
 @file:OptIn(CheckoutSessionPreview::class)
 
-package com.stripe.android.checkout.ece
+package com.stripe.android.elements.ece
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.core.networking.AnalyticsEvent
