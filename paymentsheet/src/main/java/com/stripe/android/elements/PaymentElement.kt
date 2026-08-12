@@ -23,7 +23,7 @@ class PaymentElement @Inject internal constructor(
      * It can present a sheet to collect more details or display saved payment methods.
      */
     @Composable
-    fun PaymentOptionsContent() {
+    fun Content() {
         val embeddedContent by contentHelper.embeddedContent.collectAsState()
         embeddedContent?.Content()
     }
@@ -31,7 +31,7 @@ class PaymentElement @Inject internal constructor(
     /**
      * Presents a sheet for the customer to select or manage their payment method.
      */
-    fun presentPaymentOptions() {
+    fun present() {
         contentHelper.presentPaymentOptions()
     }
 
@@ -44,7 +44,7 @@ class PaymentElement @Inject internal constructor(
         private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
 
         /**
-         * Controls whether [PaymentOptionsContent] displays mandate text below the payment methods.
+         * Controls whether [Content] displays mandate text below the payment methods.
          * Defaults to `true`.
          *
          * When set to `false`, you must display
@@ -69,7 +69,7 @@ class PaymentElement @Inject internal constructor(
         /**
          * The layout of payment methods in the sheet. Defaults to [PaymentMethodLayout.Automatic].
          *
-         * Note: Only used if you call `presentPaymentOptions`.
+         * Note: Only used if you call [present].
          *
          * @see [PaymentMethodLayout] for the list of available layouts.
          */
