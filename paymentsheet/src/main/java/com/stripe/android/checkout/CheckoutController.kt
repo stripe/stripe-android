@@ -796,7 +796,7 @@ class CheckoutController @Inject internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
-        private var adaptivePricingAllowed: Boolean = false
+        private var adaptivePricing: AdaptivePricing = AdaptivePricing()
         private var apiConfiguration: ApiConfiguration? = null
         private var merchantDisplayName: String? = null
         private var googlePayConfiguration: GooglePayConfiguration? = null
@@ -810,12 +810,12 @@ class CheckoutController @Inject internal constructor(
             ExpressCheckoutElement.Configuration()
 
         /**
-         * Sets whether adaptive pricing is allowed for this checkout session.
+         * Sets the adaptive pricing configuration for this checkout session.
          */
-        fun adaptivePricingAllowed(
-            adaptivePricingAllowed: Boolean
+        fun adaptivePricing(
+            adaptivePricing: AdaptivePricing,
         ): Configuration = apply {
-            this.adaptivePricingAllowed = adaptivePricingAllowed
+            this.adaptivePricing = adaptivePricing
         }
 
         /**
@@ -910,7 +910,7 @@ class CheckoutController @Inject internal constructor(
         internal fun build(): State {
             val defaultsState = defaults.build()
             return State(
-                adaptivePricingAllowed = adaptivePricingAllowed,
+                adaptivePricingAllowed = adaptivePricing.build().allowed,
                 apiConfiguration = apiConfiguration?.build(),
                 merchantDisplayName = merchantDisplayName,
                 paymentElementConfiguration = paymentElementConfiguration.build(),
@@ -919,6 +919,30 @@ class CheckoutController @Inject internal constructor(
                 expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
                 googlePayConfiguration = googlePayConfiguration?.build(),
                 defaults = defaultsState,
+            )
+        }
+
+        /**
+         * Configuration for adaptive pricing.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class AdaptivePricing {
+            private var allowed: Boolean = false
+
+            /**
+             * Sets whether adaptive pricing is allowed for this checkout session.
+             */
+            fun allowed(allowed: Boolean): AdaptivePricing = apply {
+                this.allowed = allowed
+            }
+
+            internal fun build(): State = State(
+                allowed = allowed,
+            )
+
+            internal data class State(
+                val allowed: Boolean,
             )
         }
 
