@@ -74,7 +74,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
-                                if (session.availableExpressCheckoutPaymentMethods.contains(ExpressCheckoutElement.PaymentMethod.GooglePay())) {
+                                if (session.availableExpressCheckoutPaymentMethods.any { it is ExpressCheckoutElement.PaymentMethod.GooglePay }) {
                                     presenter.expressCheckoutElement().Content()
                                 }
                                 paymentElement.PaymentOptionsContent()

@@ -28,10 +28,10 @@ class ExpressCheckoutElement @Inject internal constructor(
     abstract class PaymentMethod private constructor() : Parcelable {
 
         @Parcelize
-        class GooglePay : PaymentMethod()
+        class GooglePay internal constructor() : PaymentMethod()
 
         @Parcelize
-        class Link : PaymentMethod()
+        class Link internal constructor() : PaymentMethod()
     }
 
     @CheckoutSessionPreview
