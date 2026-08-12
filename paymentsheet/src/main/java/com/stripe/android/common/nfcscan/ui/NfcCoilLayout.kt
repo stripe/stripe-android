@@ -53,6 +53,8 @@ internal fun NfcCoilLayout(
             )
         }
 
+        val idleStatus = status as? NfcScanningStatus.Idle
+
         NfcCoilTextLayout(
             containerWidth = maxWidth,
             containerHeight = maxHeight,
@@ -61,10 +63,12 @@ internal fun NfcCoilLayout(
             coilSize = CoilCircleSize,
             deviceRotation = deviceRotation,
             canShow = canShowInstructionText,
-            error = NfcCoilError(
-                message = (status as? NfcScanningStatus.Idle)?.message,
-                onShown = onErrorShown,
-            ),
+            error = idleStatus?.message?.let { message ->
+                ErrorBannerParams(
+                    message = message,
+                    onShown = onErrorShown,
+                )
+            },
         )
     }
 }

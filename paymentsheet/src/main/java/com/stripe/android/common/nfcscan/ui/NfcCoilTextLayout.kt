@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.nfcscan.tapzone.TapZone
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
 import kotlin.math.roundToInt
 
@@ -38,15 +37,12 @@ internal fun NfcCoilTextLayout(
     deviceRotation: DeviceRotation,
     shouldRenderTextAboveCoil: Boolean,
     canShow: Boolean,
-    error: NfcCoilError,
+    error: ErrorBannerParams?,
 ) {
     Layout(
         content = {
             NfcCoilInstructionText(canShow)
-            ErrorBanner(
-                error = error.message,
-                onShown = error.onShown,
-            )
+            ErrorBanner(error)
         },
     ) { measurables, constraints ->
         placeCoilTextElements(
@@ -61,11 +57,6 @@ internal fun NfcCoilTextLayout(
         )
     }
 }
-
-internal class NfcCoilError(
-    val message: ResolvableString?,
-    val onShown: () -> Unit,
-)
 
 private fun MeasureScope.placeCoilTextElements(
     containerWidth: Dp,

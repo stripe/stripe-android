@@ -47,22 +47,22 @@ private val ErrorBannerVerticalPadding = 11.dp
 
 @Composable
 internal fun ErrorBanner(
-    error: ResolvableString?,
-    onShown: () -> Unit,
+    error: ErrorBannerParams?,
     modifier: Modifier = Modifier,
 ) {
-    val onShown by rememberUpdatedState(onShown)
     val isInspectionMode = LocalInspectionMode.current
 
-    ErrorBannerContent(error, modifier)
+    ErrorBannerContent(error?.message, modifier)
 
     if (error == null) {
         return
     }
 
+    val onShown by rememberUpdatedState(error.onShown)
+
     if (isInspectionMode) {
         LaunchedEffect(Unit) {
-            onShown()
+            onShown.invoke()
         }
 
         return
@@ -84,6 +84,11 @@ internal fun ErrorBanner(
         delayManager.run()
     }
 }
+
+internal data class ErrorBannerParams(
+    val message: ResolvableString,
+    val onShown: () -> Unit,
+)
 
 @Composable
 private fun ErrorBannerContent(

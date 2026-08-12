@@ -43,8 +43,10 @@ internal class ErrorBannerTest {
     fun `error message shows error banner`() {
         composeRule.setContent {
             ErrorBanner(
-                error = ERROR_MESSAGE,
-                onShown = {},
+                error = ErrorBannerParams(
+                    message = ERROR_MESSAGE,
+                    onShown = {},
+                ),
             )
         }
 
@@ -60,8 +62,10 @@ internal class ErrorBannerTest {
 
         composeRule.setContent {
             ErrorBanner(
-                error = ERROR_MESSAGE,
-                onShown = { errorShownCount++ },
+                error = ErrorBannerParams(
+                    message = ERROR_MESSAGE,
+                    onShown = { errorShownCount++ },
+                ),
             )
         }
 
@@ -139,8 +143,10 @@ internal class ErrorBannerTest {
             if (visible.value) {
                 saveableStateHolder.SaveableStateProvider(ERROR_BANNER_SAVABLE_KEY) {
                     ErrorBanner(
-                        error = error,
-                        onShown = onShown,
+                        error = ErrorBannerParams(
+                            message = error,
+                            onShown = onShown,
+                        ),
                     )
                 }
             }
