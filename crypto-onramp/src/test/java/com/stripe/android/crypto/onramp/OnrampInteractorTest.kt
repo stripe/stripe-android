@@ -44,6 +44,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
@@ -255,6 +256,35 @@ class OnrampInteractorTest {
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.WalletRegistered(CryptoNetwork.Ethereum)
         )
+    }
+
+    @Test
+    fun testDeleteWalletAddressIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(cryptoApiRepository.deleteWalletAddress(any(), any()))
+            .thenReturn(Result.success(Unit))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.deleteWalletAddress(walletId = "ccw_12345")
+
+        assertThat(result).isInstanceOf(OnrampDeleteWalletAddressResult.Completed::class.java)
+        verify(cryptoApiRepository).deleteWalletAddress(
+            walletId = "ccw_12345",
+            consumerSessionClientSecret = "secret_123"
+        )
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.WalletDeleted)
+    }
+
+    @Test
+    fun testDeleteWalletAddressFailsWithoutConsumerSecret() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(LinkController.State()))
+
+        val result = interactor.deleteWalletAddress(walletId = "ccw_12345")
+
+        assertThat(result).isInstanceOf(OnrampDeleteWalletAddressResult.Failed::class.java)
+        assertThat((result as OnrampDeleteWalletAddressResult.Failed).error)
+            .isInstanceOf(MissingConsumerSecretException::class.java)
     }
 
     @Test

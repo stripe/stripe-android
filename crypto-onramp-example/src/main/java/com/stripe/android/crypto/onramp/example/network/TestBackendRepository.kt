@@ -30,6 +30,19 @@ class TestBackendRepository {
         ignoreUnknownKeys = true
     }
 
+    suspend fun fetchCustomerWallets(
+        authToken: String
+    ): ApiResult<CustomerWalletsResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            manager.get("$baseUrl/customer_wallets?limit=$CUSTOMER_WALLETS_LIMIT")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .header("Authorization", "Bearer $authToken")
+                .suspendable()
+                .awaitModel(CustomerWalletsResponse.serializer(), json)
+        }
+    }
+
     suspend fun createOnrampSession(
         paymentToken: String,
         walletAddress: String,
@@ -204,3 +217,4 @@ suspend fun <T : Any> Request.awaitModel(
 }
 
 private const val SESSION_CREATION_TIMEOUT = 60000 // 60 seconds
+private const val CUSTOMER_WALLETS_LIMIT = 50

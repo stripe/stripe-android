@@ -32,6 +32,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
@@ -301,6 +302,30 @@ internal class OnrampInteractor @Inject constructor(
             )
             trackError(Operation.RegisterWalletAddress, error)
             OnrampRegisterWalletAddressResult.Failed(error)
+        }
+    }
+
+    suspend fun deleteWalletAddress(walletId: String): OnrampDeleteWalletAddressResult {
+        val secret = consumerSessionClientSecret()
+        return if (secret != null) {
+            cryptoApiRepository.deleteWalletAddress(walletId, secret).fold(
+                onSuccess = {
+                    analyticsService?.track(OnrampAnalyticsEvent.WalletDeleted)
+                    OnrampDeleteWalletAddressResult.Completed()
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.DeleteWalletAddress, error)
+                    trackError(Operation.DeleteWalletAddress, mappedError)
+                    OnrampDeleteWalletAddressResult.Failed(mappedError)
+                }
+            )
+        } else {
+            val error = mapError(
+                operation = Operation.DeleteWalletAddress,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.DeleteWalletAddress, error)
+            OnrampDeleteWalletAddressResult.Failed(error)
         }
     }
 

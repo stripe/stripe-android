@@ -23,6 +23,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
+import com.stripe.android.crypto.onramp.model.DeleteWalletRequestParams
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
@@ -230,7 +231,29 @@ internal class CryptoApiRepository @Inject constructor(
         )
 
         return executePost(
-            setWalletAddressUrl,
+            walletUrl,
+            Json.encodeToJsonElement(params).jsonObject,
+            Unit.serializer()
+        )
+    }
+
+    /**
+     * Deletes the given crypto wallet from the current Link account.
+     *
+     * @param walletId The ID of the crypto wallet to delete.
+     * @param consumerSessionClientSecret The client session secret for authentication.
+     */
+    suspend fun deleteWalletAddress(
+        walletId: String,
+        consumerSessionClientSecret: String
+    ): Result<Unit> {
+        val params = DeleteWalletRequestParams(
+            walletToken = walletId,
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+        )
+
+        return executeDelete(
+            walletUrl,
             Json.encodeToJsonElement(params).jsonObject,
             Unit.serializer()
         )
@@ -449,6 +472,23 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
+    private suspend fun <Response> executeDelete(
+        url: String,
+        paramsJson: JsonObject,
+        responseSerializer: KSerializer<Response>,
+    ): Result<Response> {
+        val request = apiRequestFactory.createDelete(
+            url = url,
+            options = buildRequestOptions(),
+            params = paramsJson.toMap(),
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = responseSerializer
+        )
+    }
+
     private suspend fun <Response> execute(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>,
@@ -576,7 +616,7 @@ internal class CryptoApiRepository @Inject constructor(
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/wallet`
          */
-        internal val setWalletAddressUrl: String
+        internal val walletUrl: String
             get() = getApiUrl("crypto/internal/wallet")
 
         /**
