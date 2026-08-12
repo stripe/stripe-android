@@ -55,7 +55,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
     protected var startedAt: ComparableTimeMark? = null
-    private var finished: Boolean = false
+    private val finished = AtomicBoolean(false)
 
     private val cancelMutex = Mutex()
 
@@ -95,7 +95,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         workerJob?.apply { if (isActive) { cancel() } }
         workerJob = null
         started.set(false)
-        finished = false
+        finished.set(false)
     }
 
     /**
@@ -111,7 +111,9 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
                 val analyzerResult = analyzer.analyze(frame, getState())
 
                 try {
-                    finished = onResult(analyzerResult, frame)
+                    if (onResult(analyzerResult, frame)) {
+                        finished.set(true)
+                    }
                 } catch (t: Throwable) {
                     handleResultFailure(t)
                 }
@@ -119,7 +121,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
                 handleAnalyzerFailure(t)
             }
 
-            if (finished) {
+            if (finished.get()) {
                 unsubscribeFromFlow()
             }
         }
