@@ -18,7 +18,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -786,7 +785,6 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun persistBillingAnalytics(paymentSelection: PaymentSelection?) {
-        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
         val billingAddress = paymentSelection.billingDetails?.address ?: return
         val filledAddress = viewModel.autocompleteFilledAddress
@@ -797,7 +795,6 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
-        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
         val countryCode = paymentSelection.billingDetails?.address?.country ?: return
         val autocompleteUsed = viewModel.handle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true

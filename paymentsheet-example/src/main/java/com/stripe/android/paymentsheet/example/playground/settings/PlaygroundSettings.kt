@@ -573,7 +573,6 @@ internal class PlaygroundSettings private constructor(
             CaptureMethodSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.enableNfcScanning),
             FeatureFlagSettingsDefinition(FeatureFlags.disableNfcScanningSecurity),
-            FeatureFlagSettingsDefinition(FeatureFlags.inlineAddressAutocompleteEnabled),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
