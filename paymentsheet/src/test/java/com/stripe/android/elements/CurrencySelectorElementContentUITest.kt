@@ -18,6 +18,7 @@ import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_CURRENCY_OPTION_PREFIX
@@ -46,7 +47,9 @@ internal class CurrencySelectorElementContentUITest {
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
     private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)

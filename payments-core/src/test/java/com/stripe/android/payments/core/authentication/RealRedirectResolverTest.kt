@@ -2,6 +2,7 @@ package com.stripe.android.payments.core.authentication
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,9 @@ private const val ResolvedUrl = "https://stripe.com/pay-me"
 internal class RealRedirectResolverTest {
 
     @get:Rule
-    val networkRule = NetworkRule()
+    val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     @Test
     fun `Does not attempt to resolve after the first redirect`() = runTest {

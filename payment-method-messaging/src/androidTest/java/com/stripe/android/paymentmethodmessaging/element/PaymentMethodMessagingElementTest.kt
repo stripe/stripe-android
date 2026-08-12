@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.composite
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.RetryRule
@@ -19,7 +20,8 @@ import org.junit.rules.RuleChain
 
 class PaymentMethodMessagingElementTest {
     private val networkRule = NetworkRule(
-        hostsToTrack = listOf("https://ppm.stripe.com")
+        hostsToTrack = listOf("https://ppm.stripe.com"),
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123")),
     )
     private val composeTestRule = createEmptyComposeRule()
 

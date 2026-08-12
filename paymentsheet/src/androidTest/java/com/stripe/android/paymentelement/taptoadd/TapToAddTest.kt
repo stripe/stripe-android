@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -34,7 +35,10 @@ import kotlin.time.Duration.Companion.seconds
 internal class TapToAddTest {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure
     // it happens, but it's okay if it takes a bit to happen.
-    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
+    private val networkRule = NetworkRule(
+        validationTimeout = 5.seconds,
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123")),
+    )
 
     val terminalWrapperTestRule = TerminalWrapperTestRule(enabled = true)
 

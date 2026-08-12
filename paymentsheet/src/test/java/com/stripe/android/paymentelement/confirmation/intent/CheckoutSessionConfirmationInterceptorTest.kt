@@ -28,6 +28,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -54,7 +55,9 @@ import org.robolectric.RobolectricTestRunner
 class CheckoutSessionConfirmationInterceptorTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain

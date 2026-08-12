@@ -53,6 +53,7 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -128,7 +129,9 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFlowControllerTest {
 
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     @get:Rule
     val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()

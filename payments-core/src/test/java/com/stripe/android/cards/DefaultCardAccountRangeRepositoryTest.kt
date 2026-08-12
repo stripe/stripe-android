@@ -38,7 +38,9 @@ import kotlin.test.Test
 internal class DefaultCardAccountRangeRepositoryTest {
 
     @get:Rule
-    val networkRule = NetworkRule()
+    val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()

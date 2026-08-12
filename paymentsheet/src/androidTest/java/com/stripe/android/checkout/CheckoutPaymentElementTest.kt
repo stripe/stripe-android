@@ -7,6 +7,7 @@ import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -18,7 +19,9 @@ import org.junit.Test
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutPaymentElementTest {
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)

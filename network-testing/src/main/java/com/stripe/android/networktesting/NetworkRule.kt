@@ -24,6 +24,7 @@ import kotlin.time.Duration
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
     validationTimeout: Duration?,
+    private val globalMatchers: Array<out RequestMatcher>,
 ) : TestRule {
     private val mockWebServer = TestMockWebServer(validationTimeout)
 
@@ -33,7 +34,8 @@ class NetworkRule private constructor(
     constructor(
         hostsToTrack: List<String> = listOf(ApiRequest.API_HOST),
         validationTimeout: Duration? = null,
-    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet(), validationTimeout)
+        vararg globalMatchers: RequestMatcher,
+    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet(), validationTimeout, globalMatchers)
 
     override fun apply(base: Statement, description: Description): Statement {
         return NetworkStatement(
@@ -52,7 +54,7 @@ class NetworkRule private constructor(
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (MockResponse) -> Unit
     ) {
-        mockWebServer.dispatcher.enqueue(*requestMatcher) { response ->
+        mockWebServer.dispatcher.enqueue(*globalMatchers, *requestMatcher) { response ->
             responseFactory(response)
             if (ensureResponseIsValidJson) {
                 assertResponseBodyIsValidJson(response)
@@ -65,7 +67,7 @@ class NetworkRule private constructor(
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (TestRecordedRequest, MockResponse) -> Unit
     ) {
-        mockWebServer.dispatcher.enqueue(*requestMatcher) { request, response ->
+        mockWebServer.dispatcher.enqueue(*globalMatchers, *requestMatcher) { request, response ->
             responseFactory(request, response)
             if (ensureResponseIsValidJson) {
                 assertResponseBodyIsValidJson(response)

@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
@@ -28,7 +29,9 @@ import org.robolectric.RobolectricTestRunner
 class DefaultSavedPaymentMethodRepositoryTest {
 
     @get:Rule
-    val networkRule = NetworkRule()
+    val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     @Test
     fun `detach routes to checkout session repository when customer is CheckoutSession`() = runScenario(

@@ -8,6 +8,7 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -18,7 +19,9 @@ import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
 internal class NfcScanningTest {
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     @get:Rule
     val testRules: TestRules = TestRules.create(

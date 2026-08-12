@@ -3,6 +3,7 @@ package com.stripe.android.core.networking
 import android.net.http.HttpResponseCache
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -15,7 +16,9 @@ import kotlin.test.Test
 
 internal class NetworkCachingTest {
     @get:Rule
-    val networkRule = NetworkRule()
+    val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     @Test
     fun `request that should cache creates a connection that uses cache`() = runTest {

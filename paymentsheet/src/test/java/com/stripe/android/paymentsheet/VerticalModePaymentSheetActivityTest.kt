@@ -12,6 +12,7 @@ import androidx.test.espresso.Espresso
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -42,7 +43,9 @@ internal class VerticalModePaymentSheetActivityTest {
 
     private val composeTestRule = createAndroidComposeRule<PaymentSheetActivity>()
     private val composeCleanupRule = createComposeCleanupRule()
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     private val verticalModePage = VerticalModePage(composeTestRule)
     private val formPage = FormPage(composeTestRule)

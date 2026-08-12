@@ -29,7 +29,9 @@ import kotlin.test.assertFailsWith
 class ConsumersApiServiceImplTest {
 
     @get:Rule
-    val networkRule = NetworkRule()
+    val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     private val consumersApiService = ConsumersApiServiceImpl(
         stripeNetworkClient = DefaultStripeNetworkClient(),

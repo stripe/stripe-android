@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.runTest
@@ -22,7 +23,9 @@ import org.robolectric.RobolectricTestRunner
 class CheckoutSessionRepositoryTest {
 
     @get:Rule
-    val networkRule = NetworkRule()
+    val networkRule = NetworkRule(
+        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+    )
 
     private val clientParams = ElementsSessionClientParams(
         mobileAppId = "com.stripe.android.paymentsheet.test",

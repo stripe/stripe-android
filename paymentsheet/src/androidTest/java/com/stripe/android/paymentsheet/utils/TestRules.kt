@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.utils
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.testing.RetryRule
 import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain
@@ -27,7 +28,9 @@ class TestRules private constructor(
     companion object {
         fun create(
             composeTestRule: ComposeTestRule = createEmptyComposeRule(),
-            networkRule: NetworkRule = NetworkRule(),
+            networkRule: NetworkRule = NetworkRule(
+                globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+            ),
             terminalTestRule: TerminalWrapperTestRule = TerminalWrapperTestRule(enabled = false),
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
