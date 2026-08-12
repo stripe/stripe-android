@@ -4,7 +4,9 @@ import android.app.UiAutomation
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -29,6 +31,7 @@ internal object CleanupChromeRule : TestRule {
                 } finally {
                     val command = "am force-stop com.android.chrome"
                     instrumentation.uiAutomation.executeShellCommand(command).close()
+                    device.wait(Until.gone(By.pkg("com.android.chrome")), CHROME_SHUTDOWN_TIMEOUT_MS)
 
                     // Force-stopping Chrome leaves no window focused; restore focus so the next
                     // test's Espresso RootViewPicker doesn't time out waiting for it.
@@ -56,4 +59,6 @@ internal object CleanupChromeRule : TestRule {
         }
         ParcelFileDescriptor.AutoCloseInputStream(descriptors[0]).use { it.readBytes() }
     }
+
+    private const val CHROME_SHUTDOWN_TIMEOUT_MS = 5_000L
 }
