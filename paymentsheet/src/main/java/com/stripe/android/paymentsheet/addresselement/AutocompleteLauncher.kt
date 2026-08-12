@@ -15,9 +15,8 @@ import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import kotlinx.parcelize.Parcelize
 import java.lang.ref.WeakReference
 import java.util.UUID
@@ -54,8 +53,6 @@ internal fun interface AutocompleteLauncherResultHandler {
 }
 
 internal sealed interface AutocompleteAppearanceContext : Parcelable {
-    fun applyAppearance()
-
     @Composable
     fun Theme(content: @Composable () -> Unit)
 
@@ -73,10 +70,6 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
         override val backgroundColor: Color
             @Composable
             get() = LinkTheme.colors.surfacePrimary
-
-        override fun applyAppearance() {
-            // No-op, Link supplies its own values and does adhere to merchant supplied appearance values
-        }
 
         @Composable
         override fun Theme(content: @Composable () -> Unit) {
@@ -114,13 +107,9 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
             @Composable
             get() = MaterialTheme.colors.surface
 
-        override fun applyAppearance() {
-            appearance.parseAppearance()
-        }
-
         @Composable
         override fun Theme(content: @Composable () -> Unit) {
-            StripeTheme {
+            PaymentElementTheme(appearance = appearance) {
                 content()
             }
         }

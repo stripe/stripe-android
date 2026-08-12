@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -11,19 +13,25 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
+import com.stripe.android.uicore.isSystemDarkTheme
+import com.stripe.android.uicore.stripeThemeIsDark
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 import java.util.Locale
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
 class AutocompleteScreenTest {
@@ -107,9 +115,48 @@ class AutocompleteScreenTest {
         }
     }
 
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `Payment Element always dark overrides light system theme`() {
+        runThemeScenario(PaymentSheet.ThemeMode.AlwaysDark) {
+            assertThat(isDark).isTrue()
+            assertThat(contextIsDark).isTrue()
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `Payment Element always light overrides dark system theme`() {
+        runThemeScenario(PaymentSheet.ThemeMode.AlwaysLight) {
+            assertThat(isDark).isFalse()
+            assertThat(contextIsDark).isFalse()
+        }
+    }
+
     private fun ComposeTestRule.onAddressOptionsAppBar() = onNodeWithContentDescription("Back")
     private fun ComposeTestRule.onQueryField() = onNodeWithText("Address")
     private fun ComposeTestRule.onEnterAddressManually() = onNodeWithText("Enter address manually")
+
+    private fun runThemeScenario(
+        themeMode: PaymentSheet.ThemeMode,
+        block: ThemeSnapshot.() -> Unit,
+    ) {
+        var snapshot: ThemeSnapshot? = null
+
+        composeTestRule.setContent {
+            AutocompleteAppearanceContext.PaymentElement(
+                appearance = PaymentSheet.Appearance(themeMode = themeMode),
+            ).Theme {
+                snapshot = ThemeSnapshot(
+                    isDark = MaterialTheme.stripeThemeIsDark,
+                    contextIsDark = LocalContext.current.isSystemDarkTheme(),
+                )
+            }
+        }
+        composeTestRule.waitForIdle()
+
+        requireNotNull(snapshot).apply(block)
+    }
 
     private fun createViewModel() = AutocompleteViewModel(
         placesClient = TestPlacesClientProxy(),
@@ -137,4 +184,9 @@ class AutocompleteScreenTest {
             locale: Locale,
         ): Result<Address> = fetchPlaceResponse
     }
+
+    private data class ThemeSnapshot(
+        val isDark: Boolean,
+        val contextIsDark: Boolean,
+    )
 }

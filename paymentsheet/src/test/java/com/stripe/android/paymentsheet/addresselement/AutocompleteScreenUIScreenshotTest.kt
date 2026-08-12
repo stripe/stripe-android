@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import android.text.SpannableString
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -12,10 +13,21 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 class AutocompleteScreenUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
+    )
+
+    @get:Rule
+    val lightSystemPaparazziRule = PaparazziRule(
+        listOf(SystemAppearance.LightTheme),
+    )
+
+    @get:Rule
+    val darkSystemPaparazziRule = PaparazziRule(
+        listOf(SystemAppearance.DarkTheme),
     )
 
     @Test
@@ -24,6 +36,32 @@ class AutocompleteScreenUIScreenshotTest {
             AutocompleteTestScreen(
                 appearanceContext = AutocompleteAppearanceContext.PaymentElement(
                     appearance = PaymentSheet.Appearance(),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun withAlwaysDarkPaymentElement() {
+        lightSystemPaparazziRule.snapshot {
+            AutocompleteTestScreen(
+                appearanceContext = AutocompleteAppearanceContext.PaymentElement(
+                    appearance = PaymentSheet.Appearance(
+                        themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun withAlwaysLightPaymentElement() {
+        darkSystemPaparazziRule.snapshot {
+            AutocompleteTestScreen(
+                appearanceContext = AutocompleteAppearanceContext.PaymentElement(
+                    appearance = PaymentSheet.Appearance(
+                        themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+                    ),
                 ),
             )
         }
