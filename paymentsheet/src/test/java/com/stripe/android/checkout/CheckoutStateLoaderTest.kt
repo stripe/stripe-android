@@ -108,7 +108,6 @@ internal class CheckoutStateLoaderTest {
                     .billingDetails(
                         CheckoutController.Configuration.Defaults.ContactDetails()
                             .name("Jane Billing")
-                            .phoneNumber("5559876543")
                             .address(CheckoutController.Address().country("US").city("Denver")),
                     )
                     .shippingDetails(
@@ -121,7 +120,6 @@ internal class CheckoutStateLoaderTest {
 
         val collected = requireNotNull(stateHolder.state).collectedDetails
         assertThat(collected.billingName).isEqualTo("Jane Billing")
-        assertThat(collected.billingPhoneNumber).isEqualTo("5559876543")
         assertThat(collected.billingAddress?.country).isEqualTo("US")
         assertThat(collected.billingAddress?.city).isEqualTo("Denver")
         assertThat(collected.shippingName).isEqualTo("John Shipping")

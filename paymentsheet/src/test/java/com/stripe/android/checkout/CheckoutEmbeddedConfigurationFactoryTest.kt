@@ -177,7 +177,6 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(
                 billingName = "Jane Billing",
-                billingPhoneNumber = "5559876543",
                 billingAddress = Address.State(
                     city = "Denver",
                     country = "US",
@@ -191,7 +190,6 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
         val billingDetails = requireNotNull(result.defaultBillingDetails)
         assertThat(billingDetails.name).isEqualTo("Jane Billing")
-        assertThat(billingDetails.phone).isEqualTo("5559876543")
         val address = requireNotNull(billingDetails.address)
         assertThat(address.city).isEqualTo("Denver")
         assertThat(address.country).isEqualTo("US")
@@ -208,7 +206,6 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(
                 shippingName = "John Shipping",
-                shippingPhoneNumber = "5551234567",
                 shippingAddress = Address.State(
                     city = "Denver",
                     country = "US",
@@ -221,7 +218,6 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         )
 
         assertThat(result.shippingDetails?.name).isEqualTo("John Shipping")
-        assertThat(result.shippingDetails?.phoneNumber).isEqualTo("5551234567")
         val address = requireNotNull(result.shippingDetails?.address)
         assertThat(address.city).isEqualTo("Denver")
         assertThat(address.country).isEqualTo("US")
@@ -266,16 +262,12 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     private fun collectedDetails(
         shippingName: String? = null,
         billingName: String? = null,
-        shippingPhoneNumber: String? = null,
-        billingPhoneNumber: String? = null,
         shippingAddress: Address.State? = null,
         billingAddress: Address.State? = null,
     ): CheckoutCollectedDetails {
         return CheckoutCollectedDetails(
             shippingName = shippingName,
             billingName = billingName,
-            shippingPhoneNumber = shippingPhoneNumber,
-            billingPhoneNumber = billingPhoneNumber,
             shippingAddress = shippingAddress,
             billingAddress = billingAddress,
         )

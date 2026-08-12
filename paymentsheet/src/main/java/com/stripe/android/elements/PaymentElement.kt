@@ -100,18 +100,12 @@ class PaymentElement @Inject internal constructor(
         class BillingDetailsCollectionConfiguration {
 
             private var name: CollectionMode = CollectionMode.Automatic
-            private var phone: CollectionMode = CollectionMode.Automatic
             private var email: CollectionMode = CollectionMode.Automatic
             private var address: AddressCollectionMode = AddressCollectionMode.Automatic
 
             /** How to collect the name field. */
             fun name(name: CollectionMode): BillingDetailsCollectionConfiguration = apply {
                 this.name = name
-            }
-
-            /** How to collect the phone field. */
-            fun phone(phone: CollectionMode): BillingDetailsCollectionConfiguration = apply {
-                this.phone = phone
             }
 
             /** How to collect the email field. */
@@ -134,7 +128,7 @@ class PaymentElement @Inject internal constructor(
 
             internal fun build(): State = State(
                 name = name,
-                phone = phone,
+                phone = CollectionMode.Automatic,
                 email = email,
                 address = address,
             )
