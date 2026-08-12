@@ -163,6 +163,19 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `clear removes controller and customer state`() = runScenario(
+        customer = savedCustomer(),
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        loader.clear()
+
+        assertThat(stateHolder.state).isNull()
+        assertThat(customerStateHolder.customer.value).isNull()
+        assertThat(customerStateHolder.paymentMethods.value).isEmpty()
+    }
+
+    @Test
     fun `reload routes the selection through the chooser`() = runScenario(
         loaderSelection = PaymentSelection.GooglePay,
         chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
