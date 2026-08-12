@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.isInstanceOf
@@ -36,6 +37,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -43,6 +45,7 @@ import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -354,9 +357,49 @@ class CheckoutSessionConfirmationInterceptorTest {
         interceptSavedPm(shippingInformation = SHIPPING_INFORMATION)
     }
 
+    @Test
+    fun `intercept with saved payment method confirms when tax region update preserves estimated total`() = runScenario(
+        checkoutSessionResponse = CHECKOUT_SESSION_RESPONSE,
+    ) {
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[line1]", "1234 Main Street"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("total_summary", totalSummaryJson())
+            }
+        }
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = interceptSavedPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+    }
+
+    @Test
+    fun `intercept with saved payment method fails when tax region update changes estimated total`() = runScenario(
+        checkoutSessionResponse = CHECKOUT_SESSION_RESPONSE,
+    ) {
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("total_summary", totalSummaryJson(total = 6000L))
+            }
+        }
+
+        val result = interceptSavedPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
+        val failure = result as ConfirmationDefinition.Action.Fail
+        assertThat(failure.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failure.cause.message).isEqualTo("The estimated total changed from 5099 to 6000.")
+    }
+
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
+        checkoutSessionResponse: CheckoutSessionResponse? = null,
         block: suspend Scenario.() -> Unit,
     ) {
         val stripeRepository = FakeCreatePaymentMethodRepository(
@@ -390,7 +433,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
                 checkoutSessionId = null,
             ),
-            checkoutSessionResponse = null,
+            checkoutSessionResponse = checkoutSessionResponse,
             context = applicationContext,
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
@@ -474,6 +517,30 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val SAVE_DISABLED_CUSTOMER_METADATA = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+        )
+
+        val CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            totalSummary = CheckoutSessionResponse.TotalSummaryResponse(
+                subtotal = 5099L,
+                totalDueToday = 5099L,
+                totalAmountDue = 5099L,
+                discountAmounts = emptyList(),
+                taxAmounts = emptyList(),
+                shippingRate = null,
+                appliedBalance = null,
+            ),
+        )
+
+        fun totalSummaryJson(total: Long = 5099L) = JSONObject(
+            """
+            {
+              "subtotal": 5099,
+              "due": 5099,
+              "total": $total
+            }
+            """.trimIndent()
         )
     }
 }

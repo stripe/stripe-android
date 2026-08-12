@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -87,7 +88,37 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        val billingAddress = confirmationOption.paymentMethod.billingDetails
+        val billingDetails = confirmationOption.paymentMethod.billingDetails
+        val initialEstimatedTotal = checkoutSessionResponse?.totalSummary?.totalAmountDue
+        val billingAddress = billingDetails?.address?.toCheckoutAddress()
+        val shouldUpdateTaxRegion = checkoutSessionResponse?.automaticTaxEnabled == true &&
+            checkoutSessionResponse.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING
+        val updatedCheckoutSessionResponse = if (shouldUpdateTaxRegion && billingAddress != null) {
+            checkoutSessionRepository.updateTaxRegion(
+                sessionId = integrationMetadata.id,
+                address = billingAddress,
+            ).getOrElse { error ->
+                return ConfirmationDefinition.Action.Fail(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+        } else {
+            checkoutSessionResponse
+        }
+        val finalEstimatedTotal = updatedCheckoutSessionResponse?.totalSummary?.totalAmountDue
+        if (initialEstimatedTotal != finalEstimatedTotal) {
+            val error = IllegalStateException(
+                "The estimated total changed from $initialEstimatedTotal to $finalEstimatedTotal."
+            )
+            return ConfirmationDefinition.Action.Fail(
+                cause = error,
+                message = error.stripeErrorMessage(),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
+
         val params = createConfirmParams(
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
@@ -192,6 +223,18 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             checkoutSessionResponse: CheckoutSessionResponse?,
         ): CheckoutSessionConfirmationInterceptor
     }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun com.stripe.android.model.Address.toCheckoutAddress(): CheckoutController.Address.State? {
+    return CheckoutController.Address.State(
+        city = city,
+        country = country ?: return null,
+        line1 = line1,
+        line2 = line2,
+        postalCode = postalCode,
+        state = state,
+    )
 }
 
 private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
