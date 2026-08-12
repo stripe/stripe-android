@@ -300,12 +300,34 @@ internal sealed class PaymentSelection : Parcelable {
             lightThemeIconUrl: String?,
             darkThemeIconUrl: String?,
         ): Drawable {
+            return load(
+                drawableResourceId = drawableResourceId,
+                drawableResourceIdNight = drawableResourceIdNight,
+                lightThemeIconUrl = lightThemeIconUrl,
+                darkThemeIconUrl = darkThemeIconUrl,
+                useDarkThemeIcon = null,
+            )
+        }
+
+        suspend fun load(
+            @DrawableRes drawableResourceId: Int,
+            @DrawableRes drawableResourceIdNight: Int?,
+            lightThemeIconUrl: String?,
+            darkThemeIconUrl: String?,
+            useDarkThemeIcon: Boolean?,
+        ): Drawable {
+            val shouldUseDarkThemeIcon = useDarkThemeIcon ?: isDarkTheme()
+
             fun loadResource(): Drawable {
                 @Suppress("DEPRECATION")
                 return runCatching {
                     ResourcesCompat.getDrawable(
                         resources,
-                        if (!isDarkTheme()) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
+                        if (shouldUseDarkThemeIcon) {
+                            drawableResourceIdNight ?: drawableResourceId
+                        } else {
+                            drawableResourceId
+                        },
                         null
                     )
                 }.getOrNull() ?: emptyDrawable
@@ -319,7 +341,7 @@ internal sealed class PaymentSelection : Parcelable {
 
             // If the payment option has an icon URL, we prefer it.
             // Some payment options don't have an icon URL, and are loaded locally via resource.
-            return if (isDarkTheme() && darkThemeIconUrl != null) {
+            return if (shouldUseDarkThemeIcon && darkThemeIconUrl != null) {
                 loadIcon(darkThemeIconUrl)
             } else if (lightThemeIconUrl != null) {
                 loadIcon(lightThemeIconUrl)
