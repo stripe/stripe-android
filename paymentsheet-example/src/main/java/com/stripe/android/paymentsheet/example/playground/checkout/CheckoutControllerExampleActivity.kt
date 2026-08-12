@@ -3,7 +3,6 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -30,13 +29,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
-import kotlinx.coroutines.launch
 
 internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 
@@ -48,13 +46,6 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val presenter = viewModel.controller.createPresenter(this)
         val paymentElement = presenter.paymentElement()
-
-        lifecycleScope.launch {
-            viewModel.sessionComplete.collect {
-                Toast.makeText(this@CheckoutControllerExampleActivity, "Payment complete!", Toast.LENGTH_LONG).show()
-                finish()
-            }
-        }
 
         setContent {
             val status by viewModel.status.collectAsState()
@@ -77,6 +68,9 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                     presenter.expressCheckoutElement().Content()
                                 }
                                 paymentElement.Content()
+                            }
+                            currentStatus.result?.let { result ->
+                                CheckoutResultSection(result)
                             }
                         }
                     }
@@ -103,6 +97,22 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
             )
         }
     }
+}
+
+@Composable
+private fun CheckoutResultSection(result: CheckoutController.Result) {
+    val message = when (result) {
+        is CheckoutController.Result.Completed -> "Completed"
+        is CheckoutController.Result.Canceled -> "Canceled"
+        is CheckoutController.Result.Failed -> "Failed: ${result.error.message ?: result.error}"
+    }
+
+    Divider(modifier = Modifier.padding(vertical = 12.dp))
+    Text(
+        text = "Checkout result: $message",
+        style = MaterialTheme.typography.h6,
+        color = if (result is CheckoutController.Result.Failed) Color.Red else Color.Unspecified,
+    )
 }
 
 @Composable
