@@ -6,15 +6,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.elements.IdentifierSpec
 
-private val klarnaCountryOnlyRawValues = mapOf(
+private val klarnaFullRawValues = mapOf(
     IdentifierSpec.Country to "DE",
-)
-
-private val klarnaWithEmailAndCountryRawValues = klarnaCountryOnlyRawValues + mapOf(
     IdentifierSpec.Email to "jane@example.com",
-)
-
-private val klarnaWithBillingAddressRawValues = klarnaWithEmailAndCountryRawValues + mapOf(
     IdentifierSpec.Line1 to "Unter den Linden 1",
     IdentifierSpec.Line2 to "Wohnung 2",
     IdentifierSpec.City to "Berlin",
@@ -95,21 +89,21 @@ internal val klarnaTestCases = listOf(
         name = "Klarna Never",
         paymentMethodType = PaymentMethod.Type.Klarna,
         mode = LpmBillingAddressBaselineMode.Never,
-        rawValues = klarnaCountryOnlyRawValues,
+        rawValues = klarnaFullRawValues,
         expectedPaymentMethodParams = klarnaCountryOnlyExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Klarna Automatic without tax",
         paymentMethodType = PaymentMethod.Type.Klarna,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
-        rawValues = klarnaWithEmailAndCountryRawValues,
+        rawValues = klarnaFullRawValues,
         expectedPaymentMethodParams = klarnaWithEmailAndCountryExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Klarna Full",
         paymentMethodType = PaymentMethod.Type.Klarna,
         mode = LpmBillingAddressBaselineMode.Full,
-        rawValues = klarnaWithBillingAddressRawValues,
+        rawValues = klarnaFullRawValues,
         expectedPaymentMethodParams = klarnaWithBillingAddressExpectedPaymentMethodParams,
     ),
 )
