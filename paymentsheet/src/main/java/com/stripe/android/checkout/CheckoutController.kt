@@ -76,7 +76,7 @@ class CheckoutController @Inject internal constructor(
 
     init {
         viewModelScope.launch {
-            operationCoordinator.observeConfirmationResults()
+            operationCoordinator.observeConfirmationResults(::commitConfirmedSession)
         }
     }
 
@@ -284,6 +284,16 @@ class CheckoutController @Inject internal constructor(
                 checkoutStateLoader.reload(newState)
             }
         }
+    }
+
+    /**
+     * Commits the [CheckoutSessionResponse] a successful confirmation returned, mirroring what
+     * [withCheckoutState] does with a mutation's response. Runs inside the operation gate, so the
+     * state read here is the latest committed one.
+     */
+    internal suspend fun commitConfirmedSession(response: CheckoutSessionResponse) {
+        val state = stateHolder.state ?: return
+        checkoutStateLoader.reload(state.copy(checkoutSessionResponse = response))
     }
 
     private fun requireMutableState(): kotlin.Result<Unit> {

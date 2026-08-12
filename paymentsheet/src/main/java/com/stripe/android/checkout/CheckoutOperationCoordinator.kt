@@ -2,21 +2,32 @@
 
 package com.stripe.android.checkout
 
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
+
+private val CONFIRMATION_REFRESH_TIMEOUT_MS = 10.seconds.inWholeMilliseconds
 
 @Singleton
 internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val sheetStateHolder: SheetStateHolder,
     private val resultCallback: CheckoutController.ResultCallback,
+    private val errorReporter: ErrorReporter,
 ) {
     private val admissionLock = Any()
     private var pendingMutations = 0
@@ -107,29 +118,71 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
-    suspend fun observeConfirmationResults() {
+    suspend fun observeConfirmationResults(
+        refreshCheckoutSession: suspend (CheckoutSessionResponse) -> Unit,
+    ) {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                completeConfirmation(state.result.asCheckoutResult())
+                completeConfirmation(state.result, refreshCheckoutSession)
             }
         }
     }
 
     fun failConfirmation(error: Throwable) {
-        completeConfirmation(CheckoutController.Result.Failed(error))
+        if (claimCompletion()) {
+            deliverAndRelease(CheckoutController.Result.Failed(error))
+        }
     }
 
-    private fun completeConfirmation(result: CheckoutController.Result) {
-        val shouldComplete = synchronized(admissionLock) {
-            if (!confirmationInFlight || confirmationCompletionClaimed) {
-                false
-            } else {
-                confirmationCompletionClaimed = true
-                true
-            }
-        }
-        if (!shouldComplete) return
+    private suspend fun completeConfirmation(
+        result: ConfirmationHandler.Result,
+        refreshCheckoutSession: suspend (CheckoutSessionResponse) -> Unit,
+    ) {
+        // Claim before refreshing so a racing failConfirmation cannot deliver a second result.
+        if (!claimCompletion()) return
 
+        val confirmedSession = (result as? ConfirmationHandler.Result.Succeeded)
+            ?.metadata
+            ?.get(CheckoutSessionResponseKey)
+
+        if (confirmedSession != null) {
+            refreshOrReport(refreshCheckoutSession, confirmedSession)
+        }
+
+        deliverAndRelease(result.asCheckoutResult())
+    }
+
+    private suspend fun refreshOrReport(
+        refreshCheckoutSession: suspend (CheckoutSessionResponse) -> Unit,
+        confirmedSession: CheckoutSessionResponse,
+    ) {
+        try {
+            withTimeout(CONFIRMATION_REFRESH_TIMEOUT_MS) {
+                refreshCheckoutSession(confirmedSession)
+            }
+        } catch (@Suppress("TooGenericExceptionCaught") error: Throwable) {
+            // Losing our own scope (e.g. destroy()) must not deliver a result, so let that
+            // cancellation through. Everything else is a refresh failure — including a timeout and
+            // a CancellationException the reload surfaced as a value, neither of which cancelled
+            // us. Rethrowing those would strand the gate locked with no result ever delivered.
+            currentCoroutineContext().ensureActive()
+            errorReporter.report(
+                errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_CONFIRMATION_SESSION_REFRESH_FAILED,
+                stripeException = StripeException.create(error),
+            )
+        }
+    }
+
+    private fun claimCompletion(): Boolean = synchronized(admissionLock) {
+        if (!confirmationInFlight || confirmationCompletionClaimed) {
+            false
+        } else {
+            confirmationCompletionClaimed = true
+            true
+        }
+    }
+
+    private fun deliverAndRelease(result: CheckoutController.Result) {
         try {
             resultCallback.onResult(result)
         } finally {

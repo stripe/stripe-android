@@ -12,10 +12,18 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -331,6 +339,188 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
+    fun `successful confirmation refreshes before delivering the result`() = runScenario(
+        refresher = RecordingRefresher(CompletableDeferred()),
+    ) {
+        val response = CheckoutSessionResponseFactory.create()
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession(response))
+
+        assertThat(refresher.refreshCalls.awaitItem()).isEqualTo(response)
+        resultTurbine.expectNoEvents()
+        refresher.release()
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+    }
+
+    @Test
+    fun `isUpdating stays true across a confirmation refresh`() = runScenario(
+        refresher = RecordingRefresher(CompletableDeferred()),
+    ) {
+        coordinator.isUpdating.test {
+            assertThat(awaitItem()).isFalse()
+            coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+            assertThat(awaitItem()).isTrue()
+            confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession())
+            refresher.refreshCalls.awaitItem()
+            expectNoEvents()
+            refresher.release()
+            resultTurbine.awaitItem()
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `succeeded confirmation without a session response does not refresh`() = runScenario {
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED),
+        )
+        resultTurbine.awaitItem()
+        refresher.refreshCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `canceled confirmation does not refresh`() = runScenario {
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Canceled(ConfirmationHandler.Result.Canceled.Action.None),
+        )
+        resultTurbine.awaitItem()
+        refresher.refreshCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `failed confirmation does not refresh`() = runScenario {
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("failed"),
+                message = "failed".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            ),
+        )
+        resultTurbine.awaitItem()
+        refresher.refreshCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `refresh failure still delivers confirmation result and releases the gate`() = runScenario(
+        refresher = RecordingRefresher(error = IllegalStateException("refresh failed")),
+    ) {
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession())
+        refresher.refreshCalls.awaitItem()
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.CHECKOUT_CONFIRMATION_SESSION_REFRESH_FAILED)
+        assertThat(coordinator.isUpdating.value).isFalse()
+        assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNotNull()
+    }
+
+    @Test
+    fun `refresh failing with a cancellation still delivers the confirmation result`() = runScenario(
+        // A reload can surface a CancellationException as a value rather than cancelling us — see
+        // CoroutineContext.runCatching. Rethrowing it would strand the gate with no result.
+        refresher = RecordingRefresher(error = CancellationException("reload timed out")),
+    ) {
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession())
+        refresher.refreshCalls.awaitItem()
+
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.CHECKOUT_CONFIRMATION_SESSION_REFRESH_FAILED)
+        assertThat(coordinator.isUpdating.value).isFalse()
+        assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNotNull()
+    }
+
+    @Test
+    fun `a refresh that never finishes times out and still delivers the result`() = runScenario(
+        // Gate is never released, so the refresh only ends by timing out.
+        refresher = RecordingRefresher(CompletableDeferred()),
+    ) {
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession())
+        refresher.refreshCalls.awaitItem()
+        resultTurbine.expectNoEvents()
+
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.CHECKOUT_CONFIRMATION_SESSION_REFRESH_FAILED)
+        assertThat(coordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
+    fun `confirmation refresh updates the session before delivering the result`() = runTest {
+        val response = CheckoutSessionResponseFactory.create()
+        val refresher = RecordingRefresher()
+        val callbackInvoked = CompletableDeferred<Unit>()
+
+        runScenario(
+            refresher = refresher,
+            resultCallback = CheckoutController.ResultCallback {
+                assertThat(refresher.committedSession).isEqualTo(response)
+                callbackInvoked.complete(Unit)
+            },
+        ) {
+            coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+            confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession(response))
+            refresher.refreshCalls.awaitItem()
+            callbackInvoked.await()
+        }
+    }
+
+    @Test
+    fun `mutation waits for confirmation refresh to complete`() = runScenario(
+        refresher = RecordingRefresher(CompletableDeferred()),
+    ) {
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession())
+        refresher.refreshCalls.awaitItem()
+
+        val mutationStarted = CompletableDeferred<Unit>()
+        val mutation = async {
+            coordinator.runMutation {
+                mutationStarted.complete(Unit)
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+        assertThat(mutationStarted.isCompleted).isFalse()
+
+        refresher.release()
+        resultTurbine.awaitItem()
+        assertThat(mutation.await().isSuccess).isTrue()
+        assertThat(mutationStarted.isCompleted).isTrue()
+    }
+
+    @Test
+    fun `cancelling observer during refresh does not deliver a result`() = runScenario(
+        refresher = RecordingRefresher(CompletableDeferred()),
+    ) {
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession())
+        refresher.refreshCalls.awaitItem()
+        observerJob.cancelAndJoin()
+        resultTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `restored confirmation refreshes before delivering its result`() = runScenario(
+        initialConfirmationState = ConfirmationHandler.State.Confirming(
+            CONFIRMATION_PARAMETERS.confirmationOption,
+        ),
+        hasReloadedFromProcessDeath = true,
+        refresher = RecordingRefresher(CompletableDeferred()),
+    ) {
+        confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession())
+        refresher.refreshCalls.awaitItem()
+        resultTurbine.expectNoEvents()
+        refresher.release()
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+    }
+
+    @Test
     fun `canceled confirmation is delivered as canceled`() = runScenario {
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
@@ -399,11 +589,12 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(callbackStarted.await(5, TimeUnit.SECONDS)).isTrue()
 
             confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+                succeededWithSession()
             )
             runCurrent()
 
             assertThat(deliveredResults).hasSize(1)
+            refresher.refreshCalls.expectNoEvents()
             releaseCallback.countDown()
             failureCompletion.await()
 
@@ -525,6 +716,8 @@ internal class CheckoutOperationCoordinatorTest {
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
         hasReloadedFromProcessDeath: Boolean = false,
         resultCallback: CheckoutController.ResultCallback? = null,
+        refresher: RecordingRefresher = RecordingRefresher(),
+        errorReporter: FakeErrorReporter = FakeErrorReporter(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationState = MutableStateFlow(initialConfirmationState)
@@ -540,9 +733,10 @@ internal class CheckoutOperationCoordinatorTest {
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
+            errorReporter = errorReporter,
         )
-        backgroundScope.launch {
-            coordinator.observeConfirmationResults()
+        val observerJob = backgroundScope.launch {
+            coordinator.observeConfirmationResults(refresher::refresh)
         }
         testScheduler.runCurrent()
 
@@ -550,17 +744,25 @@ internal class CheckoutOperationCoordinatorTest {
             coordinator = coordinator,
             confirmationState = confirmationState,
             resultTurbine = resultTurbine,
+            refresher = refresher,
+            observerJob = observerJob,
+            errorReporter = errorReporter,
             testScope = this,
         ).block()
 
         confirmationHandler.validate()
         resultTurbine.ensureAllEventsConsumed()
+        refresher.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val coordinator: CheckoutOperationCoordinator,
         val confirmationState: MutableStateFlow<ConfirmationHandler.State>,
         val resultTurbine: Turbine<CheckoutController.Result>,
+        val refresher: RecordingRefresher,
+        val observerJob: Job,
+        val errorReporter: FakeErrorReporter,
         private val testScope: TestScope,
     ) : CoroutineScope by testScope {
         val backgroundScope = testScope.backgroundScope
@@ -570,4 +772,32 @@ internal class CheckoutOperationCoordinatorTest {
             testScheduler.runCurrent()
         }
     }
+
+    private class RecordingRefresher(
+        private val gate: CompletableDeferred<Unit>? = null,
+        private val error: Throwable? = null,
+    ) {
+        val refreshCalls = Turbine<CheckoutSessionResponse>()
+        var committedSession: CheckoutSessionResponse? = null
+
+        suspend fun refresh(response: CheckoutSessionResponse) {
+            refreshCalls.add(response)
+            committedSession = response
+            gate?.await()
+            error?.let { throw it }
+        }
+
+        fun release() {
+            gate?.complete(Unit)
+        }
+
+        fun ensureAllEventsConsumed() = refreshCalls.ensureAllEventsConsumed()
+    }
+
+    private fun succeededWithSession(
+        response: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+    ) = ConfirmationHandler.Result.Succeeded(
+        intent = PaymentIntentFixtures.PI_SUCCEEDED,
+        metadata = MutableConfirmationMetadata().apply { set(CheckoutSessionResponseKey, response) },
+    )
 }

@@ -27,6 +27,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.CoroutineScope
@@ -806,6 +807,25 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(8000)
+    }
+
+    @Test
+    fun `confirmed session response updates the controller session`() = runMutationScenario {
+        val confirmedResponse = committedState().checkoutSessionResponse.copy(
+            totalSummary = CheckoutSessionResponse.TotalSummaryResponse(
+                subtotal = 2000,
+                totalDueToday = 2000,
+                totalAmountDue = 2000,
+                discountAmounts = emptyList(),
+                taxAmounts = emptyList(),
+                shippingRate = null,
+                appliedBalance = null,
+            ),
+        )
+
+        controller.commitConfirmedSession(confirmedResponse)
+
+        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(2000)
     }
 
     @Test

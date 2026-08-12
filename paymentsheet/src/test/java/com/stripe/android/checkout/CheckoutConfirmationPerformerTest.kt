@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -103,6 +104,7 @@ internal class CheckoutConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             resultCallback = {},
+            errorReporter = FakeErrorReporter(),
         )
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
