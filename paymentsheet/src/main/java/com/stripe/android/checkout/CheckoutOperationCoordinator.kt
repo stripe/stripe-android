@@ -26,6 +26,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private var pendingMutations = 0
     private var confirmationInFlight = confirmationHandler.hasReloadedFromProcessDeath ||
         confirmationHandler.state.value is ConfirmationHandler.State.Confirming
+    private var confirmationWasRestored = confirmationHandler.hasReloadedFromProcessDeath
     private var confirmationCompletionClaimed = false
     private val mutex = Mutex(locked = confirmationInFlight)
 
@@ -95,6 +96,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                         "Checkout operation gate should be available after confirmation admission."
                     }
                     confirmationInFlight = true
+                    confirmationWasRestored = false
                     updateIsUpdating()
                     ConfirmationAdmission.Accepted(confirmationArguments)
                 }
@@ -114,11 +116,11 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun observeConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                completeConfirmation {
+                completeConfirmation { wasRestored ->
                     if (state.result !is ConfirmationHandler.Result.Succeeded) {
                         refreshSession()
                     }
-                    state.result.asCheckoutResult()
+                    state.result.asCheckoutResult(wasRestored)
                 }
             }
         }
@@ -131,22 +133,24 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
-    private suspend fun completeConfirmation(result: suspend () -> CheckoutController.Result) {
-        val shouldComplete = synchronized(admissionLock) {
+    private suspend fun completeConfirmation(
+        mapResult: suspend (confirmationWasRestored: Boolean) -> CheckoutController.Result?,
+    ) {
+        val wasRestored = synchronized(admissionLock) {
             if (!confirmationInFlight || confirmationCompletionClaimed) {
-                false
+                return
             } else {
                 confirmationCompletionClaimed = true
-                true
+                confirmationWasRestored
             }
         }
-        if (!shouldComplete) return
 
         try {
-            resultCallback.onResult(result())
+            mapResult(wasRestored)?.let(resultCallback::onResult)
         } finally {
             synchronized(admissionLock) {
                 confirmationInFlight = false
+                confirmationWasRestored = false
                 confirmationCompletionClaimed = false
                 mutex.unlock()
                 updateIsUpdating()
@@ -179,10 +183,18 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     }
 }
 
-private fun ConfirmationHandler.Result.asCheckoutResult(): CheckoutController.Result {
+private fun ConfirmationHandler.Result.asCheckoutResult(
+    confirmationWasRestored: Boolean,
+): CheckoutController.Result? {
     return when (this) {
         is ConfirmationHandler.Result.Succeeded -> CheckoutController.Result.Completed()
-        is ConfirmationHandler.Result.Canceled -> CheckoutController.Result.Canceled()
+        is ConfirmationHandler.Result.Canceled -> when (action) {
+            ConfirmationHandler.Result.Canceled.Action.InformCancellation ->
+                CheckoutController.Result.Canceled()
+            ConfirmationHandler.Result.Canceled.Action.None ->
+                CheckoutController.Result.Canceled().takeIf { confirmationWasRestored }
+            ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails -> null
+        }
         is ConfirmationHandler.Result.Failed -> CheckoutController.Result.Failed(cause)
     }
 }

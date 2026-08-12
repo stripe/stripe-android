@@ -275,7 +275,7 @@ internal class CheckoutOperationCoordinatorTest {
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
-                ConfirmationHandler.Result.Canceled.Action.None
+                ConfirmationHandler.Result.Canceled.Action.InformCancellation
             )
         )
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
@@ -313,7 +313,7 @@ internal class CheckoutOperationCoordinatorTest {
             enqueueRefreshAction {}
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Canceled(
-                    ConfirmationHandler.Result.Canceled.Action.None
+                    ConfirmationHandler.Result.Canceled.Action.InformCancellation
                 )
             )
             refreshCalls.awaitItem()
@@ -338,19 +338,40 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `canceled confirmation is delivered as canceled`() = runScenario {
+    fun `canceled confirmation with modify payment details does not invoke callback and releases gate`() =
+        runScenario {
+            coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+
+            enqueueRefreshAction {}
+            confirmationState.value = ConfirmationHandler.State.Complete(
+                ConfirmationHandler.Result.Canceled(
+                    ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails
+                )
+            )
+            assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
+            runCurrent()
+
+            resultTurbine.expectNoEvents()
+            assertThat(coordinator.isUpdating.value).isFalse()
+            assertThat(coordinator.runSynchronousMutation { Result.success(Unit) }.isSuccess).isTrue()
+        }
+
+    @Test
+    fun `canceled confirmation with no action does not invoke callback and releases gate`() = runScenario {
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
-                ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails
+                ConfirmationHandler.Result.Canceled.Action.None
             )
         )
-
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
-        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
+        runCurrent()
+
+        resultTurbine.expectNoEvents()
         assertThat(coordinator.isUpdating.value).isFalse()
+        assertThat(coordinator.runSynchronousMutation { Result.success(Unit) }.isSuccess).isTrue()
     }
 
     @Test
