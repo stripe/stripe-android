@@ -15,6 +15,7 @@ import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -22,6 +23,7 @@ import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.UsBankAccountFormTestUtils
 import okhttp3.mockwebserver.MockResponse
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
@@ -44,6 +46,11 @@ class EmbeddedApiConfigurationTest {
     private val embeddedContentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
 
+    @Before
+    fun before() {
+        validateAnalyticsRequest(eventName = "mc_embedded_init")
+    }
+
     @Test
     fun testSuccessfulCardPayment_withFormSheetActionConfirm() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
@@ -58,6 +65,19 @@ class EmbeddedApiConfigurationTest {
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
+
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
+        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
+        validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
+        validateAnalyticsRequest(eventName = "mc_form_completed")
 
         testContext.configure {
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
@@ -86,6 +106,16 @@ class EmbeddedApiConfigurationTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
+        validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.started")
+        validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.finished")
+        validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
+        validateAnalyticsRequest(eventName = "mc_dismiss")
+
         formPage.clickPrimaryButton()
         formPage.waitUntilMissing()
     }
@@ -104,6 +134,30 @@ class EmbeddedApiConfigurationTest {
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
+
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
+        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
+        validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
+        validateAnalyticsRequest(eventName = "mc_form_completed")
+        validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(eventName = "mc_dismiss")
+        // Second form open
+        validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
+        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
+        validateAnalyticsRequest(eventName = "mc_form_completed")
+        validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(eventName = "mc_dismiss")
 
         testContext.configure {
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
@@ -140,6 +194,14 @@ class EmbeddedApiConfigurationTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
+        validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.started")
+        validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.finished")
+        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
+
         testContext.confirm()
         assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
     }
@@ -155,6 +217,12 @@ class EmbeddedApiConfigurationTest {
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
+
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+        validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
 
         testContext.configure {
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
@@ -182,6 +250,14 @@ class EmbeddedApiConfigurationTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
+        validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.started")
+        validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.finished")
+        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
+
         testContext.consumePaymentOptionEvent("cashapp", "Cash App Pay")
         testContext.confirm()
         assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
@@ -200,6 +276,17 @@ class EmbeddedApiConfigurationTest {
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
+
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+        validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_form_completed")
+        validateAnalyticsRequest(eventName = "stripe_android.bankaccountcollector.started")
+        validateAnalyticsRequest(eventName = "stripe_android.bankaccountcollector.finished")
 
         testContext.configure {
             allowsDelayedPaymentMethods(true)
@@ -236,8 +323,17 @@ class EmbeddedApiConfigurationTest {
             response.testBodyFromFile("payment-intent-confirm-us_bank_account.json")
         }
 
+        validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.started")
+        validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.finished")
+        validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
+        validateAnalyticsRequest(eventName = "mc_dismiss")
+
         formPage.clickPrimaryButton()
-        //testRules.compose.waitForIdle()
         formPage.waitUntilMissing()
     }
 
@@ -253,6 +349,18 @@ class EmbeddedApiConfigurationTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+        validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
+        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
+
         testContext.configure {
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
         }
@@ -260,12 +368,18 @@ class EmbeddedApiConfigurationTest {
         embeddedContentPage.clickOnLpm("card")
         formPage.fillOutCardDetails()
 
+        validateAnalyticsRequest(eventName = "mc_form_completed")
+
         networkRule.enqueueWithPublishableKeyValidation(
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
         ) { response ->
             response.testBodyFromFile("consumer-session-lookup-success.json")
         }
+
+        validateAnalyticsRequest(eventName = "link.signup.checkbox_checked")
+        validateAnalyticsRequest(eventName = "link.account_lookup.complete")
+        validateAnalyticsRequest(eventName = "link.signup.start")
 
         // Click the "Save my info" checkbox and fill out Link signup fields
         testRules.compose.onNode(hasText("Save my info for faster checkout with Link"))
@@ -320,8 +434,31 @@ class EmbeddedApiConfigurationTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
+        validateAnalyticsRequest(eventName = "link.signup.complete")
+        validateAnalyticsRequest(eventName = "link.create_new_card.success")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.started")
+        validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(eventName = "stripe_android.paymenthandler.confirm.finished")
+        validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
+        validateAnalyticsRequest(eventName = "mc_dismiss")
+
         formPage.clickPrimaryButton()
         formPage.waitUntilMissing()
+    }
+
+    private fun validateAnalyticsRequest(eventName: String) {
+        networkRule.enqueue(
+            host("q.stripe.com"),
+            method("GET"),
+            query("event", eventName),
+            query("publishable_key", "pk_test_123"),
+        ) { response ->
+            response.status = "HTTP/1.1 200 OK"
+        }
     }
 
     private fun NetworkRule.enqueueWithPublishableKeyValidation(
