@@ -40,6 +40,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -91,6 +92,7 @@ internal interface CustomerSheetTestHelper {
                     integrationMetadata: IntegrationMetadata,
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
+                    checkoutSessionResponse: CheckoutSessionResponse?,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {
                         enqueueCompleteStep(true)

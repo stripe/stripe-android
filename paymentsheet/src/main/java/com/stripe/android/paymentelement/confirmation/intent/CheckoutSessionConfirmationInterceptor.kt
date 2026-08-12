@@ -43,6 +43,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     @Assisted private val integrationMetadata: IntegrationMetadata.CheckoutSession,
     @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
+    @Assisted private val checkoutSessionResponse: CheckoutSessionResponse?,
     context: Context,
     private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
@@ -86,7 +87,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        // For saved payment methods, we don't need to create a new PM or save it again.
+        val billingAddress = confirmationOption.paymentMethod.billingDetails
         val params = createConfirmParams(
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
@@ -188,6 +189,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             integrationMetadata: IntegrationMetadata.CheckoutSession,
             customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
+            checkoutSessionResponse: CheckoutSessionResponse?,
         ): CheckoutSessionConfirmationInterceptor
     }
 }

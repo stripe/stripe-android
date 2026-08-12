@@ -46,6 +46,7 @@ internal class IntentConfirmationDefinition(
                 integrationMetadata = paymentMethodMetadata.integrationMetadata,
                 customerMetadata = paymentMethodMetadata.customerMetadata,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+                checkoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse,
             )
         } catch (e: CallbackNotFoundException) {
             return ConfirmationDefinition.Action.Fail(
