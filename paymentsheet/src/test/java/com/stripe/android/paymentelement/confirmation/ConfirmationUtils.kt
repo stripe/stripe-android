@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.updatedtax.DefaultUpdatedTaxAmountLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
@@ -210,7 +211,8 @@ internal fun createTestConfirmationHandlerFactory(
                             statusBarColor = statusBarColor,
                             includePaymentSheetNextHandlers = true,
                         )
-                    }
+                    },
+                    updatedTaxAmountLauncherFactory = DefaultUpdatedTaxAmountLauncherFactory,
                 ),
                 BacsConfirmationDefinition(
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,

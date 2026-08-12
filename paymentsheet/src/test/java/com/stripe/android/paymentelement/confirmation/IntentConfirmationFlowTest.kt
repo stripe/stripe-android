@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.paymentdatacollection.updatedtax.DefaultUpdatedTaxAmountLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
@@ -295,7 +296,8 @@ internal class IntentConfirmationFlowTest {
             },
             paymentLauncherFactory = { _, _ ->
                 FakePaymentLauncher()
-            }
+            },
+            updatedTaxAmountLauncherFactory = DefaultUpdatedTaxAmountLauncherFactory,
         )
     }
 

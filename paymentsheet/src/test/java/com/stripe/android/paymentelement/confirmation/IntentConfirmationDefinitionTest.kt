@@ -19,6 +19,8 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationLauncher
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationLauncherResult
 import com.stripe.android.paymentelement.confirmation.interceptor.FakeIntentConfirmationInterceptorFactory
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
@@ -26,7 +28,11 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.paymentdatacollection.updatedtax.DefaultUpdatedTaxAmountLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.updatedtax.UpdatedTaxAmountContract
+import com.stripe.android.paymentsheet.paymentdatacollection.updatedtax.UpdatedTaxAmountResult
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeActivityResultLauncher
@@ -47,9 +53,12 @@ class IntentConfirmationDefinitionTest {
             )
 
             awaitRegisterCall()
-            val registeredLauncher = awaitNextRegisteredLauncher()
+            val paymentLauncher = awaitNextRegisteredLauncher()
+            awaitRegisterCall()
+            val updatedTaxAmountLauncher = awaitNextRegisteredLauncher()
 
-            assertThat(createdLauncher).isEqualTo(registeredLauncher)
+            assertThat(createdLauncher.paymentLauncher).isEqualTo(paymentLauncher)
+            assertThat(createdLauncher.updatedTaxAmountActivityLauncher).isEqualTo(updatedTaxAmountLauncher)
         }
     }
 
@@ -262,7 +271,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = FakeActivityResultLauncher(),
+            launcher = fakeIntentConfirmationLauncher(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
@@ -286,7 +295,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = FakeActivityResultLauncher(),
+            launcher = fakeIntentConfirmationLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
@@ -314,7 +323,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = FakeActivityResultLauncher(),
+            launcher = fakeIntentConfirmationLauncher(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
@@ -338,7 +347,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = FakeActivityResultLauncher(),
+            launcher = fakeIntentConfirmationLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
@@ -363,7 +372,7 @@ class IntentConfirmationDefinitionTest {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         definition.launch(
-            launcher = FakeActivityResultLauncher(),
+            launcher = fakeIntentConfirmationLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
@@ -388,7 +397,7 @@ class IntentConfirmationDefinitionTest {
         val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
 
         definition.launch(
-            launcher = FakeActivityResultLauncher(),
+            launcher = fakeIntentConfirmationLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
@@ -414,7 +423,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = FakeActivityResultLauncher(),
+            launcher = fakeIntentConfirmationLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 deferredIntentConfirmationType = null,
@@ -424,6 +433,43 @@ class IntentConfirmationDefinitionTest {
         )
 
         assertThat(capturedStatusBarColor).isEqualTo(0x00FF00)
+    }
+
+    @Test
+    fun `On launch with updated tax, should launch updated tax amount flow with display items`() = runTest {
+        val definition = createIntentConfirmationDefinition()
+        val updatedTaxActivityLauncher = FakeActivityResultLauncher<UpdatedTaxAmountContract.Args>()
+        val launcher = IntentConfirmationLauncher(
+            paymentLauncher = FakeActivityResultLauncher(),
+            updatedTaxAmountActivityLauncher = updatedTaxActivityLauncher,
+            updatedTaxAmountLauncher = DefaultUpdatedTaxAmountLauncherFactory.create(updatedTaxActivityLauncher),
+        )
+        val response = CheckoutSessionResponseFactory.create(
+            currency = "cad",
+            lineItems = listOf(
+                CheckoutSessionResponse.LineItem(
+                    id = "li_123",
+                    name = "Widget",
+                    quantity = 1,
+                    unitAmount = 1200L,
+                    subtotal = 1200L,
+                    total = 1200L,
+                )
+            ),
+        )
+
+        definition.launch(
+            launcher = launcher,
+            arguments = IntentConfirmationDefinition.Args.ConfirmUpdatedTax(response),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        val args = updatedTaxActivityLauncher.calls.awaitItem().input
+        assertThat(args.currency).isEqualTo("cad")
+        assertThat(args.displayItems).hasSize(1)
+        assertThat(args.displayItems.single().price).isEqualTo(1200L)
+        assertThat(args.appearance).isEqualTo(CONFIRMATION_PARAMETERS.paymentMethodMetadata.appearance)
     }
 
     @Test
@@ -441,7 +487,9 @@ class IntentConfirmationDefinitionTest {
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             ),
-            result = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED),
+            result = IntentConfirmationLauncherResult.Payment(
+                InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+            ),
         )
 
         val succeededResult = result.asSucceeded()
@@ -472,7 +520,7 @@ class IntentConfirmationDefinitionTest {
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
             ),
-            result = InternalPaymentResult.Failed(exception),
+            result = IntentConfirmationLauncherResult.Payment(InternalPaymentResult.Failed(exception)),
         )
 
         val failedResult = result.asFailed()
@@ -497,11 +545,45 @@ class IntentConfirmationDefinitionTest {
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
             ),
-            result = InternalPaymentResult.Canceled,
+            result = IntentConfirmationLauncherResult.Payment(InternalPaymentResult.Canceled),
         )
 
         val canceledResult = result.asCanceled()
 
+        assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
+    }
+
+    @Test
+    fun `On updated tax confirmation, should continue with updated checkout session response`() {
+        val definition = createIntentConfirmationDefinition()
+        val updatedResponse = CheckoutSessionResponseFactory.create(amount = 6000L)
+
+        val result = definition.toResult(
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = IntentConfirmationDefinition.Args.ConfirmUpdatedTax(updatedResponse),
+            result = IntentConfirmationLauncherResult.UpdatedTaxAmount(UpdatedTaxAmountResult.Confirmed),
+        )
+
+        val nextStep = result as ConfirmationDefinition.Result.NextStep
+        assertThat(nextStep.confirmationOption).isEqualTo(SAVED_PAYMENT_CONFIRMATION_OPTION)
+        assertThat(nextStep.arguments.paymentMethodMetadata.checkoutSessionResponse).isEqualTo(updatedResponse)
+    }
+
+    @Test
+    fun `On updated tax cancellation, should return canceled confirmation result`() {
+        val definition = createIntentConfirmationDefinition()
+
+        val result = definition.toResult(
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = IntentConfirmationDefinition.Args.ConfirmUpdatedTax(
+                CheckoutSessionResponseFactory.create()
+            ),
+            result = IntentConfirmationLauncherResult.UpdatedTaxAmount(UpdatedTaxAmountResult.Cancelled),
+        )
+
+        val canceledResult = result.asCanceled()
         assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
     }
 
@@ -524,6 +606,17 @@ class IntentConfirmationDefinitionTest {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             paymentLauncherFactory = paymentLauncherFactory,
+            updatedTaxAmountLauncherFactory = DefaultUpdatedTaxAmountLauncherFactory,
+        )
+    }
+
+    private fun fakeIntentConfirmationLauncher(): IntentConfirmationLauncher {
+        val paymentLauncher = FakeActivityResultLauncher<PaymentLauncherContract.Args>()
+        val updatedTaxAmountLauncher = FakeActivityResultLauncher<UpdatedTaxAmountContract.Args>()
+        return IntentConfirmationLauncher(
+            paymentLauncher = paymentLauncher,
+            updatedTaxAmountActivityLauncher = updatedTaxAmountLauncher,
+            updatedTaxAmountLauncher = DefaultUpdatedTaxAmountLauncherFactory.create(updatedTaxAmountLauncher),
         )
     }
 

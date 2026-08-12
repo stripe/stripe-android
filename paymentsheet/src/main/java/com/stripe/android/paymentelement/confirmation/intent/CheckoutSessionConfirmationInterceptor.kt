@@ -109,13 +109,11 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         }
         val finalEstimatedTotal = updatedCheckoutSessionResponse?.totalSummary?.totalAmountDue
         if (initialEstimatedTotal != finalEstimatedTotal) {
-            val error = IllegalStateException(
-                "The estimated total changed from $initialEstimatedTotal to $finalEstimatedTotal."
-            )
-            return ConfirmationDefinition.Action.Fail(
-                cause = error,
-                message = error.stripeErrorMessage(),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            return ConfirmationDefinition.Action.Launch(
+                launcherArguments = Args.ConfirmUpdatedTax(
+                    checkoutSessionResponse = requireNotNull(updatedCheckoutSessionResponse),
+                ),
+                receivesResultInProcess = true,
             )
         }
 

@@ -13,21 +13,27 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.paymentdatacollection.updatedtax.UpdatedTaxAmountContract
+import com.stripe.android.paymentsheet.paymentdatacollection.updatedtax.UpdatedTaxAmountLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.updatedtax.UpdatedTaxAmountResult
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.parcelize.Parcelize
 
 internal class IntentConfirmationDefinition(
     private val intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
     private val paymentLauncherFactory:
         (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?) -> PaymentLauncher,
+    private val updatedTaxAmountLauncherFactory: UpdatedTaxAmountLauncherFactory,
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption,
-    ActivityResultLauncher<PaymentLauncherContract.Args>,
+    IntentConfirmationLauncher,
     IntentConfirmationDefinition.Args,
-    InternalPaymentResult
+    IntentConfirmationLauncherResult
     > {
     override val key: String = "IntentConfirmation"
 
@@ -75,28 +81,54 @@ internal class IntentConfirmationDefinition(
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
-        onResult: (InternalPaymentResult) -> Unit
-    ): ActivityResultLauncher<PaymentLauncherContract.Args> {
-        return activityResultCaller.registerForActivityResult(
+        onResult: (IntentConfirmationLauncherResult) -> Unit
+    ): IntentConfirmationLauncher {
+        val paymentLauncher = activityResultCaller.registerForActivityResult(
             PaymentLauncherContract(),
-            onResult
+        ) { result ->
+            onResult(IntentConfirmationLauncherResult.Payment(result))
+        }
+        val updatedTaxAmountActivityLauncher = activityResultCaller.registerForActivityResult(
+            UpdatedTaxAmountContract(),
+        ) { result ->
+            onResult(IntentConfirmationLauncherResult.UpdatedTaxAmount(result))
+        }
+        return IntentConfirmationLauncher(
+            paymentLauncher = paymentLauncher,
+            updatedTaxAmountActivityLauncher = updatedTaxAmountActivityLauncher,
+            updatedTaxAmountLauncher = updatedTaxAmountLauncherFactory.create(updatedTaxAmountActivityLauncher),
         )
     }
 
-    override fun unregister(launcher: ActivityResultLauncher<PaymentLauncherContract.Args>) {
-        launcher.unregister()
+    override fun unregister(launcher: IntentConfirmationLauncher) {
+        launcher.paymentLauncher.unregister()
+        launcher.updatedTaxAmountActivityLauncher.unregister()
     }
 
     override fun launch(
-        launcher: ActivityResultLauncher<PaymentLauncherContract.Args>,
+        launcher: IntentConfirmationLauncher,
         arguments: Args,
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
-        val paymentLauncher = paymentLauncherFactory(launcher, confirmationArgs.statusBarColor)
         when (arguments) {
-            is Args.Confirm -> launchConfirm(paymentLauncher, arguments.confirmNextParams)
-            is Args.NextAction -> paymentLauncher.handleNextActionForStripeIntent(arguments.intent)
+            is Args.Confirm -> {
+                val paymentLauncher = paymentLauncherFactory(launcher.paymentLauncher, confirmationArgs.statusBarColor)
+                launchConfirm(paymentLauncher, arguments.confirmNextParams)
+            }
+            is Args.NextAction -> {
+                val paymentLauncher = paymentLauncherFactory(launcher.paymentLauncher, confirmationArgs.statusBarColor)
+                paymentLauncher.handleNextActionForStripeIntent(arguments.intent)
+            }
+            is Args.ConfirmUpdatedTax -> {
+                launcher.updatedTaxAmountLauncher.launch(
+                    UpdatedTaxAmountContract.Args(
+                        displayItems = GooglePayDisplayItemsFactory.create(arguments.checkoutSessionResponse),
+                        currency = arguments.checkoutSessionResponse.currency,
+                        appearance = confirmationArgs.paymentMethodMetadata.appearance,
+                    )
+                )
+            }
         }
     }
 
@@ -104,7 +136,22 @@ internal class IntentConfirmationDefinition(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         launcherArgs: Args,
-        result: InternalPaymentResult
+        result: IntentConfirmationLauncherResult
+    ): ConfirmationDefinition.Result {
+        return when (result) {
+            is IntentConfirmationLauncherResult.Payment -> toPaymentResult(launcherArgs, result.result)
+            is IntentConfirmationLauncherResult.UpdatedTaxAmount -> toUpdatedTaxAmountResult(
+                confirmationOption = confirmationOption,
+                confirmationArgs = confirmationArgs,
+                launcherArgs = launcherArgs,
+                result = result.result,
+            )
+        }
+    }
+
+    private fun toPaymentResult(
+        launcherArgs: Args,
+        result: InternalPaymentResult,
     ): ConfirmationDefinition.Result {
         return when (result) {
             is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
@@ -121,6 +168,36 @@ internal class IntentConfirmationDefinition(
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
             is InternalPaymentResult.Canceled -> ConfirmationDefinition.Result.Canceled(
+                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+            )
+        }
+    }
+
+    private fun toUpdatedTaxAmountResult(
+        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationArgs: ConfirmationHandler.Args,
+        launcherArgs: Args,
+        result: UpdatedTaxAmountResult,
+    ): ConfirmationDefinition.Result {
+        val updatedCheckoutSessionResponse = (launcherArgs as? Args.ConfirmUpdatedTax)?.checkoutSessionResponse
+            ?: run {
+                val error = IllegalStateException("Missing updated checkout session response.")
+                return ConfirmationDefinition.Result.Failed(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                )
+            }
+        return when (result) {
+            UpdatedTaxAmountResult.Confirmed -> ConfirmationDefinition.Result.NextStep(
+                confirmationOption = confirmationOption,
+                arguments = confirmationArgs.copy(
+                    paymentMethodMetadata = confirmationArgs.paymentMethodMetadata.copy(
+                        checkoutSessionResponse = updatedCheckoutSessionResponse,
+                    ),
+                ),
+            )
+            UpdatedTaxAmountResult.Cancelled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
         }
@@ -154,5 +231,12 @@ internal class IntentConfirmationDefinition(
             val confirmNextParams: ConfirmStripeIntentParams,
             override val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         ) : Args
+
+        @Parcelize
+        data class ConfirmUpdatedTax(
+            val checkoutSessionResponse: CheckoutSessionResponse,
+        ) : Args {
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
+        }
     }
 }

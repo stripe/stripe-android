@@ -379,7 +379,8 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `intercept with saved payment method fails when tax region update changes estimated total`() = runScenario(
+    fun `intercept with saved payment method requests confirmation when tax region update changes estimated total`() =
+        runScenario(
         checkoutSessionResponse = CHECKOUT_SESSION_RESPONSE,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -390,10 +391,11 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val result = interceptSavedPm()
 
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
-        val failure = result as ConfirmationDefinition.Action.Fail
-        assertThat(failure.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failure.cause.message).isEqualTo("The estimated total changed from 5099 to 6000.")
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
+        val launch = result as ConfirmationDefinition.Action.Launch
+        val args = launch.launcherArguments as IntentConfirmationDefinition.Args.ConfirmUpdatedTax
+        assertThat(args.checkoutSessionResponse.totalSummary?.totalAmountDue).isEqualTo(6000L)
+        assertThat(launch.receivesResultInProcess).isTrue()
     }
 
     private fun runScenario(

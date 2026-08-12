@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.paymentdatacollection.updatedtax.DefaultUpdatedTaxAmountLauncherFactory
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
@@ -58,6 +59,7 @@ internal class IntentConfirmationModule {
                     includePaymentSheetNextHandlers = true,
                 )
             },
+            updatedTaxAmountLauncherFactory = DefaultUpdatedTaxAmountLauncherFactory,
         )
     }
 }

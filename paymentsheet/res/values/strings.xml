@@ -183,6 +183,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_confirm">Confirm</string>
   <!-- Title for prompting for a card's CVC on confirming the payment -->
   <string name="stripe_paymentsheet_confirm_your_cvc">Confirm your CVC</string>
+  <string name="stripe_paymentsheet_confirm_updated_total">Confirm updated total</string>
+  <string name="stripe_paymentsheet_updated_tax_message">Tax changed your total. Review the updated amount before confirming.</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Enter address manually</string>
   <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
