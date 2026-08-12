@@ -126,10 +126,10 @@ internal class PaymentSheetPage(
         waitForText(label)
         composeTestRule.onNode(hasText(label))
             .performScrollTo()
-            .performTextReplacement(text)
-        composeTestRule.waitForIdle()
-        composeTestRule.onNode(hasText(text))
             .performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNode(hasText(label))
+            .performTextReplacement(text)
     }
 
     fun clickSavedCard(last4: String) {
