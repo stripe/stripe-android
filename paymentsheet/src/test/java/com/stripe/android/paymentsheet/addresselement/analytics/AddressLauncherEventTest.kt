@@ -109,5 +109,4 @@ class AddressLauncherEventTest {
         assertThat(params["autocomplete_session_token"]).isEqualTo("token-err")
         assertThat(params["ms_session_elapsed"]).isEqualTo(5000.0)
     }
-
 }
