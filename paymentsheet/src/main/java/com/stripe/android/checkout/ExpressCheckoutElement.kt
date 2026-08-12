@@ -155,6 +155,22 @@ class ExpressCheckoutElement @Inject internal constructor(
             }
         }
 
+        class SavedPaymentMethodsConfiguration {
+
+            private var display: Display = Display.Automatic
+
+            enum class Display {
+                // Displays SPMs if there's a customer attached on the checkout session and that customer has SPMs
+                Automatic,
+                // Never displays SPMs.
+                Never,
+            }
+
+            fun display(display: Display): SavedPaymentMethodsConfiguration = apply {
+                this.display = display
+            }
+        }
+
         /**
          * Configuration related to Google Pay.
          *
@@ -361,6 +377,10 @@ class ExpressCheckoutElement @Inject internal constructor(
 
         /** Sets the configuration for Link. */
         fun linkConfiguration(linkConfiguration: LinkConfiguration): Configuration {
+            throw NotImplementedError()
+        }
+
+        fun savedPaymentMethodsConfiguration(configuration: SavedPaymentMethodsConfiguration): Configuration {
             throw NotImplementedError()
         }
 
