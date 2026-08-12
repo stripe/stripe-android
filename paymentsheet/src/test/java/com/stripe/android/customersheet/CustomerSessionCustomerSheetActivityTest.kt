@@ -50,9 +50,7 @@ class CustomerSessionCustomerSheetActivityTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     private val composeTestRule = createAndroidComposeRule<CustomerSheetActivity>()
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -503,7 +501,8 @@ class CustomerSessionCustomerSheetActivityTest {
             path("/v1/payment_methods"),
             query("type", "card"),
             query("customer", "cus_12345"),
-            query("limit", "100")
+            query("limit", "100"),
+            applyDefaultHeader = false,
         ) { response ->
             response.createPaymentMethodsResponse(cards)
         }
@@ -513,7 +512,8 @@ class CustomerSessionCustomerSheetActivityTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/elements/payment_methods/$id/detach")
+            path("/v1/elements/payment_methods/$id/detach"),
+            applyDefaultHeader = false,
         ) { response ->
             response.createPaymentMethodDetachResponse(id = id)
         }
@@ -523,7 +523,8 @@ class CustomerSessionCustomerSheetActivityTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_methods/$id")
+            path("/v1/payment_methods/$id"),
+            applyDefaultHeader = false,
         ) { response ->
             response.createPaymentMethodUpdateResponse(id)
         }

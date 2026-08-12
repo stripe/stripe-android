@@ -129,9 +129,7 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFlowControllerTest {
 
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()

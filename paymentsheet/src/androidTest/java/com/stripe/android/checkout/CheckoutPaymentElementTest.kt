@@ -20,7 +20,7 @@ import org.junit.Test
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutPaymentElementTest {
     private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+        defaultMatcher = header("Authorization", "Bearer pk_test_123")
     )
 
     @get:Rule

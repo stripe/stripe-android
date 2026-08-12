@@ -36,7 +36,7 @@ internal class LinkTest {
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(
         validationTimeout = 5.seconds,
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123")),
+        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
     )
 
     @get:Rule
@@ -141,6 +141,7 @@ internal class LinkTest {
                 host("api.stripe.com"),
                 method("GET"),
                 path("/v1/customers/cus_1"),
+                applyDefaultHeader = false,
             ) { response ->
                 response.testBodyFromFile("customer-get-success.json")
             }
@@ -149,7 +150,8 @@ internal class LinkTest {
                 host("api.stripe.com"),
                 method("GET"),
                 path("/v1/payment_methods"),
-                query("type", PaymentMethod.Type.Card.code)
+                query("type", PaymentMethod.Type.Card.code),
+                applyDefaultHeader = false,
             ) { response ->
                 response.testBodyFromFile("payment-methods-get-success-empty.json")
             }
@@ -426,6 +428,7 @@ internal class LinkTest {
                 host("api.stripe.com"),
                 method("GET"),
                 path("/v1/customers/cus_1"),
+                applyDefaultHeader = false,
             ) { response ->
                 response.testBodyFromFile("customer-get-success.json")
             }
@@ -434,7 +437,8 @@ internal class LinkTest {
                 host("api.stripe.com"),
                 method("GET"),
                 path("/v1/payment_methods"),
-                query("type", PaymentMethod.Type.Card.code)
+                query("type", PaymentMethod.Type.Card.code),
+                applyDefaultHeader = false,
             ) { response ->
                 response.testBodyFromFile("payment-methods-get-success-empty.json")
             }

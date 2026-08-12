@@ -15,9 +15,7 @@ private const val ResolvedUrl = "https://stripe.com/pay-me"
 internal class RealRedirectResolverTest {
 
     @get:Rule
-    val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    val networkRule = NetworkRule()
 
     @Test
     fun `Does not attempt to resolve after the first redirect`() = runTest {

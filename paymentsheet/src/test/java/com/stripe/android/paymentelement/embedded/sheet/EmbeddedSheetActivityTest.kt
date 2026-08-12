@@ -50,9 +50,7 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 internal class EmbeddedSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     private val managePage = ManagePage(composeTestRule)
     private val editPage = EditPage(composeTestRule)

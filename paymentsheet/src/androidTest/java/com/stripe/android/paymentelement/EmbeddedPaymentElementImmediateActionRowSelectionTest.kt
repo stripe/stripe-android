@@ -24,7 +24,7 @@ import org.junit.Test
 
 internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+        defaultMatcher = header("Authorization", "Bearer pk_test_123")
     )
 
     @get:Rule

@@ -65,9 +65,7 @@ class TapToAddActivityTest {
     private val imageLoaderTestRule = TapToAddStripeImageLoaderTestRule()
     private val intentsRule = IntentsRule()
     private val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain

@@ -22,6 +22,7 @@ fun NetworkRule.setupV1PaymentMethodsResponse(
         method("GET"),
         path("/v1/payment_methods"),
         query("type", type),
+        applyDefaultHeader = false,
     ) { response ->
         val paymentMethodsArray = JSONArray()
 

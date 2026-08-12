@@ -56,9 +56,7 @@ import java.util.concurrent.TimeUnit
 internal class CheckoutControllerTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     private val expectedMerchantDisplayName = "Mobile Example Account"
 

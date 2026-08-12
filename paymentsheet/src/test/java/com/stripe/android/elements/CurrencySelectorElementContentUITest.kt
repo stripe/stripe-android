@@ -47,9 +47,7 @@ internal class CurrencySelectorElementContentUITest {
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
     private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)

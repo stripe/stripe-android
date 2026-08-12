@@ -24,7 +24,7 @@ import kotlin.time.Duration
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
     validationTimeout: Duration?,
-    private val globalMatchers: Array<out RequestMatcher>,
+    private val defaultMatcher: RequestMatcher?,
 ) : TestRule {
     private val mockWebServer = TestMockWebServer(validationTimeout)
 
@@ -34,8 +34,8 @@ class NetworkRule private constructor(
     constructor(
         hostsToTrack: List<String> = listOf(ApiRequest.API_HOST),
         validationTimeout: Duration? = null,
-        vararg globalMatchers: RequestMatcher,
-    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet(), validationTimeout, globalMatchers)
+        defaultMatcher: RequestMatcher? = null,
+    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet(), validationTimeout, defaultMatcher)
 
     override fun apply(base: Statement, description: Description): Statement {
         return NetworkStatement(
@@ -51,10 +51,12 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        applyDefaultHeader: Boolean = true,
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (MockResponse) -> Unit
     ) {
-        mockWebServer.dispatcher.enqueue(*globalMatchers, *requestMatcher) { response ->
+        val matchers = withDefaultHeader(requestMatcher, applyDefaultHeader)
+        mockWebServer.dispatcher.enqueue(*matchers) { response ->
             responseFactory(response)
             if (ensureResponseIsValidJson) {
                 assertResponseBodyIsValidJson(response)
@@ -64,14 +66,27 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        applyDefaultHeader: Boolean = true,
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (TestRecordedRequest, MockResponse) -> Unit
     ) {
-        mockWebServer.dispatcher.enqueue(*globalMatchers, *requestMatcher) { request, response ->
+        val matchers = withDefaultHeader(requestMatcher, applyDefaultHeader)
+        mockWebServer.dispatcher.enqueue(*matchers) { request, response ->
             responseFactory(request, response)
             if (ensureResponseIsValidJson) {
                 assertResponseBodyIsValidJson(response)
             }
+        }
+    }
+
+    private fun withDefaultHeader(
+        requestMatcher: Array<out RequestMatcher>,
+        applyDefaultHeader: Boolean,
+    ): Array<out RequestMatcher> {
+        return if (applyDefaultHeader && defaultMatcher != null) {
+            arrayOf(defaultMatcher, *requestMatcher)
+        } else {
+            requestMatcher
         }
     }
 

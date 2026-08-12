@@ -43,9 +43,7 @@ import org.robolectric.RobolectricTestRunner
 internal class EmbeddedSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     private val formPage = FormPage(composeTestRule)
     private val primaryButton = composeTestRule.onNode(

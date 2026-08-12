@@ -21,7 +21,7 @@ import org.junit.rules.RuleChain
 class PaymentMethodMessagingElementTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf("https://ppm.stripe.com"),
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123")),
+        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
     )
     private val composeTestRule = createEmptyComposeRule()
 

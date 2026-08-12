@@ -55,9 +55,7 @@ import org.robolectric.RobolectricTestRunner
 class CheckoutSessionConfirmationInterceptorTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain

@@ -23,9 +23,7 @@ import org.robolectric.RobolectricTestRunner
 class CheckoutSessionRepositoryTest {
 
     @get:Rule
-    val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    val networkRule = NetworkRule()
 
     private val clientParams = ElementsSessionClientParams(
         mobileAppId = "com.stripe.android.paymentsheet.test",

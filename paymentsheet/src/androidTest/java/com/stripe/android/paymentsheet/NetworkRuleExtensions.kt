@@ -16,7 +16,9 @@ internal fun NetworkRule.validateAnalyticsRequest(
         method("GET"),
         query("event", eventName),
         query("product_usage", productUsage.joinToString(",")),
+        query("publishable_key", "pk_test_123"),
         *requestMatchers,
+        applyDefaultHeader = false,
     ) { response ->
         response.status = "HTTP/1.1 200 OK"
     }

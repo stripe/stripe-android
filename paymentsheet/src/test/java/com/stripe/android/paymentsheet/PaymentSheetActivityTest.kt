@@ -158,9 +158,7 @@ internal class PaymentSheetActivityTest {
     val composeCleanupRule = createComposeCleanupRule()
 
     @get:Rule
-    val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    val networkRule = NetworkRule()
 
     @get:Rule
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }

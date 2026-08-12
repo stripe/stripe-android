@@ -29,7 +29,7 @@ class TestRules private constructor(
         fun create(
             composeTestRule: ComposeTestRule = createEmptyComposeRule(),
             networkRule: NetworkRule = NetworkRule(
-                globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
+                defaultMatcher = header("Authorization", "Bearer pk_test_123")
             ),
             terminalTestRule: TerminalWrapperTestRule = TerminalWrapperTestRule(enabled = false),
             block: RuleChain.() -> RuleChain = { this }

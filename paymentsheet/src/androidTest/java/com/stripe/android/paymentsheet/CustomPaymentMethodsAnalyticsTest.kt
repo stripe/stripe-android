@@ -30,7 +30,7 @@ class CustomPaymentMethodsAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123")),
+        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
     )
     private val applicationContext = ApplicationProvider.getApplicationContext<Context>()
 

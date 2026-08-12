@@ -85,9 +85,7 @@ import kotlin.test.BeforeTest
 internal class PaymentOptionsActivityTest {
 
     private val composeTestRule = createEmptyComposeRule()
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
     private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @get:Rule

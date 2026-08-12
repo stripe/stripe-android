@@ -29,9 +29,7 @@ import org.robolectric.RobolectricTestRunner
 class DefaultSavedPaymentMethodRepositoryTest {
 
     @get:Rule
-    val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    val networkRule = NetworkRule()
 
     @Test
     fun `detach routes to checkout session repository when customer is CheckoutSession`() = runScenario(

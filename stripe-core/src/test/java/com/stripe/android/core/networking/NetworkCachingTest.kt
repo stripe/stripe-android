@@ -16,9 +16,7 @@ import kotlin.test.Test
 
 internal class NetworkCachingTest {
     @get:Rule
-    val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    val networkRule = NetworkRule()
 
     @Test
     fun `request that should cache creates a connection that uses cache`() = runTest {

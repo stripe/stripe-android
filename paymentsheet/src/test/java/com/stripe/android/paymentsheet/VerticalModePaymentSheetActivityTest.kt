@@ -43,9 +43,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     private val composeTestRule = createAndroidComposeRule<PaymentSheetActivity>()
     private val composeCleanupRule = createComposeCleanupRule()
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     private val verticalModePage = VerticalModePage(composeTestRule)
     private val formPage = FormPage(composeTestRule)

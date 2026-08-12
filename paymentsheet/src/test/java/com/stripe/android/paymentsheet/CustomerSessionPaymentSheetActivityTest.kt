@@ -43,9 +43,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
     private val composeTestRule = createAndroidComposeRule<PaymentSheetActivity>()
-    private val networkRule = NetworkRule(
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123"))
-    )
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain

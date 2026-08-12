@@ -31,7 +31,6 @@ internal class NfcScanningActivityAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds,
-        globalMatchers = arrayOf(header("Authorization", "Bearer pk_test_123")),
     )
 
     @get:Rule

@@ -19,6 +19,7 @@ internal object CustomerSheetUtils {
         enqueue(
             retrievePaymentMethodsRequest(),
             cardPaymentMethodsParams(),
+            applyDefaultHeader = false,
         ) { response ->
             val file = if (withCards) {
                 "payment-methods-get-success.json"
@@ -32,6 +33,7 @@ internal object CustomerSheetUtils {
         enqueue(
             retrievePaymentMethodsRequest(),
             usBankAccountPaymentMethodsParams(),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -45,6 +47,7 @@ internal object CustomerSheetUtils {
             CustomerSheetTestType.AttachToCustomer -> {
                 enqueue(
                     attachPaymentMethodRequest(),
+                    applyDefaultHeader = false,
                 ) { response ->
                     response.testBodyFromFile("payment-methods-create.json")
                 }
@@ -52,7 +55,8 @@ internal object CustomerSheetUtils {
             CustomerSheetTestType.AttachToSetupIntent -> {
                 enqueue(
                     confirmSetupIntentRequest(),
-                    confirmSetupIntentParams()
+                    confirmSetupIntentParams(),
+                    applyDefaultHeader = false,
                 ) { response ->
                     response.testBodyFromFile("setup-intent-confirm.json")
                 }

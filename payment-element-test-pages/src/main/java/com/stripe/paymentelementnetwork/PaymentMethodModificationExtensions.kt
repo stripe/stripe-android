@@ -18,6 +18,7 @@ fun NetworkRule.setupPaymentMethodDetachResponse(
         host("api.stripe.com"),
         method("POST"),
         path("/v1/payment_methods/$paymentMethodId/detach"),
+        applyDefaultHeader = false,
     ) { response ->
         response.setBody(
             """
@@ -39,7 +40,8 @@ fun NetworkRule.setupPaymentMethodUpdateResponse(
         host("api.stripe.com"),
         method("POST"),
         path("/v1/payment_methods/${paymentMethodDetails.id}"),
-        bodyPart("card[networks][preferred]", cardBrand)
+        bodyPart("card[networks][preferred]", cardBrand),
+        applyDefaultHeader = false,
     ) { response ->
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
         response.setBody(
