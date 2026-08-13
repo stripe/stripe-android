@@ -15,7 +15,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -501,8 +500,7 @@ class CustomerSessionCustomerSheetActivityTest {
             path("/v1/payment_methods"),
             query("type", "card"),
             query("customer", "cus_12345"),
-            query("limit", "100"),
-            applyDefaultHeader = false,
+            query("limit", "100")
         ) { response ->
             response.createPaymentMethodsResponse(cards)
         }
@@ -512,8 +510,7 @@ class CustomerSessionCustomerSheetActivityTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/elements/payment_methods/$id/detach"),
-            applyDefaultHeader = false,
+            path("/v1/elements/payment_methods/$id/detach")
         ) { response ->
             response.createPaymentMethodDetachResponse(id = id)
         }
@@ -523,8 +520,7 @@ class CustomerSessionCustomerSheetActivityTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_methods/$id"),
-            applyDefaultHeader = false,
+            path("/v1/payment_methods/$id")
         ) { response ->
             response.createPaymentMethodUpdateResponse(id)
         }

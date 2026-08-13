@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.utils
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.testing.RetryRule
 import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain

@@ -3,7 +3,6 @@ package com.stripe.android.core.networking
 import android.net.http.HttpResponseCache
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule

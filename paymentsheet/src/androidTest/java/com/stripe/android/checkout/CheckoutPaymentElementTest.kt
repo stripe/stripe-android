@@ -7,7 +7,6 @@ import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage

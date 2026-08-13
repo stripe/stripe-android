@@ -7,10 +7,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -25,7 +25,9 @@ import org.junit.Rule
 import org.junit.Test
 
 internal class EmbeddedPaymentElementIndecisiveUserTest {
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(
+        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
+    )
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)

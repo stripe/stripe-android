@@ -10,7 +10,6 @@ import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule

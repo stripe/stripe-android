@@ -12,9 +12,9 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.DefaultReturnUrl
@@ -34,9 +34,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class PaymentSheetNextActionTest {
     // The retrieve happens after the sheet has already handed back its result, so give
     // validate() a moment to see it.
-    private val networkRule = NetworkRule(
-        validationTimeout = 5.seconds,
-    )
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds, defaultMatcher = header("Authorization", "Bearer pk_test_123"))
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {

@@ -2,7 +2,6 @@ package com.stripe.android.payments.core.authentication
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import kotlinx.coroutines.Dispatchers

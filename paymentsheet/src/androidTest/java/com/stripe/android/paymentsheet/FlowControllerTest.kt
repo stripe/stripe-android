@@ -21,7 +21,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -59,11 +61,12 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
 internal class FlowControllerTest {
+    private val networkRule = NetworkRule(defaultMatcher = header("Authorization", "Bearer pk_test_123"))
+
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create(networkRule = networkRule)
 
     private val composeTestRule = testRules.compose
-    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
     private val walletButtonsPage = WalletButtonsPage(testRules.compose)
@@ -884,7 +887,8 @@ internal class FlowControllerTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.Card.code)
+            query("type", PaymentMethod.Type.Card.code),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -954,7 +958,8 @@ internal class FlowControllerTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.Card.code)
+            query("type", PaymentMethod.Type.Card.code),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }

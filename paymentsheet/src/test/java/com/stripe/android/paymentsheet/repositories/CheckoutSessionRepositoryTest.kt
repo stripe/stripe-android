@@ -10,7 +10,6 @@ import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.runTest

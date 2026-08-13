@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -36,13 +37,16 @@ import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetTest {
+    private val networkRule = NetworkRule(
+        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
+    )
+
     @get:Rule
-    val testRules: TestRules = TestRules.create {
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
         around(IntentsRule())
     }
 
     private val composeTestRule = testRules.compose
-    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -459,7 +463,8 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.Card.code)
+            query("type", PaymentMethod.Type.Card.code),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -586,6 +591,7 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "card"),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -595,6 +601,7 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "us_bank_account"),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
@@ -651,6 +658,7 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "card"),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -660,6 +668,7 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "us_bank_account"),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
@@ -712,6 +721,7 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "card"),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -723,6 +733,7 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "us_bank_account"),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -806,7 +817,8 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.Card.code)
+            query("type", PaymentMethod.Type.Card.code),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -952,6 +964,7 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             query("type", "card"),
             header("Authorization", "Bearer uk_12345"),
+            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }

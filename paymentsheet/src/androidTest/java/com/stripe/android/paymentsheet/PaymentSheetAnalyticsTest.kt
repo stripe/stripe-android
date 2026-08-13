@@ -10,11 +10,11 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -40,6 +40,7 @@ internal class PaymentSheetAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
+        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
     )
     private val analyticEventRule = AnalyticEventRule()
 

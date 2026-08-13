@@ -18,7 +18,6 @@ import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_CURRENCY_OPTION_PREFIX
