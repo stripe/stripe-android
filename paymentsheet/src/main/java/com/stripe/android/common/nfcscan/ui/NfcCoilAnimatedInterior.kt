@@ -17,14 +17,12 @@ import kotlin.time.Duration.Companion.seconds
 
 private val CheckmarkStartDelay = 0.15.seconds
 private val CheckmarkCompletionDelay = 0.9.seconds
-private val ErrorShownDelay = 1.7.seconds
 private val CoilIconSize = 96.dp
 
 @Composable
 internal fun NfcCoilAnimatedInterior(
     status: NfcScanningStatus,
     onSuccessShown: () -> Unit,
-    onErrorShown: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val checkmarkStateRetainer = rememberStateRetainer(
@@ -32,14 +30,16 @@ internal fun NfcCoilAnimatedInterior(
         canRetainState = status is NfcScanningStatus.Scanned,
     )
 
-    val errorStateRetainer = rememberStateRetainer(
-        key = ERROR_STATE_KEY,
-        canRetainState = status is NfcScanningStatus.Error,
-    )
-
     AnimatedContent(
         modifier = modifier,
         targetState = status,
+        contentKey = { state ->
+            when (state) {
+                is NfcScanningStatus.Idle -> IDLE_CONTENT_KEY
+                NfcScanningStatus.Scanning -> SCANNING_CONTENT_KEY
+                is NfcScanningStatus.Scanned -> SCANNED_CONTENT_KEY
+            }
+        },
         transitionSpec = {
             val fadeOut = fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium))
 
@@ -61,13 +61,6 @@ internal fun NfcCoilAnimatedInterior(
                     NfcCoilContactlessIcon(Modifier.size(CoilIconSize))
                 }
                 NfcScanningStatus.Scanning -> Spinner()
-                is NfcScanningStatus.Error -> errorStateRetainer.provider {
-                    ErrorCross(
-                        shownDelay = ErrorShownDelay,
-                        onShown = onErrorShown,
-                        modifier = Modifier.size(CoilIconSize)
-                    )
-                }
                 is NfcScanningStatus.Scanned -> checkmarkStateRetainer.provider {
                     Checkmark(
                         startDelay = CheckmarkStartDelay,
@@ -82,4 +75,6 @@ internal fun NfcCoilAnimatedInterior(
 }
 
 private const val CHECKMARK_STATE_KEY = "CHECKMARK_STATE"
-private const val ERROR_STATE_KEY = "ERROR_STATE"
+private const val IDLE_CONTENT_KEY = "idle"
+private const val SCANNING_CONTENT_KEY = "scanning"
+private const val SCANNED_CONTENT_KEY = "scanned"

@@ -11,7 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
-import com.stripe.android.common.nfcscan.ui.ERROR_CROSS_TEST_TAG
+import com.stripe.android.common.nfcscan.ui.ERROR_BANNER_TEST_TAG
 import com.stripe.android.common.nfcscan.ui.NFC_COIL_CONTACTLESS_ICON_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import org.robolectric.Shadows.shadowOf
@@ -57,24 +57,30 @@ internal class NfcScanningActivityScenario(
 
     fun assertErrorIsDisplayed(errorText: String) {
         composeRule.mainClock.advanceTimeUntil(timeoutMillis = ERROR_TIMEOUT_MS) {
-            composeRule.onAllNodesWithTag(ERROR_CROSS_TEST_TAG)
+            composeRule.onAllNodesWithTag(ERROR_BANNER_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 
-        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(ERROR_BANNER_TEST_TAG).assertIsDisplayed()
         composeRule.onNodeWithText(errorText, substring = true).assertIsDisplayed()
     }
 
     fun assertErrorDisappears() {
         composeRule.mainClock.advanceTimeUntil(timeoutMillis = ERROR_TIMEOUT_MS) {
-            composeRule.onAllNodesWithTag(ERROR_CROSS_TEST_TAG)
+            composeRule.onAllNodesWithTag(ERROR_BANNER_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
 
+        composeRule.mainClock.advanceTimeUntil(timeoutMillis = ERROR_TIMEOUT_MS) {
+            composeRule.onAllNodesWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size == 1
+        }
+
         composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertIsDisplayed()
-        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertIsNotDisplayed()
+        composeRule.onNodeWithTag(ERROR_BANNER_TEST_TAG).assertIsNotDisplayed()
     }
 
     fun getResult(): NfcScanningContract.Result {
