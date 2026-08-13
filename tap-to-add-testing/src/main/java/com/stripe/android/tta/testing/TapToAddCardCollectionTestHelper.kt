@@ -56,8 +56,7 @@ class TapToAddCardCollectionTestHelper(
             generatedCardToPaymentMethodRequest(
                 customerId = "cus_123",
                 pmId = generatedPaymentMethod.id,
-            ),
-            applyDefaultHeader = false,
+            )
         ) { response ->
             response.setBody(PaymentMethodFactory.convertCardToJson(cardPaymentMethod).toString())
         }
