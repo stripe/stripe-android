@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImp
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
@@ -147,11 +148,13 @@ internal suspend fun createIntentConfirmationInterceptor(
                 integrationMetadata: IntegrationMetadata.CheckoutSession,
                 customerMetadata: CustomerMetadata?,
                 clientAttributionMetadata: ClientAttributionMetadata,
+                checkoutSessionResponse: CheckoutSessionResponse?,
             ): CheckoutSessionConfirmationInterceptor {
                 return CheckoutSessionConfirmationInterceptor(
                     integrationMetadata = integrationMetadata,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
+                    checkoutSessionResponse = null,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
                     checkoutSessionRepository = CheckoutSessionRepository(
@@ -176,6 +179,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         integrationMetadata = integrationMetadata,
         customerMetadata = customerMetadata,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        checkoutSessionResponse = null,
     )
 }
 

@@ -390,6 +390,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
                 checkoutSessionId = null,
             ),
+            checkoutSessionResponse = null,
             context = applicationContext,
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
