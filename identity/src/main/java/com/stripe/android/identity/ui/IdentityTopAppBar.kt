@@ -4,11 +4,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.identity.R
@@ -20,15 +17,8 @@ internal fun IdentityTopAppBar(
     topBarState: IdentityTopBarState,
     onTopBarNavigationClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    val style = LocalTextStyle.current
     TopAppBar(
-        title = {
-            Text(
-                text = context.applicationInfo.loadLabel(context.packageManager).toString(),
-                style = style
-            )
-        },
+        title = {},
         navigationIcon = {
             IconButton(onClick = {
                 onTopBarNavigationClick()
