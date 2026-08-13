@@ -93,6 +93,5 @@ private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): CheckoutCon
         },
         email = email,
         name = name,
-        phone = phone,
     )
 }

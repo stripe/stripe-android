@@ -156,12 +156,10 @@ class CheckoutController @Inject internal constructor(
      * to compute updated tax amounts.
      *
      * @param name The recipient's name.
-     * @param phoneNumber The recipient's phone number.
      * @param address The shipping address.
      */
     suspend fun updateShippingAddress(
         name: String?,
-        phoneNumber: String?,
         address: Address,
     ): kotlin.Result<Unit> {
         stateHolder.state?.checkoutSessionResponse
@@ -171,7 +169,6 @@ class CheckoutController @Inject internal constructor(
             copy(
                 collectedDetails = collectedDetails.copy(
                     shippingName = name,
-                    shippingPhoneNumber = phoneNumber,
                     shippingAddress = it,
                 ),
             )
@@ -192,13 +189,11 @@ class CheckoutController @Inject internal constructor(
 
     internal suspend fun updateBillingAddress(
         name: String?,
-        phoneNumber: String?,
         address: Address,
     ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
         copy(
             collectedDetails = collectedDetails.copy(
                 billingName = name,
-                billingPhoneNumber = phoneNumber,
                 billingAddress = it,
             ),
         )
@@ -691,10 +686,6 @@ class CheckoutController @Inject internal constructor(
          * The customer's full name.
          */
         val name: String?,
-        /**
-         * The customer's phone number, without formatting (e.g. 5551234567).
-         */
-        val phone: String?,
     ) {
         /**
          * A billing address.
@@ -991,33 +982,26 @@ class CheckoutController @Inject internal constructor(
             )
 
             /**
-             * A name, phone number, and postal address for a customer.
+             * A name and postal address for a customer.
              */
             @CheckoutSessionPreview
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class ContactDetails {
                 private var name: String? = null
-                private var phoneNumber: String? = null
                 private var address: Address? = null
 
                 fun name(name: String?): ContactDetails = apply { this.name = name }
-
-                fun phoneNumber(phoneNumber: String?): ContactDetails = apply {
-                    this.phoneNumber = phoneNumber
-                }
 
                 fun address(address: Address): ContactDetails = apply { this.address = address }
 
                 @Parcelize
                 internal data class State(
                     val name: String?,
-                    val phoneNumber: String?,
                     val address: Address.State?,
                 ) : Parcelable
 
                 internal fun build(): State = State(
                     name = name,
-                    phoneNumber = phoneNumber,
                     address = address?.build(),
                 )
             }
