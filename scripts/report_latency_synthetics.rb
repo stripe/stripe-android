@@ -12,8 +12,10 @@ require_relative 'latency_test_utils'
 
 PROJECT_ROOT = LatencyTestUtils::PROJECT_ROOT
 APP_PACKAGE = 'com.stripe.android.paymentsheet.example'
-ANALYTICS_HOST = ENV.fetch('STRIPE_SYNTHETICS_ANALYTICS_HOST', 'https://q.stripe.com')
+ANALYTICS_HOST = ENV.fetch('STRIPE_SYNTHETICS_ANALYTICS_HOST', 'https://r.stripe.com/0')
 ANALYTICS_UA = 'analytics.stripe_android-1.0'
+ANALYTICS_CLIENT_ID = 'stripe-mobile-payments-sdk'
+ANALYTICS_ORIGIN = 'stripe-mobile-payments-sdk-android'
 
 def adb_getprop(property)
   stdout, status = Open3.capture2e('adb', 'shell', 'getprop', property, chdir: PROJECT_ROOT)
@@ -61,6 +63,9 @@ def device_info
 end
 
 def analytics_params(test_name:, duration_seconds:, session_id:, publishable_key:, device_info:, app_name:)
+  timestamp = Time.now.to_f
+  event = 'mpe.synthetic_latency'
+
   {
     'analytics_ua' => ANALYTICS_UA,
     'os_name' => device_info.fetch(:os_name),
@@ -70,11 +75,16 @@ def analytics_params(test_name:, duration_seconds:, session_id:, publishable_key
     'bindings_version' => sdk_version,
     'is_development' => true,
     'session_id' => session_id,
-    'timestamp' => Time.now.to_f,
+    'timestamp' => timestamp,
     'app_name' => app_name,
-    'event' => 'mpe.synthetic_latency',
+    'event' => event,
     'test' => test_name,
-    'duration' => duration_seconds
+    'duration' => duration_seconds,
+    # Params required by r.stripe.com. event_name and created mirror event and timestamp.
+    'client_id' => ANALYTICS_CLIENT_ID,
+    'event_id' => SecureRandom.uuid,
+    'event_name' => event,
+    'created' => timestamp
   }.tap do |params|
     params['publishable_key'] = publishable_key if publishable_key && !publishable_key.empty?
   end
@@ -102,17 +112,21 @@ def emit_synthetics_events(results:, publishable_key:, dry_run:)
         device_info: device,
         app_name: app_name
       )
-      uri = URI("#{ANALYTICS_HOST}?#{encode_query(params)}")
+      uri = URI(ANALYTICS_HOST)
+      body = encode_query(params)
 
       if dry_run
-        puts "DRY_RUN analytics event #{test_name} sample #{index + 1}: #{uri}"
+        puts "DRY_RUN analytics event #{test_name} sample #{index + 1}: POST #{uri} #{body}"
         next
       end
 
-      request = Net::HTTP::Get.new(uri)
+      request = Net::HTTP::Post.new(uri)
       headers.each do |key, value|
         request[key] = value
       end
+      request['Content-Type'] = 'application/x-www-form-urlencoded'
+      request['Origin'] = ANALYTICS_ORIGIN
+      request.body = body
 
       response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
         http.request(request)

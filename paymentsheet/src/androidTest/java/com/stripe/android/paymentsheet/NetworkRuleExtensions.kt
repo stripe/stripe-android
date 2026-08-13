@@ -12,8 +12,8 @@ internal fun NetworkRule.validateAnalyticsRequest(
     vararg requestMatchers: RequestMatcher,
 ) {
     enqueue(
-        host("q.stripe.com"),
-        method("GET"),
+        host("r.stripe.com"),
+        method("POST"),
         analyticsPayloadField("event", eventName),
         analyticsPayloadField("product_usage", productUsage.joinToString(",")),
         *requestMatchers,

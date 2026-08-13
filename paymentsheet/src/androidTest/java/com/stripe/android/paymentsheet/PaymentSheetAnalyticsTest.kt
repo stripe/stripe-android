@@ -9,7 +9,7 @@ import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.hasBodyParam
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -138,7 +138,7 @@ internal class PaymentSheetAnalyticsTest {
         )
         validateAnalyticsRequest(
             eventName = "mc_complete_payment_newpm_success",
-            hasQueryParam("duration"),
+            hasBodyParam("duration"),
             analyticsPayloadField("intent_id", "pi_example"),
         )
         validateAnalyticsRequest(eventName = "mc_billing_address_completed")
@@ -217,7 +217,7 @@ internal class PaymentSheetAnalyticsTest {
         )
         validateAnalyticsRequest(
             eventName = "mc_complete_payment_newpm_success",
-            hasQueryParam("duration")
+            hasBodyParam("duration")
         )
         validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
