@@ -56,6 +56,7 @@ internal object LpmBillingAddressScreenshotPaymentMethodTypeProvider : TestParam
     override fun provideValues(context: Context?): List<*> = listOf(
         value(PaymentMethod.Type.Boleto).withName("Boleto"),
         value(PaymentMethod.Type.SepaDebit).withName("SEPA Debit"),
+        value(PaymentMethod.Type.Wero).withName("Wero"),
     )
 }
 
