@@ -2,8 +2,10 @@
 
 package com.stripe.android.checkout
 
+import com.stripe.android.core.Logger
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +18,8 @@ import javax.inject.Singleton
 internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val sheetStateHolder: SheetStateHolder,
+    private val sessionRefresher: CheckoutSessionRefresher,
+    private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
 ) {
     private val admissionLock = Any()
@@ -110,16 +114,24 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun observeConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                completeConfirmation(state.result.asCheckoutResult())
+                completeConfirmation {
+                    if (state.result !is ConfirmationHandler.Result.Succeeded) {
+                        refreshSession()
+                    }
+                    state.result.asCheckoutResult()
+                }
             }
         }
     }
 
-    fun failConfirmation(error: Throwable) {
-        completeConfirmation(CheckoutController.Result.Failed(error))
+    suspend fun failConfirmation(error: Throwable) {
+        completeConfirmation {
+            refreshSession()
+            CheckoutController.Result.Failed(error)
+        }
     }
 
-    private fun completeConfirmation(result: CheckoutController.Result) {
+    private suspend fun completeConfirmation(result: suspend () -> CheckoutController.Result) {
         val shouldComplete = synchronized(admissionLock) {
             if (!confirmationInFlight || confirmationCompletionClaimed) {
                 false
@@ -131,7 +143,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         if (!shouldComplete) return
 
         try {
-            resultCallback.onResult(result)
+            resultCallback.onResult(result())
         } finally {
             synchronized(admissionLock) {
                 confirmationInFlight = false
@@ -139,6 +151,20 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                 mutex.unlock()
                 updateIsUpdating()
             }
+        }
+    }
+
+    /**
+     * The refreshed state has to be committed before the result reaches the integrator, but a failed
+     * refresh must not replace the confirmation result the integrator is waiting on.
+     */
+    private suspend fun refreshSession() {
+        try {
+            sessionRefresher.refresh()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
+            logger.error("Failed to refresh the checkout session after confirmation.", error)
         }
     }
 

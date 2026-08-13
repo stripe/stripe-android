@@ -12,7 +12,9 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
 import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.checkout.ece.DefaultAvailableExpressButtonTypesFactory
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
@@ -208,6 +210,9 @@ internal interface CheckoutControllerModule {
     fun bindsAvailableExpressButtonTypesFactory(
         impl: DefaultAvailableExpressButtonTypesFactory
     ): AvailableExpressButtonTypesFactory
+
+    @Binds
+    fun bindsCheckoutSessionRefresher(impl: DefaultCheckoutSessionRefresher): CheckoutSessionRefresher
 
     companion object {
         @Provides

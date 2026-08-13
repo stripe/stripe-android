@@ -9,6 +9,7 @@ import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -219,6 +220,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
+            sessionRefresher = {},
+            logger = Logger.noop(),
             resultCallback = {},
         )
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(

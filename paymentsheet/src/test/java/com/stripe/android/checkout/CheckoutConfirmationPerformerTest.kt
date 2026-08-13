@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -102,6 +103,8 @@ internal class CheckoutConfirmationPerformerTest {
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
+            sessionRefresher = {},
+            logger = Logger.noop(),
             resultCallback = {},
         )
         val performer = CheckoutConfirmationPerformer(
