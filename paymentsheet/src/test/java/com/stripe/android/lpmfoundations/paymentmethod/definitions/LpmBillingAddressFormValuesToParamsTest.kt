@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.uicore.elements.AddressFieldsElement
+import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.first
@@ -63,6 +64,11 @@ internal class LpmBillingAddressFormValuesToParamsTest {
         sectionFields
             .filterIsInstance<AddressFieldsElement>()
             .forEach { it.countryElement.setRawValue(rawValues) }
+        formViewModel.elements
+            .filterIsInstance<CheckboxFieldElement>()
+            .forEach { element ->
+                rawValues[element.identifier]?.let { element.controller.onValueChange(it.toBoolean()) }
+            }
 
         return formViewModel.createPaymentMethodCreateParams(paymentMethodType, metadata)
     }
@@ -114,7 +120,11 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     private companion object {
         object TestCaseProvider : TestParameterValuesProvider() {
             override fun provideValues(context: Context?): List<LpmBillingAddressFormValuesToParamsTestCase> {
-                return boletoTestCases + sepaDebitTestCases + weroTestCases + klarnaTestCases
+                return boletoTestCases +
+                    sepaDebitTestCases +
+                    weroTestCases +
+                    klarnaTestCases +
+                    bacsDebitTestCases
             }
         }
     }
