@@ -13,8 +13,10 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -336,6 +338,24 @@ internal class CheckoutControllerTest {
         val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
         assertThat(setup.controller.session.value).isNull()
         assertThat(setup.stateHolder.state).isNull()
+    }
+
+    @Test
+    fun `session exposes available express checkout payment methods`() {
+        val session = createSession(
+            availableExpressButtonTypes = listOf(
+                ExpressButtonType.GooglePay(
+                    GooglePayConfiguration(GooglePayConfiguration.Environment.Test).build()
+                ),
+                ExpressButtonType.Link,
+            ),
+        )
+
+        assertThat(session.availableExpressCheckoutPaymentMethods).hasSize(2)
+        assertThat(session.availableExpressCheckoutPaymentMethods[0])
+            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.GooglePay::class.java)
+        assertThat(session.availableExpressCheckoutPaymentMethods[1])
+            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.Link::class.java)
     }
 
     @Test
@@ -1157,6 +1177,25 @@ internal class CheckoutControllerTest {
                 application = applicationContext,
                 savedStateHandle = savedStateHandle,
             ).integrationName(integrationName).build()
+        )
+    }
+
+    private fun createSession(
+        availableExpressButtonTypes: List<ExpressButtonType>,
+    ): CheckoutController.Session {
+        return CheckoutController.Session(
+            id = DEFAULT_CHECKOUT_SESSION_ID,
+            status = CheckoutController.Session.Status.Open,
+            liveMode = false,
+            currency = "usd",
+            email = null,
+            tax = CheckoutController.Session.Tax(CheckoutController.Session.Tax.Status.Ready),
+            totalSummary = null,
+            lineItems = emptyList(),
+            shippingOptions = emptyList(),
+            paymentOptionDisplayData = null,
+            currencySelectorOptions = null,
+            availableExpressButtonTypes = availableExpressButtonTypes,
         )
     }
 
