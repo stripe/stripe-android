@@ -2,15 +2,16 @@ package com.stripe.android.core.networking
 
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileReader
-import javax.net.ssl.HttpsURLConnection
 import kotlin.test.AfterTest
 
 @RunWith(RobolectricTestRunner::class)
@@ -26,24 +27,18 @@ class StripeConnectionTest {
 
     @Test
     fun `Default correctly reads String from responseStream`() {
-        val mockConnection = mock<HttpsURLConnection>()
-        whenever(mockConnection.responseCode).thenReturn(HttpsURLConnection.HTTP_OK)
-
         val expectedStringValue = "test input stream value"
-        whenever(mockConnection.inputStream).thenReturn(ByteArrayInputStream(expectedStringValue.toByteArray()))
+        val response = buildResponse(expectedStringValue)
 
-        val connection = StripeConnection.Default(mockConnection)
+        val connection = StripeConnection.Default(response)
 
         assertThat(connection.response.body).isEqualTo(expectedStringValue)
     }
 
     @Test
     fun `FileConnection correctly reads File from responseStream`() {
-        val mockConnection = mock<HttpsURLConnection>()
-        whenever(mockConnection.responseCode).thenReturn(HttpsURLConnection.HTTP_OK)
-
         val expectedFileContent = "test file content"
-        whenever(mockConnection.inputStream).thenReturn(ByteArrayInputStream(expectedFileContent.toByteArray()))
+        val response = buildResponse(expectedFileContent)
 
         val outputFile =
             File(InstrumentationRegistry.getInstrumentation().context.cacheDir, TEST_FILE_NAME)
@@ -51,9 +46,19 @@ class StripeConnectionTest {
             outputFile.delete()
         }
 
-        val connection = StripeConnection.FileConnection(mockConnection, outputFile)
+        val connection = StripeConnection.FileConnection(response, outputFile)
         assertThat(connection.response.body).isSameInstanceAs(outputFile)
         assertThat(FileReader(outputFile).readText()).isEqualTo(expectedFileContent)
+    }
+
+    private fun buildResponse(body: String, code: Int = 200): Response {
+        return Response.Builder()
+            .request(Request.Builder().url("https://api.stripe.com/v1/test").build())
+            .protocol(Protocol.HTTP_1_1)
+            .code(code)
+            .message("OK")
+            .body(body.toResponseBody("application/json".toMediaType()))
+            .build()
     }
 
     private companion object {
