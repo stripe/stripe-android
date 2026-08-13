@@ -55,6 +55,7 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 class CheckoutController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
@@ -105,12 +106,12 @@ class CheckoutController @Inject internal constructor(
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).mapCatching { response ->
                 val defaultBillingAddress = configurationState.defaults.billingDetails?.address
-                if (defaultBillingAddress != null &&
-                    response.automaticTaxEnabled &&
-                    response.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING
-                ) {
-                    checkoutSessionRepository.updateTaxRegion(sessionId, defaultBillingAddress)
-                        .getOrThrow()
+                if (defaultBillingAddress != null) {
+                    checkoutSessionTaxRegionUpdater.updateIfNeeded(
+                        checkoutSessionResponse = response,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                        address = defaultBillingAddress,
+                    ).getOrThrow()
                 } else {
                     response
                 }
@@ -231,14 +232,12 @@ class CheckoutController @Inject internal constructor(
         val built = address.build()
         return withCheckoutState(
             additionalStateMutations = { mutation(built) },
-        ) { sessionId ->
-            val shouldSendTaxRegion = checkoutSessionResponse.automaticTaxEnabled &&
-                checkoutSessionResponse.taxAddressSource == addressType
-            if (shouldSendTaxRegion) {
-                checkoutSessionRepository.updateTaxRegion(sessionId, built)
-            } else {
-                kotlin.Result.success(checkoutSessionResponse)
-            }
+        ) {
+            checkoutSessionTaxRegionUpdater.updateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = addressType,
+                address = built,
+            )
         }
     }
 
