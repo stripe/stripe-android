@@ -107,7 +107,7 @@ class CheckoutController @Inject internal constructor(
             ).mapCatching { response ->
                 val defaultBillingAddress = configurationState.defaults.billingDetails?.address
                 if (defaultBillingAddress != null) {
-                    checkoutSessionTaxRegionUpdater.updateIfNeeded(
+                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
                         addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                         address = defaultBillingAddress,
@@ -233,7 +233,7 @@ class CheckoutController @Inject internal constructor(
         return withCheckoutState(
             additionalStateMutations = { mutation(built) },
         ) {
-            checkoutSessionTaxRegionUpdater.updateIfNeeded(
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = addressType,
                 address = built,

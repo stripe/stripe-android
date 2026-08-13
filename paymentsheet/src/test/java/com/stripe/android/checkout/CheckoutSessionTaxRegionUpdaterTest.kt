@@ -47,7 +47,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     private val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
 
     @Test
-    fun `updateIfNeeded updates tax region when automatic tax address source matches`() = runScenario {
+    fun `updateServerStateIfNeeded updates tax region when automatic tax address source matches`() = runScenario {
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[line1]", "510 Townsend St"),
@@ -59,7 +59,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             response.testBodyFromFile("checkout-session-init.json")
         }
 
-        val result = updater.updateIfNeeded(
+        val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             address = ADDRESS,
@@ -69,10 +69,10 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     }
 
     @Test
-    fun `updateIfNeeded returns original response when automatic tax is disabled`() = runScenario(
+    fun `updateServerStateIfNeeded returns original response when automatic tax is disabled`() = runScenario(
         automaticTaxEnabled = false,
     ) {
-        val result = updater.updateIfNeeded(
+        val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             address = ADDRESS,
@@ -82,8 +82,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     }
 
     @Test
-    fun `updateIfNeeded returns original response when address source does not match`() = runScenario {
-        val result = updater.updateIfNeeded(
+    fun `updateServerStateIfNeeded returns original response when address source does not match`() = runScenario {
+        val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
             address = ADDRESS,
@@ -93,13 +93,13 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     }
 
     @Test
-    fun `updateIfNeeded returns failure when tax region update fails`() = runScenario {
+    fun `updateServerStateIfNeeded returns failure when tax region update fails`() = runScenario {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Invalid tax region"}}""")
         }
 
-        val result = updater.updateIfNeeded(
+        val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             address = ADDRESS,

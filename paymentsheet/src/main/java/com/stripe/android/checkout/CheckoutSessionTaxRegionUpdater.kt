@@ -9,7 +9,7 @@ import javax.inject.Inject
 internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
 ) {
-    suspend fun updateIfNeeded(
+    suspend fun updateServerStateIfNeeded(
         checkoutSessionResponse: CheckoutSessionResponse,
         addressSource: CheckoutSessionResponse.TaxAddressSource,
         address: CheckoutController.Address.State,
