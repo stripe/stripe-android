@@ -383,7 +383,7 @@ internal class TestCard : BasePlaygroundTest() {
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText("4242", substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
