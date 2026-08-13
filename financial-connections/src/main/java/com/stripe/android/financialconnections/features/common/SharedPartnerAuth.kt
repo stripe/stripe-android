@@ -269,7 +269,7 @@ private fun PrePaneContent(
             }
             items(content.body.entries) { bodyItem ->
                 when (bodyItem) {
-                    is Entry.Image -> PrepaneImage(bodyItem.content.default!!)
+                    is Entry.Image -> bodyItem.content.default?.let { PrepaneImage(it) }
 
                     is Entry.Text -> AnnotatedText(
                         modifier = Modifier.padding(horizontal = 24.dp),
