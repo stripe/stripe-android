@@ -10,10 +10,12 @@ internal class MockRecordedRequestBuilder {
     private var path: String = "/v1/test"
     private var body: String = ""
     private var method: String = "GET"
+    private val headers = Headers.Builder()
 
     fun path(path: String) = apply { this.path = path }
     fun body(body: String) = apply { this.body = body }
     fun method(method: String) = apply { this.method = method }
+    fun header(name: String, value: String) = apply { headers.add(name, value) }
 
     fun formBody(vararg params: Pair<String, String>) = apply {
         this.body = params.joinToString("&") { (key, value) ->
@@ -25,7 +27,7 @@ internal class MockRecordedRequestBuilder {
         val buffer = Buffer().writeUtf8(body)
         return RecordedRequest(
             "$method $path HTTP/1.1",
-            Headers.headersOf(),
+            headers.build(),
             emptyList(),
             body.length.toLong(),
             buffer,

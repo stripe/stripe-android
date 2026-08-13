@@ -7,10 +7,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -25,9 +25,7 @@ import org.junit.Rule
 import org.junit.Test
 
 internal class EmbeddedPaymentElementIndecisiveUserTest {
-    private val networkRule = NetworkRule(
-        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
-    )
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)
@@ -177,7 +175,7 @@ internal class EmbeddedPaymentElementIndecisiveUserTest {
             networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
             testContext.configure {
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
             }
             testContext.consumePaymentOptionEvent("card", "4242")
 

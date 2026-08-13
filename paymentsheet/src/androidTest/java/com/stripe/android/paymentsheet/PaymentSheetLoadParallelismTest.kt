@@ -5,6 +5,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.expectNoResult
@@ -213,7 +214,7 @@ internal class PaymentSheetLoadParallelismTest {
                 CustomerType.Guest -> null
                 CustomerType.LegacyEK -> PaymentSheet.CustomerConfiguration(
                     id = "cus_1",
-                    ephemeralKeySecret = "ek_123",
+                    ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                 )
                 CustomerType.CustomerSession -> PaymentSheet.CustomerConfiguration
                     .createWithCustomerSession(

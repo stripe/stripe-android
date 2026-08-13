@@ -15,6 +15,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
@@ -37,9 +38,7 @@ import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetTest {
-    private val networkRule = NetworkRule(
-        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
-    )
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
@@ -464,7 +463,6 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", PaymentMethod.Type.Card.code),
-            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -479,7 +477,7 @@ internal class PaymentSheetTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
@@ -591,7 +589,6 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "card"),
-            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -601,7 +598,6 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "us_bank_account"),
-            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
@@ -617,7 +613,7 @@ internal class PaymentSheetTest {
                     .customer(
                         customer = PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     )
                     .allowsDelayedPaymentMethods(true)
@@ -658,7 +654,6 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "card"),
-            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -668,7 +663,6 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "us_bank_account"),
-            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
@@ -684,7 +678,7 @@ internal class PaymentSheetTest {
                     .customer(
                         customer = PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     )
                     .allowsDelayedPaymentMethods(true)
@@ -721,7 +715,6 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "card"),
-            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -733,7 +726,6 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", "us_bank_account"),
-            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -747,7 +739,7 @@ internal class PaymentSheetTest {
                     .customer(
                         customer = PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     )
                     .allowsDelayedPaymentMethods(true)
@@ -818,7 +810,6 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_methods"),
             query("type", PaymentMethod.Type.Card.code),
-            applyDefaultHeader = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -833,7 +824,7 @@ internal class PaymentSheetTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
@@ -964,7 +955,7 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             query("type", "card"),
             header("Authorization", "Bearer uk_12345"),
-            applyDefaultHeader = false,
+            applyDefaultAuthorization = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }

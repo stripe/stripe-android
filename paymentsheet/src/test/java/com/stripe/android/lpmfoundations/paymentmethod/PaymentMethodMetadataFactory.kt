@@ -61,6 +61,7 @@ internal object PaymentMethodMetadataFactory {
             PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
         canUpdateCardExpiryAndBillingDetails: Boolean = false,
+        customerEphemeralKeySecret: String = "ek_123",
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -102,7 +103,7 @@ internal object PaymentMethodMetadataFactory {
                 if (customerSessionClientSecret != null) {
                     CustomerMetadata.CustomerSession(
                         id = "cus_123",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = customerEphemeralKeySecret,
                         customerSessionClientSecret = customerSessionClientSecret,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                         removePaymentMethod = removePaymentMethod,
@@ -113,7 +114,7 @@ internal object PaymentMethodMetadataFactory {
                 } else {
                     CustomerMetadata.LegacyEphemeralKey(
                         id = "cus_123",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = customerEphemeralKeySecret,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,

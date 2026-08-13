@@ -24,7 +24,7 @@ import kotlin.time.Duration
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
     validationTimeout: Duration?,
-    private val defaultMatcher: RequestMatcher?,
+    private val defaultMatcher: RequestMatcher,
 ) : TestRule {
     private val mockWebServer = TestMockWebServer(validationTimeout)
 
@@ -34,8 +34,11 @@ class NetworkRule private constructor(
     constructor(
         hostsToTrack: List<String> = listOf(ApiRequest.API_HOST),
         validationTimeout: Duration? = null,
-        defaultMatcher: RequestMatcher? = null,
-    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet(), validationTimeout, defaultMatcher)
+    ) : this(
+        hostsToTrack.map { it.hostFromUrl() }.toSet(),
+        validationTimeout,
+        RequestMatchers.stripeApiKey(),
+    )
 
     override fun apply(base: Statement, description: Description): Statement {
         return NetworkStatement(
@@ -51,11 +54,11 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
-        applyDefaultHeader: Boolean = true,
+        applyDefaultAuthorization: Boolean = true,
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (MockResponse) -> Unit
     ) {
-        val matchers = withDefaultHeader(requestMatcher, applyDefaultHeader)
+        val matchers = withDefaultAuthorization(requestMatcher, applyDefaultAuthorization)
         mockWebServer.dispatcher.enqueue(*matchers) { response ->
             responseFactory(response)
             if (ensureResponseIsValidJson) {
@@ -66,11 +69,11 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
-        applyDefaultHeader: Boolean = true,
+        applyDefaultAuthorization: Boolean = true,
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (TestRecordedRequest, MockResponse) -> Unit
     ) {
-        val matchers = withDefaultHeader(requestMatcher, applyDefaultHeader)
+        val matchers = withDefaultAuthorization(requestMatcher, applyDefaultAuthorization)
         mockWebServer.dispatcher.enqueue(*matchers) { request, response ->
             responseFactory(request, response)
             if (ensureResponseIsValidJson) {
@@ -79,11 +82,11 @@ class NetworkRule private constructor(
         }
     }
 
-    private fun withDefaultHeader(
+    private fun withDefaultAuthorization(
         requestMatcher: Array<out RequestMatcher>,
-        applyDefaultHeader: Boolean,
+        applyDefaultAuthorization: Boolean,
     ): Array<out RequestMatcher> {
-        return if (applyDefaultHeader && defaultMatcher != null) {
+        return if (applyDefaultAuthorization) {
             arrayOf(defaultMatcher, *requestMatcher)
         } else {
             requestMatcher

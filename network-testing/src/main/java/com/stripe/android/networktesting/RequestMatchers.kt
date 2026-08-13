@@ -39,6 +39,29 @@ internal class CompositeRequestMatcher(
 }
 
 object RequestMatchers {
+    fun stripeApiKey(
+        publishableKey: String = TestApiKeys.PUBLISHABLE,
+        ephemeralKey: String = TestApiKeys.EPHEMERAL,
+    ): RequestMatcher {
+        return ToStringRequestMatcher("stripeApiKey") { request ->
+            when (request.headers[ORIGINAL_HOST_HEADER]) {
+                API_HOST -> {
+                    val expectedKey = if (request.requiresEphemeralKey()) {
+                        ephemeralKey
+                    } else {
+                        publishableKey
+                    }
+                    request.headers[AUTHORIZATION_HEADER] == "Bearer $expectedKey"
+                }
+                ANALYTICS_HOST -> {
+                    request.headers[AUTHORIZATION_HEADER] == null &&
+                        request.queryParams[PUBLISHABLE_KEY_QUERY] == publishableKey
+                }
+                else -> true
+            }
+        }
+    }
+
     fun host(host: String): RequestMatcher {
         return header("original-host", host)
     }
@@ -147,4 +170,26 @@ object RequestMatchers {
     fun composite(vararg matchers: RequestMatcher): RequestMatcher {
         return CompositeRequestMatcher(matchers.toList())
     }
+
+    private fun TestRecordedRequest.requiresEphemeralKey(): Boolean {
+        val pathWithoutQuery = path.substringBefore('?')
+        return when {
+            method == "GET" && pathWithoutQuery == PAYMENT_METHODS_PATH -> true
+            pathWithoutQuery.startsWith("$PAYMENT_METHODS_PATH/") -> true
+            pathWithoutQuery.startsWith(ELEMENTS_PAYMENT_METHODS_PATH) -> true
+            pathWithoutQuery.startsWith(CUSTOMERS_PATH) -> true
+            pathWithoutQuery.startsWith(ELEMENTS_CUSTOMERS_PATH) -> true
+            else -> false
+        }
+    }
+
+    private const val ORIGINAL_HOST_HEADER = "original-host"
+    private const val AUTHORIZATION_HEADER = "Authorization"
+    private const val API_HOST = "api.stripe.com"
+    private const val ANALYTICS_HOST = "q.stripe.com"
+    private const val PUBLISHABLE_KEY_QUERY = "publishable_key"
+    private const val PAYMENT_METHODS_PATH = "/v1/payment_methods"
+    private const val ELEMENTS_PAYMENT_METHODS_PATH = "/v1/elements/payment_methods/"
+    private const val CUSTOMERS_PATH = "/v1/customers/"
+    private const val ELEMENTS_CUSTOMERS_PATH = "/v1/elements/customers/"
 }
