@@ -124,7 +124,8 @@ internal class LpmBillingAddressFormValuesToParamsTest {
                     sepaDebitTestCases +
                     weroTestCases +
                     klarnaTestCases +
-                    bacsDebitTestCases
+                    bacsDebitTestCases +
+                    oxxoTestCases
             }
         }
     }
