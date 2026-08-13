@@ -29,23 +29,6 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     @get:Rule
     val networkRule = NetworkRule()
 
-    private val checkoutSessionRepository = CheckoutSessionRepository(
-        clientParams = ElementsSessionClientParams(
-            mobileAppId = "com.stripe.android.paymentsheet.test",
-            mobileSessionIdProvider = { "test_session" },
-        ),
-        stripeNetworkClient = DefaultStripeNetworkClient(),
-        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context = ApplicationProvider.getApplicationContext(),
-            publishableKey = "pk_test_123",
-        ),
-        publishableKeyProvider = { "pk_test_123" },
-        stripeAccountIdProvider = { null },
-    )
-
-    private val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
-
     @Test
     fun `updateServerStateIfNeeded updates tax region when automatic tax address source matches`() = runScenario {
         networkRule.checkoutUpdate(
@@ -112,11 +95,30 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         automaticTaxEnabled: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val checkoutSessionRepository = CheckoutSessionRepository(
+            clientParams = ElementsSessionClientParams(
+                mobileAppId = "com.stripe.android.paymentsheet.test",
+                mobileSessionIdProvider = { "test_session" },
+            ),
+            stripeNetworkClient = DefaultStripeNetworkClient(),
+            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKey = "pk_test_123",
+            ),
+            publishableKeyProvider = { "pk_test_123" },
+            stripeAccountIdProvider = { null },
+        )
+
+        val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
+
         val scenario = Scenario(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 automaticTaxEnabled = automaticTaxEnabled,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             ),
+            checkoutSessionRepository = checkoutSessionRepository,
+            updater = updater,
         )
 
         scenario.block()
@@ -124,6 +126,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
 
     private data class Scenario(
         val checkoutSessionResponse: CheckoutSessionResponse,
+        val checkoutSessionRepository: CheckoutSessionRepository,
+        val updater: CheckoutSessionTaxRegionUpdater,
     )
 
     private companion object {
