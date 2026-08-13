@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 
