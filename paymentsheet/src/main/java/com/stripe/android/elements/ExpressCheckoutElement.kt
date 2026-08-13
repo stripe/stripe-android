@@ -15,6 +15,11 @@ class ExpressCheckoutElement @Inject internal constructor(
     private val interactor: ExpressCheckoutElementInteractor,
 ) {
 
+    /**
+     * A composable function which displays express buttons such as Google Pay and Link.
+     *
+     * Customers can tap an express button to complete payment with that payment method.
+     */
     @Composable
     fun Content() {
         ExpressCheckoutElementContent(interactor = interactor)
