@@ -3,8 +3,6 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
-import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.isInstanceOf
