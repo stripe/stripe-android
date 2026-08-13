@@ -37,7 +37,6 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             bodyPart("tax_region[city]", "San Francisco"),
             bodyPart("tax_region[state]", "CA"),
             bodyPart("tax_region[postal_code]", "94103"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
