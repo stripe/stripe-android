@@ -1006,7 +1006,7 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `onEnterManuallyFromInline emits OnExpandForm with null values when query is empty`() = runTest {
+    fun `onEnterManuallyFromInline emits OnExpandForm with country pre-filled when query is empty`() = runTest {
         val viewModel = createInlineViewModel()
         var emittedEvent: AutocompleteAddressInteractor.Event? = null
         viewModel.register { emittedEvent = it }
@@ -1014,7 +1014,11 @@ class InputAddressViewModelTest {
         viewModel.onEnterManuallyFromInline()
 
         assertThat(emittedEvent)
-            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+            .isEqualTo(
+                AutocompleteAddressInteractor.Event.OnExpandForm(
+                    values = mapOf(IdentifierSpec.Country to "US")
+                )
+            )
     }
 
     @Test
