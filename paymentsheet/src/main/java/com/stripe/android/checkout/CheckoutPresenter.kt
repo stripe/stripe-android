@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.elements.CurrencySelectorElement
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview

@@ -1,5 +1,5 @@
 @file:OptIn(CheckoutSessionPreview::class)
-package com.stripe.android.checkout.ece
+package com.stripe.android.elements.ece
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter

@@ -1,6 +1,6 @@
 @file:OptIn(CheckoutSessionPreview::class)
 
-package com.stripe.android.checkout.ece
+package com.stripe.android.elements.ece
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutControllerStateHolder

@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.CheckoutSessionPreview

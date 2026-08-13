@@ -1,8 +1,8 @@
 @file:OptIn(CheckoutSessionPreview::class)
-package com.stripe.android.checkout.ece
+package com.stripe.android.elements.ece
 
-import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
