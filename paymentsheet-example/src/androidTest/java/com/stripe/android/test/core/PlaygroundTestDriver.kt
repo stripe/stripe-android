@@ -901,7 +901,7 @@ internal class PlaygroundTestDriver(
             testParameters = testParameters,
             executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
             afterCollectingBankInfo = {
-                composeTestRule.waitUntil { selectors.buyButton.checkEnabled() }
+                selectors.buyButton.waitProcessingComplete()
                 selectors.buyButton.click()
                 selectors.playgroundBuyButton.apply {
                     waitFor(isEnabled())
