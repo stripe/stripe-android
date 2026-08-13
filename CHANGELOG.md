@@ -3,6 +3,12 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [CHANGED] Inline address autocomplete is now enabled by default in PaymentSheet and FlowController.
+
+### AddressElement
+* [CHANGED] Inline address autocomplete is now enabled by default.
+
 ### CryptoOnramp
 * [ADDED] Added `OnrampCoordinator.deleteWalletAddress(walletId:)` to delete a registered wallet address.
 
