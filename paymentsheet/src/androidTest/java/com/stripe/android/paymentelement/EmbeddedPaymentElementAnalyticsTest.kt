@@ -39,7 +39,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
-        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
     )
     private val analyticEventRule = AnalyticEventRule()
 
