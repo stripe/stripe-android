@@ -64,13 +64,12 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             options = requestOptions,
         ).fold(
             onSuccess = { paymentMethod ->
-                val params = createConfirmParams(
+                confirmCheckoutSessionForPaymentMethod(
                     intent = intent,
                     paymentMethod = paymentMethod,
                     savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
                     shippingInformation = null,
                 )
-                confirmCheckoutSession(params)
             },
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
@@ -88,11 +87,25 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
         // For saved payment methods, we don't need to create a new PM or save it again.
-        val params = createConfirmParams(
+        return confirmCheckoutSessionForPaymentMethod(
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
             savePaymentMethod = null,
             shippingInformation = confirmationOption.shippingInformation,
+        )
+    }
+
+    private suspend fun confirmCheckoutSessionForPaymentMethod(
+        intent: StripeIntent,
+        paymentMethod: PaymentMethod,
+        savePaymentMethod: Boolean?,
+        shippingInformation: ShippingInformation?,
+    ): ConfirmationDefinition.Action<Args> {
+        val params = createConfirmParams(
+            intent = intent,
+            paymentMethod = paymentMethod,
+            savePaymentMethod = savePaymentMethod,
+            shippingInformation = shippingInformation,
         )
         return confirmCheckoutSession(params)
     }
