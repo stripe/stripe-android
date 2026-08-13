@@ -1,11 +1,14 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -47,6 +50,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     context: Context,
     private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
@@ -88,6 +92,16 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
         // For saved payment methods, we don't need to create a new PM or save it again.
+        maybeUpdateBillingDetailsForCheckoutSession(
+            paymentMethod = confirmationOption.paymentMethod,
+        ).getOrElse { error ->
+            return ConfirmationDefinition.Action.Fail(
+                cause = error,
+                message = error.stripeErrorMessage(),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
+
         val params = createConfirmParams(
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
@@ -95,6 +109,31 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             shippingInformation = confirmationOption.shippingInformation,
         )
         return confirmCheckoutSession(params)
+    }
+
+    private suspend fun maybeUpdateBillingDetailsForCheckoutSession(
+        paymentMethod: PaymentMethod,
+    ): Result<Unit> {
+        val billingDetails = paymentMethod.billingDetails
+        val initialEstimatedTotal = checkoutSessionResponse?.totalSummary?.totalAmountDue
+        val billingAddress = billingDetails?.address?.toCheckoutAddress()
+        val updatedCheckoutSessionResponse = if (checkoutSessionResponse != null && billingAddress != null) {
+            checkoutSessionTaxRegionUpdater.updateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = billingAddress,
+            ).getOrElse { error -> return Result.failure(error) }
+        } else {
+            checkoutSessionResponse
+        }
+        val finalEstimatedTotal = updatedCheckoutSessionResponse?.totalSummary?.totalAmountDue
+        if (initialEstimatedTotal != finalEstimatedTotal) {
+            val error = IllegalStateException(
+                "The estimated total changed from $initialEstimatedTotal to $finalEstimatedTotal."
+            )
+            return Result.failure(error)
+        }
+        return Result.success(Unit)
     }
 
     private fun createConfirmParams(
@@ -192,6 +231,18 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             checkoutSessionResponse: CheckoutSessionResponse?,
         ): CheckoutSessionConfirmationInterceptor
     }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun Address.toCheckoutAddress(): CheckoutController.Address.State? {
+    return CheckoutController.Address.State(
+        city = city,
+        country = country ?: return null,
+        line1 = line1,
+        line2 = line2,
+        postalCode = postalCode,
+        state = state,
+    )
 }
 
 private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
