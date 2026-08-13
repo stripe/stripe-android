@@ -119,13 +119,15 @@ internal class LpmBillingAddressFormValuesToParamsTest {
 
     private companion object {
         object TestCaseProvider : TestParameterValuesProvider() {
-            override fun provideValues(context: Context?): List<LpmBillingAddressFormValuesToParamsTestCase> {
-                return boletoTestCases +
-                    sepaDebitTestCases +
-                    weroTestCases +
-                    klarnaTestCases +
-                    bacsDebitTestCases +
-                    oxxoTestCases
+            override fun provideValues(
+                context: Context?,
+            ): List<LpmBillingAddressFormValuesToParamsTestCase> = buildList {
+                addAll(boletoTestCases)
+                addAll(sepaDebitTestCases)
+                addAll(weroTestCases)
+                addAll(klarnaTestCases)
+                addAll(bacsDebitTestCases)
+                addAll(oxxoTestCases)
             }
         }
     }
