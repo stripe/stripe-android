@@ -58,6 +58,7 @@ internal object LpmBillingAddressScreenshotPaymentMethodTypeProvider : TestParam
         value(PaymentMethod.Type.SepaDebit).withName("SEPA Debit"),
         value(PaymentMethod.Type.Wero).withName("Wero"),
         value(PaymentMethod.Type.Klarna).withName("Klarna"),
+        value(PaymentMethod.Type.BacsDebit).withName("Bacs Debit"),
     )
 }
 
