@@ -1,7 +1,6 @@
 package com.stripe.android.lpm
 
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,11 +16,9 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
-import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -65,9 +62,8 @@ internal class TestInstantDebits : BasePlaygroundTest() {
             testParameters = makeLinkTestParameters(email).copy(
                 authorizationAction = AuthorizeAction.Cancel,
             ),
-            afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+            afterAuthorization = { selectors, _ ->
+                selectors.buyButton.waitProcessingComplete()
             }
         )
     }
