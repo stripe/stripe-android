@@ -19,9 +19,7 @@ import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
 internal class NfcScanningTest {
-    private val networkRule = NetworkRule(
-        defaultMatcher = header("Authorization", "Bearer pk_test_123")
-    )
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val testRules: TestRules = TestRules.create(

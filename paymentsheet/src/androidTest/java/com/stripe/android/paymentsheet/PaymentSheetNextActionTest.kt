@@ -36,7 +36,6 @@ internal class PaymentSheetNextActionTest {
     // validate() a moment to see it.
     private val networkRule = NetworkRule(
         validationTimeout = 5.seconds,
-        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
     )
 
     @get:Rule

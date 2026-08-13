@@ -26,9 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 
 internal class EmbeddedPaymentElementTest {
-    private val networkRule = NetworkRule(
-        defaultMatcher = header("Authorization", "Bearer pk_test_123")
-    )
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)

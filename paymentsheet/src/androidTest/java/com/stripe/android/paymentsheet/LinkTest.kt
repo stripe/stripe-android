@@ -36,7 +36,6 @@ internal class LinkTest {
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(
         validationTimeout = 5.seconds,
-        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
     )
 
     @get:Rule

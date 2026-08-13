@@ -28,9 +28,7 @@ class TestRules private constructor(
     companion object {
         fun create(
             composeTestRule: ComposeTestRule = createEmptyComposeRule(),
-            networkRule: NetworkRule = NetworkRule(
-                defaultMatcher = header("Authorization", "Bearer pk_test_123")
-            ),
+            networkRule: NetworkRule = NetworkRule(),
             terminalTestRule: TerminalWrapperTestRule = TerminalWrapperTestRule(enabled = false),
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {

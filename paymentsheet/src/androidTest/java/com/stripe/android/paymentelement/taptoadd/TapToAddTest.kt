@@ -37,7 +37,6 @@ internal class TapToAddTest {
     // it happens, but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(
         validationTimeout = 5.seconds,
-        defaultMatcher = header("Authorization", "Bearer pk_test_123"),
     )
 
     val terminalWrapperTestRule = TerminalWrapperTestRule(enabled = true)
