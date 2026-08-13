@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import androidx.annotation.ColorInt
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -20,20 +21,24 @@ private fun ShippingAddressElement.Appearance.Colors.State.asPaymentSheetColors(
     isLight: Boolean,
 ): PaymentSheet.Colors {
     val defaults = if (isLight) StripeThemeDefaults.colorsLight else StripeThemeDefaults.colorsDark
+    val errorColor = colorOrDefault(this@asPaymentSheetColors.error, defaults.materialColors.error)
     return PaymentSheet.Colors(
-        primary = primary?.let { Color(it) } ?: defaults.materialColors.primary,
-        surface = surface?.let { Color(it) } ?: defaults.materialColors.surface,
-        component = component?.let { Color(it) } ?: defaults.component,
-        componentBorder = componentBorder?.let { Color(it) } ?: defaults.componentBorder,
-        componentDivider = componentDivider?.let { Color(it) } ?: defaults.componentDivider,
-        onComponent = onComponent?.let { Color(it) } ?: defaults.onComponent,
-        onSurface = onSurface?.let { Color(it) } ?: defaults.materialColors.onSurface,
-        subtitle = subtitle?.let { Color(it) } ?: defaults.subtitle,
-        placeholderText = placeholderText?.let { Color(it) } ?: defaults.placeholderText,
-        appBarIcon = appBarIcon?.let { Color(it) } ?: defaults.appBarIcon,
-        error = error?.let { Color(it) } ?: defaults.materialColors.error,
+        primary = colorOrDefault(primary, defaults.materialColors.primary),
+        surface = colorOrDefault(surface, defaults.materialColors.surface),
+        component = colorOrDefault(component, defaults.component),
+        componentBorder = colorOrDefault(componentBorder, defaults.componentBorder),
+        componentDivider = colorOrDefault(componentDivider, defaults.componentDivider),
+        onComponent = colorOrDefault(onComponent, defaults.onComponent),
+        onSurface = colorOrDefault(onSurface, defaults.materialColors.onSurface),
+        subtitle = colorOrDefault(subtitle, defaults.subtitle),
+        placeholderText = colorOrDefault(placeholderText, defaults.placeholderText),
+        appBarIcon = colorOrDefault(appBarIcon, defaults.appBarIcon),
+        error = errorColor,
     )
 }
+
+private fun colorOrDefault(@ColorInt value: Int?, default: Color): Color =
+    if (value != null) Color(value) else default
 
 @OptIn(CheckoutSessionPreview::class)
 private fun ShippingAddressElement.Appearance.Shapes.State.asPaymentSheetShapes():
