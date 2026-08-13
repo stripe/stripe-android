@@ -383,6 +383,21 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         mapOf("pane" to pane.analyticsValue)
     )
 
+    /**
+     * The primary CTA of a server-driven error pane was tapped. [action] is the action the server
+     * asked for, or `unknown` when it's one this version of the SDK can't perform.
+     */
+    class GenericErrorClickPrimaryCta(
+        pane: Pane,
+        action: String?,
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "click.primary_cta",
+        mapOf(
+            "pane" to pane.analyticsValue,
+            "action" to (action ?: "unknown"),
+        )
+    )
+
     class AuthSessionOpened(
         pane: Pane,
         flow: String?,

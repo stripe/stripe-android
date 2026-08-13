@@ -25,10 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.IconSize
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.ShapedIcon
@@ -37,6 +40,7 @@ import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -196,6 +200,20 @@ internal fun GenericHeader(
                 flushed = isBrandIcon,
                 url = iconUrl,
                 contentDescription = null,
+                // A brand icon is an institution's logo, so stand in for it with the institution
+                // placeholder rather than the person icon ShapedIcon otherwise defaults to. The
+                // debug painter replaces the image itself, so it needs the full-bleed tile; the
+                // error painter is tinted and padded, so it takes the glyph.
+                debugPainter = painterResource(
+                    id = if (isBrandIcon) {
+                        R.drawable.stripe_ic_brandicon_institution
+                    } else {
+                        R.drawable.stripe_ic_person
+                    }
+                ),
+                errorPainter = R.drawable.stripe_ic_bank
+                    .takeIf { isBrandIcon }
+                    ?.let { painterResource(id = it) },
                 iconSize = if (payload.alignment == Alignment.Center) IconSize.Large else IconSize.Medium,
             )
         }
@@ -213,17 +231,43 @@ internal fun GenericHeader(
         }
 
         if (payload.subtitle != null) {
-            AnnotatedText(
-                text = TextResource.Text(fromHtml(payload.subtitle)),
+            GenericSubtitle(
+                subtitle = payload.subtitle,
+                alignment = payload.alignment,
                 onClickableTextClick = onClickableTextClick,
-                defaultStyle = typography.bodyMedium.copy(
-                    textAlign = payload.alignment.toComposeTextAlign(),
-                    color = colors.textDefault,
-                ),
-                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
+}
+
+@Composable
+private fun GenericSubtitle(
+    subtitle: String,
+    alignment: Alignment?,
+    onClickableTextClick: (String) -> Unit,
+) {
+    val style = typography.bodyMedium.copy(
+        textAlign = alignment.toComposeTextAlign(),
+        color = colors.textDefault,
+    )
+
+    AnnotatedText(
+        text = TextResource.Text(fromHtml(subtitle)),
+        onClickableTextClick = onClickableTextClick,
+        defaultStyle = style,
+        // Bold spans only render bold if the caller supplies a style for them. Server copy uses
+        // bold to call out the part the user needs to act on, so honor it.
+        annotationStyles = mapOf(
+            StringAnnotation.CLICKABLE to style
+                .toSpanStyle()
+                .copy(textDecoration = TextDecoration.Underline),
+            StringAnnotation.BOLD to typography.bodyMediumEmphasized.copy(
+                textAlign = alignment.toComposeTextAlign(),
+                color = colors.textDefault,
+            ).toSpanStyle(),
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
