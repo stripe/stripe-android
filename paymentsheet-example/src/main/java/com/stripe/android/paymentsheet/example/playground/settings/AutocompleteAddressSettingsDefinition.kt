@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
 @OptIn(AddressAutocompletePreview::class)
@@ -25,12 +24,7 @@ internal object AutocompleteAddressSettingsDefinition : BooleanSettingsDefinitio
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
-        settings: Settings,
     ) {
-        if (value) {
-            settings.googlePlacesApiKey?.let {
-                configurationBuilder.googlePlacesApiKey(it)
-            }
-        }
+        // Address autocomplete is now powered by Stripe's hosted endpoint — no API key needed.
     }
 }

@@ -1,45 +1,40 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.content.Context
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import org.junit.Test
-import org.mockito.kotlin.mock
 
 class AddressElementViewModelModuleTest {
     private val module = AddressElementViewModelModule()
 
     @Test
-    fun `provideInlinePlacesClient returns hosted client without google api key when hosted autocomplete is enabled`() {
+    fun `provideInlinePlacesClient returns null when config is null`() {
         val placesClient = module.provideInlinePlacesClient(
             args = AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
-                config = AddressLauncher.Configuration(
-                    billingAddress = null,
-                    useStripeHostedAutocomplete = true,
-                ),
+                config = null,
             ),
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
-            googlePlacesClient = null,
             addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
         )
 
-        assertThat(placesClient).isNotNull()
+        assertThat(placesClient).isNull()
     }
 
     @Test
-    fun `provideGooglePlacesClient returns null without google api key`() {
-        val placesClient = module.provideGooglePlacesClient(
-            context = mock<Context>(),
+    fun `provideInlinePlacesClient returns Stripe-hosted client when config is present`() {
+        val placesClient = module.provideInlinePlacesClient(
             args = AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
                 config = AddressLauncher.Configuration(billingAddress = null),
             ),
+            stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+            addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
         )
 
-        assertThat(placesClient).isNull()
+        assertThat(placesClient).isNotNull()
     }
 }
