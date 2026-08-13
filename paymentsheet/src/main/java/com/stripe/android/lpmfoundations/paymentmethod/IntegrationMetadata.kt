@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.parcelize.Parcelize
 
 internal sealed class IntegrationMetadata : Parcelable {
@@ -51,5 +52,6 @@ internal sealed class IntegrationMetadata : Parcelable {
     data class CheckoutSession(
         val id: String,
         val instancesKey: String,
+        val checkoutSessionResponse: CheckoutSessionResponse,
     ) : IntegrationMetadata()
 }

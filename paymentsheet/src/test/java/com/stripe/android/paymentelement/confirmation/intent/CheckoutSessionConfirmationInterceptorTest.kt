@@ -36,6 +36,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -378,10 +379,13 @@ class CheckoutSessionConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
         )
 
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
+
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = DEFAULT_CHECKOUT_SESSION_ID,
+                id = checkoutSessionResponse.id,
                 instancesKey = "test_key",
+                checkoutSessionResponse = checkoutSessionResponse,
             ),
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(

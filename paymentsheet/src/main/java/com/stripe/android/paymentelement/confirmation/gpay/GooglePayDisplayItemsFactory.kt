@@ -3,13 +3,15 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal object GooglePayDisplayItemsFactory {
 
     fun create(paymentMethodMetadata: PaymentMethodMetadata): List<GooglePayDisplayItem> {
-        val response = paymentMethodMetadata.checkoutSessionResponse ?: return emptyList()
+        val response = (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
+            ?.checkoutSessionResponse ?: return emptyList()
 
         val items = mutableListOf<GooglePayDisplayItem>()
 

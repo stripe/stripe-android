@@ -34,7 +34,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
@@ -99,12 +98,13 @@ internal data class PaymentMethodMetadata(
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
     val shouldUseAutocompleteProxyEndpoints: Boolean,
-    val checkoutSessionResponse: CheckoutSessionResponse?,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
-        get() = checkoutSessionResponse?.collectsTaxFromBillingAddress == true
+        get() = (integrationMetadata as? IntegrationMetadata.CheckoutSession)
+            ?.checkoutSessionResponse
+            ?.collectsTaxFromBillingAddress == true
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
         return when (paymentMethodLayout) {
@@ -443,9 +443,6 @@ internal data class PaymentMethodMetadata(
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
-                checkoutSessionResponse =
-                    (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
-                        ?.checkoutSessionResponse,
                 paymentMethodLayout = paymentMethodLayout,
             )
         }
@@ -517,7 +514,6 @@ internal data class PaymentMethodMetadata(
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
-                checkoutSessionResponse = null,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             )
         }

@@ -13,6 +13,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
@@ -798,12 +799,19 @@ class CardDefinitionTest {
     private fun createAutomaticCardBillingAddressElement(
         checkoutSessionResponse: CheckoutSessionResponse?,
     ): BillingAddressElement {
+        val integrationMetadata = checkoutSessionResponse?.let { response ->
+            IntegrationMetadata.CheckoutSession(
+                id = response.id,
+                instancesKey = "CardDefinitionTest",
+                checkoutSessionResponse = response,
+            )
+        } ?: IntegrationMetadata.IntentFirst("pi_123_secret_456")
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
                 ),
-                checkoutSessionResponse = checkoutSessionResponse,
+                integrationMetadata = integrationMetadata,
             )
         )
 
