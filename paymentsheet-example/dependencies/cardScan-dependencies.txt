@@ -27,7 +27,7 @@
 |    |    |    |    |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 -> 2.2.21 (c)
 |    |    |    |    |    |    +--- androidx.concurrent:concurrent-futures:1.0.0 -> 1.1.0
 |    |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    |    |    |    |    \--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
+|    |    |    |    |    |    |    \--- com.google.guava:listenablefuture:1.0
 |    |    |    |    |    |    +--- androidx.core:core-viewtree:1.0.0
 |    |    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib -> 2.2.21 (*)
 |    |    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.2.21 (c)
@@ -80,7 +80,7 @@
 |    |    |    |    |    |    |         |    |    \--- androidx.tracing:tracing:1.0.0 -> 1.2.0
 |    |    |    |    |    |    |         |    |         +--- androidx.annotation:annotation:1.2.0 -> 1.9.1 (*)
 |    |    |    |    |    |    |         |    |         \--- androidx.tracing:tracing-ktx:1.2.0 (c)
-|    |    |    |    |    |    |         |    \--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
+|    |    |    |    |    |    |         |    \--- com.google.guava:listenablefuture:1.0
 |    |    |    |    |    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 -> 2.2.21 (*)
 |    |    |    |    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 -> 1.10.2
 |    |    |    |    |    |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
@@ -104,7 +104,7 @@
 |    |    |    |    |    |    +--- androidx.versionedparcelable:versionedparcelable:1.1.1
 |    |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
 |    |    |    |    |    |    |    \--- androidx.collection:collection:1.0.0 -> 1.5.0 (*)
-|    |    |    |    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
+|    |    |    |    |    |    +--- com.google.guava:listenablefuture:1.0
 |    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib -> 2.2.21 (*)
 |    |    |    |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1 -> 1.10.2 (*)
 |    |    |    |    |    |    +--- org.jspecify:jspecify:1.0.0
@@ -227,7 +227,7 @@
 |    |    |    +--- androidx.concurrent:concurrent-futures:1.0.0 -> 1.1.0 (*)
 |    |    |    +--- androidx.core:core:1.10.0 -> 1.17.0 (*)
 |    |    |    +--- androidx.interpolator:interpolator:1.0.0 (*)
-|    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
+|    |    |    +--- com.google.guava:listenablefuture:1.0
 |    |    |    \--- org.jspecify:jspecify:1.0.0
 |    |    +--- com.google.dagger:dagger:2.58
 |    |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
@@ -448,7 +448,7 @@
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.3.1 -> 2.10.0 (*)
 |    |    |    +--- androidx.tracing:tracing:1.2.0 (*)
 |    |    |    +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
+|    |    |    +--- com.google.guava:listenablefuture:1.0
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib -> 2.2.21 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1 -> 1.10.2 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1 -> 1.10.2 (*)
@@ -473,7 +473,7 @@
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.3.1 -> 2.10.0 (*)
 |    |    |    +--- androidx.tracing:tracing:1.2.0 (*)
 |    |    |    +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
+|    |    |    +--- com.google.guava:listenablefuture:1.0
 |    |    |    +--- org.jspecify:jspecify:1.0.0
 |    |    |    +--- androidx.camera:camera-core:1.5.3 (c)
 |    |    |    +--- androidx.camera:camera-lifecycle:1.5.3 (c)
@@ -492,7 +492,7 @@
 |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.21 -> 2.2.21 (*)
 |    |    |    |    \--- androidx.tracing:tracing:1.2.0 (c)
 |    |    |    +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
+|    |    |    +--- com.google.guava:listenablefuture:1.0
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1 -> 1.10.2 (*)
 |    |    |    +--- org.jspecify:jspecify:1.0.0
 |    |    |    +--- androidx.camera:camera-camera2:1.5.3 (c)
@@ -515,7 +515,7 @@
 |    |         |    +--- androidx.concurrent:concurrent-futures-ktx:1.1.0 (*)
 |    |         |    +--- androidx.core:core:1.1.0 -> 1.17.0 (*)
 |    |         |    +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |         |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
+|    |         |    +--- com.google.guava:listenablefuture:1.0
 |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1 -> 1.10.2 (*)
 |    |         |    +--- org.jspecify:jspecify:1.0.0
 |    |         |    +--- androidx.camera:camera-camera2:1.5.3 (c)
@@ -529,7 +529,7 @@
 |    |         +--- androidx.lifecycle:lifecycle-livedata:2.3.1 -> 2.10.0 (*)
 |    |         +--- androidx.lifecycle:lifecycle-livedata-core:2.3.1 -> 2.10.0 (*)
 |    |         +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |         +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
+|    |         +--- com.google.guava:listenablefuture:1.0
 |    |         +--- org.jspecify:jspecify:1.0.0
 |    |         +--- androidx.camera:camera-camera2:1.5.3 (c)
 |    |         +--- androidx.camera:camera-core:1.5.3 (c)
@@ -560,7 +560,7 @@
 |    |    |    |    |    \--- com.google.android.gms:play-services-tasks:18.2.0 (*)
 |    |    |    |    \--- org.tensorflow:tensorflow-lite-api:2.16.1
 |    |    |    \--- org.tensorflow:tensorflow-lite-support-api:0.4.2
-|    |    |         +--- org.checkerframework:checker-qual:2.5.8 -> 3.43.0
+|    |    |         +--- org.checkerframework:checker-qual:2.5.8
 |    |    |         +--- org.tensorflow:tensorflow-lite-api:2.9.0 -> 2.16.1
 |    |    |         \--- com.google.android.odml:image:1.0.0-beta1
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
@@ -1078,7 +1078,7 @@
 |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22 -> 1.9.24 (c)
 |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22 -> 2.2.21 (c)
 |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22 -> 1.9.24 (c)
-|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.15.0 -> 2.28.0
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.15.0
 |    |    |    |    +--- androidx.activity:activity:1.8.0 -> 1.12.4 (*)
 |    |    |    |    +--- androidx.annotation:annotation:1.2.0 -> 1.9.1 (*)
 |    |    |    |    +--- androidx.annotation:annotation-experimental:1.0.0 -> 1.4.1 (*)
@@ -1103,17 +1103,17 @@
 |    |    |    |    |    +--- androidx.customview:customview:1.0.0 -> 1.1.0 (*)
 |    |    |    |    |    +--- androidx.customview:customview-poolingcontainer:1.0.0 (*)
 |    |    |    |    |    +--- androidx.profileinstaller:profileinstaller:1.3.1 -> 1.4.0 (*)
-|    |    |    |    |    \--- androidx.viewpager2:viewpager2:1.1.0-beta02 -> 1.1.0 (c)
+|    |    |    |    |    \--- androidx.viewpager2:viewpager2:1.1.0-beta02 (c)
 |    |    |    |    +--- androidx.resourceinspection:resourceinspection-annotation:1.0.1 (*)
 |    |    |    |    +--- androidx.transition:transition:1.5.0 -> 1.6.0 (*)
 |    |    |    |    +--- androidx.vectordrawable:vectordrawable:1.1.0 (*)
-|    |    |    |    +--- androidx.viewpager2:viewpager2:1.0.0 -> 1.1.0
+|    |    |    |    +--- androidx.viewpager2:viewpager2:1.0.0 -> 1.1.0-beta02
 |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    |    |    +--- androidx.annotation:annotation-experimental:1.4.0 -> 1.4.1 (*)
+|    |    |    |    |    +--- androidx.annotation:annotation-experimental:1.3.0 -> 1.4.1 (*)
 |    |    |    |    |    +--- androidx.collection:collection:1.1.0 -> 1.5.0 (*)
 |    |    |    |    |    +--- androidx.core:core:1.3.2 -> 1.17.0 (*)
 |    |    |    |    |    +--- androidx.fragment:fragment:1.1.0 -> 1.8.9 (*)
-|    |    |    |    |    \--- androidx.recyclerview:recyclerview:1.3.1 -> 1.4.0 (*)
+|    |    |    |    |    \--- androidx.recyclerview:recyclerview:1.3.1-rc01 -> 1.4.0 (*)
 |    |    |    |    \--- androidx.graphics:graphics-shapes:1.0.1
 |    |    |    |         \--- androidx.graphics:graphics-shapes-android:1.0.1
 |    |    |    |              +--- androidx.annotation:annotation:1.8.1 -> 1.9.1 (*)
@@ -1197,25 +1197,21 @@
 |    |    +--- com.google.android.gms:play-services-base:18.5.0 (*)
 |    |    +--- com.google.android.gms:play-services-basement:18.4.0 -> 18.9.0 (*)
 |    |    +--- com.google.android.gms:play-services-mlkit-text-recognition-common:19.1.0
-|    |    |    +--- com.google.android.datatransport:transport-api:2.2.1 -> 3.1.0
+|    |    |    +--- com.google.android.datatransport:transport-api:2.2.1
 |    |    |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    +--- com.google.android.datatransport:transport-backend-cct:2.3.3 -> 3.2.0
-|    |    |    |    +--- com.google.android.datatransport:transport-api:3.1.0 (*)
-|    |    |    |    +--- com.google.android.datatransport:transport-runtime:3.2.0
-|    |    |    |    |    +--- com.google.android.datatransport:transport-api:3.1.0 (*)
-|    |    |    |    |    +--- androidx.annotation:annotation:1.3.0 -> 1.9.1 (*)
-|    |    |    |    |    +--- javax.inject:javax.inject:1
-|    |    |    |    |    +--- com.google.firebase:firebase-encoders:17.0.0
-|    |    |    |    |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    |    |    \--- com.google.firebase:firebase-encoders-proto:16.0.0
-|    |    |    |    |         +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    |    |         \--- com.google.firebase:firebase-encoders:17.0.0 (*)
-|    |    |    |    +--- com.google.firebase:firebase-encoders:17.0.0 (*)
-|    |    |    |    +--- com.google.firebase:firebase-encoders-json:18.0.0
+|    |    |    +--- com.google.android.datatransport:transport-backend-cct:2.3.3
+|    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |    |    |    +--- com.google.android.datatransport:transport-api:2.2.1 (*)
+|    |    |    |    +--- com.google.android.datatransport:transport-runtime:2.2.5 -> 2.2.6
 |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    |    |    \--- com.google.firebase:firebase-encoders:17.0.0 (*)
-|    |    |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    +--- com.google.android.datatransport:transport-runtime:2.2.6 -> 3.2.0 (*)
+|    |    |    |    |    +--- com.google.android.datatransport:transport-api:2.2.1 (*)
+|    |    |    |    |    \--- javax.inject:javax.inject:1
+|    |    |    |    +--- com.google.firebase:firebase-encoders:16.1.0
+|    |    |    |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |    |    |    \--- com.google.firebase:firebase-encoders-json:17.1.0
+|    |    |    |         +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |    |    |         \--- com.google.firebase:firebase-encoders:16.1.0 (*)
+|    |    |    +--- com.google.android.datatransport:transport-runtime:2.2.6 (*)
 |    |    |    +--- com.google.android.gms:play-services-base:18.5.0 (*)
 |    |    |    +--- com.google.android.gms:play-services-basement:18.4.0 -> 18.9.0 (*)
 |    |    |    +--- com.google.android.gms:play-services-tasks:18.2.0 (*)
@@ -1223,32 +1219,32 @@
 |    |    |    +--- com.google.firebase:firebase-components:16.1.0
 |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
 |    |    |    |    \--- com.google.firebase:firebase-annotations:16.0.0
-|    |    |    +--- com.google.firebase:firebase-encoders:16.1.0 -> 17.0.0 (*)
-|    |    |    +--- com.google.firebase:firebase-encoders-json:17.1.0 -> 18.0.0 (*)
+|    |    |    +--- com.google.firebase:firebase-encoders:16.1.0 (*)
+|    |    |    +--- com.google.firebase:firebase-encoders-json:17.1.0 (*)
 |    |    |    +--- com.google.mlkit:common:18.11.0
 |    |    |    |    +--- androidx.appcompat:appcompat:1.6.1 -> 1.7.1 (*)
 |    |    |    |    +--- androidx.core:core:1.0.0 -> 1.17.0 (*)
-|    |    |    |    +--- com.google.android.datatransport:transport-api:2.2.1 -> 3.1.0 (*)
-|    |    |    |    +--- com.google.android.datatransport:transport-backend-cct:2.3.3 -> 3.2.0 (*)
-|    |    |    |    +--- com.google.android.datatransport:transport-runtime:2.2.6 -> 3.2.0 (*)
+|    |    |    |    +--- com.google.android.datatransport:transport-api:2.2.1 (*)
+|    |    |    |    +--- com.google.android.datatransport:transport-backend-cct:2.3.3 (*)
+|    |    |    |    +--- com.google.android.datatransport:transport-runtime:2.2.6 (*)
 |    |    |    |    +--- com.google.android.gms:play-services-base:18.5.0 (*)
 |    |    |    |    +--- com.google.android.gms:play-services-basement:18.4.0 -> 18.9.0 (*)
 |    |    |    |    +--- com.google.android.gms:play-services-tasks:18.2.0 (*)
 |    |    |    |    +--- com.google.firebase:firebase-components:16.1.0 (*)
-|    |    |    |    +--- com.google.firebase:firebase-encoders:16.1.0 -> 17.0.0 (*)
-|    |    |    |    \--- com.google.firebase:firebase-encoders-json:17.1.0 -> 18.0.0 (*)
+|    |    |    |    +--- com.google.firebase:firebase-encoders:16.1.0 (*)
+|    |    |    |    \--- com.google.firebase:firebase-encoders-json:17.1.0 (*)
 |    |    |    +--- com.google.mlkit:vision-common:17.3.0
 |    |    |    |    +--- androidx.exifinterface:exifinterface:1.0.0 -> 1.4.2 (*)
-|    |    |    |    +--- com.google.android.datatransport:transport-api:2.2.1 -> 3.1.0 (*)
-|    |    |    |    +--- com.google.android.datatransport:transport-backend-cct:2.3.3 -> 3.2.0 (*)
-|    |    |    |    +--- com.google.android.datatransport:transport-runtime:2.2.6 -> 3.2.0 (*)
+|    |    |    |    +--- com.google.android.datatransport:transport-api:2.2.1 (*)
+|    |    |    |    +--- com.google.android.datatransport:transport-backend-cct:2.3.3 (*)
+|    |    |    |    +--- com.google.android.datatransport:transport-runtime:2.2.6 (*)
 |    |    |    |    +--- com.google.android.gms:play-services-base:18.1.0 -> 18.5.0 (*)
 |    |    |    |    +--- com.google.android.gms:play-services-basement:18.1.0 -> 18.9.0 (*)
 |    |    |    |    +--- com.google.android.gms:play-services-tasks:18.0.2 -> 18.2.0 (*)
 |    |    |    |    +--- com.google.android.odml:image:1.0.0-beta1
 |    |    |    |    +--- com.google.firebase:firebase-components:16.1.0 (*)
-|    |    |    |    +--- com.google.firebase:firebase-encoders:16.1.0 -> 17.0.0 (*)
-|    |    |    |    +--- com.google.firebase:firebase-encoders-json:17.1.0 -> 18.0.0 (*)
+|    |    |    |    +--- com.google.firebase:firebase-encoders:16.1.0 (*)
+|    |    |    |    +--- com.google.firebase:firebase-encoders-json:17.1.0 (*)
 |    |    |    |    \--- com.google.mlkit:common:18.6.0 -> 18.11.0 (*)
 |    |    |    \--- com.google.mlkit:vision-interfaces:16.3.0
 |    |    |         +--- com.google.android.gms:play-services-basement:18.1.0 -> 18.9.0 (*)
@@ -1527,53 +1523,6 @@
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.24 (*)
 +--- com.google.android.material:material:1.13.0 (*)
 +--- com.squareup.okio:okio:3.16.4 (*)
-+--- com.google.android.libraries.places:places:5.1.1
-|    +--- androidx.appcompat:appcompat:1.0.0 -> 1.7.1 (*)
-|    +--- androidx.cardview:cardview:1.0.0 (*)
-|    +--- androidx.constraintlayout:constraintlayout:2.1.4 -> 2.2.1 (*)
-|    +--- androidx.exifinterface:exifinterface:1.0.0 -> 1.4.2 (*)
-|    +--- androidx.fragment:fragment:1.1.0 -> 1.8.9 (*)
-|    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.8.7 -> 2.10.0 (*)
-|    +--- androidx.lifecycle:lifecycle-viewmodel:2.0.0 -> 2.10.0 (*)
-|    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7 -> 2.10.0 (*)
-|    +--- androidx.recyclerview:recyclerview:1.3.2 -> 1.4.0 (*)
-|    +--- androidx.viewpager2:viewpager2:1.1.0 (*)
-|    +--- com.android.volley:volley:1.2.1
-|    +--- com.github.bumptech.glide:glide:4.16.0
-|    |    +--- com.github.bumptech.glide:gifdecoder:4.16.0
-|    |    |    \--- androidx.annotation:annotation:1.5.0 -> 1.9.1 (*)
-|    |    +--- com.github.bumptech.glide:disklrucache:4.16.0
-|    |    +--- com.github.bumptech.glide:annotations:4.16.0
-|    |    +--- androidx.fragment:fragment:1.3.6 -> 1.8.9 (*)
-|    |    +--- androidx.vectordrawable:vectordrawable-animated:1.1.0 (*)
-|    |    +--- androidx.exifinterface:exifinterface:1.3.6 -> 1.4.2 (*)
-|    |    \--- androidx.tracing:tracing:1.0.0 -> 1.2.0 (*)
-|    +--- com.google.android.datatransport:transport-api:3.1.0 (*)
-|    +--- com.google.android.datatransport:transport-backend-cct:3.2.0 (*)
-|    +--- com.google.android.datatransport:transport-runtime:3.2.0 (*)
-|    +--- com.google.android.gms:play-services-base:18.5.0 (*)
-|    +--- com.google.android.gms:play-services-basement:18.9.0 (*)
-|    +--- com.google.android.gms:play-services-location:21.0.1
-|    |    +--- com.google.android.gms:play-services-base:18.1.0 -> 18.5.0 (*)
-|    |    +--- com.google.android.gms:play-services-basement:18.1.0 -> 18.9.0 (*)
-|    |    \--- com.google.android.gms:play-services-tasks:18.0.2 -> 18.2.0 (*)
-|    +--- com.google.android.gms:play-services-maps:17.0.0 -> 18.0.2 (*)
-|    +--- com.google.android.gms:play-services-tasks:18.2.0 (*)
-|    +--- com.google.android.material:material:1.12.0 -> 1.13.0 (*)
-|    +--- com.google.auto.value:auto-value-annotations:1.6.2 -> 1.6.3
-|    +--- com.google.code.gson:gson:2.10
-|    +--- com.google.guava:guava:33.3.0-android
-|    |    +--- com.google.guava:failureaccess:1.0.2
-|    |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
-|    |    +--- com.google.code.findbugs:jsr305:3.0.2
-|    |    +--- org.checkerframework:checker-qual:3.43.0
-|    |    \--- com.google.errorprone:error_prone_annotations:2.28.0
-|    +--- com.squareup.okhttp:okhttp:2.7.2
-|    |    \--- com.squareup.okio:okio:1.6.0 -> 3.16.4 (*)
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.0 -> 2.2.21 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0 -> 1.10.2 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0 -> 1.10.2 (*)
-|    \--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0 -> 1.10.2 (*)
 +--- com.squareup.retrofit2:converter-kotlinx-serialization:2.12.0
 |    +--- com.squareup.retrofit2:retrofit:2.12.0
 |    |    \--- com.squareup.okhttp3:okhttp:3.14.9 -> 4.12.0 (*)
