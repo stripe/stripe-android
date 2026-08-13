@@ -43,6 +43,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     @Assisted private val integrationMetadata: IntegrationMetadata.CheckoutSession,
     @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
+    @Assisted private val checkoutSessionResponse: CheckoutSessionResponse?,
     context: Context,
     private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
@@ -188,6 +189,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             integrationMetadata: IntegrationMetadata.CheckoutSession,
             customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
+            checkoutSessionResponse: CheckoutSessionResponse?,
         ): CheckoutSessionConfirmationInterceptor
     }
 }

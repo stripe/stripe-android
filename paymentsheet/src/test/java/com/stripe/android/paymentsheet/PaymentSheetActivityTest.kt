@@ -83,6 +83,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
@@ -1313,6 +1314,7 @@ internal class PaymentSheetActivityTest {
                             integrationMetadata: IntegrationMetadata,
                             customerMetadata: CustomerMetadata?,
                             clientAttributionMetadata: ClientAttributionMetadata,
+                            checkoutSessionResponse: CheckoutSessionResponse?,
                         ): IntentConfirmationInterceptor {
                             return fakeIntentConfirmationInterceptor
                         }

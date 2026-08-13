@@ -26,6 +26,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeActivityResultLauncher
@@ -511,6 +512,7 @@ class IntentConfirmationDefinitionTest {
                     integrationMetadata: IntegrationMetadata,
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
+                    checkoutSessionResponse: CheckoutSessionResponse?,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor()
                 }

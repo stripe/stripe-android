@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -277,6 +278,7 @@ internal class IntentConfirmationFlowTest {
                     integrationMetadata: IntegrationMetadata,
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
+                    checkoutSessionResponse: CheckoutSessionResponse?,
                 ): IntentConfirmationInterceptor {
                     return createIntentConfirmationInterceptor(
                         integrationMetadata = integrationMetadata,
