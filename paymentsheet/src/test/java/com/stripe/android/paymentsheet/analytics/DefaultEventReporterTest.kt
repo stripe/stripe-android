@@ -7,6 +7,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -19,6 +20,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -60,6 +62,36 @@ class DefaultEventReporterTest {
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_init")
+    }
+
+    @Test
+    fun `onExperimentExposure enqueues V2 event`() = runScenario {
+        paymentMethodMetadataStack.push(null)
+
+        eventReporter.onExperimentExposure(
+            LoggableExperiment.LinkHoldback(
+                arbId = "arb_123",
+                group = "treatment",
+                experiment = ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
+                isReturningLinkUser = false,
+                useLinkNative = true,
+                emailRecognitionSource = null,
+                providedDefaultValues = LoggableExperiment.LinkHoldback.ProvidedDefaultValues(
+                    email = false,
+                    name = false,
+                    phone = false,
+                ),
+                spmEnabled = false,
+                integrationShape = "payment_sheet",
+                linkDisplayed = true,
+                elementsSessionId = "elements_session_123",
+                mobileSdkVersion = "1.0.0",
+                mobileSessionId = "mobile_session_123",
+            )
+        )
+
+        val request = analyticsRequestV2Executor.enqueueCalls.awaitItem()
+        assertThat(request.eventName).isEqualTo("elements.experiment_exposure")
     }
 
     @Test
