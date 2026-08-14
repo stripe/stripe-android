@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -104,7 +105,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     createIntentCallback = createIntentCallback,
                     stripeRepository = stripeRepository,
                     allowsManualConfirmation = false,
-                    requestOptions = requestOptions,
+                    requestOptionsProvider = { requestOptions },
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
@@ -122,7 +123,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     customerMetadata = customerMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
-                    requestOptions = requestOptions,
+                    requestOptionsProvider = { requestOptions },
                     userFacingLogger = FakeUserFacingLogger(),
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
@@ -138,7 +139,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     handler = handler,
                     stripeRepository = stripeRepository,
                     errorReporter = errorReporter,
-                    requestOptions = requestOptions,
+                    requestOptionsProvider = { requestOptions },
                 )
             }
         },
@@ -163,12 +164,16 @@ internal suspend fun createIntentConfirmationInterceptor(
                         analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                             context = ApplicationProvider.getApplicationContext(),
-                            publishableKey = "pk",
+                            publishableKeyProvider = { "pk" },
                         ),
-                        publishableKeyProvider = { "pk" },
-                        stripeAccountIdProvider = { null },
+                        apiConfigurationProvider = {
+                            ApiConfiguration.State(
+                                publishableKey = "pk",
+                                stripeAccountId = null,
+                            )
+                        },
                     ),
-                    requestOptions = requestOptions,
+                    requestOptionsProvider = { requestOptions },
                 )
             }
         },
@@ -200,8 +205,12 @@ internal fun createTestConfirmationHandlerFactory(
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
                     paymentLauncherFactory = { launcher, _ ->
                         stripePaymentLauncherAssistedFactory.create(
-                            publishableKey = { paymentConfiguration.publishableKey },
-                            stripeAccountId = { paymentConfiguration.stripeAccountId },
+                            apiConfigurationProvider = {
+                                ApiConfiguration.State(
+                                    publishableKey = paymentConfiguration.publishableKey,
+                                    stripeAccountId = paymentConfiguration.stripeAccountId,
+                                )
+                            },
                             hostActivityLauncher = launcher,
                             statusBarColor = statusBarColor,
                             includePaymentSheetNextHandlers = true,

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.utils
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
@@ -118,6 +119,10 @@ internal object LinkTestUtils {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = linkBrand,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
     }
 }

@@ -11,6 +11,7 @@ import com.google.android.instantapps.InstantApps
 import com.stripe.android.R
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -318,7 +319,12 @@ internal class Stripe3ds2TransactionViewModelFactory(
             .create(
                 context = application,
                 enableLogging = args.enableLogging,
-                publishableKeyProvider = { args.publishableKey },
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.requestOptions.stripeAccount,
+                    )
+                },
                 productUsage = args.productUsage,
                 isInstantApp = InstantApps.isInstantApp(application),
             )

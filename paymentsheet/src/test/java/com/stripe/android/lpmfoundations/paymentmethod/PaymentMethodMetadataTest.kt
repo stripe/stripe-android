@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
@@ -1148,6 +1149,10 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1223,6 +1228,10 @@ internal class PaymentMethodMetadataTest {
             shouldUseAutocompleteProxyEndpoints = false,
             checkoutSessionResponse = null,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1285,6 +1294,10 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1324,6 +1337,10 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = true,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1384,6 +1401,10 @@ internal class PaymentMethodMetadataTest {
             shouldUseAutocompleteProxyEndpoints = false,
             checkoutSessionResponse = null,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2044,6 +2065,10 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
 
         assertThat(metadata.availableWallets)
@@ -2114,6 +2139,10 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2139,6 +2168,10 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2168,6 +2201,10 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2289,6 +2326,10 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
     }
 
@@ -2316,6 +2357,10 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
         )
     }
 
@@ -2363,6 +2408,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
         )
     }
 

@@ -5,6 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
@@ -101,6 +102,7 @@ internal data class PaymentMethodMetadata(
     val shouldUseAutocompleteProxyEndpoints: Boolean,
     val checkoutSessionResponse: CheckoutSessionResponse?,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+    val apiConfiguration: ApiConfiguration.State,
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
@@ -382,6 +384,7 @@ internal data class PaymentMethodMetadata(
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
             paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+            apiConfiguration: ApiConfiguration.State,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
@@ -447,6 +450,7 @@ internal data class PaymentMethodMetadata(
                     (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
                         ?.checkoutSessionResponse,
                 paymentMethodLayout = paymentMethodLayout,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -458,6 +462,7 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
+            apiConfiguration: ApiConfiguration.State,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -519,6 +524,7 @@ internal data class PaymentMethodMetadata(
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 checkoutSessionResponse = null,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                apiConfiguration = apiConfiguration,
             )
         }
     }

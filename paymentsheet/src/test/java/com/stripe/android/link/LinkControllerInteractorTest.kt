@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,6 +72,11 @@ class LinkControllerInteractorTest {
     // them so the scopes don't outlive the test.
     @get:Rule
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @Before
+    fun setup() {
+        PaymentConfiguration.init(application, "pk_test_123")
+    }
 
     @Test
     fun `Initial state is correct`() = runTest {
@@ -146,6 +152,7 @@ class LinkControllerInteractorTest {
                 publishableKey = "pk_123",
                 stripeAccountId = "acct_123"
             )
+        PaymentConfiguration.init(application, "pk_123", "acct_123")
         assertThat(interactor.configure(controllerConfig).isSuccess).isTrue()
         assertThat(linkComponent.configuration).isEqualTo(loadedConfiguration)
         val paymentConfiguration = PaymentConfiguration.getInstance(application)

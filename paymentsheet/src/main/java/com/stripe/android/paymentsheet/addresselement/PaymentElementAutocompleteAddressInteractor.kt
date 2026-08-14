@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 
 internal class PaymentElementAutocompleteAddressInteractor(
     private val launcher: AutocompleteLauncher,
+    private val publishableKeyProvider: () -> String,
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
 ) : AutocompleteAddressInteractor, AutocompleteLauncherResultHandler {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
@@ -20,6 +21,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
             launcher.launch(
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
+                publishableKey = publishableKeyProvider(),
                 resultHandler = this,
             )
         }
@@ -44,6 +46,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
 
     class Factory(
         private val launcher: AutocompleteLauncher,
+        private val publishableKeyProvider: () -> String,
         private val autocompleteConfig: AutocompleteAddressInteractor.Config,
         private val placesClient: PlacesClientProxy?,
         private val stripeAutocompleteRepository: StripeAutocompleteRepository?,
@@ -89,6 +92,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
             activeInlineInteractor = null
             return PaymentElementAutocompleteAddressInteractor(
                 launcher = launcher,
+                publishableKeyProvider = publishableKeyProvider,
                 autocompleteConfig = autocompleteConfig,
             )
         }

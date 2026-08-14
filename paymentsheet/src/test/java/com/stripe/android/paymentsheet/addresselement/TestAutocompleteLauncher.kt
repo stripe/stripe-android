@@ -21,12 +21,14 @@ internal class TestAutocompleteLauncher private constructor() : AutocompleteActi
     override fun launch(
         country: String,
         googlePlacesApiKey: String,
+        publishableKey: String,
         resultHandler: AutocompleteLauncherResultHandler,
     ) {
         launchCalls.add(
             LaunchCall(
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
+                publishableKey = publishableKey,
                 resultHandler = resultHandler,
             )
         )
@@ -35,6 +37,7 @@ internal class TestAutocompleteLauncher private constructor() : AutocompleteActi
     class LaunchCall(
         val country: String,
         val googlePlacesApiKey: String,
+        val publishableKey: String,
         val resultHandler: AutocompleteLauncherResultHandler,
     )
 
