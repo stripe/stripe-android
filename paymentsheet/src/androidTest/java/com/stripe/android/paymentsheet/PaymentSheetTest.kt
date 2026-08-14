@@ -462,7 +462,7 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.Card.code),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -809,7 +809,7 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.Card.code),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -960,8 +960,14 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-methods-get-success.json")
         }
 
-        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
-        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+        networkRule.setupV1PaymentMethodsResponse(
+            type = PaymentMethod.Type.USBankAccount.code,
+            applyDefaultAuthorization = false,
+        )
+        networkRule.setupV1PaymentMethodsResponse(
+            type = PaymentMethod.Type.SepaDebit.code,
+            applyDefaultAuthorization = false,
+        )
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(

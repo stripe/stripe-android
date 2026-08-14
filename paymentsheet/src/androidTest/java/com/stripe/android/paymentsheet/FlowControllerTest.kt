@@ -887,7 +887,7 @@ internal class FlowControllerTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.Card.code),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
@@ -957,7 +957,7 @@ internal class FlowControllerTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.Card.code),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }

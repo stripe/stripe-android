@@ -34,9 +34,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class LinkTest {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
-    private val networkRule = NetworkRule(
-        validationTimeout = 5.seconds,
-    )
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)
@@ -148,7 +146,7 @@ internal class LinkTest {
                 host("api.stripe.com"),
                 method("GET"),
                 path("/v1/payment_methods"),
-                query("type", PaymentMethod.Type.Card.code),
+                query("type", PaymentMethod.Type.Card.code)
             ) { response ->
                 response.testBodyFromFile("payment-methods-get-success-empty.json")
             }
@@ -432,7 +430,7 @@ internal class LinkTest {
                 host("api.stripe.com"),
                 method("GET"),
                 path("/v1/payment_methods"),
-                query("type", PaymentMethod.Type.Card.code),
+                query("type", PaymentMethod.Type.Card.code)
             ) { response ->
                 response.testBodyFromFile("payment-methods-get-success-empty.json")
             }

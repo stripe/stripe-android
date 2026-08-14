@@ -46,12 +46,13 @@ object RequestMatchers {
         return ToStringRequestMatcher("stripeApiKey") { request ->
             when (request.headers[ORIGINAL_HOST_HEADER]) {
                 API_HOST -> {
-                    val expectedKey = if (request.requiresEphemeralKey()) {
-                        ephemeralKey
+                    val authorization = request.headers[AUTHORIZATION_HEADER]
+                    if (request.requiresEphemeralKey()) {
+                        authorization == "Bearer $ephemeralKey"
                     } else {
-                        publishableKey
+                        authorization == "Bearer $publishableKey" ||
+                            authorization == "Bearer ${TestApiKeys.LIVE_PUBLISHABLE}"
                     }
-                    request.headers[AUTHORIZATION_HEADER] == "Bearer $expectedKey"
                 }
                 ANALYTICS_HOST -> {
                     request.headers[AUTHORIZATION_HEADER] == null &&
@@ -179,6 +180,7 @@ object RequestMatchers {
             pathWithoutQuery.startsWith(ELEMENTS_PAYMENT_METHODS_PATH) -> true
             pathWithoutQuery.startsWith(CUSTOMERS_PATH) -> true
             pathWithoutQuery.startsWith(ELEMENTS_CUSTOMERS_PATH) -> true
+            pathWithoutQuery == CONFIRMATION_TOKENS_PATH && bodyParams.containsKey(PAYMENT_METHOD_PARAM) -> true
             else -> false
         }
     }
@@ -192,4 +194,6 @@ object RequestMatchers {
     private const val ELEMENTS_PAYMENT_METHODS_PATH = "/v1/elements/payment_methods/"
     private const val CUSTOMERS_PATH = "/v1/customers/"
     private const val ELEMENTS_CUSTOMERS_PATH = "/v1/elements/customers/"
+    private const val CONFIRMATION_TOKENS_PATH = "/v1/confirmation_tokens"
+    private const val PAYMENT_METHOD_PARAM = "payment_method"
 }

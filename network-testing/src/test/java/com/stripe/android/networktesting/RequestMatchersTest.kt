@@ -19,6 +19,19 @@ class RequestMatchersTest {
     }
 
     @Test
+    fun `stripeApiKey matches live publishable key for API request`() {
+        val request = createRequest(
+            path = "/v1/payment_intents/pi_123",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.LIVE_PUBLISHABLE}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
     fun `stripeApiKey rejects missing authorization for API request`() {
         val request = createRequest(
             path = "/v1/payment_intents/pi_123",
@@ -89,6 +102,36 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches ephemeral key for confirmation token using saved payment method`() {
+        val request = createRequest(
+            path = "/v1/confirmation_tokens",
+            method = "POST",
+            body = "payment_method=pm_123",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches publishable key for confirmation token using new payment method`() {
+        val request = createRequest(
+            path = "/v1/confirmation_tokens",
+            method = "POST",
+            body = "payment_method_data%5Btype%5D=card",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
             ),
         )
 
@@ -273,11 +316,15 @@ class RequestMatchersTest {
         method: String = "GET",
         headers: Map<String, String> = emptyMap(),
     ): TestRecordedRequest {
-        val requestBuilder = MockRecordedRequestBuilder()
-            .path(path)
-            .body(body)
-            .method(method)
-        headers.forEach { (name, value) -> requestBuilder.header(name, value) }
-        return TestRecordedRequest(requestBuilder.build())
+        return TestRecordedRequest(
+            MockRecordedRequestBuilder()
+                .path(path)
+                .body(body)
+                .method(method)
+                .apply {
+                    headers.forEach { (name, value) -> header(name, value) }
+                }
+                .build()
+        )
     }
 }
