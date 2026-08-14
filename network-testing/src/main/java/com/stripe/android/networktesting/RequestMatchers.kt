@@ -128,6 +128,10 @@ object RequestMatchers {
         }
     }
 
+    fun analyticsPayloadField(key: String, value: String): RequestMatcher {
+        return query(key, value)
+    }
+
     fun method(method: String): RequestMatcher {
         return ToStringRequestMatcher("method($method)") { request ->
             request.method == method
