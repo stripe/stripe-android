@@ -113,7 +113,7 @@ class StripeAutocompleteRepositoryTest {
         val repository = DefaultStripeAutocompleteRepository(
             stripeNetworkClient = networkClient,
             apiRequestFactory = ApiRequest.Factory(),
-            publishableKeyProvider = { "pk_test_123" },
+            requestOptionsProvider = { ApiRequest.Options(apiKey = "pk_test_123") },
         )
         return Scenario(networkClient = networkClient, repository = repository)
     }

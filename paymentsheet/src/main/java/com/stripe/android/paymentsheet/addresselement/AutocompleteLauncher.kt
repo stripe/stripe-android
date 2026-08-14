@@ -27,6 +27,7 @@ internal interface AutocompleteLauncher {
     fun launch(
         country: String,
         googlePlacesApiKey: String,
+        publishableKey: String,
         resultHandler: AutocompleteLauncherResultHandler
     )
 
@@ -175,6 +176,7 @@ internal class DefaultAutocompleteLauncher(
     override fun launch(
         country: String,
         googlePlacesApiKey: String,
+        publishableKey: String,
         resultHandler: AutocompleteLauncherResultHandler
     ) {
         val id = UUID.randomUUID().toString()
@@ -186,6 +188,7 @@ internal class DefaultAutocompleteLauncher(
                 id = id,
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
+                publishableKey = publishableKey,
                 appearanceContext = appearanceContext,
             )
         )

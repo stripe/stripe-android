@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.signup
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -118,6 +119,7 @@ class SignUpScreenStateTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
         )
     }
 

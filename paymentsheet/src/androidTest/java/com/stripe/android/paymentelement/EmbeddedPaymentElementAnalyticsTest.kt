@@ -59,7 +59,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
     @Before
     fun before() {
-        validateAnalyticsRequest(eventName = "mc_embedded_init")
+         validateAnalyticsRequest(eventName = "mc_embedded_init")
     }
 
     @Test

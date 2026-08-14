@@ -15,11 +15,10 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -43,6 +42,7 @@ import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -126,6 +126,7 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
         PaymentElementConfirmationModule::class,
         PaymentElementConfirmationTestModule::class,
         GooglePayLauncherModule::class,
+        ApiRequestOptionsModule::class,
     ]
 )
 @Singleton
@@ -212,12 +213,17 @@ internal interface PaymentElementConfirmationTestModule {
         )
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providesPublishableKey(config: PaymentConfiguration): () -> String = { config.publishableKey }
+        fun providesApiConfigurationState(config: PaymentConfiguration): ApiConfiguration.State {
+            return ApiConfiguration.State(
+                publishableKey = config.publishableKey,
+                stripeAccountId = config.stripeAccountId,
+            )
+        }
 
         @Provides
-        @Named(STRIPE_ACCOUNT_ID)
-        fun providesStripeAccountId(config: PaymentConfiguration): () -> String? = { config.stripeAccountId }
+        fun providesApiConfigurationStateProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiConfiguration.State = { state }
 
         @Provides
         @Singleton

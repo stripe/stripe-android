@@ -205,6 +205,9 @@ internal class PaymentMethodViewModel @Inject constructor(
                             autocompleteAddressInteractorFactory =
                                 PaymentElementAutocompleteAddressInteractor.Factory(
                                     launcher = parentComponent.autocompleteLauncher,
+                                    publishableKeyProvider = {
+                                        parentComponent.paymentMethodMetadata.apiConfiguration.publishableKey
+                                    },
                                     autocompleteConfig = AutocompleteAddressInteractor.Config(
                                         googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
                                         autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,

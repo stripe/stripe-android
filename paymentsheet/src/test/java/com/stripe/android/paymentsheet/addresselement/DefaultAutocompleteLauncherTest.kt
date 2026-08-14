@@ -46,7 +46,7 @@ class DefaultAutocompleteLauncherTest {
     fun `launch does nothing when not registered`() = runTest {
         val launcher = createLauncher()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             error("Should not be called!")
         }
     }
@@ -60,7 +60,7 @@ class DefaultAutocompleteLauncherTest {
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             error("Should not be called!")
         }
 
@@ -86,11 +86,11 @@ class DefaultAutocompleteLauncherTest {
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             error("Should not be called!")
         }
 
-        launcher.launch(country = "CA", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "CA", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             error("Should not be called!")
         }
 
@@ -131,7 +131,7 @@ class DefaultAutocompleteLauncherTest {
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             error("Should not be called!")
         }
 
@@ -154,7 +154,7 @@ class DefaultAutocompleteLauncherTest {
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             error("Should not be called!")
         }
 
@@ -181,7 +181,7 @@ class DefaultAutocompleteLauncherTest {
         assertThat(registerCall.contract).isEqualTo(AutocompleteContract)
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             capturedResult = it
         }
 
@@ -218,7 +218,7 @@ class DefaultAutocompleteLauncherTest {
         assertThat(registerCall.contract).isEqualTo(AutocompleteContract)
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             capturedResult = it
         }
 
@@ -254,7 +254,7 @@ class DefaultAutocompleteLauncherTest {
         assertThat(registerCall.contract).isEqualTo(AutocompleteContract)
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             callbackCalledCount++
         }
 
@@ -326,11 +326,11 @@ class DefaultAutocompleteLauncherTest {
         assertThat(registerCall.contract).isEqualTo(AutocompleteContract)
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             firstReceivedResult = it
         }
 
-        launcher.launch(country = "CA", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(country = "CA", googlePlacesApiKey = "test-api-key", publishableKey = "pk_test_123") {
             secondReceivedResult = it
         }
 

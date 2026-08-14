@@ -46,7 +46,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     context: Context,
     private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptionsProvider: () -> ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
     private val returnUrl: String = DefaultReturnUrl.create(context).value
@@ -60,7 +60,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = confirmationOption.createParams,
-            options = requestOptions,
+            options = requestOptionsProvider(),
         ).fold(
             onSuccess = { paymentMethod ->
                 val params = createConfirmParams(
