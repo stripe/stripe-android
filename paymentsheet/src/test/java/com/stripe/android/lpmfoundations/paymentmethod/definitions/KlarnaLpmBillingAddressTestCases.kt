@@ -90,20 +90,32 @@ internal val klarnaTestCases = listOf(
         paymentMethodType = PaymentMethod.Type.Klarna,
         mode = LpmBillingAddressBaselineMode.Never,
         rawValues = klarnaFullRawValues,
-        expectedPaymentMethodParams = klarnaCountryOnlyExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = klarnaCountryOnlyExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Klarna Automatic without tax",
         paymentMethodType = PaymentMethod.Type.Klarna,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
         rawValues = klarnaFullRawValues,
-        expectedPaymentMethodParams = klarnaWithEmailAndCountryExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = klarnaWithEmailAndCountryExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Klarna Full",
         paymentMethodType = PaymentMethod.Type.Klarna,
         mode = LpmBillingAddressBaselineMode.Full,
         rawValues = klarnaFullRawValues,
-        expectedPaymentMethodParams = klarnaWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = klarnaWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
 )

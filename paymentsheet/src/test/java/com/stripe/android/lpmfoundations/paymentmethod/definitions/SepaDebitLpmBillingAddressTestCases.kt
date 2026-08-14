@@ -4,6 +4,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val sepaDebitNoBillingAddressRawValues = mapOf(
@@ -74,20 +76,32 @@ internal val sepaDebitTestCases = listOf(
         paymentMethodType = PaymentMethod.Type.SepaDebit,
         mode = LpmBillingAddressBaselineMode.Never,
         rawValues = sepaDebitNoBillingAddressRawValues,
-        expectedPaymentMethodParams = sepaDebitNoBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = sepaDebitNoBillingAddressExpectedPaymentMethodParams,
+            optionsParams = PaymentMethodOptionsParams.SepaDebit(null),
+            extraParams = PaymentMethodExtraParams.SepaDebit(null),
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "SEPA Debit Automatic without tax",
         paymentMethodType = PaymentMethod.Type.SepaDebit,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
         rawValues = sepaDebitWithBillingAddressRawValues,
-        expectedPaymentMethodParams = sepaDebitWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = sepaDebitWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = PaymentMethodOptionsParams.SepaDebit(null),
+            extraParams = PaymentMethodExtraParams.SepaDebit(null),
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "SEPA Debit Full",
         paymentMethodType = PaymentMethod.Type.SepaDebit,
         mode = LpmBillingAddressBaselineMode.Full,
         rawValues = sepaDebitWithBillingAddressRawValues,
-        expectedPaymentMethodParams = sepaDebitWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = sepaDebitWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = PaymentMethodOptionsParams.SepaDebit(null),
+            extraParams = PaymentMethodExtraParams.SepaDebit(null),
+        ),
     ),
 )

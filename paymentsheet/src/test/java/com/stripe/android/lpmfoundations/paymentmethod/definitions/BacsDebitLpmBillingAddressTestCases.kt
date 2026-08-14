@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val bacsDebitFullRawValues = mapOf(
@@ -78,20 +79,32 @@ internal val bacsDebitTestCases = listOf(
         paymentMethodType = PaymentMethod.Type.BacsDebit,
         mode = LpmBillingAddressBaselineMode.Never,
         rawValues = bacsDebitFullRawValues,
-        expectedPaymentMethodParams = bacsDebitBankDetailsExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = bacsDebitBankDetailsExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.BacsDebit(confirmed = true),
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Bacs Debit Automatic without tax",
         paymentMethodType = PaymentMethod.Type.BacsDebit,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
         rawValues = bacsDebitFullRawValues,
-        expectedPaymentMethodParams = bacsDebitWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = bacsDebitWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.BacsDebit(confirmed = true),
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Bacs Debit Full",
         paymentMethodType = PaymentMethod.Type.BacsDebit,
         mode = LpmBillingAddressBaselineMode.Full,
         rawValues = bacsDebitFullRawValues,
-        expectedPaymentMethodParams = bacsDebitWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = bacsDebitWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.BacsDebit(confirmed = true),
+        ),
     ),
 )

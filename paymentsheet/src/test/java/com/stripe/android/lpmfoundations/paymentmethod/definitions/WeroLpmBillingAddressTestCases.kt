@@ -69,20 +69,32 @@ internal val weroTestCases = listOf(
         paymentMethodType = PaymentMethod.Type.Wero,
         mode = LpmBillingAddressBaselineMode.Never,
         rawValues = weroCountryOnlyRawValues,
-        expectedPaymentMethodParams = weroCountryOnlyExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = weroCountryOnlyExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Wero Automatic without tax",
         paymentMethodType = PaymentMethod.Type.Wero,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
         rawValues = weroCountryOnlyRawValues,
-        expectedPaymentMethodParams = weroCountryOnlyExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = weroCountryOnlyExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Wero Full",
         paymentMethodType = PaymentMethod.Type.Wero,
         mode = LpmBillingAddressBaselineMode.Full,
         rawValues = weroWithBillingAddressRawValues,
-        expectedPaymentMethodParams = weroWithBillingAddressExpectedPaymentParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = weroWithBillingAddressExpectedPaymentParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
 )
