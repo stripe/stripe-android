@@ -10,6 +10,7 @@ internal class FakeConfirmationHandler(
     override val hasReloadedFromProcessDeath: Boolean = false,
     override val state: MutableStateFlow<ConfirmationHandler.State> = MutableStateFlow(ConfirmationHandler.State.Idle),
     private val startError: Throwable? = null,
+    private val awaitResultError: Throwable? = null,
 ) : ConfirmationHandler {
     val registerTurbine: Turbine<RegisterCall> = Turbine()
     val startTurbine: Turbine<ConfirmationHandler.Args> = Turbine()
@@ -35,6 +36,7 @@ internal class FakeConfirmationHandler(
     }
 
     override suspend fun awaitResult(): ConfirmationHandler.Result? {
+        awaitResultError?.let { throw it }
         return awaitResultTurbine.awaitItem()
     }
 

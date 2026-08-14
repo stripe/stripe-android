@@ -50,19 +50,21 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         } ?: return
 
         viewModelScope.launch {
-            try {
+            val result = try {
                 confirmationHandler.start(operation.arguments)
-
-                when (val result = confirmationHandler.awaitResult()) {
-                    is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
-                    is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
-                    is ConfirmationHandler.Result.Canceled,
-                    null -> Unit
-                }
+                confirmationHandler.awaitResult()
             } catch (error: CancellationException) {
                 throw error
             } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
                 operationCoordinator.failConfirmation(operation, error)
+                return@launch
+            }
+
+            when (result) {
+                is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
+                is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
+                is ConfirmationHandler.Result.Canceled,
+                null -> Unit
             }
         }
     }
