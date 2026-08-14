@@ -6,7 +6,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -75,7 +74,6 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
             configuration = configuration.asCommonConfiguration(),
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-            googlePayDisplayItems = GooglePayDisplayItemsFactory.create(paymentMethodMetadata),
             googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                 configuration = configuration.asCommonConfiguration(),
                 paymentMethodMetadata = paymentMethodMetadata,

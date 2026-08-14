@@ -41,7 +41,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -561,7 +560,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
                 cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-                googlePayDisplayItems = GooglePayDisplayItemsFactory.create(state.paymentMethodMetadata),
                 googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                     configuration = state.config,
                     paymentMethodMetadata = state.paymentMethodMetadata,

@@ -11,7 +11,6 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItem
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -20,7 +19,6 @@ internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
     cardFundingFilter: CardFundingFilter,
-    googlePayDisplayItems: List<GooglePayDisplayItem> = emptyList(),
     googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
     googlePayBillingEmailOverride: String? = null,
     googlePayShippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,
@@ -35,7 +33,6 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.GooglePay -> toConfirmationOption(
             configuration,
             cardFundingFilter,
-            googlePayDisplayItems,
             isEmailRequired = googlePayIsEmailRequired,
             billingEmailOverride = googlePayBillingEmailOverride,
             shippingAddressParameters = googlePayShippingAddressParameters,
@@ -132,7 +129,6 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
     cardFundingFilter: CardFundingFilter,
-    displayItems: List<GooglePayDisplayItem>,
     isEmailRequired: Boolean,
     billingEmailOverride: String?,
     shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
@@ -150,7 +146,6 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 additionalEnabledNetworks = googlePay.additionalEnabledNetworks,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 cardFundingFilter = cardFundingFilter,
-                displayItems = displayItems,
                 isEmailRequired = isEmailRequired,
                 billingEmailOverride = billingEmailOverride,
                 shippingAddressParameters = shippingAddressParameters,
