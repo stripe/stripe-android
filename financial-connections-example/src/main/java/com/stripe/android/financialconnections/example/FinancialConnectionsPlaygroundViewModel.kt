@@ -33,6 +33,7 @@ import com.stripe.android.financialconnections.example.settings.FlowSetting
 import com.stripe.android.financialconnections.example.settings.ForceOnelinkConsumerSetting
 import com.stripe.android.financialconnections.example.settings.ForceOnelinkSetting
 import com.stripe.android.financialconnections.example.settings.IntegrationTypeSetting
+import com.stripe.android.financialconnections.example.settings.LinkDs3Setting
 import com.stripe.android.financialconnections.example.settings.ManualConsentCollectedAtSetting
 import com.stripe.android.financialconnections.example.settings.ManualConsentIdSetting
 import com.stripe.android.financialconnections.example.settings.MerchantSetting
@@ -624,6 +625,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
         )
         FeatureFlags.forceOnelinkConsumer.setEnabled(
             playgroundSettings.get<ForceOnelinkConsumerSetting>().selectedOption
+        )
+        FeatureFlags.financialConnectionsLinkDs3.setEnabled(
+            playgroundSettings.get<LinkDs3Setting>().selectedOption
         )
     }
 

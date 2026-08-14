@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections
 
 import android.os.Bundle
 import androidx.annotation.StringRes
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
@@ -11,6 +12,7 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.ui.theme.Theme.Default
 import com.stripe.android.financialconnections.ui.theme.Theme.Link
+import com.stripe.android.financialconnections.ui.theme.Theme.LinkDs3
 
 /**
  *  Class containing all of the data needed to represent the screen.
@@ -27,10 +29,10 @@ internal data class FinancialConnectionsSheetState(
 
     val theme: Theme
         // We can't rely on the value coming from the `manifest` here, because its initial value will be null
-        get() = if (isInstantDebits) {
-            Link(initialArgs.configuration.themeMode)
-        } else {
-            Default(initialArgs.configuration.themeMode)
+        get() = when {
+            isInstantDebits.not() -> Default(initialArgs.configuration.themeMode)
+            FeatureFlags.financialConnectionsLinkDs3.isEnabled -> LinkDs3(initialArgs.configuration.themeMode)
+            else -> Link(initialArgs.configuration.themeMode)
         }
 
     val sessionSecret: String
