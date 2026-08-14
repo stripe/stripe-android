@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
@@ -79,6 +80,22 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
     }
 
+    @Test
+    fun `confirm delivers failure when confirmation start throws`() {
+        val expected = IllegalStateException("Start failed")
+        runScenario(
+            state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+            startError = expected,
+        ) {
+            performer.confirm()
+
+            confirmationHandler.startTurbine.awaitItem()
+            val result = resultTurbine.awaitItem()
+            assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
+            assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
+        }
+    }
+
     private fun googlePayState(
         paymentSelection: PaymentSelection?,
     ): CheckoutControllerState {
@@ -94,9 +111,11 @@ internal class CheckoutConfirmationPerformerTest {
     private fun runScenario(
         state: CheckoutControllerState?,
         statusBarColor: Int? = null,
+        startError: Throwable? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
+        val confirmationHandler = FakeConfirmationHandler(startError = startError)
+        val resultTurbine = Turbine<CheckoutController.Result>()
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
@@ -106,7 +125,7 @@ internal class CheckoutConfirmationPerformerTest {
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
-            resultCallback = {},
+            resultCallback = CheckoutController.ResultCallback(resultTurbine::add),
         )
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
@@ -120,16 +139,19 @@ internal class CheckoutConfirmationPerformerTest {
             performer = performer,
             confirmationHandler = confirmationHandler,
             stateHolder = stateHolder,
+            resultTurbine = resultTurbine,
         ).block()
 
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
+        resultTurbine.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val stateHolder: CheckoutControllerStateHolder,
+        val resultTurbine: Turbine<CheckoutController.Result>,
     )
 
     private companion object {

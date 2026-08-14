@@ -31,7 +31,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : ExpressCheckoutElementConfirmationPerformer {
     override fun confirm(expressButton: ExpressButton) {
-        val confirmationArgs = operationCoordinator.tryBeginConfirmation {
+        val operation = operationCoordinator.tryBeginConfirmation {
             val state = stateHolder.state ?: run {
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
@@ -51,7 +51,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
 
         viewModelScope.launch {
             try {
-                confirmationHandler.start(confirmationArgs)
+                confirmationHandler.start(operation.arguments)
 
                 when (val result = confirmationHandler.awaitResult()) {
                     is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
@@ -62,7 +62,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             } catch (error: CancellationException) {
                 throw error
             } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
-                operationCoordinator.failConfirmation(error)
+                operationCoordinator.failConfirmation(operation, error)
             }
         }
     }

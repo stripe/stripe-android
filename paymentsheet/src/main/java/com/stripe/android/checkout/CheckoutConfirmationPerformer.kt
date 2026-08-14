@@ -20,14 +20,14 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     fun confirm() {
-        val arguments = operationCoordinator.tryBeginConfirmation(::confirmationArgs) ?: return
+        val operation = operationCoordinator.tryBeginConfirmation(::confirmationArgs) ?: return
         viewModelScope.launch {
             try {
-                confirmationHandler.start(arguments)
+                confirmationHandler.start(operation.arguments)
             } catch (error: CancellationException) {
                 throw error
             } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
-                operationCoordinator.failConfirmation(error)
+                operationCoordinator.failConfirmation(operation, error)
             }
         }
     }
