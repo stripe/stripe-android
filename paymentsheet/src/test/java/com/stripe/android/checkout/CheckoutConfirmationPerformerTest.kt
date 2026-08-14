@@ -3,14 +3,19 @@ package com.stripe.android.checkout
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -79,6 +84,42 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
     }
 
+    @Test
+    fun `confirm reports payment success when confirmation succeeds`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+    ) {
+        confirmationHandler.awaitResultTurbine.add(
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+
+        performer.confirm()
+
+        confirmationHandler.startTurbine.awaitItem()
+        val call = eventReporter.paymentSuccessCalls.awaitItem()
+        assertThat(call.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(call.intentId).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED.id)
+    }
+
+    @Test
+    fun `confirm reports payment failure when confirmation fails`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+    ) {
+        confirmationHandler.awaitResultTurbine.add(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("Payment failed"),
+                message = "Payment failed".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        )
+
+        performer.confirm()
+
+        confirmationHandler.startTurbine.awaitItem()
+        val call = eventReporter.paymentFailureCalls.awaitItem()
+        assertThat(call.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(call.error).isInstanceOf<PaymentSheetConfirmationError.Stripe>()
+    }
+
     private fun googlePayState(
         paymentSelection: PaymentSelection?,
     ): CheckoutControllerState {
@@ -97,6 +138,7 @@ internal class CheckoutConfirmationPerformerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
+        val eventReporter = FakeEventReporter()
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
@@ -112,6 +154,7 @@ internal class CheckoutConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             stateHolder = stateHolder,
             operationCoordinator = operationCoordinator,
+            eventReporter = eventReporter,
             statusBarColor = statusBarColor,
             viewModelScope = backgroundScope,
         )
@@ -119,16 +162,19 @@ internal class CheckoutConfirmationPerformerTest {
         Scenario(
             performer = performer,
             confirmationHandler = confirmationHandler,
+            eventReporter = eventReporter,
             stateHolder = stateHolder,
         ).block()
 
         confirmationHandler.validate()
+        eventReporter.validate()
         sessionRefresher.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
+        val eventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
     )
 

@@ -6,6 +6,8 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmail
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -16,14 +18,19 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val stateHolder: CheckoutControllerStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
+    private val eventReporter: EventReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     fun confirm() {
         val arguments = operationCoordinator.tryBeginConfirmation(::confirmationArgs) ?: return
+        val paymentSelection = stateHolder.state?.paymentSelection
         viewModelScope.launch {
             try {
                 confirmationHandler.start(arguments)
+                confirmationHandler.awaitResult()?.let { result ->
+                    eventReporter.reportPaymentResult(result, paymentSelection)
+                }
             } catch (error: CancellationException) {
                 throw error
             } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
