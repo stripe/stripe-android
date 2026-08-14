@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -38,9 +39,10 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Test
     fun `confirm does nothing when the selection cannot be converted to a confirmation option`() = runScenario(
-        // Google Pay is selected but the configuration has no Google Pay set, so toConfirmationOption
+        // Google Pay is selected but the checkout session has no merchant country, so toConfirmationOption
         // returns null and there is nothing to confirm.
         state = CheckoutControllerStateFactory.create(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
             paymentSelection = PaymentSelection.GooglePay,
         ),
     ) {
@@ -85,7 +87,7 @@ internal class CheckoutConfirmationPerformerTest {
         return CheckoutControllerStateFactory.create(
             paymentSelection = paymentSelection,
             configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
+                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
                 .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
         )

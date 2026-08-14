@@ -13,8 +13,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.checkout.GooglePayConfiguration
-import com.stripe.android.checkout.GooglePayConfiguration.Environment
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,10 +69,11 @@ internal class CheckoutControllerExampleViewModel(
                 controller.configure(
                     clientSecret = clientSecret,
                     configuration = CheckoutController.Configuration()
-                        .googlePayConfiguration(
-                            GooglePayConfiguration(
-                                environment = Environment.Test
-                            )
+                        .expressCheckoutElement(
+                            ExpressCheckoutElement.Configuration()
+                                .googlePayConfiguration(
+                                    ExpressCheckoutElement.Configuration.GooglePayConfiguration()
+                                )
                         )
                 ).fold(
                     onSuccess = {

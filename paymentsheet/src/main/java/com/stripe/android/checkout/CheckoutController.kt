@@ -812,7 +812,6 @@ class CheckoutController @Inject internal constructor(
         private var adaptivePricing: AdaptivePricing = AdaptivePricing()
         private var apiConfiguration: ApiConfiguration? = null
         private var merchantDisplayName: String? = null
-        private var googlePayConfiguration: GooglePayConfiguration? = null
         private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var defaults: Defaults = Defaults()
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
@@ -890,15 +889,6 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
-         * Sets the Google Pay configuration for this checkout session.
-         */
-        fun googlePayConfiguration(
-            configuration: GooglePayConfiguration,
-        ): Configuration = apply {
-            this.googlePayConfiguration = configuration
-        }
-
-        /**
          * Sets the Link configuration for this checkout session.
          */
         fun linkConfiguration(
@@ -922,7 +912,6 @@ class CheckoutController @Inject internal constructor(
             val adaptivePricingAllowed: Boolean,
             val apiConfiguration: ApiConfiguration.State?,
             val merchantDisplayName: String?,
-            val googlePayConfiguration: GooglePayConfiguration.State?,
             val linkConfiguration: LinkConfiguration.State,
             val defaults: Defaults.State,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
@@ -941,7 +930,6 @@ class CheckoutController @Inject internal constructor(
                 currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
                 shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
                 expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
-                googlePayConfiguration = googlePayConfiguration?.build(),
                 linkConfiguration = linkConfiguration.build(),
                 defaults = defaultsState,
             )
