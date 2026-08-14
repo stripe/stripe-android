@@ -11,6 +11,8 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItems
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -25,7 +27,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     private val stateHolder: CheckoutControllerStateHolder,
     private val confirmationHandler: ConfirmationHandler,
     private val operationCoordinator: CheckoutOperationCoordinator,
-    private val eventReporter: ExpressCheckoutElementEventReporter,
+    private val eceEventReporter: ExpressCheckoutElementEventReporter,
+    private val eventReporter: EventReporter,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -53,9 +56,14 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             try {
                 confirmationHandler.start(confirmationArgs)
 
-                when (val result = confirmationHandler.awaitResult()) {
-                    is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
-                    is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
+                val result = confirmationHandler.awaitResult()
+                result?.let {
+                    eventReporter.reportPaymentResult(it, expressButton.toSelection())
+                }
+
+                when (result) {
+                    is ConfirmationHandler.Result.Succeeded -> eceEventReporter.onEcePaymentSuccess(expressButton)
+                    is ConfirmationHandler.Result.Failed -> eceEventReporter.onEcePaymentFailure(expressButton, result)
                     is ConfirmationHandler.Result.Canceled,
                     null -> Unit
                 }
