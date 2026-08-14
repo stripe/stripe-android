@@ -24,6 +24,7 @@ class CardScanDemoActivity : AppCompatActivity() {
                     elementsSessionId = null,
                     enableMlKitTextRecognition = viewBinding.enableMlKitCheckbox.isChecked,
                     disableSsdOcr = viewBinding.disableSsdOcrCheckbox.isChecked,
+                    publishableKey = "pk_123"
                 )
             )
         }
