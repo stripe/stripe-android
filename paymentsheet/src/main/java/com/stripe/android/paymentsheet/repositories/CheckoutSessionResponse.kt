@@ -129,7 +129,6 @@ internal data class CheckoutSessionResponse(
         OPEN,
         COMPLETE,
         EXPIRED,
-        UNKNOWN,
     }
 
     enum class TaxStatus {

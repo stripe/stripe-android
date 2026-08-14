@@ -426,26 +426,39 @@ class CheckoutController @Inject internal constructor(
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        enum class Status {
+        sealed class Status {
             /**
              * The checkout session is still in progress. Payment processing has not started.
              */
-            Open,
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Open internal constructor() : Status() {
+                override fun equals(other: Any?): Boolean = other is Open
+
+                override fun hashCode(): Int = Open::class.hashCode()
+            }
 
             /**
              * The checkout session is complete. Payment processing may still be in progress.
              */
-            Complete,
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Complete internal constructor() : Status() {
+                override fun equals(other: Any?): Boolean = other is Complete
+
+                override fun hashCode(): Int = Complete::class.hashCode()
+            }
 
             /**
              * The checkout session has expired. No further processing will occur.
              */
-            Expired,
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Expired internal constructor() : Status() {
+                override fun equals(other: Any?): Boolean = other is Expired
 
-            /**
-             * A status not recognized by this version of the SDK.
-             */
-            Unknown,
+                override fun hashCode(): Int = Expired::class.hashCode()
+            }
         }
 
         /**
