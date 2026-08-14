@@ -80,34 +80,17 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     fun tryBeginConfirmation(
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
-        val admission = synchronized(admissionLock) {
-            when {
-                sheetStateHolder.sheetIsOpen -> ConfirmationAdmission.Rejected(
-                    IllegalStateException("Cannot confirm checkout session while a payment flow is presented.")
-                )
-                pendingMutations > 0 || confirmationInFlight -> ConfirmationAdmission.Rejected(
-                    IllegalStateException("Cannot confirm checkout session while another mutation is in progress.")
-                )
-                else -> {
-                    val confirmationArguments = arguments()
-                        ?: return@synchronized ConfirmationAdmission.NoArguments
-                    check(mutex.tryLock()) {
-                        "Checkout operation gate should be available after confirmation admission."
-                    }
-                    confirmationInFlight = true
-                    updateIsUpdating()
-                    ConfirmationAdmission.Accepted(confirmationArguments)
-                }
+        return synchronized(admissionLock) {
+            if (sheetStateHolder.sheetIsOpen || pendingMutations > 0 || confirmationInFlight) {
+                return@synchronized null
             }
-        }
-
-        return when (admission) {
-            is ConfirmationAdmission.Accepted -> admission.arguments
-            is ConfirmationAdmission.Rejected -> {
-                resultCallback.onResult(CheckoutController.Result.Failed(admission.error))
-                null
+            val confirmationArguments = arguments() ?: return@synchronized null
+            check(mutex.tryLock()) {
+                "Checkout operation gate should be available after confirmation admission."
             }
-            is ConfirmationAdmission.NoArguments -> null
+            confirmationInFlight = true
+            updateIsUpdating()
+            confirmationArguments
         }
     }
 
@@ -172,11 +155,6 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         _isUpdating.value = confirmationInFlight || pendingMutations > 0
     }
 
-    private sealed interface ConfirmationAdmission {
-        data class Accepted(val arguments: ConfirmationHandler.Args) : ConfirmationAdmission
-        data class Rejected(val error: Throwable) : ConfirmationAdmission
-        data object NoArguments : ConfirmationAdmission
-    }
 }
 
 private fun ConfirmationHandler.Result.asCheckoutResult(): CheckoutController.Result {

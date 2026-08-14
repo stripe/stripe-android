@@ -215,22 +215,18 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `confirmation returns failure when a payment flow is presented`() = runScenario(
+    fun `confirmation is ignored when a payment flow is presented`() = runScenario(
         sheetIsOpen = true,
     ) {
         val arguments = coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
         assertThat(arguments).isNull()
-        val result = resultTurbine.awaitItem()
-        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        val failure = result as CheckoutController.Result.Failed
-        assertThat(failure.error).hasMessageThat()
-            .isEqualTo("Cannot confirm checkout session while a payment flow is presented.")
+        resultTurbine.expectNoEvents()
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
     @Test
-    fun `confirmation returns failure while a mutation is in flight`() = runScenario {
+    fun `confirmation is ignored while a mutation is in flight`() = runScenario {
         val mutationStarted = CompletableDeferred<Unit>()
         val finishMutation = CompletableDeferred<Unit>()
         val mutation = async {
@@ -245,28 +241,25 @@ internal class CheckoutOperationCoordinatorTest {
         val arguments = coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
         assertThat(arguments).isNull()
-        val result = resultTurbine.awaitItem()
-        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        val failure = result as CheckoutController.Result.Failed
-        assertThat(failure.error).hasMessageThat()
-            .isEqualTo("Cannot confirm checkout session while another mutation is in progress.")
+        resultTurbine.expectNoEvents()
 
         finishMutation.complete(Unit)
         mutation.await()
     }
 
     @Test
-    fun `second confirmation returns failure while confirmation is in flight`() = runScenario {
+    fun `second confirmation is ignored while confirmation is in flight`() = runScenario {
         assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNotNull()
 
         val arguments = coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
         assertThat(arguments).isNull()
-        val result = resultTurbine.awaitItem()
-        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        val failure = result as CheckoutController.Result.Failed
-        assertThat(failure.error).hasMessageThat()
-            .isEqualTo("Cannot confirm checkout session while another mutation is in progress.")
+        resultTurbine.expectNoEvents()
+
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
     }
 
     @Test
