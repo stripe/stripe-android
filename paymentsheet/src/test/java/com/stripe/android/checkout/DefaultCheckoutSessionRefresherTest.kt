@@ -14,6 +14,16 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultCheckoutSessionRefresherTest {
 
     @Test
+    fun `refresh with response commits it without fetching`() = runScenario {
+        val response = CheckoutSessionResponseFactory.create(id = "cs_confirmed")
+
+        refresher.refresh(response)
+
+        assertThat(refreshActions.reloadCalls.awaitItem())
+            .isEqualTo(initialState.copy(checkoutSessionResponse = response))
+    }
+
+    @Test
     fun `refresh without response fetches and commits latest session`() = runScenario {
         val response = CheckoutSessionResponseFactory.create(id = "cs_fetched")
         val stateAtCommit = initialState.copy(temporarySelection = "card")

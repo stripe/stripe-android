@@ -4,6 +4,7 @@ package com.stripe.android.checkout
 
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -117,8 +118,14 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
                 completeConfirmation { wasRestored ->
-                    if (state.result !is ConfirmationHandler.Result.Succeeded) {
-                        refreshSession()
+                    when (val result = state.result) {
+                        is ConfirmationHandler.Result.Succeeded -> {
+                            result.metadata[CheckoutSessionResponseKey]?.let { response ->
+                                refreshSession { sessionRefresher.refresh(response) }
+                            }
+                        }
+
+                        else -> refreshSession { sessionRefresher.refresh() }
                     }
                     state.result.asCheckoutResult(wasRestored)
                 }
@@ -128,7 +135,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 
     suspend fun failConfirmation(error: Throwable) {
         completeConfirmation {
-            refreshSession()
+            refreshSession { sessionRefresher.refresh() }
             CheckoutController.Result.Failed(error)
         }
     }
@@ -162,9 +169,9 @@ internal class CheckoutOperationCoordinator @Inject constructor(
      * The refreshed state has to be committed before the result reaches the integrator, but a failed
      * refresh must not replace the confirmation result the integrator is waiting on.
      */
-    private suspend fun refreshSession() {
+    private suspend fun refreshSession(refresh: suspend () -> Unit) {
         try {
-            sessionRefresher.refresh()
+            refresh()
         } catch (error: CancellationException) {
             throw error
         } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
