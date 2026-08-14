@@ -83,14 +83,14 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Loads the Checkout Session identified by [checkoutSessionClientSecret] and prepares the
+     * Loads the Checkout Session identified by [clientSecret] and prepares the
      * payment UI, populating [session] on success.
      *
-     * @param checkoutSessionClientSecret The client secret of the Checkout Session to load.
+     * @param clientSecret The client secret of the Checkout Session to load.
      * @param configuration Options controlling how the checkout is configured and displayed.
      */
     suspend fun configure(
-        checkoutSessionClientSecret: String,
+        clientSecret: String,
         configuration: Configuration = Configuration(),
     ): kotlin.Result<Unit> {
         // A re-configure while a payment flow is presented would reload the session out from under
@@ -100,7 +100,7 @@ class CheckoutController @Inject internal constructor(
         }
         return operationCoordinator.runMutation {
             val configurationState = configuration.build()
-            val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
+            val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
                 sessionId = sessionId,
