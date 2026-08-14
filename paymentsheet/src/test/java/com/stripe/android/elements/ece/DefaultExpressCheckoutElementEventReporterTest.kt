@@ -34,7 +34,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             "ece_config",
             mapOf(
                 "link_visibility" to "auto",
-                "google_pay_visibility" to "auto",
+                "google_pay_visibility" to true,
             ),
         )
         assertThat(
@@ -42,6 +42,26 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 FakeDurationProvider.Call.Start(DurationProvider.Key.ExpressCheckoutElement, true)
             )
         ).isTrue()
+    }
+
+    @Test
+    fun `onEceDisplayed reports google pay as not visible when disabled`() = runScenario(
+        expressCheckoutElementConfiguration = ExpressCheckoutElement.Configuration()
+            .googlePayConfiguration(
+                ExpressCheckoutElement.Configuration.GooglePayConfiguration()
+                    .display(ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never)
+            ),
+    ) {
+        reporter.onEceDisplayed()
+
+        val loggedParams = executor.getExecutedRequests().single().params
+        assertThat(loggedParams).containsEntry(
+            "ece_config",
+            mapOf(
+                "link_visibility" to "auto",
+                "google_pay_visibility" to false,
+            ),
+        )
     }
 
     @Test
@@ -119,6 +139,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
     )
 
     private fun runScenario(
+        expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration =
+            ExpressCheckoutElement.Configuration(),
         block: Scenario.() -> Unit,
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
@@ -129,9 +151,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 mapOf("example_analytics_metadata" to AnalyticsMetadata.Value.SimpleBoolean(true))
             ),
         )
-        val googlePayConfiguration = GooglePayConfiguration(
-            environment = GooglePayConfiguration.Environment.Test,
-        ).build()
+        val googlePayConfiguration =
+            ExpressCheckoutElement.Configuration.GooglePayConfiguration().build()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(
             savedStateHandle = SavedStateHandle(),
             availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
@@ -144,7 +165,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         stateHolder.state = CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
                 .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
-                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+                .expressCheckoutElement(expressCheckoutElementConfiguration)
                 .build(),
             paymentMethodMetadata = paymentMethodMetadata,
         )

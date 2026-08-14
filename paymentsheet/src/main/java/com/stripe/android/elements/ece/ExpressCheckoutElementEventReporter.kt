@@ -105,7 +105,10 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
             FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
             FIELD_ECE_CONFIG to mapOf(
                 FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkVisibility.name.lowercase(),
-                FIELD_GOOGLE_PAY_VISIBILITY to (expressCheckoutElementConfiguration.googlePayConfiguration.display == ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic),
+                FIELD_GOOGLE_PAY_VISIBILITY to (
+                    expressCheckoutElementConfiguration.googlePayConfiguration.display ==
+                        ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic
+                    ),
             ),
         )
     }

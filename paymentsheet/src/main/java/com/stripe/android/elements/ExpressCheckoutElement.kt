@@ -83,7 +83,6 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.display = display
             }
 
-
             /**
              * Sets the label displayed with the amount.
              *
@@ -174,7 +173,7 @@ class ExpressCheckoutElement @Inject internal constructor(
                 val label: String?,
                 val buttonType: ButtonType,
                 val additionalEnabledNetworks: List<String>,
-            ): Parcelable
+            ) : Parcelable
 
             internal fun build(): State = State(
                 display = display,
@@ -183,8 +182,6 @@ class ExpressCheckoutElement @Inject internal constructor(
                 additionalEnabledNetworks = additionalEnabledNetworks,
             )
         }
-
-
         private var linkVisibility: LinkVisibility = LinkVisibility.Auto
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
