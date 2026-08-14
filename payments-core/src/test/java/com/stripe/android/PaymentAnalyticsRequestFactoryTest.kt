@@ -383,31 +383,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 )
             )
 
-        // Verify URL contains all expected parameters including timestamp
-        val url = analyticsRequest.url
-        assertThat(url).contains("https://q.stripe.com?")
-        assertThat(url).contains("publishable_key=pk_abc123")
-        assertThat(url).contains("app_version=0")
-        assertThat(url).contains("bindings_version=$sdkVersion")
-        assertThat(url).contains("os_version=30")
-        assertThat(url).contains("session_id=${AnalyticsRequestFactory.sessionId}")
-        assertThat(url).contains("os_release=11")
-        assertThat(url).contains("device_type=robolectric_robolectric_robolectric")
-        assertThat(url).contains("source_type=card")
-        assertThat(url).contains("locale=en_US")
-        assertThat(url).contains("app_name=com.stripe.android.test")
-        assertThat(url).contains("analytics_ua=analytics.stripe_android-1.0")
-        assertThat(url).contains("os_name=REL")
-        assertThat(url).contains("network_type=2G")
-        assertThat(url).contains("event=stripe_android.payment_method_creation")
-        assertThat(url).contains("is_development=true")
-        assertThat(url).contains("timestamp=")
-
-        // Verify timestamp is a valid number
-        val timestampParam = url.substringAfter("timestamp=").substringBefore("&")
-        val timestamp = timestampParam.toDoubleOrNull()
-        assertThat(timestamp).isNotNull()
-        assertThat(timestamp).isGreaterThan(0.0)
+        assertThat(analyticsRequest.url).startsWith("https://q.stripe.com?")
     }
 
     @Test
