@@ -49,6 +49,7 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -58,7 +59,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
-import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
@@ -116,7 +116,7 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
-        ApiConfigurationModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
     ],
 )
 internal interface CheckoutControllerComponent {
