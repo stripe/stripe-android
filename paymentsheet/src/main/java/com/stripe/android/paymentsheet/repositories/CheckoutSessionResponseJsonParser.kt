@@ -42,7 +42,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             StripeJsonUtils.optCountryCode(it, FIELD_ACCOUNT_SETTINGS_COUNTRY)
         }
         val mode = parseMode(json.optString(FIELD_MODE))
-        val status = parseStatus(json.optString(FIELD_STATUS))
+        val status = parseStatus(json.optString(FIELD_STATUS)) ?: return null
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
         val taxContext = json.optJSONObject(FIELD_TAX_CONTEXT)
         val automaticTaxEnabled = taxContext?.optBoolean(FIELD_AUTOMATIC_TAX_ENABLED, false) ?: false
@@ -126,12 +126,12 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         }
     }
 
-    private fun parseStatus(statusString: String): CheckoutSessionResponse.Status {
+    private fun parseStatus(statusString: String): CheckoutSessionResponse.Status? {
         return when (statusString) {
             "open" -> CheckoutSessionResponse.Status.OPEN
             "complete" -> CheckoutSessionResponse.Status.COMPLETE
             "expired" -> CheckoutSessionResponse.Status.EXPIRED
-            else -> CheckoutSessionResponse.Status.UNKNOWN
+            else -> null
         }
     }
 
