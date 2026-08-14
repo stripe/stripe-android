@@ -1185,7 +1185,7 @@ internal class CheckoutControllerTest {
     ): CheckoutController.Session {
         return CheckoutController.Session(
             id = DEFAULT_CHECKOUT_SESSION_ID,
-            status = CheckoutController.Session.Status.Open,
+            status = CheckoutController.Session.Status.Open(),
             liveMode = false,
             currency = "usd",
             email = null,
