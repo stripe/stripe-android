@@ -100,10 +100,11 @@ internal class CheckoutConfirmationPerformerTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
+        val sessionRefresher = FakeCheckoutSessionRefresher()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
-            sessionRefresher = {},
+            sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
         )
@@ -122,6 +123,7 @@ internal class CheckoutConfirmationPerformerTest {
         ).block()
 
         confirmationHandler.validate()
+        sessionRefresher.ensureAllEventsConsumed()
     }
 
     private class Scenario(

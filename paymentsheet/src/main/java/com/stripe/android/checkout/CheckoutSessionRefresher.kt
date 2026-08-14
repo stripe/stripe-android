@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
 
 /**
@@ -13,17 +14,30 @@ internal fun interface CheckoutSessionRefresher {
 }
 
 @OptIn(CheckoutSessionPreview::class)
-internal class DefaultCheckoutSessionRefresher @Inject constructor(
+internal class DefaultCheckoutSessionRefresher internal constructor(
     private val stateHolder: CheckoutControllerStateHolder,
-    private val checkoutSessionRepository: CheckoutSessionRepository,
-    private val checkoutStateLoader: CheckoutStateLoader,
+    private val fetchResponse: suspend (String, Boolean) -> Result<CheckoutSessionResponse>,
+    private val reloadState: suspend (CheckoutControllerState) -> Unit,
 ) : CheckoutSessionRefresher {
+
+    @Inject
+    internal constructor(
+        stateHolder: CheckoutControllerStateHolder,
+        checkoutSessionRepository: CheckoutSessionRepository,
+        checkoutStateLoader: CheckoutStateLoader,
+    ) : this(
+        stateHolder = stateHolder,
+        fetchResponse = checkoutSessionRepository::init,
+        reloadState = checkoutStateLoader::reload,
+    )
+
     override suspend fun refresh() {
         val state = stateHolder.state ?: return
-        val response = checkoutSessionRepository.init(
-            sessionId = state.checkoutSessionResponse.id,
-            adaptivePricingAllowed = state.configuration.adaptivePricingAllowed,
+        val response = fetchResponse(
+            state.checkoutSessionResponse.id,
+            state.configuration.adaptivePricingAllowed,
         ).getOrThrow()
-        checkoutStateLoader.reload(state.copy(checkoutSessionResponse = response))
+        val latestState = stateHolder.state ?: return
+        reloadState(latestState.copy(checkoutSessionResponse = response))
     }
 }
