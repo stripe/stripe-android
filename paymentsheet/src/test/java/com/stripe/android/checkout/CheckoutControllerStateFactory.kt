@@ -3,9 +3,9 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
-import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview

@@ -21,6 +21,7 @@ import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -302,7 +303,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
     private fun createRemoteCardAccountRangeSource(
         store: CardAccountRangeStore,
-        publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        publishableKey: String = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     ): CardAccountRangeSource {
         val stripeRepository = StripeApiRepository(
             context = application,
@@ -332,7 +333,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     private companion object {
-        private val DEFAULT_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE)
 
         private val VISA_ACCOUNT_RANGES = listOf(
             AccountRange(

@@ -42,10 +42,8 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
         val collectedDetails = collectedDetails(
             billingName = "Jane Billing",
-            billingPhoneNumber = "5559876543",
             billingAddress = address(),
             shippingName = "John Shipping",
-            shippingPhoneNumber = "5551234567",
             shippingAddress = address(),
         )
 
@@ -202,16 +200,12 @@ internal class CheckoutCommonConfigurationFactoryTest {
     private fun collectedDetails(
         shippingName: String? = null,
         billingName: String? = null,
-        shippingPhoneNumber: String? = null,
-        billingPhoneNumber: String? = null,
         shippingAddress: Address.State? = null,
         billingAddress: Address.State? = null,
     ): CheckoutCollectedDetails {
         return CheckoutCollectedDetails(
             shippingName = shippingName,
             billingName = billingName,
-            shippingPhoneNumber = shippingPhoneNumber,
-            billingPhoneNumber = billingPhoneNumber,
             shippingAddress = shippingAddress,
             billingAddress = billingAddress,
         )

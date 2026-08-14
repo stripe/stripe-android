@@ -91,7 +91,6 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         val billingDetails = requireNotNull(option?.billingDetails)
         assertThat(billingDetails.name).isEqualTo("Jenny Rosen")
         assertThat(billingDetails.email).isEqualTo("jenny.rosen@example.com")
-        assertThat(billingDetails.phone).isEqualTo("123-456-7890")
         assertThat(billingDetails.address?.line1).isEqualTo("1234 Main Street")
         assertThat(billingDetails.address?.city).isEqualTo("San Francisco")
         assertThat(billingDetails.address?.state).isEqualTo("CA")
@@ -114,7 +113,6 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
                     billingDetails = PaymentMethod.BillingDetails(
                         name = "Jenny Rosen",
                         email = "jenny.rosen@example.com",
-                        phone = "123-456-7890",
                         address = null,
                     ),
                 ),
@@ -125,7 +123,6 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         val billingDetails = requireNotNull(option?.billingDetails)
         assertThat(billingDetails.name).isEqualTo("Jenny Rosen")
         assertThat(billingDetails.email).isEqualTo("jenny.rosen@example.com")
-        assertThat(billingDetails.phone).isEqualTo("123-456-7890")
         assertThat(billingDetails.address).isNull()
     }
 

@@ -92,7 +92,7 @@ internal fun CurrencySelectorToggle(
     isEnabled: Boolean,
     showCurrencyCode: Boolean,
     errorMessage: String? = null,
-    appearance: CurrencySelectorElement.Appearance.State,
+    appearance: CurrencySelectorElement.Configuration.Appearance.State,
     modifier: Modifier = Modifier,
 ) {
     val shape = appearance.cornerRadiusDp?.let { RoundedCornerShape(it.dp) }

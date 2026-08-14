@@ -41,7 +41,7 @@ internal class NfcScanningViewModel @Inject constructor(
     private val _viewState = MutableStateFlow(
         NfcScanningViewState(
             tapZone = tapZone,
-            status = NfcScanningStatus.Idle,
+            status = NfcScanningStatus.Idle(),
         )
     )
     val viewState: StateFlow<NfcScanningViewState> = _viewState.asStateFlow()
@@ -81,7 +81,7 @@ internal class NfcScanningViewModel @Inject constructor(
                         _viewState.emit(
                             NfcScanningViewState(
                                 tapZone = tapZone,
-                                status = NfcScanningStatus.Error(error.userMessage),
+                                status = NfcScanningStatus.Idle(error.userMessage),
                             )
                         )
 
@@ -149,7 +149,11 @@ internal class NfcScanningViewModel @Inject constructor(
             }
             is NfcScanningViewAction.ErrorShown -> {
                 _viewState.update { state ->
-                    state.copy(status = NfcScanningStatus.Idle)
+                    if (state.status is NfcScanningStatus.Idle) {
+                        state.copy(status = NfcScanningStatus.Idle())
+                    } else {
+                        state
+                    }
                 }
             }
         }

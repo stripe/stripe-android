@@ -50,14 +50,13 @@ internal class BillingDetailsCollectionConfigurationMapperTest {
     fun `all CollectionMode fields map 1 to 1`() {
         val mapped = BillingDetailsCollectionConfiguration()
             .name(BillingDetailsCollectionConfiguration.CollectionMode.Always)
-            .phone(BillingDetailsCollectionConfiguration.CollectionMode.Never)
             .email(BillingDetailsCollectionConfiguration.CollectionMode.Always)
             .build()
             .asPaymentSheet()
         assertThat(mapped.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
         assertThat(mapped.phone)
-            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
         assertThat(mapped.email)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
     }

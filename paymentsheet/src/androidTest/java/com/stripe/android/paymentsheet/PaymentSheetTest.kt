@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -14,6 +15,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
@@ -36,13 +38,14 @@ import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetTest {
+    private val networkRule = NetworkRule()
+
     @get:Rule
-    val testRules: TestRules = TestRules.create {
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
         around(IntentsRule())
     }
 
     private val composeTestRule = testRules.compose
-    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -474,7 +477,7 @@ internal class PaymentSheetTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
@@ -610,7 +613,7 @@ internal class PaymentSheetTest {
                     .customer(
                         customer = PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     )
                     .allowsDelayedPaymentMethods(true)
@@ -675,7 +678,7 @@ internal class PaymentSheetTest {
                     .customer(
                         customer = PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     )
                     .allowsDelayedPaymentMethods(true)
@@ -736,7 +739,7 @@ internal class PaymentSheetTest {
                     .customer(
                         customer = PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     )
                     .allowsDelayedPaymentMethods(true)
@@ -821,7 +824,7 @@ internal class PaymentSheetTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
@@ -952,12 +955,19 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             query("type", "card"),
             header("Authorization", "Bearer uk_12345"),
+            applyDefaultAuthorization = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
 
-        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
-        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+        networkRule.setupV1PaymentMethodsResponse(
+            type = PaymentMethod.Type.USBankAccount.code,
+            applyDefaultAuthorization = false,
+        )
+        networkRule.setupV1PaymentMethodsResponse(
+            type = PaymentMethod.Type.SepaDebit.code,
+            applyDefaultAuthorization = false,
+        )
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(

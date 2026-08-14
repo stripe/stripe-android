@@ -1226,7 +1226,6 @@ internal class PaymentMethodMetadataTest {
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
-            checkoutSessionResponse = null,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = ApiConfiguration.State(
                 publishableKey = "pk_test_123",
@@ -1399,7 +1398,6 @@ internal class PaymentMethodMetadataTest {
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
-            checkoutSessionResponse = null,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = ApiConfiguration.State(
                 publishableKey = "pk_test_123",
@@ -2212,16 +2210,21 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `createForPaymentElement requires automatic tax billing address when tax status requires it`() {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "key",
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                    taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
-                    automaticTaxEnabled = true,
-                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                ),
+                checkoutSessionResponse = checkoutSessionResponse,
             ),
-            integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_123",
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
         )
 
         assertThat(metadata.requiresBillingAddressForAutomaticTax).isTrue()
@@ -2229,16 +2232,21 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `createForPaymentElement requires automatic tax billing address when tax status is ready`() {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            taxStatus = CheckoutSessionResponse.TaxStatus.READY,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "key",
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                    taxStatus = CheckoutSessionResponse.TaxStatus.READY,
-                    automaticTaxEnabled = true,
-                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                ),
+                checkoutSessionResponse = checkoutSessionResponse,
             ),
-            integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_123",
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
         )
 
         assertThat(metadata.requiresBillingAddressForAutomaticTax).isTrue()
@@ -2246,15 +2254,20 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `createForPaymentElement does not require automatic tax billing address when automatic tax is disabled`() {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = false,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "key",
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                    automaticTaxEnabled = false,
-                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                ),
+                checkoutSessionResponse = checkoutSessionResponse,
             ),
-            integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_123",
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
         )
 
         assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()
@@ -2262,15 +2275,20 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `createForPaymentElement does not require automatic tax billing address when tax uses shipping`() {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+        )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "key",
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                    automaticTaxEnabled = true,
-                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                ),
+                checkoutSessionResponse = checkoutSessionResponse,
             ),
-            integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_123",
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
         )
 
         assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()

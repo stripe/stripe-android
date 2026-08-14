@@ -91,6 +91,8 @@ internal fun OnrampScreen(
                     uiState = uiState,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
+                    onDeleteWallet = viewModel::deleteWallet,
+                    onRefreshWallets = viewModel::refreshWallets,
                     onGetWalletOwnershipChallenge = viewModel::getWalletOwnershipChallenge,
                     onSubmitWalletOwnershipSignature = viewModel::submitWalletOwnershipSignature,
                     onWalletOwnershipSignatureChange = viewModel::updateWalletOwnershipSignatureInput,

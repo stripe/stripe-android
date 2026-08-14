@@ -7,6 +7,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -262,7 +263,7 @@ internal class TapToAddTest {
         linkHelper.enqueueSignup(withName = false)
         linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(
             paymentMethodId = info.cardPaymentMethod.id,
-            ephemeralKey = "ek_12345",
+            ephemeralKey = TestApiKeys.EPHEMERAL,
         )
         enqueueConfirmRequests()
         enqueueLinkLogout(integrationType)

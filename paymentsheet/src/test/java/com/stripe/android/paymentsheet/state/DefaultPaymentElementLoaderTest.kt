@@ -1926,8 +1926,9 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(
                 IntegrationMetadata.CheckoutSession(
-                    id = DEFAULT_CHECKOUT_SESSION_ID,
+                    id = checkoutSession.checkoutSessionResponse.id,
                     instancesKey = "DefaultPaymentElementLoaderTest",
+                    checkoutSessionResponse = checkoutSession.checkoutSessionResponse,
                 )
             )
     }

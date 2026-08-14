@@ -114,7 +114,9 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends adaptive_pricing allowed true when configured`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().adaptivePricingAllowed(true),
+        configuration = CheckoutController.Configuration().adaptivePricing(
+            CheckoutController.Configuration.AdaptivePricing().allowed(true),
+        ),
         networkSetup = {
             networkRule.checkoutInit(
                 bodyPart("adaptive_pricing[allowed]", "true"),
@@ -656,14 +658,12 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = "John",
-                phoneNumber = "5551234567",
                 address = fullAddress,
             )
 
             result.getOrThrow()
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
-            assertThat(state.collectedDetails.shippingPhoneNumber).isEqualTo("5551234567")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
         }
 
@@ -681,7 +681,7 @@ internal class CheckoutControllerTest {
             )
 
             val address = Address().country("US").postalCode("80202")
-            val result = controller.updateShippingAddress(name = null, phoneNumber = null, address = address)
+            val result = controller.updateShippingAddress(name = null, address = address)
 
             assertThat(result.isSuccess).isTrue()
         }
@@ -691,7 +691,7 @@ internal class CheckoutControllerTest {
         runMutationScenario {
             // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
             // and the payment element is reloaded from the existing response, firing no request.
-            val result = controller.updateShippingAddress(name = "John", phoneNumber = null, address = fullAddress)
+            val result = controller.updateShippingAddress(name = "John", address = fullAddress)
 
             result.getOrThrow()
             val state = committedState()
@@ -707,7 +707,7 @@ internal class CheckoutControllerTest {
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
 
-            val result = controller.updateShippingAddress(name = "John", phoneNumber = null, address = fullAddress)
+            val result = controller.updateShippingAddress(name = "John", address = fullAddress)
 
             assertThat(result.isFailure).isTrue()
             val state = committedState()
@@ -719,7 +719,7 @@ internal class CheckoutControllerTest {
     fun `updateShippingAddress does not send tax_region when automatic tax targets billing`() =
         runMutationScenario(initModifier = automaticTaxFor("billing")) {
             // Automatic tax targets billing, so a shipping address update stays local: no request.
-            val result = controller.updateShippingAddress(name = "John", phoneNumber = null, address = fullAddress)
+            val result = controller.updateShippingAddress(name = "John", address = fullAddress)
 
             result.getOrThrow()
             val state = committedState()
@@ -740,14 +740,12 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateBillingAddress(
                 name = "Jane",
-                phoneNumber = "5559876543",
                 address = fullAddress,
             )
 
             result.getOrThrow()
             val state = committedState()
             assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
-            assertThat(state.collectedDetails.billingPhoneNumber).isEqualTo("5559876543")
             assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
         }
 
@@ -755,7 +753,7 @@ internal class CheckoutControllerTest {
     fun `updateBillingAddress does not send tax_region when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             // Automatic tax targets shipping, so a billing address update stays local: no request.
-            val result = controller.updateBillingAddress(name = "Jane", phoneNumber = null, address = fullAddress)
+            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
 
             result.getOrThrow()
             val state = committedState()
@@ -768,7 +766,7 @@ internal class CheckoutControllerTest {
         runMutationScenario {
             // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
             // and the payment element is reloaded from the existing response, firing no request.
-            val result = controller.updateBillingAddress(name = "Jane", phoneNumber = null, address = fullAddress)
+            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
 
             result.getOrThrow()
             val state = committedState()
@@ -784,7 +782,7 @@ internal class CheckoutControllerTest {
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
 
-            val result = controller.updateBillingAddress(name = "Jane", phoneNumber = null, address = fullAddress)
+            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
 
             assertThat(result.isFailure).isTrue()
             val state = committedState()
@@ -985,7 +983,6 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("US"),
             )
 
@@ -1005,7 +1002,6 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("DE"),
             )
 
@@ -1024,7 +1020,6 @@ internal class CheckoutControllerTest {
             // No allowlist set, so any country passes.
             val result = controller.updateShippingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("DE"),
             )
 
@@ -1038,7 +1033,6 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("US"),
             )
 
@@ -1056,7 +1050,6 @@ internal class CheckoutControllerTest {
         runMutationScenario(initModifier = allowedShippingCountries(listOf("US"))) {
             val result = controller.updateBillingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("DE"),
             )
 
@@ -1069,7 +1062,7 @@ internal class CheckoutControllerTest {
             // Address.build() requires a country and throws synchronously, before the allowlist is
             // ever consulted, so the call is wrapped to capture the thrown exception.
             val result = runCatching {
-                controller.updateShippingAddress(name = null, phoneNumber = null, address = Address())
+                controller.updateShippingAddress(name = null, address = Address())
             }
 
             assertThat(result.isFailure).isTrue()

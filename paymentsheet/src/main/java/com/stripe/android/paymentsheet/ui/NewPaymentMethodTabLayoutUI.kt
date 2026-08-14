@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -22,10 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.FormInsets
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
 
 private object PaymentMethodsUISpacing {
     val carouselInnerPadding = 12.dp
@@ -77,7 +79,7 @@ internal fun NewPaymentMethodTabLayoutUI(
 
         LazyRow(
             state = state,
-            contentPadding = StripeTheme.getOuterFormInsets(),
+            contentPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets(),
             horizontalArrangement = Arrangement.spacedBy(innerPadding),
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
@@ -109,15 +111,19 @@ internal fun NewPaymentMethodTabLayoutUI(
 private fun rememberViewWidth(
     maxWidth: Dp,
     numberOfPaymentMethods: Int
-) = remember(maxWidth, numberOfPaymentMethods) {
-    calculateViewWidth(maxWidth, numberOfPaymentMethods)
+): Dp {
+    val formInsets = MaterialTheme.stripeFormInsets
+    return remember(maxWidth, numberOfPaymentMethods, formInsets) {
+        calculateViewWidth(maxWidth, numberOfPaymentMethods, formInsets)
+    }
 }
 
 internal fun calculateViewWidth(
     maxWidth: Dp,
-    numberOfPaymentMethods: Int
+    numberOfPaymentMethods: Int,
+    formInsets: FormInsets,
 ): Dp {
-    val targetWidth = maxWidth - (StripeTheme.formInsets.end + StripeTheme.formInsets.start).dp
+    val targetWidth = maxWidth - (formInsets.end + formInsets.start).dp
     val minItemWidth = 90.dp
 
     val minimumCardsWidth = minItemWidth * numberOfPaymentMethods

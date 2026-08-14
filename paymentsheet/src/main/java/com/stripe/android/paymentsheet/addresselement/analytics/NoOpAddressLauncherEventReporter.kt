@@ -11,7 +11,6 @@ internal object NoOpAddressLauncherEventReporter : AddressLauncherEventReporter 
     override fun onAutocompleteFetchStarted() = Unit
     override fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
-        queryLength: Int,
         resultCount: Int,
         source: String?,
     ) = Unit

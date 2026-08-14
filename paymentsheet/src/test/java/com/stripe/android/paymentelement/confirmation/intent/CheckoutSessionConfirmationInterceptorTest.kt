@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
@@ -37,6 +36,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -383,10 +383,13 @@ class CheckoutSessionConfirmationInterceptorTest {
             },
         )
 
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
+
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = DEFAULT_CHECKOUT_SESSION_ID,
+                id = checkoutSessionResponse.id,
                 instancesKey = "test_key",
+                checkoutSessionResponse = checkoutSessionResponse,
             ),
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(

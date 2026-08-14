@@ -56,11 +56,11 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             val status: NfcScanningStatus
 
             data object Idle : NfcScanningScreenshotStatus {
-                override val status = NfcScanningStatus.Idle
+                override val status = NfcScanningStatus.Idle()
             }
 
             data class Error(val message: String) : NfcScanningScreenshotStatus {
-                override val status = NfcScanningStatus.Error(message.resolvableString)
+                override val status = NfcScanningStatus.Idle(message.resolvableString)
 
                 override fun toString(): String {
                     return "withError(${message.filter { !it.isWhitespace() }})"
@@ -79,7 +79,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
                     NfcScanningScreenshotStatus.Idle
                 ),
                 *HIGH_LOW_CASES,
-                *CLOSE_START_END_CASES,
+                *CLOSE_TOP_START_END_CASES,
                 *LANDSCAPE_CORNER_CASES,
                 *ERROR_CASES,
             )
@@ -116,12 +116,19 @@ internal class NfcScanningLayoutScreenshotTestSuite {
                 ),
             )
 
+            val PORTRAIT_CLOSE_TOP_TAP_ZONE = TapZone(xBias = 0.05f, yBias = 0.05f)
             val PORTRAIT_CLOSE_START_TAP_ZONE = TapZone(xBias = 0.05f, yBias = 0.3f)
             val PORTRAIT_CLOSE_END_TAP_ZONE = TapZone(xBias = 0.95f, yBias = 0.3f)
             val LANDSCAPE_CLOSE_START_TAP_ZONE = TapZone(xBias = 0.5f, yBias = 0.05f)
             val LANDSCAPE_CLOSE_END_TAP_ZONE = TapZone(xBias = 0.5f, yBias = 0.95f)
 
-            val CLOSE_START_END_CASES = arrayOf(
+            val CLOSE_TOP_START_END_CASES = arrayOf(
+                arrayOf(
+                    DeviceRotation.Portrait,
+                    PORTRAIT_CLOSE_TOP_TAP_ZONE,
+                    Orientation.Portrait,
+                    NfcScanningScreenshotStatus.Idle,
+                ),
                 arrayOf(
                     DeviceRotation.Portrait,
                     PORTRAIT_CLOSE_START_TAP_ZONE,
@@ -221,7 +228,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             paparazziRule.gif(end = 1500L) {
                 NfcScanningTheme {
                     NfcScanningLayout(
-                        status = NfcScanningStatus.Idle,
+                        status = NfcScanningStatus.Idle(),
                         tapZone = TapZone(xBias = 0.5f, yBias = 0.35f),
                         deviceRotation = DeviceRotation.Portrait,
                         onClose = {},
@@ -237,12 +244,12 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             paparazziRule.gif(end = 1500L) {
                 NfcScanningTheme {
                     var status by remember {
-                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle)
+                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle())
                     }
 
                     LaunchedEffect(Unit) {
                         delay(800L)
-                        status = NfcScanningStatus.Error(ERROR_TEXT.resolvableString)
+                        status = NfcScanningStatus.Idle(ERROR_TEXT.resolvableString)
                     }
 
                     NfcScanningLayout(
@@ -262,7 +269,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             paparazziRule.gif(end = 2500L) {
                 NfcScanningTheme {
                     var status by remember {
-                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle)
+                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle())
                     }
 
                     LaunchedEffect(Unit) {

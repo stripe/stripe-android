@@ -21,6 +21,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -254,6 +255,7 @@ internal class EmbeddedSheetActivityTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
             canUpdateCardExpiryAndBillingDetails = false,
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),
         selection: PaymentSelection? = null,

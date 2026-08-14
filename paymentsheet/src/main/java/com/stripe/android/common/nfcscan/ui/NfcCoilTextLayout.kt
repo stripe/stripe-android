@@ -3,40 +3,30 @@ package com.stripe.android.common.nfcscan.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.stripe.android.common.nfcscan.tapzone.TapZone
-import com.stripe.android.common.ui.InlineContentTemplateBuilder
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.strings.resolve
 import kotlin.math.roundToInt
-import com.stripe.payments.model.R as PaymentsModelR
 
-private val TextAboveCoilBottomMargin = 22.5.dp
-private val BottomTextOffset = 30.dp
+private val PortraitTopTextOffset = 40.5.dp
+private val PortraitBottomTextOffset = 48.dp
+private val LandscapeTopTextOffset = 22.5.dp
+private val LandscapeBottomTextOffset = 30.dp
 private val InstructionTextEdgePadding = 20.dp
-private val ErrorTextTopSpacing = 8.dp
+private val ErrorTextTopSpacing = 20.dp
 
 @Composable
 internal fun NfcCoilTextLayout(
@@ -44,19 +34,15 @@ internal fun NfcCoilTextLayout(
     containerHeight: Dp,
     tapZone: TapZone,
     coilSize: Dp,
+    deviceRotation: DeviceRotation,
     shouldRenderTextAboveCoil: Boolean,
     canShow: Boolean,
-    error: ResolvableString?,
+    error: ErrorBannerParams?,
 ) {
     Layout(
         content = {
-            NfcCoilInstructionText(canShow = canShow)
-            if (error != null) {
-                NfcCoilErrorText(
-                    message = error,
-                    canShow = canShow,
-                )
-            }
+            NfcCoilInstructionText(canShow)
+            ErrorBanner(error)
         },
     ) { measurables, constraints ->
         placeCoilTextElements(
@@ -64,6 +50,7 @@ internal fun NfcCoilTextLayout(
             containerHeight = containerHeight,
             tapZone = tapZone,
             coilSize = coilSize,
+            deviceRotation = deviceRotation,
             shouldRenderTextAboveCoil = shouldRenderTextAboveCoil,
             measurables = measurables,
             constraints = constraints,
@@ -76,6 +63,7 @@ private fun MeasureScope.placeCoilTextElements(
     containerHeight: Dp,
     tapZone: TapZone,
     coilSize: Dp,
+    deviceRotation: DeviceRotation,
     measurables: List<Measurable>,
     constraints: Constraints,
     shouldRenderTextAboveCoil: Boolean,
@@ -106,9 +94,9 @@ private fun MeasureScope.placeCoilTextElements(
     val instructionY = if (shouldRenderTextAboveCoil) {
         val textBlockHeight = instructionPlaceable.height +
             (errorPlaceable?.let { it.height + ErrorTextTopSpacing.roundToPx() } ?: 0)
-        coilBoxTop - TextAboveCoilBottomMargin.roundToPx() - textBlockHeight
+        coilBoxTop - aboveCoilPadding(deviceRotation).roundToPx() - textBlockHeight
     } else {
-        coilBoxTop + coilSizePx + BottomTextOffset.roundToPx()
+        coilBoxTop + coilSizePx + bottomCoilPadding(deviceRotation).roundToPx()
     }
 
     return layout(containerWidthPx, containerHeightPx) {
@@ -144,6 +132,24 @@ private fun MeasureScope.placeCoilTextElements(
     }
 }
 
+private fun aboveCoilPadding(deviceRotation: DeviceRotation): Dp {
+    return when (deviceRotation) {
+        DeviceRotation.Portrait,
+        DeviceRotation.UpsideDown -> PortraitTopTextOffset
+        DeviceRotation.LandscapeLeft,
+        DeviceRotation.LandscapeRight -> LandscapeTopTextOffset
+    }
+}
+
+private fun bottomCoilPadding(deviceRotation: DeviceRotation): Dp {
+    return when (deviceRotation) {
+        DeviceRotation.Portrait,
+        DeviceRotation.UpsideDown -> PortraitBottomTextOffset
+        DeviceRotation.LandscapeLeft,
+        DeviceRotation.LandscapeRight -> LandscapeBottomTextOffset
+    }
+}
+
 private fun clampedTextX(
     placeable: Placeable,
     coilCenterX: Int,
@@ -174,50 +180,3 @@ private fun NfcCoilInstructionText(
         )
     }
 }
-
-@Composable
-private fun NfcCoilErrorText(
-    message: ResolvableString,
-    canShow: Boolean,
-) {
-    AnimatedVisibility(
-        visible = canShow,
-        enter = fadeIn(),
-        exit = fadeOut(),
-    ) {
-        val textStyle = MaterialTheme.typography.body1
-        val fontSize = textStyle.fontSize
-
-        Text(
-            text = buildAnnotatedString {
-                appendInlineContent(ERROR_ICON_ID)
-                appendInlineContent(ERROR_SPACER_ID)
-                append(message.resolve())
-            },
-            inlineContent = InlineContentTemplateBuilder()
-                .add(
-                    id = ERROR_ICON_ID,
-                    width = fontSize,
-                    height = fontSize,
-                    align = PlaceholderVerticalAlign.TextCenter
-                ) {
-                    Icon(
-                        painter = painterResource(PaymentsModelR.drawable.stripe_ic_error),
-                        contentDescription = null,
-                        tint = MaterialTheme.colors.error,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-                .addSpacer(ERROR_SPACER_ID, ERROR_SPACER_WIDTH)
-                .build(),
-            color = MaterialTheme.colors.error,
-            style = textStyle,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-private const val ERROR_SPACER_ID = "ERROR_SPACER"
-private val ERROR_SPACER_WIDTH = 5.sp
-
-private const val ERROR_ICON_ID = "ERROR_ICON_ID"

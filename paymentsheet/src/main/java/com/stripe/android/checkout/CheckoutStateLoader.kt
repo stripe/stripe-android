@@ -41,6 +41,11 @@ internal class CheckoutStateLoader @Inject constructor(
         )
     }
 
+    fun clear() {
+        stateHolder.state = null
+        customerStateHolder.setCustomerState(null)
+    }
+
     private suspend fun commit(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
@@ -141,8 +146,6 @@ private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): 
     return CheckoutCollectedDetails(
         shippingName = defaults.shippingDetails?.name,
         billingName = defaults.billingDetails?.name,
-        shippingPhoneNumber = defaults.shippingDetails?.phoneNumber,
-        billingPhoneNumber = defaults.billingDetails?.phoneNumber,
         shippingAddress = defaults.shippingDetails?.address,
         billingAddress = defaults.billingDetails?.address,
     )

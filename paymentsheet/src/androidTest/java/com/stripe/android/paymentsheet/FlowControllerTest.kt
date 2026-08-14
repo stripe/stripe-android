@@ -21,12 +21,14 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
@@ -59,11 +61,12 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
 internal class FlowControllerTest {
+    private val networkRule = NetworkRule()
+
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create(networkRule = networkRule)
 
     private val composeTestRule = testRules.compose
-    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
     private val walletButtonsPage = WalletButtonsPage(testRules.compose)
@@ -352,7 +355,7 @@ internal class FlowControllerTest {
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE)
             @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,
@@ -440,7 +443,7 @@ internal class FlowControllerTest {
         fun initializeActivity() {
             scenario.moveToState(Lifecycle.State.CREATED)
             scenario.onActivity {
-                PaymentConfiguration.init(it, "pk_test_123")
+                PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE)
 
                 @Suppress("Deprecation")
                 val unsynchronizedController = PaymentSheet.FlowController.create(
@@ -508,7 +511,7 @@ internal class FlowControllerTest {
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE)
             @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,
@@ -899,7 +902,7 @@ internal class FlowControllerTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
@@ -969,7 +972,7 @@ internal class FlowControllerTest {
                     .customer(
                         PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     )
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)

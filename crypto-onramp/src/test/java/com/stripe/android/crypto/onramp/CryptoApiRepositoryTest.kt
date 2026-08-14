@@ -7,6 +7,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HEADER_STRIPE_VERSION
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -783,6 +784,48 @@ class CryptoApiRepositoryTest {
             assertThat(result.isFailure)
                 .isEqualTo(true)
         }
+    }
+
+    @Test
+    fun testDeleteWalletAddressSucceeds() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, "{}", emptyMap()))
+
+        val result = cryptoApiRepository.deleteWalletAddress(
+            walletId = "ccw_12345",
+            consumerSessionClientSecret = "test-secret"
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.DELETE)
+        assertThat(apiRequest.baseUrl)
+            .isEqualTo("https://api.stripe.com/v1/crypto/internal/wallet")
+        assertThat(apiRequest.url)
+            .startsWith("https://api.stripe.com/v1/crypto/internal/wallet?")
+        assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
+            .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
+        assertThat(apiRequest.params).isEqualTo(
+            mapOf(
+                "wallet_token" to "ccw_12345",
+                "credentials" to mapOf("consumer_session_client_secret" to "test-secret")
+            )
+        )
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun testDeleteWalletAddressFails() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(400, "{}", emptyMap()))
+
+        val result = cryptoApiRepository.deleteWalletAddress(
+            walletId = "ccw_12345",
+            consumerSessionClientSecret = "test-secret"
+        )
+
+        assertThat(result.isFailure).isTrue()
     }
 
     @Test

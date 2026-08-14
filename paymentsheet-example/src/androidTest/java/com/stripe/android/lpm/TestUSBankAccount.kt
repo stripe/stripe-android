@@ -208,9 +208,8 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
             testParameters = testParameters.copy(
                 authorizationAction = AuthorizeAction.Cancel,
             ),
-            afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+            afterAuthorization = { selectors, _ ->
+                selectors.buyButton.waitProcessingComplete()
             }
         )
     }
@@ -225,9 +224,8 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 }.copy(
                     authorizationAction = AuthorizeAction.Cancel,
                 ),
-            afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+            afterAuthorization = { selectors, _ ->
+                selectors.buyButton.waitProcessingComplete()
             }
         )
     }

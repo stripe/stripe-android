@@ -29,30 +29,30 @@ internal class PaymentElementTest {
     val composeCleanupRule = createComposeCleanupRule()
 
     @Test
-    fun `presentPaymentOptions delegates to the content helper`() = runTest {
+    fun `present delegates to the content helper`() = runTest {
         val contentHelper = FakeEmbeddedContentHelper()
         val paymentElement = PaymentElement(contentHelper)
 
-        paymentElement.presentPaymentOptions()
+        paymentElement.present()
 
         contentHelper.presentPaymentOptionsCalls.awaitItem()
         contentHelper.presentPaymentOptionsCalls.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `PaymentOptionsContent renders nothing when there is no embedded content`() {
+    fun `Content renders nothing when there is no embedded content`() {
         val contentHelper = FakeEmbeddedContentHelper(embeddedContent = MutableStateFlow(null))
         val paymentElement = PaymentElement(contentHelper)
 
         composeRule.setContent {
-            paymentElement.PaymentOptionsContent()
+            paymentElement.Content()
         }
 
         composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertDoesNotExist()
     }
 
     @Test
-    fun `PaymentOptionsContent renders the current embedded content`() {
+    fun `Content renders the current embedded content`() {
         val content = EmbeddedContent(
             interactor = FakePaymentMethodVerticalLayoutInteractor.create(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -65,7 +65,7 @@ internal class PaymentElementTest {
         val paymentElement = PaymentElement(contentHelper)
 
         composeRule.setContent {
-            paymentElement.PaymentOptionsContent()
+            paymentElement.Content()
         }
 
         composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertIsDisplayed()

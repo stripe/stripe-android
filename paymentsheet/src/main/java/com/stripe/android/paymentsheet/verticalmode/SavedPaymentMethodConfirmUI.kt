@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -11,15 +12,15 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun SavedPaymentMethodConfirmUI(
     savedPaymentMethodConfirmInteractor: SavedPaymentMethodConfirmInteractor,
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     Column(
         modifier = Modifier

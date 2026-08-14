@@ -7,7 +7,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -212,8 +211,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                     autocompleteConfig = AutocompleteAddressInteractor.Config(
                                         googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
                                         autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                                        isInlineAutocompleteEnabled =
-                                            FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+                                        isInlineAutocompleteEnabled = true,
                                     ),
                                     placesClient = null,
                                     stripeAutocompleteRepository = null,

@@ -70,7 +70,7 @@ internal fun Checkmark(
             startDelay = startDelay,
             completionDelay = completionDelay,
             savedState = savedState,
-            onComplete = onAnimationComplete,
+            onComplete = { onAnimationComplete() },
         )
     }
 

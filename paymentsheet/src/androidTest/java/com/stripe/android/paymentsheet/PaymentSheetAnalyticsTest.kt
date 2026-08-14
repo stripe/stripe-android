@@ -14,6 +14,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -140,6 +141,7 @@ internal class PaymentSheetAnalyticsTest {
             hasQueryParam("duration"),
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
@@ -217,6 +219,7 @@ internal class PaymentSheetAnalyticsTest {
             eventName = "mc_complete_payment_newpm_success",
             hasQueryParam("duration")
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
@@ -316,6 +319,7 @@ internal class PaymentSheetAnalyticsTest {
             query("is_confirmation_tokens", "true"),
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
         page.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
@@ -353,7 +357,7 @@ internal class PaymentSheetAnalyticsTest {
                     .customer(
                         PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     )
                     .build()

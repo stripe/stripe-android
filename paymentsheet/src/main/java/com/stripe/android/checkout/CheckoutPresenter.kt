@@ -2,19 +2,21 @@ package com.stripe.android.checkout
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.elements.CurrencySelectorElement
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Provider
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CheckoutPresenter @Inject internal constructor(
-    private val paymentElementProvider: Provider<PaymentElement>,
-    private val currencySelectorElementProvider: Provider<CurrencySelectorElement>,
-    private val shippingAddressElementProvider: Provider<ShippingAddressElement>,
-    private val expressCheckoutElementProvider: Provider<ExpressCheckoutElement>,
+    private val paymentElementProvider: Lazy<PaymentElement>,
+    private val currencySelectorElementProvider: Lazy<CurrencySelectorElement>,
+    private val shippingAddressElementProvider: Lazy<ShippingAddressElement>,
+    private val expressCheckoutElementProvider: Lazy<ExpressCheckoutElement>,
     private val checkoutConfirmationPerformerProvider: Provider<CheckoutConfirmationPerformer>,
 ) {
 

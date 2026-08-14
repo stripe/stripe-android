@@ -782,6 +782,7 @@ internal class PlaygroundTestDriver(
         )
 
         isSelectPaymentMethodScreen()
+        selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
         teardown()
@@ -834,7 +835,7 @@ internal class PlaygroundTestDriver(
             selectors.customPaymentMethodCancelButton,
         )
 
-        isSelectPaymentMethodScreen()
+        waitForPaymentSheetActivity()
         selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
@@ -901,7 +902,7 @@ internal class PlaygroundTestDriver(
             testParameters = testParameters,
             executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
             afterCollectingBankInfo = {
-                composeTestRule.waitUntil { selectors.buyButton.checkEnabled() }
+                selectors.buyButton.waitProcessingComplete()
                 selectors.buyButton.click()
                 selectors.playgroundBuyButton.apply {
                     waitFor(isEnabled())
@@ -1771,6 +1772,10 @@ internal class PlaygroundTestDriver(
         return runCatching {
             composeTestRule.onNodeWithText("Select your payment method").assertIsDisplayed()
         }.isSuccess
+    }
+
+    private fun waitForPaymentSheetActivity() {
+        awaitActivityClass("com.stripe.android.paymentsheet.PaymentSheetActivity")
     }
 
     private fun addPaymentMethodNode(): SemanticsNodeInteraction {

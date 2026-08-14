@@ -230,6 +230,7 @@ internal interface PaymentElementLoader {
                 return IntegrationMetadata.CheckoutSession(
                     id = checkoutSessionResponse.id,
                     instancesKey = instancesKey,
+                    checkoutSessionResponse = checkoutSessionResponse,
                 )
             }
         }

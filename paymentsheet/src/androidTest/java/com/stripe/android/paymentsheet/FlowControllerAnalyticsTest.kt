@@ -15,6 +15,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -152,6 +153,7 @@ internal class FlowControllerAnalyticsTest {
             hasQueryParam("duration"),
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
@@ -236,6 +238,7 @@ internal class FlowControllerAnalyticsTest {
             eventName = "mc_custom_payment_newpm_success",
             hasQueryParam("duration")
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
@@ -343,6 +346,7 @@ internal class FlowControllerAnalyticsTest {
             query("is_confirmation_tokens", "true"),
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
         testContext.consumeNullPaymentOptionEventForFlowController()
@@ -381,7 +385,7 @@ internal class FlowControllerAnalyticsTest {
                     .customer(
                         PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     ).build(),
                 callback = { success, error ->
