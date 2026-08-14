@@ -7,9 +7,9 @@ import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripeIntentResult.Outcome.Companion.CANCELED
 import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -22,8 +22,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -32,7 +30,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
-    private val publishableKeyProvider: Provider<String>,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
@@ -49,7 +47,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         val requestOptions = ApiRequest.Options(
-            apiKey = publishableKeyProvider.get(),
+            apiKey = apiConfigProvider().publishableKey,
             stripeAccount = result.stripeAccountId
         )
 
@@ -327,7 +325,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 @Singleton
 internal class PaymentIntentFlowResultProcessor @Inject constructor(
     context: Context,
-    @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+    apiConfigProvider: () -> ApiConfiguration.State,
     stripeRepository: StripeRepository,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
@@ -335,7 +333,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
     clock: Clock,
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
     context,
-    publishableKeyProvider,
+    apiConfigProvider,
     stripeRepository,
     logger,
     workContext,
@@ -395,7 +393,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
 @Singleton
 internal class SetupIntentFlowResultProcessor @Inject constructor(
     context: Context,
-    @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+    apiConfigProvider: () -> ApiConfiguration.State,
     stripeRepository: StripeRepository,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
@@ -403,7 +401,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
     clock: Clock,
 ) : PaymentFlowResultProcessor<SetupIntent, SetupIntentResult>(
     context,
-    publishableKeyProvider,
+    apiConfigProvider,
     stripeRepository,
     logger,
     workContext,

@@ -133,8 +133,8 @@ internal class PaymentAuthWebViewActivityViewModel(
                 args,
                 DefaultAnalyticsRequestExecutor(logger, Dispatchers.IO),
                 PaymentAnalyticsRequestFactory(
-                    application,
-                    args.publishableKey,
+                    context = application,
+                    publishableKeyProvider = { args.publishableKey },
                     defaultProductUsageTokens = setOf("PaymentAuthWebViewActivity")
                 )
             ) as T
