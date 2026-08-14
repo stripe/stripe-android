@@ -175,7 +175,7 @@ internal class FlagImageResolverTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = application,
-                publishableKey = "pk_test_123",
+                publishableKeyProvider = { "pk_test_123" },
             ),
         )
 

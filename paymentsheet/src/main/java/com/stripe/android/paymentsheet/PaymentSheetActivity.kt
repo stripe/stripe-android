@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -47,7 +48,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 starterArgs.initializationMode.validate()
                 starterArgs.config.asCommonConfiguration().validate(
                     initializationMode = starterArgs.initializationMode,
-                    isLiveMode = PaymentConfiguration.getInstance(this).isLiveMode(),
+                    isLiveMode = PaymentConfiguration.getInstance(this).let {
+                        ApiConfiguration.State(
+                            publishableKey = it.publishableKey,
+                            stripeAccountId = it.stripeAccountId,
+                        )
+                    }.isLiveMode(),
                     callbackIdentifier = starterArgs.paymentElementCallbackIdentifier,
                 )
             } catch (e: IllegalArgumentException) {
