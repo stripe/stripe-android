@@ -146,6 +146,7 @@ internal class LpmBillingAddressFormValuesToParamsTest {
                 addAll(bacsDebitTestCases)
                 addAll(oxxoTestCases)
                 addAll(auBecsDebitTestCases)
+                addAll(blikTestCases)
             }
         }
     }
