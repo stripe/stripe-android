@@ -22,16 +22,12 @@ class ExpressCheckoutElement @Inject internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     /** Payment methods supported by the Express Checkout Element. */
-    abstract class PaymentMethod private constructor() : Parcelable {
+    abstract class PaymentMethod private constructor() {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Suppress("PARCELABLE_PRIMARY_CONSTRUCTOR_IS_EMPTY")
-        @Parcelize
         class GooglePay internal constructor() : PaymentMethod()
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Suppress("PARCELABLE_PRIMARY_CONSTRUCTOR_IS_EMPTY")
-        @Parcelize
         class Link internal constructor() : PaymentMethod()
     }
 
