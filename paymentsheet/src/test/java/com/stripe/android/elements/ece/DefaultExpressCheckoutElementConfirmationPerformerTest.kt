@@ -8,6 +8,7 @@ import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
+import com.stripe.android.checkout.FakeCheckoutSessionRefresher
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
@@ -217,10 +218,11 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
+        val sessionRefresher = FakeCheckoutSessionRefresher()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
-            sessionRefresher = {},
+            sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
         )
@@ -244,6 +246,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         ).block()
 
         confirmationHandler.validate()
+        sessionRefresher.ensureAllEventsConsumed()
         eventReporter.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
     }
