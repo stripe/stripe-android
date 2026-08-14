@@ -404,10 +404,17 @@ class CheckoutController @Inject internal constructor(
         internal val availableExpressButtonTypes: List<ExpressButtonType>,
     ) {
 
-        /**
-         * Whether Express Checkout Element has any payment methods to display for this checkout session.
+        /** Payment methods ready to be displayed in [ExpressCheckoutElement].
+         *
+         * When empty, Express Checkout Element will render empty content.
          */
-        val isExpressCheckoutElementAvailable: Boolean = availableExpressButtonTypes.isNotEmpty()
+        val availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod> =
+            availableExpressButtonTypes.map { type ->
+                when (type) {
+                    is ExpressButtonType.GooglePay -> ExpressCheckoutElement.PaymentMethod.GooglePay()
+                    ExpressButtonType.Link -> ExpressCheckoutElement.PaymentMethod.Link()
+                }
+            }
 
         /**
          * Whether Currency Selector Element has content to display for this checkout session.

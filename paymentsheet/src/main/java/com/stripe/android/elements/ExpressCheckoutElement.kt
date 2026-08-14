@@ -25,6 +25,17 @@ class ExpressCheckoutElement @Inject internal constructor(
         ExpressCheckoutElementContent(interactor = interactor)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    /** Payment methods supported by the Express Checkout Element. */
+    abstract class PaymentMethod private constructor() {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class GooglePay internal constructor() : PaymentMethod()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Link internal constructor() : PaymentMethod()
+    }
+
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
