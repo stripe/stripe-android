@@ -57,6 +57,7 @@ class ExpressCheckoutElement @Inject internal constructor(
             /**
              * Display configuration for Google Pay.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class Display {
                 /**
                  * Google Pay will be displayed when available.
@@ -125,6 +126,7 @@ class ExpressCheckoutElement @Inject internal constructor(
              * [Google's documentation](https://developers.google.com/pay/api/android/reference/request-objects#ButtonOptions)
              * for more information on button types.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class ButtonType {
                 /**
                  * Displays "Buy with" alongside the Google Pay logo.
