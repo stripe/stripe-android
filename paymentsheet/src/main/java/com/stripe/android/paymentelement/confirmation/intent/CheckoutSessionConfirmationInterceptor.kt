@@ -114,10 +114,11 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethod: PaymentMethod,
     ): Result<Unit> {
         val billingDetails = paymentMethod.billingDetails
-        val initialEstimatedTotal = checkoutSessionResponse?.totalSummary?.totalAmountDue
+        val checkoutSessionResponse = integrationMetadata.checkoutSessionResponse
+        val initialEstimatedTotal = checkoutSessionResponse.totalSummary?.totalAmountDue
         val billingAddress = billingDetails?.address?.toCheckoutAddress()
-        val updatedCheckoutSessionResponse = if (checkoutSessionResponse != null && billingAddress != null) {
-            checkoutSessionTaxRegionUpdater.updateIfNeeded(
+        val updatedCheckoutSessionResponse = if (billingAddress != null) {
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 address = billingAddress,
