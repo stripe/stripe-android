@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.ui.core.elements.BsbElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -61,6 +62,11 @@ internal class LpmBillingAddressFormValuesToParamsTest {
             .flatMap { it.fields }
 
         sectionFields.forEach { it.setRawValue(rawValues) }
+        formViewModel.elements
+            .filterIsInstance<BsbElement>()
+            .forEach { element ->
+                rawValues[element.identifier]?.let { element.controller.onValueChange(it) }
+            }
         sectionFields
             .filterIsInstance<AddressFieldsElement>()
             .forEach { it.countryElement.setRawValue(rawValues) }
@@ -128,6 +134,7 @@ internal class LpmBillingAddressFormValuesToParamsTest {
                 addAll(klarnaTestCases)
                 addAll(bacsDebitTestCases)
                 addAll(oxxoTestCases)
+                addAll(auBecsDebitTestCases)
             }
         }
     }

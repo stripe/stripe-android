@@ -22,7 +22,7 @@ fun BsbElementUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
 ) {
-    val validationMessage by element.textElement.controller.validationMessage.collectAsState()
+    val validationMessage by element.controller.validationMessage.collectAsState()
     val bankName by element.bankName.collectAsState()
     Column {
         Section(
@@ -31,7 +31,7 @@ fun BsbElementUI(
             modifier = modifier,
         ) {
             TextField(
-                element.textElement.controller,
+                element.controller,
                 enabled = enabled,
                 imeAction = if (lastTextFieldIdentifier == element.identifier) {
                     ImeAction.Done
