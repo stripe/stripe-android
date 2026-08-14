@@ -145,6 +145,15 @@ private class NetworkStatement(
             request: StripeRequest,
             callback: HttpURLConnection.(request: StripeRequest) -> Unit
         ): HttpsURLConnection {
+            // No test asserts on v2 analytics, since no test tracks its host. Reject the request
+            // type explicitly so the reason is clear even once the host is tracked.
+            if (request is AnalyticsRequestV2) {
+                throw RequestNotFoundException(
+                    "Test request attempted to reach AnalyticsRequestV2, which is not asserted on. " +
+                        "Url: ${request.url}"
+                )
+            }
+
             val requestHost = request.url.hostFromUrl()
             if (!hostsToTrack.contains(requestHost)) {
                 throw RequestNotFoundException(
