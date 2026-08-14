@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class FakeConfirmationHandler(
     override val hasReloadedFromProcessDeath: Boolean = false,
-    override val state: MutableStateFlow<ConfirmationHandler.State> = MutableStateFlow(ConfirmationHandler.State.Idle)
+    override val state: MutableStateFlow<ConfirmationHandler.State> = MutableStateFlow(ConfirmationHandler.State.Idle),
+    private val startError: Throwable? = null,
 ) : ConfirmationHandler {
     val registerTurbine: Turbine<RegisterCall> = Turbine()
     val startTurbine: Turbine<ConfirmationHandler.Args> = Turbine()
@@ -30,6 +31,7 @@ internal class FakeConfirmationHandler(
 
     override suspend fun start(arguments: ConfirmationHandler.Args) {
         startTurbine.add(arguments)
+        startError?.let { throw it }
     }
 
     override suspend fun awaitResult(): ConfirmationHandler.Result? {
