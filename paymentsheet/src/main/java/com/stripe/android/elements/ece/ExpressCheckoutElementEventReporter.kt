@@ -106,8 +106,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
             FIELD_ECE_CONFIG to mapOf(
                 FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkVisibility.name.lowercase(),
                 FIELD_GOOGLE_PAY_VISIBILITY to (
-                    expressCheckoutElementConfiguration.googlePayConfiguration.display ==
-                        ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic
+                    expressCheckoutElementConfiguration.googlePayConfiguration.display.toAnalyticsValue()
                     ),
             ),
         )
@@ -141,5 +140,12 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
         const val FIELD_ECE_CONFIG = "ece_config"
         const val FIELD_LINK_VISIBILITY = "link_visibility"
         const val FIELD_GOOGLE_PAY_VISIBILITY = "google_pay_visibility"
+
+        fun ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.toAnalyticsValue(): String {
+            return when (this) {
+                ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic -> "automatic"
+                ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never -> "never"
+            }
+        }
     }
 }

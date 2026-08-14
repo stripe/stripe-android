@@ -34,7 +34,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             "ece_config",
             mapOf(
                 "link_visibility" to "auto",
-                "google_pay_visibility" to true,
+                "google_pay_visibility" to "automatic",
             ),
         )
         assertThat(
@@ -59,7 +59,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             "ece_config",
             mapOf(
                 "link_visibility" to "auto",
-                "google_pay_visibility" to false,
+                "google_pay_visibility" to "never",
             ),
         )
     }
