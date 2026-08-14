@@ -64,7 +64,6 @@ class KlarnaDefinitionTest {
                 defaultBillingDetails = PaymentSheet.BillingDetails(
                     address = PaymentSheet.Address(country = "DE"),
                 ),
-                checkoutSessionResponse = null,
             ),
         )
 

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -16,7 +17,7 @@ class GooglePayDisplayItemsFactoryTest {
 
     @Test
     fun `returns empty list when checkoutSessionResponse is null`() {
-        val metadata = PaymentMethodMetadataFactory.create(checkoutSessionResponse = null)
+        val metadata = PaymentMethodMetadataFactory.create()
 
         val result = GooglePayDisplayItemsFactory.create(metadata)
 
@@ -214,10 +215,15 @@ class GooglePayDisplayItemsFactoryTest {
         lineItems: List<CheckoutSessionResponse.LineItem>,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
     ): List<GooglePayJsonFactory.DisplayItem> {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            lineItems = lineItems,
+            totalSummary = totalSummary,
+        )
         val metadata = PaymentMethodMetadataFactory.create(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                lineItems = lineItems,
-                totalSummary = totalSummary,
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = checkoutSessionResponse.id,
+                instancesKey = "GooglePayDisplayItemsFactoryTest",
+                checkoutSessionResponse = checkoutSessionResponse,
             ),
         )
 

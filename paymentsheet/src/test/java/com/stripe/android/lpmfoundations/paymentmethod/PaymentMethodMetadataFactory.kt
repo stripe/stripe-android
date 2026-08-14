@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -83,7 +82,6 @@ internal object PaymentMethodMetadataFactory {
         disableSsdOcrCardScan: Boolean = false,
         cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
-        checkoutSessionResponse: CheckoutSessionResponse? = null,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
@@ -157,7 +155,6 @@ internal object PaymentMethodMetadataFactory {
             disableSsdOcrCardScan = disableSsdOcrCardScan,
             cardArts = cardArts,
             shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
-            checkoutSessionResponse = checkoutSessionResponse,
             paymentMethodLayout = paymentMethodLayout,
         )
     }
