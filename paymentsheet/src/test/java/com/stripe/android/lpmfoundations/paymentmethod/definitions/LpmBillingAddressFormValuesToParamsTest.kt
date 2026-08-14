@@ -10,14 +10,12 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
-import com.stripe.android.uicore.elements.AddressFieldsElement
-import com.stripe.android.uicore.elements.CheckboxFieldElement
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -37,50 +35,41 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     ) = runTest {
         assertThat(
             createPaymentMethodCreateParamsFromFormValues(
-                paymentMethodType = testCase.paymentMethodType,
-                mode = testCase.mode,
-                rawValues = testCase.rawValues,
+                testCase = testCase,
             ),
         ).isEqualTo(testCase.expectedPaymentMethodParams)
     }
 
     private suspend fun createPaymentMethodCreateParamsFromFormValues(
-        paymentMethodType: PaymentMethod.Type,
-        mode: LpmBillingAddressBaselineMode,
-        rawValues: Map<IdentifierSpec, String?>,
+        testCase: LpmBillingAddressFormValuesToParamsTestCase,
     ): PaymentMethodCreateParams {
-        val metadata = createMetadata(paymentMethodType, mode)
+        val metadata = createMetadata(
+            paymentMethodType = testCase.paymentMethodType,
+            mode = testCase.mode,
+            defaultBillingDetails = testCase.defaultBillingDetails,
+        )
         val formViewModel = createFormViewModel(
-            paymentMethodType = paymentMethodType,
+            paymentMethodType = testCase.paymentMethodType,
             metadata = metadata,
-            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(
+                paymentMethodCreateParams = testCase.paymentMethodCreateParams,
+                paymentMethodExtraParams = testCase.paymentMethodExtraParams,
+            ),
         )
 
-        val sectionFields = formViewModel.elements
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-
-        sectionFields.forEach { it.setRawValue(rawValues) }
-        sectionFields
-            .filterIsInstance<AddressFieldsElement>()
-            .forEach { it.countryElement.setRawValue(rawValues) }
-        formViewModel.elements
-            .filterIsInstance<CheckboxFieldElement>()
-            .forEach { element ->
-                rawValues[element.identifier]?.let { element.controller.onValueChange(it.toBoolean()) }
-            }
-
-        return formViewModel.createPaymentMethodCreateParams(paymentMethodType, metadata)
+        return formViewModel.createPaymentMethodCreateParams(testCase.paymentMethodType, metadata)
     }
 
     private fun createMetadata(
         paymentMethodType: PaymentMethod.Type,
         mode: LpmBillingAddressBaselineMode,
+        defaultBillingDetails: PaymentSheet.BillingDetails,
     ) = PaymentMethodMetadataFactory.create(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = listOf(paymentMethodType.code),
         ),
         billingDetailsCollectionConfiguration = mode.billingDetailsCollectionConfiguration(),
+        defaultBillingDetails = defaultBillingDetails,
     )
 
     private fun createFormViewModel(
@@ -137,7 +126,9 @@ internal data class LpmBillingAddressFormValuesToParamsTestCase(
     val name: String,
     val paymentMethodType: PaymentMethod.Type,
     val mode: LpmBillingAddressBaselineMode,
-    val rawValues: Map<IdentifierSpec, String?>,
+    val defaultBillingDetails: PaymentSheet.BillingDetails,
+    val paymentMethodCreateParams: PaymentMethodCreateParams?,
+    val paymentMethodExtraParams: PaymentMethodExtraParams?,
     val expectedPaymentMethodParams: PaymentMethodCreateParams,
 ) {
     override fun toString(): String = name

@@ -4,21 +4,32 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.PaymentSheet
 
-private val boletoNoBillingAddressRawValues = mapOf(
-    IdentifierSpec.Generic("boleto[tax_id]") to "123.456.789-09",
+private val boletoBillingDetails = PaymentSheet.BillingDetails(
+    name = "Jane Doe",
+    email = "jane@example.com",
+    address = PaymentSheet.Address(
+        line1 = "Avenida Paulista 123",
+        line2 = "Apto 45",
+        city = "Sao Paulo",
+        state = "SP",
+        country = "BR",
+        postalCode = "01311000",
+    ),
 )
 
-private val boletoWithBillingAddressRawValues = boletoNoBillingAddressRawValues + mapOf(
-    IdentifierSpec.Name to "Jane Doe",
-    IdentifierSpec.Email to "jane@example.com",
-    IdentifierSpec.Line1 to "Avenida Paulista 123",
-    IdentifierSpec.Line2 to "Apto 45",
-    IdentifierSpec.City to "Sao Paulo",
-    IdentifierSpec.State to "SP",
-    IdentifierSpec.Country to "BR",
-    IdentifierSpec.PostalCode to "01311000",
+private val boletoPaymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+    code = PaymentMethod.Type.Boleto.code,
+    billingDetails = null,
+    requiresMandate = false,
+    overrideParamMap = mapOf(
+        "type" to PaymentMethod.Type.Boleto.code,
+        "boleto" to mapOf("tax_id" to "123.456.789-09"),
+    ),
+    productUsage = emptySet(),
+    allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
 private val boletoNoBillingAddressExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
@@ -75,21 +86,27 @@ internal val boletoTestCases = listOf(
         name = "Boleto Never",
         paymentMethodType = PaymentMethod.Type.Boleto,
         mode = LpmBillingAddressBaselineMode.Never,
-        rawValues = boletoNoBillingAddressRawValues,
+        defaultBillingDetails = boletoBillingDetails,
+        paymentMethodCreateParams = boletoPaymentMethodCreateParams,
+        paymentMethodExtraParams = null,
         expectedPaymentMethodParams = boletoNoBillingAddressExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Automatic without tax",
         paymentMethodType = PaymentMethod.Type.Boleto,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
-        rawValues = boletoWithBillingAddressRawValues,
+        defaultBillingDetails = boletoBillingDetails,
+        paymentMethodCreateParams = boletoPaymentMethodCreateParams,
+        paymentMethodExtraParams = null,
         expectedPaymentMethodParams = boletoWithBillingAddressExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Full",
         paymentMethodType = PaymentMethod.Type.Boleto,
         mode = LpmBillingAddressBaselineMode.Full,
-        rawValues = boletoWithBillingAddressRawValues,
+        defaultBillingDetails = boletoBillingDetails,
+        paymentMethodCreateParams = boletoPaymentMethodCreateParams,
+        paymentMethodExtraParams = null,
         expectedPaymentMethodParams = boletoWithBillingAddressExpectedPaymentMethodParams,
     ),
 )

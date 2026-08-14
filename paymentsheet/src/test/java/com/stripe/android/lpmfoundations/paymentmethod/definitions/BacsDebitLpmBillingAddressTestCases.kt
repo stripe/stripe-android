@@ -4,19 +4,31 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.paymentsheet.PaymentSheet
 
-private val bacsDebitFullRawValues = mapOf(
-    IdentifierSpec.Generic("bacs_debit[sort_code]") to "108800",
-    IdentifierSpec.Generic("bacs_debit[account_number]") to "00012345",
-    IdentifierSpec.BacsDebitConfirmed to "true",
-    IdentifierSpec.Name to "Jenny Rosen",
-    IdentifierSpec.Email to "jenny.rosen@example.com",
-    IdentifierSpec.Line1 to "10 Downing Street",
-    IdentifierSpec.Line2 to "Westminster",
-    IdentifierSpec.City to "London",
-    IdentifierSpec.PostalCode to "SW1A 2AA",
-    IdentifierSpec.Country to "GB",
+private val bacsDebitBillingDetails = PaymentSheet.BillingDetails(
+    name = "Jenny Rosen",
+    email = "jenny.rosen@example.com",
+    address = PaymentSheet.Address(
+        line1 = "10 Downing Street",
+        line2 = "Westminster",
+        city = "London",
+        postalCode = "SW1A 2AA",
+        country = "GB",
+    ),
+)
+
+private val bacsDebitPaymentMethodCreateParams = PaymentMethodCreateParams.create(
+    bacsDebit = PaymentMethodCreateParams.BacsDebit(
+        accountNumber = "00012345",
+        sortCode = "108800",
+    ),
+    billingDetails = PaymentMethod.BillingDetails(),
+)
+
+private val bacsDebitPaymentMethodExtraParams = PaymentMethodExtraParams.BacsDebit(
+    confirmed = true,
 )
 
 private val bacsDebitBankDetailsExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
@@ -77,21 +89,27 @@ internal val bacsDebitTestCases = listOf(
         name = "Bacs Debit Never",
         paymentMethodType = PaymentMethod.Type.BacsDebit,
         mode = LpmBillingAddressBaselineMode.Never,
-        rawValues = bacsDebitFullRawValues,
+        defaultBillingDetails = bacsDebitBillingDetails,
+        paymentMethodCreateParams = bacsDebitPaymentMethodCreateParams,
+        paymentMethodExtraParams = bacsDebitPaymentMethodExtraParams,
         expectedPaymentMethodParams = bacsDebitBankDetailsExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Bacs Debit Automatic without tax",
         paymentMethodType = PaymentMethod.Type.BacsDebit,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
-        rawValues = bacsDebitFullRawValues,
+        defaultBillingDetails = bacsDebitBillingDetails,
+        paymentMethodCreateParams = bacsDebitPaymentMethodCreateParams,
+        paymentMethodExtraParams = bacsDebitPaymentMethodExtraParams,
         expectedPaymentMethodParams = bacsDebitWithBillingAddressExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Bacs Debit Full",
         paymentMethodType = PaymentMethod.Type.BacsDebit,
         mode = LpmBillingAddressBaselineMode.Full,
-        rawValues = bacsDebitFullRawValues,
+        defaultBillingDetails = bacsDebitBillingDetails,
+        paymentMethodCreateParams = bacsDebitPaymentMethodCreateParams,
+        paymentMethodExtraParams = bacsDebitPaymentMethodExtraParams,
         expectedPaymentMethodParams = bacsDebitWithBillingAddressExpectedPaymentMethodParams,
     ),
 )

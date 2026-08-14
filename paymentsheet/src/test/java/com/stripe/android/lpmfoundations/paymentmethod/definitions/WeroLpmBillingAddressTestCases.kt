@@ -4,17 +4,20 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.PaymentSheet
 
-private val weroCountryOnlyRawValues = mapOf(
-    IdentifierSpec.Country to "DE",
+private val weroCountryOnlyBillingDetails = PaymentSheet.BillingDetails(
+    address = PaymentSheet.Address(country = "DE"),
 )
 
-private val weroWithBillingAddressRawValues = weroCountryOnlyRawValues + mapOf(
-    IdentifierSpec.Line1 to "Unter den Linden 1",
-    IdentifierSpec.Line2 to "Wohnung 2",
-    IdentifierSpec.City to "Berlin",
-    IdentifierSpec.PostalCode to "10117",
+private val weroFullBillingDetails = PaymentSheet.BillingDetails(
+    address = PaymentSheet.Address(
+        line1 = "Unter den Linden 1",
+        line2 = "Wohnung 2",
+        city = "Berlin",
+        country = "DE",
+        postalCode = "10117",
+    ),
 )
 
 private val weroCountryOnlyExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
@@ -68,21 +71,27 @@ internal val weroTestCases = listOf(
         name = "Wero Never",
         paymentMethodType = PaymentMethod.Type.Wero,
         mode = LpmBillingAddressBaselineMode.Never,
-        rawValues = weroCountryOnlyRawValues,
+        defaultBillingDetails = weroCountryOnlyBillingDetails,
+        paymentMethodCreateParams = null,
+        paymentMethodExtraParams = null,
         expectedPaymentMethodParams = weroCountryOnlyExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Wero Automatic without tax",
         paymentMethodType = PaymentMethod.Type.Wero,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
-        rawValues = weroCountryOnlyRawValues,
+        defaultBillingDetails = weroCountryOnlyBillingDetails,
+        paymentMethodCreateParams = null,
+        paymentMethodExtraParams = null,
         expectedPaymentMethodParams = weroCountryOnlyExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Wero Full",
         paymentMethodType = PaymentMethod.Type.Wero,
         mode = LpmBillingAddressBaselineMode.Full,
-        rawValues = weroWithBillingAddressRawValues,
+        defaultBillingDetails = weroFullBillingDetails,
+        paymentMethodCreateParams = null,
+        paymentMethodExtraParams = null,
         expectedPaymentMethodParams = weroWithBillingAddressExpectedPaymentParams,
     ),
 )

@@ -4,15 +4,17 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.PaymentSheet
 
-private val klarnaFullRawValues = mapOf(
-    IdentifierSpec.Country to "DE",
-    IdentifierSpec.Email to "jane@example.com",
-    IdentifierSpec.Line1 to "Unter den Linden 1",
-    IdentifierSpec.Line2 to "Wohnung 2",
-    IdentifierSpec.City to "Berlin",
-    IdentifierSpec.PostalCode to "10117",
+private val klarnaBillingDetails = PaymentSheet.BillingDetails(
+    email = "jane@example.com",
+    address = PaymentSheet.Address(
+        line1 = "Unter den Linden 1",
+        line2 = "Wohnung 2",
+        city = "Berlin",
+        country = "DE",
+        postalCode = "10117",
+    ),
 )
 
 private val klarnaCountryOnlyExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
@@ -89,21 +91,27 @@ internal val klarnaTestCases = listOf(
         name = "Klarna Never",
         paymentMethodType = PaymentMethod.Type.Klarna,
         mode = LpmBillingAddressBaselineMode.Never,
-        rawValues = klarnaFullRawValues,
+        defaultBillingDetails = klarnaBillingDetails,
+        paymentMethodCreateParams = null,
+        paymentMethodExtraParams = null,
         expectedPaymentMethodParams = klarnaCountryOnlyExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Klarna Automatic without tax",
         paymentMethodType = PaymentMethod.Type.Klarna,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
-        rawValues = klarnaFullRawValues,
+        defaultBillingDetails = klarnaBillingDetails,
+        paymentMethodCreateParams = null,
+        paymentMethodExtraParams = null,
         expectedPaymentMethodParams = klarnaWithEmailAndCountryExpectedPaymentMethodParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Klarna Full",
         paymentMethodType = PaymentMethod.Type.Klarna,
         mode = LpmBillingAddressBaselineMode.Full,
-        rawValues = klarnaFullRawValues,
+        defaultBillingDetails = klarnaBillingDetails,
+        paymentMethodCreateParams = null,
+        paymentMethodExtraParams = null,
         expectedPaymentMethodParams = klarnaWithBillingAddressExpectedPaymentMethodParams,
     ),
 )
