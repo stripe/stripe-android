@@ -790,7 +790,6 @@ class CheckoutController @Inject internal constructor(
         private var adaptivePricing: AdaptivePricing = AdaptivePricing()
         private var apiConfiguration: ApiConfiguration? = null
         private var merchantDisplayName: String? = null
-        private var googlePayConfiguration: GooglePayConfiguration? = null
         private var defaults: Defaults = Defaults()
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
@@ -867,15 +866,6 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
-         * Sets the Google Pay configuration for this checkout session.
-         */
-        fun googlePayConfiguration(
-            configuration: GooglePayConfiguration,
-        ): Configuration = apply {
-            this.googlePayConfiguration = configuration
-        }
-
-        /**
          * Prefill values for the customer's details. If known up front, these prepopulate the
          * elements (and the Checkout Session) so the customer doesn't re-enter them.
          */
@@ -890,7 +880,6 @@ class CheckoutController @Inject internal constructor(
             val adaptivePricingAllowed: Boolean,
             val apiConfiguration: ApiConfiguration.State?,
             val merchantDisplayName: String?,
-            val googlePayConfiguration: GooglePayConfiguration.State?,
             val defaults: Defaults.State,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
@@ -908,7 +897,6 @@ class CheckoutController @Inject internal constructor(
                 currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
                 shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
                 expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
-                googlePayConfiguration = googlePayConfiguration?.build(),
                 defaults = defaultsState,
             )
         }

@@ -24,7 +24,10 @@ internal fun CheckoutController.Configuration.State.toGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
     checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
-        googlePayConfiguration?.asPaymentSheet(merchantCountry)
+        expressCheckoutElementConfiguration.googlePayConfiguration.asPaymentSheet(
+            merchantCountry = merchantCountry,
+            liveMode = checkoutSessionResponse.liveMode,
+        )
     }
 
 @OptIn(CheckoutSessionPreview::class)

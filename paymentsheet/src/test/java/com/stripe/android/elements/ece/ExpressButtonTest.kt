@@ -3,7 +3,7 @@
 package com.stripe.android.elements.ece
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkExpressMode
@@ -248,9 +248,7 @@ internal class ExpressButtonTest {
         buttonType: GooglePayConfiguration.ButtonType = GooglePayConfiguration.ButtonType.Pay,
         additionalEnabledNetworks: List<String> = emptyList(),
     ): GooglePayConfiguration.State {
-        return GooglePayConfiguration(
-            GooglePayConfiguration.Environment.Test,
-        )
+        return GooglePayConfiguration()
             .buttonType(buttonType)
             .additionalEnabledNetworks(additionalEnabledNetworks)
             .build()

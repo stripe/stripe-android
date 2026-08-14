@@ -8,9 +8,10 @@ import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
-import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -53,7 +54,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm reports unexpected error when confirmation args are null`() = runScenario(
-        state = CheckoutControllerStateFactory.create(),
+        state = CheckoutControllerStateFactory.create(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
+        ),
         expressButton = createGooglePayExpressButton(),
     ) {
         performer.confirm(expressButton)
@@ -184,7 +187,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
+                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
                 .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "US",
@@ -199,9 +202,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     ): ExpressButton.GooglePay {
         return ExpressButton.GooglePay.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            googlePayConfiguration = GooglePayConfiguration(
-                GooglePayConfiguration.Environment.Test,
-            ).build(),
+            googlePayConfiguration = GooglePayConfiguration().build(),
             shippingAddressRequired = shippingAddressRequired,
         )
     }

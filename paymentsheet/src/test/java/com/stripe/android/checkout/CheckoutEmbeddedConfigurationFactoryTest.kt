@@ -2,6 +2,8 @@ package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
@@ -111,7 +113,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     @Test
     fun `maps googlePayConfiguration using the checkout session country`() {
         val configuration = controllerConfiguration(
-            googlePayConfiguration = GooglePayConfiguration(GooglePayConfiguration.Environment.Production)
+            googlePayConfiguration = GooglePayConfiguration()
                 .label("Total")
                 .buttonType(GooglePayConfiguration.ButtonType.Checkout)
                 .additionalEnabledNetworks(listOf("INTERAC")),
@@ -119,7 +121,10 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
         val result = factory().create(
             configuration = configuration,
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "GB"),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                merchantCountry = "GB",
+                liveMode = true,
+            ),
             collectedDetails = collectedDetails(),
         )
 
@@ -136,7 +141,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     @Test
     fun `leaves googlePay null when the checkout session country is missing`() {
         val configuration = controllerConfiguration(
-            googlePayConfiguration = GooglePayConfiguration(GooglePayConfiguration.Environment.Production),
+            googlePayConfiguration = GooglePayConfiguration(),
         )
 
         val result = factory().create(
@@ -149,14 +154,17 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `leaves googlePay null when the merchant supplied no googlePayConfiguration`() {
+    fun `maps googlePay regardless of ECE display setting`() {
         val result = factory().create(
-            configuration = controllerConfiguration(googlePayConfiguration = null),
+            configuration = controllerConfiguration(
+                googlePayConfiguration = GooglePayConfiguration()
+                    .display(GooglePayConfiguration.Display.Never),
+            ),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.googlePay).isNull()
+        assertThat(result.googlePay).isNotNull()
     }
 
     @Test
@@ -254,7 +262,9 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
                     )
             )
         if (googlePayConfiguration != null) {
-            builder.googlePayConfiguration(googlePayConfiguration)
+            builder.expressCheckoutElement(
+                ExpressCheckoutElement.Configuration().googlePayConfiguration(googlePayConfiguration)
+            )
         }
         return builder.build()
     }

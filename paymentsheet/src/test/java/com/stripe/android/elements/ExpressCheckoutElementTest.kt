@@ -7,14 +7,14 @@ import org.junit.Test
 @OptIn(CheckoutSessionPreview::class)
 internal class ExpressCheckoutElementTest {
     @Test
-    fun `configuration defaults both wallet visibilities to auto`() {
+    fun `configuration defaults both wallet visibilities to automatic`() {
         val state = ExpressCheckoutElement.Configuration().build()
 
         assertThat(state.linkVisibility).isEqualTo(
             ExpressCheckoutElement.Configuration.LinkVisibility.Auto
         )
-        assertThat(state.googlePayVisibility).isEqualTo(
-            ExpressCheckoutElement.Configuration.GooglePayVisibility.Auto
+        assertThat(state.googlePayConfiguration.display).isEqualTo(
+            ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic
         )
     }
 
@@ -22,14 +22,17 @@ internal class ExpressCheckoutElementTest {
     fun `configuration builds requested wallet visibilities`() {
         val state = ExpressCheckoutElement.Configuration()
             .linkVisibility(ExpressCheckoutElement.Configuration.LinkVisibility.Never)
-            .googlePayVisibility(ExpressCheckoutElement.Configuration.GooglePayVisibility.Never)
+            .googlePayConfiguration(
+                ExpressCheckoutElement.Configuration.GooglePayConfiguration()
+                    .display(ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never)
+            )
             .build()
 
         assertThat(state.linkVisibility).isEqualTo(
             ExpressCheckoutElement.Configuration.LinkVisibility.Never
         )
-        assertThat(state.googlePayVisibility).isEqualTo(
-            ExpressCheckoutElement.Configuration.GooglePayVisibility.Never
+        assertThat(state.googlePayConfiguration.display).isEqualTo(
+            ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never
         )
     }
 

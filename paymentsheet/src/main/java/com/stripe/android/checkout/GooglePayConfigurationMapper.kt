@@ -1,27 +1,24 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun GooglePayConfiguration.State.asPaymentSheet(
     merchantCountry: String,
+    liveMode: Boolean,
 ): PaymentSheet.GooglePayConfiguration = PaymentSheet.GooglePayConfiguration(
-    environment = environment.asPaymentSheet(),
+    environment = if (liveMode) {
+        PaymentSheet.GooglePayConfiguration.Environment.Production
+    } else {
+        PaymentSheet.GooglePayConfiguration.Environment.Test
+    },
     countryCode = merchantCountry,
     label = label,
     buttonType = buttonType.asPaymentSheet(),
     additionalEnabledNetworks = additionalEnabledNetworks,
 )
-
-@OptIn(CheckoutSessionPreview::class)
-private fun GooglePayConfiguration.Environment.asPaymentSheet():
-    PaymentSheet.GooglePayConfiguration.Environment = when (this) {
-    GooglePayConfiguration.Environment.Production ->
-        PaymentSheet.GooglePayConfiguration.Environment.Production
-    GooglePayConfiguration.Environment.Test ->
-        PaymentSheet.GooglePayConfiguration.Environment.Test
-}
 
 @OptIn(CheckoutSessionPreview::class)
 private fun GooglePayConfiguration.ButtonType.asPaymentSheet():
