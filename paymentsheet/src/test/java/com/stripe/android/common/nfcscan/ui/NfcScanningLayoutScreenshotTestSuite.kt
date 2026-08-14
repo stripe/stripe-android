@@ -225,7 +225,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
         @Test
         fun idle() {
-            paparazziRule.gif(end = 1500L) {
+            paparazziRule.gif(end = 5000L) {
                 NfcScanningTheme {
                     NfcScanningLayout(
                         status = NfcScanningStatus.Idle(),
@@ -241,14 +241,14 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
         @Test
         fun error() {
-            paparazziRule.gif(end = 1500L) {
+            paparazziRule.gif(end = 2000L) {
                 NfcScanningTheme {
                     var status by remember {
                         mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle())
                     }
 
                     LaunchedEffect(Unit) {
-                        delay(800L)
+                        delay(1000)
                         status = NfcScanningStatus.Idle(ERROR_TEXT.resolvableString)
                     }
 
@@ -266,14 +266,14 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
         @Test
         fun scanned() {
-            paparazziRule.gif(end = 2500L) {
+            paparazziRule.gif(end = 3000L) {
                 NfcScanningTheme {
                     var status by remember {
                         mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle())
                     }
 
                     LaunchedEffect(Unit) {
-                        delay(600L)
+                        delay(1200L)
                         status = NfcScanningStatus.Scanning
                         delay(400L)
                         status = NfcScanningStatus.Scanned
