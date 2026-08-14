@@ -175,6 +175,7 @@ internal data class PlaygroundSettings(
             TestModeSetting(),
             ForceOnelinkSetting(),
             ForceOnelinkConsumerSetting(),
+            LinkDs3Setting(),
             FlowSetting(),
             ConfirmIntentSetting(),
             NativeSetting(),

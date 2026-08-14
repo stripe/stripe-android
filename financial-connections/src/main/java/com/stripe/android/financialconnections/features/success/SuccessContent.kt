@@ -281,7 +281,10 @@ private fun SpinnerToCheckmark(
             contentAlignment = Alignment.Center,
             modifier = modifier
                 .size(ICON_SIZE.dp)
-                .background(colors.primary, CircleShape)
+                // Dedicated tokens rather than primary/primaryAccent: Link DS 3.0's primary is
+                // near-black, but the success moment stays green. For every other theme these
+                // resolve to the same colors as before.
+                .background(colors.successIconBackground, CircleShape)
         ) {
             Icon(
                 modifier = Modifier.graphicsLayer {
@@ -290,7 +293,7 @@ private fun SpinnerToCheckmark(
                 },
                 painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                 contentDescription = stringResource(id = R.string.stripe_success_pane_title),
-                tint = colors.primaryAccent,
+                tint = colors.successIconForeground,
             )
         }
     }

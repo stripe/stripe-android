@@ -54,6 +54,8 @@ import com.stripe.android.uicore.R as StripeUiCoreR
  * @param onAccountClicked callback when this account is clicked
  * @param account the account info to display
  * @param networkedAccount For networked accounts, extra info to display
+ * @param groupPosition where this row sits inside a Link DS 3.0 grouped card, or null to render as a
+ *        standalone bordered row.
  */
 @Composable
 internal fun AccountItem(
@@ -61,24 +63,16 @@ internal fun AccountItem(
     showInstitutionIcon: Boolean = true,
     onAccountClicked: (PartnerAccount) -> Unit,
     account: PartnerAccount,
+    groupPosition: GroupPosition?,
     networkedAccount: NetworkedAccount? = null,
 ) {
     val view = LocalView.current
     val viewState = remember(account, networkedAccount) { getVisibilityState(account, networkedAccount) }
 
-    val shape = remember { RoundedCornerShape(12.dp) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape)
-            .border(
-                width = if (selected) 2.dp else 1.dp,
-                color = when {
-                    selected -> colors.primary
-                    else -> colors.borderNeutral
-                },
-                shape = shape
-            )
+            .then(accountItemSurface(groupPosition = groupPosition, selected = selected))
             .clickableSingle(enabled = viewState != Disabled) {
                 view.performHapticFeedback(CONTEXT_CLICK)
                 onAccountClicked(account)
@@ -117,6 +111,31 @@ internal fun AccountItem(
             )
         }
     }
+}
+
+/**
+ * The row's background treatment. Inside a grouped card the shared surface and its separators replace
+ * the per-row border entirely — including on the selected row, where the trailing checkmark already
+ * carries the state. Standalone rows keep the bordered box.
+ */
+@Composable
+private fun accountItemSurface(groupPosition: GroupPosition?, selected: Boolean): Modifier {
+    if (groupPosition != null) {
+        return Modifier.groupedCardSurface(
+            isFirst = groupPosition.isFirst,
+            isLast = groupPosition.isLast,
+            // Account rows have no leading icon here, so the separator spans the full width.
+            separatorInset = 0.dp,
+        )
+    }
+    val shape = remember { RoundedCornerShape(12.dp) }
+    return Modifier
+        .clip(shape)
+        .border(
+            width = if (selected) 2.dp else 1.dp,
+            color = if (selected) colors.primary else colors.borderNeutral,
+            shape = shape
+        )
 }
 
 private fun getVisibilityState(
@@ -226,6 +245,7 @@ internal fun AccountItemPreview() {
                 AccountItem(
                     selected = false,
                     onAccountClicked = { },
+                    groupPosition = null,
                     account = PartnerAccount(
                         id = "id",
                         name = "Regular Checking",
@@ -254,6 +274,7 @@ internal fun AccountItemPreview() {
                 AccountItem(
                     selected = false,
                     onAccountClicked = { },
+                    groupPosition = null,
                     account = PartnerAccount(
                         id = "id",
                         name = "Regular Checking",
@@ -276,6 +297,7 @@ internal fun AccountItemPreview() {
                 AccountItem(
                     selected = true,
                     onAccountClicked = { },
+                    groupPosition = null,
                     account = PartnerAccount(
                         id = "id",
                         name = "Regular Checking (Selected)",
@@ -303,6 +325,7 @@ internal fun AccountItemPreview() {
                 AccountItem(
                     selected = false,
                     onAccountClicked = { },
+                    groupPosition = null,
                     account = PartnerAccount(
                         id = "id",
                         name = "Regular Checking (Disabled)",
@@ -331,6 +354,7 @@ internal fun AccountItemPreview() {
                 AccountItem(
                     selected = false,
                     onAccountClicked = { },
+                    groupPosition = null,
                     account = PartnerAccount(
                         id = "id",
                         name = "Regular Checking (Disabled)",
@@ -359,6 +383,7 @@ internal fun AccountItemPreview() {
                 AccountItem(
                     selected = false,
                     onAccountClicked = { },
+                    groupPosition = null,
                     account = PartnerAccount(
                         id = "id",
                         name = "Manually entered (Disabled)",

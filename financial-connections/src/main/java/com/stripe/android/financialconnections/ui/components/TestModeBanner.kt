@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.isLinkDs3
 
 @Composable
 internal fun TestModeBanner(
@@ -66,7 +67,13 @@ internal fun TestModeBanner(
 
         Text(
             text = buttonLabel,
-            color = FinancialConnectionsTheme.colors.textAction,
+            // DS 3.0's textAction is green, which reads as a brand accent on the warning banner.
+            // Matches iOS, which uses textDefault here for the Link theme.
+            color = if (FinancialConnectionsTheme.theme.isLinkDs3) {
+                FinancialConnectionsTheme.colors.textDefault
+            } else {
+                FinancialConnectionsTheme.colors.textAction
+            },
             style = FinancialConnectionsTheme.typography.bodyMediumEmphasized,
             modifier = Modifier
                 .semantics { testTagsAsResourceId = true }

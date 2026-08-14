@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.exit
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -15,14 +14,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.FooterButton
+import com.stripe.android.financialconnections.features.common.FooterButtons
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.presentation.paneViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -77,22 +79,39 @@ private fun ExitModalContent(
             color = colors.textDefault,
         )
         Spacer(modifier = Modifier.size(24.dp))
-        FinancialConnectionsButton(
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !loading,
-            onClick = onCancel,
-        ) {
-            Text(text = stringResource(id = R.string.stripe_exit_modal_cta_cancel))
-        }
-        Spacer(modifier = Modifier.size(8.dp))
-        FinancialConnectionsButton(
-            modifier = Modifier.fillMaxWidth(),
-            loading = loading,
-            enabled = !loading,
-            type = FinancialConnectionsButton.Type.Secondary,
-            onClick = onExit,
-        ) {
-            Text(text = stringResource(id = R.string.stripe_exit_modal_cta_accept))
+        FooterButtons(
+            // A bottom sheet, so DS 3.0 puts the two actions side by side.
+            preferSideBySide = true,
+            stackedSpacing = 8.dp,
+            primary = FooterButton(
+                onClick = onCancel,
+                enabled = !loading,
+                loading = false,
+                testTag = "exit_modal_cancel_button",
+                content = { Text(text = stringResource(id = R.string.stripe_exit_modal_cta_cancel)) },
+            ),
+            secondary = FooterButton(
+                onClick = onExit,
+                enabled = !loading,
+                loading = loading,
+                testTag = "exit_modal_accept_button",
+                content = { Text(text = stringResource(id = R.string.stripe_exit_modal_cta_accept)) },
+            ),
+        )
+    }
+}
+
+@Composable
+@Preview(name = "Link DS 3.0")
+internal fun ExitModalLinkDs3Preview() {
+    FinancialConnectionsPreview(theme = Theme.LinkDs3) {
+        Surface(color = colors.background) {
+            ExitModalContent(
+                description = TextResource.StringId(R.string.stripe_exit_modal_desc, listOf("MerchantName")),
+                loading = false,
+                onExit = {},
+                onCancel = {}
+            )
         }
     }
 }

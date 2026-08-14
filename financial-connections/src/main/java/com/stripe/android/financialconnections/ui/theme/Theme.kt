@@ -34,18 +34,26 @@ import com.stripe.android.model.LinkBrand
 
 internal enum class Theme {
     DefaultLight,
-    LinkLight;
+    LinkLight,
+
+    /**
+     * The Link DS 3.0 refresh of [LinkLight]. Only reachable when
+     * [com.stripe.android.core.utils.FeatureFlags.financialConnectionsLinkDs3] is enabled — see
+     * `FinancialConnectionsSheetNativeActivity.toLocalTheme`.
+     */
+    LinkDs3;
 
     val colors: FinancialConnectionsColors
         @Composable
         get() = when (this) {
             DefaultLight -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
             LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
+            LinkDs3 -> if (isSystemInDarkTheme()) LinkDs3DarkColors else LinkDs3Colors
         }
 
     fun icon(linkBrand: LinkBrand): Int = when (this) {
         DefaultLight -> R.drawable.stripe_logo
-        LinkLight -> when (linkBrand) {
+        LinkLight, LinkDs3 -> when (linkBrand) {
             LinkBrand.Onelink -> R.drawable.stripe_onelink_logo_monochrome
             LinkBrand.Link -> R.drawable.stripe_link_logo_monochrome
         }
@@ -55,6 +63,14 @@ internal enum class Theme {
         val default: Theme = DefaultLight
     }
 }
+
+/**
+ * Whether the Link DS 3.0 design is active. Prefer expressing differences as color tokens on
+ * [FinancialConnectionsColors]; only branch on this for structural changes that no token can express
+ * (pill buttons, grouped card lists, the warmup sheet's horizontal footer).
+ */
+internal val Theme.isLinkDs3: Boolean
+    get() = this == Theme.LinkDs3
 
 private val Colors = FinancialConnectionsColors(
     background = Neutral0,
@@ -75,8 +91,11 @@ private val Colors = FinancialConnectionsColors(
     logo = Brand600,
     iconTint = Brand500,
     iconBackground = Brand25,
+    iconBackgroundOnCard = Brand25,
     spinner = Brand500,
     border = Brand600,
+    successIconBackground = Brand500,
+    successIconForeground = Neutral0,
 )
 
 private val DarkThemeColors = FinancialConnectionsColors(
@@ -98,8 +117,11 @@ private val DarkThemeColors = FinancialConnectionsColors(
     logo = Neutral0,
     iconTint = Brand500,
     iconBackground = Brand25Dark,
+    iconBackgroundOnCard = Brand25Dark,
     spinner = Brand500,
     border = Brand600,
+    successIconBackground = Brand500,
+    successIconForeground = Neutral0,
 )
 
 private val InstantDebitsColors = FinancialConnectionsColors(
@@ -121,8 +143,11 @@ private val InstantDebitsColors = FinancialConnectionsColors(
     logo = LinkGreen900,
     iconTint = LinkGreen500,
     iconBackground = LinkGreen50,
+    iconBackgroundOnCard = LinkGreen50,
     spinner = LinkGreen200,
     border = LinkGreen200,
+    successIconBackground = LinkGreen200,
+    successIconForeground = LinkGreen900,
 )
 
 private val InstantDebitsDarkModeColors = FinancialConnectionsColors(
@@ -144,8 +169,71 @@ private val InstantDebitsDarkModeColors = FinancialConnectionsColors(
     logo = Neutral0,
     iconTint = LinkGreen500,
     iconBackground = LinkGreen50Dark,
+    iconBackgroundOnCard = LinkGreen50Dark,
     spinner = LinkGreen200,
     border = LinkGreen200,
+    successIconBackground = LinkGreen200,
+    successIconForeground = LinkGreen900,
+)
+
+/**
+ * Link DS 3.0, light. Neutral tokens are shared with [InstantDebitsColors]; the brand-driven tokens
+ * move from green to the pure grey ramp, so the primary CTA becomes near-black rather than green.
+ */
+private val LinkDs3Colors = FinancialConnectionsColors(
+    background = Neutral0,
+    backgroundSecondary = Neutral25,
+    backgroundHighlighted = Neutral50,
+    textDefault = Neutral800,
+    textSubdued = Neutral600,
+    textCritical = FeedbackCritical600,
+    icon = Neutral700,
+    borderNeutral = Neutral100,
+    spinnerNeutral = Neutral200,
+    warningLight = Attention50,
+    warning = Attention300,
+    primary = LinkNeutral900,
+    primaryAccent = LinkNeutral0,
+    textAction = LinkBrand600,
+    textFieldFocused = LinkNeutral900,
+    logo = LinkNeutral900,
+    iconTint = LinkNeutral900,
+    iconBackground = LinkNeutral100,
+    iconBackgroundOnCard = LinkNeutral200,
+    spinner = LinkNeutral900,
+    border = LinkNeutral900,
+    successIconBackground = LinkGreen200,
+    successIconForeground = LinkNeutral900,
+)
+
+/**
+ * Link DS 3.0, dark. Note [primary] / [primaryAccent] invert relative to
+ * [LinkDs3Colors], so the primary CTA is dark-on-white here.
+ */
+private val LinkDs3DarkColors = FinancialConnectionsColors(
+    background = Neutral0Dark,
+    backgroundSecondary = Neutral25Dark,
+    backgroundHighlighted = Neutral50Dark,
+    textDefault = Neutral25,
+    textSubdued = Neutral800Dark,
+    textCritical = FeedbackCritical600,
+    icon = Neutral25,
+    borderNeutral = Neutral100Dark,
+    spinnerNeutral = Neutral200,
+    warningLight = Attention100Dark,
+    warning = Attention300,
+    primary = LinkNeutral0,
+    primaryAccent = LinkNeutral900,
+    textAction = LinkGreen200,
+    textFieldFocused = LinkNeutral0,
+    logo = Neutral0,
+    iconTint = LinkNeutral0,
+    iconBackground = LinkNeutral800,
+    iconBackgroundOnCard = LinkNeutral700,
+    spinner = LinkNeutral0,
+    border = LinkNeutral0,
+    successIconBackground = LinkGreen200,
+    successIconForeground = LinkNeutral900,
 )
 
 private val lineHeightStyle = LineHeightStyle(
@@ -241,16 +329,25 @@ internal val TextSelectionColors: TextSelectionColors
 
 private val FinancialConnectionsRippleConfiguration: RippleConfiguration
     @Composable
-    get() = RippleConfiguration(
-        color = RippleDefaults.rippleColor(
-            contentColor = FinancialConnectionsTheme.colors.textAction,
-            lightTheme = MaterialTheme.colors.isLight,
-        ),
-        rippleAlpha = RippleDefaults.rippleAlpha(
-            contentColor = FinancialConnectionsTheme.colors.textAction,
-            lightTheme = MaterialTheme.colors.isLight,
+    get() {
+        // DS 3.0's textAction is green, which tints every pressed row green. Press feedback there is
+        // meant to be neutral, so it follows the text color instead.
+        val rippleContentColor = if (FinancialConnectionsTheme.theme.isLinkDs3) {
+            FinancialConnectionsTheme.colors.textDefault
+        } else {
+            FinancialConnectionsTheme.colors.textAction
+        }
+        return RippleConfiguration(
+            color = RippleDefaults.rippleColor(
+                contentColor = rippleContentColor,
+                lightTheme = MaterialTheme.colors.isLight,
+            ),
+            rippleAlpha = RippleDefaults.rippleAlpha(
+                contentColor = rippleContentColor,
+                lightTheme = MaterialTheme.colors.isLight,
+            )
         )
-    )
+    }
 
 @Composable
 internal fun FinancialConnectionsTheme(
@@ -261,6 +358,7 @@ internal fun FinancialConnectionsTheme(
         LocalNavHostController provides rememberNavController(),
         LocalTypography provides Typography,
         LocalColors provides theme.colors,
+        LocalTheme provides theme,
     ) {
         val view = LocalView.current
         val window = findWindow()
@@ -313,6 +411,11 @@ private val LocalColors =
         error("no Colors provided")
     }
 
+private val LocalTheme =
+    staticCompositionLocalOf<Theme> {
+        error("no Theme provided")
+    }
+
 internal object FinancialConnectionsTheme {
     val typography
         @Composable
@@ -320,6 +423,9 @@ internal object FinancialConnectionsTheme {
     val colors
         @Composable
         get() = LocalColors.current
+    val theme
+        @Composable
+        get() = LocalTheme.current
 }
 
 private fun TextStyle.toCompat(useDefaultLineHeight: Boolean = false): TextStyle {

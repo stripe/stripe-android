@@ -34,18 +34,21 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.FooterButton
+import com.stripe.android.financialconnections.features.common.FooterButtons
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.LinkBrand50
 import com.stripe.android.financialconnections.ui.theme.LinkGreen200
 import com.stripe.android.financialconnections.ui.theme.LinkGreen900
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLinkDs3
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -97,10 +100,15 @@ private fun NetworkingLinkLoginWarmupContent(
 
 @Composable
 private fun HeaderSection(linkBrand: LinkBrand) {
-    val title = if (linkBrand == LinkBrand.Link) {
-        stringResource(R.string.stripe_networking_link_login_warmup_title)
-    } else {
-        stringResource(R.string.stripe_networking_link_login_warmup_title_with_brand, linkBrand.brandName())
+    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
+    val title = when {
+        // DS 3.0 uses a fixed greeting with no brand name.
+        isLinkDs3 -> stringResource(R.string.stripe_networking_link_login_warmup_title_welcome_back)
+        linkBrand == LinkBrand.Link -> stringResource(R.string.stripe_networking_link_login_warmup_title)
+        else -> stringResource(
+            R.string.stripe_networking_link_login_warmup_title_with_brand,
+            linkBrand.brandName()
+        )
     }
     val description = if (linkBrand == LinkBrand.Link) {
         stringResource(R.string.stripe_networking_link_login_warmup_description)
@@ -110,10 +118,13 @@ private fun HeaderSection(linkBrand: LinkBrand) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        ShapedIcon(
-            painter = painterResource(id = R.drawable.stripe_ic_person),
-            contentDescription = title
-        )
+        if (isLinkDs3.not()) {
+            // DS 3.0 removes the avatar above the title entirely.
+            ShapedIcon(
+                painter = painterResource(id = R.drawable.stripe_ic_person),
+                contentDescription = title
+            )
+        }
         Text(
             text = title,
             style = typography.headingLarge,
@@ -138,39 +149,36 @@ private fun Footer(
     onSkipClicked: () -> Unit
 ) {
     val enableButtons = !primaryButtonLoading && !secondaryButtonLoading
-    val ctaContinue = if (linkBrand == LinkBrand.Link) {
-        stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue)
-    } else {
-        stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue_with_brand, linkBrand.brandName())
+    val ctaContinue = when {
+        // The side-by-side layout only has room for the short label.
+        FinancialConnectionsTheme.theme.isLinkDs3 ->
+            stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue_short)
+        linkBrand == LinkBrand.Link ->
+            stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue)
+        else -> stringResource(
+            id = R.string.stripe_networking_link_login_warmup_cta_continue_with_brand,
+            linkBrand.brandName()
+        )
     }
 
-    Column {
-        FinancialConnectionsButton(
-            loading = primaryButtonLoading,
-            enabled = enableButtons,
-            type = Type.Primary,
+    FooterButtons(
+        preferSideBySide = true,
+        stackedSpacing = 16.dp,
+        primary = FooterButton(
             onClick = onContinueClick,
-            modifier = Modifier
-                .semantics { testTagsAsResourceId = true }
-                .testTag("existing_email-button")
-                .fillMaxWidth()
-        ) {
-            Text(text = ctaContinue)
-        }
-        Spacer(modifier = Modifier.size(16.dp))
-        FinancialConnectionsButton(
-            loading = secondaryButtonLoading,
             enabled = enableButtons,
-            type = Type.Secondary,
-            onClick = { onSkipClicked() },
-            modifier = Modifier
-                .semantics { testTagsAsResourceId = true }
-                .testTag("skip-button")
-                .fillMaxWidth()
-        ) {
-            Text(text = stringResource(id = secondaryButtonLabel))
-        }
-    }
+            loading = primaryButtonLoading,
+            testTag = "existing_email-button",
+            content = { Text(text = ctaContinue) },
+        ),
+        secondary = FooterButton(
+            onClick = onSkipClicked,
+            enabled = enableButtons,
+            loading = secondaryButtonLoading,
+            testTag = "skip-button",
+            content = { Text(text = stringResource(id = secondaryButtonLabel)) },
+        ),
+    )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -178,16 +186,24 @@ private fun Footer(
 internal fun ExistingEmailSection(
     email: String
 ) {
+    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .semantics { testTagsAsResourceId = true }
             .clip(RoundedCornerShape(12.dp))
-            .border(
-                width = 1.dp,
-                color = colors.borderNeutral,
-                shape = RoundedCornerShape(12.dp)
+            // DS 3.0 replaces the outline with a green-tinted fill.
+            .then(
+                if (isLinkDs3) {
+                    Modifier.background(color = LinkBrand50, shape = RoundedCornerShape(12.dp))
+                } else {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = colors.borderNeutral,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                }
             )
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
@@ -210,7 +226,19 @@ internal fun ExistingEmailSection(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = typography.bodySmall,
-            color = colors.textDefault
+            color = if (isLinkDs3) LinkGreen200 else colors.textDefault
+        )
+    }
+}
+
+@Composable
+@Preview(group = "NetworkingLinkLoginWarmup Pane", name = "Link DS 3.0")
+internal fun NetworkingLinkLoginWarmupScreenLinkDs3Preview() {
+    FinancialConnectionsPreview(theme = Theme.LinkDs3) {
+        NetworkingLinkLoginWarmupContent(
+            state = NetworkingLinkLoginWarmupPreviewParameterProvider().instantDebits(),
+            onContinueClick = {},
+            onSkipClicked = {},
         )
     }
 }

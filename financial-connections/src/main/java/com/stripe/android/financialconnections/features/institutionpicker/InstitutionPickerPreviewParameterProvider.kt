@@ -52,7 +52,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         initialScroll = 0
     )
 
-    private fun searchSuccess() = InstitutionPreviewState(
+    internal fun searchSuccess() = InstitutionPreviewState(
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload()),

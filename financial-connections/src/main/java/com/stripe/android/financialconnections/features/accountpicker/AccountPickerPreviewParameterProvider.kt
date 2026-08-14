@@ -28,7 +28,7 @@ internal class AccountPickerPreviewParameterProvider :
     override val count: Int
         get() = super.count
 
-    private fun loading() = AccountPickerState(
+    internal fun loading() = AccountPickerState(
         payload = Loading(),
         selectedIds = emptySet(),
     )
@@ -54,7 +54,7 @@ internal class AccountPickerPreviewParameterProvider :
         selectedIds = emptySet(),
     )
 
-    private fun multiSelect() = AccountPickerState(
+    internal fun multiSelect() = AccountPickerState(
         institution = Success(
             FinancialConnectionsInstitution(
                 id = "1",
