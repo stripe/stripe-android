@@ -53,6 +53,11 @@ internal interface IdentityIO {
     ): File
 
     /**
+     * Create a file containing the placeholder image for a test-mode upload.
+     */
+    fun createTestModeFileToUpload(image: TestModeImage): File
+
+    /**
      * Crop and pad a bitmap to upload as high resolution image.
      *
      * First find the center cropped bitmap of original bitmap, this is the same bitmap sent to ML model.
@@ -74,4 +79,10 @@ internal interface IdentityIO {
      * Create a file in cache.
      */
     fun createCacheFile(): File
+}
+
+internal enum class TestModeImage {
+    DOCUMENT_FRONT,
+    DOCUMENT_BACK,
+    SELFIE
 }

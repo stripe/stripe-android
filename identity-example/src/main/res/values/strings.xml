@@ -13,6 +13,7 @@
     <string name="use_native">Native</string>
     <string name="use_web">Web</string>
     <string name="get_link">Link</string>
+    <string name="use_test_mode">Use test mode</string>
 
     <string name="identity_example">Identity Example</string>
     <string name="verification_type">Verification Type</string>
