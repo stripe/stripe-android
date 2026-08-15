@@ -145,7 +145,8 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     activeAuthSession.institutionSkipAccountSelection == true &&
                     accounts.size == 1,
                 businessName = manifest.businessName,
-                stripeDirect = manifest.isStripeDirect ?: false
+                stripeDirect = manifest.isStripeDirect ?: false,
+                accountsLimit = manifest.limits?.accounts,
             ).also {
                 eventTracker.track(PaneLoaded(PANE))
             }
@@ -248,10 +249,10 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             val selectedIds = state.selectedIds
             val newSelectedIds = when (payload.selectionMode) {
                 SelectionMode.Single -> setOf(account.id)
-                SelectionMode.Multiple -> if (selectedIds.contains(account.id)) {
-                    selectedIds - account.id
-                } else {
-                    selectedIds + account.id
+                SelectionMode.Multiple -> when {
+                    selectedIds.contains(account.id) -> selectedIds - account.id
+                    payload.accountsLimit != null && selectedIds.size >= payload.accountsLimit -> selectedIds
+                    else -> selectedIds + account.id
                 }
             }
             setState { copy(selectedIds = newSelectedIds) }
@@ -434,6 +435,7 @@ internal data class AccountPickerState(
         val stripeDirect: Boolean,
         val businessName: String?,
         val userSelectedSingleAccountInInstitution: Boolean,
+        val accountsLimit: Int? = null,
     ) {
 
         val selectableAccounts
