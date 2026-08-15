@@ -1,7 +1,17 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
@@ -9,6 +19,9 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.FieldValidationMessage
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionFieldElement
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
@@ -20,6 +33,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -78,6 +92,8 @@ class CvcController constructor(
     private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
 
+    private val focusAsk = MutableStateFlow(false)
+
     override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
             fieldState.shouldShowValidationMessage(hasFocus, isValidating)
@@ -130,5 +146,47 @@ class CvcController constructor(
 
     override fun onValidationStateChanged(isValidating: Boolean) {
         _isValidating.value = isValidating
+    }
+
+    fun requestFocus() {
+        focusAsk.value = true
+    }
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+    ) {
+        val isInspectionMode = LocalInspectionMode.current
+        val focusRequester = remember { FocusRequester() }
+        val windowInfo = LocalWindowInfo.current
+
+        LaunchedEffect(isInspectionMode) {
+            if (!isInspectionMode) {
+                focusAsk.collect { shouldFocus ->
+                    if (shouldFocus) {
+                        snapshotFlow { windowInfo.isWindowFocused }.first { it }
+                        withFrameNanos {}
+                        focusRequester.requestFocus()
+                        focusAsk.value = false
+                    }
+                }
+            }
+        }
+
+        TextField(
+            textFieldController = this,
+            enabled = enabled,
+            imeAction = if (lastTextFieldIdentifier == field.identifier) {
+                ImeAction.Done
+            } else {
+                ImeAction.Next
+            },
+            modifier = modifier,
+            focusRequester = focusRequester,
+        )
     }
 }
