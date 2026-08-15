@@ -6,15 +6,19 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
+import com.stripe.android.ui.core.elements.BillingAddressCollectionMode
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
@@ -23,6 +27,7 @@ import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.StaticTextElement
+import com.stripe.android.ui.core.elements.additionalAutomaticTaxFieldsByCountry
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.CountryElement
@@ -31,6 +36,8 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.RowElement
+import com.stripe.android.uicore.elements.SameAsShippingController
+import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -38,6 +45,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -748,6 +756,74 @@ internal class FormViewModelTest {
                     ?.map { (it.controller as? DropdownFieldController) }
                     ?.firstOrNull { it?.label?.first() == resolvableString(label) }
         }
+    }
+
+    @Suppress("LongMethod")
+    @Test
+    fun `same as shipping fills visible tax fields and omits hidden fields from payment method params`() = runTest {
+        val sameAsShippingElement = SameAsShippingElement(
+            identifier = IdentifierSpec.SameAsShipping,
+            controller = SameAsShippingController(initialValue = false),
+        )
+        val billingAddressElement = BillingAddressElement(
+            identifier = IdentifierSpec.BillingAddress,
+            rawValuesMap = emptyMap(),
+            countryCodes = setOf("US"),
+            autocompleteAddressInteractorFactory = null,
+            sameAsShippingElement = sameAsShippingElement,
+            shippingValuesMap = mapOf(
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.Line1 to "510 Townsend St",
+                IdentifierSpec.Line2 to "Suite 42",
+                IdentifierSpec.City to "San Francisco",
+                IdentifierSpec.State to "CA",
+                IdentifierSpec.PostalCode to "94103",
+            ),
+            addressCollectionMode = BillingAddressCollectionMode.Country(
+                additionalFieldsByCountry = additionalAutomaticTaxFieldsByCountry,
+            ),
+        )
+        val formViewModel = createViewModel(
+            arguments = COMPOSE_FRAGMENT_ARGS.copy(
+                paymentMethodCode = PaymentMethod.Type.Klarna.code,
+                billingDetails = null,
+            ),
+            formElements = listOf(
+                SectionElement.wrap(billingAddressElement),
+                sameAsShippingElement,
+            ),
+        )
+
+        sameAsShippingElement.setRawValue(mapOf(IdentifierSpec.SameAsShipping to "true"))
+        advanceUntilIdle()
+        val formValues = requireNotNull(formViewModel.completeFormValues.first())
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf(PaymentMethod.Type.Klarna.code),
+            ),
+        )
+        val params = formValues.transformToPaymentMethodCreateParams(
+            paymentMethodCode = PaymentMethod.Type.Klarna.code,
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
+
+        assertThat(formValues.fieldValuePairs).containsAtLeastEntriesIn(
+            mapOf(
+                IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                IdentifierSpec.Line1 to FormFieldEntry(value = "510 Townsend St", isComplete = true),
+                IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                IdentifierSpec.PostalCode to FormFieldEntry(value = "94103", isComplete = true),
+            ),
+        )
+        assertThat(formViewModel.hiddenIdentifiers.value).contains(IdentifierSpec.Line2)
+        assertThat(formValues.fieldValuePairs).doesNotContainKey(IdentifierSpec.Line2)
+        assertThat(params.billingDetails?.address?.country).isEqualTo("US")
+        assertThat(params.billingDetails?.address?.line1).isEqualTo("510 Townsend St")
+        assertThat(params.billingDetails?.address?.city).isEqualTo("San Francisco")
+        assertThat(params.billingDetails?.address?.state).isEqualTo("CA")
+        assertThat(params.billingDetails?.address?.postalCode).isEqualTo("94103")
+        assertThat(params.billingDetails?.address?.line2).isNull()
     }
 
     @Test

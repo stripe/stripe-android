@@ -20,15 +20,23 @@ internal class CheckoutControllerExampleBackendRepository(
     private val json = Json { ignoreUnknownKeys = true }
     private val backendUrl = Settings(applicationContext).playgroundBackendUrl
 
-    suspend fun fetchCheckoutSessionClientSecret(): kotlin.Result<String> {
+    suspend fun fetchCheckoutSessionClientSecret(
+        profile: CheckoutControllerExampleProfile,
+    ): kotlin.Result<String> {
         val requestBody = CheckoutRequest.Builder()
             .initialization("checkout_session")
             .useCheckoutSession(true)
             .mode("payment")
             .customerEmail("email@example.com")
-            .currency("usd")
+            .currency(profile.currency)
             .amount(5000)
             .customer("new")
+            .automaticPaymentMethods(false)
+            .supportedPaymentMethods(listOf(profile.paymentMethodCode))
+            .automaticTax(true)
+            .setShippingAddress(false)
+            .displayShippingRates(false)
+            .useLink(false)
             .build()
 
         val apiResponse = withContext(Dispatchers.IO) {
@@ -58,4 +66,21 @@ internal class CheckoutControllerExampleBackendRepository(
             }
         }
     }
+}
+
+internal enum class CheckoutControllerExampleProfile(
+    val displayName: String,
+    val paymentMethodCode: String,
+    val currency: String,
+) {
+    Klarna(
+        displayName = "Klarna",
+        paymentMethodCode = "klarna",
+        currency = "usd",
+    ),
+    CashApp(
+        displayName = "Cash App Pay",
+        paymentMethodCode = "cashapp",
+        currency = "usd",
+    ),
 }

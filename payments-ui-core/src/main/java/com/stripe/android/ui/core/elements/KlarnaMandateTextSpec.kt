@@ -19,7 +19,7 @@ data class KlarnaMandateTextSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("klarna_mandate"),
     @StringRes
     val stringResId: Int = R.string.stripe_klarna_mandate,
-) : FormItemSpec() {
+) : FormItemSpec(), MandateSpec {
 
     @IgnoredOnParcel
     @Transient

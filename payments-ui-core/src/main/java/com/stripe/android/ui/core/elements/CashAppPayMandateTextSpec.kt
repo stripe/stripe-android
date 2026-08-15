@@ -19,7 +19,7 @@ data class CashAppPayMandateTextSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("cashapp_mandate"),
     @StringRes
     val stringResId: Int = R.string.stripe_cash_app_pay_mandate,
-) : FormItemSpec() {
+) : FormItemSpec(), MandateSpec {
 
     @IgnoredOnParcel
     @Transient

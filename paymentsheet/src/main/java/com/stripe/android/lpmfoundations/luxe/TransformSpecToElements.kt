@@ -10,6 +10,7 @@ import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
+import com.stripe.android.ui.core.elements.AutomaticTaxBillingAddressSpec
 import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
 import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.BsbSpec
@@ -50,43 +51,60 @@ internal class TransformSpecToElements(
         placeholderOverrideList: List<IdentifierSpec> = emptyList(),
         termsDisplay: PaymentSheet.TermsDisplay,
     ): List<FormElement> {
-        return specsForConfiguration(
+        val configuredSpecs = specsForConfiguration(
             configuration = arguments.billingDetailsCollectionConfiguration,
             placeholderOverrideList = placeholderOverrideList,
             requiresMandate = arguments.requiresMandate,
             specs = specs,
             termsDisplay = termsDisplay,
-        ).flatMap { spec ->
-            when (spec) {
-                is StaticTextSpec -> listOf(spec.transform())
-                is AfterpayClearpayTextSpec -> listOf(spec.transform(metadata?.stripeIntent?.currency))
-                is AffirmTextSpec -> listOf(spec.transform())
-                is EmptyFormSpec -> listOf(EmptyFormElement())
-                is MandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-                is AuBecsDebitMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-                is BacsDebitBankAccountSpec -> listOf(spec.transform(arguments.initialValues))
-                is BacsDebitConfirmSpec -> listOf(spec.transform(arguments.merchantName, arguments.initialValues))
-                is BsbSpec -> listOf(spec.transform(arguments.initialValues))
-                is OTPSpec -> listOf(spec.transform())
-                is NameSpec -> listOf(spec.transform(arguments.initialValues))
-                is EmailSpec -> listOf(spec.transform(arguments.initialValues))
-                is PhoneSpec -> listOf(spec.transform(arguments.initialValues))
-                is SimpleTextSpec -> listOf(spec.transform(arguments.initialValues))
-                is AuBankAccountNumberSpec -> listOf(spec.transform(arguments.initialValues))
-                is IbanSpec -> listOf(spec.transform(arguments.initialValues))
-                is KlarnaHeaderStaticTextSpec -> listOf(spec.transform())
-                is DropdownSpec -> listOf(spec.transform(arguments.initialValues))
-                is CountrySpec -> listOf(spec.transform(arguments.initialValues))
-                is AddressSpec -> spec.transform(
-                    arguments.initialValues,
-                    arguments.shippingValues,
-                    arguments.autocompleteAddressInteractorFactory,
-                )
-                is SepaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-                is PlaceholderSpec -> listOf() // Placeholders should be processed before calling transform.
-                is CashAppPayMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-                is KlarnaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-            }
+        )
+        val resolvedSpecs = BillingAddressSpecResolver.resolve(
+            specs = configuredSpecs,
+            addressCollectionMode = arguments.billingDetailsCollectionConfiguration.address,
+            requiresBillingAddressForAutomaticTax = arguments.requiresBillingAddressForAutomaticTax,
+            allowedBillingCountries = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+        )
+
+        return resolvedSpecs.flatMap { spec -> transform(spec, metadata) }
+    }
+
+    @Suppress("CyclomaticComplexMethod")
+    private fun transform(
+        spec: FormItemSpec,
+        metadata: PaymentMethodMetadata?,
+    ): List<FormElement> {
+        return when (spec) {
+            is AutomaticTaxBillingAddressSpec -> AutomaticTaxBillingAddressFactory(arguments).create(
+                allowedCountryCodes = spec.allowedCountryCodes,
+            )
+            is StaticTextSpec -> listOf(spec.transform())
+            is AfterpayClearpayTextSpec -> listOf(spec.transform(metadata?.stripeIntent?.currency))
+            is AffirmTextSpec -> listOf(spec.transform())
+            is EmptyFormSpec -> listOf(EmptyFormElement())
+            is MandateTextSpec -> listOf(spec.transform(arguments.merchantName))
+            is AuBecsDebitMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
+            is BacsDebitBankAccountSpec -> listOf(spec.transform(arguments.initialValues))
+            is BacsDebitConfirmSpec -> listOf(spec.transform(arguments.merchantName, arguments.initialValues))
+            is BsbSpec -> listOf(spec.transform(arguments.initialValues))
+            is OTPSpec -> listOf(spec.transform())
+            is NameSpec -> listOf(spec.transform(arguments.initialValues))
+            is EmailSpec -> listOf(spec.transform(arguments.initialValues))
+            is PhoneSpec -> listOf(spec.transform(arguments.initialValues))
+            is SimpleTextSpec -> listOf(spec.transform(arguments.initialValues))
+            is AuBankAccountNumberSpec -> listOf(spec.transform(arguments.initialValues))
+            is IbanSpec -> listOf(spec.transform(arguments.initialValues))
+            is KlarnaHeaderStaticTextSpec -> listOf(spec.transform())
+            is DropdownSpec -> listOf(spec.transform(arguments.initialValues))
+            is CountrySpec -> listOf(spec.transform(arguments.initialValues))
+            is AddressSpec -> spec.transform(
+                arguments.initialValues,
+                arguments.shippingValues,
+                arguments.autocompleteAddressInteractorFactory,
+            )
+            is SepaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
+            is PlaceholderSpec -> listOf() // Placeholders should be processed before calling transform.
+            is CashAppPayMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
+            is KlarnaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
         }
     }
 }
