@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.features.common.PrepaneImage
 import com.stripe.android.financialconnections.features.generic.GenericHeader
 import com.stripe.android.financialconnections.model.GenericErrorPane
 import com.stripe.android.financialconnections.model.GenericErrorPane.PrimaryCtaAction
+import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -37,6 +38,7 @@ internal fun GenericErrorScreen() {
 
     GenericErrorContent(
         pane = state.pane,
+        loading = state.primaryCtaClick is Loading,
         onPrimaryCtaClick = viewModel::onPrimaryCtaClick,
         onClickableTextClick = viewModel::onClickableTextClick,
     )
@@ -45,6 +47,7 @@ internal fun GenericErrorScreen() {
 @Composable
 private fun GenericErrorContent(
     pane: GenericErrorPane?,
+    loading: Boolean,
     onPrimaryCtaClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
 ) {
@@ -62,6 +65,7 @@ private fun GenericErrorContent(
             FinancialConnectionsButton(
                 onClick = onPrimaryCtaClick,
                 modifier = Modifier.fillMaxWidth(),
+                loading = loading,
             ) {
                 Text(text = pane.primaryCtaLabel())
             }
@@ -100,6 +104,7 @@ internal fun GenericErrorScreenPreview(
         Surface(color = colors.background) {
             GenericErrorContent(
                 pane = pane,
+                loading = false,
                 onPrimaryCtaClick = {},
                 onClickableTextClick = {},
             )

@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.model.GenericErrorPane.PrimaryCta
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_AUTO_LAUNCH_AUTH_SESSION
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.GenericErrorContentRepository
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -28,6 +29,7 @@ import com.stripe.android.uicore.navigation.PopUpToBehavior
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -77,6 +79,18 @@ internal class GenericErrorViewModel @AssistedInject constructor(
                 )
             }
         }
+
+        onAsync(
+            GenericErrorState::primaryCtaClick,
+            onFail = {
+                eventTracker.logError(
+                    extraMessage = "Error handling generic error pane primary CTA click.",
+                    error = it,
+                    logger = logger,
+                    pane = PANE,
+                )
+            },
+        )
     }
 
     override fun updateTopAppBar(state: GenericErrorState): TopAppBarStateUpdate {
@@ -89,7 +103,11 @@ internal class GenericErrorViewModel @AssistedInject constructor(
         )
     }
 
-    fun onPrimaryCtaClick() = viewModelScope.launch {
+    /**
+     * Tracked as [GenericErrorState.primaryCtaClick] so the screen can disable the button while
+     * this is in flight, since [restartAuthFlow] makes a network call before navigating away.
+     */
+    fun onPrimaryCtaClick(): Job = suspend {
         val action = stateFlow.value.pane?.primaryCtaAction
         eventTracker.track(GenericErrorClickPrimaryCta(pane = PANE, action = action?.value))
 
@@ -99,7 +117,7 @@ internal class GenericErrorViewModel @AssistedInject constructor(
             PrimaryCtaAction.RestartAuthFlow -> restartAuthFlow()
             null -> selectAnotherBank()
         }
-    }
+    }.execute { copy(primaryCtaClick = it) }
 
     fun onClickableTextClick(uri: String) {
         // No clickable links are expected in server-driven error copy.
@@ -175,4 +193,5 @@ internal class GenericErrorViewModel @AssistedInject constructor(
 
 internal data class GenericErrorState(
     val pane: GenericErrorPane? = null,
+    val primaryCtaClick: Async<Unit> = Async.Uninitialized,
 )
