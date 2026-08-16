@@ -76,20 +76,32 @@ internal val boletoTestCases = listOf(
         paymentMethodType = PaymentMethod.Type.Boleto,
         mode = LpmBillingAddressBaselineMode.Never,
         rawValues = boletoNoBillingAddressRawValues,
-        expectedPaymentMethodParams = boletoNoBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = boletoNoBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Automatic without tax",
         paymentMethodType = PaymentMethod.Type.Boleto,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
         rawValues = boletoWithBillingAddressRawValues,
-        expectedPaymentMethodParams = boletoWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = boletoWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Full",
         paymentMethodType = PaymentMethod.Type.Boleto,
         mode = LpmBillingAddressBaselineMode.Full,
         rawValues = boletoWithBillingAddressRawValues,
-        expectedPaymentMethodParams = boletoWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = boletoWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
 )

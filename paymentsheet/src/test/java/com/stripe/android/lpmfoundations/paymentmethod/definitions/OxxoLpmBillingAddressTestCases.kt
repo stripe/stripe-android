@@ -90,20 +90,32 @@ internal val oxxoTestCases = listOf(
         paymentMethodType = PaymentMethod.Type.Oxxo,
         mode = LpmBillingAddressBaselineMode.Never,
         rawValues = oxxoFullRawValues,
-        expectedPaymentMethodParams = oxxoNoBillingDetailsExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = oxxoNoBillingDetailsExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "OXXO Automatic without tax",
         paymentMethodType = PaymentMethod.Type.Oxxo,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
         rawValues = oxxoFullRawValues,
-        expectedPaymentMethodParams = oxxoWithContactDetailsExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = oxxoWithContactDetailsExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "OXXO Full",
         paymentMethodType = PaymentMethod.Type.Oxxo,
         mode = LpmBillingAddressBaselineMode.Full,
         rawValues = oxxoFullRawValues,
-        expectedPaymentMethodParams = oxxoWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = oxxoWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
 )

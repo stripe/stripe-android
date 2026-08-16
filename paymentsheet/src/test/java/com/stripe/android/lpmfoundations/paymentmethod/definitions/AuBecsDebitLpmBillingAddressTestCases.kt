@@ -104,20 +104,32 @@ internal val auBecsDebitTestCases = listOf(
         paymentMethodType = PaymentMethod.Type.AuBecsDebit,
         mode = LpmBillingAddressBaselineMode.Never,
         rawValues = auBecsDebitFullRawValues,
-        expectedPaymentMethodParams = auBecsDebitBankDetailsExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = auBecsDebitBankDetailsExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "AU BECS Debit Automatic without tax",
         paymentMethodType = PaymentMethod.Type.AuBecsDebit,
         mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
         rawValues = auBecsDebitFullRawValues,
-        expectedPaymentMethodParams = auBecsDebitWithContactDetailsExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = auBecsDebitWithContactDetailsExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "AU BECS Debit Full",
         paymentMethodType = PaymentMethod.Type.AuBecsDebit,
         mode = LpmBillingAddressBaselineMode.Full,
         rawValues = auBecsDebitFullRawValues,
-        expectedPaymentMethodParams = auBecsDebitWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = auBecsDebitWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
 )
