@@ -8,7 +8,10 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,12 +46,13 @@ fun AddressTextFieldUI(
     val inlineQuery by controller.inlineQuery.collectAsState()
     val error by controller.validationMessage.collectAsState()
     val textFieldInsets = LocalTextFieldInsets.current
+    val focusRequester = remember { FocusRequester() }
 
     val isEditable = controller.isEditable
     val isError = error != null
 
     val fieldModifier = modifier.fillMaxWidth().then(
-        if (isEditable) Modifier else Modifier.clickable(enabled = enabled) { onClick() }
+        if (isEditable) Modifier.focusRequester(focusRequester) else Modifier.clickable(enabled = enabled) { onClick() }
     )
 
     CompatTextField(
@@ -64,7 +68,10 @@ fun AddressTextFieldUI(
         trailingIcon = if (onSearchActivated != null) {
             {
                 SearchIconButton(
-                    onClick = onSearchActivated,
+                    onClick = {
+                        focusRequester.requestFocus()
+                        onSearchActivated()
+                    },
                     enabled = enabled,
                 )
             }

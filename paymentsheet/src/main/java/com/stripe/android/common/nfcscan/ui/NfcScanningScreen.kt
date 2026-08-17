@@ -86,10 +86,10 @@ private fun BoxScope.CloseButtonLayout(
     val (alignment, padding) = rememberOrientationValues(
         deviceRotation = deviceRotation,
         onPortrait = {
-            if (tapZone.yBias < 0.75) {
-                Alignment.BottomCenter to PaddingValues(bottom = BottomCenterEdgePadding)
-            } else {
+            if (tapZone.yBias > 0.1) {
                 Alignment.TopStart to PaddingValues(start = DefaultEdgePadding, top = DefaultEdgePadding)
+            } else {
+                Alignment.BottomCenter to PaddingValues(bottom = BottomCenterEdgePadding)
             }
         },
         onLandscape = {

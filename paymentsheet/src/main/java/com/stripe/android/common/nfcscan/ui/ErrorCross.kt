@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -54,7 +55,7 @@ internal fun ErrorCross(
         return
     }
 
-    val savedState = remember {
+    val savedState = rememberSaveable {
         mutableStateOf<ErrorCrossState>(ErrorCrossState.Init)
     }
 
@@ -62,7 +63,7 @@ internal fun ErrorCross(
         ErrorCrossDelayManager(
             delay = shownDelay,
             savedState = savedState,
-            onShown = onShown,
+            onShown = { onShown() },
         )
     }
 
@@ -101,14 +102,12 @@ private class ErrorCrossDelayManager(
     private suspend fun wait(state: ErrorCrossState.Waiting) {
         val startedAt = state.startedAt
 
-        if (startedAt < 0L) {
-            return
-        }
+        if (startedAt >= 0L) {
+            val remainingMs = delay.inWholeMilliseconds - (SystemClock.elapsedRealtime() - startedAt)
 
-        val remainingMs = delay.inWholeMilliseconds - (SystemClock.elapsedRealtime() - startedAt)
-
-        if (remainingMs > 0L) {
-            delay(remainingMs.milliseconds)
+            if (remainingMs > 0L) {
+                delay(remainingMs.milliseconds)
+            }
         }
 
         savedState.value = ErrorCrossState.Complete

@@ -74,7 +74,6 @@ internal class StripeHostedPlacesClientProxy(
         }.onSuccess { response ->
             eventReporter.onAutocompleteSuggestionsReturned(
                 sessionToken = token,
-                queryLength = q.length,
                 resultCount = response.autocompletePredictions.size,
                 source = responseSource,
             )

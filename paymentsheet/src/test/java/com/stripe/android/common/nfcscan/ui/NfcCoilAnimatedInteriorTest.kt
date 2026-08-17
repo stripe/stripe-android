@@ -108,8 +108,6 @@ internal class NfcCoilAnimatedInteriorTest {
     fun `scanned status invokes onSuccessShown after animation and delay`() {
         var successShownCount by mutableIntStateOf(0)
 
-        composeRule.mainClock.autoAdvance = true
-
         composeRule.setContent {
             NfcCoilAnimatedInterior(
                 status = NfcScanningStatus.Scanned,
@@ -119,9 +117,9 @@ internal class NfcCoilAnimatedInteriorTest {
             )
         }
 
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            successShownCount == 1
-        }
+        composeRule.waitForIdle()
+        composeRule.advanceThroughSuccessAnimation()
+        composeRule.advanceSuccessDelayBy(SUCCESS_SHOWN_DELAY_MS + FRAME_BUFFER_MS)
 
         assertThat(successShownCount).isEqualTo(1)
     }
@@ -149,8 +147,6 @@ internal class NfcCoilAnimatedInteriorTest {
     fun `error status invokes onErrorShown after delay`() {
         var errorShownCount by mutableIntStateOf(0)
 
-        composeRule.mainClock.autoAdvance = true
-
         composeRule.setContent {
             NfcCoilAnimatedInterior(
                 status = NfcScanningStatus.Error(ERROR_MESSAGE),
@@ -160,9 +156,8 @@ internal class NfcCoilAnimatedInteriorTest {
             )
         }
 
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            errorShownCount == 1
-        }
+        composeRule.waitForIdle()
+        composeRule.advanceErrorDelayBy(ERROR_SHOWN_DELAY_MS + FRAME_BUFFER_MS)
 
         assertThat(errorShownCount).isEqualTo(1)
     }
@@ -200,16 +195,15 @@ internal class NfcCoilAnimatedInteriorTest {
         var errorShownCount by mutableIntStateOf(0)
         val visible = mutableStateOf(true)
 
-        composeRule.mainClock.autoAdvance = true
         composeRule.setNfcCoilContent(
             visible = visible,
             status = NfcScanningStatus.Error(ERROR_MESSAGE),
             onErrorShown = { errorShownCount++ },
         )
 
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            errorShownCount == 1
-        }
+        composeRule.waitForIdle()
+        composeRule.advanceErrorDelayBy(ERROR_SHOWN_DELAY_MS + FRAME_BUFFER_MS)
+        assertThat(errorShownCount).isEqualTo(1)
 
         composeRule.simulateConfigChange(visible)
         composeRule.waitForIdle()
@@ -266,16 +260,16 @@ internal class NfcCoilAnimatedInteriorTest {
         var successShownCount by mutableIntStateOf(0)
         val visible = mutableStateOf(true)
 
-        composeRule.mainClock.autoAdvance = true
         composeRule.setNfcCoilContent(
             visible = visible,
             status = NfcScanningStatus.Scanned,
             onSuccessShown = { successShownCount++ },
         )
 
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            successShownCount == 1
-        }
+        composeRule.waitForIdle()
+        composeRule.advanceThroughSuccessAnimation()
+        composeRule.advanceSuccessDelayBy(SUCCESS_SHOWN_DELAY_MS + FRAME_BUFFER_MS)
+        assertThat(successShownCount).isEqualTo(1)
 
         composeRule.simulateConfigChange(visible)
         composeRule.waitForIdle()
