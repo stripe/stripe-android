@@ -35,7 +35,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
         customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
         googlePlacesApiKey = null,
-        termsDisplay = emptyMap(),
+        termsDisplay = configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet(),
         walletButtons = null,
         opensCardScannerAutomatically = ConfigurationDefaults.opensCardScannerAutomatically,
         userOverrideCountry = ConfigurationDefaults.userOverrideCountry,
