@@ -16,8 +16,6 @@
 
 ## Architecture
 
-Multi-module Android library for payment processing and financial services.
-
 **Core**: `payments-core` (API models, Stripe client) → `payments` (high-level APIs) → `paymentsheet` (pre-built UI)
 **Shared**: `stripe-core` (utilities), `payments-model` (data models), `payments-ui-core` (shared UI)
 **Specialized**: `financial-connections`, `identity`, `connect`, `3ds2sdk`
@@ -26,7 +24,7 @@ Multi-module Android library for payment processing and financial services.
 **Key Patterns**
 - Kotlin coroutines for async; Jetpack Compose + traditional Views
 - Dagger/Hilt DI in some modules; binary-compatibility-validator for API compat
-- Gradle with shared deps (dependencies.gradle), AGP 8.13.x, Kotlin 2.3.x
+- Gradle with shared deps (dependencies.gradle)
 - Detekt for static analysis, Paparazzi for screenshot testing
 - No defaults for internal code: public APIs give parameters defaults (`= null`, `= false`) for ergonomic construction; non-public code (`internal` or `@RestrictTo`) omits defaults on both model fields and function parameters to force explicit decisions at each call site
 
@@ -35,5 +33,8 @@ Multi-module Android library for payment processing and financial services.
 - `create-fake` — fake implementations with Turbine call tracking
 - `compose-tests` — Compose UI tests with composeRule, Robolectric, node assertions
 - `network-tests` — NetworkRule integration tests with testBodyFromFile and fixture patterns
+- `screenshot-tests` — Paparazzi screenshot tests: PaparazziRule setup, record/verify commands
+- `parameterized-tests` — TestParameterInjector runners, method vs class parameters, value providers
+- `fixing-flakes` — reproducing and fixing intermittent test failures
 
 **Build validation** — invoke `delegate-low-reasoning-work` before running routine Gradle checks, formatting, static analysis, or generated-output validation. Delegate when a low-cost subagent is available.
