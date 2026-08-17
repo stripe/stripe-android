@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -56,6 +57,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("#ir-fishery-zigzag")
     @Test
     fun testCardWithCustomBillingDetailsCollection() {
         testDriver.confirmNewOrGuestComplete(
