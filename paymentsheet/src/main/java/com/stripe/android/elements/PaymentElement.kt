@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.uicore.utils.collectAsState
@@ -42,6 +43,7 @@ class PaymentElement @Inject internal constructor(
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
         private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
+        private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
 
         /**
          * Controls whether [Content] displays mandate text below the payment methods.
@@ -79,18 +81,44 @@ class PaymentElement @Inject internal constructor(
             this.paymentMethodLayout = paymentMethodLayout
         }
 
+        /**
+         * A map for specifying when legal agreements are displayed for each payment method type.
+         * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
+         */
+        fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>): Configuration = apply {
+            this.termsDisplay = termsDisplay
+        }
+
         @Parcelize
         internal data class State(
             val embeddedViewDisplaysMandateText: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
             val paymentMethodLayout: PaymentMethodLayout,
+            val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
         ) : Parcelable
 
         internal fun build(): State = State(
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
             paymentMethodLayout = paymentMethodLayout,
+            termsDisplay = termsDisplay,
         )
+
+        /**
+         * [TermsDisplay] controls how mandates and legal agreements are displayed.
+         * Use [TermsDisplay.NEVER] to never display legal agreements.
+         * The default setting is [TermsDisplay.AUTOMATIC], which causes legal agreements to be shown only when
+         * necessary.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class TermsDisplay {
+            /** Show legal agreements only when necessary */
+            AUTOMATIC,
+
+            /** Never show legal agreements */
+            NEVER,
+        }
 
         /**
          * Configuration for how billing details are collected during checkout.
