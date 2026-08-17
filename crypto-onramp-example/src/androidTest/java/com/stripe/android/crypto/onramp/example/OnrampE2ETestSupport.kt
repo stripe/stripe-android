@@ -494,6 +494,12 @@ internal class OnrampE2EPage(
         if (snackbarOverlaps(tag)) {
             composeRule.waitUntilDoesNotExist(hasTestTag(SNACKBAR_TAG), timeoutMillis = timeoutMs)
         }
+        composeRule.waitForIdle()
+        // Async content can move the target while a snackbar is visible, so scroll again immediately before tapping.
+        runCatching { node.performScrollTo() }
+        if (scrollRoot) {
+            scrollContentUp()
+        }
         composeRule.onNodeWithTag(tag).performClick()
     }
 
