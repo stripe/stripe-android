@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Prihvaćeni oblici identifikacijskih dokumenata uključuju</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Držite osobni dokument ravno</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Dopustite</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Postavke aplikacije</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Dozvole kamere</string>
   <string name="stripe_camera_permission_rationale">Ova aplikacija koristi kameru za skeniranje vaših osobnih dokumenata i snimanje fotografija radi provjere vašeg identiteta.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Snimljena prednja strana</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Snimljeno lijevo</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Snimljeno desno</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Snimanje…</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Možete pokušati ponovno ili prenijeti sliku sa svog uređaja.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Nismo uspjeli snimiti fotografiju</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Odbijanje</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Pojedinosti nisu vidljive</string>
   <string name="stripe_decrease_lighting_2">Pomaknite se u manje osvijetljeni prostor</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Potrebna nam je dozvola za uporabu kamere. Molimo dozvolite pristup kameri u postavkama aplikacije.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Ne pomičite se, skeniranje u tijeku</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Budite mirni…</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">Osobna iskaznica</string>
   <!-- Label for ID number section -->
@@ -224,10 +236,24 @@
   <string name="stripe_selfie_capture_complete">Snimanje selfi slika je završeno</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Snimanje selfie slika</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Odlično! Provjeravamo vaše slike…</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">snimljen je jedan selfie</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Okrenite glavu prema lijevo</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Okrenite glavu prema desno</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Približite se</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Vaše selfie slike nisu pohranjene. Želite li napustiti?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Postavite lice unutar kadra</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Selfie</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Pomozite nam poboljšati provjere</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">U sljedećem koraku automatski će se snimiti nekoliko fotografija kako bi se potvrdilo da ste to vi</string>
   <!-- Title for selfie warmup page -->

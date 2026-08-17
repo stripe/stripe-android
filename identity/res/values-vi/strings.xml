@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Các loại ID được chấp nhận bao gồm</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Giữ ID cân bằng</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Cho phép</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Cài đặt Ứng dụng</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Cấp quyền máy ảnh</string>
   <string name="stripe_camera_permission_rationale">Ứng dụng này sử dụng máy ảnh để quét giấy tờ tùy thân và chụp ảnh để xác minh danh tính của bạn.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Đã chụp phía trước</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Đã chụp bên trái</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Đã chụp bên phải</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Đang chụp…</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Bạn có thể thử lại hoặc tải lên hình ảnh từ thiết bị của mình.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Không thể chụp ảnh</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Từ chối</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Không thấy rõ thông tin chi tiết</string>
   <string name="stripe_decrease_lighting_2">Di chuyển đến khu vực tối hơn</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Chúng tôi cần được cấp quyền để sử dụng máy ảnh của bạn. Vui lòng cho phép truy cập máy ảnh trong phần cài đặt ứng dụng.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Giữ yên, đang quét</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Giữ yên...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">ID</string>
   <!-- Label for ID number section -->
@@ -224,10 +236,24 @@
   <string name="stripe_selfie_capture_complete">Chụp ảnh selfie đã hoàn tất</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Chụp ảnh selfie</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Tuyệt vời! Đang kiểm tra hình ảnh của bạn…</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">đã chụp một ảnh selfie</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Quay đầu sang trái</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Quay đầu sang phải</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Di chuyển lại gần</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Ảnh selfie của bạn chưa được lưu. Bạn có muốn rời khỏi?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Đặt khuôn mặt của bạn vào trong khung hình</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Hình tự chụp</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Giúp chúng tôi cải thiện quá trình xác minh</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Một vài ảnh sẽ được chụp tự động ở bước tiếp theo để xác minh đó là bạn</string>
   <!-- Title for selfie warmup page -->

@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Godkendte former for ID inkluderer</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Hold id\'et vandret</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Tillad</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Appindstillinger</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Kameratilladelse</string>
   <string name="stripe_camera_permission_rationale">Denne app bruger kameraet til at scanne dine identifikationsdokument og tage billeder for at bekræfte din identitet.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Taget forside</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Taget venstre</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Taget højre</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Optager...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Du kan enten prøve igen eller uploade et billede fra din enhed.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Kunne ikke tage billede</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Afvis</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Detaljer ikke synlige</string>
   <string name="stripe_decrease_lighting_2">Gå til et mørkere område</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Vi skal bruge en tilladelse til at bruge dit kamera. Tillad kameraadgang i appindstillingerne.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Hold stille, scanner</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Hold stille ...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">ID</string>
   <!-- Label for ID number section -->
@@ -224,10 +236,24 @@
   <string name="stripe_selfie_capture_complete">Optagelse af selfier er fuldført</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Selfie-optagelser</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Fantastisk! Kontrollerer dine billeder ...</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">én selfie optaget</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Drej hovedet til venstre</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Drej hovedet til højre</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Ryk tættere på</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Dine selfie-billeder er ikke blevet gemt. Ønsker du at forlade denne session?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Placer dit ansigt inden for rammen</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Selfie</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Hjælp os med at optimere verificeringsprocessen</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Der tages automatisk nogle få billeder i det næste trin for at bekræfte, at det er dig</string>
   <!-- Title for selfie warmup page -->
