@@ -781,7 +781,7 @@ internal class PlaygroundTestDriver(
             selectors.externalPaymentMethodCancelButton,
         )
 
-        isSelectPaymentMethodScreen()
+        waitForPaymentSheetActivity()
         selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
