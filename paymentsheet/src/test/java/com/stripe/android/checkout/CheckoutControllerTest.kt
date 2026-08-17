@@ -957,6 +957,59 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `mutation commits onto a selection written while the response was in flight`() =
+        runMutationScenario {
+            val releaseResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                releaseResponse.await(10, TimeUnit.SECONDS)
+                successResponseFactory().invoke(response)
+            }
+
+            assertThat(committedState().temporarySelection).isNull()
+
+            val mutation = async { controller.applyPromotionCode("10OFF") }
+            testScheduler.advanceUntilIdle()
+
+            // The customer picks a row while the promo response is still in flight. That write skips
+            // the operation gate, so the commit has to read the latest state rather than the snapshot
+            // it took before the request.
+            assertThat(mutation.isCompleted).isFalse()
+            setTemporarySelection("card")
+            releaseResponse.countDown()
+            mutation.await().getOrThrow()
+
+            assertThat(committedState().temporarySelection).isEqualTo("card")
+        }
+
+    @Test
+    fun `mutation fails without restoring state when controller is destroyed in flight`() =
+        runMutationScenario {
+            val releaseResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                releaseResponse.await(10, TimeUnit.SECONDS)
+                successResponseFactory().invoke(response)
+            }
+
+            val mutation = async { controller.applyPromotionCode("10OFF") }
+            testScheduler.advanceUntilIdle()
+            assertThat(mutation.isCompleted).isFalse()
+
+            controller.destroy()
+            releaseResponse.countDown()
+
+            val result = mutation.await()
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo(
+                "Cannot mutate checkout session before it is configured."
+            )
+            assertThat(hasCommittedState()).isFalse()
+        }
+
+    @Test
     fun `configure is serialized behind an in-flight mutation and shares its loading window`() =
         runMutationScenario(assertLoadingConsumed = true) {
             val holdMutation = CountDownLatch(1)
@@ -1309,6 +1362,12 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
+
+        fun hasCommittedState(): Boolean = stateHolder.state != null
+
+        // Simulates the customer picking a payment method row, which writes straight to the state
+        // holder without passing through the operation gate.
+        fun setTemporarySelection(code: String) = stateHolder.setTemporarySelection(code)
     }
 
     private companion object {

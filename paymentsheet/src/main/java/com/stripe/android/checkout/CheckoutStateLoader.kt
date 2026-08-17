@@ -28,16 +28,27 @@ internal class CheckoutStateLoader @Inject constructor(
             configuration = configuration,
             response = checkoutSessionResponse,
             collectedDetails = configuration.asInitialCollectedDetails(),
-            carryForward = CarryForward.initial(),
+            cachedFlagImages = null,
+            latestCarryForward = { CarryForward.initial() },
         )
     }
 
-    suspend fun reload(state: CheckoutControllerState) {
-        commit(
+    /**
+     * Commits [checkoutSessionResponse] onto the latest committed state, applying
+     * [updateCollectedDetails] to the details collected so far. Selection state is read after the
+     * reload finishes so a choice written while it was in flight survives the commit.
+     */
+    suspend fun reload(
+        checkoutSessionResponse: CheckoutSessionResponse,
+        updateCollectedDetails: (CheckoutCollectedDetails) -> CheckoutCollectedDetails,
+    ): Boolean {
+        val state = stateHolder.state ?: return false
+        return commit(
             configuration = state.configuration,
-            response = state.checkoutSessionResponse,
-            collectedDetails = state.collectedDetails,
-            carryForward = CarryForward.from(state),
+            response = checkoutSessionResponse,
+            collectedDetails = updateCollectedDetails(state.collectedDetails),
+            cachedFlagImages = state.flagImages,
+            latestCarryForward = { stateHolder.state?.let(CarryForward::from) },
         )
     }
 
@@ -50,11 +61,10 @@ internal class CheckoutStateLoader @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-        carryForward: CarryForward,
-    ) {
-        // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
-        // reused when the currencies haven't changed.
-        val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
+        cachedFlagImages: Map<String, Bitmap>?,
+        latestCarryForward: () -> CarryForward?,
+    ): Boolean {
+        val flagImages = flagImageResolver.resolve(response, cached = cachedFlagImages)
 
         val embeddedConfig = embeddedConfigurationFactory.create(
             configuration = configuration,
@@ -84,9 +94,13 @@ internal class CheckoutStateLoader @Inject constructor(
             ),
         ).getOrThrow()
 
+        // Selection writes do not use the operation gate. Read them after all suspending work so a
+        // choice made while the reload was in flight survives the commit.
+        val carryForward = latestCarryForward() ?: return false
+
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
-        // previous selection comes from the incoming state, not a separate holder.
+        // previous selection comes from the latest committed state, not a separate holder.
         val selection = selectionChooser.choose(
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             paymentMethods = loaderState.customer?.paymentMethods,
@@ -110,29 +124,25 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         customerStateHolder.setCustomerState(loaderState.customer)
+        return true
     }
 
     /**
-     * The fields carried from the prior state (or fresh defaults) into the next committed state, so a
-     * [reload] preserves everything the load itself doesn't recompute. Collapses [commit]'s parameter
-     * list into a single carrier.
+     * Selection fields carried from the prior state (or fresh defaults) into the next committed state.
      */
     private data class CarryForward(
-        val cachedFlagImages: Map<String, Bitmap>?,
         val previousSelection: PaymentSelection?,
         val temporarySelection: String?,
         val previousNewSelections: Bundle,
     ) {
         companion object {
             fun initial() = CarryForward(
-                cachedFlagImages = null,
                 previousSelection = null,
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
             )
 
             fun from(state: CheckoutControllerState) = CarryForward(
-                cachedFlagImages = state.flagImages,
                 previousSelection = state.paymentSelection,
                 temporarySelection = state.temporarySelection,
                 previousNewSelections = state.previousNewSelections,

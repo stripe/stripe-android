@@ -103,6 +103,8 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                 completeConfirmation { wasRestored ->
                     when (val result = state.result) {
                         is ConfirmationHandler.Result.Succeeded -> {
+                            // A success carrying no response came back through a next action, whose
+                            // result isn't captured yet. Once it is, this commits like any other.
                             result.metadata[CheckoutSessionResponseKey]?.let { response ->
                                 refreshSession { sessionRefresher.refresh(response) }
                             }

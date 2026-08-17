@@ -34,7 +34,9 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -42,6 +44,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -155,7 +159,7 @@ internal class CheckoutStateLoaderTest {
         // new set through to the shared holder rather than leaving the stale one from the initial
         // load in place.
         paymentElementLoader.updatePaymentMethods(emptyList())
-        loader.reload(requireNotNull(stateHolder.state))
+        loader.reload(checkoutSessionResponse = response(), updateCollectedDetails = { it })
 
         assertThat(customerStateHolder.paymentMethods.value).isEmpty()
     }
@@ -179,8 +183,10 @@ internal class CheckoutStateLoaderTest {
         chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) {
         // The committed state's selection is what the chooser must be offered as the previous
-        // value, sourced from the incoming state rather than a separate holder.
-        loader.reload(committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
+        // value, sourced from the committed state rather than a separate holder.
+        stateHolder.state = committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        loader.reload(checkoutSessionResponse = response(), updateCollectedDetails = { it })
 
         // The committed state adopts whatever the chooser returned, not the loader's recomputed
         // selection.
@@ -217,11 +223,11 @@ internal class CheckoutStateLoaderTest {
 
         // The customer picks Google Pay after the initial load; in the single-state model that pick
         // lives on the committed state rather than a separate selection holder.
-        val afterPick = requireNotNull(stateHolder.state).copy(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.state = requireNotNull(stateHolder.state).copy(paymentSelection = PaymentSelection.GooglePay)
 
         // A mutation reloads with the same configuration, so the chooser keeps the customer's
         // selection rather than adopting the loader's recomputed one.
-        loader.reload(afterPick)
+        loader.reload(checkoutSessionResponse = response(), updateCollectedDetails = { it })
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
     }
@@ -258,25 +264,77 @@ internal class CheckoutStateLoaderTest {
 
         // A mutation reloads with the previously resolved images carried forward (on the committed
         // state) and the same currencies, so the cache is reused and nothing re-downloads.
-        loader.reload(requireNotNull(stateHolder.state))
+        loader.reload(checkoutSessionResponse = response, updateCollectedDetails = { it })
 
         imageLoader.ensureAllEventsConsumed()
     }
 
     @Test
     fun `reload carries the temporary selection and previous new selections forward`() = runScenario {
-        val seeded = committedState(
+        stateHolder.state = committedState(
             temporarySelection = "card",
             previousNewSelections = Bundle().apply {
                 putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
             },
         )
 
-        loader.reload(seeded)
+        loader.reload(checkoutSessionResponse = response(), updateCollectedDetails = { it })
 
         assertThat(stateHolder.state?.temporarySelection).isEqualTo("card")
         assertThat(stateHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `reload applies the collected details transform to the latest committed details`() = runScenario {
+        stateHolder.state = committedState().copy(
+            collectedDetails = CheckoutCollectedDetails(shippingName = "Jane Doe"),
+        )
+
+        loader.reload(checkoutSessionResponse = response()) { it.copy(billingName = "John Doe") }
+
+        // The transform is handed the committed details, so the shipping name survives alongside the
+        // billing name it adds.
+        assertThat(stateHolder.state?.collectedDetails?.shippingName).isEqualTo("Jane Doe")
+        assertThat(stateHolder.state?.collectedDetails?.billingName).isEqualTo("John Doe")
+    }
+
+    @Test
+    fun `reload preserves selection state written while payment element is loading`() = runScenario(
+        loaderDelay = 1.seconds,
+    ) {
+        stateHolder.state = committedState()
+
+        val reload = async {
+            loader.reload(checkoutSessionResponse = response(), updateCollectedDetails = { it })
+        }
+        runCurrent()
+        assertThat(reload.isCompleted).isFalse()
+
+        stateHolder.setTemporarySelection("card")
+        advanceUntilIdle()
+
+        assertThat(reload.await()).isTrue()
+        assertThat(stateHolder.state?.temporarySelection).isEqualTo("card")
+    }
+
+    @Test
+    fun `reload does not restore state cleared while payment element is loading`() = runScenario(
+        loaderDelay = 1.seconds,
+    ) {
+        stateHolder.state = committedState()
+
+        val reload = async {
+            loader.reload(checkoutSessionResponse = response(), updateCollectedDetails = { it })
+        }
+        runCurrent()
+        assertThat(reload.isCompleted).isFalse()
+
+        loader.clear()
+        advanceUntilIdle()
+
+        assertThat(reload.await()).isFalse()
+        assertThat(stateHolder.state).isNull()
     }
 
     @Test
@@ -352,6 +410,7 @@ internal class CheckoutStateLoaderTest {
         shouldFail: Boolean = false,
         isGooglePayAvailable: Boolean = false,
         customer: CustomerState? = null,
+        loaderDelay: Duration = Duration.ZERO,
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
@@ -384,6 +443,7 @@ internal class CheckoutStateLoaderTest {
             shouldFail = shouldFail,
             isGooglePayAvailable = isGooglePayAvailable,
             customer = customer,
+            delay = loaderDelay,
         )
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
@@ -402,6 +462,7 @@ internal class CheckoutStateLoaderTest {
             paymentElementLoader = paymentElementLoader,
             chooser = recordingChooser,
             imageLoader = imageLoader,
+            testScope = this,
         ).block()
 
         imageLoader.ensureAllEventsConsumed()
@@ -414,7 +475,16 @@ internal class CheckoutStateLoaderTest {
         val paymentElementLoader: FakePaymentElementLoader,
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
-    )
+        private val testScope: TestScope,
+    ) : CoroutineScope by testScope {
+        fun runCurrent() {
+            testScope.testScheduler.runCurrent()
+        }
+
+        fun advanceUntilIdle() {
+            testScope.testScheduler.advanceUntilIdle()
+        }
+    }
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,
     // so tests can verify the loader threads the state's previous selection and the loader's new

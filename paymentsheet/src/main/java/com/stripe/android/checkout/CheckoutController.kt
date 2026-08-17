@@ -42,6 +42,9 @@ import kotlin.time.Duration.Companion.seconds
 
 private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 
+private const val NOT_CONFIGURED_ERROR = "Cannot mutate checkout session before it is configured."
+private const val FLOW_PRESENTED_ERROR = "Cannot mutate checkout session while a payment flow is presented."
+
 /**
  * Controls a Stripe Checkout Session: load it with [configure], observe it through
  * [session], mutate it with the various `update`/`apply`/`select` methods, and present
@@ -95,9 +98,7 @@ class CheckoutController @Inject internal constructor(
     ): kotlin.Result<Unit> {
         // A re-configure while a payment flow is presented would reload the session out from under
         // the open sheet. The first configure runs with null state, so this only blocks re-configures.
-        if (sheetStateHolder.sheetIsOpen) {
-            return integrationLaunchedFailure()
-        }
+        checkMutable(requiresConfiguredSession = false).onFailure { return kotlin.Result.failure(it) }
         return operationCoordinator.runMutation {
             val configurationState = configuration.build()
             val sessionId = clientSecret.substringBefore("_secret_")
@@ -139,15 +140,15 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
+    ): kotlin.Result<Unit> = mutateSession(updateCollectedDetails = { it }) { state ->
+        checkoutSessionRepository.applyPromotionCode(state.checkoutSessionResponse.id, promotionCode.trim())
     }
 
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
-    suspend fun removePromotionCode(): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(sessionId, "")
+    suspend fun removePromotionCode(): kotlin.Result<Unit> = mutateSession(updateCollectedDetails = { it }) { state ->
+        checkoutSessionRepository.applyPromotionCode(state.checkoutSessionResponse.id, "")
     }
 
     /**
@@ -168,12 +169,7 @@ class CheckoutController @Inject internal constructor(
             ?.validateShippingCountry(address.build().country)
             ?.onFailure { return kotlin.Result.failure(it) }
         return updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
-            copy(
-                collectedDetails = collectedDetails.copy(
-                    shippingName = name,
-                    shippingAddress = it,
-                ),
-            )
+            copy(shippingName = name, shippingAddress = it)
         }
     }
 
@@ -185,20 +181,15 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun updateEmail(
         email: String?,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateEmail(sessionId, email?.trim().orEmpty())
+    ): kotlin.Result<Unit> = mutateSession(updateCollectedDetails = { it }) { state ->
+        checkoutSessionRepository.updateEmail(state.checkoutSessionResponse.id, email?.trim().orEmpty())
     }
 
     internal suspend fun updateBillingAddress(
         name: String?,
         address: Address,
     ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
-        copy(
-            collectedDetails = collectedDetails.copy(
-                billingName = name,
-                billingAddress = it,
-            ),
-        )
+        copy(billingName = name, billingAddress = it)
     }
 
     /**
@@ -213,12 +204,12 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun runServerUpdate(
         serverUpdate: suspend () -> kotlin.Result<Unit>,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
+    ): kotlin.Result<Unit> = mutateSession(updateCollectedDetails = { it }) { state ->
         withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }.fold(
             onSuccess = {
                 checkoutSessionRepository.init(
-                    sessionId = sessionId,
-                    adaptivePricingAllowed = configuration.adaptivePricingAllowed,
+                    sessionId = state.checkoutSessionResponse.id,
+                    adaptivePricingAllowed = state.configuration.adaptivePricingAllowed,
                 )
             },
             onFailure = { kotlin.Result.failure(it) },
@@ -228,14 +219,12 @@ class CheckoutController @Inject internal constructor(
     private suspend fun updateAddress(
         addressType: CheckoutSessionResponse.TaxAddressSource,
         address: Address,
-        mutation: CheckoutControllerState.(Address.State) -> CheckoutControllerState,
+        collectDetails: CheckoutCollectedDetails.(Address.State) -> CheckoutCollectedDetails,
     ): kotlin.Result<Unit> {
         val built = address.build()
-        return withCheckoutState(
-            additionalStateMutations = { mutation(built) },
-        ) {
+        return mutateSession(updateCollectedDetails = { it.collectDetails(built) }) { state ->
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
+                checkoutSessionResponse = state.checkoutSessionResponse,
                 addressSource = addressType,
                 address = built,
             )
@@ -243,63 +232,44 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Runs a mutation against the checkout session, serializing it behind the operation coordinator
-     * so mutations run in sequence. [block] produces the updated [CheckoutSessionResponse]; the
-     * result is folded into a new [CheckoutControllerState] (with any [additionalStateMutations]
-     * applied) and handed to [checkoutStateLoader] to reload the payment element and atomically
-     * commit the new state.
+     * Serializes a mutation behind the operation coordinator so mutations run in sequence.
+     * [nextResponse] produces the updated [CheckoutSessionResponse], and [updateCollectedDetails]
+     * updates the details collected locally.
      *
      * Returns [kotlin.Result.failure] if the session hasn't been configured yet or a payment flow is
      * currently presented.
      */
-    private suspend fun withCheckoutState(
-        additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState = { this },
-        block: suspend CheckoutControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
+    private suspend fun mutateSession(
+        updateCollectedDetails: (CheckoutCollectedDetails) -> CheckoutCollectedDetails,
+        nextResponse: suspend (CheckoutControllerState) -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> {
-        stateHolder.state
-            ?: return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session before it is configured.")
-            )
-        if (sheetStateHolder.sheetIsOpen) {
-            return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
-            )
-        }
+        checkMutable(requiresConfiguredSession = true).onFailure { return kotlin.Result.failure(it) }
         return operationCoordinator.runMutation {
             runCatching {
-                // Re-read the latest committed state inside the lock so serialized mutations
-                // build on each other's results rather than a stale snapshot.
-                val state = requireNotNull(stateHolder.state)
-                val response = state.block(state.checkoutSessionResponse.id).getOrThrow()
-                val newState = state
-                    .copy(checkoutSessionResponse = response)
-                    .additionalStateMutations()
-                // reload resolves flag images (reusing newState's carried-over cache) and commits
-                // the fully reloaded state to the holder.
-                checkoutStateLoader.reload(newState)
+                val state = checkNotNull(stateHolder.state) { NOT_CONFIGURED_ERROR }
+                val response = nextResponse(state).getOrThrow()
+                check(checkoutStateLoader.reload(response, updateCollectedDetails)) {
+                    NOT_CONFIGURED_ERROR
+                }
             }
         }
     }
 
-    private fun requireMutableState(): kotlin.Result<Unit> {
-        stateHolder.state
-            ?: return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session before it is configured.")
-            )
-        return if (sheetStateHolder.sheetIsOpen) {
-            integrationLaunchedFailure()
-        } else {
-            kotlin.Result.success(Unit)
-        }
+    /**
+     * The preconditions every mutation entry point shares. [requiresConfiguredSession] is false only
+     * for [configure], which is what populates the state in the first place.
+     */
+    private fun checkMutable(requiresConfiguredSession: Boolean): kotlin.Result<Unit> = when {
+        requiresConfiguredSession && stateHolder.state == null ->
+            kotlin.Result.failure(IllegalStateException(NOT_CONFIGURED_ERROR))
+        sheetStateHolder.sheetIsOpen ->
+            kotlin.Result.failure(IllegalStateException(FLOW_PRESENTED_ERROR))
+        else -> kotlin.Result.success(Unit)
     }
 
-    private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
-        IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
-    )
-
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
-        return withCheckoutState { sessionId ->
-            checkoutSessionRepository.updateCurrency(sessionId, currency)
+        return mutateSession(updateCollectedDetails = { it }) { state ->
+            checkoutSessionRepository.updateCurrency(state.checkoutSessionResponse.id, currency)
         }
     }
 
@@ -339,15 +309,11 @@ class CheckoutController @Inject internal constructor(
      * currently presented, or another mutation or confirmation is in progress.
      */
     fun clearPaymentOption(): kotlin.Result<Unit> {
-        return requireMutableState().fold(
-            onSuccess = {
-                operationCoordinator.runSynchronousMutation {
-                    stateHolder.clearSelection()
-                    kotlin.Result.success(Unit)
-                }
-            },
-            onFailure = { kotlin.Result.failure(it) },
-        )
+        checkMutable(requiresConfiguredSession = true).onFailure { return kotlin.Result.failure(it) }
+        return operationCoordinator.runSynchronousMutation {
+            stateHolder.clearSelection()
+            kotlin.Result.success(Unit)
+        }
     }
 
     /**

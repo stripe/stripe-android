@@ -19,7 +19,7 @@ internal interface CheckoutSessionRefresher {
 internal class DefaultCheckoutSessionRefresher internal constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val fetchResponse: suspend (String, Boolean) -> Result<CheckoutSessionResponse>,
-    private val reloadState: suspend (CheckoutControllerState) -> Unit,
+    private val reloadResponse: suspend (CheckoutSessionResponse) -> Unit,
 ) : CheckoutSessionRefresher {
 
     @Inject
@@ -30,7 +30,12 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
     ) : this(
         stateHolder = stateHolder,
         fetchResponse = checkoutSessionRepository::init,
-        reloadState = checkoutStateLoader::reload,
+        reloadResponse = { response ->
+            checkoutStateLoader.reload(
+                checkoutSessionResponse = response,
+                updateCollectedDetails = { it },
+            )
+        },
     )
 
     override suspend fun refresh() {
@@ -44,7 +49,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
     }
 
     override suspend fun refresh(response: CheckoutSessionResponse) {
-        val state = stateHolder.state ?: return
-        reloadState(state.copy(checkoutSessionResponse = response))
+        if (stateHolder.state == null) return
+        reloadResponse(response)
     }
 }

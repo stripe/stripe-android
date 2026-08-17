@@ -14,23 +14,27 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultCheckoutSessionRefresherTest {
 
     @Test
-    fun `refresh with response commits it without fetching`() = runScenario {
+    fun `refresh with response reloads it without fetching`() = runScenario {
         val response = CheckoutSessionResponseFactory.create(id = "cs_confirmed")
 
         refresher.refresh(response)
 
-        assertThat(refreshActions.reloadCalls.awaitItem())
-            .isEqualTo(initialState.copy(checkoutSessionResponse = response))
+        assertThat(refreshActions.reloadCalls.awaitItem()).isEqualTo(response)
     }
 
     @Test
-    fun `refresh without response fetches and commits latest session`() = runScenario {
+    fun `refresh with response does nothing without loaded state`() = runScenario(
+        stateIsLoaded = false,
+    ) {
+        refresher.refresh(CheckoutSessionResponseFactory.create(id = "cs_confirmed"))
+
+        refreshActions.reloadCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `refresh without response fetches and reloads latest session`() = runScenario {
         val response = CheckoutSessionResponseFactory.create(id = "cs_fetched")
-        val stateAtCommit = initialState.copy(temporarySelection = "card")
-        refreshActions.enqueueFetchResponse {
-            stateHolder.state = stateAtCommit
-            Result.success(response)
-        }
+        refreshActions.enqueueFetchResponse { Result.success(response) }
 
         refresher.refresh()
 
@@ -40,26 +44,25 @@ internal class DefaultCheckoutSessionRefresherTest {
                 adaptivePricingAllowed = initialState.configuration.adaptivePricingAllowed,
             )
         )
-        assertThat(refreshActions.reloadCalls.awaitItem())
-            .isEqualTo(stateAtCommit.copy(checkoutSessionResponse = response))
+        assertThat(refreshActions.reloadCalls.awaitItem()).isEqualTo(response)
     }
 
     private fun runScenario(
+        stateIsLoaded: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
         val initialState = CheckoutControllerStateFactory.create()
-        stateHolder.state = initialState
+        stateHolder.state = initialState.takeIf { stateIsLoaded }
         val refreshActions = FakeCheckoutSessionRefreshActions()
         val refresher = DefaultCheckoutSessionRefresher(
             stateHolder = stateHolder,
             fetchResponse = refreshActions::fetch,
-            reloadState = refreshActions::reload,
+            reloadResponse = refreshActions::reload,
         )
 
         Scenario(
             refresher = refresher,
-            stateHolder = stateHolder,
             initialState = initialState,
             refreshActions = refreshActions,
         ).block()
@@ -69,7 +72,6 @@ internal class DefaultCheckoutSessionRefresherTest {
 
     private data class Scenario(
         val refresher: DefaultCheckoutSessionRefresher,
-        val stateHolder: CheckoutControllerStateHolder,
         val initialState: CheckoutControllerState,
         val refreshActions: FakeCheckoutSessionRefreshActions,
     )
