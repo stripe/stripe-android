@@ -12,6 +12,8 @@
 
 **GitHub Issues** — use `gh` CLI with `GH_HOST=github.com` prefix (`export` for reads, inline for writes). Always use `--state all` when searching. Check existing issues before investigating user reports.
 
+**Pull requests** — always open pull requests as drafts. When an agent opens a pull request, include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
+
 **Internal Tools** — Jira: MOBILESDK, RUN_MOBILESDK | Trailhead space: mobile-sdk
 
 ## Architecture
