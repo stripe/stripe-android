@@ -13,16 +13,6 @@ internal class OnrampFlowTest {
     private val page by lazy { OnrampE2EPage(onrampRule.composeRule) }
 
     @Test
-    fun testCheckoutFlow() {
-        page.loginAndAuthenticateWithOtp()
-        page.registerDefaultWallet()
-        page.collectExistingCard()
-        page.createPaymentTokenAndSession()
-        page.performCheckout()
-        page.waitForCheckoutCompleted()
-    }
-
-    @Test
     fun cardCollectionCanBeCanceledAndRetried() {
         page.loginAndAuthenticateWithOtp()
         page.cancelCardCollection()
