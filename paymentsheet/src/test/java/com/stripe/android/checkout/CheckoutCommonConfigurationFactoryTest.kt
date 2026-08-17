@@ -17,7 +17,10 @@ import org.junit.Test
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
-@OptIn(CheckoutSessionPreview::class)
+@OptIn(
+    CheckoutSessionPreview::class,
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+)
 internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
@@ -191,15 +194,31 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(result.googlePlacesApiKey).isNull()
     }
 
+    @Test
+    fun `propagates payment element appearance`() {
+        val result = factory().create(
+            configuration = controllerConfiguration(
+                appearance = PaymentElement.Configuration.Appearance()
+                    .shapes(PaymentElement.Configuration.Appearance.Shapes().cornerRadiusDp(3f))
+            ),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.appearance.shapes.cornerRadiusDp).isEqualTo(3f)
+    }
+
     private fun factory(appName: String = "Test App") = CheckoutCommonConfigurationFactory(appName)
 
     private fun controllerConfiguration(
         billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
+        appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),
         googlePayConfiguration: GooglePayConfiguration? = null,
     ): CheckoutController.Configuration.State {
         val builder = CheckoutController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
+                    .appearance(appearance)
                     .billingDetailsCollectionConfiguration(
                         BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
                     )

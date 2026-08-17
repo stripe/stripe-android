@@ -15,7 +15,10 @@ import org.junit.Test
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
-@OptIn(CheckoutSessionPreview::class)
+@OptIn(
+    CheckoutSessionPreview::class,
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+)
 internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
@@ -75,6 +78,22 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         )
 
         assertThat(result.embeddedViewDisplaysMandateText).isFalse()
+    }
+
+    @Test
+    fun `propagates payment element appearance`() {
+        val result = factory().create(
+            configuration = controllerConfiguration(
+                appearance = PaymentElement.Configuration.Appearance()
+                    .colorsLight(
+                        PaymentElement.Configuration.Appearance.Colors.light().primary(0xFF123456.toInt())
+                    )
+            ),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.appearance.colorsLight.primary).isEqualTo(0xFF123456.toInt())
     }
 
     @Test
@@ -264,6 +283,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,
+        appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),
         billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
         googlePayConfiguration: GooglePayConfiguration? = null,
     ): CheckoutController.Configuration.State {
@@ -271,6 +291,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             .paymentElement(
                 PaymentElement.Configuration()
                     .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
+                    .appearance(appearance)
                     .billingDetailsCollectionConfiguration(
                         BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
                     )
