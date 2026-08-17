@@ -64,6 +64,7 @@ internal object LpmBillingAddressScreenshotPaymentMethodTypeProvider : TestParam
         value(PaymentMethod.Type.Blik).withName("Blik"),
         value(PaymentMethod.Type.P24).withName("P24"),
         value(PaymentMethod.Type.Eps).withName("EPS"),
+        value(PaymentMethod.Type.Konbini).withName("Konbini"),
     )
 }
 
