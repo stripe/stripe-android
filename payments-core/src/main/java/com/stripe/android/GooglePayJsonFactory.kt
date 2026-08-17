@@ -406,7 +406,7 @@ class GooglePayJsonFactory internal constructor(
 
     @Parcelize
     @Poko
-    class TransactionInfo internal constructor(
+    class TransactionInfo @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
         internal val currencyCode: String,
         internal val totalPriceStatus: TotalPriceStatus,
         internal val countryCode: String?,
