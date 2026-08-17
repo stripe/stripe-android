@@ -193,6 +193,7 @@ private fun SharedPartnerAuthBody(
             LoadedContent(
                 showInModal = inModal,
                 isRelinkSession = state.isNetworkingRelinkSession,
+                autoLaunchAuthSession = state.autoLaunchAuthSession,
                 authenticationStatus = state.authenticationStatus,
                 payload = it,
                 onContinueClick = onContinueClick,
@@ -207,6 +208,7 @@ private fun SharedPartnerAuthBody(
 private fun LoadedContent(
     showInModal: Boolean,
     isRelinkSession: Boolean,
+    autoLaunchAuthSession: Boolean,
     authenticationStatus: Async<AuthenticationStatus>,
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
@@ -217,8 +219,12 @@ private fun LoadedContent(
         is Uninitialized,
         is Loading,
         is Fail,
-        is Success -> when (payload.authSession.isOAuth) {
-            true -> PrePaneContent(
+        is Success -> when {
+            // Auto-launching skips the prepane entirely, so there's nothing to show behind the
+            // browser. Fill the blank space the same way non-OAuth flows do.
+            autoLaunchAuthSession -> SharedPartnerLoading(showInModal)
+
+            payload.authSession.isOAuth -> PrePaneContent(
                 // show loading prepane when authenticationStatus
                 // is Loading or Success (completing auth after redirect)
                 authenticationStatus = authenticationStatus,
@@ -230,7 +236,7 @@ private fun LoadedContent(
                 onClickableTextClick = onClickableTextClick,
             )
 
-            false -> SharedPartnerLoading(showInModal)
+            else -> SharedPartnerLoading(showInModal)
         }
     }
 }
@@ -263,7 +269,7 @@ private fun PrePaneContent(
             }
             items(content.body.entries) { bodyItem ->
                 when (bodyItem) {
-                    is Entry.Image -> PrepaneImage(bodyItem)
+                    is Entry.Image -> bodyItem.content.default?.let { PrepaneImage(it) }
 
                     is Entry.Text -> AnnotatedText(
                         modifier = Modifier.padding(horizontal = 24.dp),
@@ -289,8 +295,13 @@ private fun PrePaneContent(
     )
 }
 
+/**
+ * Renders [imageUrl] in a fixed-size frame that reads as a phone screenshot, on a band that spans
+ * the full width of the pane. Callers must not apply a horizontal inset, or the band won't reach
+ * the edges.
+ */
 @Composable
-internal fun PrepaneImage(bodyItem: Entry.Image) {
+internal fun PrepaneImage(imageUrl: String) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -324,7 +335,7 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
             modifier = Modifier
                 .width(PHONE_BACKGROUND_WIDTH_DP.dp)
                 .fillMaxHeight(),
-            bodyItem.content.default!!
+            imageUrl
         )
         // right separator
         Box(

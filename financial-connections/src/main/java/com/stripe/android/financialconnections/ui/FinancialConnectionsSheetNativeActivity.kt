@@ -220,6 +220,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                         composable(Destination.Success)
                         composable(Destination.Reset)
                         composable(Destination.Error)
+                        composable(Destination.GenericError)
                         composable(Destination.AttachLinkedPaymentAccount)
                         composable(Destination.NetworkingLinkSignup)
                         bottomSheet(Destination.NetworkingLinkLoginWarmup)

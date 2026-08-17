@@ -56,7 +56,10 @@ internal fun ShapedIcon(
  * @param contentDescription the content description for the icon
  * @param flushed whether the icon should be flushed to the edge of the wrapper
  * @param errorPainter the [Painter] to use for the icon if the URL fails to load. If null,
- *        no icon will be rendered inside the circle.
+ *        no icon will be rendered inside the circle. Rendered tinted and padded, so pass a glyph.
+ * @param debugPainter the [Painter] to stand in for the URL in previews and screenshot tests, where
+ *        remote images can't be loaded. Rendered in place of the image itself, so it should fill
+ *        the wrapper when [flushed].
  */
 @Composable
 internal fun ShapedIcon(
@@ -66,6 +69,7 @@ internal fun ShapedIcon(
     backgroundShape: Shape = CircleShape,
     contentDescription: String?,
     errorPainter: Painter? = null,
+    debugPainter: Painter = painterResource(id = R.drawable.stripe_ic_person),
     flushed: Boolean = false
 ) {
     IconWrapperBox(
@@ -79,7 +83,7 @@ internal fun ShapedIcon(
             ),
             url = url,
             imageLoader = LocalImageLoader.current,
-            debugPainter = painterResource(id = R.drawable.stripe_ic_person),
+            debugPainter = debugPainter,
             contentDescription = contentDescription,
             errorContent = {
                 errorPainter?.let {
