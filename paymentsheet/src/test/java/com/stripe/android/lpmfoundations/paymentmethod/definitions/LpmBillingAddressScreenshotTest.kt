@@ -63,6 +63,7 @@ internal object LpmBillingAddressScreenshotPaymentMethodTypeProvider : TestParam
         value(PaymentMethod.Type.AuBecsDebit).withName("AU BECS Debit"),
         value(PaymentMethod.Type.Blik).withName("Blik"),
         value(PaymentMethod.Type.P24).withName("P24"),
+        value(PaymentMethod.Type.Eps).withName("EPS"),
     )
 }
 
