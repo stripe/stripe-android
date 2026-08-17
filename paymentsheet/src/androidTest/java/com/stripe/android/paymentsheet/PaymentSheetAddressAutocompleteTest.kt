@@ -107,6 +107,9 @@ class PaymentSheetAddressAutocompleteTest {
 
         clickAndFillOutCard()
 
+        paymentSheetPage.waitForContentDescription(description = "Search")
+        paymentSheetPage.clickViewWithContentDescription(description = "Search")
+
         fillOutAutocompletePage()
 
         enqueueConfirm()
