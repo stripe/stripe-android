@@ -137,6 +137,18 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `loadInitial passes opens card scanner automatically to common configuration`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(PaymentElement.Configuration().opensCardScannerAutomatically(true))
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(stateHolder.state?.commonConfiguration?.opensCardScannerAutomatically).isTrue()
+    }
+
+    @Test
     fun `loadInitial seeds collected details with the defaults billing address`() = runScenario {
         val address = CheckoutController.Address()
             .city(" San Francisco ")

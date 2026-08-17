@@ -25,6 +25,9 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             )
             .preferredNetworks(configuration.paymentElementConfiguration.preferredNetworks)
             .paymentMethodOrder(configuration.paymentElementConfiguration.paymentMethodOrder)
+            .opensCardScannerAutomatically(
+                configuration.paymentElementConfiguration.opensCardScannerAutomatically
+            )
             .termsDisplay(configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet())
             .appearance(configuration.paymentElementConfiguration.appearance.asPaymentSheet())
             .googlePay(configuration.toGooglePayConfiguration(checkoutSessionResponse))
