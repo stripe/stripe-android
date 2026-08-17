@@ -5,6 +5,8 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
@@ -14,13 +16,12 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeUp
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModelProvider
@@ -134,7 +135,7 @@ internal class OnrampE2EPage(
         clickTag(AUTHENTICATE_BUTTON_TAG)
         enterLinkOtp()
         acceptOAuthConsentIfShown()
-        waitForTag(AUTHENTICATED_OPERATIONS_TAG, timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForTag(AUTHENTICATED_OPERATIONS_TAG, timeoutMs = 30.seconds.inWholeMilliseconds)
     }
 
     fun registerAndAuthenticateFreshUser(country: String): FreshOnrampUser {
@@ -158,7 +159,7 @@ internal class OnrampE2EPage(
         clickTag(AUTHENTICATE_BUTTON_TAG)
         enterLinkOtp()
         acceptOAuthConsentIfShown()
-        waitForTag(AUTHENTICATED_OPERATIONS_TAG, timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForTag(AUTHENTICATED_OPERATIONS_TAG, timeoutMs = 30.seconds.inWholeMilliseconds)
 
         return user
     }
@@ -179,8 +180,8 @@ internal class OnrampE2EPage(
         replaceTag(KYC_ADDRESS_POSTAL_CODE_TAG, address.postalCode)
         hideKeyboard()
 
-        clickTag(COLLECT_KYC_BUTTON_TAG, timeoutMs = 60.seconds.inWholeMilliseconds)
-        waitForSnackbar("KYC Collection successful", timeoutMs = 60.seconds.inWholeMilliseconds)
+        clickTag(COLLECT_KYC_BUTTON_TAG, timeoutMs = 30.seconds.inWholeMilliseconds)
+        waitForSnackbar("KYC Collection successful", timeoutMs = 30.seconds.inWholeMilliseconds)
     }
 
     fun cancelKycVerification() {
@@ -197,15 +198,14 @@ internal class OnrampE2EPage(
         }
         clickTag(VERIFY_KYC_BUTTON_TAG)
         clickText(KYC_CONFIRM_BUTTON_TEXT)
-        waitForSnackbar("KYC Verification Completed", timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForSnackbar("KYC Verification Completed", timeoutMs = 30.seconds.inWholeMilliseconds)
     }
 
     fun failIdentityVerification() {
         clickTag(START_IDENTITY_VERIFICATION_BUTTON_TAG)
         clickTag(
             IDENTITY_FAILED_BUTTON_TAG,
-            timeoutMs = 60.seconds.inWholeMilliseconds,
-            scrollRoot = false,
+            timeoutMs = 30.seconds.inWholeMilliseconds,
         )
         waitForSnackbar("Identity Verification failed: Failure from test mode")
         waitForTag(LOGIN_EMAIL_TAG)
@@ -215,14 +215,13 @@ internal class OnrampE2EPage(
         clickTag(START_IDENTITY_VERIFICATION_BUTTON_TAG)
         clickTag(
             IDENTITY_SUCCESS_OPTION_TAG,
-            timeoutMs = 60.seconds.inWholeMilliseconds,
-            scrollRoot = false,
+            timeoutMs = 30.seconds.inWholeMilliseconds,
         )
-        clickTag(IDENTITY_SUBMIT_BUTTON_TAG, scrollRoot = false)
+        clickTag(IDENTITY_SUBMIT_BUTTON_TAG)
         if (waitForOptionalNode(hasTestTag(IDENTITY_CONFIRM_BUTTON_TAG), timeoutMs = 5.seconds.inWholeMilliseconds)) {
-            clickTag(IDENTITY_CONFIRM_BUTTON_TAG, scrollRoot = false)
+            clickTag(IDENTITY_CONFIRM_BUTTON_TAG)
         }
-        waitForSnackbar("Identity Verification completed", timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForSnackbar("Identity Verification completed", timeoutMs = 30.seconds.inWholeMilliseconds)
         composeRule.waitUntilDoesNotExist(
             hasTestTag(SNACKBAR_TAG),
             timeoutMillis = defaultTimeout.inWholeMilliseconds,
@@ -231,15 +230,15 @@ internal class OnrampE2EPage(
 
     fun cancelUserAttestation() {
         clickTag(USER_ATTESTATION_BUTTON_TAG)
-        clickTag(USER_ATTESTATION_CANCEL_BUTTON_TAG, scrollRoot = false)
+        clickTag(USER_ATTESTATION_CANCEL_BUTTON_TAG)
         waitForSnackbar("User Attestation cancelled")
     }
 
     fun confirmUserAttestation() {
         clickTag(USER_ATTESTATION_BUTTON_TAG)
         waitForNode(hasText(USER_ATTESTATION_ACCEPT_TEXT))
-        clickTag(LINK_PRIMARY_BUTTON_TAG, scrollRoot = false)
-        waitForSnackbar("User Attestation Confirmed", timeoutMs = 60.seconds.inWholeMilliseconds)
+        clickTag(LINK_PRIMARY_BUTTON_TAG)
+        waitForSnackbar("User Attestation Confirmed", timeoutMs = 30.seconds.inWholeMilliseconds)
     }
 
     fun retrieveMissingTaxIdentifiers() {
@@ -260,7 +259,7 @@ internal class OnrampE2EPage(
         replaceTag("$IDENTIFIER_VALUE_TAG-0", TEST_MALTA_NATIONAL_ID)
         hideKeyboard()
         clickTag(SUBMIT_IDENTIFIERS_BUTTON_TAG)
-        waitForSnackbar("Identifiers submitted", timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForSnackbar("Identifiers submitted", timeoutMs = 30.seconds.inWholeMilliseconds)
         clickTag(IDENTIFIER_SECTION_TAG)
         waitForTaggedText(SUBMIT_IDENTIFIERS_SUMMARY_TAG, "Completed: true")
     }
@@ -281,7 +280,7 @@ internal class OnrampE2EPage(
     }
 
     fun registerDefaultWallet() {
-        clickTag(REGISTER_WALLET_BUTTON_TAG, scrollRoot = false)
+        clickTag(REGISTER_WALLET_BUTTON_TAG)
         waitForSnackbar("Wallet address registered successfully!")
     }
 
@@ -330,7 +329,7 @@ internal class OnrampE2EPage(
 
         hideKeyboard()
         clickTag(LINK_PRIMARY_BUTTON_TAG)
-        waitForSelectedPayment(timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForSelectedPayment(timeoutMs = 30.seconds.inWholeMilliseconds)
     }
 
     fun collectBankAccount() {
@@ -342,10 +341,10 @@ internal class OnrampE2EPage(
         }
 
         if (waitForOptionalNode(hasTestTag(LINK_WALLET_PAY_BUTTON_TAG), timeoutMs = 10.seconds.inWholeMilliseconds)) {
-            clickTag(LINK_WALLET_PAY_BUTTON_TAG, scrollRoot = false)
+            clickTag(LINK_WALLET_PAY_BUTTON_TAG)
         }
 
-        waitForTag(SETTLEMENT_SPEED_STANDARD_TAG, timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForTag(SETTLEMENT_SPEED_STANDARD_TAG, timeoutMs = 30.seconds.inWholeMilliseconds)
         composeRule.onNodeWithTag(SETTLEMENT_SPEED_STANDARD_TAG)
             .performScrollTo()
             .performClick()
@@ -355,7 +354,7 @@ internal class OnrampE2EPage(
     fun createPaymentTokenAndSession() {
         createPaymentToken()
         clickTag(CREATE_SESSION_BUTTON_TAG)
-        waitForTag(SESSION_STATUS_TAG, timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForTag(SESSION_STATUS_TAG, timeoutMs = 30.seconds.inWholeMilliseconds)
     }
 
     fun createPaymentToken() {
@@ -364,11 +363,11 @@ internal class OnrampE2EPage(
     }
 
     fun performCheckout() {
-        clickTag(CHECKOUT_BUTTON_TAG, timeoutMs = 60.seconds.inWholeMilliseconds)
+        clickTag(CHECKOUT_BUTTON_TAG, timeoutMs = 30.seconds.inWholeMilliseconds)
     }
 
     fun waitForCheckoutCompleted() {
-        waitForSnackbar("Checkout completed successfully!", timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForSnackbar("Checkout completed successfully!", timeoutMs = 30.seconds.inWholeMilliseconds)
     }
 
     fun waitForSelectedPayment(timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
@@ -394,7 +393,7 @@ internal class OnrampE2EPage(
     }
 
     private fun completeFinancialConnectionsFlow() {
-        clickTag("consent_cta", timeoutMs = 60.seconds.inWholeMilliseconds)
+        clickTag("consent_cta", timeoutMs = 30.seconds.inWholeMilliseconds)
 
         if (waitForOptionalNode(hasTestTag("existing_email-button"), timeoutMs = 10.seconds.inWholeMilliseconds)) {
             clickTag("existing_email-button")
@@ -406,13 +405,13 @@ internal class OnrampE2EPage(
             composeRule.onNodeWithTag("OTP-0").performTextInput("000000")
         }
 
-        waitForTag("loaded_picker_title", timeoutMs = 60.seconds.inWholeMilliseconds)
+        waitForTag("loaded_picker_title", timeoutMs = 30.seconds.inWholeMilliseconds)
         composeRule.onAllNodes(hasText(TEST_BANK_ACCOUNT_NAME, substring = true))
             .onFirst()
             .performScrollTo()
             .performClick()
-        clickTag("link_account_picker_cta", timeoutMs = 60.seconds.inWholeMilliseconds)
-        clickTag("done_button", timeoutMs = 60.seconds.inWholeMilliseconds)
+        clickTag("link_account_picker_cta", timeoutMs = 30.seconds.inWholeMilliseconds)
+        clickTag("done_button", timeoutMs = 30.seconds.inWholeMilliseconds)
     }
 
     private fun waitForSnackbar(message: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
@@ -483,24 +482,17 @@ internal class OnrampE2EPage(
     fun clickTag(
         tag: String,
         timeoutMs: Long = defaultTimeout.inWholeMilliseconds,
-        scrollRoot: Boolean = true,
     ) {
         waitForEnabledTag(tag, timeoutMs)
-        val node = composeRule.onNodeWithTag(tag)
-        runCatching { node.performScrollTo() }
-        if (scrollRoot) {
-            scrollContentUp()
-        }
+        runCatching { composeRule.onNodeWithTag(tag).performScrollTo() }
         if (snackbarOverlaps(tag)) {
             composeRule.waitUntilDoesNotExist(hasTestTag(SNACKBAR_TAG), timeoutMillis = timeoutMs)
         }
         composeRule.waitForIdle()
-        // Async content can move the target while a snackbar is visible, so scroll again immediately before tapping.
-        runCatching { node.performScrollTo() }
-        if (scrollRoot) {
-            scrollContentUp()
-        }
-        composeRule.onNodeWithTag(tag).performClick()
+        positionTagForClick(tag)
+        composeRule.onNodeWithTag(tag)
+            .assertIsDisplayed()
+            .performClick()
     }
 
     private fun waitForEnabledTag(tag: String, timeoutMs: Long) {
@@ -540,14 +532,26 @@ internal class OnrampE2EPage(
         }
     }
 
-    private fun scrollContentUp() {
-        runCatching {
-            composeRule.onRoot().performTouchInput {
-                swipeUp(
-                    startY = centerY + EXTRA_SCROLL_DISTANCE,
-                    endY = centerY - EXTRA_SCROLL_DISTANCE,
-                    durationMillis = EXTRA_SCROLL_DURATION_MILLIS
-                )
+    private fun positionTagForClick(tag: String) {
+        runCatching { composeRule.onNodeWithTag(tag).performScrollTo() }
+
+        val authenticatedTargetMatcher = hasTestTag(tag)
+            .and(hasAnyAncestor(hasTestTag(AUTHENTICATED_OPERATIONS_TAG)))
+        val authenticatedTarget = composeRule.onAllNodes(authenticatedTargetMatcher)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .singleOrNull() ?: return
+
+        val targetBounds = authenticatedTarget.boundsInRoot
+        val scrollContainer = composeRule.onNodeWithTag(AUTHENTICATED_OPERATIONS_TAG)
+        val containerBounds = scrollContainer.fetchSemanticsNode().boundsInRoot
+        val targetCenterY = (targetBounds.top + targetBounds.bottom) / 2f
+        val containerCenterY = (containerBounds.top + containerBounds.bottom) / 2f
+        val scrollDistance = targetCenterY - containerCenterY
+        // performScrollTo can leave a target against the bottom edge. Move it toward the center so the physical tap
+        // stays clear of system UI, clamping naturally when the target is at the end of the scrollable content.
+        if (scrollDistance > 0f) {
+            scrollContainer.performSemanticsAction(SemanticsActions.ScrollBy) { scrollBy ->
+                scrollBy(0f, scrollDistance)
             }
         }
         composeRule.waitForIdle()
@@ -653,5 +657,3 @@ private const val TEST_NEW_CARD_CVC = "123"
 private const val TEST_CARD_POSTAL_CODE = "94111"
 private const val TEST_SOLANA_WALLET_ADDRESS = "bufoH37MTiMTNAfBS4VEZ94dCEwMsmeSijD2vZRShuV"
 private const val TEST_MODE_WALLET_OWNERSHIP_SIGNATURE = "abcd"
-private const val EXTRA_SCROLL_DISTANCE = 72f
-private const val EXTRA_SCROLL_DURATION_MILLIS = 50L
