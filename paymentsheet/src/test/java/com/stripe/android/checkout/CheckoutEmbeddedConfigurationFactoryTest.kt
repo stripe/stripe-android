@@ -7,6 +7,7 @@ import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCo
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.elements.PaymentElement.Configuration.TermsDisplay
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -167,6 +168,26 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         )
 
         assertThat(result.googlePay).isNull()
+    }
+
+    @Test
+    fun `maps preferred networks to embedded configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().preferredNetworks(
+                    listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+                )
+            )
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.preferredNetworks)
+            .isEqualTo(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
     }
 
     @Test

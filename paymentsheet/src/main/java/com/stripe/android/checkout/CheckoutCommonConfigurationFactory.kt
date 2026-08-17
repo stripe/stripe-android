@@ -27,7 +27,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
         billingDetailsCollectionConfiguration =
             configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
-        preferredNetworks = ConfigurationDefaults.preferredNetworks,
+        preferredNetworks = configuration.paymentElementConfiguration.preferredNetworks,
         allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
         paymentMethodOrder = configuration.paymentElementConfiguration.paymentMethodOrder,
         externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,

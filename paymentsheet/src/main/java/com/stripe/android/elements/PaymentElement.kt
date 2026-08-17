@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -49,6 +50,7 @@ class PaymentElement @Inject internal constructor(
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
         private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
+        private var preferredNetworks: List<CardBrand> = emptyList()
         private var paymentMethodOrder: List<String> = emptyList()
         private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
         private var appearance: Appearance = Appearance()
@@ -90,6 +92,17 @@ class PaymentElement @Inject internal constructor(
         }
 
         /**
+         * A list of preferred networks that should be used to process payments made with a
+         * co-branded card if your user hasn't selected a network themselves.
+         *
+         * The first preferred network that matches any available network will be used. If no
+         * preferred network is applicable, Stripe will select the network.
+         */
+        fun preferredNetworks(preferredNetworks: List<CardBrand>): Configuration = apply {
+            this.preferredNetworks = preferredNetworks
+        }
+
+        /**
          * Overrides the default order in which payment methods are displayed.
          *
          * Payment methods omitted from this list are automatically ordered by Stripe after the
@@ -117,6 +130,7 @@ class PaymentElement @Inject internal constructor(
             val embeddedViewDisplaysMandateText: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
             val paymentMethodLayout: PaymentMethodLayout,
+            val preferredNetworks: List<CardBrand>,
             val paymentMethodOrder: List<String>,
             val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
             val appearance: Appearance.State,
@@ -126,6 +140,7 @@ class PaymentElement @Inject internal constructor(
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
             paymentMethodLayout = paymentMethodLayout,
+            preferredNetworks = preferredNetworks,
             paymentMethodOrder = paymentMethodOrder,
             termsDisplay = termsDisplay,
             appearance = appearance.build(),
