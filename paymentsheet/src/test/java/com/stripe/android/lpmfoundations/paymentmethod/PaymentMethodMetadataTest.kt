@@ -27,7 +27,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.LinkHiddenWalletButtonPreview
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -1858,9 +1857,8 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.shouldShowLinkButton).isFalse()
     }
 
-    @OptIn(LinkHiddenWalletButtonPreview::class)
     @Test
-    fun `shouldShowLinkButton returns false when linkState is present and display is Hidden`() {
+    fun `shouldShowLinkButton returns false when linkState is present and display is WalletButtonHidden`() {
         val metadata = PaymentMethodMetadataFactory.create(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
@@ -1868,7 +1866,7 @@ internal class PaymentMethodMetadataTest {
                 signupMode = null,
             ),
             linkConfiguration = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Hidden,
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
             ),
         )
 

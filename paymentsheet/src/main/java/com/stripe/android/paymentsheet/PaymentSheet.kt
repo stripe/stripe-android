@@ -38,7 +38,6 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.LinkHiddenWalletButtonPreview
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -3710,12 +3709,11 @@ class PaymentSheet internal constructor(
             disallowFundingSourceCreation = emptySet(),
         )
 
-        @OptIn(LinkHiddenWalletButtonPreview::class)
         internal val shouldDisplay: Boolean
             get() = when (display) {
                 Display.Automatic -> true
                 Display.Never -> false
-                Display.Hidden -> true
+                Display.WalletButtonHidden -> true
             }
 
         /**
@@ -3724,11 +3722,10 @@ class PaymentSheet internal constructor(
          * when its button is hidden, e.g. to support the returning-user flow and inline sign-up
          * without a visible entry point.
          */
-        @OptIn(LinkHiddenWalletButtonPreview::class)
         internal val shouldShowButton: Boolean
             get() = when (display) {
                 Display.Automatic -> true
-                Display.Never, Display.Hidden -> false
+                Display.Never, Display.WalletButtonHidden -> false
             }
 
         class Builder {
@@ -3782,15 +3779,13 @@ class PaymentSheet internal constructor(
              * otherwise enabled: the returning-user flow and the inline sign-up checkbox are
              * still shown.
              */
-            @LinkHiddenWalletButtonPreview
-            Hidden;
+            WalletButtonHidden;
 
-            @OptIn(LinkHiddenWalletButtonPreview::class)
             internal val analyticsValue: String
                 get() = when (this) {
                     Automatic -> "automatic"
                     Never -> "never"
-                    Hidden -> "hidden"
+                    WalletButtonHidden -> "wallet_button_hidden"
                 }
         }
     }

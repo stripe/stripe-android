@@ -27,7 +27,6 @@ import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.LinkHiddenWalletButtonPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -121,15 +120,14 @@ class DefaultWalletButtonsInteractorTest {
         }
     }
 
-    @OptIn(LinkHiddenWalletButtonPreview::class)
     @Test
-    fun `on init with Link Display Hidden, state should have no Link button`() = runTest {
+    fun `on init with Link Display WalletButtonHidden, state should have no Link button`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
                 availableWallets = listOf(WalletType.Link),
                 linkEmail = null,
                 linkConfiguration = PaymentSheet.LinkConfiguration(
-                    display = PaymentSheet.LinkConfiguration.Display.Hidden,
+                    display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
                 ),
             )
         )

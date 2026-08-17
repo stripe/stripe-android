@@ -9,7 +9,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.LinkHiddenWalletButtonPreview
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -74,9 +73,8 @@ class VerticalModeInitialScreenFactoryTest {
         assertThat(screens[0].showsWalletsHeader(false).value).isTrue()
     }
 
-    @OptIn(LinkHiddenWalletButtonPreview::class)
     @Test
-    fun `showsWalletHeader is false for VerticalModeForm if only wallet is Link with Display Hidden`() = runScenario(
+    fun `showsWalletHeader is false for VerticalModeForm if only wallet is Link and WalletButtonHidden`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("cashapp"),
@@ -88,7 +86,7 @@ class VerticalModeInitialScreenFactoryTest {
                 signupMode = null,
             ),
             linkConfiguration = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Hidden,
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
             ),
         )
     ) {

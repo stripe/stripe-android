@@ -18,7 +18,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
-import com.stripe.android.paymentelement.LinkHiddenWalletButtonPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -66,13 +65,12 @@ class SavedPaymentMethodMutatorTest {
             .contains(PaymentOptionsItem.Link(LinkBrand.Onelink))
     }
 
-    @OptIn(LinkHiddenWalletButtonPreview::class)
     @Test
-    fun `paymentOptionsItems does not include Link when Display is Hidden`() = runScenario(
+    fun `paymentOptionsItems does not include Link when Display is WalletButtonHidden`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             linkBrand = LinkBrand.Link,
             linkConfiguration = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Hidden,
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
             ),
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,

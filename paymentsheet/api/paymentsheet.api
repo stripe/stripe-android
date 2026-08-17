@@ -810,9 +810,6 @@ public abstract interface annotation class com/stripe/android/paymentelement/Exp
 public abstract interface annotation class com/stripe/android/paymentelement/ExtendedLabelsInPaymentOptionPreview : java/lang/annotation/Annotation {
 }
 
-public abstract interface annotation class com/stripe/android/paymentelement/LinkHiddenWalletButtonPreview : java/lang/annotation/Annotation {
-}
-
 public abstract interface annotation class com/stripe/android/paymentelement/PaymentMethodOptionsSetupFutureUsagePreview : java/lang/annotation/Annotation {
 }
 
@@ -1747,8 +1744,8 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguratio
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display : java/lang/Enum {
 	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
-	public static final field Hidden Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
 	public static final field Never Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
+	public static final field WalletButtonHidden Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
 	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
