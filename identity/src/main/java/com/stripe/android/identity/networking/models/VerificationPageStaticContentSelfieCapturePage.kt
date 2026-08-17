@@ -40,6 +40,8 @@ internal data class VerificationPageStaticContentSelfieCapturePage(
     val highResImageCropPadding: Float,
     @SerialName("training_consent_text")
     val consentText: String,
+    @SerialName("decline_and_continue_button_text")
+    val declineAndContinueButtonText: String? = null,
     @SerialName("pose_sequence")
     val poseSequence: List<String>? = null
 ) : Parcelable {

@@ -79,6 +79,8 @@ class DefaultIdentityRepositoryTest {
     fun `retrieveVerificationPage - type document, require selfie`() {
         testFetchVerificationPage(VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING) {
             assertThat(it.selfieCapture).isNotNull()
+            assertThat(it.selfieCapture?.declineAndContinueButtonText)
+                .isEqualTo("Decline and continue")
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
                 Requirement.IDDOCUMENTFRONT,

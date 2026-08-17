@@ -36,6 +36,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.navigation.SelfieDestination
 import com.stripe.android.identity.navigation.navigateTo
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.has3DFaceCaptureExperiment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 @Composable
@@ -47,10 +48,18 @@ internal fun SelfieWarmupScreen(
         identityViewModel = identityViewModel,
         navController = navController
     ) { verificationPage ->
+        val useRedesignedTrainingConsent = verificationPage.has3DFaceCaptureExperiment()
         SelfieWarmupContent(
             navController = navController,
             identityViewModel = identityViewModel,
-            trainingConsentText = verificationPage.selfieCapture?.consentText.orEmpty()
+            trainingConsentText = verificationPage.selfieCapture?.consentText.orEmpty(),
+            useRedesignedTrainingConsent = useRedesignedTrainingConsent,
+            declineButtonText = if (useRedesignedTrainingConsent) {
+                verificationPage.selfieCapture?.declineAndContinueButtonText
+                    ?: verificationPage.biometricConsent.declineButtonText
+            } else {
+                null
+            }
         )
     }
 }
@@ -61,9 +70,12 @@ internal fun SelfieWarmupScreen(
 private fun SelfieWarmupContent(
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    trainingConsentText: String
+    trainingConsentText: String,
+    useRedesignedTrainingConsent: Boolean,
+    declineButtonText: String?
 ) {
     val shouldShowTrainingConsent = trainingConsentText.isNotBlank()
+    val shouldUseRedesignedTrainingConsent = shouldShowTrainingConsent && useRedesignedTrainingConsent
     var selectedTrainingConsent by remember {
         mutableStateOf<Boolean?>(null)
     }
@@ -99,23 +111,43 @@ private fun SelfieWarmupContent(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = stringResource(id = R.string.stripe_selfie_warmup_title),
+                text = stringResource(
+                    id = if (shouldUseRedesignedTrainingConsent) {
+                        R.string.stripe_selfie_consent_title
+                    } else {
+                        R.string.stripe_selfie_warmup_title
+                    }
+                ),
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .testTag(SELFIE_WARMUP_TITLE_TAG),
                 style = MaterialTheme.typography.h4,
                 textAlign = TextAlign.Center
             )
+
             Text(
-                text = stringResource(id = R.string.stripe_selfie_warmup_body),
+                text = stringResource(
+                    id = if (shouldUseRedesignedTrainingConsent) {
+                        R.string.stripe_selfie_consent_body
+                    } else {
+                        R.string.stripe_selfie_warmup_body
+                    }
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
                         top = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
-                    ),
+                    )
+                    .testTag(SELFIE_WARMUP_BODY_TAG),
                 style = MaterialTheme.typography.subtitle1,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(64.dp))
+
+            Spacer(
+                modifier = Modifier.height(
+                    if (shouldUseRedesignedTrainingConsent) 32.dp else 64.dp
+                )
+            )
             Image(
                 painter = painterResource(id = R.drawable.stripe_selfie_warmup),
                 modifier = Modifier
@@ -128,13 +160,20 @@ private fun SelfieWarmupContent(
 
         if (shouldShowTrainingConsent) {
             BottomSheetHTML(
-                html = trainingConsentHtml(
-                    title = stringResource(id = R.string.stripe_selfie_training_consent_title),
-                    body = trainingConsentText
-                ),
+                html = if (shouldUseRedesignedTrainingConsent) {
+                    trainingConsentText
+                } else {
+                    trainingConsentHtml(
+                        title = stringResource(id = R.string.stripe_selfie_training_consent_title),
+                        body = trainingConsentText
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin)),
+                    .padding(
+                        bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
+                    )
+                    .testTag(SELFIE_TRAINING_CONSENT_FOOTER_TAG),
                 bottomSheets = null,
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.caption.copy(textAlign = TextAlign.Center),
@@ -158,7 +197,7 @@ private fun SelfieWarmupContent(
             Spacer(modifier = Modifier.height(8.dp))
             LoadingTextButton(
                 modifier = Modifier.testTag(SELFIE_DECLINE_BUTTON_TAG),
-                text = stringResource(id = R.string.stripe_decline),
+                text = declineButtonText ?: stringResource(id = R.string.stripe_decline),
                 state = when (selectedTrainingConsent) {
                     true -> LoadingButtonState.Disabled
                     false -> LoadingButtonState.Loading
@@ -189,6 +228,9 @@ private fun trainingConsentHtml(
 ) = "<b>$title</b><br/><br/>$body"
 
 internal const val SELFIE_WARMUP_CONTENT_TAG = "SelfieWarmupContentTag"
+internal const val SELFIE_WARMUP_TITLE_TAG = "SelfieWarmupTitleTag"
+internal const val SELFIE_WARMUP_BODY_TAG = "SelfieWarmupBodyTag"
+internal const val SELFIE_TRAINING_CONSENT_FOOTER_TAG = "SelfieTrainingConsentFooterTag"
 internal const val SELFIE_CONTINUE_BUTTON_TAG = "SelfieContinueButtonTag"
 internal const val SELFIE_ALLOW_BUTTON_TAG = "SelfieAllowButtonTag"
 internal const val SELFIE_DECLINE_BUTTON_TAG = "SelfieDeclineButtonTag"
