@@ -16,6 +16,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -23,6 +24,7 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -53,7 +55,11 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
-@OptIn(CheckoutSessionPreview::class, com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class)
+@OptIn(
+    CheckoutSessionPreview::class,
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+    CardFundingFilteringPrivatePreview::class,
+)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutStateLoaderTest {
 
@@ -146,6 +152,23 @@ internal class CheckoutStateLoaderTest {
         )
 
         assertThat(stateHolder.state?.commonConfiguration?.opensCardScannerAutomatically).isTrue()
+    }
+
+    @Test
+    fun `loadInitial passes allowed card funding types to common configuration`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().allowedCardFundingTypes(
+                        listOf(PaymentElement.Configuration.CardFundingType.Debit)
+                    )
+                )
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(stateHolder.state?.commonConfiguration?.allowedCardFundingTypes)
+            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
     }
 
     @Test
