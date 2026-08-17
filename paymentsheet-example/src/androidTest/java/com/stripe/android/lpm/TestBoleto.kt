@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymen
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -38,6 +39,7 @@ internal class TestBoleto : BasePlaygroundTest() {
         state = "Goiás",
     )
 
+    @Ignore("#ir-fishery-zigzag")
     @Test
     fun testBoleto() {
         testDriver.confirmNewOrGuestComplete(
@@ -52,6 +54,7 @@ internal class TestBoleto : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("#ir-fishery-zigzag")
     @Test
     fun testBoletoSfu() {
         testDriver.confirmNewOrGuestComplete(
@@ -68,6 +71,7 @@ internal class TestBoleto : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("#ir-fishery-zigzag")
     @Test
     fun testBoletoSetup() {
         testDriver.confirmNewOrGuestComplete(
