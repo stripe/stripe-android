@@ -261,9 +261,7 @@ private fun RegisterWalletAddressForm(
                 TextButton(
                     onClick = { onDropdownExpandedChange(true) },
                     modifier = Modifier.testTag(WALLET_NETWORK_DROPDOWN_TAG),
-                ) {
-                    Text("▼")
-                }
+                ) { Text("▼") }
             },
             modifier = Modifier
                 .fillMaxWidth()
