@@ -19,6 +19,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
@@ -458,7 +459,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                     "customer_session": {
                       "id": "cuss_654321",
                       "livemode": false,
-                      "api_key": "ek_12345",
+                      "api_key": "${TestApiKeys.EPHEMERAL}",
                       "api_key_expiry": 1899787184,
                       "customer": "cus_12345",
                       "components": {

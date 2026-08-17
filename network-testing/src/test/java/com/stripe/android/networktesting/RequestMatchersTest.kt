@@ -6,6 +6,182 @@ import org.junit.Test
 class RequestMatchersTest {
 
     @Test
+    fun `stripeApiKey matches publishable key for API request`() {
+        val request = createRequest(
+            path = "/v1/payment_intents/pi_123",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches live publishable key for API request`() {
+        val request = createRequest(
+            path = "/v1/payment_intents/pi_123",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.LIVE_PUBLISHABLE}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey rejects missing authorization for API request`() {
+        val request = createRequest(
+            path = "/v1/payment_intents/pi_123",
+            headers = mapOf("original-host" to "api.stripe.com"),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey rejects incorrect authorization for API request`() {
+        val request = createRequest(
+            path = "/v1/payment_intents/pi_123",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey matches ephemeral key for retrieving payment methods`() {
+        val request = createRequest(
+            path = "/v1/payment_methods?type=card",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches publishable key for creating payment method`() {
+        val request = createRequest(
+            path = "/v1/payment_methods",
+            method = "POST",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches ephemeral key for payment method mutation`() {
+        val request = createRequest(
+            path = "/v1/payment_methods/pm_123/detach",
+            method = "POST",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches ephemeral key for customer request`() {
+        val request = createRequest(
+            path = "/v1/customers/cus_123",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches ephemeral key for confirmation token using saved payment method`() {
+        val request = createRequest(
+            path = "/v1/confirmation_tokens",
+            method = "POST",
+            body = "payment_method=pm_123",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches publishable key for confirmation token using new payment method`() {
+        val request = createRequest(
+            path = "/v1/confirmation_tokens",
+            method = "POST",
+            body = "payment_method_data%5Btype%5D=card",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches analytics publishable key query parameter`() {
+        val request = createRequest(
+            path = "/?event=mc_load&publishable_key=${TestApiKeys.PUBLISHABLE}",
+            headers = mapOf("original-host" to "q.stripe.com"),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey rejects authorization header for analytics request`() {
+        val request = createRequest(
+            path = "/?publishable_key=${TestApiKeys.PUBLISHABLE}",
+            headers = mapOf(
+                "original-host" to "q.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey rejects missing publishable key for analytics request`() {
+        val request = createRequest(
+            path = "/?event=mc_load",
+            headers = mapOf("original-host" to "q.stripe.com"),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey ignores unrelated host`() {
+        val request = createRequest(
+            path = "/config",
+            headers = mapOf("original-host" to "ppm.stripe.com"),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
     fun `bodyPart matches plain args and pre-encoded args`() {
         val request = postWithFormBody("billing_details[email]" to "foo@bar.com")
 
@@ -138,12 +314,16 @@ class RequestMatchersTest {
         path: String = "/v1/test",
         body: String = "",
         method: String = "GET",
+        headers: Map<String, String> = emptyMap(),
     ): TestRecordedRequest {
         return TestRecordedRequest(
             MockRecordedRequestBuilder()
                 .path(path)
                 .body(body)
                 .method(method)
+                .apply {
+                    headers.forEach { (name, value) -> header(name, value) }
+                }
                 .build()
         )
     }

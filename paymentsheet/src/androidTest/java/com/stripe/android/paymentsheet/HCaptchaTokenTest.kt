@@ -116,7 +116,6 @@ internal class HCaptchaTokenTest {
 
     private fun navigateToFormForLpm() {
         val verticalModePage = createPaymentSheetPage()
-        verticalModePage.waitUntilVisible()
         verticalModePage.fillOutCardDetails()
     }
 

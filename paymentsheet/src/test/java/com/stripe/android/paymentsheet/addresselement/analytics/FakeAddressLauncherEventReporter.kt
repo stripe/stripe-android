@@ -51,12 +51,11 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
 
     override fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
-        queryLength: Int,
         resultCount: Int,
         source: String?,
     ) {
         _autocompleteSuggestionsReturnedCalls.add(
-            SuggestionsReturnedCall(sessionToken, queryLength, resultCount, source)
+            SuggestionsReturnedCall(sessionToken, resultCount, source)
         )
     }
 
@@ -91,7 +90,6 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
 
     data class SuggestionsReturnedCall(
         val sessionToken: String,
-        val queryLength: Int,
         val resultCount: Int,
         val source: String?,
     )

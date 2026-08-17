@@ -15,6 +15,7 @@ internal const val BACK_TO_SIGN_IN_BUTTON_TAG = "BackToSignInButtonTag"
 internal const val WALLET_NETWORK_DROPDOWN_TAG = "WalletNetworkDropdownTag"
 internal const val WALLET_ADDRESS_TAG = "WalletAddressTag"
 internal const val REGISTER_WALLET_BUTTON_TAG = "RegisterWalletButtonTag"
+internal const val DELETE_WALLET_BUTTON_TAG_PREFIX = "DeleteWalletButtonTag-"
 internal const val GET_WALLET_OWNERSHIP_CHALLENGE_BUTTON_TAG = "GetWalletOwnershipChallengeButtonTag"
 internal const val SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG = "SubmitWalletOwnershipSignatureButtonTag"
 internal const val KYC_SECTION_TAG = "KycSectionTag"
@@ -55,3 +56,7 @@ internal const val INITIALIZATION_FAILURE_ALERT_TITLE_TAG = "InitializationFailu
 internal const val INITIALIZATION_FAILURE_ALERT_MESSAGE_TAG = "InitializationFailureAlertMessageTag"
 internal const val SNACKBAR_TAG = "SnackbarTag"
 internal const val SNACKBAR_TEXT_TAG = "SnackbarTextTag"
+
+internal fun deleteWalletButtonTag(walletId: String): String {
+    return "$DELETE_WALLET_BUTTON_TAG_PREFIX$walletId"
+}

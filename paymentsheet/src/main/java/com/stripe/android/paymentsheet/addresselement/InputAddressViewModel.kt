@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
@@ -71,7 +70,7 @@ internal class InputAddressViewModel @Inject constructor(
     )
     val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
 
-    private val isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled
+    private val isInlineAutocompleteEnabled = true
 
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,

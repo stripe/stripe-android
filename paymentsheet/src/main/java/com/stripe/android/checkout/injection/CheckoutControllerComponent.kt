@@ -9,11 +9,12 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
-import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
-import com.stripe.android.checkout.ece.DefaultAvailableExpressButtonTypesFactory
+import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
@@ -25,6 +26,8 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.elements.ece.DefaultAvailableExpressButtonTypesFactory
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.injection.PaymentsIntegrityModule
@@ -121,9 +124,9 @@ internal interface CheckoutControllerComponent {
     interface Factory {
         fun create(
             @BindsInstance application: Application,
-            @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
+            @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
         ): CheckoutControllerComponent
     }
 }
@@ -208,7 +211,17 @@ internal interface CheckoutControllerModule {
         impl: DefaultAvailableExpressButtonTypesFactory
     ): AvailableExpressButtonTypesFactory
 
+    @Binds
+    fun bindsCheckoutSessionRefresher(impl: DefaultCheckoutSessionRefresher): CheckoutSessionRefresher
+
     companion object {
+        @Provides
+        fun provideSavedStateHandle(
+            checkoutControllerSavedState: CheckoutControllerSavedState,
+        ): SavedStateHandle {
+            return checkoutControllerSavedState.handle
+        }
+
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

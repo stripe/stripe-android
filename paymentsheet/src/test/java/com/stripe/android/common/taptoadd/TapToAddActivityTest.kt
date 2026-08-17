@@ -19,6 +19,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -119,6 +120,7 @@ class TapToAddActivityTest {
     fun successWithLinkInlineSignupInContinueMode() = runScenario(
         mode = TapToAddMode.Continue,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             linkState = LinkState(
@@ -174,6 +176,7 @@ class TapToAddActivityTest {
     fun successInCompleteMode() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PAYMENT_INTENT,
@@ -212,6 +215,7 @@ class TapToAddActivityTest {
     fun failedPaymentInCompleteMode() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PAYMENT_INTENT,
@@ -251,6 +255,7 @@ class TapToAddActivityTest {
     fun successWithLinkInlineSignupInCompleteMode() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PAYMENT_INTENT,
@@ -277,7 +282,7 @@ class TapToAddActivityTest {
         linkHelper.enqueueSignup()
         linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(
             paymentMethodId = info.cardPaymentMethod.id,
-            ephemeralKey = "ek_123",
+            ephemeralKey = TestApiKeys.EPHEMERAL,
         )
 
         confirmationHelper.intendingPaymentConfirmationToBeLaunched(
@@ -321,6 +326,7 @@ class TapToAddActivityTest {
     fun successWithCvcRecollection() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
@@ -389,6 +395,7 @@ class TapToAddActivityTest {
     fun canceledFromCardAddedScreen() = runScenario(
         mode = TapToAddMode.Continue,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             linkState = LinkState(
@@ -431,6 +438,7 @@ class TapToAddActivityTest {
     fun canceledFromConfirmationScreen() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PAYMENT_INTENT,
@@ -528,6 +536,7 @@ class TapToAddActivityTest {
     private fun runScenario(
         mode: TapToAddMode,
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
         ),

@@ -3,7 +3,7 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
-import com.stripe.android.checkout.ece.ExpressButtonType
+import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFactory
@@ -36,10 +36,9 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.Status.asStatus(): Session.Status {
     return when (this) {
-        CheckoutSessionResponse.Status.OPEN -> Session.Status.Open
-        CheckoutSessionResponse.Status.COMPLETE -> Session.Status.Complete
-        CheckoutSessionResponse.Status.EXPIRED -> Session.Status.Expired
-        CheckoutSessionResponse.Status.UNKNOWN -> Session.Status.Unknown
+        CheckoutSessionResponse.Status.OPEN -> Session.Status.Open()
+        CheckoutSessionResponse.Status.COMPLETE -> Session.Status.Complete()
+        CheckoutSessionResponse.Status.EXPIRED -> Session.Status.Expired()
     }
 }
 

@@ -1036,7 +1036,7 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `parse status unknown for unrecognized value`() {
+    fun `fails to parse unrecognized status`() {
         val json = JSONObject(
             """
             {
@@ -1050,12 +1050,11 @@ class CheckoutSessionResponseJsonParserTest {
         )
         val result = CheckoutSessionResponseJsonParser.parse(json)
 
-        assertThat(result).isNotNull()
-        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.UNKNOWN)
+        assertThat(result).isNull()
     }
 
     @Test
-    fun `parse status defaults to unknown when missing`() {
+    fun `fails to parse missing status`() {
         val json = JSONObject(
             """
             {
@@ -1066,10 +1065,12 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(
+            json = json,
+            addDefaultStatus = false,
+        )
 
-        assertThat(result).isNotNull()
-        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.UNKNOWN)
+        assertThat(result).isNull()
     }
 
     @Test
@@ -1443,5 +1444,22 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result).isNotNull()
         assertThat(result?.allowedShippingCountries).isEqualTo(emptyList<String>())
+    }
+
+    /**
+     * Most parser tests predate the required status field and exercise unrelated response fields.
+     * Give those fixtures a known status while allowing status-specific tests to opt out.
+     */
+    private object CheckoutSessionResponseJsonParser {
+        fun parse(
+            json: JSONObject,
+            addDefaultStatus: Boolean = true,
+        ): CheckoutSessionResponse? {
+            val responseJson = JSONObject(json.toString())
+            if (addDefaultStatus && !responseJson.has("status")) {
+                responseJson.put("status", "open")
+            }
+            return com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseJsonParser.parse(responseJson)
+        }
     }
 }

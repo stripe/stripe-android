@@ -156,6 +156,10 @@
   <string name="stripe_fpx_bank_offline">%s - 線下</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">您的支付方式被拒絕了。</string>
+  <!-- Google Pay line item showing the amount before exclusive taxes. -->
+  <string name="stripe_google_pay_cost_excluding_tax">不含税金的費用</string>
+  <!-- Google Pay total label when the final tax may change with the selected billing address. -->
+  <string name="stripe_google_pay_estimated_total">預計總額（最終税金可能有所不同）</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">總計</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->

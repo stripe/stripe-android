@@ -156,6 +156,10 @@
   <string name="stripe_fpx_bank_offline">%s - Izvan mreže</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Vaš način plaćanja je odbijen.</string>
+  <!-- Google Pay line item showing the amount before exclusive taxes. -->
+  <string name="stripe_google_pay_cost_excluding_tax">Trošak bez poreza</string>
+  <!-- Google Pay total label when the final tax may change with the selected billing address. -->
+  <string name="stripe_google_pay_estimated_total">Procijenjeni ukupni iznos (konačni porez može varirati)</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">Ukupno</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->

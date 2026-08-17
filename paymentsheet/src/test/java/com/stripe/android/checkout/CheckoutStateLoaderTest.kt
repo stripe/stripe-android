@@ -70,7 +70,7 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial seeds collected details with default billing address`() = runScenario {
+    fun `loadInitial seeds collected details with the defaults billing address`() = runScenario {
         val address = CheckoutController.Address()
             .city(" San Francisco ")
             .country(" US ")
@@ -80,7 +80,12 @@ internal class CheckoutStateLoaderTest {
 
         loader.loadInitial(
             configuration = CheckoutController.Configuration()
-                .defaultBillingAddress(address)
+                .defaults(
+                    CheckoutController.Configuration.Defaults()
+                        .billingDetails(
+                            CheckoutController.Configuration.Defaults.ContactDetails().address(address),
+                        ),
+                )
                 .build(),
             checkoutSessionResponse = response(),
         )
@@ -93,6 +98,31 @@ internal class CheckoutStateLoaderTest {
         assertThat(billingAddress.state).isEqualTo("CA")
         assertThat(stateHolder.state?.embeddedConfiguration?.defaultBillingDetails?.address?.postalCode)
             .isEqualTo("94103")
+    }
+
+    @Test
+    fun `loadInitial seeds collected details from configuration defaults`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .defaults(
+                CheckoutController.Configuration.Defaults()
+                    .billingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("Jane Billing")
+                            .address(CheckoutController.Address().country("US").city("Denver")),
+                    )
+                    .shippingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails().name("John Shipping"),
+                    ),
+            )
+            .build()
+
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+        val collected = requireNotNull(stateHolder.state).collectedDetails
+        assertThat(collected.billingName).isEqualTo("Jane Billing")
+        assertThat(collected.billingAddress?.country).isEqualTo("US")
+        assertThat(collected.billingAddress?.city).isEqualTo("Denver")
+        assertThat(collected.shippingName).isEqualTo("John Shipping")
     }
 
     @Test
@@ -127,6 +157,19 @@ internal class CheckoutStateLoaderTest {
         paymentElementLoader.updatePaymentMethods(emptyList())
         loader.reload(requireNotNull(stateHolder.state))
 
+        assertThat(customerStateHolder.paymentMethods.value).isEmpty()
+    }
+
+    @Test
+    fun `clear removes controller and customer state`() = runScenario(
+        customer = savedCustomer(),
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        loader.clear()
+
+        assertThat(stateHolder.state).isNull()
+        assertThat(customerStateHolder.customer.value).isNull()
         assertThat(customerStateHolder.paymentMethods.value).isEmpty()
     }
 

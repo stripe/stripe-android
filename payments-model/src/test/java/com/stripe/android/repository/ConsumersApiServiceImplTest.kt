@@ -20,6 +20,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.TestApiKeys
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -442,7 +443,7 @@ class ConsumersApiServiceImplTest {
     }
 
     private companion object {
-        private val DEFAULT_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE)
         private const val DEFAULT_SESSION_ID = "sess_123"
     }
 }

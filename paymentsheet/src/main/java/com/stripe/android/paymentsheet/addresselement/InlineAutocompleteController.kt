@@ -111,6 +111,7 @@ internal class InlineAutocompleteController(
     }
 
     fun onSearchActivated() {
+        predictionsPaused = false
         activationState = ActivationState.ActiveBySearch
         val q = queryFlow?.value ?: return
         val c = countryFlow?.value ?: ""

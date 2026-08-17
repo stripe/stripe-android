@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -199,7 +200,7 @@ internal class PaymentSheetDeferredTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
                     .build(),
             )
@@ -262,7 +263,7 @@ internal class PaymentSheetDeferredTest {
                     )
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .build(),
             )
@@ -347,7 +348,7 @@ internal class PaymentSheetDeferredTest {
                     )
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
                     .build(),
             )
@@ -410,7 +411,7 @@ internal class PaymentSheetDeferredTest {
                     )
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .build(),
             )

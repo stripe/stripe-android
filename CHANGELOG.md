@@ -4,13 +4,30 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+* [CHANGED] Inline address autocomplete is now enabled by default in PaymentSheet and FlowController.
+
+### AddressElement
+* [CHANGED] Inline address autocomplete is now enabled by default.
+
+### CryptoOnramp
+* [ADDED] Added `OnrampCoordinator.deleteWalletAddress(walletId:)` to delete a registered wallet address.
+
+## 23.15.0 - 2026-08-10
+
+### PaymentSheet
 * [FIXED] LinkController (private preview) now returns an error when no funding sources are available for a Link session, rather than silently falling back to card.
 * [ADDED] Added support for the Agrobank, MBSB Bank, and Bank of China FPX banks, and the FPX bank list is now displayed in alphabetical order.
+* [CHANGED] Inline address autocomplete is now enabled by default in PaymentSheet and FlowController.
+
+### AddressElement
+* [CHANGED] Inline address autocomplete is now enabled by default.
+
+### CryptoOnramp
+* [ADDED][13623](https://github.com/stripe/stripe-android/pull/13623) Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
 
 ## 23.14.0 - 2026-08-03
 
 ### CryptoOnramp
-* [ADDED][13623](https://github.com/stripe/stripe-android/pull/13623) Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
 * [ADDED] Added Tempo as a supported wallet network and pinned Crypto Onramp internal API calls to the preview API version required by newer networks.
 
 ### PaymentSheet

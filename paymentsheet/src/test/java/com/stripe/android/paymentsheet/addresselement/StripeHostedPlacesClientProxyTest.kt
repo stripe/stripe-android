@@ -359,7 +359,7 @@ class StripeHostedPlacesClientProxyTest {
     }
 
     @Test
-    fun `findAutocompletePredictions success fires suggestions returned with query length`() = runTest {
+    fun `findAutocompletePredictions success fires suggestions returned with result count`() = runTest {
         val eventReporter = FakeAddressLauncherEventReporter()
         val repository = defaultRepository()
         val proxy = createProxy(repository = repository, eventReporter = eventReporter)
@@ -370,7 +370,6 @@ class StripeHostedPlacesClientProxyTest {
         eventReporter.autocompleteFetchStartedCalls.awaitItem()
 
         val suggestionsCall = eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
-        assertThat(suggestionsCall.queryLength).isEqualTo("123 Main".length)
         assertThat(suggestionsCall.resultCount).isEqualTo(1)
         repository.ensureAllEventsConsumed()
         eventReporter.validate()

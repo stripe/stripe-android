@@ -4,10 +4,18 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.LocalFormScrollContext
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.collectAsState
@@ -17,6 +25,8 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldController(
@@ -105,14 +115,30 @@ class AddressTextFieldController(
                 )
             }
 
-            Column(
-                modifier = modifier.onFocusChanged { state ->
-                    if (state.hasFocus) {
-                        inlineAutocompleteHandler.onFocusGained()
-                    } else {
-                        inlineAutocompleteHandler.onFocusLost()
-                    }
+            val scrollContext = LocalFormScrollContext.current
+            var elementScreenY by remember { mutableIntStateOf(0) }
+            val showingPredictions = shouldShowPredictionsDropdown(predictionsState)
+            LaunchedEffect(showingPredictions) {
+                if (showingPredictions && scrollContext != null) {
+                    snapshotFlow { elementScreenY }.filter { it > 0 }.first()
+                    val target = scrollContext.scrollState.value +
+                        elementScreenY - scrollContext.viewportTopY
+                    scrollContext.scrollState.animateScrollTo(target)
                 }
+            }
+
+            Column(
+                modifier = modifier
+                    .onGloballyPositioned { coordinates ->
+                        elementScreenY = coordinates.positionInRoot().y.toInt()
+                    }
+                    .onFocusChanged { state ->
+                        if (state.hasFocus) {
+                            inlineAutocompleteHandler.onFocusGained()
+                        } else {
+                            inlineAutocompleteHandler.onFocusLost()
+                        }
+                    }
             ) {
                 AddressTextFieldUI(
                     controller = this@AddressTextFieldController,

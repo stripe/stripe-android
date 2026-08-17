@@ -59,6 +59,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             val nextStep = interceptor.intercept(
                 intent = intent,
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = providedPaymentMethod,
                     optionsParams = null,
                 ),

@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
-import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
+import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview

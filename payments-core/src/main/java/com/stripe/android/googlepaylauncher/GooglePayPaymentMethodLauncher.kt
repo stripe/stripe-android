@@ -28,6 +28,7 @@ import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import dev.drewhamilton.poko.Poko
@@ -356,9 +357,18 @@ class GooglePayPaymentMethodLauncher internal constructor(
          */
         @Parcelize
         @Poko
-        class Completed(
-            val paymentMethod: PaymentMethod
-        ) : Result()
+        class Completed
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            val paymentMethod: PaymentMethod,
+            @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            val shippingInformation: ShippingInformation?,
+        ) : Result() {
+            constructor(paymentMethod: PaymentMethod) : this(
+                paymentMethod = paymentMethod,
+                shippingInformation = null,
+            )
+        }
 
         /**
          * Represents a failed transaction.

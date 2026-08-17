@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onFirst
@@ -484,7 +485,7 @@ internal class OnrampE2EPage(
         timeoutMs: Long = defaultTimeout.inWholeMilliseconds,
         scrollRoot: Boolean = true,
     ) {
-        waitForTag(tag, timeoutMs)
+        waitForEnabledTag(tag, timeoutMs)
         val node = composeRule.onNodeWithTag(tag)
         runCatching { node.performScrollTo() }
         if (scrollRoot) {
@@ -494,6 +495,13 @@ internal class OnrampE2EPage(
             composeRule.waitUntilDoesNotExist(hasTestTag(SNACKBAR_TAG), timeoutMillis = timeoutMs)
         }
         composeRule.onNodeWithTag(tag).performClick()
+    }
+
+    private fun waitForEnabledTag(tag: String, timeoutMs: Long) {
+        composeRule.waitUntilExactlyOneExists(
+            matcher = hasTestTag(tag).and(isEnabled()),
+            timeoutMillis = timeoutMs,
+        )
     }
 
     private fun waitForTag(tag: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {

@@ -18,6 +18,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject
 import androidx.test.uiautomator.UiSelector
+import androidx.test.uiautomator.Until
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethod.Type.Blik
@@ -156,19 +157,19 @@ internal class Selectors(
 
     val closeButton = UiAutomatorText("Close", device = device)
 
-    @OptIn(ExperimentalTestApi::class)
     fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
         val authorizationText = requireNotNull(testParameters.authorizationAction).text(isSetup)
         val readinessText = authorizationText.ifBlank {
             "test ${if (isSetup) "setup" else "payment"} page"
         }
-        val authorizationSelector = UiSelector().textContains(readinessText)
 
-        composeTestRule.waitUntil(
-            conditionDescription = "authorization page content '$readinessText' to load",
-            timeoutMillis = HOOKS_PAGE_LOAD_TIMEOUT * 1000,
+        checkNotNull(
+            device.wait(
+                Until.findObject(By.textContains(readinessText)),
+                HOOKS_PAGE_LOAD_TIMEOUT * 1000,
+            )
         ) {
-            device.findObject(authorizationSelector).exists()
+            "Authorization page content '$readinessText' did not load"
         }
         device.waitForIdle()
     }

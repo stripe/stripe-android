@@ -7,7 +7,7 @@ import org.junit.runner.Description
 
 class PaymentConfigurationTestRule(
     private val context: Context,
-    private val publishableKey: String = "pk_123"
+    private val publishableKey: String = PUBLISHABLE_KEY
 ) : TestWatcher() {
     override fun starting(description: Description) {
         PaymentConfiguration.init(context, publishableKey)
@@ -17,5 +17,9 @@ class PaymentConfigurationTestRule(
     override fun finished(description: Description) {
         super.finished(description)
         PaymentConfiguration.clearInstance()
+    }
+
+    private companion object {
+        const val PUBLISHABLE_KEY = "pk_test_123"
     }
 }

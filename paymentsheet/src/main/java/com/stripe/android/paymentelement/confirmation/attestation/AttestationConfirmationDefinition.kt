@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.attestation
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
@@ -109,6 +110,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (AttestationActivityResult) -> Unit
     ): ActivityResultLauncher<AttestationActivityContract.Args> {
         return activityResultCaller.registerForActivityResult(AttestationActivityContract(), onResult)

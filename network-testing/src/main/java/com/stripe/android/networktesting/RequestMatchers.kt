@@ -39,6 +39,30 @@ internal class CompositeRequestMatcher(
 }
 
 object RequestMatchers {
+    fun stripeApiKey(
+        publishableKey: String = TestApiKeys.PUBLISHABLE,
+        ephemeralKey: String = TestApiKeys.EPHEMERAL,
+    ): RequestMatcher {
+        return ToStringRequestMatcher("stripeApiKey") { request ->
+            when (request.headers[ORIGINAL_HOST_HEADER]) {
+                API_HOST -> {
+                    val authorization = request.headers[AUTHORIZATION_HEADER]
+                    if (request.requiresEphemeralKey()) {
+                        authorization == "Bearer $ephemeralKey"
+                    } else {
+                        authorization == "Bearer $publishableKey" ||
+                            authorization == "Bearer ${TestApiKeys.LIVE_PUBLISHABLE}"
+                    }
+                }
+                ANALYTICS_HOST -> {
+                    request.headers[AUTHORIZATION_HEADER] == null &&
+                        request.queryParams[PUBLISHABLE_KEY_QUERY] == publishableKey
+                }
+                else -> true
+            }
+        }
+    }
+
     fun host(host: String): RequestMatcher {
         return header("original-host", host)
     }
@@ -104,6 +128,10 @@ object RequestMatchers {
         }
     }
 
+    fun analyticsPayloadField(key: String, value: String): RequestMatcher {
+        return query(key, value)
+    }
+
     fun method(method: String): RequestMatcher {
         return ToStringRequestMatcher("method($method)") { request ->
             request.method == method
@@ -147,4 +175,29 @@ object RequestMatchers {
     fun composite(vararg matchers: RequestMatcher): RequestMatcher {
         return CompositeRequestMatcher(matchers.toList())
     }
+
+    private fun TestRecordedRequest.requiresEphemeralKey(): Boolean {
+        val pathWithoutQuery = path.substringBefore('?')
+        return when {
+            method == "GET" && pathWithoutQuery == PAYMENT_METHODS_PATH -> true
+            pathWithoutQuery.startsWith("$PAYMENT_METHODS_PATH/") -> true
+            pathWithoutQuery.startsWith(ELEMENTS_PAYMENT_METHODS_PATH) -> true
+            pathWithoutQuery.startsWith(CUSTOMERS_PATH) -> true
+            pathWithoutQuery.startsWith(ELEMENTS_CUSTOMERS_PATH) -> true
+            pathWithoutQuery == CONFIRMATION_TOKENS_PATH && bodyParams.containsKey(PAYMENT_METHOD_PARAM) -> true
+            else -> false
+        }
+    }
+
+    private const val ORIGINAL_HOST_HEADER = "original-host"
+    private const val AUTHORIZATION_HEADER = "Authorization"
+    private const val API_HOST = "api.stripe.com"
+    private const val ANALYTICS_HOST = "q.stripe.com"
+    private const val PUBLISHABLE_KEY_QUERY = "publishable_key"
+    private const val PAYMENT_METHODS_PATH = "/v1/payment_methods"
+    private const val ELEMENTS_PAYMENT_METHODS_PATH = "/v1/elements/payment_methods/"
+    private const val CUSTOMERS_PATH = "/v1/customers/"
+    private const val ELEMENTS_CUSTOMERS_PATH = "/v1/elements/customers/"
+    private const val CONFIRMATION_TOKENS_PATH = "/v1/confirmation_tokens"
+    private const val PAYMENT_METHOD_PARAM = "payment_method"
 }

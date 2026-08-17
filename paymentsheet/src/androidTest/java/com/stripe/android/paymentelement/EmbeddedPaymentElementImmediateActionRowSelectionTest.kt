@@ -8,6 +8,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -219,7 +220,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         ) { testContext ->
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
             testContext.consumePaymentOptionEvent("card", "4242")
@@ -243,7 +244,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         ) { testContext ->
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
             testContext.consumePaymentOptionEvent("card", "4242")
@@ -274,7 +275,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         ) { testContext ->
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
             testContext.consumePaymentOptionEvent("card", "4242")
@@ -305,7 +306,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
             }
             testContext.consumePaymentOptionEvent("card", "4242")
 
@@ -327,7 +328,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
             }
             testContext.consumePaymentOptionEvent("card", "4242")
 
@@ -351,7 +352,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         ) { testContext ->
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
             }
             testContext.consumePaymentOptionEvent("card", "4242")
 

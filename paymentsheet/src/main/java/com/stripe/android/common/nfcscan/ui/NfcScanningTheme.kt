@@ -21,9 +21,9 @@ internal fun NfcScanningTheme(
 private object NfcScanningThemeDefaults {
     val typography = StripeThemeDefaults.typography.copy(
         h4 = TextStyle(
-            fontSize = 24.sp,
-            letterSpacing = 0.sp,
-            fontWeight = FontWeight.W700,
+            fontSize = 28.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 0.3.sp,
         )
     )
 }

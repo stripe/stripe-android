@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.graphics.drawable.Drawable
-import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
@@ -10,15 +9,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.checkout.ece.ExpressButtonType
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.ShippingAddressElement
+import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -34,7 +36,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
-import java.util.WeakHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -55,12 +56,14 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 class CheckoutController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
+    private val savedState: CheckoutControllerSavedState,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -69,7 +72,7 @@ class CheckoutController @Inject internal constructor(
         get() = stateHolder.session
 
     /**
-     * Whether a mutation is currently in progress.
+     * Whether a mutation or confirmation is currently in progress or queued.
      */
     val isUpdating: StateFlow<Boolean> = operationCoordinator.isUpdating
 
@@ -80,14 +83,14 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Loads the Checkout Session identified by [checkoutSessionClientSecret] and prepares the
+     * Loads the Checkout Session identified by [clientSecret] and prepares the
      * payment UI, populating [session] on success.
      *
-     * @param checkoutSessionClientSecret The client secret of the Checkout Session to load.
+     * @param clientSecret The client secret of the Checkout Session to load.
      * @param configuration Options controlling how the checkout is configured and displayed.
      */
     suspend fun configure(
-        checkoutSessionClientSecret: String,
+        clientSecret: String,
         configuration: Configuration = Configuration(),
     ): kotlin.Result<Unit> {
         // A re-configure while a payment flow is presented would reload the session out from under
@@ -97,18 +100,26 @@ class CheckoutController @Inject internal constructor(
         }
         return operationCoordinator.runMutation {
             val configurationState = configuration.build()
-            val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
+            val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).mapCatching { response ->
-                if (configurationState.defaultBillingAddress != null &&
-                    response.automaticTaxEnabled &&
-                    response.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING
-                ) {
-                    checkoutSessionRepository.updateTaxRegion(sessionId, configurationState.defaultBillingAddress)
-                        .getOrThrow()
+                val defaultBillingAddress = configurationState.defaults.billingDetails?.address
+                if (defaultBillingAddress != null) {
+                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = response,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                        address = defaultBillingAddress,
+                    ).getOrThrow()
+                } else {
+                    response
+                }
+            }.mapCatching { response ->
+                val defaultEmail = configurationState.defaults.email
+                if (defaultEmail != null) {
+                    checkoutSessionRepository.updateEmail(sessionId, defaultEmail).getOrThrow()
                 } else {
                     response
                 }
@@ -147,12 +158,10 @@ class CheckoutController @Inject internal constructor(
      * to compute updated tax amounts.
      *
      * @param name The recipient's name.
-     * @param phoneNumber The recipient's phone number.
      * @param address The shipping address.
      */
     suspend fun updateShippingAddress(
         name: String?,
-        phoneNumber: String?,
         address: Address,
     ): kotlin.Result<Unit> {
         stateHolder.state?.checkoutSessionResponse
@@ -162,7 +171,6 @@ class CheckoutController @Inject internal constructor(
             copy(
                 collectedDetails = collectedDetails.copy(
                     shippingName = name,
-                    shippingPhoneNumber = phoneNumber,
                     shippingAddress = it,
                 ),
             )
@@ -183,13 +191,11 @@ class CheckoutController @Inject internal constructor(
 
     internal suspend fun updateBillingAddress(
         name: String?,
-        phoneNumber: String?,
         address: Address,
     ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
         copy(
             collectedDetails = collectedDetails.copy(
                 billingName = name,
-                billingPhoneNumber = phoneNumber,
                 billingAddress = it,
             ),
         )
@@ -227,14 +233,12 @@ class CheckoutController @Inject internal constructor(
         val built = address.build()
         return withCheckoutState(
             additionalStateMutations = { mutation(built) },
-        ) { sessionId ->
-            val shouldSendTaxRegion = checkoutSessionResponse.automaticTaxEnabled &&
-                checkoutSessionResponse.taxAddressSource == addressType
-            if (shouldSendTaxRegion) {
-                checkoutSessionRepository.updateTaxRegion(sessionId, built)
-            } else {
-                kotlin.Result.success(checkoutSessionResponse)
-            }
+        ) {
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = addressType,
+                address = built,
+            )
         }
     }
 
@@ -324,17 +328,26 @@ class CheckoutController @Inject internal constructor(
      */
     fun destroy() {
         viewModelScope.cancel()
-        stateHolder.state = null
+        checkoutStateLoader.clear()
+        savedState.clear()
     }
 
     /**
      * Clears the customer's selected payment option, resetting it to `null`.
      *
-     * Returns [kotlin.Result.failure] if the session hasn't been configured yet or a payment flow is
-     * currently presented.
+     * Returns [kotlin.Result.failure] if the session hasn't been configured yet, a payment flow is
+     * currently presented, or another mutation or confirmation is in progress.
      */
     fun clearPaymentOption(): kotlin.Result<Unit> {
-        return requireMutableState().map { stateHolder.clearSelection() }
+        return requireMutableState().fold(
+            onSuccess = {
+                operationCoordinator.runSynchronousMutation {
+                    stateHolder.clearSelection()
+                    kotlin.Result.success(Unit)
+                }
+            },
+            onFailure = { kotlin.Result.failure(it) },
+        )
     }
 
     /**
@@ -391,36 +404,61 @@ class CheckoutController @Inject internal constructor(
         internal val availableExpressButtonTypes: List<ExpressButtonType>,
     ) {
 
-        /**
-         * Whether Express Checkout Element has any payment methods to display for this checkout session.
+        /** Payment methods ready to be displayed in [ExpressCheckoutElement].
+         *
+         * When empty, Express Checkout Element will render empty content.
          */
-        val isExpressCheckoutElementAvailable: Boolean = availableExpressButtonTypes.isNotEmpty()
+        val availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod> =
+            availableExpressButtonTypes.map { type ->
+                when (type) {
+                    is ExpressButtonType.GooglePay -> ExpressCheckoutElement.PaymentMethod.GooglePay()
+                    ExpressButtonType.Link -> ExpressCheckoutElement.PaymentMethod.Link()
+                }
+            }
+
+        /**
+         * Whether Currency Selector Element has content to display for this checkout session.
+         */
+        val isCurrencySelectorAvailable: Boolean = currencySelectorOptions != null
 
         /**
          * The status of a checkout session.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        enum class Status {
+        sealed class Status {
             /**
              * The checkout session is still in progress. Payment processing has not started.
              */
-            Open,
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Open internal constructor() : Status() {
+                override fun equals(other: Any?): Boolean = other is Open
+
+                override fun hashCode(): Int = Open::class.hashCode()
+            }
 
             /**
              * The checkout session is complete. Payment processing may still be in progress.
              */
-            Complete,
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Complete internal constructor() : Status() {
+                override fun equals(other: Any?): Boolean = other is Complete
+
+                override fun hashCode(): Int = Complete::class.hashCode()
+            }
 
             /**
              * The checkout session has expired. No further processing will occur.
              */
-            Expired,
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Expired internal constructor() : Status() {
+                override fun equals(other: Any?): Boolean = other is Expired
 
-            /**
-             * A status not recognized by this version of the SDK.
-             */
-            Unknown,
+                override fun hashCode(): Int = Expired::class.hashCode()
+            }
         }
 
         /**
@@ -668,10 +706,6 @@ class CheckoutController @Inject internal constructor(
          * The customer's full name.
          */
         val name: String?,
-        /**
-         * The customer's phone number, without formatting (e.g. 5551234567).
-         */
-        val phone: String?,
     ) {
         /**
          * A billing address.
@@ -751,11 +785,15 @@ class CheckoutController @Inject internal constructor(
          * Builds a [CheckoutController] from the current configuration.
          */
         fun build(): CheckoutController {
+            val checkoutControllerSavedState = CheckoutControllerSavedState(
+                parentHandle = savedStateHandle,
+                integrationName = integrationName,
+            )
             val component = DaggerCheckoutControllerComponent.factory().create(
                 application = application,
-                savedStateHandle = savedStateHandle.checkoutSubHandle(integrationName),
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
+                checkoutControllerSavedState = checkoutControllerSavedState,
             )
 
             return component.checkoutController
@@ -769,10 +807,11 @@ class CheckoutController @Inject internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
-        private var adaptivePricingAllowed: Boolean = false
-        private var defaultBillingAddress: Address? = null
+        private var adaptivePricing: AdaptivePricing = AdaptivePricing()
+        private var apiConfiguration: ApiConfiguration? = null
         private var merchantDisplayName: String? = null
         private var googlePayConfiguration: GooglePayConfiguration? = null
+        private var defaults: Defaults = Defaults()
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
             CurrencySelectorElement.Configuration()
@@ -782,24 +821,21 @@ class CheckoutController @Inject internal constructor(
             ExpressCheckoutElement.Configuration()
 
         /**
-         * Sets whether adaptive pricing is allowed for this checkout session.
+         * Sets the adaptive pricing configuration for this checkout session.
          */
-        fun adaptivePricingAllowed(
-            adaptivePricingAllowed: Boolean
+        fun adaptivePricing(
+            adaptivePricing: AdaptivePricing,
         ): Configuration = apply {
-            this.adaptivePricingAllowed = adaptivePricingAllowed
+            this.adaptivePricing = adaptivePricing
         }
 
         /**
-         * Sets the customer's known billing address.
-         *
-         * The address is used to prefill payment method forms. When automatic tax uses the billing
-         * address, Checkout can also use it to calculate an initial tax estimate.
+         * Sets the API configuration for this checkout session.
          */
-        fun defaultBillingAddress(
-            defaultBillingAddress: Address,
+        fun apiConfiguration(
+            apiConfiguration: ApiConfiguration,
         ): Configuration = apply {
-            this.defaultBillingAddress = defaultBillingAddress
+            this.apiConfiguration = apiConfiguration
         }
 
         /**
@@ -859,28 +895,137 @@ class CheckoutController @Inject internal constructor(
             this.googlePayConfiguration = configuration
         }
 
+        /**
+         * Prefill values for the customer's details. If known up front, these prepopulate the
+         * elements (and the Checkout Session) so the customer doesn't re-enter them.
+         */
+        fun defaults(
+            defaults: Defaults
+        ): Configuration = apply {
+            this.defaults = defaults
+        }
+
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
-            val defaultBillingAddress: Address.State?,
+            val apiConfiguration: ApiConfiguration.State?,
             val merchantDisplayName: String?,
             val googlePayConfiguration: GooglePayConfiguration.State?,
+            val defaults: Defaults.State,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
             val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
         ) : Parcelable
 
-        internal fun build(): State = State(
-            adaptivePricingAllowed = adaptivePricingAllowed,
-            defaultBillingAddress = defaultBillingAddress?.build(),
-            merchantDisplayName = merchantDisplayName,
-            paymentElementConfiguration = paymentElementConfiguration.build(),
-            currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
-            shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
-            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
-            googlePayConfiguration = googlePayConfiguration?.build(),
-        )
+        internal fun build(): State {
+            val defaultsState = defaults.build()
+            return State(
+                adaptivePricingAllowed = adaptivePricing.build().allowed,
+                apiConfiguration = apiConfiguration?.build(),
+                merchantDisplayName = merchantDisplayName,
+                paymentElementConfiguration = paymentElementConfiguration.build(),
+                currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
+                shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
+                expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
+                googlePayConfiguration = googlePayConfiguration?.build(),
+                defaults = defaultsState,
+            )
+        }
+
+        /**
+         * Configuration for adaptive pricing.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class AdaptivePricing {
+            private var allowed: Boolean = false
+
+            /**
+             * Sets whether adaptive pricing is allowed for this checkout session.
+             */
+            fun allowed(allowed: Boolean): AdaptivePricing = apply {
+                this.allowed = allowed
+            }
+
+            internal fun build(): State = State(
+                allowed = allowed,
+            )
+
+            internal data class State(
+                val allowed: Boolean,
+            )
+        }
+
+        /**
+         * Prefill values for the customer's billing/shipping details and email.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Defaults {
+            private var billingDetails: ContactDetails? = null
+            private var shippingDetails: ContactDetails? = null
+            private var email: String? = null
+
+            /**
+             * The customer's known billing contact details.
+             */
+            fun billingDetails(billingDetails: ContactDetails): Defaults = apply {
+                this.billingDetails = billingDetails
+            }
+
+            /**
+             * The customer's known shipping contact details.
+             */
+            fun shippingDetails(shippingDetails: ContactDetails): Defaults = apply {
+                this.shippingDetails = shippingDetails
+            }
+
+            /**
+             * The customer's known email address.
+             */
+            fun email(email: String?): Defaults = apply {
+                this.email = email
+            }
+
+            @Parcelize
+            internal data class State(
+                val billingDetails: ContactDetails.State?,
+                val shippingDetails: ContactDetails.State?,
+                val email: String?,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                billingDetails = billingDetails?.build(),
+                shippingDetails = shippingDetails?.build(),
+                email = email?.trim()?.takeIf { it.isNotEmpty() },
+            )
+
+            /**
+             * A name and postal address for a customer.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class ContactDetails {
+                private var name: String? = null
+                private var address: Address? = null
+
+                fun name(name: String?): ContactDetails = apply { this.name = name }
+
+                fun address(address: Address): ContactDetails = apply { this.address = address }
+
+                @Parcelize
+                internal data class State(
+                    val name: String?,
+                    val address: Address.State?,
+                ) : Parcelable
+
+                internal fun build(): State = State(
+                    name = name,
+                    address = address?.build(),
+                )
+            }
+        }
     }
 
     /**
@@ -1005,31 +1150,3 @@ class CheckoutController @Inject internal constructor(
         fun onResult(result: Result)
     }
 }
-
-/**
- * Caches the child handle derived for each (parent, integrationName) pair so repeated derivations
- * return the same instance. Every [CheckoutController] key lives inside its own child, so multiple
- * controllers sharing one parent handle never clobber one another, and the shared instance means
- * writes are observable across every reference within a process. Weak keys let a parent — and the
- * children scoped to it — be collected once the parent goes away.
- */
-private val checkoutChildHandles = WeakHashMap<SavedStateHandle, MutableMap<String, SavedStateHandle>>()
-
-/**
- * Derives a child [SavedStateHandle] namespaced under [integrationName] within this parent handle.
- * The child folds its contents back into the parent through [SavedStateHandle.setSavedStateProvider],
- * so they persist with the parent and are restored from the parent's bundle after process death.
- *
- * [SavedStateHandle.savedStateProvider] is the only way to snapshot a whole handle — there is no
- * public equivalent — so the RestrictedApi suppression is intentional.
- */
-@Suppress("RestrictedApi")
-internal fun SavedStateHandle.checkoutSubHandle(integrationName: String): SavedStateHandle =
-    synchronized(checkoutChildHandles) {
-        val children = checkoutChildHandles.getOrPut(this) { mutableMapOf() }
-        children.getOrPut(integrationName) {
-            val subHandle = SavedStateHandle.createHandle(get<Bundle>(integrationName), null)
-            setSavedStateProvider(integrationName) { subHandle.savedStateProvider().saveState() }
-            subHandle
-        }
-    }

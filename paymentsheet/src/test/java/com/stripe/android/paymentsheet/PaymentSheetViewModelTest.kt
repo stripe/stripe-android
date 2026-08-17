@@ -21,7 +21,6 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -420,6 +419,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
@@ -494,6 +494,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
@@ -521,6 +522,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = SEPA_DEBIT_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -990,6 +992,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
             )
@@ -1042,6 +1045,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
             )
@@ -1992,6 +1996,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -2029,6 +2034,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -2110,6 +2116,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = null,
             )
@@ -2143,6 +2150,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -2180,6 +2188,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -2217,6 +2226,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false
@@ -3014,6 +3024,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = false,
@@ -3321,49 +3332,39 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `reportBillingAddressCompleted fires on successful payment with new card`() = confirmationTest {
-        FeatureFlags.inlineAddressAutocompleteEnabled.setEnabled(true)
-        try {
-            val eventReporter = FakeEventReporter()
-            val viewModel = createViewModel(eventReporter = eventReporter)
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(eventReporter = eventReporter)
 
-            viewModel.updateSelection(CARD_PAYMENT_SELECTION)
-            viewModel.checkout()
+        viewModel.updateSelection(CARD_PAYMENT_SELECTION)
+        viewModel.checkout()
 
-            assertThat(startTurbine.awaitItem()).isNotNull()
+        assertThat(startTurbine.awaitItem()).isNotNull()
 
-            confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(intent = PAYMENT_INTENT)
-            )
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(intent = PAYMENT_INTENT)
+        )
 
-            val call = eventReporter.billingAddressCompletedCalls.awaitItem()
-            assertThat(call.addressCountryCode).isEqualTo("US")
-            assertThat(call.autocompleteResultSelected).isFalse()
-            assertThat(call.editDistance).isNull()
-        } finally {
-            FeatureFlags.inlineAddressAutocompleteEnabled.reset()
-        }
+        val call = eventReporter.billingAddressCompletedCalls.awaitItem()
+        assertThat(call.addressCountryCode).isEqualTo("US")
+        assertThat(call.autocompleteResultSelected).isFalse()
+        assertThat(call.editDistance).isNull()
     }
 
     @Test
     fun `reportBillingAddressCompleted does not fire for saved payment methods`() = confirmationTest {
-        FeatureFlags.inlineAddressAutocompleteEnabled.setEnabled(true)
-        try {
-            val eventReporter = FakeEventReporter()
-            val viewModel = createViewModel(eventReporter = eventReporter)
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(eventReporter = eventReporter)
 
-            viewModel.updateSelection(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
-            viewModel.checkout()
+        viewModel.updateSelection(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+        viewModel.checkout()
 
-            assertThat(startTurbine.awaitItem()).isNotNull()
+        assertThat(startTurbine.awaitItem()).isNotNull()
 
-            confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(intent = PAYMENT_INTENT)
-            )
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(intent = PAYMENT_INTENT)
+        )
 
-            eventReporter.billingAddressCompletedCalls.ensureAllEventsConsumed()
-        } finally {
-            FeatureFlags.inlineAddressAutocompleteEnabled.reset()
-        }
+        eventReporter.billingAddressCompletedCalls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -3373,44 +3374,39 @@ internal class PaymentSheetViewModelTest {
             emitNullResults = false,
             consumeBootstrap = false,
         ) {
-            FeatureFlags.inlineAddressAutocompleteEnabled.setEnabled(true)
-            try {
-                val eventReporter = FakeEventReporter()
-                val savedStateHandle = SavedStateHandle(
-                    mapOf(
-                        "IN_PROGRESS_PAYMENT_SELECTION" to CARD_PAYMENT_SELECTION,
-                        "BILLING_AUTOCOMPLETE_USED" to true,
-                        "BILLING_AUTOCOMPLETE_EDIT_DISTANCE" to 3,
-                    )
+            val eventReporter = FakeEventReporter()
+            val savedStateHandle = SavedStateHandle(
+                mapOf(
+                    "IN_PROGRESS_PAYMENT_SELECTION" to CARD_PAYMENT_SELECTION,
+                    "BILLING_AUTOCOMPLETE_USED" to true,
+                    "BILLING_AUTOCOMPLETE_EDIT_DISTANCE" to 3,
                 )
-                val stripeIntent = PaymentIntentFactory.create(
-                    status = StripeIntent.Status.Succeeded
+            )
+            val stripeIntent = PaymentIntentFactory.create(
+                status = StripeIntent.Status.Succeeded
+            )
+            val paymentSheetLoader = RelayingPaymentElementLoader()
+            val viewModel = createViewModel(
+                eventReporter = eventReporter,
+                savedStateHandle = savedStateHandle,
+                stripeIntent = stripeIntent,
+                paymentElementLoader = paymentSheetLoader,
+            )
+
+            viewModel.paymentSheetResult.test {
+                paymentSheetLoader.enqueueSuccess(stripeIntent = stripeIntent)
+
+                awaitResultTurbine.add(
+                    ConfirmationHandler.Result.Succeeded(intent = stripeIntent)
                 )
-                val paymentSheetLoader = RelayingPaymentElementLoader()
-                val viewModel = createViewModel(
-                    eventReporter = eventReporter,
-                    savedStateHandle = savedStateHandle,
-                    stripeIntent = stripeIntent,
-                    paymentElementLoader = paymentSheetLoader,
-                )
 
-                viewModel.paymentSheetResult.test {
-                    paymentSheetLoader.enqueueSuccess(stripeIntent = stripeIntent)
-
-                    awaitResultTurbine.add(
-                        ConfirmationHandler.Result.Succeeded(intent = stripeIntent)
-                    )
-
-                    assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed())
-                }
-
-                val call = eventReporter.billingAddressCompletedCalls.awaitItem()
-                assertThat(call.addressCountryCode).isEqualTo("US")
-                assertThat(call.autocompleteResultSelected).isTrue()
-                assertThat(call.editDistance).isEqualTo(3)
-            } finally {
-                FeatureFlags.inlineAddressAutocompleteEnabled.reset()
+                assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed())
             }
+
+            val call = eventReporter.billingAddressCompletedCalls.awaitItem()
+            assertThat(call.addressCountryCode).isEqualTo("US")
+            assertThat(call.autocompleteResultSelected).isTrue()
+            assertThat(call.editDistance).isEqualTo(3)
         }
 
     private fun testConfirmationStateRestorationAfterPaymentSuccess(

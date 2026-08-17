@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
@@ -134,6 +135,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         DummyActivityResultCaller.test {
             definition.createLauncher(
                 activityResultCaller = activityResultCaller,
+                lifecycleOwner = fakeLifecycleOwner(),
                 onResult = onResult,
             )
 
@@ -161,6 +163,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         DummyActivityResultCaller.test {
             definition.createLauncher(
                 activityResultCaller = activityResultCaller,
+                lifecycleOwner = fakeLifecycleOwner(),
                 onResult = {},
             )
 
@@ -631,6 +634,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         )
 
         private val PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PAYMENT_INTENT.paymentMethod!!,
             optionsParams = null,
             originatedFromWallet = false,

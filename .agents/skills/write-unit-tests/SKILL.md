@@ -185,6 +185,7 @@ fun `state updates when data changes`() = runScenario {
 | Fake call tracking | `assertThat(fake.calls.awaitItem()).isEqualTo(call)` |
 | Fake validation | `ensureAllEventsConsumed()` — automatic in runScenario |
 | Test granularity | One scenario or configuration per `@Test` |
+| Parameterized cases | Invoke the [`parameterized-tests`](../parameterized-tests/SKILL.md) skill |
 | Compose UI tests | Invoke `compose-tests` skill |
 | Creating fakes | Invoke `create-fake` skill |
 | NetworkRule integration tests | Invoke `network-tests` skill |

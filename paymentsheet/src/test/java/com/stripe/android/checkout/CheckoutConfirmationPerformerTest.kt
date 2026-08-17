@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -9,6 +10,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -95,10 +97,15 @@ internal class CheckoutConfirmationPerformerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
+        val sessionRefresher = FakeCheckoutSessionRefresher()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
+            sheetStateHolder = SheetStateHolder(savedStateHandle),
+            sessionRefresher = sessionRefresher,
+            logger = Logger.noop(),
             resultCallback = {},
         )
         val performer = CheckoutConfirmationPerformer(
@@ -116,6 +123,7 @@ internal class CheckoutConfirmationPerformerTest {
         ).block()
 
         confirmationHandler.validate()
+        sessionRefresher.ensureAllEventsConsumed()
     }
 
     private class Scenario(

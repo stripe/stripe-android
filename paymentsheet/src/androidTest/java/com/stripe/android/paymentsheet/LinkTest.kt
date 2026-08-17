@@ -6,12 +6,12 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.composite
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -166,7 +166,7 @@ internal class LinkTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ek_123"
+                        ephemeralKeySecret = TestApiKeys.EPHEMERAL
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 )
@@ -371,7 +371,6 @@ internal class LinkTest {
             /*
              * In passthrough mode, should use the publishable key from base configuration
              */
-            header("Authorization", "Bearer pk_test_123"),
             topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
@@ -451,7 +450,7 @@ internal class LinkTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ek_123"
+                        ephemeralKeySecret = TestApiKeys.EPHEMERAL
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 )
@@ -587,7 +586,6 @@ internal class LinkTest {
             /*
              * In passthrough mode, should use the publishable key from base configuration
              */
-            header("Authorization", "Bearer pk_test_123"),
             topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")

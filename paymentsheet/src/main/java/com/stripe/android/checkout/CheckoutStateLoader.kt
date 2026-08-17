@@ -27,9 +27,7 @@ internal class CheckoutStateLoader @Inject constructor(
         commit(
             configuration = configuration,
             response = checkoutSessionResponse,
-            collectedDetails = CheckoutCollectedDetails(
-                billingAddress = configuration.defaultBillingAddress,
-            ),
+            collectedDetails = configuration.asInitialCollectedDetails(),
             carryForward = CarryForward.initial(),
         )
     }
@@ -41,6 +39,11 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = state.collectedDetails,
             carryForward = CarryForward.from(state),
         )
+    }
+
+    fun clear() {
+        stateHolder.state = null
+        customerStateHolder.setCustomerState(null)
     }
 
     private suspend fun commit(
@@ -136,4 +139,14 @@ internal class CheckoutStateLoader @Inject constructor(
             )
         }
     }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): CheckoutCollectedDetails {
+    return CheckoutCollectedDetails(
+        shippingName = defaults.shippingDetails?.name,
+        billingName = defaults.billingDetails?.name,
+        shippingAddress = defaults.shippingDetails?.address,
+        billingAddress = defaults.billingDetails?.address,
+    )
 }

@@ -15,7 +15,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Before
 import org.junit.Rule
@@ -44,9 +43,8 @@ internal class NfcCoilAnimatedInteriorTest {
     fun `idle status shows NFC icon`() {
         composeRule.setContent {
             NfcCoilAnimatedInterior(
-                status = NfcScanningStatus.Idle,
+                status = NfcScanningStatus.Idle(),
                 onSuccessShown = {},
-                onErrorShown = {},
                 modifier = Modifier.size(CoilSize),
             )
         }
@@ -55,7 +53,7 @@ internal class NfcCoilAnimatedInteriorTest {
 
         composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(CHECKMARK_TEST_TAG).assertDoesNotExist()
-        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(ERROR_BANNER_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
@@ -64,7 +62,6 @@ internal class NfcCoilAnimatedInteriorTest {
             NfcCoilAnimatedInterior(
                 status = NfcScanningStatus.Scanning,
                 onSuccessShown = {},
-                onErrorShown = {},
                 modifier = Modifier.size(CoilSize),
             )
         }
@@ -74,7 +71,6 @@ internal class NfcCoilAnimatedInteriorTest {
         composeRule.onNodeWithTag(SPINNER_TEST_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertDoesNotExist()
         composeRule.onNodeWithTag(CHECKMARK_TEST_TAG).assertDoesNotExist()
-        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
@@ -83,7 +79,6 @@ internal class NfcCoilAnimatedInteriorTest {
             NfcCoilAnimatedInterior(
                 status = NfcScanningStatus.Scanned,
                 onSuccessShown = {},
-                onErrorShown = {},
                 modifier = Modifier.size(CoilSize),
             )
         }
@@ -108,114 +103,19 @@ internal class NfcCoilAnimatedInteriorTest {
     fun `scanned status invokes onSuccessShown after animation and delay`() {
         var successShownCount by mutableIntStateOf(0)
 
-        composeRule.mainClock.autoAdvance = true
-
         composeRule.setContent {
             NfcCoilAnimatedInterior(
                 status = NfcScanningStatus.Scanned,
                 onSuccessShown = { successShownCount++ },
-                onErrorShown = {},
                 modifier = Modifier.size(CoilSize),
             )
         }
 
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            successShownCount == 1
-        }
+        composeRule.waitForIdle()
+        composeRule.advanceThroughSuccessAnimation()
+        composeRule.advanceSuccessDelayBy(SUCCESS_SHOWN_DELAY_MS + FRAME_BUFFER_MS)
 
         assertThat(successShownCount).isEqualTo(1)
-    }
-
-    @Test
-    fun `error status shows error cross`() {
-        composeRule.setContent {
-            NfcCoilAnimatedInterior(
-                status = NfcScanningStatus.Error(ERROR_MESSAGE),
-                onSuccessShown = {},
-                onErrorShown = {},
-                modifier = Modifier.size(CoilSize),
-            )
-        }
-
-        composeRule.waitForIdle()
-
-        composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertDoesNotExist()
-        composeRule.onNodeWithTag(SPINNER_TEST_TAG).assertDoesNotExist()
-        composeRule.onNodeWithTag(CHECKMARK_TEST_TAG).assertDoesNotExist()
-        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertIsDisplayed()
-    }
-
-    @Test
-    fun `error status invokes onErrorShown after delay`() {
-        var errorShownCount by mutableIntStateOf(0)
-
-        composeRule.mainClock.autoAdvance = true
-
-        composeRule.setContent {
-            NfcCoilAnimatedInterior(
-                status = NfcScanningStatus.Error(ERROR_MESSAGE),
-                onSuccessShown = {},
-                onErrorShown = { errorShownCount++ },
-                modifier = Modifier.size(CoilSize),
-            )
-        }
-
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            errorShownCount == 1
-        }
-
-        assertThat(errorShownCount).isEqualTo(1)
-    }
-
-    @Test
-    fun `config change during error delay resumes remaining delay`() {
-        var errorShownCount by mutableIntStateOf(0)
-        val visible = mutableStateOf(true)
-
-        composeRule.setNfcCoilContent(
-            visible = visible,
-            status = NfcScanningStatus.Error(ERROR_MESSAGE),
-            onErrorShown = { errorShownCount++ },
-        )
-
-        composeRule.waitForIdle()
-
-        val elapsedDelayMs = ERROR_SHOWN_DELAY_MS / 2
-        composeRule.advanceErrorDelayBy(elapsedDelayMs)
-        assertThat(errorShownCount).isEqualTo(0)
-
-        composeRule.simulateConfigChange(visible)
-        assertThat(errorShownCount).isEqualTo(0)
-
-        val remainingDelayMs = ERROR_SHOWN_DELAY_MS - elapsedDelayMs
-        composeRule.advanceErrorDelayBy(remainingDelayMs / 2)
-        assertThat(errorShownCount).isEqualTo(0)
-
-        composeRule.advanceErrorDelayBy(remainingDelayMs / 2 + FRAME_BUFFER_MS)
-        assertThat(errorShownCount).isEqualTo(1)
-    }
-
-    @Test
-    fun `config change after error shown does not invoke onErrorShown again`() {
-        var errorShownCount by mutableIntStateOf(0)
-        val visible = mutableStateOf(true)
-
-        composeRule.mainClock.autoAdvance = true
-        composeRule.setNfcCoilContent(
-            visible = visible,
-            status = NfcScanningStatus.Error(ERROR_MESSAGE),
-            onErrorShown = { errorShownCount++ },
-        )
-
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            errorShownCount == 1
-        }
-
-        composeRule.simulateConfigChange(visible)
-        composeRule.waitForIdle()
-
-        assertThat(errorShownCount).isEqualTo(1)
-        composeRule.onNodeWithTag(ERROR_CROSS_TEST_TAG).assertIsDisplayed()
     }
 
     @Test
@@ -266,16 +166,16 @@ internal class NfcCoilAnimatedInteriorTest {
         var successShownCount by mutableIntStateOf(0)
         val visible = mutableStateOf(true)
 
-        composeRule.mainClock.autoAdvance = true
         composeRule.setNfcCoilContent(
             visible = visible,
             status = NfcScanningStatus.Scanned,
             onSuccessShown = { successShownCount++ },
         )
 
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            successShownCount == 1
-        }
+        composeRule.waitForIdle()
+        composeRule.advanceThroughSuccessAnimation()
+        composeRule.advanceSuccessDelayBy(SUCCESS_SHOWN_DELAY_MS + FRAME_BUFFER_MS)
+        assertThat(successShownCount).isEqualTo(1)
 
         composeRule.simulateConfigChange(visible)
         composeRule.waitForIdle()
@@ -328,17 +228,10 @@ internal class NfcCoilAnimatedInteriorTest {
         waitForIdle()
     }
 
-    private fun ComposeContentTestRule.advanceErrorDelayBy(durationMs: Long) {
-        ShadowSystemClock.advanceBy(durationMs, TimeUnit.MILLISECONDS)
-        mainClock.advanceTimeBy(durationMs)
-        waitForIdle()
-    }
-
     private fun ComposeContentTestRule.setNfcCoilContent(
         visible: MutableState<Boolean>,
         status: NfcScanningStatus,
         onSuccessShown: () -> Unit = {},
-        onErrorShown: () -> Unit = {},
     ) {
         setContent {
             val saveableStateHolder = rememberSaveableStateHolder()
@@ -348,7 +241,6 @@ internal class NfcCoilAnimatedInteriorTest {
                     NfcCoilAnimatedInterior(
                         status = status,
                         onSuccessShown = onSuccessShown,
-                        onErrorShown = onErrorShown,
                         modifier = Modifier.size(CoilSize),
                     )
                 }
@@ -378,9 +270,7 @@ internal class NfcCoilAnimatedInteriorTest {
         const val FRAME_BUFFER_MS = 32L
         val CoilSize = 200.dp
         const val PROGRESS_TOLERANCE = 0.02f
-        const val CHECKMARK_START_DELAY_MS = 100L
+        const val CHECKMARK_START_DELAY_MS = 150L
         const val SUCCESS_SHOWN_DELAY_MS = 900L
-        const val ERROR_SHOWN_DELAY_MS = 1_700L
-        val ERROR_MESSAGE = "Card expired. Try another card.".resolvableString
     }
 }
