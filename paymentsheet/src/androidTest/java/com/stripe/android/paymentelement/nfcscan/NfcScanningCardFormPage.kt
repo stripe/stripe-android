@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.nfcscan
 
-import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -51,7 +50,8 @@ internal class NfcScanningCardFormPage(
 
     fun assertCvcIsFocused() {
         composeTestRule.waitUntil(UI_TIMEOUT_MS) {
-            composeTestRule.onAllNodes(hasText("CVC"))
+            composeTestRule.waitForIdle()
+            composeTestRule.onAllNodes(hasText("CVC").and(isFocused()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }

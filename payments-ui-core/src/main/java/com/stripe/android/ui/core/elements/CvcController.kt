@@ -170,7 +170,9 @@ class CvcController constructor(
                     if (shouldFocus) {
                         snapshotFlow { windowInfo.isWindowFocused }.first { it }
                         withFrameNanos {}
-                        focusRequester.requestFocus()
+                        while (!focusRequester.requestFocus()) {
+                            withFrameNanos {}
+                        }
                         focusAsk.value = false
                     }
                 }
