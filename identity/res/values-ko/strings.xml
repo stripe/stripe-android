@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">허용되는 신분증 형식은 다음과 같음</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">신분증 각도 유지</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">허용</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">앱 설정</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">카메라 권한</string>
   <string name="stripe_camera_permission_rationale">이 앱은 신원을 확인하기 위해 신분증을 스캔하고 사진을 찍는 절차에 카메라를 사용합니다.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">앞쪽 캡처됨</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">왼쪽 캡처됨</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">오른쪽 캡처됨</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">캡처 중…</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">다시 시도하거나 디바이스에 있는 이미지를 업로드하실 수 있습니다.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">이미지를 캡처할 수 없음</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">거절</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">세부사항이 보이지 않음</string>
   <string name="stripe_decrease_lighting_2">조명이 어두운 곳으로 이동해 주십시오</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">카메라 사용 권한이 필요합니다. 앱 설정에서 카메라 액세스를 허용해 주십시오.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">움직이지 마십시오. 스캔하는 중입니다.</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">움직이지 마십시오...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">신분증</string>
   <!-- Label for ID number section -->
@@ -224,10 +236,24 @@
   <string name="stripe_selfie_capture_complete">셀카 캡처 완료</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">캡처된 셀카</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">좋습니다! 이미지를 확인하는 중입니다....</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">셀카 1장 캡처됨</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">고개를 왼쪽으로 돌리십시오</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">고개를 오른쪽으로 돌리십시오</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">더 가까이 다가오십시오</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">셀카 이미지가 저장되지 않았습니다. 종료하시겠습니까?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">얼굴을 프레임 안에 위치시키십시오</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">셀카</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">인증 과정 개선에 도움을 주십시오</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">다음 단계에서 본인임을 확인하기 위해 몇 장의 사진이 자동으로 촬영됩니다.</string>
   <!-- Title for selfie warmup page -->
