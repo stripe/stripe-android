@@ -25,13 +25,20 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 ) {
     private val admissionLock = Any()
     private var pendingMutations = 0
-    private var confirmationInFlight = confirmationHandler.hasReloadedFromProcessDeath ||
+    private var activeConfirmation = if (
+        confirmationHandler.hasReloadedFromProcessDeath ||
         confirmationHandler.state.value is ConfirmationHandler.State.Confirming
-    private var confirmationWasRestored = confirmationHandler.hasReloadedFromProcessDeath
-    private var confirmationCompletionClaimed = false
-    private val mutex = Mutex(locked = confirmationInFlight)
+    ) {
+        ActiveConfirmation(
+            wasRestored = confirmationHandler.hasReloadedFromProcessDeath,
+            completionClaimed = false,
+        )
+    } else {
+        null
+    }
+    private val mutex = Mutex(locked = activeConfirmation != null)
 
-    private val _isUpdating = MutableStateFlow(confirmationInFlight)
+    private val _isUpdating = MutableStateFlow(activeConfirmation != null)
     val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
 
     suspend fun <T> runMutation(
@@ -59,7 +66,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     ): Result<T> {
         return synchronized(admissionLock) {
             when {
-                confirmationInFlight -> Result.failure(
+                activeConfirmation != null -> Result.failure(
                     IllegalStateException("Cannot mutate checkout session while confirmation is in progress.")
                 )
                 pendingMutations > 0 -> Result.failure(
@@ -83,15 +90,17 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
         return synchronized(admissionLock) {
-            if (sheetStateHolder.sheetIsOpen || pendingMutations > 0 || confirmationInFlight) {
+            if (sheetStateHolder.sheetIsOpen || pendingMutations > 0 || activeConfirmation != null) {
                 return@synchronized null
             }
             val confirmationArguments = arguments() ?: return@synchronized null
             check(mutex.tryLock()) {
                 "Checkout operation gate should be available after confirmation admission."
             }
-            confirmationInFlight = true
-            confirmationWasRestored = false
+            activeConfirmation = ActiveConfirmation(
+                wasRestored = false,
+                completionClaimed = false,
+            )
             updateIsUpdating()
             confirmationArguments
         }
@@ -126,22 +135,21 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private suspend fun completeConfirmation(
         mapResult: suspend (confirmationWasRestored: Boolean) -> CheckoutController.Result?,
     ) {
-        val wasRestored = synchronized(admissionLock) {
-            if (!confirmationInFlight || confirmationCompletionClaimed) {
+        val confirmation = synchronized(admissionLock) {
+            val confirmation = activeConfirmation
+            if (confirmation == null || confirmation.completionClaimed) {
                 return
             } else {
-                confirmationCompletionClaimed = true
-                confirmationWasRestored
+                confirmation.completionClaimed = true
+                confirmation
             }
         }
 
         try {
-            mapResult(wasRestored)?.let(resultCallback::onResult)
+            mapResult(confirmation.wasRestored)?.let(resultCallback::onResult)
         } finally {
             synchronized(admissionLock) {
-                confirmationInFlight = false
-                confirmationWasRestored = false
-                confirmationCompletionClaimed = false
+                activeConfirmation = null
                 mutex.unlock()
                 updateIsUpdating()
             }
@@ -163,8 +171,13 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     }
 
     private fun updateIsUpdating() {
-        _isUpdating.value = confirmationInFlight || pendingMutations > 0
+        _isUpdating.value = activeConfirmation != null || pendingMutations > 0
     }
+
+    private class ActiveConfirmation(
+        val wasRestored: Boolean,
+        var completionClaimed: Boolean,
+    )
 }
 
 private fun ConfirmationHandler.Result.asCheckoutResult(

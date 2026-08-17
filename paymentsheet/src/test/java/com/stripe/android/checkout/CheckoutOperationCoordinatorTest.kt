@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -55,7 +54,7 @@ internal class CheckoutOperationCoordinatorTest {
         coordinator.isUpdating.test {
             assertThat(awaitItem()).isFalse()
 
-            val mutation = backgroundScope.async {
+            val mutation = testScope.backgroundScope.async {
                 coordinator.runMutation {
                     releaseMutation.await()
                     Result.success(Unit)
@@ -79,7 +78,7 @@ internal class CheckoutOperationCoordinatorTest {
         coordinator.isUpdating.test {
             assertThat(awaitItem()).isFalse()
 
-            val mutation = backgroundScope.async {
+            val mutation = testScope.backgroundScope.async {
                 coordinator.runMutation<Unit> {
                     releaseMutation.await()
                     Result.failure(expectedException)
@@ -106,7 +105,7 @@ internal class CheckoutOperationCoordinatorTest {
         coordinator.isUpdating.test {
             assertThat(awaitItem()).isFalse()
 
-            val first = backgroundScope.async {
+            val first = testScope.backgroundScope.async {
                 coordinator.runMutation {
                     firstStarted.complete(Unit)
                     releaseFirst.await()
@@ -116,14 +115,14 @@ internal class CheckoutOperationCoordinatorTest {
             firstStarted.await()
             assertThat(awaitItem()).isTrue()
 
-            val second = backgroundScope.async {
+            val second = testScope.backgroundScope.async {
                 coordinator.runMutation {
                     secondStarted.complete(Unit)
                     releaseSecond.await()
                     Result.success(Unit)
                 }
             }
-            testScheduler.runCurrent()
+            testScope.testScheduler.runCurrent()
 
             assertThat(secondStarted.isCompleted).isFalse()
 
@@ -150,7 +149,7 @@ internal class CheckoutOperationCoordinatorTest {
         coordinator.isUpdating.test {
             assertThat(awaitItem()).isFalse()
 
-            val first = backgroundScope.async {
+            val first = testScope.backgroundScope.async {
                 coordinator.runMutation {
                     firstStarted.complete(Unit)
                     releaseFirst.await()
@@ -160,13 +159,13 @@ internal class CheckoutOperationCoordinatorTest {
             firstStarted.await()
             assertThat(awaitItem()).isTrue()
 
-            val second = backgroundScope.async {
+            val second = testScope.backgroundScope.async {
                 coordinator.runMutation {
                     secondStarted.complete(Unit)
                     Result.success(Unit)
                 }
             }
-            testScheduler.runCurrent()
+            testScope.testScheduler.runCurrent()
 
             assertThat(secondStarted.isCompleted).isFalse()
 
@@ -191,7 +190,7 @@ internal class CheckoutOperationCoordinatorTest {
         coordinator.isUpdating.test {
             assertThat(awaitItem()).isFalse()
 
-            val mutation = backgroundScope.async {
+            val mutation = testScope.backgroundScope.async {
                 runCatching {
                     coordinator.runMutation<Unit> {
                         releaseMutation.await()
@@ -236,7 +235,7 @@ internal class CheckoutOperationCoordinatorTest {
     fun `confirmation is ignored while a mutation is in flight`() = runScenario {
         val mutationStarted = CompletableDeferred<Unit>()
         val finishMutation = CompletableDeferred<Unit>()
-        val mutation = async {
+        val mutation = testScope.async {
             coordinator.runMutation {
                 mutationStarted.complete(Unit)
                 finishMutation.await()
@@ -272,13 +271,13 @@ internal class CheckoutOperationCoordinatorTest {
     @Test
     fun `second confirmation can start after first confirmation completes`() = runScenario {
         assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNotNull()
-        enqueueRefreshAction {}
+        sessionRefresher.enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
                 ConfirmationHandler.Result.Canceled.Action.InformCancellation
             )
         )
-        assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
+        assertThat(sessionRefresher.calls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
         assertThat(coordinator.isUpdating.value).isFalse()
 
@@ -299,24 +298,24 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(awaitItem()).isTrue()
 
             val mutationStarted = CompletableDeferred<Unit>()
-            val mutation = async {
+            val mutation = testScope.async {
                 coordinator.runMutation {
                     mutationStarted.complete(Unit)
                     Result.success(Unit)
                 }
             }
-            runCurrent()
+            testScope.testScheduler.runCurrent()
 
             assertThat(mutationStarted.isCompleted).isFalse()
             expectNoEvents()
 
-            enqueueRefreshAction {}
+            sessionRefresher.enqueueRefreshAction {}
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Canceled(
                     ConfirmationHandler.Result.Canceled.Action.InformCancellation
                 )
             )
-            refreshCalls.awaitItem()
+            sessionRefresher.calls.awaitItem()
             assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
             mutation.await()
 
@@ -342,14 +341,14 @@ internal class CheckoutOperationCoordinatorTest {
         runScenario {
             coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
-            enqueueRefreshAction {}
+            sessionRefresher.enqueueRefreshAction {}
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Canceled(
                     ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails
                 )
             )
-            assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
-            runCurrent()
+            assertThat(sessionRefresher.calls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
+            testScope.testScheduler.runCurrent()
 
             resultTurbine.expectNoEvents()
             assertThat(coordinator.isUpdating.value).isFalse()
@@ -360,14 +359,14 @@ internal class CheckoutOperationCoordinatorTest {
     fun `canceled confirmation with no action does not invoke callback and releases gate`() = runScenario {
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
-        enqueueRefreshAction {}
+        sessionRefresher.enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
                 ConfirmationHandler.Result.Canceled.Action.None
             )
         )
-        assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
-        runCurrent()
+        assertThat(sessionRefresher.calls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
+        testScope.testScheduler.runCurrent()
 
         resultTurbine.expectNoEvents()
         assertThat(coordinator.isUpdating.value).isFalse()
@@ -379,7 +378,7 @@ internal class CheckoutOperationCoordinatorTest {
         val expected = IllegalStateException("Confirmation failed")
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
-        enqueueRefreshAction {}
+        sessionRefresher.enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
                 cause = expected,
@@ -388,7 +387,7 @@ internal class CheckoutOperationCoordinatorTest {
             )
         )
 
-        assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
+        assertThat(sessionRefresher.calls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
         val result = resultTurbine.awaitItem()
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
         assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
@@ -400,10 +399,10 @@ internal class CheckoutOperationCoordinatorTest {
         val expected = IllegalStateException("Start failed")
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
-        enqueueRefreshAction {}
+        sessionRefresher.enqueueRefreshAction {}
         coordinator.failConfirmation(expected)
 
-        refreshCalls.awaitItem()
+        sessionRefresher.calls.awaitItem()
         val result = resultTurbine.awaitItem()
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
         assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
@@ -418,7 +417,7 @@ internal class CheckoutOperationCoordinatorTest {
         runScenario {
             coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
-            enqueueRefreshAction { releaseRefresh.await() }
+            sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Failed(
                     cause = expected,
@@ -427,7 +426,7 @@ internal class CheckoutOperationCoordinatorTest {
                 )
             )
 
-            refreshCalls.awaitItem()
+            sessionRefresher.calls.awaitItem()
             resultTurbine.expectNoEvents()
             assertThat(coordinator.isUpdating.value).isTrue()
 
@@ -446,20 +445,20 @@ internal class CheckoutOperationCoordinatorTest {
             coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
             assertThat(coordinator.isUpdating.value).isTrue()
 
-            enqueueRefreshAction { releaseCommit.await() }
+            sessionRefresher.enqueueRefreshAction { releaseCommit.await() }
             confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession(response))
-            assertThat(refreshCalls.awaitItem())
+            assertThat(sessionRefresher.calls.awaitItem())
                 .isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
             resultTurbine.expectNoEvents()
 
             val mutationStarted = CompletableDeferred<Unit>()
-            val mutation = backgroundScope.async {
+            val mutation = testScope.backgroundScope.async {
                 coordinator.runMutation {
                     mutationStarted.complete(Unit)
                     Result.success(Unit)
                 }
             }
-            runCurrent()
+            testScope.testScheduler.runCurrent()
 
             assertThat(mutationStarted.isCompleted).isFalse()
             assertThat(coordinator.isUpdating.value).isTrue()
@@ -478,10 +477,10 @@ internal class CheckoutOperationCoordinatorTest {
         runScenario(logger = logger) {
             coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
-            enqueueRefreshAction { throw expected }
+            sessionRefresher.enqueueRefreshAction { throw expected }
             confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession(response))
 
-            refreshCalls.awaitItem()
+            sessionRefresher.calls.awaitItem()
             assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
             assertThat(logger.errorLogs).containsExactly(
                 "Failed to refresh the checkout session after confirmation." to expected
@@ -495,9 +494,9 @@ internal class CheckoutOperationCoordinatorTest {
     fun `commit cancellation suppresses result and releases gate`() = runScenario {
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
-        enqueueRefreshAction { throw CancellationException("Commit canceled") }
+        sessionRefresher.enqueueRefreshAction { throw CancellationException("Commit canceled") }
         confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession(response))
-        refreshCalls.awaitItem()
+        sessionRefresher.calls.awaitItem()
         observerJob.join()
 
         resultTurbine.expectNoEvents()
@@ -515,21 +514,21 @@ internal class CheckoutOperationCoordinatorTest {
             ),
             hasReloadedFromProcessDeath = true,
         ) {
-            enqueueRefreshAction { releaseCommit.await() }
+            sessionRefresher.enqueueRefreshAction { releaseCommit.await() }
             confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession(response))
 
-            assertThat(refreshCalls.awaitItem())
+            assertThat(sessionRefresher.calls.awaitItem())
                 .isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
 
             coordinator.failConfirmation(IllegalStateException("Competing failure"))
-            refreshCalls.expectNoEvents()
+            sessionRefresher.calls.expectNoEvents()
             resultTurbine.expectNoEvents()
 
             releaseCommit.complete(Unit)
 
             assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
             resultTurbine.expectNoEvents()
-            refreshCalls.expectNoEvents()
+            sessionRefresher.calls.expectNoEvents()
         }
     }
 
@@ -542,7 +541,7 @@ internal class CheckoutOperationCoordinatorTest {
         )
 
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
-        refreshCalls.expectNoEvents()
+        sessionRefresher.calls.expectNoEvents()
     }
 
     @Test
@@ -550,7 +549,7 @@ internal class CheckoutOperationCoordinatorTest {
         val expected = IllegalStateException("Confirmation failed")
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
-        enqueueRefreshAction { error("Refresh failed") }
+        sessionRefresher.enqueueRefreshAction { error("Refresh failed") }
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
                 cause = expected,
@@ -559,7 +558,7 @@ internal class CheckoutOperationCoordinatorTest {
             )
         )
 
-        refreshCalls.awaitItem()
+        sessionRefresher.calls.awaitItem()
         val result = resultTurbine.awaitItem()
         assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
         assertThat(coordinator.isUpdating.value).isFalse()
@@ -569,12 +568,12 @@ internal class CheckoutOperationCoordinatorTest {
     fun `refresh cancellation propagates and still releases the operation gate`() = runScenario {
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
-        enqueueRefreshAction { throw CancellationException("Refresh canceled") }
+        sessionRefresher.enqueueRefreshAction { throw CancellationException("Refresh canceled") }
         assertFailsWith<CancellationException> {
             coordinator.failConfirmation(IllegalStateException("Start failed"))
         }
 
-        refreshCalls.awaitItem()
+        sessionRefresher.calls.awaitItem()
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
@@ -595,8 +594,8 @@ internal class CheckoutOperationCoordinatorTest {
             val expected = IllegalStateException("Start failed")
             assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNotNull()
 
-            enqueueRefreshAction {}
-            val failureCompletion = async(Dispatchers.Default) {
+            sessionRefresher.enqueueRefreshAction {}
+            val failureCompletion = testScope.async(Dispatchers.Default) {
                 coordinator.failConfirmation(expected)
             }
             assertThat(callbackStarted.await(5, TimeUnit.SECONDS)).isTrue()
@@ -604,12 +603,12 @@ internal class CheckoutOperationCoordinatorTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
             )
-            runCurrent()
+            testScope.testScheduler.runCurrent()
 
             assertThat(deliveredResults).hasSize(1)
             releaseCallback.countDown()
             failureCompletion.await()
-            refreshCalls.awaitItem()
+            sessionRefresher.calls.awaitItem()
 
             assertThat(deliveredResults).hasSize(1)
             val result = deliveredResults.single()
@@ -629,22 +628,22 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(coordinator.isUpdating.value).isTrue()
 
         val mutationStarted = CompletableDeferred<Unit>()
-        val mutation = async {
+        val mutation = testScope.async {
             coordinator.runMutation {
                 mutationStarted.complete(Unit)
                 Result.success(Unit)
             }
         }
-        runCurrent()
+        testScope.testScheduler.runCurrent()
         assertThat(mutationStarted.isCompleted).isFalse()
 
-        enqueueRefreshAction {}
+        sessionRefresher.enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
                 ConfirmationHandler.Result.Canceled.Action.None
             )
         )
-        refreshCalls.awaitItem()
+        sessionRefresher.calls.awaitItem()
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
         mutation.await()
 
@@ -688,7 +687,7 @@ internal class CheckoutOperationCoordinatorTest {
     fun `synchronous mutation fails while asynchronous mutation is in flight`() = runScenario {
         val mutationStarted = CompletableDeferred<Unit>()
         val finishMutation = CompletableDeferred<Unit>()
-        val mutation = async {
+        val mutation = testScope.async {
             coordinator.runMutation {
                 mutationStarted.complete(Unit)
                 finishMutation.await()
@@ -760,7 +759,6 @@ internal class CheckoutOperationCoordinatorTest {
             coordinator = coordinator,
             confirmationState = confirmationState,
             resultTurbine = resultTurbine,
-            refreshCalls = sessionRefresher.calls,
             sessionRefresher = sessionRefresher,
             observerJob = observerJob,
             testScope = this,
@@ -775,22 +773,11 @@ internal class CheckoutOperationCoordinatorTest {
         val coordinator: CheckoutOperationCoordinator,
         val confirmationState: MutableStateFlow<ConfirmationHandler.State>,
         val resultTurbine: Turbine<CheckoutController.Result>,
-        val refreshCalls: Turbine<FakeCheckoutSessionRefresher.Call>,
-        private val sessionRefresher: FakeCheckoutSessionRefresher,
+        val sessionRefresher: FakeCheckoutSessionRefresher,
         val observerJob: Job,
-        private val testScope: TestScope,
-    ) : CoroutineScope by testScope {
+        val testScope: TestScope,
+    ) {
         val response = CheckoutSessionResponseFactory.create(id = "cs_confirmed")
-        val backgroundScope = testScope.backgroundScope
-        val testScheduler = testScope.testScheduler
-
-        fun runCurrent() {
-            testScheduler.runCurrent()
-        }
-
-        fun enqueueRefreshAction(action: suspend () -> Unit) {
-            sessionRefresher.enqueueRefreshAction(action)
-        }
     }
 
     private fun succeededWithSession(
