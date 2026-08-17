@@ -44,8 +44,11 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccountItem
+import com.stripe.android.financialconnections.features.common.GroupPosition
+import com.stripe.android.financialconnections.features.common.GroupedShimmerCard
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.common.groupedCardSurface
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.AddNewAccount
@@ -64,9 +67,11 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.isLinkDs3
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -153,6 +158,7 @@ private fun LinkAccountPickerLoaded(
     onSelectAccountClick: () -> Unit,
     cta: TextResource,
 ) {
+    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
     LazyLayout(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         lazyListState = scrollState,
@@ -164,9 +170,10 @@ private fun LinkAccountPickerLoaded(
                     payload = it,
                     selectNetworkedAccountAsync = selectNetworkedAccountAsync,
                     onAccountClick = onAccountClick,
-                    onNewBankAccountClick = onNewBankAccountClick
+                    onNewBankAccountClick = onNewBankAccountClick,
+                    isLinkDs3 = isLinkDs3,
                 )
-            } ?: loadingContent()
+            } ?: loadingContent(isLinkDs3 = isLinkDs3)
         },
         footer = {
             payload()?.let {
@@ -204,7 +211,8 @@ private fun LazyListScope.loadedContent(
     payload: Payload,
     selectNetworkedAccountAsync: Async<Unit>,
     onAccountClick: (PartnerAccount) -> Unit,
-    onNewBankAccountClick: () -> Unit
+    onNewBankAccountClick: () -> Unit,
+    isLinkDs3: Boolean,
 ) {
     item {
         AnnotatedText(
@@ -219,26 +227,58 @@ private fun LazyListScope.loadedContent(
         )
         Spacer(modifier = Modifier.size(8.dp))
     }
-    items(payload.accounts) {
-        NetworkedAccountItem(
-            selected = it.account.id in payload.selectedAccountIds,
-            account = it,
-            onAccountClicked = { selected ->
-                if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
-            }
-        )
+    val onAccountClickIfIdle: (PartnerAccount) -> Unit = { selected ->
+        if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
     }
-    item {
-        SelectNewAccount(
-            text = payload.addNewAccount,
-            onClick = {
-                if (selectNetworkedAccountAsync !is Loading) onNewBankAccountClick()
+    val onNewBankAccountClickIfIdle: () -> Unit = {
+        if (selectNetworkedAccountAsync !is Loading) onNewBankAccountClick()
+    }
+
+    if (isLinkDs3) {
+        // DS 3.0 groups the accounts and the "add bank account" row into a single card, so they are
+        // emitted as one item to keep them flush; the enclosing 16.dp arrangement then only separates
+        // the card from the title.
+        item("accounts") {
+            Column {
+                payload.accounts.forEachIndexed { index, linkedAccount ->
+                    NetworkedAccountItem(
+                        selected = linkedAccount.account.id in payload.selectedAccountIds,
+                        account = linkedAccount,
+                        onAccountClicked = onAccountClickIfIdle,
+                        // The "add bank account" row below always closes out the card.
+                        groupPosition = GroupPosition(isFirst = index == 0, isLast = false),
+                    )
+                }
+                SelectNewAccount(
+                    text = payload.addNewAccount,
+                    onClick = onNewBankAccountClickIfIdle,
+                    groupPosition = GroupPosition(
+                        isFirst = payload.accounts.isEmpty(),
+                        isLast = true,
+                    ),
+                )
             }
-        )
+        }
+    } else {
+        items(payload.accounts) {
+            NetworkedAccountItem(
+                selected = it.account.id in payload.selectedAccountIds,
+                account = it,
+                onAccountClicked = onAccountClickIfIdle,
+                groupPosition = null,
+            )
+        }
+        item {
+            SelectNewAccount(
+                text = payload.addNewAccount,
+                onClick = onNewBankAccountClickIfIdle,
+                groupPosition = null,
+            )
+        }
     }
 }
 
-private fun LazyListScope.loadingContent() {
+private fun LazyListScope.loadingContent(isLinkDs3: Boolean) {
     item {
         Text(
             modifier = Modifier.fillMaxWidth(),
@@ -247,30 +287,41 @@ private fun LazyListScope.loadingContent() {
         )
         Spacer(modifier = Modifier.size(8.dp))
     }
-    items(3) {
-        LoadingShimmerEffect {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(88.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(it)
-            )
+    if (isLinkDs3) {
+        // DS 3.0: two adjacent shimmer rows sharing one rounded card.
+        item("loading") {
+            GroupedShimmerCard(rowHeight = LinkedAccountShimmerHeight)
+        }
+    } else {
+        items(3) {
+            LoadingShimmerEffect {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(LinkedAccountShimmerHeight)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(it)
+                )
+            }
         }
     }
 }
+
+private val LinkedAccountShimmerHeight = 88.dp
 
 @Composable
 private fun NetworkedAccountItem(
     account: LinkedAccount,
     onAccountClicked: (PartnerAccount) -> Unit,
-    selected: Boolean
+    selected: Boolean,
+    groupPosition: GroupPosition?,
 ) {
     val (partnerAccount, networkedAccount) = account
     AccountItem(
         selected = selected,
         onAccountClicked = onAccountClicked,
         account = partnerAccount,
+        groupPosition = groupPosition,
         networkedAccount = networkedAccount
     )
 }
@@ -278,18 +329,30 @@ private fun NetworkedAccountItem(
 @Composable
 private fun SelectNewAccount(
     onClick: () -> Unit,
-    text: AddNewAccount
+    text: AddNewAccount,
+    groupPosition: GroupPosition?,
 ) {
     val shape = remember { RoundedCornerShape(16.dp) }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
+    // Inside a grouped card the shared surface replaces this row's own border.
+    val surfaceModifier = if (groupPosition != null) {
+        Modifier.groupedCardSurface(
+            isFirst = groupPosition.isFirst,
+            isLast = groupPosition.isLast,
+            separatorInset = 0.dp,
+        )
+    } else {
+        Modifier
             .clip(shape)
             .border(
                 width = 1.dp,
                 color = colors.borderNeutral,
                 shape = shape
             )
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(surfaceModifier)
             .clickableSingle(role = Role.Button) { onClick() }
             .padding(16.dp)
     ) {
@@ -320,7 +383,9 @@ fun SelectNewAccountIcon(
         modifier = Modifier
             .size(56.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(colors.iconBackground)
+            // Sits on the grouped card, so it needs the darker shade to stay visible. Outside
+            // DS 3.0 this token equals `iconBackground`, so no branch is needed.
+            .background(colors.iconBackgroundOnCard)
     ) {
         val iconModifier = Modifier.size(20.dp)
         val placeholderImage = @Composable {
@@ -332,6 +397,10 @@ fun SelectNewAccountIcon(
             )
         }
         when {
+            // DS 3.0 iconography is monochrome. The server-provided icon here is a green plus,
+            // which renders untinted, so the local drawable is used instead and tinted to match.
+            FinancialConnectionsTheme.theme.isLinkDs3 -> placeholderImage()
+
             LocalInspectionMode.current ||
                 icon.isNullOrEmpty() -> placeholderImage()
 

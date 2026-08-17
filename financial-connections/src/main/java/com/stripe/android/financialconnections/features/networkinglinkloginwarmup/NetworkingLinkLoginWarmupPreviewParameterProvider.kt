@@ -77,7 +77,7 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         linkBrand = LinkBrand.Link,
     )
 
-    private fun instantDebits() = NetworkingLinkLoginWarmupState(
+    internal fun instantDebits() = NetworkingLinkLoginWarmupState(
         payload = Success(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = "Test",

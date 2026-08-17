@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Enter bank details</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Cancel</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Continue with Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Continue</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Continue with %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Not now</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Use information you previously saved with your Link account.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Use information you previously saved with your %1$s account.</string>
   <string name="stripe_networking_link_login_warmup_title">Continue with Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Welcome back</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Continue with %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>
   <string name="stripe_networking_save_to_link_verification_title">Confirm it\'s you</string>

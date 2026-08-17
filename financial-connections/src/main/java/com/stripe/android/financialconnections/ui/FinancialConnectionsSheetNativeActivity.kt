@@ -30,6 +30,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -335,7 +336,7 @@ internal fun FinancialConnectionsSessionManifest.Theme.toLocalTheme(): Theme {
             Theme.DefaultLight
         }
         FinancialConnectionsSessionManifest.Theme.LINK_LIGHT -> {
-            Theme.LinkLight
+            if (FeatureFlags.financialConnectionsLinkDs3.isEnabled) Theme.LinkDs3 else Theme.LinkLight
         }
     }
 }

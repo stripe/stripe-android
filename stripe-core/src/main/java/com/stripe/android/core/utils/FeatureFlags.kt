@@ -23,6 +23,7 @@ object FeatureFlags {
     val enableNfcScanning = FeatureFlag("Enable NFC Scanning")
     val disableNfcScanningSecurity = FeatureFlag("Disable NFC Scanning Security")
     val disablePassiveCaptchaWarmup = FeatureFlag("Disable Passive Captcha Warm-Up")
+    val financialConnectionsLinkDs3 = FeatureFlag("FC: Link DS 3.0 theme")
     val forceTapToAddWithTerminal = FeatureFlag("Tap to Add: Force Terminal integration to be available")
 }
 

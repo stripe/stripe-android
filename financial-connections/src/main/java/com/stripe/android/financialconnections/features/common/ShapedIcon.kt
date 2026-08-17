@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -24,6 +25,8 @@ import com.stripe.android.uicore.image.StripeImage
  * A circular icon with a branded background color.
  *
  * @param painter the [Painter] to use for the icon
+ * @param backgroundColor the background of the icon wrapper. Pass
+ *        `colors.iconBackgroundOnCard` when the icon sits on top of a grouped card surface.
  */
 @Composable
 internal fun ShapedIcon(
@@ -31,12 +34,14 @@ internal fun ShapedIcon(
     modifier: Modifier = Modifier,
     iconSize: IconSize = IconSize.Medium,
     backgroundShape: Shape = CircleShape,
+    backgroundColor: Color = colors.iconBackground,
     contentDescription: String?,
 ) {
     IconWrapperBox(
         modifier = modifier,
         iconSize = iconSize,
         backgroundShape = backgroundShape,
+        backgroundColor = backgroundColor,
     ) {
         LocalIcon(
             painter = painter,
@@ -53,6 +58,8 @@ internal fun ShapedIcon(
  * @param modifier to apply to the icon wrapper
  * @param iconSize the size of the icon
  * @param backgroundShape the shape of the icon wrapper
+ * @param backgroundColor the background of the icon wrapper. Pass
+ *        `colors.iconBackgroundOnCard` when the icon sits on top of a grouped card surface.
  * @param contentDescription the content description for the icon
  * @param flushed whether the icon should be flushed to the edge of the wrapper
  * @param errorPainter the [Painter] to use for the icon if the URL fails to load. If null,
@@ -64,6 +71,7 @@ internal fun ShapedIcon(
     modifier: Modifier = Modifier,
     iconSize: IconSize = IconSize.Medium,
     backgroundShape: Shape = CircleShape,
+    backgroundColor: Color = colors.iconBackground,
     contentDescription: String?,
     errorPainter: Painter? = null,
     flushed: Boolean = false
@@ -71,6 +79,7 @@ internal fun ShapedIcon(
     IconWrapperBox(
         modifier = modifier,
         backgroundShape = backgroundShape,
+        backgroundColor = backgroundColor,
         iconSize = iconSize
     ) {
         StripeImage(
@@ -114,13 +123,14 @@ private fun IconWrapperBox(
     modifier: Modifier = Modifier,
     iconSize: IconSize,
     backgroundShape: Shape,
+    backgroundColor: Color,
     content: @Composable () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .size(iconSize.size)
-            .background(color = colors.iconBackground, shape = backgroundShape)
+            .background(color = backgroundColor, shape = backgroundShape)
             .clip(backgroundShape)
     ) {
         content()
