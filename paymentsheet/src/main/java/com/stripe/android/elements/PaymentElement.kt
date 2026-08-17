@@ -49,6 +49,7 @@ class PaymentElement @Inject internal constructor(
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
         private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
+        private var paymentMethodOrder: List<String> = emptyList()
         private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
         private var appearance: Appearance = Appearance()
 
@@ -89,6 +90,16 @@ class PaymentElement @Inject internal constructor(
         }
 
         /**
+         * Overrides the default order in which payment methods are displayed.
+         *
+         * Payment methods omitted from this list are automatically ordered by Stripe after the
+         * specified methods. Invalid payment method types are ignored.
+         */
+        fun paymentMethodOrder(paymentMethodOrder: List<String>): Configuration = apply {
+            this.paymentMethodOrder = paymentMethodOrder
+        }
+
+        /**
          * A map for specifying when legal agreements are displayed for each payment method type.
          * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
          */
@@ -106,6 +117,7 @@ class PaymentElement @Inject internal constructor(
             val embeddedViewDisplaysMandateText: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
             val paymentMethodLayout: PaymentMethodLayout,
+            val paymentMethodOrder: List<String>,
             val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
             val appearance: Appearance.State,
         ) : Parcelable
@@ -114,6 +126,7 @@ class PaymentElement @Inject internal constructor(
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
             paymentMethodLayout = paymentMethodLayout,
+            paymentMethodOrder = paymentMethodOrder,
             termsDisplay = termsDisplay,
             appearance = appearance.build(),
         )

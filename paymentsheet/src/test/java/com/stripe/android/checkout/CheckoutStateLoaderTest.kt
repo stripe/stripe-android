@@ -104,6 +104,21 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `loadInitial passes payment method order to payment method metadata`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().paymentMethodOrder(listOf("klarna", "card"))
+                )
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
+            .isEqualTo(listOf("klarna", "card"))
+    }
+
+    @Test
     fun `loadInitial seeds collected details with the defaults billing address`() = runScenario {
         val address = CheckoutController.Address()
             .city(" San Francisco ")

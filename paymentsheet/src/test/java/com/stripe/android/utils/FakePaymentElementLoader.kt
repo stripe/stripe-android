@@ -64,6 +64,7 @@ internal class FakePaymentElementLoader(
             allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
             allowsPaymentMethodsRequiringShippingAddress = configuration
                 .allowsPaymentMethodsRequiringShippingAddress,
+            paymentMethodOrder = configuration.paymentMethodOrder,
             isGooglePayReady = isGooglePayAvailable,
             cbcEligibility = cbcEligibility,
             linkState = linkState,
