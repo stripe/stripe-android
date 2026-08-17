@@ -65,6 +65,7 @@ private fun GenericErrorContent(
             FinancialConnectionsButton(
                 onClick = onPrimaryCtaClick,
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !loading,
                 loading = loading,
             ) {
                 Text(text = pane.primaryCtaLabel())
