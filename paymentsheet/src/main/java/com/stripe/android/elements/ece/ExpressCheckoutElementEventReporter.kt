@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.mapOfDurationInSeconds
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -104,7 +105,9 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
             FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
             FIELD_ECE_CONFIG to mapOf(
                 FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkVisibility.name.lowercase(),
-                FIELD_GOOGLE_PAY_VISIBILITY to expressCheckoutElementConfiguration.googlePayVisibility.name.lowercase(),
+                FIELD_GOOGLE_PAY_VISIBILITY to (
+                    expressCheckoutElementConfiguration.googlePayConfiguration.display.toAnalyticsValue()
+                    ),
             ),
         )
     }
@@ -137,5 +140,12 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
         const val FIELD_ECE_CONFIG = "ece_config"
         const val FIELD_LINK_VISIBILITY = "link_visibility"
         const val FIELD_GOOGLE_PAY_VISIBILITY = "google_pay_visibility"
+
+        fun ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.toAnalyticsValue(): String {
+            return when (this) {
+                ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic -> "automatic"
+                ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never -> "never"
+            }
+        }
     }
 }

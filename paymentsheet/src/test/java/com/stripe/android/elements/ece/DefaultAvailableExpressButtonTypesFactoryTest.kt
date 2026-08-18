@@ -2,7 +2,6 @@
 package com.stripe.android.elements.ece
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -22,10 +21,14 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
-    fun `create filters out google pay when configuration is missing`() {
+    fun `create filters out google pay when disabled by configuration`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay),
-            googlePayConfiguration = null,
+            configuration = ExpressCheckoutElement.Configuration()
+                .googlePayConfiguration(
+                    ExpressCheckoutElement.Configuration.GooglePayConfiguration()
+                        .display(ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never)
+                ),
         )
 
         assertThat(availableExpressButtonTypes).isEmpty()
@@ -83,20 +86,17 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     private fun create(
         availableWallets: List<WalletType>,
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
-        googlePayConfiguration: GooglePayConfiguration.State? = TEST_GOOGLE_PAY_CONFIGURATION,
     ): List<ExpressButtonType> {
         return DefaultAvailableExpressButtonTypesFactory().create(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 availableWallets = availableWallets,
             ),
             expressCheckoutElementConfiguration = configuration.build(),
-            googlePayConfiguration = googlePayConfiguration,
         )
     }
 
     private companion object {
-        val TEST_GOOGLE_PAY_CONFIGURATION = GooglePayConfiguration(
-            GooglePayConfiguration.Environment.Test,
-        ).build()
+        val TEST_GOOGLE_PAY_CONFIGURATION =
+            ExpressCheckoutElement.Configuration.GooglePayConfiguration().build()
     }
 }

@@ -1,7 +1,6 @@
 @file:OptIn(CheckoutSessionPreview::class)
 package com.stripe.android.elements.ece
 
-import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -12,7 +11,6 @@ internal fun interface AvailableExpressButtonTypesFactory {
     fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
-        googlePayConfiguration: GooglePayConfiguration.State?,
     ): List<ExpressButtonType>
 }
 
@@ -21,17 +19,14 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
     override fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
-        googlePayConfiguration: GooglePayConfiguration.State?,
     ): List<ExpressButtonType> {
         return paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
             when (walletType) {
-                WalletType.GooglePay -> googlePayConfiguration?.let {
-                    ExpressButtonType.GooglePay(
-                        googlePayConfiguration = it,
+                WalletType.GooglePay -> ExpressButtonType.GooglePay(
+                        googlePayConfiguration = expressCheckoutElementConfiguration.googlePayConfiguration,
                     ).takeIf {
-                        expressCheckoutElementConfiguration.googlePayVisibility !=
-                            ExpressCheckoutElement.Configuration.GooglePayVisibility.Never
-                    }
+                    expressCheckoutElementConfiguration.googlePayConfiguration.display ==
+                        ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic
                 }
                 WalletType.Link -> ExpressButtonType.Link.takeIf {
                     expressCheckoutElementConfiguration.linkVisibility !=

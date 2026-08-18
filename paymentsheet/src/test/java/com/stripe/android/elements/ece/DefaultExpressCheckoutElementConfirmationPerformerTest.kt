@@ -12,6 +12,7 @@ import com.stripe.android.checkout.FakeCheckoutSessionRefresher
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -200,9 +201,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     ): ExpressButton.GooglePay {
         return ExpressButton.GooglePay.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            googlePayConfiguration = GooglePayConfiguration(
-                GooglePayConfiguration.Environment.Test,
-            ).build(),
+            googlePayConfiguration =
+                ExpressCheckoutElement.Configuration.GooglePayConfiguration().build(),
             shippingAddressRequired = shippingAddressRequired,
         )
     }
