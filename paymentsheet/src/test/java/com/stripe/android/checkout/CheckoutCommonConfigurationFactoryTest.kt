@@ -11,6 +11,7 @@ import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCo
 import com.stripe.android.elements.PaymentElement.Configuration.TermsDisplay
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 @OptIn(
     CheckoutSessionPreview::class,
     com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+    CardFundingFilteringPrivatePreview::class,
 )
 internal class CheckoutCommonConfigurationFactoryTest {
 
@@ -211,6 +213,26 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         assertThat(result.opensCardScannerAutomatically).isTrue()
+    }
+
+    @Test
+    fun `maps allowed card funding types to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().allowedCardFundingTypes(
+                    listOf(PaymentElement.Configuration.CardFundingType.Debit)
+                )
+            )
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.allowedCardFundingTypes)
+            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
     }
 
     @Test

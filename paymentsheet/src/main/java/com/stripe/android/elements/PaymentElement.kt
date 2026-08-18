@@ -12,6 +12,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -45,6 +46,7 @@ class PaymentElement @Inject internal constructor(
 
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @OptIn(CardFundingFilteringPrivatePreview::class)
     class Configuration {
         private var embeddedViewDisplaysMandateText: Boolean = true
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
@@ -53,6 +55,7 @@ class PaymentElement @Inject internal constructor(
         private var opensCardScannerAutomatically: Boolean = false
         private var preferredNetworks: List<CardBrand> = emptyList()
         private var paymentMethodOrder: List<String> = emptyList()
+        private var allowedCardFundingTypes: List<CardFundingType> = CardFundingType.entries
         private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
         private var appearance: Appearance = Appearance()
 
@@ -122,6 +125,19 @@ class PaymentElement @Inject internal constructor(
         }
 
         /**
+         * Specifies the card funding types accepted by the payment element.
+         *
+         * By default, all card funding types are accepted. This is a client-side setting and is
+         * not currently supported in Link.
+         */
+        @CardFundingFilteringPrivatePreview
+        fun allowedCardFundingTypes(
+            allowedCardFundingTypes: List<CardFundingType>
+        ): Configuration = apply {
+            this.allowedCardFundingTypes = allowedCardFundingTypes
+        }
+
+        /**
          * A map for specifying when legal agreements are displayed for each payment method type.
          * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
          */
@@ -135,6 +151,7 @@ class PaymentElement @Inject internal constructor(
         }
 
         @Parcelize
+        @OptIn(CardFundingFilteringPrivatePreview::class)
         internal data class State(
             val embeddedViewDisplaysMandateText: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
@@ -142,10 +159,12 @@ class PaymentElement @Inject internal constructor(
             val opensCardScannerAutomatically: Boolean,
             val preferredNetworks: List<CardBrand>,
             val paymentMethodOrder: List<String>,
+            val allowedCardFundingTypes: List<CardFundingType>,
             val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
             val appearance: Appearance.State,
         ) : Parcelable
 
+        @OptIn(CardFundingFilteringPrivatePreview::class)
         internal fun build(): State = State(
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
@@ -153,9 +172,31 @@ class PaymentElement @Inject internal constructor(
             opensCardScannerAutomatically = opensCardScannerAutomatically,
             preferredNetworks = preferredNetworks,
             paymentMethodOrder = paymentMethodOrder,
+            allowedCardFundingTypes = allowedCardFundingTypes,
             termsDisplay = termsDisplay,
             appearance = appearance.build(),
         )
+
+        /**
+         * Card funding categories that can be filtered.
+         */
+        @CheckoutSessionPreview
+        @CardFundingFilteringPrivatePreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        enum class CardFundingType : Parcelable {
+            /** Debit cards. */
+            Debit,
+
+            /** Credit cards. */
+            Credit,
+
+            /** Prepaid cards. */
+            Prepaid,
+
+            /** Unknown funding type. */
+            Unknown,
+        }
 
         /** Appearance configuration for the Payment Element. */
         @CheckoutSessionPreview
