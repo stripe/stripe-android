@@ -121,6 +121,25 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
+    fun `on init with Link Display WalletButtonHidden, state should have no Link button`() = runTest {
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.Link),
+                linkEmail = null,
+                linkConfiguration = PaymentSheet.LinkConfiguration(
+                    display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+                ),
+            )
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+
+            assertThat(state.walletButtons).isEmpty()
+        }
+    }
+
+    @Test
     fun `on init with GPay & Link enabled in arguments, state should have both GPay & Link buttons`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
@@ -906,7 +925,11 @@ class DefaultWalletButtonsInteractorTest {
         linkEmail: String? = null,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         googlePay: PaymentSheet.GooglePayConfiguration? = null,
-        linkState: LinkState? = null,
+        linkState: LinkState? = LinkState(
+            configuration = TestFactory.LINK_CONFIGURATION,
+            loginState = LinkState.LoginState.LoggedOut,
+            signupMode = null,
+        ),
         cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         walletButtonsViewVisibility: Map<
             PaymentSheet.WalletButtonsConfiguration.Wallet,
@@ -914,13 +937,15 @@ class DefaultWalletButtonsInteractorTest {
             > = emptyMap(),
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
-        attestOnIntentConfirmation: Boolean = false
+        attestOnIntentConfirmation: Boolean = false,
+        linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
     ): DefaultWalletButtonsInteractor.Arguments {
         return DefaultWalletButtonsInteractor.Arguments(
             linkEmail = linkEmail,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 availableWallets = availableWallets,
                 linkState = linkState,
+                linkConfiguration = linkConfiguration,
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 attestOnIntentConfirmation = attestOnIntentConfirmation,
             ),

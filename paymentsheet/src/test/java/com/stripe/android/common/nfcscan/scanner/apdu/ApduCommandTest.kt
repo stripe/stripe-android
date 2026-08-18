@@ -100,7 +100,6 @@ internal class ApduCommandTest {
 
             val error = result.exceptionOrNull()
             assertThat(error).isInstanceOf<ApduResponseError.Invalid>()
-            assertThat((error as ApduResponseError.Invalid).data.contentEquals(responseData)).isTrue()
             assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
         }
     }

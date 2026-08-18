@@ -177,7 +177,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
         val hasLinkWithSelectedPayment = currentSelection is Link && currentSelection.selectedPayment != null
         WalletsState.create(
-            isLinkAvailable = isLinkAvailable == true && visibleWallets.contains(WalletType.Link),
+            isLinkAvailable = isLinkAvailable == true &&
+                visibleWallets.contains(WalletType.Link) &&
+                paymentMethodMetadata.shouldShowLinkButton,
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata.isGooglePayReady && visibleWallets.contains(WalletType.GooglePay),
             buttonsEnabled = buttonsEnabled,

@@ -15,8 +15,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.FieldPopulator
+import com.stripe.android.test.core.FieldPopulator.AddressEntryMode
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -37,9 +37,9 @@ internal class TestBoleto : BasePlaygroundTest() {
     private val boletoValues = FieldPopulator.Values().copy(
         zip = "76600-000",
         state = "Goiás",
+        addressEntryMode = AddressEntryMode.InlineAutocomplete,
     )
 
-    @Ignore("#ir-fishery-zigzag")
     @Test
     fun testBoleto() {
         testDriver.confirmNewOrGuestComplete(
@@ -54,7 +54,6 @@ internal class TestBoleto : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-fishery-zigzag")
     @Test
     fun testBoletoSfu() {
         testDriver.confirmNewOrGuestComplete(
@@ -71,7 +70,6 @@ internal class TestBoleto : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-fishery-zigzag")
     @Test
     fun testBoletoSetup() {
         testDriver.confirmNewOrGuestComplete(

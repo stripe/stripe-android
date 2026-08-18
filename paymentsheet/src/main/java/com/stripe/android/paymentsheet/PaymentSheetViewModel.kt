@@ -223,7 +223,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) { isLinkAvailable, linkEmail, account, buttonsEnabled, paymentMethodMetadata ->
         val linkBrand = paymentMethodMetadata?.effectiveLinkBrand(account) ?: LinkBrand.Link
         WalletsState.create(
-            isLinkAvailable = isLinkAvailable,
+            isLinkAvailable = isLinkAvailable == true && paymentMethodMetadata?.shouldShowLinkButton == true,
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
             buttonsEnabled = buttonsEnabled,

@@ -9,7 +9,9 @@ import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCo
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.elements.PaymentElement.Configuration.TermsDisplay
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -20,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 @OptIn(
     CheckoutSessionPreview::class,
     com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+    CardFundingFilteringPrivatePreview::class,
 )
 internal class CheckoutCommonConfigurationFactoryTest {
 
@@ -127,6 +130,22 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
+    fun `maps Link configuration`() {
+        val result = factory().create(
+            configuration = CheckoutController.Configuration()
+                .linkConfiguration(
+                    CheckoutController.Configuration.LinkConfiguration()
+                        .display(CheckoutController.Configuration.LinkConfiguration.Display.Never)
+                )
+                .build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+    }
+
+    @Test
     fun `maps terms display to common configuration`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(
@@ -144,6 +163,76 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
         assertThat(result.termsDisplay)
             .isEqualTo(mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER))
+    }
+
+    @Test
+    fun `maps payment method order to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration().paymentMethodOrder(listOf("card", "klarna")))
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.paymentMethodOrder).isEqualTo(listOf("card", "klarna"))
+    }
+
+    @Test
+    fun `maps preferred networks to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().preferredNetworks(
+                    listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+                )
+            )
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.preferredNetworks)
+            .isEqualTo(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
+    }
+
+    @Test
+    fun `maps opens card scanner automatically to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration().opensCardScannerAutomatically(true))
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.opensCardScannerAutomatically).isTrue()
+    }
+
+    @Test
+    fun `maps allowed card funding types to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().allowedCardFundingTypes(
+                    listOf(PaymentElement.Configuration.CardFundingType.Debit)
+                )
+            )
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.allowedCardFundingTypes)
+            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
     }
 
     @Test

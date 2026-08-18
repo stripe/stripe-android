@@ -7,11 +7,14 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import androidx.test.platform.app.InstrumentationRegistry
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
@@ -21,6 +24,7 @@ import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.elements.formatExpirationDateForAccessibility
 import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.core.R as CoreR
+import com.stripe.android.uicore.R as UiCoreR
 
 internal class FieldPopulator(
     private val selectors: Selectors,
@@ -86,6 +90,20 @@ internal class FieldPopulator(
         }
     }
 
+    enum class AddressEntryMode(
+        val lineOneLabelResourceId: Int,
+        val requiresManualEntry: Boolean,
+    ) {
+        Regular(
+            lineOneLabelResourceId = CoreR.string.stripe_address_label_address_line1,
+            requiresManualEntry = false,
+        ),
+        InlineAutocomplete(
+            lineOneLabelResourceId = UiCoreR.string.stripe_address_label_address,
+            requiresManualEntry = true,
+        ),
+    }
+
     data class Values(
         val name: String = "Jenny Rosen",
         val email: String = "jrosen@email.com",
@@ -103,6 +121,7 @@ internal class FieldPopulator(
         val bacsSortCode: String = "108800",
         val bacsAccountNumber: String = "00012345",
         val boletoTaxId: String = "00000000000",
+        val addressEntryMode: AddressEntryMode = AddressEntryMode.Regular,
     )
 
     private fun verifyPlatformLpmFields() {
@@ -113,7 +132,9 @@ internal class FieldPopulator(
             selectors.getName(selectors.getResourceString(TranslationId.AddressName.resourceId))
                 .ifExistsAssertContentDescriptionEquals(values.name)
 
-            selectors.getLine1()
+            selectors.composeTestRule.onNodeWithText(
+                selectors.getResourceString(values.addressEntryMode.lineOneLabelResourceId)
+            )
                 .ifExistsAssertContentDescriptionEquals(values.line1)
             selectors.getCity()
                 .ifExistsAssertContentDescriptionEquals(values.city)
@@ -158,6 +179,10 @@ internal class FieldPopulator(
     private val merchantCountryCode: String
         get() = testParameters.playgroundSettingsSnapshot[MerchantSettingsDefinition].countryCode
 
+    private val collectsFullAddress: Boolean
+        get() = testParameters.playgroundSettingsSnapshot[CollectAddressSettingsDefinition] ==
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+
     private fun usesStateDropdown(): Boolean {
         return merchantCountryCode in setOf("BR", "US", "GB")
     }
@@ -175,7 +200,7 @@ internal class FieldPopulator(
             performTextInput(values.cardCvc)
         }
 
-        if (!defaultBillingAddress) {
+        if (!defaultBillingAddress && !collectsFullAddress) {
             populateZip()
         }
     }
@@ -221,11 +246,20 @@ internal class FieldPopulator(
 
     fun populateAddress() {
         selectors
-            .getLine1()
+            .composeTestRule
+            .onNodeWithText(selectors.getResourceString(values.addressEntryMode.lineOneLabelResourceId))
             .performScrollTo()
             .performClick()
             .performTextInput(values.line1)
 
+        if (values.addressEntryMode.requiresManualEntry) {
+            selectors.enterAddressManually()
+        }
+
+        populateAddressDetails()
+    }
+
+    private fun populateAddressDetails() {
         selectors
             .getCity()
             .performScrollTo()
