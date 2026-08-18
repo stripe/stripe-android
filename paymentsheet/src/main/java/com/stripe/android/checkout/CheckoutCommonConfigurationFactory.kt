@@ -29,7 +29,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
         preferredNetworks = ConfigurationDefaults.preferredNetworks,
         allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
-        paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
+        paymentMethodOrder = configuration.paymentElementConfiguration.paymentMethodOrder,
         externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
         cardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
         allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,

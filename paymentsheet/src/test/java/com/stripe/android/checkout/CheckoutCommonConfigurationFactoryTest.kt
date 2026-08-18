@@ -147,6 +147,21 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
+    fun `maps payment method order to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration().paymentMethodOrder(listOf("card", "klarna")))
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.paymentMethodOrder).isEqualTo(listOf("card", "klarna"))
+    }
+
+    @Test
     fun `sources the billing email from the checkout session customer email`() {
         val result = factory().create(
             configuration = controllerConfiguration(),

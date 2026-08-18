@@ -23,6 +23,7 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .billingDetailsCollectionConfiguration(
                 configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse)
             )
+            .paymentMethodOrder(configuration.paymentElementConfiguration.paymentMethodOrder)
             .termsDisplay(configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet())
             .appearance(configuration.paymentElementConfiguration.appearance.asPaymentSheet())
             .googlePay(configuration.toGooglePayConfiguration(checkoutSessionResponse))
