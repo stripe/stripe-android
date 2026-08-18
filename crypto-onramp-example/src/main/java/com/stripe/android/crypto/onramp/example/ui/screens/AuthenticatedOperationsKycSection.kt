@@ -18,11 +18,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.crypto.onramp.example.COLLECT_KYC_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.KYC_ADDRESS_CITY_TAG
+import com.stripe.android.crypto.onramp.example.KYC_ADDRESS_COUNTRY_TAG
+import com.stripe.android.crypto.onramp.example.KYC_ADDRESS_LINE_1_TAG
+import com.stripe.android.crypto.onramp.example.KYC_ADDRESS_POSTAL_CODE_TAG
+import com.stripe.android.crypto.onramp.example.KYC_ADDRESS_STATE_TAG
+import com.stripe.android.crypto.onramp.example.KYC_BIRTH_CITY_TAG
+import com.stripe.android.crypto.onramp.example.KYC_BIRTH_COUNTRY_TAG
+import com.stripe.android.crypto.onramp.example.KYC_FIRST_NAME_TAG
+import com.stripe.android.crypto.onramp.example.KYC_LAST_NAME_TAG
+import com.stripe.android.crypto.onramp.example.KYC_NATIONALITIES_TAG
+import com.stripe.android.crypto.onramp.example.KYC_SECTION_TAG
+import com.stripe.android.crypto.onramp.example.VERIFY_KYC_BUTTON_TAG
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -48,6 +62,7 @@ internal fun KycSection(
 ) {
     Row(
         modifier = Modifier
+            .testTag(KYC_SECTION_TAG)
             .fillMaxWidth()
             .clickable { onExpandedChange(!isExpanded) }
             .padding(vertical = 20.dp),
@@ -82,6 +97,7 @@ internal fun KycSection(
             Button(
                 onClick = onVerifyKyc,
                 modifier = Modifier
+                    .testTag(VERIFY_KYC_BUTTON_TAG)
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
             ) {
@@ -123,11 +139,17 @@ private fun KycForm(
         KycTextField(
             value = firstName,
             label = "First Name",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_FIRST_NAME_TAG),
             onChange = onFirstNameChange
         )
         KycTextField(
             value = lastName,
             label = "Last Name",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_LAST_NAME_TAG),
             onChange = onLastNameChange
         )
         KycTextField(
@@ -170,16 +192,25 @@ private fun KycForm(
         KycTextField(
             value = birthCountry,
             label = "Birth Country (ISO)",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_BIRTH_COUNTRY_TAG),
             onChange = onBirthCountryChange
         )
         KycTextField(
             value = birthCity,
             label = "Birth City",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_BIRTH_CITY_TAG),
             onChange = onBirthCityChange
         )
         KycTextField(
             value = nationalities,
             label = "Nationalities (ISO, comma-separated)",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_NATIONALITIES_TAG),
             onChange = onNationalitiesChange
         )
 
@@ -192,6 +223,9 @@ private fun KycForm(
         KycTextField(
             value = address.line1.orEmpty(),
             label = "Address Line 1",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_ADDRESS_LINE_1_TAG),
             onChange = { onAddressChange(address.replacing(line1 = it)) }
         )
         KycTextField(
@@ -202,21 +236,33 @@ private fun KycForm(
         KycTextField(
             value = address.city.orEmpty(),
             label = "City",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_ADDRESS_CITY_TAG),
             onChange = { onAddressChange(address.replacing(city = it)) }
         )
         KycTextField(
             value = address.state.orEmpty(),
             label = "State",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_ADDRESS_STATE_TAG),
             onChange = { onAddressChange(address.replacing(state = it)) }
         )
         KycTextField(
             value = address.country.orEmpty(),
             label = "Country",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_ADDRESS_COUNTRY_TAG),
             onChange = { onAddressChange(address.replacing(country = it)) }
         )
         KycTextField(
             value = address.postalCode.orEmpty(),
             label = "Postal Code",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(KYC_ADDRESS_POSTAL_CODE_TAG),
             onChange = { onAddressChange(address.replacing(postalCode = it)) }
         )
 
@@ -244,6 +290,7 @@ private fun KycForm(
                 )
             },
             modifier = Modifier
+                .testTag(COLLECT_KYC_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         ) {
