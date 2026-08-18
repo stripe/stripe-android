@@ -865,6 +865,7 @@ internal fun PaymentMethodPreviewDetails.toPreview(
                 drawableResourceIdNight = null,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
+                useDarkThemeIcon = null,
             )
         },
         label = label,
@@ -912,6 +913,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
                 drawableResourceIdNight = null,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
+                useDarkThemeIcon = null,
             )
         },
         label = label,
