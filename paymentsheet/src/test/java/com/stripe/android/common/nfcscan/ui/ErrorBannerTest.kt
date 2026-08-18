@@ -1,14 +1,12 @@
 package com.stripe.android.common.nfcscan.ui
 
 import android.os.Build
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -34,6 +32,8 @@ internal class ErrorBannerTest {
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
+    val stateRestorer = StateRestorationTester(composeRule)
+
     @Before
     fun setUp() {
         composeRule.mainClock.autoAdvance = false
@@ -41,7 +41,7 @@ internal class ErrorBannerTest {
 
     @Test
     fun `error message shows error banner`() {
-        composeRule.setContent {
+        stateRestorer.setContent {
             ErrorBanner(
                 error = ErrorBannerParams(
                     message = ERROR_MESSAGE,
@@ -60,7 +60,7 @@ internal class ErrorBannerTest {
     fun `error invokes onShown after delay`() {
         var errorShownCount by mutableIntStateOf(0)
 
-        composeRule.setContent {
+        stateRestorer.setContent {
             ErrorBanner(
                 error = ErrorBannerParams(
                     message = ERROR_MESSAGE,
@@ -79,10 +79,8 @@ internal class ErrorBannerTest {
     @Test
     fun `config change during error delay resumes remaining delay`() {
         var errorShownCount by mutableIntStateOf(0)
-        val visible = mutableStateOf(true)
 
-        composeRule.setErrorBannerContent(
-            visible = visible,
+        stateRestorer.setErrorBannerContent(
             error = ERROR_MESSAGE,
             onShown = { errorShownCount++ },
         )
@@ -93,7 +91,7 @@ internal class ErrorBannerTest {
         composeRule.advanceErrorDelayBy(elapsedDelayMs)
         assertThat(errorShownCount).isEqualTo(0)
 
-        composeRule.simulateConfigChange(visible)
+        stateRestorer.emulateSavedInstanceStateRestore()
         assertThat(errorShownCount).isEqualTo(0)
 
         val remainingDelayMs = ERROR_SHOWN_DELAY_MS - elapsedDelayMs
@@ -107,10 +105,8 @@ internal class ErrorBannerTest {
     @Test
     fun `config change after error shown does not invoke onShown again`() {
         var errorShownCount by mutableIntStateOf(0)
-        val visible = mutableStateOf(true)
 
-        composeRule.setErrorBannerContent(
-            visible = visible,
+        stateRestorer.setErrorBannerContent(
             error = ERROR_MESSAGE,
             onShown = { errorShownCount++ },
         )
@@ -119,7 +115,7 @@ internal class ErrorBannerTest {
         composeRule.advanceErrorDelayBy(ERROR_SHOWN_DELAY_MS + FRAME_BUFFER_MS)
         assertThat(errorShownCount).isEqualTo(1)
 
-        composeRule.simulateConfigChange(visible)
+        stateRestorer.emulateSavedInstanceStateRestore()
         composeRule.waitForIdle()
 
         assertThat(errorShownCount).isEqualTo(1)
@@ -132,36 +128,21 @@ internal class ErrorBannerTest {
         waitForIdle()
     }
 
-    private fun ComposeContentTestRule.setErrorBannerContent(
-        visible: MutableState<Boolean>,
+    private fun StateRestorationTester.setErrorBannerContent(
         error: ResolvableString,
         onShown: () -> Unit = {},
     ) {
         setContent {
-            val saveableStateHolder = rememberSaveableStateHolder()
-
-            if (visible.value) {
-                saveableStateHolder.SaveableStateProvider(ERROR_BANNER_SAVABLE_KEY) {
-                    ErrorBanner(
-                        error = ErrorBannerParams(
-                            message = error,
-                            onShown = onShown,
-                        ),
-                    )
-                }
-            }
+            ErrorBanner(
+                error = ErrorBannerParams(
+                    message = error,
+                    onShown = onShown,
+                ),
+            )
         }
     }
 
-    private fun ComposeContentTestRule.simulateConfigChange(visible: MutableState<Boolean>) {
-        runOnUiThread { visible.value = false }
-        waitForIdle()
-        runOnUiThread { visible.value = true }
-        waitForIdle()
-    }
-
     private companion object {
-        const val ERROR_BANNER_SAVABLE_KEY = "nfc_error_banner"
         const val FRAME_BUFFER_MS = 32L
         const val ERROR_SHOWN_DELAY_MS = 3_000L
         const val ERROR_MESSAGE_TEXT = "Card expired. Try another card."
