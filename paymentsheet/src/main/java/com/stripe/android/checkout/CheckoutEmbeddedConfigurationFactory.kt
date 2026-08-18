@@ -41,6 +41,8 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .googlePay(configuration.toGooglePayConfiguration(checkoutSessionResponse))
             .defaultBillingDetails(collectedDetails.toBillingDetails(checkoutSessionResponse))
             .shippingDetails(collectedDetails.toShippingDetails())
+            .allowsDelayedPaymentMethods(true)
+            .allowsPaymentMethodsRequiringShippingAddress(true)
             .build()
     }
 }
