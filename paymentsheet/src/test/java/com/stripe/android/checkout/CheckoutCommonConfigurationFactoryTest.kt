@@ -199,6 +199,21 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
+    fun `maps opens card scanner automatically to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration().opensCardScannerAutomatically(true))
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.opensCardScannerAutomatically).isTrue()
+    }
+
+    @Test
     fun `sources the billing email from the checkout session customer email`() {
         val result = factory().create(
             configuration = controllerConfiguration(),

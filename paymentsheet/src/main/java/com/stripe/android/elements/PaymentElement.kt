@@ -50,6 +50,7 @@ class PaymentElement @Inject internal constructor(
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
         private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
+        private var opensCardScannerAutomatically: Boolean = false
         private var preferredNetworks: List<CardBrand> = emptyList()
         private var paymentMethodOrder: List<String> = emptyList()
         private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
@@ -92,6 +93,14 @@ class PaymentElement @Inject internal constructor(
         }
 
         /**
+         * Controls whether the card scanner opens automatically when the card entry form is shown.
+         * Defaults to `false`.
+         */
+        fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean): Configuration = apply {
+            this.opensCardScannerAutomatically = opensCardScannerAutomatically
+        }
+
+        /**
          * A list of preferred networks that should be used to process payments made with a
          * co-branded card if your user hasn't selected a network themselves.
          *
@@ -130,6 +139,7 @@ class PaymentElement @Inject internal constructor(
             val embeddedViewDisplaysMandateText: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
             val paymentMethodLayout: PaymentMethodLayout,
+            val opensCardScannerAutomatically: Boolean,
             val preferredNetworks: List<CardBrand>,
             val paymentMethodOrder: List<String>,
             val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
@@ -140,6 +150,7 @@ class PaymentElement @Inject internal constructor(
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
             paymentMethodLayout = paymentMethodLayout,
+            opensCardScannerAutomatically = opensCardScannerAutomatically,
             preferredNetworks = preferredNetworks,
             paymentMethodOrder = paymentMethodOrder,
             termsDisplay = termsDisplay,
