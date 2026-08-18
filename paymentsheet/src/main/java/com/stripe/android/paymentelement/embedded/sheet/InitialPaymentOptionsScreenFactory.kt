@@ -227,7 +227,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private fun walletsState(): WalletsState? {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         return WalletsState.create(
-            isLinkAvailable = paymentMethodMetadata.linkState != null,
+            isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton,
             linkEmail = null,
             isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
             buttonsEnabled = true,

@@ -204,7 +204,8 @@ internal class DefaultWalletButtonsInteractor constructor(
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&
-                                walletsAllowedByMerchant.contains(WalletType.Link)
+                                walletsAllowedByMerchant.contains(WalletType.Link) &&
+                                arguments.paymentMethodMetadata.shouldShowLinkButton
                         }
                     }
                 }
