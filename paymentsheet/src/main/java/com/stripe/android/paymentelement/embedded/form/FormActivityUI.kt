@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,9 +24,9 @@ import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.Mandate
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -77,7 +78,7 @@ internal fun USBankAccountMandate(
             mandateText = it.resolve(),
             modifier = Modifier
                 .padding(vertical = 8.dp)
-                .padding(StripeTheme.getOuterFormInsets())
+                .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
         )
     }
 }
@@ -91,7 +92,7 @@ internal fun FormActivityError(
             error = it.resolve(),
             modifier = Modifier
                 .padding(vertical = 8.dp)
-                .padding(StripeTheme.getOuterFormInsets())
+                .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
         )
     }
 }
@@ -103,7 +104,7 @@ internal fun FormActivityPrimaryButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier.padding(StripeTheme.getOuterFormInsets())
+        modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
     ) {
         PrimaryButton(
             modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),
