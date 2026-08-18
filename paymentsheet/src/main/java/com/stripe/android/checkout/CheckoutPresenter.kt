@@ -14,6 +14,7 @@ import javax.inject.Provider
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CheckoutPresenter @Inject internal constructor(
     private val paymentElementProvider: Lazy<PaymentElement>,
+    private val rowSelectionBehaviorHolder: CheckoutRowSelectionBehaviorHolder,
     private val currencySelectorElementProvider: Lazy<CurrencySelectorElement>,
     private val shippingAddressElementProvider: Lazy<ShippingAddressElement>,
     private val expressCheckoutElementProvider: Lazy<ExpressCheckoutElement>,
@@ -23,7 +24,15 @@ class CheckoutPresenter @Inject internal constructor(
     /**
      * Returns the [PaymentElement], which displays and collects the customer's payment method.
      */
-    fun paymentElement(): PaymentElement {
+    fun paymentElement(): PaymentElement = paymentElement(PaymentElement.RowSelectionBehavior.default())
+
+    /**
+     * Returns the [PaymentElement], which displays and collects the customer's payment method.
+     *
+     * Call this once when creating the presenter. [rowSelectionBehavior] only applies to [PaymentElement.Content].
+     */
+    fun paymentElement(rowSelectionBehavior: PaymentElement.RowSelectionBehavior): PaymentElement {
+        rowSelectionBehaviorHolder.behavior = rowSelectionBehavior
         return paymentElementProvider.get()
     }
 

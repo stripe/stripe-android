@@ -12,6 +12,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.CheckoutRowSelectionBehaviorHolder
 import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
@@ -253,9 +254,9 @@ internal interface CheckoutControllerModule {
 
         @Provides
         fun providesInternalRowSelectionCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            holder: CheckoutRowSelectionBehaviorHolder,
         ): InternalRowSelectionCallback? {
-            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
+            return holder.behavior.immediateActionCallbackOrNull()
         }
 
         @Provides

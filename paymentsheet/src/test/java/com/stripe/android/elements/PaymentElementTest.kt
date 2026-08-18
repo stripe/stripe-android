@@ -3,6 +3,7 @@ package com.stripe.android.elements
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContent
@@ -37,6 +38,21 @@ internal class PaymentElementTest {
 
         contentHelper.presentPaymentOptionsCalls.awaitItem()
         contentHelper.presentPaymentOptionsCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `default row selection behavior has no immediate action callback`() {
+        assertThat(PaymentElement.RowSelectionBehavior.default().immediateActionCallbackOrNull()).isNull()
+    }
+
+    @Test
+    fun `immediate action row selection behavior returns its callback`() {
+        var wasInvoked = false
+        val behavior = PaymentElement.RowSelectionBehavior.immediateAction { wasInvoked = true }
+
+        behavior.immediateActionCallbackOrNull()?.invoke()
+
+        assertThat(wasInvoked).isTrue()
     }
 
     @Test

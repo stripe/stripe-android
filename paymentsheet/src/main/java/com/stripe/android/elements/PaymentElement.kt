@@ -42,6 +42,40 @@ class PaymentElement @Inject internal constructor(
         contentHelper.presentPaymentOptions()
     }
 
+    /**
+     * Describes how [Content] handles payment option row selections.
+     *
+     * Note: Only used if you call [Content].
+     */
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract class RowSelectionBehavior internal constructor() {
+        private object Default : RowSelectionBehavior()
+
+        private class ImmediateAction(
+            val didSelectPaymentOption: () -> Unit,
+        ) : RowSelectionBehavior()
+
+        internal fun immediateActionCallbackOrNull(): (() -> Unit)? {
+            return (this as? ImmediateAction)?.didSelectPaymentOption
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            /** The default behavior, which only updates the selected payment option. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun default(): RowSelectionBehavior = Default
+
+            /** Invokes [didSelectPaymentOption] after the customer selects a payment option. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun immediateAction(didSelectPaymentOption: () -> Unit): RowSelectionBehavior {
+                return ImmediateAction(didSelectPaymentOption)
+            }
+        }
+    }
+
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
