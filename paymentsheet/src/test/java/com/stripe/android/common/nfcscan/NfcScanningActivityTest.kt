@@ -152,7 +152,7 @@ internal class NfcScanningActivityTest {
         autoAdvance = false,
     ) {
         dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
-        assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
+        assertErrorIsDisplayed(errorText = "Card declined. Try another.")
         assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
@@ -165,7 +165,7 @@ internal class NfcScanningActivityTest {
     @Test
     fun `unsupported card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
-        assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+        assertErrorIsDisplayed(errorText = "Card not supported. Try another.")
         assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
@@ -180,7 +180,7 @@ internal class NfcScanningActivityTest {
             paymentMethodMetadata = NfcScanningActivityTestFixtures.paymentMethodMetadataWithVisaDisallowed(),
         ) {
             dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
-            assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+            assertErrorIsDisplayed(errorText = "Card not supported. Try another.")
             assertErrorDisappears()
 
             isoDep.assertSuccess()
@@ -192,7 +192,7 @@ internal class NfcScanningActivityTest {
     @Test
     fun `expired card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
-        assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
+        assertErrorIsDisplayed(errorText = "Card expired. Try another.")
         assertErrorDisappears()
 
         isoDep.assertSuccess()
