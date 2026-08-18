@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.KlarnaSDKPrivatePreview
 import com.stripe.android.testing.RadarOptionsFactory
 import kotlin.test.Test
 
@@ -367,6 +368,31 @@ class ConfirmPaymentIntentParamsTest {
                 "payment_method_options" to mapOf("card" to mapOf("cvc" to "123")),
                 "client_secret" to CLIENT_SECRET,
                 "use_stripe_sdk" to false
+            )
+        )
+    }
+
+    @OptIn(KlarnaSDKPrivatePreview::class)
+    @Test
+    fun toParamMap_withKlarnaPaymentMethodOptions_shouldCreateExpectedMap() {
+        assertThat(
+            ConfirmPaymentIntentParams(
+                clientSecret = CLIENT_SECRET,
+                paymentMethodOptions = PaymentMethodOptionsParams.Klarna(
+                    interoperabilityToken = "interoperability_token",
+                    partnerConfirmationToken = "partner_confirmation_token",
+                ),
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "client_secret" to CLIENT_SECRET,
+                "use_stripe_sdk" to false,
+                "payment_method_options" to mapOf(
+                    "klarna" to mapOf(
+                        "interoperability_token" to "interoperability_token",
+                        "partner_confirmation_token" to "partner_confirmation_token",
+                    )
+                ),
             )
         )
     }

@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.KlarnaSDKPrivatePreview
 import kotlin.test.Test
 
 class PaymentMethodOptionsParamsTest {
@@ -43,6 +44,32 @@ class PaymentMethodOptionsParamsTest {
         assertThat(
             PaymentMethodOptionsParams.Card()
                 .toParamMap()
+        ).isEmpty()
+    }
+
+    @OptIn(KlarnaSDKPrivatePreview::class)
+    @Test
+    fun klarnaToParamMap_hasCorrectValues() {
+        assertThat(
+            PaymentMethodOptionsParams.Klarna(
+                interoperabilityToken = "interoperability_token",
+                partnerConfirmationToken = "partner_confirmation_token",
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "klarna" to mapOf(
+                    "interoperability_token" to "interoperability_token",
+                    "partner_confirmation_token" to "partner_confirmation_token",
+                )
+            )
+        )
+    }
+
+    @OptIn(KlarnaSDKPrivatePreview::class)
+    @Test
+    fun klarnaToParamMap_withNoData_shouldHaveEmptyParams() {
+        assertThat(
+            PaymentMethodOptionsParams.Klarna().toParamMap()
         ).isEmpty()
     }
 
