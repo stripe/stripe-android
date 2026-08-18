@@ -12,6 +12,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -116,6 +117,23 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
             .isEqualTo(listOf("klarna", "card"))
+    }
+
+    @Test
+    fun `loadInitial passes preferred networks to common configuration`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().preferredNetworks(
+                        listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+                    )
+                )
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(stateHolder.state?.commonConfiguration?.preferredNetworks)
+            .isEqualTo(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
     }
 
     @Test

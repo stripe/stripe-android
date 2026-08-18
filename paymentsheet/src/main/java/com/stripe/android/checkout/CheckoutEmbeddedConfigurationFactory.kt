@@ -23,6 +23,7 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .billingDetailsCollectionConfiguration(
                 configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse)
             )
+            .preferredNetworks(configuration.paymentElementConfiguration.preferredNetworks)
             .paymentMethodOrder(configuration.paymentElementConfiguration.paymentMethodOrder)
             .termsDisplay(configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet())
             .appearance(configuration.paymentElementConfiguration.appearance.asPaymentSheet())
