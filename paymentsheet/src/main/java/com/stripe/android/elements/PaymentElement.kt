@@ -55,6 +55,7 @@ class PaymentElement @Inject internal constructor(
         private var opensCardScannerAutomatically: Boolean = false
         private var preferredNetworks: List<CardBrand> = emptyList()
         private var paymentMethodOrder: List<String> = emptyList()
+        private var cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.All
         private var allowedCardFundingTypes: List<CardFundingType> = CardFundingType.entries
         private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
         private var appearance: Appearance = Appearance()
@@ -125,6 +126,16 @@ class PaymentElement @Inject internal constructor(
         }
 
         /**
+         * Specifies the card brands accepted by the payment element.
+         *
+         * By default, all card brands are accepted. This is a client-side setting and is not
+         * currently supported in Link.
+         */
+        fun cardBrandAcceptance(cardBrandAcceptance: CardBrandAcceptance): Configuration = apply {
+            this.cardBrandAcceptance = cardBrandAcceptance
+        }
+
+        /**
          * Specifies the card funding types accepted by the payment element.
          *
          * By default, all card funding types are accepted. This is a client-side setting and is
@@ -159,6 +170,7 @@ class PaymentElement @Inject internal constructor(
             val opensCardScannerAutomatically: Boolean,
             val preferredNetworks: List<CardBrand>,
             val paymentMethodOrder: List<String>,
+            val cardBrandAcceptance: CardBrandAcceptance,
             val allowedCardFundingTypes: List<CardFundingType>,
             val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
             val appearance: Appearance.State,
@@ -172,10 +184,64 @@ class PaymentElement @Inject internal constructor(
             opensCardScannerAutomatically = opensCardScannerAutomatically,
             preferredNetworks = preferredNetworks,
             paymentMethodOrder = paymentMethodOrder,
+            cardBrandAcceptance = cardBrandAcceptance,
             allowedCardFundingTypes = allowedCardFundingTypes,
             termsDisplay = termsDisplay,
             appearance = appearance.build(),
         )
+
+        /** Options to allow or disallow card brands. */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        sealed class CardBrandAcceptance : Parcelable {
+            /** Card brand categories that can be allowed or disallowed. */
+            @Parcelize
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class BrandCategory : Parcelable {
+                /** Visa branded cards. */
+                Visa,
+
+                /** Mastercard branded cards. */
+                Mastercard,
+
+                /** Amex branded cards. */
+                Amex,
+
+                /** Discover Global Network branded cards. */
+                Discover,
+            }
+
+            @Parcelize
+            internal data object All : CardBrandAcceptance()
+
+            @Parcelize
+            internal data class Allowed(
+                val brands: List<BrandCategory>
+            ) : CardBrandAcceptance()
+
+            @Parcelize
+            internal data class Disallowed(
+                val brands: List<BrandCategory>
+            ) : CardBrandAcceptance()
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            companion object {
+                /** Accepts all card brands supported by Stripe. */
+                @JvmStatic
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun all(): CardBrandAcceptance = All
+
+                /** Accepts only the specified card brands. */
+                @JvmStatic
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun allowed(brands: List<BrandCategory>): CardBrandAcceptance = Allowed(brands)
+
+                /** Accepts all card brands except the specified ones. */
+                @JvmStatic
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance = Disallowed(brands)
+            }
+        }
 
         /**
          * Card funding categories that can be filtered.

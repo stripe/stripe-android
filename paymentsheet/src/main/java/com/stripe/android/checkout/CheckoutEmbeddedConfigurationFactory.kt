@@ -31,6 +31,7 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             )
             .preferredNetworks(configuration.paymentElementConfiguration.preferredNetworks)
             .paymentMethodOrder(configuration.paymentElementConfiguration.paymentMethodOrder)
+            .cardBrandAcceptance(configuration.paymentElementConfiguration.cardBrandAcceptance.asPaymentSheet())
             .allowedCardFundingTypes(configuration.paymentElementConfiguration.allowedCardFundingTypes.asPaymentSheet())
             .opensCardScannerAutomatically(
                 configuration.paymentElementConfiguration.opensCardScannerAutomatically
