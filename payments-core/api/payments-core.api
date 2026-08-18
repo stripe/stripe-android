@@ -1476,6 +1476,7 @@ public final class com/stripe/android/model/ConfirmSetupIntentParams : com/strip
 	public fun hashCode ()I
 	public final fun setMandateData (Lcom/stripe/android/model/MandateDataParams;)V
 	public final fun setMandateId (Ljava/lang/String;)V
+	public final fun setPaymentMethodOptions (Lcom/stripe/android/model/PaymentMethodOptionsParams;)V
 	public fun setReturnUrl (Ljava/lang/String;)V
 	public fun shouldUseStripeSdk ()Z
 	public fun toParamMap ()Ljava/util/Map;

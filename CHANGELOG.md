@@ -4,7 +4,7 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Payments
-* [ADDED] Added Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens to PaymentIntent confirmation (private preview).
+* [ADDED] Added Klarna confirmation options for passing SDK-generated interoperability tokens to PaymentIntent and SetupIntent confirmation, and partner confirmation tokens to PaymentIntent confirmation (private preview).
 
 ### PaymentSheet
 * [CHANGED] Inline address autocomplete is now enabled by default in PaymentSheet and FlowController.
