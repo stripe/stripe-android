@@ -19,7 +19,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
         customer = ConfigurationDefaults.customer,
         googlePay = configuration.toGooglePayConfiguration(checkoutSessionResponse),
-        link = ConfigurationDefaults.link,
+        link = configuration.linkConfiguration.asPaymentSheet(),
         defaultBillingDetails = collectedDetails.toBillingDetails(checkoutSessionResponse),
         shippingDetails = collectedDetails.toShippingDetails(),
         allowsDelayedPaymentMethods = ConfigurationDefaults.allowsDelayedPaymentMethods,
