@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val promptPayRawValues = mapOf(
@@ -93,22 +94,34 @@ private val promptPayFullExpectedParams = LpmBillingAddressFormParams(
 internal val promptPayTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "PromptPay Never",
-        paymentMethodType = PaymentMethod.Type.PromptPay,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.PromptPay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = promptPayRawValues,
         expectedParams = promptPayNeverExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "PromptPay Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.PromptPay,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.PromptPay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = promptPayRawValues,
         expectedParams = promptPayAutomaticWithoutTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "PromptPay Full",
-        paymentMethodType = PaymentMethod.Type.PromptPay,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.PromptPay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = promptPayRawValues,
         expectedParams = promptPayFullExpectedParams,
     ),

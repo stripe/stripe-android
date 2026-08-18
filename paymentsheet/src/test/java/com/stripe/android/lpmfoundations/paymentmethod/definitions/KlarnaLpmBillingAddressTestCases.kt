@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val klarnaFullRawValues = mapOf(
@@ -87,8 +88,12 @@ private val klarnaWithBillingAddressExpectedPaymentMethodParams =
 internal val klarnaTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Klarna Never",
-        paymentMethodType = PaymentMethod.Type.Klarna,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Klarna,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = klarnaFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = klarnaCountryOnlyExpectedPaymentMethodParams,
@@ -98,8 +103,12 @@ internal val klarnaTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Klarna Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.Klarna,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Klarna,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = klarnaFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = klarnaWithEmailAndCountryExpectedPaymentMethodParams,
@@ -109,8 +118,12 @@ internal val klarnaTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Klarna Full",
-        paymentMethodType = PaymentMethod.Type.Klarna,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Klarna,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = klarnaFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = klarnaWithBillingAddressExpectedPaymentMethodParams,

@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val epsFullRawValues = mapOf(
@@ -83,8 +84,12 @@ private val epsWithBillingAddressExpectedPaymentMethodParams = PaymentMethodCrea
 internal val epsTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "EPS Never",
-        paymentMethodType = PaymentMethod.Type.Eps,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Eps,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = epsFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = epsNoBillingDetailsExpectedPaymentMethodParams,
@@ -94,8 +99,12 @@ internal val epsTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "EPS Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.Eps,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Eps,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = epsFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = epsWithContactDetailsExpectedPaymentMethodParams,
@@ -105,8 +114,12 @@ internal val epsTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "EPS Full",
-        paymentMethodType = PaymentMethod.Type.Eps,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Eps,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = epsFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = epsWithBillingAddressExpectedPaymentMethodParams,

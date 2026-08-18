@@ -5,6 +5,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val bacsDebitFullRawValues = mapOf(
@@ -76,8 +77,12 @@ private val bacsDebitWithBillingAddressExpectedPaymentMethodParams = PaymentMeth
 internal val bacsDebitTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Bacs Debit Never",
-        paymentMethodType = PaymentMethod.Type.BacsDebit,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.BacsDebit,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = bacsDebitFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = bacsDebitBankDetailsExpectedPaymentMethodParams,
@@ -87,8 +92,12 @@ internal val bacsDebitTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Bacs Debit Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.BacsDebit,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.BacsDebit,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = bacsDebitFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = bacsDebitWithBillingAddressExpectedPaymentMethodParams,
@@ -98,8 +107,12 @@ internal val bacsDebitTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Bacs Debit Full",
-        paymentMethodType = PaymentMethod.Type.BacsDebit,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.BacsDebit,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = bacsDebitFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = bacsDebitWithBillingAddressExpectedPaymentMethodParams,

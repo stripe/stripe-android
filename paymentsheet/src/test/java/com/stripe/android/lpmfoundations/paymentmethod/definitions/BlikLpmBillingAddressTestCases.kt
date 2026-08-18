@@ -5,6 +5,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val blikFullRawValues = mapOf(
@@ -60,8 +61,12 @@ private val blikWithBillingAddressExpectedPaymentMethodParams = PaymentMethodCre
 internal val blikTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Blik Never",
-        paymentMethodType = PaymentMethod.Type.Blik,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Blik,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = blikFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = blikExpectedPaymentMethodParams,
@@ -71,8 +76,12 @@ internal val blikTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Blik Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.Blik,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Blik,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = blikFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = blikExpectedPaymentMethodParams,
@@ -82,8 +91,12 @@ internal val blikTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Blik Full",
-        paymentMethodType = PaymentMethod.Type.Blik,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Blik,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = blikFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = blikWithBillingAddressExpectedPaymentMethodParams,
