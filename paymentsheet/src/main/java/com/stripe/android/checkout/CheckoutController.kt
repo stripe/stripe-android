@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.CollectMissingLinkBillingDetailsPreview
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
@@ -811,6 +813,7 @@ class CheckoutController @Inject internal constructor(
         private var apiConfiguration: ApiConfiguration? = null
         private var merchantDisplayName: String? = null
         private var googlePayConfiguration: GooglePayConfiguration? = null
+        private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var defaults: Defaults = Defaults()
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
@@ -896,6 +899,15 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
+         * Sets the Link configuration for this checkout session.
+         */
+        fun linkConfiguration(
+            configuration: LinkConfiguration,
+        ): Configuration = apply {
+            this.linkConfiguration = configuration
+        }
+
+        /**
          * Prefill values for the customer's details. If known up front, these prepopulate the
          * elements (and the Checkout Session) so the customer doesn't re-enter them.
          */
@@ -911,6 +923,7 @@ class CheckoutController @Inject internal constructor(
             val apiConfiguration: ApiConfiguration.State?,
             val merchantDisplayName: String?,
             val googlePayConfiguration: GooglePayConfiguration.State?,
+            val linkConfiguration: LinkConfiguration.State,
             val defaults: Defaults.State,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
@@ -929,8 +942,84 @@ class CheckoutController @Inject internal constructor(
                 shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
                 expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
                 googlePayConfiguration = googlePayConfiguration?.build(),
+                linkConfiguration = linkConfiguration.build(),
                 defaults = defaultsState,
             )
+        }
+
+        /**
+         * Builder for Link configuration used by checkout.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class LinkConfiguration {
+            private var display: Display = Display.Automatic
+            private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+            private var disallowFundingSourceCreation: Set<String> = emptySet()
+
+            /**
+             * Sets when Link is displayed in the payment element.
+             */
+            fun display(display: Display): LinkConfiguration = apply {
+                this.display = display
+            }
+
+            /**
+             * Sets whether Link collects missing billing details for existing payment methods.
+             */
+            @CollectMissingLinkBillingDetailsPreview
+            fun collectMissingBillingDetailsForExistingPaymentMethods(
+                collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+            ): LinkConfiguration = apply {
+                this.collectMissingBillingDetailsForExistingPaymentMethods =
+                    collectMissingBillingDetailsForExistingPaymentMethods
+            }
+
+            /**
+             * Sets Link funding sources that cannot be created.
+             */
+            @LinkDisallowFundingSourceCreationPreview
+            fun disallowFundingSourceCreation(
+                disallowFundingSourceCreation: Set<String>,
+            ): LinkConfiguration = apply {
+                this.disallowFundingSourceCreation = disallowFundingSourceCreation
+            }
+
+            @Parcelize
+            internal data class State(
+                val display: Display,
+                val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+                val disallowFundingSourceCreation: Set<String>,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                display = display,
+                collectMissingBillingDetailsForExistingPaymentMethods =
+                    collectMissingBillingDetailsForExistingPaymentMethods,
+                disallowFundingSourceCreation = disallowFundingSourceCreation.toSet(),
+            )
+
+            /**
+             * Display configuration for Link.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Display {
+                /**
+                 * Link is displayed when available.
+                 */
+                Automatic,
+
+                /**
+                 * Link is never displayed.
+                 */
+                Never,
+
+                /**
+                 * Link remains enabled but its button or row is hidden from the payment element UI.
+                 */
+                WalletButtonHidden,
+            }
         }
 
         /**

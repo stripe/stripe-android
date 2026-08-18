@@ -127,6 +127,22 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
+    fun `maps Link configuration`() {
+        val result = factory().create(
+            configuration = CheckoutController.Configuration()
+                .linkConfiguration(
+                    CheckoutController.Configuration.LinkConfiguration()
+                        .display(CheckoutController.Configuration.LinkConfiguration.Display.Never)
+                )
+                .build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+    }
+
+    @Test
     fun `maps terms display to common configuration`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(
