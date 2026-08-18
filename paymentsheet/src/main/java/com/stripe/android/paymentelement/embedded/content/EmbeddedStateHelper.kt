@@ -5,7 +5,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.parseAppearance
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -46,7 +45,6 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
             configuration = state.confirmationState.configuration
         )
 
-        state.confirmationState.configuration.appearance.parseAppearance()
         confirmationStateHolder.state = state.confirmationState
         customerStateHolder.setCustomerState(state.customer)
         selectionHolder.setPreviousNewSelections(state.previousNewSelections)

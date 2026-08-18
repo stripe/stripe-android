@@ -2,7 +2,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import android.os.Bundle
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -20,12 +19,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -45,34 +40,6 @@ internal class DefaultEmbeddedStateHelperTest {
         confirmationHandler.bootstrapTurbine.awaitItem()
         assertThat(contentStateHolder.dataLoadedTurbine.awaitItem().configuration.appearance)
             .isEqualTo(appearance)
-    }
-
-    @Test
-    fun `setting state correctly parses appearance`() = testScenario {
-        assertThat(StripeTheme.colorsLightMutable.componentBorder)
-            .isEqualTo(
-                StripeThemeDefaults.colorsLight.componentBorder
-            )
-
-        setState {
-            appearance(
-                PaymentSheet.Appearance(
-                    colorsLight = PaymentSheetAppearance.CrazyAppearance.appearance.colorsLight,
-                )
-            )
-        }
-
-        confirmationHandler.bootstrapTurbine.awaitItem()
-        assertThat(StripeTheme.colorsLightMutable.componentBorder)
-            .isEqualTo(
-                Color(
-                    PaymentSheetAppearance.CrazyAppearance.appearance.colorsLight.componentBorder
-                )
-            )
-
-        // Reset appearance
-        PaymentSheet.Appearance().parseAppearance()
-        contentStateHolder.dataLoadedTurbine.awaitItem()
     }
 
     @Test
