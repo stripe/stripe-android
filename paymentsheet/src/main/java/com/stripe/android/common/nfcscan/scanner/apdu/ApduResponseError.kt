@@ -89,10 +89,8 @@ internal sealed class ApduResponseError(
         override val userMessage: ResolvableString = R.string.stripe_nfc_scan_internal_error_message.resolvableString
     }
 
-    class Invalid(
-        val data: ByteArray
-    ) : ApduResponseError(
-        message = "Invalid data in response: ${data.toHexString()}"
+    class Invalid : ApduResponseError(
+        message = "Invalid data in response!"
     ) {
         override val errorCode: String = "cardUnsupportedByNfc"
         override val userMessage: ResolvableString = R.string.stripe_nfc_scan_internal_error_message.resolvableString
