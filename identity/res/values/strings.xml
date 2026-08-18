@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Selfie captures</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Great! Checking your images....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">With your permission, Stripe may use your images to improve fraud detection. Declining doesn\'t affect your verification.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Verify with a selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">one selfie captured</string>
   <!-- Status text instructing the user to turn left for selfie capture -->
@@ -252,10 +256,6 @@
   <string name="stripe_selfie_place_face">Place your face within the frame</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_title">Selfie</string>
-  <!-- Body for the redesigned selfie consent page -->
-  <string name="stripe_selfie_consent_body">With your permission, Stripe may use your images to improve fraud detection. Declining doesn\'t affect your verification.</string>
-  <!-- Title for the redesigned selfie consent page -->
-  <string name="stripe_selfie_consent_title">Verify with a selfie</string>
   <!-- Title for the optional training consent section on the selfie warmup page -->
   <string name="stripe_selfie_training_consent_title">Help us improve verifications</string>
   <!-- Body for selfie warmup page -->
