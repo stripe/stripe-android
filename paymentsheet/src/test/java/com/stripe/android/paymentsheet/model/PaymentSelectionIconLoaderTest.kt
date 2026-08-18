@@ -170,22 +170,13 @@ internal class PaymentSelectionIconLoaderTest {
             resources = ApplicationProvider.getApplicationContext<Context>().resources,
             imageLoader = imageLoader,
         )
-        val drawable = if (useDarkThemeIcon == null) {
-            iconLoader.load(
-                drawableResourceId = iconRes ?: 0,
-                drawableResourceIdNight = iconResNight,
-                lightThemeIconUrl = iconUrl,
-                darkThemeIconUrl = darkIconUrl,
-            )
-        } else {
-            iconLoader.load(
-                drawableResourceId = iconRes ?: 0,
-                drawableResourceIdNight = iconResNight,
-                lightThemeIconUrl = iconUrl,
-                darkThemeIconUrl = darkIconUrl,
-                useDarkThemeIcon = useDarkThemeIcon,
-            )
-        }
+        val drawable = iconLoader.load(
+            drawableResourceId = iconRes ?: 0,
+            drawableResourceIdNight = iconResNight,
+            lightThemeIconUrl = iconUrl,
+            darkThemeIconUrl = darkIconUrl,
+            useDarkThemeIcon = useDarkThemeIcon,
+        )
         advanceUntilIdle()
 
         val expectedUrl = if (useDarkThemeIcon == true && darkIconUrl != null) darkIconUrl else iconUrl

@@ -299,21 +299,6 @@ internal sealed class PaymentSelection : Parcelable {
             @DrawableRes drawableResourceIdNight: Int?,
             lightThemeIconUrl: String?,
             darkThemeIconUrl: String?,
-        ): Drawable {
-            return load(
-                drawableResourceId = drawableResourceId,
-                drawableResourceIdNight = drawableResourceIdNight,
-                lightThemeIconUrl = lightThemeIconUrl,
-                darkThemeIconUrl = darkThemeIconUrl,
-                useDarkThemeIcon = null,
-            )
-        }
-
-        suspend fun load(
-            @DrawableRes drawableResourceId: Int,
-            @DrawableRes drawableResourceIdNight: Int?,
-            lightThemeIconUrl: String?,
-            darkThemeIconUrl: String?,
             useDarkThemeIcon: Boolean?,
         ): Drawable {
             val shouldUseDarkThemeIcon = useDarkThemeIcon ?: isDarkTheme()
