@@ -152,6 +152,7 @@ internal class LpmBillingAddressFormValuesToParamsTest {
                 addAll(konbiniTestCases)
                 addAll(mobilePayTestCases)
                 addAll(multibancoTestCases)
+                addAll(promptPayTestCases)
             }
         }
     }

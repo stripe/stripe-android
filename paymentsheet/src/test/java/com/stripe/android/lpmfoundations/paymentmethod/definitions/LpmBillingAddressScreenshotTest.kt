@@ -67,6 +67,7 @@ internal object LpmBillingAddressScreenshotPaymentMethodTypeProvider : TestParam
         value(PaymentMethod.Type.Konbini).withName("Konbini"),
         value(PaymentMethod.Type.MobilePay).withName("MobilePay"),
         value(PaymentMethod.Type.Multibanco).withName("Multibanco"),
+        value(PaymentMethod.Type.PromptPay).withName("PromptPay"),
     )
 }
 
