@@ -31,6 +31,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRefreshRequest
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
+import com.stripe.android.crypto.onramp.model.RetrieveCryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.SamsungPayTokenParams
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
@@ -105,6 +106,25 @@ internal class CryptoApiRepository @Inject constructor(
             customersUrl,
             Json.encodeToJsonElement(params).jsonObject,
             CryptoCustomerResponse.serializer()
+        )
+    }
+
+    /**
+     * Retrieves the current crypto customer, including any additional KYC requirements.
+     */
+    suspend fun retrieveCryptoCustomer(
+        cryptoCustomerId: String,
+        consumerSessionClientSecret: String,
+    ): Result<RetrieveCryptoCustomerResponse> {
+        val request = apiRequestFactory.createGet(
+            url = getCustomerUrl(cryptoCustomerId),
+            options = buildRequestOptions(),
+            params = credentialsParams(consumerSessionClientSecret).toMap(),
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = RetrieveCryptoCustomerResponse.serializer(),
         )
     }
 
@@ -588,6 +608,13 @@ internal class CryptoApiRepository @Inject constructor(
          */
         internal val customersUrl: String
             get() = getApiUrl("crypto/internal/customers")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/customers/:id`
+         */
+        internal fun getCustomerUrl(cryptoCustomerId: String): String {
+            return getApiUrl("crypto/customers/$cryptoCustomerId")
+        }
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/kyc_data_collection`

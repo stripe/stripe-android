@@ -124,6 +124,58 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
+    fun `retrieve crypto customer includes additional KYC requirements`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            """
+                {
+                    "id": "crc_123",
+                    "requirements": {
+                        "entries": [
+                            {
+                                "description": "proof_of_address",
+                                "requested_by": "swapped",
+                                "awaiting_action_from": "user",
+                                "submission_type": "document",
+                                "document": {
+                                    "accepted_subtypes": [
+                                        {
+                                            "id": "utility_bill",
+                                            "label": "Utility bill"
+                                        }
+                                    ],
+                                    "accepted_formats": ["pdf", "jpeg", "png"],
+                                    "min_documents": 1,
+                                    "instructions": []
+                                }
+                            }
+                        ]
+                    }
+                }
+            """.trimIndent(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        val result = cryptoApiRepository.retrieveCryptoCustomer(
+            cryptoCustomerId = "crc_123",
+            consumerSessionClientSecret = "test-secret",
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.GET)
+        assertThat(apiRequest.baseUrl).isEqualTo("https://api.stripe.com/v1/crypto/customers/crc_123")
+        assertThat(apiRequest.params).isEqualTo(
+            mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret"))
+        )
+        val customer = result.getOrThrow()
+        assertThat(customer.id).isEqualTo("crc_123")
+        assertThat(requireNotNull(customer.requirements).entries.single().description)
+            .isEqualTo("proof_of_address")
+    }
+
+    @Test
     fun testCollectKycDataSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(

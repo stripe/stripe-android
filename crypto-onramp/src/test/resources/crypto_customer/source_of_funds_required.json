@@ -1,0 +1,56 @@
+{
+  "id": "crc_sof",
+  "requirements": {
+    "entries": [
+      {
+        "description": "source_of_funds",
+        "requested_by": "swapped",
+        "awaiting_action_from": "user",
+        "requested_reasons": ["kyc_step_up"],
+        "errors": [],
+        "submission_type": "document",
+        "document": {
+          "accepted_subtypes": [
+            {
+              "id": "payslip",
+              "label": "Payslip"
+            },
+            {
+              "id": "bank_statement",
+              "label": "Bank statement"
+            }
+          ],
+          "accepted_formats": ["pdf", "jpeg", "png"],
+          "min_documents": 1,
+          "instructions": [
+            "Upload documents that support your past and expected transaction activity"
+          ],
+          "additional_requirements": {
+            "questionnaire": {
+              "questions": [
+                {
+                  "id": "purchase_purpose",
+                  "prompt": "Why are you purchasing cryptocurrency?",
+                  "answer_type": "free_text",
+                  "required": true
+                },
+                {
+                  "id": "third_party_advised",
+                  "prompt": "Has anyone advised you to purchase cryptocurrency?",
+                  "answer_type": "free_text",
+                  "required": true
+                },
+                {
+                  "id": "funding_sources",
+                  "prompt": "How are you funding your transactions?",
+                  "answer_type": "free_text",
+                  "required": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}
