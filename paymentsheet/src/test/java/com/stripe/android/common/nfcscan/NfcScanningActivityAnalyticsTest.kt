@@ -91,7 +91,7 @@ internal class NfcScanningActivityAnalyticsTest {
 
         launchScenario(autoAdvance = false) {
             dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
-            assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
+            assertErrorIsDisplayed(errorText = "Card declined. Try another.")
             isoDep.assertUntilPpseSelectionCommand()
         }
     }
@@ -111,7 +111,7 @@ internal class NfcScanningActivityAnalyticsTest {
 
         launchScenario(autoAdvance = false) {
             dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
-            assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+            assertErrorIsDisplayed(errorText = "Card not supported. Try another.")
             isoDep.assertUntilPpseSelectionCommand()
         }
     }
@@ -134,7 +134,7 @@ internal class NfcScanningActivityAnalyticsTest {
 
         launchScenario(autoAdvance = false) {
             dispatchCardRead(NfcScanningActivityTestFixtures.selectApplicationFailureResponses())
-            assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+            assertErrorIsDisplayed(errorText = "Card not supported. Try another.")
             isoDep.assertConnect()
             isoDep.assertCommand(NfcScanningActivityTestFixtures.ApduCommands.SELECT_PPSE)
             isoDep.assertCommand(NfcScanningActivityTestFixtures.ApduCommands.SELECT_VISA_APPLICATION)
@@ -152,7 +152,7 @@ internal class NfcScanningActivityAnalyticsTest {
 
         launchScenario(autoAdvance = false) {
             dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
-            assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
+            assertErrorIsDisplayed(errorText = "Card expired. Try another.")
             isoDep.assertSuccess()
         }
     }
