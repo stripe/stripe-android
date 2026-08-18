@@ -345,7 +345,7 @@ internal class CheckoutControllerTest {
         val session = createSession(
             availableExpressButtonTypes = listOf(
                 ExpressButtonType.GooglePay(
-                    GooglePayConfiguration(GooglePayConfiguration.Environment.Test).build()
+                    ExpressCheckoutElement.Configuration.GooglePayConfiguration().build()
                 ),
                 ExpressButtonType.Link,
             ),

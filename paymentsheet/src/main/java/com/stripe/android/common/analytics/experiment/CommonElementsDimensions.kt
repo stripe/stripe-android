@@ -12,7 +12,7 @@ internal object CommonElementsDimensions {
     ): Map<String, String> {
         val paymentMethodTypes = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code }
         val isGooglePayAvailable = paymentMethodMetadata.isGooglePayReady
-        val isLinkDisplayed = paymentMethodMetadata.linkState != null
+        val isLinkDisplayed = paymentMethodMetadata.shouldShowLinkButton
         val integrationType = when (mode) {
             EventReporter.Mode.Complete -> "paymentsheet"
             EventReporter.Mode.Custom -> "flowcontroller"

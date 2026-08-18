@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.node.Ref
@@ -68,7 +69,7 @@ internal fun ErrorBanner(
         return
     }
 
-    val savedState = remember {
+    val savedState = rememberSaveable {
         mutableStateOf<ErrorBannerState>(ErrorBannerState.Init)
     }
 

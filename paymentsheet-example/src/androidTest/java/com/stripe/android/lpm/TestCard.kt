@@ -33,8 +33,8 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.FieldPopulator
+import com.stripe.android.test.core.FieldPopulator.AddressEntryMode
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -57,7 +57,6 @@ internal class TestCard : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-fishery-zigzag")
     @Test
     fun testCardWithCustomBillingDetailsCollection() {
         testDriver.confirmNewOrGuestComplete(
@@ -72,6 +71,9 @@ internal class TestCard : BasePlaygroundTest() {
                 settings[CollectAddressSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             },
+            values = FieldPopulator.Values(
+                addressEntryMode = AddressEntryMode.InlineAutocomplete,
+            ),
             populateCustomLpmFields = {
                 populateCardDetails()
                 populateEmail()

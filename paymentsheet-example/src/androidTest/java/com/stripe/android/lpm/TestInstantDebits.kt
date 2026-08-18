@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.LinkDisplaySetting
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
@@ -78,7 +79,7 @@ internal class TestInstantDebits : BasePlaygroundTest() {
             settings[CurrencySettingsDefinition] = Currency.USD
             settings[AutomaticPaymentMethodsSettingsDefinition] = false
             settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
-            settings[LinkSettingsDefinition] = true
+            settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
             settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
                 PaymentMethod.Type.Card,
                 PaymentMethod.Type.Link
@@ -94,7 +95,7 @@ internal class TestInstantDebits : BasePlaygroundTest() {
             settings[CurrencySettingsDefinition] = Currency.USD
             settings[AutomaticPaymentMethodsSettingsDefinition] = false
             settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
-            settings[LinkSettingsDefinition] = true
+            settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
             settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
                 PaymentMethod.Type.Card,
                 PaymentMethod.Type.Link

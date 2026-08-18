@@ -1,12 +1,15 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Payments
 * [ADDED] Added Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens to PaymentIntent confirmation (private preview).
 
+## 23.16.0 - 2026-08-18
+
 ### PaymentSheet
+* [ADDED] Added `PaymentSheet.LinkConfiguration.Display.WalletButtonHidden`, which keeps Link enabled but hides its button from the payment element UI.
 * [CHANGED] Inline address autocomplete is now enabled by default in PaymentSheet and FlowController.
 
 ### AddressElement

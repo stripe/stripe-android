@@ -124,7 +124,6 @@ import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.ResetMockRule
-import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -191,7 +190,6 @@ internal class PaymentSheetViewModelTest {
         .around(SessionTestRule())
         .around(PaymentElementCallbackTestRule())
         .around(ResetMockRule(eventReporter))
-        .around(RetryRule(3))
 
     @BeforeTest
     fun setup() {

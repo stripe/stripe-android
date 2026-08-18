@@ -3,11 +3,12 @@ package com.stripe.android.checkout
 import com.stripe.android.checkout.injection.AppName
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
 
-@OptIn(CheckoutSessionPreview::class)
+@OptIn(CheckoutSessionPreview::class, CardFundingFilteringPrivatePreview::class)
 internal class CheckoutCommonConfigurationFactory @Inject constructor(
     @AppName private val appName: String,
 ) {
@@ -19,7 +20,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
         customer = ConfigurationDefaults.customer,
         googlePay = configuration.toGooglePayConfiguration(checkoutSessionResponse),
-        link = ConfigurationDefaults.link,
+        link = configuration.linkConfiguration.asPaymentSheet(),
         defaultBillingDetails = collectedDetails.toBillingDetails(checkoutSessionResponse),
         shippingDetails = collectedDetails.toShippingDetails(),
         allowsDelayedPaymentMethods = ConfigurationDefaults.allowsDelayedPaymentMethods,
@@ -27,17 +28,17 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
         billingDetailsCollectionConfiguration =
             configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
-        preferredNetworks = ConfigurationDefaults.preferredNetworks,
+        preferredNetworks = configuration.paymentElementConfiguration.preferredNetworks,
         allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
-        paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
+        paymentMethodOrder = configuration.paymentElementConfiguration.paymentMethodOrder,
         externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
         cardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
-        allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
+        allowedCardFundingTypes = configuration.paymentElementConfiguration.allowedCardFundingTypes.asPaymentSheet(),
         customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
         googlePlacesApiKey = null,
         termsDisplay = configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet(),
         walletButtons = null,
-        opensCardScannerAutomatically = ConfigurationDefaults.opensCardScannerAutomatically,
+        opensCardScannerAutomatically = configuration.paymentElementConfiguration.opensCardScannerAutomatically,
         userOverrideCountry = ConfigurationDefaults.userOverrideCountry,
         appearance = configuration.paymentElementConfiguration.appearance.asPaymentSheet(),
     )
