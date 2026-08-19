@@ -90,10 +90,6 @@ class ExpressCheckoutElement @Inject internal constructor(
                  * Collect the full billing address, regardless of the Payment Method requirements.
                  */
                 Full,
-
-                // Note: a `Never` mode is intentionally omitted for the CheckoutSession private
-                // preview — suppressing billing collection is not supported with a CheckoutSession.
-                // It can be added at public preview/GA if that use case is supported.
             }
 
             /** How to collect the name field. */

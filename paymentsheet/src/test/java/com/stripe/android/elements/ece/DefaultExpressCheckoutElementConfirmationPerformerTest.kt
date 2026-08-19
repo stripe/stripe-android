@@ -73,7 +73,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm starts confirmation with a Google Pay option`() {
-        val state = googlePayState()
+        val state = createState()
 
         runScenario(
             state = state,
@@ -93,7 +93,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm requests a Google Pay shipping address for allowed countries`() {
-        val state = googlePayState(
+        val state = createState(
             allowedShippingCountries = listOf("US", "CA"),
         )
 
@@ -119,7 +119,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm uses ECE billing details collection configuration`() {
-        val state = googlePayState(
+        val state = createState(
             eceBillingDetailsCollectionConfiguration =
                 ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
                     .name(
@@ -163,7 +163,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm collects a billing address when required by the Checkout Session`() {
-        val state = googlePayState(requiresBillingAddress = true)
+        val state = createState(requiresBillingAddress = true)
 
         runScenario(
             state = state,
@@ -210,7 +210,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm reports ECE payment success when confirmation succeeds`() = runScenario(
-        state = googlePayState(),
+        state = createState(),
         expressButton = createGooglePayExpressButton(),
     ) {
         confirmationHandler.awaitResultTurbine.add(
@@ -226,7 +226,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm reports ECE payment failure when confirmation fails`() = runScenario(
-        state = googlePayState(),
+        state = createState(),
         expressButton = createGooglePayExpressButton(),
     ) {
         confirmationHandler.awaitResultTurbine.add(
@@ -247,7 +247,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         assertThat(failureCall.error.cause.message).isEqualTo("Payment failed")
     }
 
-    private fun googlePayState(
+    private fun createState(
         allowedShippingCountries: List<String>? = null,
         requiresBillingAddress: Boolean = false,
         eceBillingDetailsCollectionConfiguration:
