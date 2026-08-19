@@ -19,7 +19,9 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     fun confirm() {
-        val arguments = operationCoordinator.tryBeginConfirmation(::confirmationArgs) ?: return
+        val state = stateHolder.state ?: return
+        val selection = state.paymentSelection ?: return
+        val arguments = operationCoordinator.tryBeginConfirmation(selection, ::confirmationArgs) ?: return
         viewModelScope.launch {
             try {
                 confirmationHandler.start(arguments)

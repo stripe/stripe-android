@@ -6,6 +6,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +25,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val sessionRefresher: CheckoutSessionRefresher,
     private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
+    private val eventReporter: EventReporter,
 ) {
     private val admissionLock = Any()
     private var pendingMutations = 0
@@ -29,7 +33,14 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         confirmationHandler.state.value is ConfirmationHandler.State.Confirming
     private var confirmationWasRestored = confirmationHandler.hasReloadedFromProcessDeath
     private var confirmationCompletionClaimed = false
+    private var selectionToConfirm: PaymentSelection? = null
+    private var surfaceConfirmingFrom: Surface? = null
     private val mutex = Mutex(locked = confirmationInFlight)
+
+    enum class Surface {
+        ECE,
+        PE,
+    }
 
     private val _isUpdating = MutableStateFlow(confirmationInFlight)
     val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
@@ -80,6 +91,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     }
 
     fun tryBeginConfirmation(
+        selection: PaymentSelection,
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
         return synchronized(admissionLock) {
@@ -90,6 +102,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             check(mutex.tryLock()) {
                 "Checkout operation gate should be available after confirmation admission."
             }
+            this.selectionToConfirm = selection
             confirmationInFlight = true
             confirmationWasRestored = false
             updateIsUpdating()
@@ -136,7 +149,12 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
 
         try {
-            mapResult(wasRestored)?.let(resultCallback::onResult)
+            mapResult(wasRestored)?.let {
+                // TODO: maybe it doesn't belong quite here, we need the confirmation handler result.
+                // TODO: we'd also pass the surface in here, so that we can track whether the payment came from ECE or PE.
+//                eventReporter.reportPaymentResult(it, selectionToConfirm)
+                resultCallback.onResult(it)
+            }
         } finally {
             synchronized(admissionLock) {
                 confirmationInFlight = false
