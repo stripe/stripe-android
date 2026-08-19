@@ -3,13 +3,11 @@ package com.stripe.android.elements.ece
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
-import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -55,7 +53,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm reports unexpected error when confirmation args are null`() = runScenario(
-        state = CheckoutControllerStateFactory.create(),
+        state = CheckoutControllerStateFactory.create(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
+        ),
         expressButton = createGooglePayExpressButton(),
     ) {
         performer.confirm(expressButton)
@@ -185,9 +185,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         allowedShippingCountries: List<String>? = null,
     ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
-            configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
-                .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "US",
                 allowedShippingCountries = allowedShippingCountries,

@@ -3,6 +3,7 @@ package com.stripe.android.elements.ece
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -21,13 +22,12 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
-    fun `create filters out google pay when disabled by configuration`() {
+    fun `create filters out Google Pay when ECE disables it`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay),
             configuration = ExpressCheckoutElement.Configuration()
                 .googlePayConfiguration(
-                    ExpressCheckoutElement.Configuration.GooglePayConfiguration()
-                        .display(ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never)
+                    GooglePayConfiguration().display(GooglePayConfiguration.Display.Never)
                 ),
         )
 
@@ -96,7 +96,6 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     private companion object {
-        val TEST_GOOGLE_PAY_CONFIGURATION =
-            ExpressCheckoutElement.Configuration.GooglePayConfiguration().build()
+        val TEST_GOOGLE_PAY_CONFIGURATION = GooglePayConfiguration().build()
     }
 }
