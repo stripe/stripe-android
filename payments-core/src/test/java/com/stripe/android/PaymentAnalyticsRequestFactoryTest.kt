@@ -16,9 +16,11 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networktesting.formBody
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -383,29 +385,34 @@ class PaymentAnalyticsRequestFactoryTest {
                 )
             )
 
-        // Verify URL contains all expected parameters including timestamp
-        val url = analyticsRequest.url
-        assertThat(url).contains("https://q.stripe.com?")
-        assertThat(url).contains("publishable_key=pk_abc123")
-        assertThat(url).contains("app_version=0")
-        assertThat(url).contains("bindings_version=$sdkVersion")
-        assertThat(url).contains("os_version=30")
-        assertThat(url).contains("session_id=${AnalyticsRequestFactory.sessionId}")
-        assertThat(url).contains("os_release=11")
-        assertThat(url).contains("device_type=robolectric_robolectric_robolectric")
-        assertThat(url).contains("source_type=card")
-        assertThat(url).contains("locale=en_US")
-        assertThat(url).contains("app_name=com.stripe.android.test")
-        assertThat(url).contains("analytics_ua=analytics.stripe_android-1.0")
-        assertThat(url).contains("os_name=REL")
-        assertThat(url).contains("network_type=2G")
-        assertThat(url).contains("event=stripe_android.payment_method_creation")
-        assertThat(url).contains("is_development=true")
-        assertThat(url).contains("timestamp=")
+        assertThat(analyticsRequest.url).isEqualTo("https://r.stripe.com/0")
+
+        // Verify the body contains all expected parameters including timestamp
+        val body = analyticsRequest.formBody()
+        assertThat(body).containsEntry("publishable_key", "pk_abc123")
+        assertThat(body).containsEntry("app_version", "0")
+        assertThat(body).containsEntry("bindings_version", sdkVersion)
+        assertThat(body).containsEntry("os_version", "30")
+        assertThat(body).containsEntry("session_id", AnalyticsRequestFactory.sessionId.toString())
+        assertThat(body).containsEntry("os_release", "11")
+        assertThat(body).containsEntry("device_type", "robolectric_robolectric_robolectric")
+        assertThat(body).containsEntry("source_type", "card")
+        assertThat(body).containsEntry("locale", "en_US")
+        assertThat(body).containsEntry("app_name", "com.stripe.android.test")
+        assertThat(body).containsEntry("analytics_ua", "analytics.stripe_android-1.0")
+        assertThat(body).containsEntry("os_name", "REL")
+        assertThat(body).containsEntry("network_type", "2G")
+        assertThat(body).containsEntry("event", "stripe_android.payment_method_creation")
+        assertThat(body).containsEntry("is_development", "true")
+
+        // Verify the params required by r.stripe.com
+        assertThat(body).containsEntry("client_id", "stripe-mobile-payments-sdk")
+        assertThat(body).containsEntry("event_name", "stripe_android.payment_method_creation")
+        assertThat(body).containsEntry("created", body["timestamp"])
+        assertNotNull(UUID.fromString(body["event_id"]))
 
         // Verify timestamp is a valid number
-        val timestampParam = url.substringAfter("timestamp=").substringBefore("&")
-        val timestamp = timestampParam.toDoubleOrNull()
+        val timestamp = body["timestamp"]?.toDoubleOrNull()
         assertThat(timestamp).isNotNull()
         assertThat(timestamp).isGreaterThan(0.0)
     }

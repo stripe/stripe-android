@@ -129,7 +129,7 @@ object RequestMatchers {
     }
 
     fun analyticsPayloadField(key: String, value: String): RequestMatcher {
-        return query(key, value)
+        return bodyPart(key, value)
     }
 
     fun method(method: String): RequestMatcher {
@@ -169,6 +169,12 @@ object RequestMatchers {
     fun hasQueryParam(param: String): RequestMatcher {
         return ToStringRequestMatcher("queryParam($param)") { request ->
             request.queryParameterValues(param).size == 1
+        }
+    }
+
+    fun hasBodyParam(param: String): RequestMatcher {
+        return ToStringRequestMatcher("bodyParam($param)") { request ->
+            request.bodyParameterValues(param).size == 1
         }
     }
 

@@ -6,7 +6,7 @@ import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 
-private const val ANALYTICS_HOST = "q.stripe.com"
+private const val ANALYTICS_HOST = "r.stripe.com"
 private const val EVENT_PREFIX = "mc_"
 
 internal fun NetworkRule.expectNfcScanStarted() {
@@ -50,7 +50,7 @@ internal fun createApduErrorMatchers(
         analyticsPayloadField("sw1", sw1),
         analyticsPayloadField("sw2", sw2),
         RequestMatcher { request ->
-            request.queryParameterValues("executed_commands[]") == executedCommands
+            request.bodyParameterValues("executed_commands[]") == executedCommands
         },
     )
 }
@@ -61,7 +61,7 @@ private fun NetworkRule.expectAnalyticsEvent(
 ) {
     val matchers = buildList {
         add(host(ANALYTICS_HOST))
-        add(method("GET"))
+        add(method("POST"))
         add(analyticsPayloadField("event", eventName))
         addAll(matchers)
     }

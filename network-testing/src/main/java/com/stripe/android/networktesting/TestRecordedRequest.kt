@@ -43,4 +43,17 @@ class TestRecordedRequest(private val recordedRequest: RecordedRequest) {
             .build()
         return url.queryParameterValues(name)
     }
+
+    /**
+     * The body counterpart of [queryParameterValues]. Unlike [bodyParams], this can express a
+     * repeated key such as `executed_commands[]=a&executed_commands[]=b`.
+     */
+    fun bodyParameterValues(name: String): List<String?> {
+        val url = HttpUrl.Builder()
+            .scheme("https")
+            .host("example.com")
+            .encodedQuery(bodyText.takeIf { it.isNotEmpty() })
+            .build()
+        return url.queryParameterValues(name)
+    }
 }

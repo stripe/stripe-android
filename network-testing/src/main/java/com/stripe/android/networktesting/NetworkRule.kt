@@ -116,10 +116,7 @@ private class NetworkStatement(
 ) : Statement() {
     override fun evaluate() {
         try {
-            if (
-                !hostsToTrack.contains(AnalyticsRequest.HOST.hostFromUrl()) &&
-                !hostsToTrack.contains(AnalyticsRequestV2.ANALYTICS_HOST.hostFromUrl())
-            ) {
+            if (!hostsToTrack.contains(AnalyticsRequest.HOST.hostFromUrl())) {
                 AnalyticsRequestExecutor.ENABLED = false
             }
             setup()
@@ -145,6 +142,16 @@ private class NetworkStatement(
             request: StripeRequest,
             callback: HttpURLConnection.(request: StripeRequest) -> Unit
         ): HttpsURLConnection {
+            // v1 and v2 analytics now share r.stripe.com, so host tracking can no longer tell them
+            // apart. No test asserts v2 requests today — they were dropped because the v2 host was
+            // never tracked. Preserve that behavior explicitly.
+            if (request is AnalyticsRequestV2) {
+                throw RequestNotFoundException(
+                    "Test request attempted to reach AnalyticsRequestV2, which is not asserted on. " +
+                        "Url: ${request.url}"
+                )
+            }
+
             val requestHost = request.url.hostFromUrl()
             if (!hostsToTrack.contains(requestHost)) {
                 throw RequestNotFoundException(
