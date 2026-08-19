@@ -26,7 +26,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     private val stateHolder: CheckoutControllerStateHolder,
     private val confirmationHandler: ConfirmationHandler,
     private val operationCoordinator: CheckoutOperationCoordinator,
-    private val eventReporter: ExpressCheckoutElementEventReporter,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -53,13 +52,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         viewModelScope.launch {
             try {
                 confirmationHandler.start(confirmationArgs)
-
-                when (val result = confirmationHandler.awaitResult()) {
-                    is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
-                    is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
-                    is ConfirmationHandler.Result.Canceled,
-                    null -> Unit
-                }
             } catch (error: CancellationException) {
                 throw error
             } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
