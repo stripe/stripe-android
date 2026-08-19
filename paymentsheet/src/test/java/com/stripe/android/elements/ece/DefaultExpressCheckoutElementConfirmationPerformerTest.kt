@@ -19,12 +19,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler.AnalyticsMetadata.ConfirmationOrigin
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
@@ -88,6 +90,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isNull()
             assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+            assertThat(args.analyticsMetadata?.paymentSelection).isEqualTo(expressButton.toSelection())
+            assertThat(args.analyticsMetadata?.confirmationOrigin)
+                .isEqualTo(ConfirmationOrigin.ExpressCheckoutElement)
         }
     }
 
@@ -214,7 +219,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         expressButton = createGooglePayExpressButton(),
     ) {
         confirmationHandler.awaitResultTurbine.add(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null)
         )
 
         performer.confirm(expressButton)
@@ -234,6 +239,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                 cause = IllegalStateException("Payment failed"),
                 message = "Payment failed".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                analyticsMetadata = null,
             )
         )
 
@@ -300,6 +306,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
+            eventReporter = FakeEventReporter(),
         )
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,

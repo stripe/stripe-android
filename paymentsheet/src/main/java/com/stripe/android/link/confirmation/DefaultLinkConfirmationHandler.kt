@@ -186,6 +186,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,
+            analyticsMetadata = null,
         )
     }
 
@@ -222,6 +223,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             ),
             paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,
+            analyticsMetadata = null,
         )
     }
 

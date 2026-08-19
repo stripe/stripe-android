@@ -50,6 +50,7 @@ internal suspend fun assertIntentConfirmed(
                     shippingDetails = params.shippingDetails,
                     integrationMetadata = params.integrationMetadata,
                 ),
+                analyticsMetadata = null,
             )
         )
 

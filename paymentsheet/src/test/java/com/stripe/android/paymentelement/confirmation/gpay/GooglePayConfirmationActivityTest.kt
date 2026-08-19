@@ -291,6 +291,7 @@ internal class GooglePayConfirmationActivityTest {
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),
             ),
+            analyticsMetadata = null,
         )
 
         const val GOOGLE_PAY_ACTIVITY_NAME =

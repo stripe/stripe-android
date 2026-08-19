@@ -47,6 +47,7 @@ class EmbeddedConfirmationStarterTest {
                     paymentMethod = PaymentMethodFactory.card(random = true),
                 )
             ),
+            analyticsMetadata = null,
         )
 
         confirmationStarter.start(arguments)
@@ -89,6 +90,7 @@ class EmbeddedConfirmationStarterTest {
             confirmationState = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = intent,
+                    analyticsMetadata = null,
                 ),
             ),
         ) {
@@ -113,7 +115,8 @@ class EmbeddedConfirmationStarterTest {
         test(
             confirmationState = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Canceled(
-                    action = ConfirmationHandler.Result.Canceled.Action.InformCancellation
+                    action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+                    analyticsMetadata = null,
                 ),
             ),
         ) {

@@ -705,6 +705,7 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Canceled(
                     action = ConfirmationHandler.Result.Canceled.Action.None,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -776,6 +777,7 @@ internal class PaymentSheetViewModelTest {
                     cause = Exception("Test exception"),
                     message = PaymentsCoreR.string.stripe_internal_error.resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -858,6 +860,7 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -968,6 +971,7 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -1003,6 +1007,7 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -1055,6 +1060,7 @@ internal class PaymentSheetViewModelTest {
                     cause = error,
                     message = error.errorMessage,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 )
             )
             verify(eventReporter)
@@ -1086,6 +1092,7 @@ internal class PaymentSheetViewModelTest {
                     cause = InvalidDeferredIntentUsageException(),
                     message = "An error occurred!".resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -1107,6 +1114,7 @@ internal class PaymentSheetViewModelTest {
                     cause = error,
                     message = R.string.stripe_something_went_wrong.resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -1136,6 +1144,7 @@ internal class PaymentSheetViewModelTest {
                     cause = error,
                     message = errorMessage.resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -1356,6 +1365,7 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Canceled(
                     action = ConfirmationHandler.Result.Canceled.Action.None,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -1458,6 +1468,7 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Canceled(
                     action = ConfirmationHandler.Result.Canceled.Action.None,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -2004,6 +2015,7 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -2048,6 +2060,7 @@ internal class PaymentSheetViewModelTest {
                     cause = Exception(error),
                     message = error.resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -2123,6 +2136,7 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             result = ConfirmationHandler.Result.Succeeded(
                 intent = PAYMENT_INTENT,
+                analyticsMetadata = null,
             )
         )
 
@@ -2161,6 +2175,7 @@ internal class PaymentSheetViewModelTest {
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
                     },
+                    analyticsMetadata = null,
                 )
             )
 
@@ -2198,7 +2213,8 @@ internal class PaymentSheetViewModelTest {
                     intent = PAYMENT_INTENT,
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Client)
-                    }
+                    },
+                    analyticsMetadata = null,
                 )
             )
 
@@ -2237,6 +2253,7 @@ internal class PaymentSheetViewModelTest {
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                     },
+                    analyticsMetadata = null,
                 )
             )
 
@@ -2561,6 +2578,7 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                analyticsMetadata = null,
             )
         )
 
@@ -2606,6 +2624,7 @@ internal class PaymentSheetViewModelTest {
                 cause = IllegalStateException("This failed!"),
                 message = "This failed".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 10),
+                analyticsMetadata = null,
             )
         )
 
@@ -2641,6 +2660,7 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                analyticsMetadata = null,
             )
         )
 
@@ -2679,6 +2699,7 @@ internal class PaymentSheetViewModelTest {
                 cause = IllegalStateException("This failed!"),
                 message = "This failed".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 10),
+                analyticsMetadata = null,
             )
         )
 
@@ -2716,6 +2737,7 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                analyticsMetadata = null,
             )
         )
 
@@ -2760,6 +2782,7 @@ internal class PaymentSheetViewModelTest {
                 cause = IllegalStateException("This failed!"),
                 message = "This failed".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 10),
+                analyticsMetadata = null,
             )
         )
 
@@ -3339,7 +3362,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(startTurbine.awaitItem()).isNotNull()
 
         confirmationState.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(intent = PAYMENT_INTENT)
+            ConfirmationHandler.Result.Succeeded(intent = PAYMENT_INTENT, analyticsMetadata = null)
         )
 
         val call = eventReporter.billingAddressCompletedCalls.awaitItem()
@@ -3359,7 +3382,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(startTurbine.awaitItem()).isNotNull()
 
         confirmationState.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(intent = PAYMENT_INTENT)
+            ConfirmationHandler.Result.Succeeded(intent = PAYMENT_INTENT, analyticsMetadata = null)
         )
 
         eventReporter.billingAddressCompletedCalls.ensureAllEventsConsumed()
@@ -3395,7 +3418,7 @@ internal class PaymentSheetViewModelTest {
                 paymentSheetLoader.enqueueSuccess(stripeIntent = stripeIntent)
 
                 awaitResultTurbine.add(
-                    ConfirmationHandler.Result.Succeeded(intent = stripeIntent)
+                    ConfirmationHandler.Result.Succeeded(intent = stripeIntent, analyticsMetadata = null)
                 )
 
                 assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed())
@@ -3434,6 +3457,7 @@ internal class PaymentSheetViewModelTest {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = stripeIntent,
+                    analyticsMetadata = null,
                 )
             )
         }

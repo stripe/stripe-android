@@ -601,6 +601,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         confirmationOption = option,
                         paymentMethodMetadata = paymentMethodMetadata,
                         statusBarColor = args.statusBarColor,
+                        analyticsMetadata = null,
                     ),
                 )
             } ?: run {
@@ -624,6 +625,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             cause = exception,
                             message = exception.stripeErrorMessage(),
                             type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                            analyticsMetadata = null,
                         )
                     )
                 }

@@ -584,6 +584,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         confirmationOption = option,
                         paymentMethodMetadata = state.paymentMethodMetadata,
                         statusBarColor = viewModel.statusBarColor,
+                        analyticsMetadata = null,
                     )
                 )
             } ?: run {
@@ -603,6 +604,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         cause = exception,
                         message = exception.stripeErrorMessage(),
                         type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                        analyticsMetadata = null,
                     )
                 )
             }

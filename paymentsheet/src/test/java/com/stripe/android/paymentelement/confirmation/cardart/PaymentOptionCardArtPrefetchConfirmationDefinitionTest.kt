@@ -111,6 +111,7 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinitionTest {
                 confirmationOption = FakeConfirmationOption(),
                 statusBarColor = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                analyticsMetadata = null,
             ),
         ).apply { block() }
 

@@ -310,6 +310,7 @@ internal class IntentConfirmationFlowTest {
                 ),
             ),
             statusBarColor = null,
+            analyticsMetadata = null,
         )
     }
 
@@ -354,6 +355,7 @@ internal class IntentConfirmationFlowTest {
                     phoneNumber = "1234567890"
                 ),
             ),
+            analyticsMetadata = null,
         )
     }
 }

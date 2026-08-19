@@ -8,6 +8,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.IgnoredOnParcel
@@ -80,7 +81,7 @@ internal interface ConfirmationHandler {
          * merchant's chrome. Always `null` on API 35+, where the platform enforces edge-to-edge.
          */
         @ColorInt val statusBarColor: Int?,
-        // TODO-codex: add analytics metadata here.
+        val analyticsMetadata: AnalyticsMetadata?,
     ) : Parcelable {
         /**
          * The [StripeIntent] that is being potentially confirmed by the handler
@@ -118,6 +119,8 @@ internal interface ConfirmationHandler {
      * Defines the result types that can be returned after completing a confirmation process.
      */
     sealed interface Result {
+        val analyticsMetadata: AnalyticsMetadata?
+
         fun log(logger: Logger)
 
         /**
@@ -125,7 +128,7 @@ internal interface ConfirmationHandler {
          */
         data class Canceled(
             val action: Action,
-            // TODO-codex: add analytics metadata here
+            override val analyticsMetadata: AnalyticsMetadata?,
         ) : Result {
             /**
              * Action to perform if a user cancels a running confirmation process.
@@ -162,7 +165,7 @@ internal interface ConfirmationHandler {
             val intent: StripeIntent,
             val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
             val completedFullPaymentFlow: Boolean = true,
-            // TODO-codex: add analytics metadata here
+            override val analyticsMetadata: AnalyticsMetadata?,
         ) : Result {
             override fun log(logger: Logger) {
                 logger.info("ConfirmationHandler.Result.Succeeded")
@@ -177,7 +180,7 @@ internal interface ConfirmationHandler {
             val cause: Throwable,
             val message: ResolvableString,
             val type: ErrorType,
-            // TODO-codex: add analytics metadata here.
+            override val analyticsMetadata: AnalyticsMetadata?,
         ) : Result {
             override fun log(logger: Logger) {
                 logger.error("ConfirmationHandler.Result.Failed", cause)
@@ -217,6 +220,17 @@ internal interface ConfirmationHandler {
                  */
                 data class GooglePay(val errorCode: Int) : ErrorType
             }
+        }
+    }
+
+    @Parcelize
+    data class AnalyticsMetadata(
+        val paymentSelection: PaymentSelection,
+        val confirmationOrigin: ConfirmationOrigin,
+    ) : Parcelable {
+        enum class ConfirmationOrigin {
+            ExpressCheckoutElement,
+            PaymentElement,
         }
     }
 

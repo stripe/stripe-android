@@ -180,6 +180,7 @@ internal class AttestationConfirmationActivityTest {
                 stripeIntent = PAYMENT_INTENT,
                 attestOnIntentConfirmation = true,
             ),
+            analyticsMetadata = null,
         )
 
         const val ATTESTATION_ACTIVITY_NAME =

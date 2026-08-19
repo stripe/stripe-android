@@ -15,6 +15,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
@@ -301,6 +302,7 @@ class DefaultConfirmationHandlerTest {
 
         assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
         assertThat(successResult.completedFullPaymentFlow).isTrue()
+        assertThat(successResult.analyticsMetadata).isEqualTo(ANALYTICS_METADATA)
 
         assertThat(confirmationSaverTurbine.awaitItem()).isNotNull()
     }
@@ -343,6 +345,7 @@ class DefaultConfirmationHandlerTest {
         assertThat(failedResult.cause.message).isEqualTo("Failed!")
         assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
+        assertThat(failedResult.analyticsMetadata).isEqualTo(ANALYTICS_METADATA)
     }
 
     @Test
@@ -354,6 +357,7 @@ class DefaultConfirmationHandlerTest {
         val canceledResult = completeState.result.assertCanceled()
 
         assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails)
+        assertThat(canceledResult.analyticsMetadata).isEqualTo(ANALYTICS_METADATA)
     }
 
     @Test
@@ -1132,11 +1136,16 @@ class DefaultConfirmationHandlerTest {
     private data object SomeStringMetadataKey : ConfirmationMetadata.Key<String>
 
     private companion object {
+        val ANALYTICS_METADATA = ConfirmationHandler.AnalyticsMetadata(
+            paymentSelection = PaymentSelection.GooglePay,
+            confirmationOrigin = ConfirmationHandler.AnalyticsMetadata.ConfirmationOrigin.PaymentElement,
+        )
         const val SOME_DEFINITION_PERSISTED_KEY = "SomeParameters"
         const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
 
         val CONFIRMATION_PARAMETERS = com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
-            confirmationOption = SomeConfirmationDefinition.Option
+            confirmationOption = SomeConfirmationDefinition.Option,
+            analyticsMetadata = ANALYTICS_METADATA,
         )
 
         val UPDATED_PAYMENT_INTENT = PAYMENT_INTENT.copy(

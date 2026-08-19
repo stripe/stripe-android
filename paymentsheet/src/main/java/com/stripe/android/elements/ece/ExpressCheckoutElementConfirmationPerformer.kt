@@ -8,6 +8,7 @@ import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler.AnalyticsMetadata.ConfirmationOrigin
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -105,7 +106,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             confirmationOption = confirmationOption,
             paymentMethodMetadata = state.paymentMethodMetadata,
             statusBarColor = statusBarColor,
-            // TODO-codex: set analytics metadata - payment selection, confirm initiated for ECE.
+            analyticsMetadata = ConfirmationHandler.AnalyticsMetadata(
+                paymentSelection = expressButton.toSelection(),
+                confirmationOrigin = ConfirmationOrigin.ExpressCheckoutElement,
+            ),
         )
     }
 }

@@ -171,6 +171,7 @@ internal class CustomPaymentMethodConfirmationActivityTest {
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),
             ),
+            analyticsMetadata = null,
         )
 
         const val CPM_ACTIVITY_NAME =

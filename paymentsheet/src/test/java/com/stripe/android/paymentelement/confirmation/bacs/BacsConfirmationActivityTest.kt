@@ -201,6 +201,7 @@ internal class BacsConfirmationActivityTest {
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),
             ),
+            analyticsMetadata = null,
         )
 
         const val BACS_ACTIVITY_NAME =

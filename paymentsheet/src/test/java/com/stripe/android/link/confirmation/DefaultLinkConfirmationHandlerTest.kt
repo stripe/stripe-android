@@ -61,6 +61,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
+                analyticsMetadata = null,
             )
         )
 
@@ -100,6 +101,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
+                analyticsMetadata = null,
             )
         )
 
@@ -127,6 +129,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
+                analyticsMetadata = null,
             )
         )
 
@@ -169,7 +172,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Failed(
                 cause = error,
                 message = errorMessage,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                analyticsMetadata = null,
             )
         )
 
@@ -193,7 +197,10 @@ internal class DefaultLinkConfirmationHandlerTest {
         )
 
         confirmationHandler.awaitResultTurbine.add(
-            item = ConfirmationHandler.Result.Canceled(ConfirmationHandler.Result.Canceled.Action.None)
+            item = ConfirmationHandler.Result.Canceled(
+                action = ConfirmationHandler.Result.Canceled.Action.None,
+                analyticsMetadata = null,
+            )
         )
 
         val result = handler.confirm(
@@ -241,6 +248,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
+                analyticsMetadata = null,
             )
         )
 
@@ -279,6 +287,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
+                analyticsMetadata = null,
             )
         )
 
@@ -310,6 +319,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
+                analyticsMetadata = null,
             )
         )
 
@@ -341,6 +351,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
+                analyticsMetadata = null,
             )
         )
 
@@ -372,6 +383,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -405,6 +417,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -440,6 +453,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
+                analyticsMetadata = null,
             )
         )
 
@@ -481,6 +495,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -516,6 +531,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -551,6 +567,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -611,6 +628,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -652,6 +670,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -693,6 +712,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
+                analyticsMetadata = null,
             )
         )
 

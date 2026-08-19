@@ -83,6 +83,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,
+            analyticsMetadata = null,
         )
     }
 }

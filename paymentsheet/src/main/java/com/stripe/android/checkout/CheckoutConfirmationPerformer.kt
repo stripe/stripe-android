@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler.AnalyticsMetadata.ConfirmationOrigin
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -48,7 +49,10 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = state.paymentMethodMetadata,
             statusBarColor = statusBarColor,
-            // TODO-codex: set analytics metadata - payment selection, confirm initiated for PE.
+            analyticsMetadata = ConfirmationHandler.AnalyticsMetadata(
+                paymentSelection = state.paymentSelection,
+                confirmationOrigin = ConfirmationOrigin.PaymentElement,
+            ),
         )
     }
 }

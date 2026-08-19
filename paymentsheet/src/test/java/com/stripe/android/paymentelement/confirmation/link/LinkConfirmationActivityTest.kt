@@ -105,6 +105,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                     confirmationOption = LINK_CONFIRMATION_OPTION,
                     statusBarColor = null,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    analyticsMetadata = null,
                 )
             )
 

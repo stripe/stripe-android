@@ -343,6 +343,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = arguments.paymentMethodMetadata,
             statusBarColor = arguments.statusBarColor,
+            analyticsMetadata = null,
         )
     }
 

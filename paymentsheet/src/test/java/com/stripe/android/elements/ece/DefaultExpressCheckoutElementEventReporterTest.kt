@@ -138,6 +138,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 cause = IllegalStateException("Payment failed"),
                 message = "Payment failed".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(10),
+                analyticsMetadata = null,
             ),
         )
 

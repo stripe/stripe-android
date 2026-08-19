@@ -1009,6 +1009,7 @@ internal class CustomerSheetViewModel(
                     ),
                     paymentMethodMetadata = metadata,
                     statusBarColor = statusBarColor,
+                    analyticsMetadata = null,
                 )
             )
 

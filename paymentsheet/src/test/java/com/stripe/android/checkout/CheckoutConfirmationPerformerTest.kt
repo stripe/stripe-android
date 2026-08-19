@@ -7,10 +7,12 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler.AnalyticsMetadata.ConfirmationOrigin
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -59,6 +61,8 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
         assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
         assertThat(args.statusBarColor).isEqualTo(STATUS_BAR_COLOR)
+        assertThat(args.analyticsMetadata?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(args.analyticsMetadata?.confirmationOrigin).isEqualTo(ConfirmationOrigin.PaymentElement)
     }
 
     @Test
@@ -105,6 +109,7 @@ internal class CheckoutConfirmationPerformerTest {
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
+            eventReporter = FakeEventReporter(),
         )
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,

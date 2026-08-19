@@ -187,6 +187,7 @@ internal class CvcRecollectionConfirmationActivityTest {
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),
             ),
+            analyticsMetadata = null,
         )
 
         const val CVC_RECOLLECTION_ACTIVITY_NAME =

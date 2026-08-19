@@ -189,6 +189,7 @@ internal class PassiveChallengeConfirmationActivityTest {
                 shippingDetails = AddressDetails(),
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             ),
+            analyticsMetadata = null,
         )
 
         const val PASSIVE_CHALLENGE_ACTIVITY_NAME =

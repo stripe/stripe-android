@@ -6,6 +6,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +24,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val sessionRefresher: CheckoutSessionRefresher,
     private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
+    private val eventReporter: EventReporter,
 ) {
     private val admissionLock = Any()
     private var pendingMutations = 0
@@ -97,7 +100,6 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
-    // TODO-codex: report eventReporter reportPaymentResult from somewhere in here or called from here. This is the entrypoint.
     suspend fun observeConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
@@ -106,7 +108,12 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                     // commit, but the session changed server-side, so re-fetch it.
                     val response = (state.result as? ConfirmationHandler.Result.Succeeded)
                         ?.metadata?.get(CheckoutSessionResponseKey)
-                    // TODO-codex: get analytics metadata from result.
+                    state.result.analyticsMetadata?.let { analyticsMetadata ->
+                        eventReporter.reportPaymentResult(
+                            result = state.result,
+                            paymentSelection = analyticsMetadata.paymentSelection,
+                        )
+                    }
                     refreshSession {
                         if (response != null) {
                             sessionRefresher.refresh(response)

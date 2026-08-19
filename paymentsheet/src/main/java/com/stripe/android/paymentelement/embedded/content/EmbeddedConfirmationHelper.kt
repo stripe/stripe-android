@@ -67,6 +67,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = confirmationState.paymentMethodMetadata,
             statusBarColor = confirmationState.statusBarColor,
+            analyticsMetadata = null,
         )
     }
 }

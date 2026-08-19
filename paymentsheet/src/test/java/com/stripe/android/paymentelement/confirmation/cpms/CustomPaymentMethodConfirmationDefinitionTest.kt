@@ -246,6 +246,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(),
             ),
+            analyticsMetadata = null,
         )
 
         private val CUSTOM_PAYMENT_METHOD_TYPE = PaymentSheet.CustomPaymentMethod(

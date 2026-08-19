@@ -69,6 +69,7 @@ internal class DefaultConfirmationHandler(
                     onHandlerResult(
                         ConfirmationHandler.Result.Canceled(
                             action = ConfirmationHandler.Result.Canceled.Action.None,
+                            analyticsMetadata = initialConfirmationArguments?.analyticsMetadata,
                         )
                     )
                 }
@@ -162,6 +163,7 @@ internal class DefaultConfirmationHandler(
                     ),
                     message = R.string.stripe_something_went_wrong.resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                    analyticsMetadata = arguments.analyticsMetadata,
                 )
             )
 
@@ -195,6 +197,7 @@ internal class DefaultConfirmationHandler(
                         cause = action.cause,
                         message = action.message,
                         type = action.errorType,
+                        analyticsMetadata = arguments.analyticsMetadata,
                     )
                 )
             }
@@ -204,6 +207,7 @@ internal class DefaultConfirmationHandler(
                         intent = action.intent,
                         metadata = action.metadata,
                         completedFullPaymentFlow = action.completedFullPaymentFlow,
+                        analyticsMetadata = arguments.analyticsMetadata,
                     )
                 )
             }
@@ -229,17 +233,17 @@ internal class DefaultConfirmationHandler(
                 intent = result.intent,
                 metadata = result.metadata,
                 completedFullPaymentFlow = result.completedFullPaymentFlow,
-                // TODO-codex: set analytics metadata based on confirmation args
+                analyticsMetadata = initialConfirmationArguments?.analyticsMetadata,
             )
             is ConfirmationDefinition.Result.Failed -> ConfirmationHandler.Result.Failed(
                 cause = result.cause,
                 type = result.type,
                 message = result.message,
-                // TODO-codex: set analytics metadata based on confirmation args
+                analyticsMetadata = initialConfirmationArguments?.analyticsMetadata,
             )
             is ConfirmationDefinition.Result.Canceled -> ConfirmationHandler.Result.Canceled(
                 action = result.action,
-                // TODO-codex: set analytics metadata based on confirmation args
+                analyticsMetadata = initialConfirmationArguments?.analyticsMetadata,
             )
         }
 

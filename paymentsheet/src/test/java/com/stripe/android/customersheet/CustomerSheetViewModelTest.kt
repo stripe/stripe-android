@@ -819,6 +819,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD
                     ),
+                    analyticsMetadata = null,
                 )
             )
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
@@ -847,6 +848,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = SetupIntentFactory.create(CARD_PAYMENT_METHOD),
+                    analyticsMetadata = null,
                 )
             )
 
@@ -885,6 +887,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD,
                     ),
+                    analyticsMetadata = null,
                 )
             )
 
@@ -926,6 +929,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     cause = IllegalStateException(message),
                     message = message.resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -1035,6 +1039,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = SetupIntentFactory.create(CARD_PAYMENT_METHOD),
+                    analyticsMetadata = null,
                 )
             )
 
@@ -1581,6 +1586,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 intent = SetupIntentFactory.create(
                     paymentMethod = PaymentMethodFactory.card(),
                 ),
+                analyticsMetadata = null,
             )
         )
 
@@ -1617,6 +1623,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 cause = IllegalStateException("Failed!"),
                 message = "Failed!".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                analyticsMetadata = null,
             )
         )
 
@@ -1653,6 +1660,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 intent = SetupIntentFactory.create(
                     paymentMethod = PaymentMethodFactory.card(),
                 ),
+                analyticsMetadata = null,
             )
         )
 
@@ -1687,6 +1695,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 cause = IllegalStateException("Failed!"),
                 message = "Failed!".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                analyticsMetadata = null,
             )
         )
 
@@ -2014,6 +2023,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     intent = SetupIntentFactory.create(
                         paymentMethod = US_BANK_ACCOUNT_VERIFIED,
                     ),
+                    analyticsMetadata = null,
                 )
             )
 
@@ -2465,6 +2475,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD,
                     ),
+                    analyticsMetadata = null,
                 )
             )
 
@@ -2506,6 +2517,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     intent = SetupIntentFactory.create(
                         paymentMethod = US_BANK_ACCOUNT,
                     ),
+                    analyticsMetadata = null,
                 )
             )
 
@@ -2683,6 +2695,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                         intent = SetupIntentFactory.create(
                             paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
                         ),
+                        analyticsMetadata = null,
                     )
                 )
 
@@ -2998,6 +3011,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = SetupIntentFactory.create(acceptedCardPaymentMethod),
+                    analyticsMetadata = null,
                 )
             )
 
@@ -3196,6 +3210,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                         intent = SetupIntentFactory.create(
                             paymentMethod = attachedPaymentMethod,
                         ),
+                        analyticsMetadata = null,
                     )
                 )
 
@@ -3236,6 +3251,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                         intent = SetupIntentFactory.create(
                             paymentMethod = attachedPaymentMethod,
                         ),
+                        analyticsMetadata = null,
                     )
                 )
 
@@ -3470,6 +3486,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD,
                     ),
+                    analyticsMetadata = null,
                 )
             )
 

@@ -208,4 +208,5 @@ internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
         passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
     ),
     statusBarColor = null,
+    analyticsMetadata = null,
 )

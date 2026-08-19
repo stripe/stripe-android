@@ -12,10 +12,13 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler.AnalyticsMetadata.ConfirmationOrigin
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeLogger
@@ -46,6 +49,28 @@ internal class CheckoutOperationCoordinatorTest {
         }
 
         assertThat(result.getOrThrow()).isEqualTo("result")
+    }
+
+    @Test
+    fun `successful confirmation reports payment result analytics`() = runScenario {
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        enqueueRefreshAction {}
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                analyticsMetadata = ConfirmationHandler.AnalyticsMetadata(
+                    paymentSelection = PaymentSelection.GooglePay,
+                    confirmationOrigin = ConfirmationOrigin.PaymentElement,
+                ),
+            )
+        )
+        runCurrent()
+
+        val call = eventReporter.paymentSuccessCalls.awaitItem()
+        assertThat(call.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(call.intentId).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED.id)
+        refreshCalls.awaitItem()
+        resultTurbine.awaitItem()
     }
 
     @Test
@@ -265,7 +290,7 @@ internal class CheckoutOperationCoordinatorTest {
 
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null)
         )
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
@@ -277,7 +302,8 @@ internal class CheckoutOperationCoordinatorTest {
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
-                ConfirmationHandler.Result.Canceled.Action.InformCancellation
+                ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+                analyticsMetadata = null,
             )
         )
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
@@ -287,7 +313,7 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNotNull()
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null)
         )
 
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
@@ -317,7 +343,8 @@ internal class CheckoutOperationCoordinatorTest {
             enqueueRefreshAction {}
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Canceled(
-                    ConfirmationHandler.Result.Canceled.Action.InformCancellation
+                    ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+                    analyticsMetadata = null,
                 )
             )
             refreshCalls.awaitItem()
@@ -335,7 +362,7 @@ internal class CheckoutOperationCoordinatorTest {
 
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null)
         )
 
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
@@ -351,7 +378,8 @@ internal class CheckoutOperationCoordinatorTest {
             enqueueRefreshAction {}
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Canceled(
-                    ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails
+                    ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails,
+                    analyticsMetadata = null,
                 )
             )
             assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
@@ -369,7 +397,8 @@ internal class CheckoutOperationCoordinatorTest {
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
-                ConfirmationHandler.Result.Canceled.Action.None
+                ConfirmationHandler.Result.Canceled.Action.None,
+                analyticsMetadata = null,
             )
         )
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
@@ -391,6 +420,7 @@ internal class CheckoutOperationCoordinatorTest {
                 cause = expected,
                 message = "Confirmation failed".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                analyticsMetadata = null,
             )
         )
 
@@ -430,6 +460,7 @@ internal class CheckoutOperationCoordinatorTest {
                     cause = expected,
                     message = "Confirmation failed".resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 )
             )
 
@@ -545,7 +576,7 @@ internal class CheckoutOperationCoordinatorTest {
 
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null)
         )
 
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
@@ -560,7 +591,7 @@ internal class CheckoutOperationCoordinatorTest {
 
             enqueueRefreshAction { releaseRefresh.await() }
             confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null)
             )
             assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
             resultTurbine.expectNoEvents()
@@ -592,7 +623,7 @@ internal class CheckoutOperationCoordinatorTest {
 
             enqueueRefreshAction { throw expected }
             confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null)
             )
 
             assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
@@ -616,6 +647,7 @@ internal class CheckoutOperationCoordinatorTest {
                 cause = expected,
                 message = "Confirmation failed".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                analyticsMetadata = null,
             )
         )
 
@@ -662,7 +694,7 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(callbackStarted.await(5, TimeUnit.SECONDS)).isTrue()
 
             confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null)
             )
             runCurrent()
 
@@ -701,7 +733,8 @@ internal class CheckoutOperationCoordinatorTest {
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
-                ConfirmationHandler.Result.Canceled.Action.None
+                ConfirmationHandler.Result.Canceled.Action.None,
+                analyticsMetadata = null,
             )
         )
         refreshCalls.awaitItem()
@@ -724,7 +757,7 @@ internal class CheckoutOperationCoordinatorTest {
 
             enqueueRefreshAction {}
             confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null)
             )
 
             assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
@@ -806,12 +839,14 @@ internal class CheckoutOperationCoordinatorTest {
         }
         val resultTurbine = Turbine<CheckoutController.Result>()
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val eventReporter = FakeEventReporter()
         val coordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
+            eventReporter = eventReporter,
         )
         val observerJob = backgroundScope.launch {
             coordinator.observeConfirmationResults()
@@ -826,11 +861,13 @@ internal class CheckoutOperationCoordinatorTest {
             sessionRefresher = sessionRefresher,
             observerJob = observerJob,
             testScope = this,
+            eventReporter = eventReporter,
         ).block()
 
         confirmationHandler.validate()
         resultTurbine.ensureAllEventsConsumed()
         sessionRefresher.ensureAllEventsConsumed()
+        eventReporter.validate()
     }
 
     private class Scenario(
@@ -841,6 +878,7 @@ internal class CheckoutOperationCoordinatorTest {
         private val sessionRefresher: FakeCheckoutSessionRefresher,
         val observerJob: Job,
         private val testScope: TestScope,
+        val eventReporter: FakeEventReporter,
     ) : CoroutineScope by testScope {
         val response = CheckoutSessionResponseFactory.create(id = "cs_confirmed")
         val backgroundScope = testScope.backgroundScope
@@ -862,5 +900,6 @@ internal class CheckoutOperationCoordinatorTest {
         metadata = MutableConfirmationMetadata().apply {
             set(CheckoutSessionResponseKey, response)
         },
+        analyticsMetadata = null,
     )
 }

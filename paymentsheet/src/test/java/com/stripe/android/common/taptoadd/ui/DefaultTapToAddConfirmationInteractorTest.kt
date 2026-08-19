@@ -247,7 +247,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             val intent = PaymentIntentFixtures.PI_SUCCEEDED
 
             confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(intent),
+                ConfirmationHandler.Result.Succeeded(intent, analyticsMetadata = null),
             )
 
             assertThat(awaitItem().primaryButton.state)
@@ -277,7 +277,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             val intent = PaymentIntentFixtures.PI_SUCCEEDED
 
             confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(intent),
+                ConfirmationHandler.Result.Succeeded(intent, analyticsMetadata = null),
             )
 
             assertThat(awaitItem().primaryButton.state)
@@ -312,6 +312,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                     cause = exception,
                     message = errorMessage,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 ),
             )
 
@@ -350,6 +351,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                     cause = exception,
                     message = errorMessage,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 ),
             )
 
@@ -474,7 +476,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             assertThat(awaitItem().form.enabled).isTrue()
 
             confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED),
+                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, analyticsMetadata = null),
             )
 
             assertThat(awaitItem().form.enabled).isFalse()
@@ -494,6 +496,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                     cause = Exception("Payment failed"),
                     message = "Payment failed".resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 ),
             )
 
@@ -519,6 +522,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 intent = PaymentIntentFactory.create(
                     status = StripeIntent.Status.Succeeded,
                 ),
+                analyticsMetadata = null,
             ),
         )
     ) {
@@ -541,6 +545,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                     cause = Exception("Payment failed"),
                     message = "Payment failed".resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    analyticsMetadata = null,
                 ),
             )
             cvcFormHelper.updateState(CvcFormHelper.State.Complete(cvc = "123"))

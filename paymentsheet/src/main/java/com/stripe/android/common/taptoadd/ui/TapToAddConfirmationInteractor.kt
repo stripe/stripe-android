@@ -179,6 +179,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                     confirmationOption = confirmationOption,
                     paymentMethodMetadata = paymentMethodMetadata,
                     statusBarColor = statusBarColor,
+                    analyticsMetadata = null,
                 )
             )
         }

@@ -641,6 +641,7 @@ class ConfirmationMediatorTest {
             confirmationOption = FakeConfirmationOption(),
             statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            analyticsMetadata = null,
         )
     }
 }

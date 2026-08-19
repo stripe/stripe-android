@@ -22,12 +22,14 @@ internal fun confirmationStateComplete(succeeded: Boolean): ConfirmationHandler.
     val result = if (succeeded) {
         ConfirmationHandler.Result.Succeeded(
             PaymentIntentFixtures.PI_SUCCEEDED,
+            analyticsMetadata = null,
         )
     } else {
         ConfirmationHandler.Result.Failed(
             cause = Throwable(),
             message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.Internal
+            type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            analyticsMetadata = null,
         )
     }
     return ConfirmationHandler.State.Complete(result)

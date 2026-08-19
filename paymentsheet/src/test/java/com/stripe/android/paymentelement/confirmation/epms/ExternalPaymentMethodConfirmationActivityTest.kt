@@ -197,6 +197,7 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),
             ),
+            analyticsMetadata = null,
         )
 
         const val EPM_ACTIVITY_NAME =
