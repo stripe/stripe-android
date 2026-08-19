@@ -135,6 +135,8 @@ class ExpressCheckoutElement @Inject internal constructor(
             /**
              * Display configuration for Link.
              */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class Display {
                 /**
                  * Link will be displayed when available.
