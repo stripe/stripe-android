@@ -267,14 +267,14 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `sources the billing email from the checkout session customer email`() {
+    fun `sources the collected billing email over the checkout session customer email`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
-            collectedDetails = collectedDetails(),
+            collectedDetails = collectedDetails(email = "collected@example.com"),
         )
 
-        assertThat(result.defaultBillingDetails?.email).isEqualTo("checkout@example.com")
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("collected@example.com")
     }
 
     @Test
@@ -361,12 +361,14 @@ internal class CheckoutCommonConfigurationFactoryTest {
     )
 
     private fun collectedDetails(
+        email: String? = null,
         shippingName: String? = null,
         billingName: String? = null,
         shippingAddress: Address.State? = null,
         billingAddress: Address.State? = null,
     ): CheckoutCollectedDetails {
         return CheckoutCollectedDetails(
+            email = email,
             shippingName = shippingName,
             billingName = billingName,
             shippingAddress = shippingAddress,

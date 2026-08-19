@@ -117,13 +117,6 @@ class CheckoutController @Inject internal constructor(
                     response
                 }
             }.mapCatching { response ->
-                val defaultEmail = configurationState.defaults.email
-                if (defaultEmail != null) {
-                    checkoutSessionRepository.updateEmail(sessionId, defaultEmail).getOrThrow()
-                } else {
-                    response
-                }
-            }.mapCatching { response ->
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
@@ -181,12 +174,17 @@ class CheckoutController @Inject internal constructor(
      * Updates the customer's email address.
      *
      * @param email The email address to set. Pass `null` to clear the customer's email.
-     * Leading/trailing whitespace is trimmed.
      */
     suspend fun updateEmail(
         email: String?,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateEmail(sessionId, email?.trim().orEmpty())
+    ): kotlin.Result<Unit> {
+        return withCheckoutState(
+            additionalStateMutations = {
+                copy(collectedDetails = collectedDetails.copy(email = email))
+            },
+        ) {
+            kotlin.Result.success(checkoutSessionResponse)
+        }
     }
 
     internal suspend fun updateBillingAddress(
@@ -986,7 +984,7 @@ class CheckoutController @Inject internal constructor(
             internal fun build(): State = State(
                 billingDetails = billingDetails?.build(),
                 shippingDetails = shippingDetails?.build(),
-                email = email?.trim()?.takeIf { it.isNotEmpty() },
+                email = email,
             )
 
             /**

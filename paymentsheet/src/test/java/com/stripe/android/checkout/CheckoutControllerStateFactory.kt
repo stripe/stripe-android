@@ -22,7 +22,7 @@ internal object CheckoutControllerStateFactory {
         configuration: CheckoutController.Configuration.State = CheckoutController.Configuration().build(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         flagImages: Map<String, Bitmap>? = null,
-        collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(),
+        collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
