@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodBillingAddressPolicy
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -67,19 +68,10 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .ignoreBillingAddressRequirements()
-            .element(
-                formElement = SectionElement.wrap(
-                    sectionFieldElement = CountryElement(
-                        identifier = IdentifierSpec.Country,
-                        controller = DropdownFieldController(
-                            config = CountryConfig(
-                                onlyShowCountryCodes =
-                                metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                            ),
-                            initialValue = arguments.initialValues[IdentifierSpec.Country],
-                        )
-                    )
-                )
+            .billingAddressPolicy(
+                PaymentMethodBillingAddressPolicy.CountryOnly(
+                    allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                ),
             )
             .apply {
                 if (

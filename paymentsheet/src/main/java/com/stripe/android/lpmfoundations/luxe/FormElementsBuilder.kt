@@ -3,7 +3,12 @@ package com.stripe.android.lpmfoundations.luxe
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
@@ -60,6 +65,24 @@ internal class FormElementsBuilder(
 
     fun element(formElement: FormElement): FormElementsBuilder = apply {
         uiFormElements += formElement
+    }
+
+    fun billingAddressPolicy(policy: PaymentMethodBillingAddressPolicy): FormElementsBuilder = apply {
+        when (policy) {
+            is PaymentMethodBillingAddressPolicy.CountryOnly -> {
+                element(
+                    formElement = SectionElement.wrap(
+                        sectionFieldElement = CountryElement(
+                            identifier = IdentifierSpec.Country,
+                            controller = DropdownFieldController(
+                                config = CountryConfig(policy.allowedCountryCodes),
+                                initialValue = arguments.initialValues[IdentifierSpec.Country],
+                            ),
+                        ),
+                    ),
+                )
+            }
+        }
     }
 
     fun ignoreBillingAddressRequirements() = apply {
