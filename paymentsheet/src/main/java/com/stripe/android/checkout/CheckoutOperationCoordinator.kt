@@ -97,6 +97,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
+    // TODO-codex: report eventReporter reportPaymentResult from somewhere in here or called from here. This is the entrypoint.
     suspend fun observeConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
@@ -105,6 +106,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                     // commit, but the session changed server-side, so re-fetch it.
                     val response = (state.result as? ConfirmationHandler.Result.Succeeded)
                         ?.metadata?.get(CheckoutSessionResponseKey)
+                    // TODO-codex: get analytics metadata from result.
                     refreshSession {
                         if (response != null) {
                             sessionRefresher.refresh(response)

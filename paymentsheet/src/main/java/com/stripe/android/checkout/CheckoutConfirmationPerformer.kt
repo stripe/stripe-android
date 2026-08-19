@@ -48,6 +48,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = state.paymentMethodMetadata,
             statusBarColor = statusBarColor,
+            // TODO-codex: set analytics metadata - payment selection, confirm initiated for PE.
         )
     }
 }

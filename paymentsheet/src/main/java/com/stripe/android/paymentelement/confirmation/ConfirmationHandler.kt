@@ -80,6 +80,7 @@ internal interface ConfirmationHandler {
          * merchant's chrome. Always `null` on API 35+, where the platform enforces edge-to-edge.
          */
         @ColorInt val statusBarColor: Int?,
+        // TODO-codex: add analytics metadata here.
     ) : Parcelable {
         /**
          * The [StripeIntent] that is being potentially confirmed by the handler
@@ -124,6 +125,7 @@ internal interface ConfirmationHandler {
          */
         data class Canceled(
             val action: Action,
+            // TODO-codex: add analytics metadata here
         ) : Result {
             /**
              * Action to perform if a user cancels a running confirmation process.
@@ -160,6 +162,7 @@ internal interface ConfirmationHandler {
             val intent: StripeIntent,
             val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
             val completedFullPaymentFlow: Boolean = true,
+            // TODO-codex: add analytics metadata here
         ) : Result {
             override fun log(logger: Logger) {
                 logger.info("ConfirmationHandler.Result.Succeeded")
@@ -174,6 +177,7 @@ internal interface ConfirmationHandler {
             val cause: Throwable,
             val message: ResolvableString,
             val type: ErrorType,
+            // TODO-codex: add analytics metadata here.
         ) : Result {
             override fun log(logger: Logger) {
                 logger.error("ConfirmationHandler.Result.Failed", cause)

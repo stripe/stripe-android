@@ -229,14 +229,17 @@ internal class DefaultConfirmationHandler(
                 intent = result.intent,
                 metadata = result.metadata,
                 completedFullPaymentFlow = result.completedFullPaymentFlow,
+                // TODO-codex: set analytics metadata based on confirmation args
             )
             is ConfirmationDefinition.Result.Failed -> ConfirmationHandler.Result.Failed(
                 cause = result.cause,
                 type = result.type,
                 message = result.message,
+                // TODO-codex: set analytics metadata based on confirmation args
             )
             is ConfirmationDefinition.Result.Canceled -> ConfirmationHandler.Result.Canceled(
                 action = result.action,
+                // TODO-codex: set analytics metadata based on confirmation args
             )
         }
 
