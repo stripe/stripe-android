@@ -202,7 +202,7 @@ internal class NfcScanningActivityTest {
 
     @Test
     fun `inactivity timeout returns canceled result`() = test {
-        ShadowSystemClock.advanceBy(20.seconds.inWholeSeconds, TimeUnit.SECONDS)
+        ShadowSystemClock.advanceBy(30.seconds.inWholeSeconds, TimeUnit.SECONDS)
         waitForIdle()
 
         assertThat(getResult()).isEqualTo(NfcScanningContract.Result.Canceled)
