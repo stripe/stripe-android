@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val weroCountryOnlyRawValues = mapOf(
@@ -66,8 +67,12 @@ private val weroWithBillingAddressExpectedPaymentParams = PaymentMethodCreatePar
 internal val weroTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Wero Never",
-        paymentMethodType = PaymentMethod.Type.Wero,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Wero,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = weroCountryOnlyRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = weroCountryOnlyExpectedPaymentMethodParams,
@@ -77,8 +82,12 @@ internal val weroTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Wero Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.Wero,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Wero,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = weroCountryOnlyRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = weroCountryOnlyExpectedPaymentMethodParams,
@@ -88,8 +97,12 @@ internal val weroTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Wero Full",
-        paymentMethodType = PaymentMethod.Type.Wero,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Wero,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = weroWithBillingAddressRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = weroWithBillingAddressExpectedPaymentParams,
