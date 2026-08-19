@@ -49,10 +49,11 @@ class PaymentMethodOptionsParamsTest {
     @Test
     fun klarnaToParamMap_hasCorrectValues() {
         assertThat(
-            PaymentMethodOptionsParams.Klarna(
-                interoperabilityToken = "interoperability_token",
-                partnerConfirmationToken = "partner_confirmation_token",
-            ).toParamMap()
+            PaymentMethodOptionsParams.Klarna.Builder()
+                .setInteroperabilityToken("interoperability_token")
+                .setPartnerConfirmationToken("partner_confirmation_token")
+                .build()
+                .toParamMap()
         ).isEqualTo(
             mapOf(
                 "klarna" to mapOf(
@@ -66,7 +67,7 @@ class PaymentMethodOptionsParamsTest {
     @Test
     fun klarnaToParamMap_withNoData_shouldHaveEmptyParams() {
         assertThat(
-            PaymentMethodOptionsParams.Klarna().toParamMap()
+            PaymentMethodOptionsParams.Klarna.Builder().build().toParamMap()
         ).isEmpty()
     }
 

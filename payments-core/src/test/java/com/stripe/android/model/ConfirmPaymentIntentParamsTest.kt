@@ -376,10 +376,10 @@ class ConfirmPaymentIntentParamsTest {
         assertThat(
             ConfirmPaymentIntentParams(
                 clientSecret = CLIENT_SECRET,
-                paymentMethodOptions = PaymentMethodOptionsParams.Klarna(
-                    interoperabilityToken = "interoperability_token",
-                    partnerConfirmationToken = "partner_confirmation_token",
-                ),
+                paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+                    .setInteroperabilityToken("interoperability_token")
+                    .setPartnerConfirmationToken("partner_confirmation_token")
+                    .build(),
             ).toParamMap()
         ).isEqualTo(
             mapOf(
