@@ -40,6 +40,68 @@ class ExpressCheckoutElement @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
 
+        /**
+         * Configuration for how billing details are collected during checkout.
+         */
+        class BillingDetailsCollectionConfiguration {
+            /**
+             * Billing details fields collection options.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class CollectionMode {
+                /**
+                 * The field will be collected depending on the Payment Method's requirements.
+                 */
+                Automatic,
+
+                /**
+                 * The field will never be collected.
+                 * If this field is required by the Payment Method, you must provide it as part of
+                 * the default billing details.
+                 */
+                Never,
+
+                /**
+                 * The field will always be collected, even if it isn't required for the Payment
+                 * Method.
+                 */
+                Always,
+            }
+
+            /**
+             * Billing address collection options.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class AddressCollectionMode {
+                /**
+                 * Only the fields required by the Payment Method will be collected, this may be
+                 * none.
+                 */
+                Automatic,
+
+                /**
+                 * Collect the full billing address, regardless of the Payment Method requirements.
+                 */
+                Full,
+
+                // Note: a `Never` mode is intentionally omitted for the CheckoutSession private
+                // preview — suppressing billing collection is not supported with a CheckoutSession.
+                // It can be added at public preview/GA if that use case is supported.
+            }
+
+            // TODO-codex: Make these work, look at other config classes to see how they should behave.
+            /** How to collect the name field. */
+            fun name(name: CollectionMode): BillingDetailsCollectionConfiguration
+
+            /** How to collect the email field. */
+            fun email(email: CollectionMode): BillingDetailsCollectionConfiguration
+
+            /** How to collect the billing address. */
+            fun address(address: AddressCollectionMode): BillingDetailsCollectionConfiguration
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @CheckoutSessionPreview
         enum class LinkVisibility {
@@ -206,6 +268,13 @@ class ExpressCheckoutElement @Inject internal constructor(
         ): Configuration = apply {
             this.shippingAddressRequired = shippingAddressRequired
         }
+
+        // TODO-codex: make this work.
+        /** Sets how billing details are collected when displaying payment methods. */
+        fun billingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        ): Configuration
+
 
         @Parcelize
         internal data class State(
