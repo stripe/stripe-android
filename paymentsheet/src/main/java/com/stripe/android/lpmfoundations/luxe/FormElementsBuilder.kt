@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.AutomaticTaxBillingAddressSpec
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -11,6 +12,7 @@ import com.stripe.android.uicore.elements.SectionElement
 
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
+    private val supportsAutomaticTaxBillingAddress: Boolean,
 ) {
     private val headerFormElements: MutableList<FormElement> = mutableListOf()
     private val uiFormElements: MutableList<FormElement> = mutableListOf()
@@ -68,6 +70,8 @@ internal class FormElementsBuilder(
         val resolvedBillingAddress = BillingAddressPolicyResolver(
             policy = paymentMethodBillingAddressPolicy,
             addressCollectionMode = arguments.billingDetailsCollectionConfiguration.address,
+            requiresBillingAddressForAutomaticTax = supportsAutomaticTaxBillingAddress &&
+                arguments.requiresBillingAddressForAutomaticTax,
             merchantAllowedCountryCodes =
                 arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
         ).resolve()
@@ -109,6 +113,9 @@ internal class FormElementsBuilder(
                 initialValues = arguments.initialValues,
                 shippingValues = arguments.shippingValues,
                 autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
+            )
+            is ResolvedBillingAddress.TaxMinimum -> AutomaticTaxBillingAddressFactory(arguments).create(
+                spec = AutomaticTaxBillingAddressSpec(allowedCountryCodes),
             )
         }
     }

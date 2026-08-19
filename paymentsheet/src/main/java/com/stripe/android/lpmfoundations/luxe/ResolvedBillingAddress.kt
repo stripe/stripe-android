@@ -21,6 +21,13 @@ internal sealed interface ResolvedBillingAddress {
         val allowedCountryCodes: Set<String>,
     ) : ResolvedBillingAddress
 
+    /**
+     * Renders the country-specific minimum address required by automatic tax, restricted to [allowedCountryCodes].
+     */
+    data class TaxMinimum(
+        val allowedCountryCodes: Set<String>,
+    ) : ResolvedBillingAddress
+
     /** Renders no address fields and prevents every later resolution stage from promoting address collection. */
     data object Suppressed : ResolvedBillingAddress
 }
@@ -34,9 +41,10 @@ internal sealed interface ResolvedBillingAddress {
 internal class BillingAddressPolicyResolver(
     private val policy: PaymentMethodBillingAddressPolicy?,
     private val addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
     private val merchantAllowedCountryCodes: Set<String>,
 ) {
-    fun resolve(): ResolvedBillingAddress = resolvePaymentMethodPolicy()
+    fun resolve(): ResolvedBillingAddress = resolvePaymentMethodPolicy().resolveAutomaticTax()
 
     private fun resolvePaymentMethodPolicy(): ResolvedBillingAddress {
         return when (policy) {
@@ -68,6 +76,25 @@ internal class BillingAddressPolicyResolver(
                 }
             }
             PaymentMethodBillingAddressPolicy.Suppressed -> ResolvedBillingAddress.Suppressed
+        }
+    }
+
+    private fun ResolvedBillingAddress.resolveAutomaticTax(): ResolvedBillingAddress {
+        val requiresTaxMinimum =
+            addressCollectionMode ==
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic &&
+                requiresBillingAddressForAutomaticTax
+
+        if (!requiresTaxMinimum) {
+            return this
+        }
+
+        return when (this) {
+            ResolvedBillingAddress.Absent -> ResolvedBillingAddress.TaxMinimum(merchantAllowedCountryCodes)
+            is ResolvedBillingAddress.CountryOnly -> ResolvedBillingAddress.TaxMinimum(allowedCountryCodes)
+            is ResolvedBillingAddress.Full,
+            ResolvedBillingAddress.Suppressed,
+            is ResolvedBillingAddress.TaxMinimum -> this
         }
     }
 }
