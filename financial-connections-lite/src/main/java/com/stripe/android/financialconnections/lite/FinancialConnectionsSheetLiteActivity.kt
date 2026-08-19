@@ -35,7 +35,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
 import com.stripe.android.financialconnections.launcher.flowType
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
-import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
 import kotlinx.coroutines.launch
 
@@ -69,9 +68,14 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
         setupBackButtonHandling()
 
         lifecycleScope.launch {
+            viewModel.state.collect { state ->
+                state?.hostedAuthUrl?.let(webView::loadUrl)
+            }
+        }
+
+        lifecycleScope.launch {
             viewModel.viewEffects.collect { viewEffect ->
                 when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> webView.loadUrl(viewEffect.url)
                     is FinishWithResult -> finishWithResult(viewEffect.result)
                     is OpenCustomTab -> openCustomTab(viewEffect.url)
                 }
