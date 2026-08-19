@@ -5,7 +5,6 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
-import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -15,11 +14,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
-import com.stripe.android.ui.core.elements.BsbElement
-import com.stripe.android.uicore.elements.AddressFieldsElement
-import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -69,40 +64,27 @@ internal class LpmBillingAddressFormValuesToParamsTest {
         val formViewModel = createFormViewModel(
             paymentMethodType = config.paymentMethodType,
             metadata = metadata,
-            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            initialValues = rawValues,
         )
 
-        val sectionFields = formViewModel.elements
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-
-        sectionFields.forEach { it.setRawValue(rawValues) }
-        formViewModel.elements
-            .filterIsInstance<BsbElement>()
-            .forEach { element ->
-                rawValues[element.identifier]?.let { element.controller.onValueChange(it) }
-            }
-        sectionFields
-            .filterIsInstance<AddressFieldsElement>()
-            .forEach { it.countryElement.setRawValue(rawValues) }
-        formViewModel.elements
-            .filterIsInstance<CheckboxFieldElement>()
-            .forEach { element ->
-                rawValues[element.identifier]?.let { element.controller.onValueChange(it.toBoolean()) }
-            }
-
-        return formViewModel.createFormParams(config.paymentMethodType, metadata)
+        return formViewModel.createFormParams(
+            paymentMethodType = config.paymentMethodType,
+            metadata = metadata,
+            rawValues = rawValues,
+        )
     }
 
     private fun createFormViewModel(
         paymentMethodType: PaymentMethod.Type,
         metadata: PaymentMethodMetadata,
-        uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
+        initialValues: Map<IdentifierSpec, String?>,
     ): FormViewModel {
         val formElements = requireNotNull(
             metadata.formElementsForCode(
                 code = paymentMethodType.code,
-                uiDefinitionFactoryArgumentsFactory = uiDefinitionFactoryArgumentsFactory,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(
+                    initialValues = initialValues,
+                ),
             ),
         )
 
@@ -120,12 +102,23 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     private suspend fun FormViewModel.createFormParams(
         paymentMethodType: PaymentMethod.Type,
         metadata: PaymentMethodMetadata,
+        rawValues: Map<IdentifierSpec, String?>,
     ): LpmBillingAddressFormParams {
         val supportedPaymentMethod = requireNotNull(
             metadata.supportedPaymentMethodForCode(paymentMethodType.code),
         )
-        val paymentSelection = requireNotNull(completeFormValues.first())
-            .transformToPaymentSelection(supportedPaymentMethod, metadata)
+        val formFieldValues = requireNotNull(completeFormValues.first()) {
+            "The ${paymentMethodType.code} form never completed. A required field was not seeded, " +
+                "which means its definition ignores UiDefinitionFactory.Arguments.initialValues."
+        }
+
+        // A form with elements must report at least one seeded value, otherwise its definition
+        // ignored initialValues and the assertion in the test body would be vacuous.
+        if (elements.isNotEmpty()) {
+            assertThat(formFieldValues.fieldValuePairs.keys).containsAnyIn(rawValues.keys)
+        }
+
+        val paymentSelection = formFieldValues.transformToPaymentSelection(supportedPaymentMethod, metadata)
 
         require(paymentSelection is PaymentSelection.New)
 

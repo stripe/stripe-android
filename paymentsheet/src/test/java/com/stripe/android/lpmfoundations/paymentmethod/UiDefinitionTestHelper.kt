@@ -11,12 +11,14 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal fun PaymentMethodDefinition.formElements(
     metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     paymentMethodCreateParams: PaymentMethodCreateParams? = null,
     paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
     paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+    initialValues: Map<IdentifierSpec, String?>? = null,
     initialLinkUserInput: UserInput? = null,
     linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
     setAsDefaultMatchesSaveForFutureUse: Boolean = false,
@@ -33,6 +35,7 @@ internal fun PaymentMethodDefinition.formElements(
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
                 paymentMethodExtraParams = paymentMethodExtraParams,
+                initialValues = initialValues,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 initialLinkUserInput = initialLinkUserInput,
