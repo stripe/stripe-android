@@ -72,9 +72,9 @@ class ConfirmSetupIntentParamsTest {
     fun toParamMap_withKlarnaPaymentMethodOptions_shouldCreateExpectedMap() {
         val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(
             clientSecret = CLIENT_SECRET,
-            paymentMethodOptions = PaymentMethodOptionsParams.Klarna(
-                interoperabilityToken = "interoperability_token"
-            ),
+            paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+                .setInteroperabilityToken("interoperability_token")
+                .build(),
         )
 
         assertThat(params.toParamMap()).isEqualTo(
@@ -91,10 +91,55 @@ class ConfirmSetupIntentParamsTest {
     }
 
     @Test
-    fun withShouldUseStripeSdk_preservesPaymentMethodOptions() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.Klarna(
-            interoperabilityToken = "interoperability_token"
+    fun create_withAttachedPaymentMethod_preservesPaymentMethodOptions() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+            .setInteroperabilityToken("interoperability_token")
+            .build()
+
+        val params = ConfirmSetupIntentParams.createWithAttachedPaymentMethod(
+            clientSecret = CLIENT_SECRET,
+            paymentMethodType = PaymentMethod.Type.Klarna,
+            paymentMethodOptions = paymentMethodOptions,
         )
+
+        assertThat(params.paymentMethodOptions).isSameInstanceAs(paymentMethodOptions)
+    }
+
+    @Test
+    fun create_withPaymentMethodId_preservesPaymentMethodOptions() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+            .setInteroperabilityToken("interoperability_token")
+            .build()
+
+        val params = ConfirmSetupIntentParams.createWithPaymentMethodId(
+            paymentMethodId = "pm_12345",
+            clientSecret = CLIENT_SECRET,
+            paymentMethodOptions = paymentMethodOptions,
+        )
+
+        assertThat(params.paymentMethodOptions).isSameInstanceAs(paymentMethodOptions)
+    }
+
+    @Test
+    fun create_withPaymentMethodCreateParams_preservesPaymentMethodOptions() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+            .setInteroperabilityToken("interoperability_token")
+            .build()
+
+        val params = ConfirmSetupIntentParams.createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams = PaymentMethodCreateParams.createKlarna(),
+            clientSecret = CLIENT_SECRET,
+            paymentMethodOptions = paymentMethodOptions,
+        )
+
+        assertThat(params.paymentMethodOptions).isSameInstanceAs(paymentMethodOptions)
+    }
+
+    @Test
+    fun withShouldUseStripeSdk_preservesPaymentMethodOptions() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+            .setInteroperabilityToken("interoperability_token")
+            .build()
         val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(
             clientSecret = CLIENT_SECRET,
             paymentMethodOptions = paymentMethodOptions,

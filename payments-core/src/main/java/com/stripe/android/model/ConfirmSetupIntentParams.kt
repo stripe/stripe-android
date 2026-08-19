@@ -217,7 +217,7 @@ constructor(
          * PaymentMethod and [paymentMethodOptions].
          */
         @JvmStatic
-        fun create(
+        fun createWithAttachedPaymentMethod(
             clientSecret: String,
             paymentMethodType: PaymentMethod.Type,
             paymentMethodOptions: PaymentMethodOptionsParams,
@@ -297,7 +297,8 @@ constructor(
          * PaymentMethod and [paymentMethodOptions].
          */
         @JvmStatic
-        fun create(
+        @JvmOverloads
+        fun createWithPaymentMethodId(
             paymentMethodId: String,
             clientSecret: String,
             paymentMethodOptions: PaymentMethodOptionsParams,
@@ -349,7 +350,8 @@ constructor(
          * and [paymentMethodOptions].
          */
         @JvmStatic
-        fun create(
+        @JvmOverloads
+        fun createWithPaymentMethodCreateParams(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             clientSecret: String,
             paymentMethodOptions: PaymentMethodOptionsParams,
