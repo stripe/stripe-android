@@ -104,9 +104,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             label = config.customLabel,
             isElements = true,
             publishableKey = null,
-            displayItems = GooglePayDisplayItemsFactory.create(confirmationArgs.paymentMethodMetadata).map {
-                it.resolve(context)
-            },
+            displayItems = GooglePayDisplayItemsFactory.create(confirmationArgs.paymentMethodMetadata, context),
             billingEmailOverride = config.billingEmailOverride,
             shippingAddressParameters = config.shippingAddressParameters,
         )
