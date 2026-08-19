@@ -447,6 +447,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
                             selectedPaymentMethodCode = "card",
@@ -474,6 +475,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = null,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
+                        checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
                             selectedPaymentMethodCode = "card",
@@ -507,6 +509,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
                             selectedPaymentMethodCode = "card",

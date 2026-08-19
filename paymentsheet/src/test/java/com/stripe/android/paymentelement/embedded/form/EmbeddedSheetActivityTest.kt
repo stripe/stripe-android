@@ -94,6 +94,7 @@ internal class EmbeddedSheetActivityTest {
                     selection = null,
                     hasBeenConfirmed = true,
                     customerState = null,
+                    checkoutSessionResponse = null,
                     shouldInvokeSelectionCallback = false,
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = "card",
