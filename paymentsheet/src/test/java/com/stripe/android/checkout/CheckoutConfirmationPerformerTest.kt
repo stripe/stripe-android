@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -86,9 +85,6 @@ internal class CheckoutConfirmationPerformerTest {
     ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             paymentSelection = paymentSelection,
-            configuration = CheckoutController.Configuration()
-                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-                .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
         )
     }

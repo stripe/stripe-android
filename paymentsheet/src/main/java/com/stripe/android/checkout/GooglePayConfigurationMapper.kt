@@ -8,8 +8,9 @@ import com.stripe.android.paymentsheet.PaymentSheet
 internal fun GooglePayConfiguration.State.asPaymentSheet(
     merchantCountry: String,
     liveMode: Boolean,
+    isDebugBuild: Boolean,
 ): PaymentSheet.GooglePayConfiguration = PaymentSheet.GooglePayConfiguration(
-    environment = if (liveMode) {
+    environment = if (liveMode && !isDebugBuild) {
         PaymentSheet.GooglePayConfiguration.Environment.Production
     } else {
         PaymentSheet.GooglePayConfiguration.Environment.Test

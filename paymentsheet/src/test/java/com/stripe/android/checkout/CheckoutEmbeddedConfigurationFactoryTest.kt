@@ -154,7 +154,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
         val googlePay = requireNotNull(result.googlePay)
         assertThat(googlePay.environment)
-            .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
         assertThat(googlePay.countryCode).isEqualTo("GB")
         assertThat(googlePay.label).isEqualTo("Total")
         assertThat(googlePay.buttonType)
@@ -164,12 +164,8 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `leaves googlePay null when the checkout session country is missing`() {
-        val configuration = controllerConfiguration(
-            googlePayConfiguration = GooglePayConfiguration(),
-        )
-
         val result = factory().create(
-            configuration = configuration,
+            configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
             collectedDetails = collectedDetails(),
         )

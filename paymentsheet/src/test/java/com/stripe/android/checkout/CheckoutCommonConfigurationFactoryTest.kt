@@ -108,9 +108,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `maps googlePay using the checkout session country`() {
         val result = factory().create(
-            configuration = controllerConfiguration(
-                googlePayConfiguration = GooglePayConfiguration(),
-            ),
+            configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "GB",
                 liveMode = true,
@@ -120,7 +118,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
         assertThat(result.googlePay?.countryCode).isEqualTo("GB")
         assertThat(result.googlePay?.environment)
-            .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
     }
 
     @Test

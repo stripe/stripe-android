@@ -3,7 +3,6 @@ package com.stripe.android.elements.ece
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -12,7 +11,6 @@ import com.stripe.android.checkout.FakeCheckoutSessionRefresher
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.ExpressCheckoutElement
-import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -187,9 +185,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         allowedShippingCountries: List<String>? = null,
     ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
-            configuration = CheckoutController.Configuration()
-                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-                .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "US",
                 allowedShippingCountries = allowedShippingCountries,
@@ -203,7 +198,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     ): ExpressButton.GooglePay {
         return ExpressButton.GooglePay.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            googlePayConfiguration = GooglePayConfiguration().build(),
+            googlePayConfiguration =
+                ExpressCheckoutElement.Configuration.GooglePayConfiguration().build(),
             shippingAddressRequired = shippingAddressRequired,
         )
     }
