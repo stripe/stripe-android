@@ -65,8 +65,6 @@ internal fun SelfieWarmupScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterialApi::class)
-@Suppress("LongMethod")
 private fun SelfieWarmupContent(
     navController: NavController,
     identityViewModel: IdentityViewModel,
@@ -102,124 +100,178 @@ private fun SelfieWarmupContent(
             screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE_WARMUP
         )
 
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .testTag(SELFIE_WARMUP_CONTENT_TAG),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                text = stringResource(
-                    id = if (shouldUseRedesignedTrainingConsent) {
-                        R.string.stripe_selfie_consent_title
-                    } else {
-                        R.string.stripe_selfie_warmup_title
-                    }
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(SELFIE_WARMUP_TITLE_TAG),
-                style = MaterialTheme.typography.h4,
-                textAlign = TextAlign.Center
-            )
-
-            Text(
-                text = stringResource(
-                    id = if (shouldUseRedesignedTrainingConsent) {
-                        R.string.stripe_selfie_consent_body
-                    } else {
-                        R.string.stripe_selfie_warmup_body
-                    }
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
-                    )
-                    .testTag(SELFIE_WARMUP_BODY_TAG),
-                style = MaterialTheme.typography.subtitle1,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(
-                modifier = Modifier.height(
-                    if (shouldUseRedesignedTrainingConsent) 32.dp else 64.dp
-                )
-            )
-            Image(
-                painter = painterResource(id = R.drawable.stripe_selfie_warmup),
-                modifier = Modifier
-                    .size(144.dp)
-                    .align(Alignment.CenterHorizontally),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(colorResource(id = R.color.stripe_selfie_warmup_icon_tint))
-            )
-        }
-
-        if (shouldShowTrainingConsent) {
-            BottomSheetHTML(
-                html = if (shouldUseRedesignedTrainingConsent) {
-                    trainingConsentText
-                } else {
-                    trainingConsentHtml(
-                        title = stringResource(id = R.string.stripe_selfie_training_consent_title),
-                        body = trainingConsentText
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
-                    )
-                    .testTag(SELFIE_TRAINING_CONSENT_FOOTER_TAG),
-                bottomSheets = null,
-                color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.caption.copy(textAlign = TextAlign.Center),
-                urlSpanStyle = SpanStyle(
-                    textDecoration = TextDecoration.Underline,
-                    color = MaterialTheme.colors.onBackground
-                )
-            )
-
-            LoadingButton(
-                modifier = Modifier.testTag(SELFIE_ALLOW_BUTTON_TAG),
-                text = stringResource(id = R.string.stripe_allow),
-                state = when (selectedTrainingConsent) {
-                    true -> LoadingButtonState.Loading
-                    false -> LoadingButtonState.Disabled
-                    null -> LoadingButtonState.Idle
-                }
-            ) {
-                continueWithTrainingConsent(true)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            LoadingTextButton(
-                modifier = Modifier.testTag(SELFIE_DECLINE_BUTTON_TAG),
-                text = declineButtonText ?: stringResource(id = R.string.stripe_decline),
-                state = when (selectedTrainingConsent) {
-                    true -> LoadingButtonState.Disabled
-                    false -> LoadingButtonState.Loading
-                    null -> LoadingButtonState.Idle
-                }
-            ) {
-                continueWithTrainingConsent(false)
-            }
-        } else {
-            LoadingButton(
-                modifier = Modifier.testTag(SELFIE_CONTINUE_BUTTON_TAG),
-                text = stringResource(id = R.string.stripe_kontinue).uppercase(),
-                state = if (selectedTrainingConsent == false) {
-                    LoadingButtonState.Loading
-                } else {
-                    LoadingButtonState.Idle
-                }
-            ) {
-                continueWithTrainingConsent(false)
-            }
-        }
+        SelfieWarmupMainContent(
+            shouldUseRedesignedTrainingConsent = shouldUseRedesignedTrainingConsent,
+            modifier = Modifier.weight(1f)
+        )
+        SelfieWarmupActions(
+            trainingConsentText = trainingConsentText,
+            shouldUseRedesignedTrainingConsent = shouldUseRedesignedTrainingConsent,
+            declineButtonText = declineButtonText,
+            selectedTrainingConsent = selectedTrainingConsent,
+            onTrainingConsentSelected = ::continueWithTrainingConsent
+        )
     }
+}
+
+@Composable
+private fun SelfieWarmupMainContent(
+    shouldUseRedesignedTrainingConsent: Boolean,
+    modifier: Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .testTag(SELFIE_WARMUP_CONTENT_TAG),
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(
+                id = if (shouldUseRedesignedTrainingConsent) {
+                    R.string.stripe_selfie_consent_title
+                } else {
+                    R.string.stripe_selfie_warmup_title
+                }
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(SELFIE_WARMUP_TITLE_TAG),
+            style = MaterialTheme.typography.h4,
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = stringResource(
+                id = if (shouldUseRedesignedTrainingConsent) {
+                    R.string.stripe_selfie_consent_body
+                } else {
+                    R.string.stripe_selfie_warmup_body
+                }
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    top = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
+                )
+                .testTag(SELFIE_WARMUP_BODY_TAG),
+            style = MaterialTheme.typography.subtitle1,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(
+            modifier = Modifier.height(
+                if (shouldUseRedesignedTrainingConsent) 32.dp else 64.dp
+            )
+        )
+        Image(
+            painter = painterResource(id = R.drawable.stripe_selfie_warmup),
+            modifier = Modifier
+                .size(144.dp)
+                .align(Alignment.CenterHorizontally),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(colorResource(id = R.color.stripe_selfie_warmup_icon_tint))
+        )
+    }
+}
+
+@Composable
+private fun SelfieWarmupActions(
+    trainingConsentText: String,
+    shouldUseRedesignedTrainingConsent: Boolean,
+    declineButtonText: String?,
+    selectedTrainingConsent: Boolean?,
+    onTrainingConsentSelected: (Boolean) -> Unit
+) {
+    if (trainingConsentText.isNotBlank()) {
+        TrainingConsentActions(
+            trainingConsentText = trainingConsentText,
+            shouldUseRedesignedTrainingConsent = shouldUseRedesignedTrainingConsent,
+            declineButtonText = declineButtonText,
+            selectedTrainingConsent = selectedTrainingConsent,
+            onTrainingConsentSelected = onTrainingConsentSelected
+        )
+    } else {
+        ContinueAction(
+            isLoading = selectedTrainingConsent == false,
+            onContinue = { onTrainingConsentSelected(false) }
+        )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterialApi::class)
+private fun TrainingConsentActions(
+    trainingConsentText: String,
+    shouldUseRedesignedTrainingConsent: Boolean,
+    declineButtonText: String?,
+    selectedTrainingConsent: Boolean?,
+    onTrainingConsentSelected: (Boolean) -> Unit
+) {
+    BottomSheetHTML(
+        html = if (shouldUseRedesignedTrainingConsent) {
+            trainingConsentText
+        } else {
+            trainingConsentHtml(
+                title = stringResource(id = R.string.stripe_selfie_training_consent_title),
+                body = trainingConsentText
+            )
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
+            )
+            .testTag(SELFIE_TRAINING_CONSENT_FOOTER_TAG),
+        bottomSheets = null,
+        color = MaterialTheme.colors.onBackground,
+        style = MaterialTheme.typography.caption.copy(textAlign = TextAlign.Center),
+        urlSpanStyle = SpanStyle(
+            textDecoration = TextDecoration.Underline,
+            color = MaterialTheme.colors.onBackground
+        )
+    )
+
+    LoadingButton(
+        modifier = Modifier.testTag(SELFIE_ALLOW_BUTTON_TAG),
+        text = stringResource(id = R.string.stripe_allow),
+        state = when (selectedTrainingConsent) {
+            true -> LoadingButtonState.Loading
+            false -> LoadingButtonState.Disabled
+            null -> LoadingButtonState.Idle
+        }
+    ) {
+        onTrainingConsentSelected(true)
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+    LoadingTextButton(
+        modifier = Modifier.testTag(SELFIE_DECLINE_BUTTON_TAG),
+        text = declineButtonText ?: stringResource(id = R.string.stripe_decline),
+        state = when (selectedTrainingConsent) {
+            true -> LoadingButtonState.Disabled
+            false -> LoadingButtonState.Loading
+            null -> LoadingButtonState.Idle
+        }
+    ) {
+        onTrainingConsentSelected(false)
+    }
+}
+
+@Composable
+private fun ContinueAction(
+    isLoading: Boolean,
+    onContinue: () -> Unit
+) {
+    LoadingButton(
+        modifier = Modifier.testTag(SELFIE_CONTINUE_BUTTON_TAG),
+        text = stringResource(id = R.string.stripe_kontinue).uppercase(),
+        state = if (isLoading) {
+            LoadingButtonState.Loading
+        } else {
+            LoadingButtonState.Idle
+        },
+        onClick = onContinue
+    )
 }
 
 private fun trainingConsentHtml(
