@@ -21,6 +21,7 @@ import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
 import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
@@ -416,6 +417,42 @@ internal class OnrampInteractor @Inject constructor(
                     OnrampAttachKycInfoResult.Failed(mappedError)
                 }
             )
+    }
+
+    suspend fun retrieveAdditionalKycRequirements(): Result<AdditionalKycRequirements> {
+        val cryptoCustomerId = _state.value.cryptoCustomerId
+        if (cryptoCustomerId == null) {
+            val error = mapError(
+                operation = Operation.RetrieveAdditionalKycRequirements,
+                error = MissingCryptoCustomerException(),
+            )
+            trackError(Operation.RetrieveAdditionalKycRequirements, error)
+            return Result.failure(error)
+        }
+
+        val secret = consumerSessionClientSecret()
+        if (secret == null) {
+            val error = mapError(
+                operation = Operation.RetrieveAdditionalKycRequirements,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.RetrieveAdditionalKycRequirements, error)
+            return Result.failure(error)
+        }
+
+        return cryptoApiRepository.retrieveCryptoCustomer(
+            cryptoCustomerId = cryptoCustomerId,
+            consumerSessionClientSecret = secret,
+        ).fold(
+            onSuccess = { customer ->
+                Result.success(customer.requirements.toAdditionalKycRequirements())
+            },
+            onFailure = { error ->
+                val mappedError = mapError(Operation.RetrieveAdditionalKycRequirements, error)
+                trackError(Operation.RetrieveAdditionalKycRequirements, mappedError)
+                Result.failure(mappedError)
+            }
+        )
     }
 
     suspend fun retrieveMissingIdentifiers(): OnrampRetrieveMissingIdentifiersResult {
