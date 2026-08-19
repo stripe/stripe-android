@@ -3,6 +3,8 @@ package com.stripe.android.elements
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContent
@@ -27,6 +29,35 @@ internal class PaymentElementTest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @Test
+    fun `configuration builds default Google Pay values`() {
+        val googlePayConfiguration = PaymentElement.Configuration().build().googlePayConfiguration
+
+        assertThat(googlePayConfiguration.display).isEqualTo(GooglePayConfiguration.Display.Automatic)
+        assertThat(googlePayConfiguration.label).isNull()
+        assertThat(googlePayConfiguration.buttonType).isEqualTo(GooglePayConfiguration.ButtonType.Pay)
+        assertThat(googlePayConfiguration.additionalEnabledNetworks).isEmpty()
+    }
+
+    @Test
+    fun `configuration builds requested Google Pay values`() {
+        val googlePayConfiguration = PaymentElement.Configuration()
+            .googlePayConfiguration(
+                GooglePayConfiguration()
+                    .display(GooglePayConfiguration.Display.Never)
+                    .label("Complete your purchase")
+                    .buttonType(GooglePayConfiguration.ButtonType.Checkout)
+                    .additionalEnabledNetworks(listOf("INTERAC"))
+            )
+            .build()
+            .googlePayConfiguration
+
+        assertThat(googlePayConfiguration.display).isEqualTo(GooglePayConfiguration.Display.Never)
+        assertThat(googlePayConfiguration.label).isEqualTo("Complete your purchase")
+        assertThat(googlePayConfiguration.buttonType).isEqualTo(GooglePayConfiguration.ButtonType.Checkout)
+        assertThat(googlePayConfiguration.additionalEnabledNetworks).containsExactly("INTERAC")
+    }
 
     @Test
     fun `present delegates to the content helper`() = runTest {
