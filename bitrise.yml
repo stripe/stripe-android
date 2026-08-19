@@ -65,10 +65,6 @@ workflows:
           is_expand: false
         NEEDS_ROBOLECTRIC: true
       - INCLUDE_PAPARAZZI_ON_FAILURE: true
-    meta:
-      bitrise.io:
-        stack: osx-xcode-26.5.x    # Specify Mac stack just for this workflow
-        machine_type_id: g2.mac.4large # Appropriate Mac instance
     before_run:
       - prepare_all
     after_run:
@@ -133,28 +129,16 @@ workflows:
       - MAESTRO_TAGS: testmode-payments
     before_run:
       - _run-connections-e2e-tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-connections-e2e-data-tests:
     envs:
       - MAESTRO_TAGS: testmode-data
     before_run:
       - _run-connections-e2e-tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-connections-e2e-token-tests:
     envs:
       - MAESTRO_TAGS: testmode-token
     before_run:
       - _run-connections-e2e-tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-connections-e2e-payments-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-payments
@@ -162,10 +146,6 @@ workflows:
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-connections-e2e-data-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-data
@@ -173,10 +153,6 @@ workflows:
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-connections-e2e-token-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-token
@@ -184,10 +160,6 @@ workflows:
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-connections-e2e-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode
@@ -245,19 +217,11 @@ workflows:
             - content: |-
                 #!/usr/bin/env bash
                 python3 "$BITRISE_SOURCE_DIR/scripts/merge_maestro_junit_reports.py" --tag "$MAESTRO_TAGS" --module financial-connections
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-connections-e2e-livemode-tests:
     envs:
       - MAESTRO_TAGS: livemode-data
     before_run:
       - _run-connections-e2e-tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   _run-connect-e2e-tests:
     before_run:
       - build-connect-debug
@@ -383,10 +347,6 @@ workflows:
           title: Export PaymentSheet instrumentation test results
           inputs:
             - test_title: PaymentSheet instrumentation tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-paymentsheet-ime-instrumentation-tests:
     before_run:
       - prepare_all
@@ -426,10 +386,6 @@ workflows:
           title: Export FC and Crypto instrumentation test results
           inputs:
             - test_title: FC and Crypto instrumentation tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-cardscan-and-google-pay-tests:
     before_run:
       - start_cardscan_emulator
@@ -480,10 +436,6 @@ workflows:
           inputs:
             - notify_user_groups: none
             - is_enable_public_page: "false"
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-paymentsheet-e2e:
     before_run:
       - prepare_all
@@ -505,10 +457,6 @@ workflows:
           title: Export PaymentSheet E2E test results
           inputs:
             - test_title: PaymentSheet E2E tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-paymentsheet-google-pay-e2e:
     before_run:
       - prepare_all
@@ -536,10 +484,6 @@ workflows:
           inputs:
             - notify_user_groups: none
             - is_enable_public_page: "false"
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-paymentsheet-latency-synthetics:
     before_run:
       - start_emulator
@@ -563,10 +507,6 @@ workflows:
           title: Export PaymentSheet latency test results
           inputs:
             - test_title: PaymentSheet latency synthetics
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   check-dependencies-and-publish-pom:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true
@@ -748,5 +688,7 @@ step_bundles:
                 bash "$BITRISE_SOURCE_DIR/scripts/store_in_bitrise_test_results_folder.sh" "$test_type" "$test_title"
 meta:
   bitrise.io:
-    stack: ubuntu-resolute-26.04-bitrise-2026-android
-    machine_type_id: g2.linux.medium
+    # Run every workflow on the same macOS environment while evaluating a
+    # macOS-only Bitrise setup.
+    stack: osx-xcode-26.5.x
+    machine_type_id: g2.mac.4large
