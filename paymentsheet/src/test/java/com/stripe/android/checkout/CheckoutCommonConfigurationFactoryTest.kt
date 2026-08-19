@@ -135,14 +135,15 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `maps Link configuration`() {
+    fun `maps Link configuration from payment element configuration`() {
         val result = factory().create(
-            configuration = CheckoutController.Configuration()
-                .linkConfiguration(
-                    CheckoutController.Configuration.LinkConfiguration()
-                        .display(CheckoutController.Configuration.LinkConfiguration.Display.Never)
+            configuration = CheckoutController.Configuration().paymentElement(
+                PaymentElement.Configuration().linkConfiguration(
+                    PaymentElement.Configuration.LinkConfiguration().display(
+                        PaymentElement.Configuration.LinkConfiguration.Display.Never
+                    )
                 )
-                .build(),
+            ).build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
