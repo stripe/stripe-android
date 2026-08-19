@@ -1225,7 +1225,7 @@ internal class CheckoutControllerTest {
                 application = applicationContext,
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = CheckoutController.ResultCallback {},
-                rowSelectionImmediateActionCallback = null,
+                rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
                 checkoutControllerSavedState = controllerSavedState,
             ).checkoutController
         )

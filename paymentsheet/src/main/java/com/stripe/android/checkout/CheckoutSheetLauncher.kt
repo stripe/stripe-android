@@ -67,7 +67,9 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 applyCompleteResult(result)
-                result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
+                if (!result.hasBeenConfirmed) {
+                    result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
+                }
             }
             is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit

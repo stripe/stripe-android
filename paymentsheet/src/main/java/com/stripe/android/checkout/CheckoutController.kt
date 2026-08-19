@@ -23,7 +23,6 @@ import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -757,7 +756,8 @@ class CheckoutController @Inject internal constructor(
     ) {
         private var resultCallback: ResultCallback = ResultCallback {}
         private var integrationName: String = "stripe_checkout"
-        private var rowSelectionImmediateActionCallback: InternalRowSelectionCallback? = null
+        private var rowSelectionBehavior: PaymentElement.RowSelectionBehavior =
+            PaymentElement.RowSelectionBehavior.default()
 
         /**
          * Sets the [ResultCallback] invoked when a payment flow finishes.
@@ -769,13 +769,12 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
-         * Sets the callback invoked after the customer selects a payment option that requires an
-         * immediate action.
+         * Sets how payment-option row selections are handled.
          */
-        fun rowSelectionImmediateActionCallback(
-            rowSelectionImmediateActionCallback: () -> Unit,
+        fun rowSelectionBehavior(
+            rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
         ): Builder = apply {
-            this.rowSelectionImmediateActionCallback = rowSelectionImmediateActionCallback
+            this.rowSelectionBehavior = rowSelectionBehavior
         }
 
         /**
@@ -805,7 +804,7 @@ class CheckoutController @Inject internal constructor(
                 application = application,
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
-                rowSelectionImmediateActionCallback = rowSelectionImmediateActionCallback,
+                rowSelectionBehavior = rowSelectionBehavior,
                 checkoutControllerSavedState = checkoutControllerSavedState,
             )
 

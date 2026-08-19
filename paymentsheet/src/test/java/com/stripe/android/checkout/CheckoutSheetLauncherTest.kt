@@ -18,7 +18,6 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
-import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
@@ -224,6 +223,23 @@ internal class CheckoutSheetLauncherTest {
         registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
 
         assertThat(immediateActionWasInvoked()).isTrue()
+    }
+
+    @Test
+    fun `formActivityLauncher does not invoke immediate action when the result is confirmed`() = testScenario {
+        launchForm("cashapp")
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            hasBeenConfirmed = true,
+            customerState = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+
+        assertThat(immediateActionWasInvoked()).isFalse()
     }
 
     @Test

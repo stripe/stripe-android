@@ -101,4 +101,27 @@ internal class PaymentElementTest {
 
         composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertIsDisplayed()
     }
+
+    @Test
+    fun `default row selection behavior has no immediate action`() {
+        val immediateAction = PaymentElement.RowSelectionBehavior.getImmediateAction(
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
+        )
+
+        assertThat(immediateAction).isNull()
+    }
+
+    @Test
+    fun `immediate row selection behavior invokes its callback`() {
+        var callbackInvoked = false
+        val immediateAction = PaymentElement.RowSelectionBehavior.getImmediateAction(
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                callbackInvoked = true
+            },
+        )
+
+        requireNotNull(immediateAction).invoke()
+
+        assertThat(callbackInvoked).isTrue()
+    }
 }

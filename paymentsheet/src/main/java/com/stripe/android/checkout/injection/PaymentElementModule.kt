@@ -40,7 +40,7 @@ internal interface PaymentElementModule {
 
     @Binds
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
-        handler: DefaultEmbeddedRowSelectionImmediateActionHandler
+        handler: DefaultEmbeddedRowSelectionImmediateActionHandler,
     ): EmbeddedRowSelectionImmediateActionHandler
 
     @Binds
