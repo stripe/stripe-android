@@ -825,6 +825,19 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `refresh commits a complete session status to the state holder`() = runMutationScenario {
+        networkRule.checkoutInit(
+            responseFactory = successResponseFactory { json -> json.put("status", "complete") },
+        )
+
+        val result = controller.runServerUpdate { Result.success(Unit) }
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(controller.session.value?.status)
+            .isInstanceOf(CheckoutController.Session.Status.Complete::class.java)
+    }
+
+    @Test
     fun `runServerUpdate returns failure when serverUpdate throws`() = runMutationScenario {
         val before = controller.session.value
 
