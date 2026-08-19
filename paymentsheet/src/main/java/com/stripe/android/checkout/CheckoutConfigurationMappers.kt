@@ -34,12 +34,10 @@ internal fun CheckoutCollectedDetails.toBillingDetails(
     address = billingAddress?.asPaymentSheet(),
     email = checkoutSessionResponse.customerEmail,
     name = billingName,
-    phone = billingPhoneNumber,
 )
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutCollectedDetails.toShippingDetails(): AddressDetails = AddressDetails(
     name = shippingName,
     address = shippingAddress?.asPaymentSheet(),
-    phoneNumber = shippingPhoneNumber,
 )

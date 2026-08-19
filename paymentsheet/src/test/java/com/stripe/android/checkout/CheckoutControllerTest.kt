@@ -13,8 +13,10 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -114,7 +116,9 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends adaptive_pricing allowed true when configured`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().adaptivePricingAllowed(true),
+        configuration = CheckoutController.Configuration().adaptivePricing(
+            CheckoutController.Configuration.AdaptivePricing().allowed(true),
+        ),
         networkSetup = {
             networkRule.checkoutInit(
                 bodyPart("adaptive_pricing[allowed]", "true"),
@@ -334,6 +338,24 @@ internal class CheckoutControllerTest {
         val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
         assertThat(setup.controller.session.value).isNull()
         assertThat(setup.stateHolder.state).isNull()
+    }
+
+    @Test
+    fun `session exposes available express checkout payment methods`() {
+        val session = createSession(
+            availableExpressButtonTypes = listOf(
+                ExpressButtonType.GooglePay(
+                    ExpressCheckoutElement.Configuration.GooglePayConfiguration().build()
+                ),
+                ExpressButtonType.Link,
+            ),
+        )
+
+        assertThat(session.availableExpressCheckoutPaymentMethods).hasSize(2)
+        assertThat(session.availableExpressCheckoutPaymentMethods[0])
+            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.GooglePay::class.java)
+        assertThat(session.availableExpressCheckoutPaymentMethods[1])
+            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.Link::class.java)
     }
 
     @Test
@@ -656,14 +678,12 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = "John",
-                phoneNumber = "5551234567",
                 address = fullAddress,
             )
 
             result.getOrThrow()
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
-            assertThat(state.collectedDetails.shippingPhoneNumber).isEqualTo("5551234567")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
         }
 
@@ -681,7 +701,7 @@ internal class CheckoutControllerTest {
             )
 
             val address = Address().country("US").postalCode("80202")
-            val result = controller.updateShippingAddress(name = null, phoneNumber = null, address = address)
+            val result = controller.updateShippingAddress(name = null, address = address)
 
             assertThat(result.isSuccess).isTrue()
         }
@@ -691,7 +711,7 @@ internal class CheckoutControllerTest {
         runMutationScenario {
             // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
             // and the payment element is reloaded from the existing response, firing no request.
-            val result = controller.updateShippingAddress(name = "John", phoneNumber = null, address = fullAddress)
+            val result = controller.updateShippingAddress(name = "John", address = fullAddress)
 
             result.getOrThrow()
             val state = committedState()
@@ -707,7 +727,7 @@ internal class CheckoutControllerTest {
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
 
-            val result = controller.updateShippingAddress(name = "John", phoneNumber = null, address = fullAddress)
+            val result = controller.updateShippingAddress(name = "John", address = fullAddress)
 
             assertThat(result.isFailure).isTrue()
             val state = committedState()
@@ -719,7 +739,7 @@ internal class CheckoutControllerTest {
     fun `updateShippingAddress does not send tax_region when automatic tax targets billing`() =
         runMutationScenario(initModifier = automaticTaxFor("billing")) {
             // Automatic tax targets billing, so a shipping address update stays local: no request.
-            val result = controller.updateShippingAddress(name = "John", phoneNumber = null, address = fullAddress)
+            val result = controller.updateShippingAddress(name = "John", address = fullAddress)
 
             result.getOrThrow()
             val state = committedState()
@@ -740,14 +760,12 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateBillingAddress(
                 name = "Jane",
-                phoneNumber = "5559876543",
                 address = fullAddress,
             )
 
             result.getOrThrow()
             val state = committedState()
             assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
-            assertThat(state.collectedDetails.billingPhoneNumber).isEqualTo("5559876543")
             assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
         }
 
@@ -755,7 +773,7 @@ internal class CheckoutControllerTest {
     fun `updateBillingAddress does not send tax_region when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             // Automatic tax targets shipping, so a billing address update stays local: no request.
-            val result = controller.updateBillingAddress(name = "Jane", phoneNumber = null, address = fullAddress)
+            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
 
             result.getOrThrow()
             val state = committedState()
@@ -768,7 +786,7 @@ internal class CheckoutControllerTest {
         runMutationScenario {
             // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
             // and the payment element is reloaded from the existing response, firing no request.
-            val result = controller.updateBillingAddress(name = "Jane", phoneNumber = null, address = fullAddress)
+            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
 
             result.getOrThrow()
             val state = committedState()
@@ -784,7 +802,7 @@ internal class CheckoutControllerTest {
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
 
-            val result = controller.updateBillingAddress(name = "Jane", phoneNumber = null, address = fullAddress)
+            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
 
             assertThat(result.isFailure).isTrue()
             val state = committedState()
@@ -985,7 +1003,6 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("US"),
             )
 
@@ -1005,7 +1022,6 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("DE"),
             )
 
@@ -1024,7 +1040,6 @@ internal class CheckoutControllerTest {
             // No allowlist set, so any country passes.
             val result = controller.updateShippingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("DE"),
             )
 
@@ -1038,7 +1053,6 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("US"),
             )
 
@@ -1056,7 +1070,6 @@ internal class CheckoutControllerTest {
         runMutationScenario(initModifier = allowedShippingCountries(listOf("US"))) {
             val result = controller.updateBillingAddress(
                 name = null,
-                phoneNumber = null,
                 address = Address().country("DE"),
             )
 
@@ -1069,7 +1082,7 @@ internal class CheckoutControllerTest {
             // Address.build() requires a country and throws synchronously, before the allowlist is
             // ever consulted, so the call is wrapped to capture the thrown exception.
             val result = runCatching {
-                controller.updateShippingAddress(name = null, phoneNumber = null, address = Address())
+                controller.updateShippingAddress(name = null, address = Address())
             }
 
             assertThat(result.isFailure).isTrue()
@@ -1164,6 +1177,25 @@ internal class CheckoutControllerTest {
                 application = applicationContext,
                 savedStateHandle = savedStateHandle,
             ).integrationName(integrationName).build()
+        )
+    }
+
+    private fun createSession(
+        availableExpressButtonTypes: List<ExpressButtonType>,
+    ): CheckoutController.Session {
+        return CheckoutController.Session(
+            id = DEFAULT_CHECKOUT_SESSION_ID,
+            status = CheckoutController.Session.Status.Open(),
+            liveMode = false,
+            currency = "usd",
+            email = null,
+            tax = CheckoutController.Session.Tax(CheckoutController.Session.Tax.Status.Ready),
+            totalSummary = null,
+            lineItems = emptyList(),
+            shippingOptions = emptyList(),
+            paymentOptionDisplayData = null,
+            currencySelectorOptions = null,
+            availableExpressButtonTypes = availableExpressButtonTypes,
         )
     }
 

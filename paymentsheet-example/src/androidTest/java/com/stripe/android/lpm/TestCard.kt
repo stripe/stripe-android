@@ -31,7 +31,9 @@ import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.FieldPopulator
+import com.stripe.android.test.core.FieldPopulator.AddressEntryMode
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,6 +71,9 @@ internal class TestCard : BasePlaygroundTest() {
                 settings[CollectAddressSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             },
+            values = FieldPopulator.Values(
+                addressEntryMode = AddressEntryMode.InlineAutocomplete,
+            ),
             populateCustomLpmFields = {
                 populateCardDetails()
                 populateEmail()
@@ -382,7 +387,7 @@ internal class TestCard : BasePlaygroundTest() {
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText("4242", substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -412,7 +417,7 @@ internal class TestCard : BasePlaygroundTest() {
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText("4242", substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )

@@ -6,6 +6,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
@@ -41,6 +42,11 @@ internal class CheckoutStateLoader @Inject constructor(
         )
     }
 
+    fun clear() {
+        stateHolder.state = null
+        customerStateHolder.setCustomerState(null)
+    }
+
     private suspend fun commit(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
@@ -56,6 +62,7 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
+        embeddedConfig.appearance.parseAppearance()
 
         val commonConfiguration = commonConfigurationFactory.create(
             configuration = configuration,
@@ -141,8 +148,6 @@ private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): 
     return CheckoutCollectedDetails(
         shippingName = defaults.shippingDetails?.name,
         billingName = defaults.billingDetails?.name,
-        shippingPhoneNumber = defaults.shippingDetails?.phoneNumber,
-        billingPhoneNumber = defaults.billingDetails?.phoneNumber,
         shippingAddress = defaults.shippingDetails?.address,
         billingAddress = defaults.billingDetails?.address,
     )

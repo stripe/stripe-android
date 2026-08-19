@@ -21,6 +21,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -30,7 +31,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
@@ -67,7 +67,6 @@ internal class EmbeddedSheetActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(RetryRule(3))
 
     @Test
     fun `when launched without args should finish with error result`() {
@@ -254,6 +253,7 @@ internal class EmbeddedSheetActivityTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
             canUpdateCardExpiryAndBillingDetails = false,
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),
         selection: PaymentSelection? = null,

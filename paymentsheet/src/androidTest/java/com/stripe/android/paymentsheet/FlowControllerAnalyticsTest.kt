@@ -14,7 +14,8 @@ import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -88,7 +89,7 @@ internal class FlowControllerAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
-            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+            analyticsPayloadField(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
         )
         validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")
@@ -96,9 +97,9 @@ internal class FlowControllerAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay,wechat_pay")),
-            query("visible_payment_methods", Uri.encode("card,afterpay_clearpay,klarna")),
-            query("payment_method_layout", "horizontal"),
+            analyticsPayloadField("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay,wechat_pay")),
+            analyticsPayloadField("visible_payment_methods", Uri.encode("card,afterpay_clearpay,klarna")),
+            analyticsPayloadField("payment_method_layout", "horizontal"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
 
@@ -137,21 +138,22 @@ internal class FlowControllerAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(
             eventName = "mc_custom_payment_newpm_success",
             hasQueryParam("duration"),
-            query("intent_id", "pi_example"),
+            analyticsPayloadField("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
@@ -180,8 +182,8 @@ internal class FlowControllerAnalyticsTest {
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay,wechat_pay")),
-            query("payment_method_layout", "vertical"),
+            analyticsPayloadField("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay,wechat_pay")),
+            analyticsPayloadField("payment_method_layout", "vertical"),
         )
 
         testContext.configureFlowController {
@@ -222,20 +224,21 @@ internal class FlowControllerAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(
             eventName = "mc_custom_payment_newpm_success",
             hasQueryParam("duration")
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
@@ -261,16 +264,16 @@ internal class FlowControllerAnalyticsTest {
         }
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
-            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
-            query(Uri.encode("is_decoupled"), "true"),
+            analyticsPayloadField(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+            analyticsPayloadField(Uri.encode("is_decoupled"), "true"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
         validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         validateAnalyticsRequest(
             eventName = "mc_form_shown",
-            query(Uri.encode("is_decoupled"), "true"),
-            query(Uri.encode("is_confirmation_tokens"), "true"),
+            analyticsPayloadField(Uri.encode("is_decoupled"), "true"),
+            analyticsPayloadField(Uri.encode("is_confirmation_tokens"), "true"),
         )
         // cardscan is not available in test mode
         validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
@@ -329,20 +332,21 @@ internal class FlowControllerAnalyticsTest {
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
-            query("intent_id", "pi_example"),
+            analyticsPayloadField("intent_id", "pi_example"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(
             eventName = "mc_custom_payment_newpm_success",
-            query("is_confirmation_tokens", "true"),
-            query("intent_id", "pi_example"),
+            analyticsPayloadField("is_confirmation_tokens", "true"),
+            analyticsPayloadField("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_billing_address_completed")
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
         testContext.consumeNullPaymentOptionEventForFlowController()
@@ -381,7 +385,7 @@ internal class FlowControllerAnalyticsTest {
                     .customer(
                         PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     ).build(),
                 callback = { success, error ->

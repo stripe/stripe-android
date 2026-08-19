@@ -64,6 +64,7 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
+                    useDarkThemeIcon = null,
                 )
             },
             label = selection.label(
@@ -93,6 +94,5 @@ private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): CheckoutCon
         },
         email = email,
         name = name,
-        phone = phone,
     )
 }

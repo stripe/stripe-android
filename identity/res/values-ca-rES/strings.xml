@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Les formes d\'identificació acceptades inclouen</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Col·loca bé el document d\'identitat</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Permet</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Configuració de l\'aplicació</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Permís de càmera</string>
   <string name="stripe_camera_permission_rationale">Aquesta aplicació utilitza la càmera per escanejar els vostres documents d\'identificació i fa fotos per verificar la vostra identitat.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">S\'ha capturat la part davantera</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">S\'ha capturat la part esquerra</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">S\'ha capturat la part dreta</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">S\'està capturant la imatge...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Podeu tornar-ho a provar o carregar una imatge des del vostre dispositiu.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">No s\'ha pogut capturar la imatge</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Rebutja</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Els detalls no es veuen bé</string>
   <string name="stripe_decrease_lighting_2">Mou-lo a un espai més fosc</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Necessitem permís per utilitzar la càmera. Permeteu l\'accés a la càmera a la configuració de l\'aplicació.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">S\'està escanejant; espereu</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Quedeu-vos quiet...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">Identificació</string>
   <!-- Label for ID number section -->
@@ -222,10 +234,24 @@
   <string name="stripe_select">Selecciona</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">S\'han completat les autofotos</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Genial! S\'estan comprovant les imatges...</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">s\'ha capturat una autofoto</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Gireu el cap a l\'esquerra</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Gireu el cap a la dreta</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Apropeu-vos</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">No s\'han desat les autofotos. Voleu sortir?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Col·loqueu la cara dins del marc</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Autofoto</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Ajudeu-nos a millorar les verificacions</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Es faran unes quantes fotos automàticament al següent pas per verificar que sou vosaltres</string>
   <!-- Title for selfie warmup page -->

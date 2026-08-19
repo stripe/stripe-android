@@ -122,7 +122,6 @@ internal class PaymentMethodScreenScreenshotTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
             ),
-            checkoutSessionResponse = null,
         )
         val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,

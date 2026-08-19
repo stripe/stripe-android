@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Priimtos asmens tapatybės dokumento formos apima</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Sulygiuokite tapatybės dokumentą</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Leisti</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Programos nustatymai</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Fotoaparato leidimas</string>
   <string name="stripe_camera_permission_rationale">Ši programa, naudodama fotoaparatą, nuskaito jūsų tapatybės dokumentus ir daro nuotraukas, kad patvirtintų jūsų tapatybę.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Užfiksuotas priekis</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Užfiksuota kairė pusė</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Užfiksuota dešinė pusė</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Fiksuojama...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Galite bandyti dar kartą arba įkelti vaizdą iš savo įrenginio.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Nepavyko užfiksuoti vaizdo</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Atmesti</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Nematyti detalių</string>
   <string name="stripe_decrease_lighting_2">Pereikite į tamsesnę vietą</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Mums reikia leidimo naudoti jūsų fotoaparatą. Suteikite priegą prie fotoaparato programos nustatymuose.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Išlaikyti nejudinant, nuskaitoma</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Laikykite stabiliai...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">Asmens tapatybės dokumentas</string>
   <!-- Label for ID number section -->
@@ -222,10 +234,24 @@
   <string name="stripe_select">Pasirinkti</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Baigti asmenukių įrašai</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Puiku! Vykdomas nuotraukų patikrinimas…</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">užfiksuota viena asmenukė</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Pasukite galvą į kairę</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Pasukite galvą į dešinę</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Prieikite arčiau</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Jūsų asmenukės vaizdai neįrašyti. Ar norite išeiti?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Įstatykite veidą į kadrą</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Asmenukė</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Padėkite patobulinti patikras</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Sekančiame žingsnyje, siekiant patvirtinti jūsų tapatybę, bus padarytos kelios jūsų nuotraukos</string>
   <!-- Title for selfie warmup page -->

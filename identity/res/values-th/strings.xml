@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">รูปแบบเอกสารประจำตัวที่ยอมรับประกอบด้วย</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">วางเอกสารให้อยู่ในมุมที่พอดี</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">อนุญาต</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">การตั้งค่าแอป</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">สิทธิ์สำหรับกล้องถ่ายรูป</string>
   <string name="stripe_camera_permission_rationale">แอปนี้ใช้กล้องมาสแกนบัตรประจำตัวของคุณและถ่ายรูปเพื่อยืนยันตัวตนของคุณ</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">จับภาพด้านหน้า</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">จับภาพด้านซ้ายแล้ว</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">จับภาพด้านขวาแล้ว</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">กำลังจับภาพ...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">โปรดลองอีกครั้งหรืออัปโหลดรูปภาพจากอุปกรณ์</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">ไม่สามารถถ่ายภาพ</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">ปฏิเสธ</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">รายละเอียดไม่ชัดเจน</string>
   <string name="stripe_decrease_lighting_2">ย้ายไปพื้นที่ที่มีแสงสว่างน้อยลง</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">เราต้องการสิทธิ์เข้าถึงกล้องถ่ายรูปของคุณ โปรดให้สิทธิ์ดังกล่าวในการตั้งค่าแอป</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">ถือไว้ให้นิ่ง ระบบกำลังสแกน</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">อยู่นิ่งๆ...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">บัตรประจำตัว</string>
   <!-- Label for ID number section -->
@@ -222,10 +234,24 @@
   <string name="stripe_select">เลือก</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">ถ่ายเซลฟีเรียบร้อยแล้ว</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">เยี่ยม! กำลังตรวจสอบรูปภาพของคุณ....</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">ถ่ายเซลฟี 1 ภาพแล้ว</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">หันศีรษะไปทางซ้าย</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">หันศีรษะไปทางขวา</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">ขยับมาใกล้อีก</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">ระบบยังไม่ได้บันทึกภาพเซลฟี คุณต้องการออกจากส่วนนี้ไหม</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">วางใบหน้าของคุณภายในกรอบ</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">เซลฟี</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">ช่วยเราปรับปรุงการตรวจสอบยืนยัน</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">ระบบจะถ่ายภาพ 2-3 รายการโดยอัตโนมัติในขั้นตอนถัดไปเพื่อยืนยันว่าเป็นคุณจริงๆ</string>
   <!-- Title for selfie warmup page -->

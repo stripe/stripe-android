@@ -141,6 +141,9 @@ internal class CardDetailsController(
                     scannedCardDetails.expirationYear,
                 )
             )
+            cvcElement.controller.onRawValueChange("")
+            cvcElement.controller.requestFocus()
+            return
         } else {
             numberElement.controller.onRawValueChange(scannedCardDetails.cardNumber)
 

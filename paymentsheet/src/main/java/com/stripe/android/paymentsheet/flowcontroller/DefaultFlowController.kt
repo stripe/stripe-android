@@ -18,7 +18,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -35,6 +34,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
@@ -42,7 +42,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -255,8 +254,19 @@ internal class DefaultFlowController @Inject internal constructor(
             val linkBrand = viewModel.state?.paymentSheetState?.paymentMethodMetadata?.effectiveLinkBrand(
                 linkAccountHolder.linkAccountInfo.value.account
             )
-            paymentOptionFactory.create(it, linkBrand)
+            createPaymentOption(it, linkBrand)
         }
+    }
+
+    private fun createPaymentOption(
+        selection: PaymentSelection,
+        linkBrand: LinkBrand?,
+    ): PaymentOption {
+        return paymentOptionFactory.create(
+            selection = selection,
+            linkBrand = linkBrand,
+            appearance = viewModel.state?.config?.appearance,
+        )
     }
 
     private fun withCurrentState(block: (State) -> Unit) {
@@ -421,7 +431,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection = selection
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(
-                        paymentOption = paymentOptionFactory.create(selection, effectiveBrand),
+                        paymentOption = createPaymentOption(selection, effectiveBrand),
                         didCancel = false,
                     )
                 )
@@ -481,7 +491,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentOption = newSelection?.let {
                 val linkBrand = viewModel.state?.linkConfiguration
                     ?.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
-                paymentOptionFactory.create(it, linkBrand)
+                createPaymentOption(it, linkBrand)
             }
             val result = PaymentOptionResult(
                 paymentOption = paymentOption,
@@ -562,7 +572,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
                 cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-                googlePayDisplayItems = GooglePayDisplayItemsFactory.create(state.paymentMethodMetadata),
                 googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                     configuration = state.config,
                     paymentMethodMetadata = state.paymentMethodMetadata,
@@ -631,7 +640,7 @@ internal class DefaultFlowController @Inject internal constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         val paymentOption = paymentSelection?.let {
             val linkBrand = viewModel.state?.linkConfiguration?.effectiveLinkBrand(linkAccount)
-            paymentOptionFactory.create(it, linkBrand)
+            createPaymentOption(it, linkBrand)
         }
 
         paymentOptionResultCallback.onPaymentOptionResult(
@@ -786,7 +795,6 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun persistBillingAnalytics(paymentSelection: PaymentSelection?) {
-        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
         val billingAddress = paymentSelection.billingDetails?.address ?: return
         val filledAddress = viewModel.autocompleteFilledAddress
@@ -797,7 +805,6 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun reportBillingAddressCompleted(paymentSelection: PaymentSelection) {
-        if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return
         if (paymentSelection !is PaymentSelection.New) return
         val countryCode = paymentSelection.billingDetails?.address?.country ?: return
         val autocompleteUsed = viewModel.handle.get<Boolean>(AUTOCOMPLETE_USED_KEY) == true

@@ -29,7 +29,6 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayIsEmailRequiredProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -204,7 +203,8 @@ internal class DefaultWalletButtonsInteractor constructor(
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&
-                                walletsAllowedByMerchant.contains(WalletType.Link)
+                                walletsAllowedByMerchant.contains(WalletType.Link) &&
+                                arguments.paymentMethodMetadata.shouldShowLinkButton
                         }
                     }
                 }
@@ -329,7 +329,6 @@ internal class DefaultWalletButtonsInteractor constructor(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = arguments.paymentMethodMetadata.cardFundingFilter,
-            googlePayDisplayItems = GooglePayDisplayItemsFactory.create(arguments.paymentMethodMetadata),
             googlePayIsEmailRequired = GooglePayIsEmailRequiredProvider.get(
                 configuration = arguments.configuration,
                 paymentMethodMetadata = arguments.paymentMethodMetadata,

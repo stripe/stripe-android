@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Οι αποδεκτές μορφές εγγράφου ταυτότητας περιλαμβάνουν</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Κρατήστε οριζόντια την ταυτότητα</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Να επιτρέπεται</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Ρυθμίσεις εφαρμογής</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Άδεια κάμερας</string>
   <string name="stripe_camera_permission_rationale">Αυτή η εφαρμογή χρησιμοποιεί την κάμερα για να σαρώσει τα έγγραφα ταυτοποίησής σας και παίρνει φωτογραφίες για να επαληθεύσει την ταυτότητά σας.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Έγινε λήψη της μπροστινής πλευράς</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Έγινε λήψη αριστερά</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Έγινε λήψη δεξιά</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Καταγραφή…</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Μπορείτε να δοκιμάσετε ξανά ή να αποστείλετε μια εικόνα από τη συσκευή σας.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Δεν ήταν δυνατή η καταγραφή εικόνας</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Απόρριψη</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Οι λεπτομέρειες δεν είναι ορατές</string>
   <string name="stripe_decrease_lighting_2">Μεταβείτε σε έναν σκοτεινότερο χώρο</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Χρειαζόμαστε άδεια για να χρησιμοποιήσουμε την κάμερά σας. Επιτρέψτε την πρόσβαση της κάμερας από τις ρυθμίσεις εφαρμογής.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Κρατήστε σταθερά, γίνεται σάρωση</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Μείνετε ακίνητος/η...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">Ταυτότητα</string>
   <!-- Label for ID number section -->
@@ -222,10 +234,24 @@
   <string name="stripe_select">Επιλογή</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Οι λήψεις selfie ολοκληρώθηκαν</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Τέλεια. Ελέγχουμε τις εικόνες σας....</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">έγινε λήψη μιας selfie</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Γυρίστε το κεφάλι αριστερά</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Γυρίστε το κεφάλι δεξιά</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Μετακινηθείτε πιο κοντά</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Οι selfie δεν αποθηκεύτηκαν. Θέλετε να πραγματοποιήσετε έξοδο;</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Τοποθετήστε το πρόσωπό σας μέσα στο πλαίσιο</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Σέλφι</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Βοηθήστε μας να βελτιώσουμε τις επαληθεύσεις</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Στο επόμενο βήμα θα ληφθούν αυτόματα μερικές φωτογραφίες για να επαληθεύσουμε ότι είστε εσείς</string>
   <!-- Title for selfie warmup page -->

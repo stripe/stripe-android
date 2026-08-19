@@ -1,16 +1,17 @@
 package com.stripe.android.common.nfcscan.ui
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import android.os.SystemClock
+import androidx.compose.animation.core.withInfiniteAnimationFrameMillis
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -28,24 +29,26 @@ internal fun PulseRings(coilSize: Dp) {
         PulseRingsCanvas(
             coilSize = coilSize,
             color = color,
-            transitionProgress = STATIC_PROGRESS,
+            elapsedMillis = STATIC_PROGRESS * CYCLE_DURATION,
         )
     } else {
-        val transition = rememberInfiniteTransition(label = "pulsing_rings")
-        val transitionProgress by transition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(CYCLE_DURATION, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart,
-            ),
-            label = "pulsing_rings_animation",
-        )
+        val startMillis = rememberSaveable { SystemClock.elapsedRealtime() }
+        var elapsedMillis by remember {
+            mutableFloatStateOf((SystemClock.elapsedRealtime() - startMillis).toFloat())
+        }
+
+        LaunchedEffect(startMillis) {
+            while (true) {
+                withInfiniteAnimationFrameMillis {
+                    elapsedMillis = (SystemClock.elapsedRealtime() - startMillis).toFloat()
+                }
+            }
+        }
 
         PulseRingsCanvas(
             coilSize = coilSize,
             color = color,
-            transitionProgress = transitionProgress,
+            elapsedMillis = elapsedMillis,
         )
     }
 }
@@ -54,7 +57,7 @@ internal fun PulseRings(coilSize: Dp) {
 private fun PulseRingsCanvas(
     coilSize: Dp,
     color: Color,
-    transitionProgress: Float,
+    elapsedMillis: Float,
 ) {
     Canvas(modifier = Modifier.size(coilSize)) {
         val center = Offset(size.width / 2f, size.height / 2f)
@@ -62,7 +65,14 @@ private fun PulseRingsCanvas(
         val strokeWidth = 1.dp.toPx()
 
         repeat(RING_COUNT) { index ->
-            val progress = (transitionProgress + index / NUM_RINGS) % 1f
+            val ringStartMillis = index / NUM_RINGS * CYCLE_DURATION
+            val ringElapsedMillis = elapsedMillis - ringStartMillis
+
+            if (ringElapsedMillis < 0f) {
+                return@repeat
+            }
+
+            val progress = (ringElapsedMillis % CYCLE_DURATION) / CYCLE_DURATION
             val scale = MIN_SIZE_SCALE + progress * (MAX_SIZE_SCALE - MIN_SIZE_SCALE)
             val alpha = (1f - progress) * MAX_RING_ALPHA
             val radius = baseRadius * scale
@@ -82,7 +92,7 @@ private fun PulseRingsCanvas(
     }
 }
 
-private const val CYCLE_DURATION = 4500
+private const val CYCLE_DURATION = 4500f
 private const val RING_COUNT = 3
 private const val NUM_RINGS = RING_COUNT.toFloat()
 

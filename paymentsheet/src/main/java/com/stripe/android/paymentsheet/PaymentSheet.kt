@@ -3713,6 +3713,19 @@ class PaymentSheet internal constructor(
             get() = when (display) {
                 Display.Automatic -> true
                 Display.Never -> false
+                Display.WalletButtonHidden -> true
+            }
+
+        /**
+         * Canonical source of truth for whether the Link button/row should be rendered in the
+         * payment element UI. Link may remain functionally enabled (see [shouldDisplay]) even
+         * when its button is hidden, e.g. to support the returning-user flow and inline sign-up
+         * without a visible entry point.
+         */
+        internal val shouldShowButton: Boolean
+            get() = when (display) {
+                Display.Automatic -> true
+                Display.Never, Display.WalletButtonHidden -> false
             }
 
         class Builder {
@@ -3759,12 +3772,20 @@ class PaymentSheet internal constructor(
             /**
              * Link will never be displayed.
              */
-            Never;
+            Never,
+
+            /**
+             * Link's button/row is hidden from the payment element UI, but Link remains
+             * otherwise enabled: the returning-user flow and the inline sign-up checkbox are
+             * still shown.
+             */
+            WalletButtonHidden;
 
             internal val analyticsValue: String
                 get() = when (this) {
                     Automatic -> "automatic"
                     Never -> "never"
+                    WalletButtonHidden -> "wallet_button_hidden"
                 }
         }
     }

@@ -1,6 +1,12 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.isFocused
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -10,6 +16,7 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.FieldValidationMessage
@@ -32,6 +39,12 @@ class CardDetailsControllerTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -363,6 +376,54 @@ class CardDetailsControllerTest {
             .isEqualTo("")
     }
 
+    @Test
+    fun `When validated card scanned, CVC field gains focus`() = scannedCardTest(
+        scannedCardDetails = ScannedCardDetails.Validated(
+            cardNumber = "4242424242424242",
+            expirationYear = 2030,
+            expirationMonth = 6,
+        ),
+    ) {
+        composeTestRule.onNodeWithTag(TEST_TAG).assert(isFocused())
+    }
+
+    @Test
+    fun `When card scanned via camera, CVC field does not gain focus`() = scannedCardTest(
+        scannedCardDetails = ScannedCardDetails.Unvalidated(
+            cardNumber = "5555555555554444",
+            expirationYear = 2044,
+            expirationMonth = 4,
+        )
+    ) {
+        composeTestRule.onNodeWithTag(TEST_TAG).assert(!isFocused())
+    }
+
+    private fun scannedCardTest(
+        scannedCardDetails: ScannedCardDetails,
+        block: suspend () -> Unit,
+    ) = runTest {
+        val cardController = cardDetailsController()
+
+        composeTestRule.setContent {
+            cardController.cvcElement.controller.ComposeUI(
+                enabled = true,
+                field = cardController.cvcElement,
+                modifier = Modifier.testTag(TEST_TAG),
+                hiddenIdentifiers = emptySet(),
+                lastTextFieldIdentifier = null,
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag(TEST_TAG).assert(!isFocused())
+
+        cardController.onScannedCard(scannedCardDetails)
+
+        composeTestRule.waitForIdle()
+
+        block()
+    }
+
     private fun cardDetailsController(
         initialValues: Map<IdentifierSpec, String?> = emptyMap(),
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -433,5 +494,9 @@ class CardDetailsControllerTest {
         override fun determineState(input: String): TextFieldState {
             return textFieldState
         }
+    }
+
+    private companion object {
+        const val TEST_TAG = "CVC_FIELD"
     }
 }

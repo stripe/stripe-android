@@ -19,6 +19,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -30,7 +31,6 @@ import com.stripe.android.paymentsheet.state.LinkSignupModeResult
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.tta.testing.TapToAddCardAddedPage
 import com.stripe.android.tta.testing.TapToAddCardCollectionTestHelper
@@ -76,7 +76,6 @@ class TapToAddActivityTest {
         .around(imageLoaderTestRule)
         .around(FeatureFlagTestRule(FeatureFlags.forceTapToAddWithTerminal, isEnabled = true))
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(RetryRule(3))
         .around(intentsRule)
 
     private val linkHelper = TapToAddLinkTestHelper(composeTestRule, networkRule)
@@ -119,6 +118,7 @@ class TapToAddActivityTest {
     fun successWithLinkInlineSignupInContinueMode() = runScenario(
         mode = TapToAddMode.Continue,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             linkState = LinkState(
@@ -174,6 +174,7 @@ class TapToAddActivityTest {
     fun successInCompleteMode() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PAYMENT_INTENT,
@@ -212,6 +213,7 @@ class TapToAddActivityTest {
     fun failedPaymentInCompleteMode() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PAYMENT_INTENT,
@@ -251,6 +253,7 @@ class TapToAddActivityTest {
     fun successWithLinkInlineSignupInCompleteMode() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PAYMENT_INTENT,
@@ -277,7 +280,7 @@ class TapToAddActivityTest {
         linkHelper.enqueueSignup()
         linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(
             paymentMethodId = info.cardPaymentMethod.id,
-            ephemeralKey = "ek_123",
+            ephemeralKey = TestApiKeys.EPHEMERAL,
         )
 
         confirmationHelper.intendingPaymentConfirmationToBeLaunched(
@@ -321,6 +324,7 @@ class TapToAddActivityTest {
     fun successWithCvcRecollection() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
@@ -389,6 +393,7 @@ class TapToAddActivityTest {
     fun canceledFromCardAddedScreen() = runScenario(
         mode = TapToAddMode.Continue,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             linkState = LinkState(
@@ -431,6 +436,7 @@ class TapToAddActivityTest {
     fun canceledFromConfirmationScreen() = runScenario(
         mode = TapToAddMode.Complete,
         metadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
             stripeIntent = PAYMENT_INTENT,
@@ -528,6 +534,7 @@ class TapToAddActivityTest {
     private fun runScenario(
         mode: TapToAddMode,
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
         ),

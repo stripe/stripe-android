@@ -34,7 +34,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
@@ -99,12 +98,13 @@ internal data class PaymentMethodMetadata(
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
     val shouldUseAutocompleteProxyEndpoints: Boolean,
-    val checkoutSessionResponse: CheckoutSessionResponse?,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
-        get() = checkoutSessionResponse?.collectsTaxFromBillingAddress == true
+        get() = (integrationMetadata as? IntegrationMetadata.CheckoutSession)
+            ?.checkoutSessionResponse
+            ?.collectsTaxFromBillingAddress == true
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
         return when (paymentMethodLayout) {
@@ -124,6 +124,14 @@ internal data class PaymentMethodMetadata(
             is LinkState -> result
             is LinkDisabledState, null -> null
         }
+
+    /**
+     * Canonical source of truth for whether the Link button/row should be rendered in the
+     * payment element UI. Link may remain functionally enabled ([linkState] non-null) even when
+     * its button is hidden via [PaymentSheet.LinkConfiguration.Display.WalletButtonHidden].
+     */
+    val shouldShowLinkButton: Boolean
+        get() = linkState != null && linkConfiguration.shouldShowButton
 
     /**
      * Returns the consumer's LinkBrand if logged in, otherwise falls back to the metadata's brand.
@@ -443,9 +451,6 @@ internal data class PaymentMethodMetadata(
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
-                checkoutSessionResponse =
-                    (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
-                        ?.checkoutSessionResponse,
                 paymentMethodLayout = paymentMethodLayout,
             )
         }
@@ -517,7 +522,6 @@ internal data class PaymentMethodMetadata(
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
-                checkoutSessionResponse = null,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             )
         }

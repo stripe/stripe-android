@@ -1972,20 +1972,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
         options: ApiRequest.Options
     ): Result<ConfirmPaymentIntentParams> {
-        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+        if (!options.apiKeyIsUserKey) {
             return Result.success(this)
         }
 
-        // For user key auth, we must create the PM first.
-        val paymentMethodResult = createPaymentMethod(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            options = options,
-        )
+        val paymentMethodIdResult = if (paymentMethodId != null) {
+            Result.success(paymentMethodId)
+        } else if (paymentMethodCreateParams != null) {
+            // New payment method: create the PM first, then build Dashboard params.
+            createPaymentMethod(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                options = options,
+            ).map { it.id }
+        } else {
+            return Result.success(this)
+        }
 
-        return paymentMethodResult.mapCatching { paymentMethod ->
+        return paymentMethodIdResult.mapCatching { paymentMethod ->
             ConfirmPaymentIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id,
+                paymentMethodId = paymentMethod,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }
@@ -1994,20 +2000,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmSetupIntentParams.maybeForDashboard(
         options: ApiRequest.Options
     ): Result<ConfirmSetupIntentParams> {
-        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+        if (!options.apiKeyIsUserKey) {
             return Result.success(this)
         }
 
-        // For user key auth, we must create the PM first.
-        val paymentMethodResult = createPaymentMethod(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            options = options,
-        )
+        val paymentMethodIdResult = if (paymentMethodId != null) {
+            Result.success(paymentMethodId)
+        } else if (paymentMethodCreateParams != null) {
+            // New payment method: create the PM first, then build Dashboard params.
+            createPaymentMethod(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                options = options,
+            ).map { it.id }
+        } else {
+            return Result.success(this)
+        }
 
-        return paymentMethodResult.mapCatching { paymentMethod ->
+        return paymentMethodIdResult.mapCatching { paymentMethod ->
             ConfirmSetupIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id,
+                paymentMethodId = paymentMethod,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }

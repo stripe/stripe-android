@@ -383,6 +383,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 {
                   "session_id": "cs_123",
                   "ui_mode": "custom",
+                  "status": "open",
                   "currency": "usd",
                   "total_summary": {
                     "due": 5099

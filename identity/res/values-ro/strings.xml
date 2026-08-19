@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Formele de identificare acceptate includ</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Țineți documentul de identitate drept</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Permiteți</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Setările aplicației</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Permisiune cameră</string>
   <string name="stripe_camera_permission_rationale">Această aplicație utilizează camera pentru a vă scana documentele de identificare și face fotografii pentru a vă verifica identitatea.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Captură față</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Captură stânga</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Captură dreapta</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Se captează…</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Puteți să încercați din nou sau să încărcați o imagine de pe dispozitivul dvs.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Nu s-a putut capta imaginea</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Refuzare</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Datele nu sunt vizibile</string>
   <string name="stripe_decrease_lighting_2">Mutați-vă într-o zonă mai întunecată</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Avem nevoie de permisiunea de a utiliza camera dvs. Vă rugăm să permiteți accesul la cameră în setările aplicației.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Nu mișcați, se scanează</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Nu vă mișcați...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">Carte de identitate</string>
   <!-- Label for ID number section -->
@@ -222,10 +234,24 @@
   <string name="stripe_select">Selectare</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Capturile de tip selfie sunt complete</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Excelent! Vă verificăm imaginile....</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">un selfie captat</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Întoarceți capul spre stânga</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Întoarceți capul spre dreapta</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Apropiați-vă</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Fotografiile dvs. de tip selfie nu au fost salvate. Doriți să ieșiți?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Așezați-vă fața în cadru</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Selfie</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Ajutați-ne să îmbunătățim verificările</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Câteva fotografii vor fi efectuate automat la următorul pas pentru a verifica dacă sunteți dvs.</string>
   <!-- Title for selfie warmup page -->

@@ -8,6 +8,10 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+import com.stripe.android.elements.PaymentElement.Configuration.TermsDisplay
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -15,7 +19,11 @@ import org.junit.Test
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
-@OptIn(CheckoutSessionPreview::class)
+@OptIn(
+    CheckoutSessionPreview::class,
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+    CardFundingFilteringPrivatePreview::class,
+)
 internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
@@ -42,10 +50,8 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
         val collectedDetails = collectedDetails(
             billingName = "Jane Billing",
-            billingPhoneNumber = "5559876543",
             billingAddress = address(),
             shippingName = "John Shipping",
-            shippingPhoneNumber = "5551234567",
             shippingAddress = address(),
         )
 
@@ -124,6 +130,137 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
+    fun `maps Link configuration`() {
+        val result = factory().create(
+            configuration = CheckoutController.Configuration()
+                .linkConfiguration(
+                    CheckoutController.Configuration.LinkConfiguration()
+                        .display(CheckoutController.Configuration.LinkConfiguration.Display.Never)
+                )
+                .build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+    }
+
+    @Test
+    fun `maps terms display to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().termsDisplay(
+                    mapOf(PaymentMethod.Type.Card to TermsDisplay.NEVER)
+                )
+            )
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.termsDisplay)
+            .isEqualTo(mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER))
+    }
+
+    @Test
+    fun `maps payment method order to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration().paymentMethodOrder(listOf("card", "klarna")))
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.paymentMethodOrder).isEqualTo(listOf("card", "klarna"))
+    }
+
+    @Test
+    fun `maps preferred networks to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().preferredNetworks(
+                    listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+                )
+            )
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.preferredNetworks)
+            .isEqualTo(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
+    }
+
+    @Test
+    fun `maps opens card scanner automatically to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration().opensCardScannerAutomatically(true))
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.opensCardScannerAutomatically).isTrue()
+    }
+
+    @Test
+    fun `maps card brand acceptance to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().cardBrandAcceptance(
+                    PaymentElement.Configuration.CardBrandAcceptance.disallowed(
+                        listOf(PaymentElement.Configuration.CardBrandAcceptance.BrandCategory.Amex)
+                    )
+                )
+            )
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.cardBrandAcceptance).isEqualTo(
+            PaymentSheet.CardBrandAcceptance.disallowed(
+                listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+            )
+        )
+    }
+
+    @Test
+    fun `maps allowed card funding types to common configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().allowedCardFundingTypes(
+                    listOf(PaymentElement.Configuration.CardFundingType.Debit)
+                )
+            )
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.allowedCardFundingTypes)
+            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
+    }
+
+    @Test
     fun `sources the billing email from the checkout session customer email`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
@@ -171,15 +308,31 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(result.googlePlacesApiKey).isNull()
     }
 
+    @Test
+    fun `propagates payment element appearance`() {
+        val result = factory().create(
+            configuration = controllerConfiguration(
+                appearance = PaymentElement.Configuration.Appearance()
+                    .shapes(PaymentElement.Configuration.Appearance.Shapes().cornerRadiusDp(3f))
+            ),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.appearance.shapes.cornerRadiusDp).isEqualTo(3f)
+    }
+
     private fun factory(appName: String = "Test App") = CheckoutCommonConfigurationFactory(appName)
 
     private fun controllerConfiguration(
         billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
+        appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),
         googlePayConfiguration: GooglePayConfiguration? = null,
     ): CheckoutController.Configuration.State {
         val builder = CheckoutController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
+                    .appearance(appearance)
                     .billingDetailsCollectionConfiguration(
                         BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
                     )
@@ -202,16 +355,12 @@ internal class CheckoutCommonConfigurationFactoryTest {
     private fun collectedDetails(
         shippingName: String? = null,
         billingName: String? = null,
-        shippingPhoneNumber: String? = null,
-        billingPhoneNumber: String? = null,
         shippingAddress: Address.State? = null,
         billingAddress: Address.State? = null,
     ): CheckoutCollectedDetails {
         return CheckoutCollectedDetails(
             shippingName = shippingName,
             billingName = billingName,
-            shippingPhoneNumber = shippingPhoneNumber,
-            billingPhoneNumber = billingPhoneNumber,
             shippingAddress = shippingAddress,
             billingAddress = billingAddress,
         )

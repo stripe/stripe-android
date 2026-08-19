@@ -40,13 +40,13 @@ import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcompone
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.text.annotatedStringResource
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.collectLatest
@@ -250,7 +250,7 @@ internal fun AutocompleteScreenUI(
                 .padding(paddingValues)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(top = StripeTheme.formInsets.top.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = MaterialTheme.stripeFormInsets.top.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -259,7 +259,7 @@ internal fun AutocompleteScreenUI(
                 ) {
                     TextFieldSection(
                         textFieldController = queryController,
-                        modifier = Modifier.padding(StripeTheme.getOuterFormInsets())
+                        modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
                     ) {
                         TextField(
                             modifier = Modifier
@@ -282,7 +282,9 @@ internal fun AutocompleteScreenUI(
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(StripeTheme.getOuterFormInsets())
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
                             ) {
                                 it.forEach { prediction ->
                                     val primaryText = prediction.primaryText
@@ -332,7 +334,7 @@ internal fun AutocompleteScreenUI(
                                 contentDescription = null,
                                 modifier = Modifier
                                     .padding(vertical = 16.dp)
-                                    .padding(StripeTheme.getOuterFormInsets())
+                                    .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
                                     .testTag(TEST_TAG_ATTRIBUTION_DRAWABLE)
                             )
                         }

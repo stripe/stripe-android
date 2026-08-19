@@ -1,7 +1,10 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.cachedConsumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
@@ -13,6 +16,7 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
 import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.MaybePresentGenericError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
@@ -21,12 +25,15 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
+import com.stripe.android.financialconnections.repository.GenericErrorContentRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.ViewModelStoreTestRule
+import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -54,6 +61,7 @@ internal class AccountPickerViewModelTest {
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val saveAccountToLink = mock<SaveAccountToLink>()
+    private val genericErrorContentRepository = GenericErrorContentRepository(SavedStateHandle())
 
     private fun buildViewModel(
         state: AccountPickerState
@@ -66,6 +74,10 @@ internal class AccountPickerViewModelTest {
         logger = Logger.noop(),
         handleClickableUrl = mock(),
         pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts,
+        maybePresentGenericError = MaybePresentGenericError(
+            contentRepository = genericErrorContentRepository,
+            navigationManager = navigationManager,
+        ),
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         saveAccountToLink = saveAccountToLink,
         consumerSessionProvider = { cachedConsumerSession() },
@@ -339,8 +351,57 @@ internal class AccountPickerViewModelTest {
         )
     }
 
+    @Test
+    fun `init - an error carrying a server-driven pane replaces this pane with it`() = runTest {
+        givenManifestReturns(sessionManifest().copy(activeAuthSession = authorizationSession()))
+        givenPollAccountsThrows(errorWithGenericPane())
+
+        buildViewModel(AccountPickerState())
+
+        navigationManager.assertNavigatedTo(
+            destination = Destination.GenericError,
+            pane = Pane.ACCOUNT_PICKER,
+            popUpTo = PopUpToBehavior.Current(inclusive = true),
+        )
+        assertThat(genericErrorContentRepository.get()?.pane?.heading)
+            .isEqualTo("There was a problem accessing your account")
+    }
+
+    @Test
+    fun `init - a plain error is left to this pane's own inline error content`() = runTest {
+        givenManifestReturns(sessionManifest().copy(activeAuthSession = authorizationSession()))
+        givenPollAccountsThrows(InvalidRequestException(stripeError = StripeError(message = "Nope.")))
+
+        buildViewModel(AccountPickerState())
+
+        assertThat(navigationManager.emittedIntents).isEmpty()
+        assertThat(genericErrorContentRepository.get()).isNull()
+    }
+
+    private fun errorWithGenericPane() = InvalidRequestException(
+        stripeError = StripeError(
+            extraFields = mapOf(
+                "use_generic_error_pane" to "true",
+                "generic_error_pane_heading" to "There was a problem accessing your account",
+                "generic_error_pane_subheading" to "Please try again.",
+                "generic_error_pane_primary_cta" to "Try again",
+                "generic_error_pane_primary_cta_action" to "restart_auth_flow",
+            )
+        ),
+        statusCode = 400,
+    )
+
     private suspend fun givenManifestReturns(manifest: FinancialConnectionsSessionManifest) {
         whenever(getSync()).thenReturn(syncResponse(manifest))
+    }
+
+    private suspend fun givenPollAccountsThrows(error: Throwable) {
+        whenever(
+            pollAuthorizationSessionAccounts(
+                canRetry = any(),
+                sync = any()
+            )
+        ).thenAnswer { throw error }
     }
 
     private suspend fun givenPollAccountsReturns(

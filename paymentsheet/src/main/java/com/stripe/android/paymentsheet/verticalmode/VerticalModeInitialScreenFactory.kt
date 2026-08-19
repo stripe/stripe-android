@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
@@ -38,7 +39,9 @@ internal object VerticalModeInitialScreenFactory {
                         bankFormInteractor = bankFormInteractor,
                         paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                     ),
-                    showsWalletHeader = paymentMethodMetadata.availableWallets.isNotEmpty(),
+                    showsWalletHeader = paymentMethodMetadata.availableWallets.any {
+                        it != WalletType.Link || paymentMethodMetadata.shouldShowLinkButton
+                    },
                 )
             )
         }

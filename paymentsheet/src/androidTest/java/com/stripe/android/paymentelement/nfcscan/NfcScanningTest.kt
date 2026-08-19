@@ -65,6 +65,8 @@ internal class NfcScanningTest {
             lastFourDigits = SCANNED_CARD_LAST_FOUR,
         )
 
+        nfcScanningCardFormPage.assertCvcIsFocused()
+
         nfcScanningCardFormPage.fillRemainingCardDetails()
 
         enqueueConfirmRequests()

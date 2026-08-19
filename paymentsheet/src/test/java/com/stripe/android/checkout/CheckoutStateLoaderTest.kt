@@ -3,16 +3,20 @@ package com.stripe.android.checkout
 import android.app.Application
 import android.graphics.Bitmap
 import android.os.Bundle
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -20,6 +24,7 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -28,6 +33,13 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.uicore.FormInsets
+import com.stripe.android.uicore.IconStyle
+import com.stripe.android.uicore.PrimaryButtonStyle
+import com.stripe.android.uicore.StripeColors
+import com.stripe.android.uicore.StripeShapes
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeTypography
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -43,7 +55,11 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
-@OptIn(CheckoutSessionPreview::class)
+@OptIn(
+    CheckoutSessionPreview::class,
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+    CardFundingFilteringPrivatePreview::class,
+)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutStateLoaderTest {
 
@@ -67,6 +83,92 @@ internal class CheckoutStateLoaderTest {
         )
 
         assertThat(stateHolder.state?.commonConfiguration?.googlePay?.countryCode).isEqualTo("US")
+    }
+
+    @Test
+    fun `loadInitial applies payment element appearance to the global theme`() = runScenario {
+        val previousTheme = StripeThemeSnapshot()
+        try {
+            loader.loadInitial(
+                configuration = CheckoutController.Configuration()
+                    .paymentElement(
+                        PaymentElement.Configuration().appearance(
+                            PaymentElement.Configuration.Appearance().colorsLight(
+                                PaymentElement.Configuration.Appearance.Colors.light()
+                                    .primary(0xFF123456.toInt())
+                            )
+                        )
+                    )
+                    .build(),
+                checkoutSessionResponse = response(),
+            )
+
+            assertThat(StripeTheme.colorsLightMutable.materialColors.primary.toArgb())
+                .isEqualTo(0xFF123456.toInt())
+        } finally {
+            previousTheme.restore()
+        }
+    }
+
+    @Test
+    fun `loadInitial passes payment method order to payment method metadata`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().paymentMethodOrder(listOf("klarna", "card"))
+                )
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
+            .isEqualTo(listOf("klarna", "card"))
+    }
+
+    @Test
+    fun `loadInitial passes preferred networks to common configuration`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().preferredNetworks(
+                        listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+                    )
+                )
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(stateHolder.state?.commonConfiguration?.preferredNetworks)
+            .isEqualTo(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
+    }
+
+    @Test
+    fun `loadInitial passes opens card scanner automatically to common configuration`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(PaymentElement.Configuration().opensCardScannerAutomatically(true))
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(stateHolder.state?.commonConfiguration?.opensCardScannerAutomatically).isTrue()
+    }
+
+    @Test
+    fun `loadInitial passes allowed card funding types to common configuration`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().allowedCardFundingTypes(
+                        listOf(PaymentElement.Configuration.CardFundingType.Debit)
+                    )
+                )
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(stateHolder.state?.commonConfiguration?.allowedCardFundingTypes)
+            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
     }
 
     @Test
@@ -108,7 +210,6 @@ internal class CheckoutStateLoaderTest {
                     .billingDetails(
                         CheckoutController.Configuration.Defaults.ContactDetails()
                             .name("Jane Billing")
-                            .phoneNumber("5559876543")
                             .address(CheckoutController.Address().country("US").city("Denver")),
                     )
                     .shippingDetails(
@@ -121,7 +222,6 @@ internal class CheckoutStateLoaderTest {
 
         val collected = requireNotNull(stateHolder.state).collectedDetails
         assertThat(collected.billingName).isEqualTo("Jane Billing")
-        assertThat(collected.billingPhoneNumber).isEqualTo("5559876543")
         assertThat(collected.billingAddress?.country).isEqualTo("US")
         assertThat(collected.billingAddress?.city).isEqualTo("Denver")
         assertThat(collected.shippingName).isEqualTo("John Shipping")
@@ -159,6 +259,19 @@ internal class CheckoutStateLoaderTest {
         paymentElementLoader.updatePaymentMethods(emptyList())
         loader.reload(requireNotNull(stateHolder.state))
 
+        assertThat(customerStateHolder.paymentMethods.value).isEmpty()
+    }
+
+    @Test
+    fun `clear removes controller and customer state`() = runScenario(
+        customer = savedCustomer(),
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        loader.clear()
+
+        assertThat(stateHolder.state).isNull()
+        assertThat(customerStateHolder.customer.value).isNull()
         assertThat(customerStateHolder.paymentMethods.value).isEmpty()
     }
 
@@ -429,5 +542,31 @@ internal class CheckoutStateLoaderTest {
             val previousSelection: PaymentSelection?,
             val newSelection: PaymentSelection?,
         )
+    }
+}
+
+internal class StripeThemeSnapshot(
+    private val colorsLight: StripeColors = StripeTheme.colorsLightMutable,
+    private val colorsDark: StripeColors = StripeTheme.colorsDarkMutable,
+    private val shapes: StripeShapes = StripeTheme.shapesMutable,
+    private val typography: StripeTypography = StripeTheme.typographyMutable,
+    private val primaryButtonStyle: PrimaryButtonStyle = StripeTheme.primaryButtonStyle,
+    private val formInsets: FormInsets = StripeTheme.formInsets,
+    private val sectionSpacing: Float? = StripeTheme.customSectionSpacing,
+    private val textFieldInsets: FormInsets = StripeTheme.textFieldInsets,
+    private val iconStyle: IconStyle = StripeTheme.iconStyle,
+    private val verticalModeRowPadding: Float = StripeTheme.verticalModeRowPadding,
+) {
+    fun restore() {
+        StripeTheme.colorsLightMutable = colorsLight
+        StripeTheme.colorsDarkMutable = colorsDark
+        StripeTheme.shapesMutable = shapes
+        StripeTheme.typographyMutable = typography
+        StripeTheme.primaryButtonStyle = primaryButtonStyle
+        StripeTheme.formInsets = formInsets
+        StripeTheme.customSectionSpacing = sectionSpacing
+        StripeTheme.textFieldInsets = textFieldInsets
+        StripeTheme.iconStyle = iconStyle
+        StripeTheme.verticalModeRowPadding = verticalModeRowPadding
     }
 }

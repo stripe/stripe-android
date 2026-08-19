@@ -1,10 +1,9 @@
 package com.stripe.android.paymentelement.nfcscan
 
-import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -47,6 +46,15 @@ internal class NfcScanningCardFormPage(
 
         composeTestRule.onNodeWithText("•••• $lastFourDigits").assertExists()
         composeTestRule.onNodeWithContentDescription(CLEAR_SCANNED_CARD_CONTENT_DESCRIPTION).assertExists()
+    }
+
+    fun assertCvcIsFocused() {
+        composeTestRule.waitUntil(UI_TIMEOUT_MS) {
+            composeTestRule.waitForIdle()
+            composeTestRule.onAllNodes(hasText("CVC").and(isFocused()))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
     }
 
     private companion object {

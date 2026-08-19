@@ -5,10 +5,10 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun PaymentElement.PaymentMethodLayout.asPaymentSheet(): PaymentSheet.PaymentMethodLayout {
+internal fun PaymentElement.Configuration.PaymentMethodLayout.asPaymentSheet(): PaymentSheet.PaymentMethodLayout {
     return when (this) {
-        PaymentElement.PaymentMethodLayout.Horizontal -> PaymentSheet.PaymentMethodLayout.Horizontal
-        PaymentElement.PaymentMethodLayout.Vertical -> PaymentSheet.PaymentMethodLayout.Vertical
-        PaymentElement.PaymentMethodLayout.Automatic -> PaymentSheet.PaymentMethodLayout.Automatic
+        PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> PaymentSheet.PaymentMethodLayout.Horizontal
+        PaymentElement.Configuration.PaymentMethodLayout.Vertical -> PaymentSheet.PaymentMethodLayout.Vertical
+        PaymentElement.Configuration.PaymentMethodLayout.Automatic -> PaymentSheet.PaymentMethodLayout.Automatic
     }
 }

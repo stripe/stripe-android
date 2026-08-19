@@ -10,32 +10,20 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
-    # Number of parallel machines for run-paymentsheet-e2e. Must stay in sync with the
-    # --num-shards passed to get_shard_test_classes.py so every test class is assigned once.
-    - PAYMENTSHEET_E2E_SHARD_COUNT: 6
+    # Run PaymentSheet E2E tests in parallel on one machine so Bitrise bills a single job.
+    - PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT: 6
 
 pipelines:
   main-trigger-pipeline:
     workflows:
-      check: { }
-      test: { }
-      run-instrumentation-tests: { }
+      check-and-test: { }
+      run-instrumentation-and-ime-tests: { }
       run-paymentsheet-instrumentation-tests: { }
-      run-paymentsheet-ime-instrumentation-tests: { }
-      run-financial-connections-instrumentation-tests: { }
-      run-connections-e2e-payments-tests-on-push: { }
-      run-connections-e2e-token-tests-on-push: { }
-      run-connections-e2e-data-tests-on-push: { }
-      run-cardscan-instrumentation-tests: { }
-      run-crypto-onramp-example-e2e-tests: { }
-      build-paymentsheet-e2e: { }
-      run-paymentsheet-e2e:
-        parallel: $PAYMENTSHEET_E2E_SHARD_COUNT
-        depends_on:
-          - build-paymentsheet-e2e
-#      run-paymentsheet-google-pay-e2e: { }
-      check-dependencies: { }
-      verify-publish-pom: { }
+      run-financial-connections-and-crypto-instrumentation-tests: { }
+      run-connections-e2e-tests-on-push: { }
+      run-cardscan-and-google-pay-tests: { }
+      run-paymentsheet-e2e: { }
+      check-dependencies-and-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
     stages:
       - stage-run-connect-e2e-tests: { }
@@ -71,17 +59,7 @@ stages:
     workflows:
       - notify-connections-e2e-failure: { }
 workflows:
-  check:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          timeout: 1200
-          inputs:
-            - content: ./gradlew detekt lintRelease apiCheck verifyReleaseResources
-  test:
+  check-and-test:
     envs:
       - opts:
           is_expand: false
@@ -97,9 +75,10 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          title: Run static analysis, unit, and screenshot tests
           timeout: 1200
           inputs:
-            - content: ./gradlew runUnitAndScreenshotTests --init-script build-configuration/unit-test-init.gradle --continue
+            - content: ./gradlew detekt lintRelease apiCheck verifyReleaseResources runUnitAndScreenshotTests --init-script build-configuration/unit-test-init.gradle --continue
       - bundle::export_unit_test_results:
           title: Export unit & screenshot test results
           inputs:
@@ -209,6 +188,67 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+  run-connections-e2e-tests-on-push:
+    envs:
+      - MAESTRO_TAGS: testmode
+      - BUILD_VARIANT: release
+    before_run:
+      - start_connections_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      # Build once and run all testmode flows on the same emulator. This avoids
+      # paying for three jobs that each repeat checkout, build, and emulator boot.
+      - android-build@1:
+          inputs:
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+            - variant: $BUILD_VARIANT
+            - build_type: apk
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Start logcat capture
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                adb logcat > /tmp/logcat.txt 2>&1 &
+                echo $! > /tmp/logcat.pid
+      - script@1:
+          title: Execute all testmode Maestro tests
+          timeout: 1200
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh -m financial-connections -t $MAESTRO_TAGS
+      - script@1:
+          title: Stop logcat capture
+          is_always_run: true
+          is_skippable: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                kill "$(cat /tmp/logcat.pid)" 2>/dev/null || true
+      - deploy-to-bitrise-io@2:
+          title: Upload logcat on failure
+          run_if: '{{ getenv "BITRISE_BUILD_STATUS" | eq "1" }}'
+          inputs:
+            - deploy_path: /tmp/logcat.txt
+            - notify_user_groups: none
+            - is_enable_public_page: "false"
+      - script@1:
+          title: Test results
+          is_always_run: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                python3 "$BITRISE_SOURCE_DIR/scripts/merge_maestro_junit_reports.py" --tag "$MAESTRO_TAGS" --module financial-connections
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-livemode-tests:
     envs:
       - MAESTRO_TAGS: livemode-data
@@ -306,21 +346,28 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CUX_BOTS
             - webhook_url_on_error: $WEBHOOK_SLACK_CUX_BOTS
-  run-instrumentation-tests:
+  run-instrumentation-and-ime-tests:
     before_run:
       - prepare_all
     after_run:
       - conclude_all
     steps:
       - script@1:
-          title: Execute instrumentation tests
+          title: Execute general instrumentation tests
           timeout: 1200
           inputs:
             - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export instrumentation test results
+      - script@1:
+          title: Execute PaymentSheet IME instrumentation tests
+          is_always_run: true
+          timeout: 1200
           inputs:
-            - test_title: Instrumentation tests
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33imeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export general and IME instrumentation test results
+          is_always_run: true
+          inputs:
+            - test_title: General and IME instrumentation tests
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -355,7 +402,7 @@ workflows:
           title: Export PaymentSheet IME instrumentation test results
           inputs:
             - test_title: PaymentSheet IME instrumentation tests
-  run-financial-connections-instrumentation-tests:
+  run-financial-connections-and-crypto-instrumentation-tests:
     before_run:
       - start_emulator
       - prepare_all
@@ -366,7 +413,7 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest
+            - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -374,12 +421,16 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest :crypto-onramp-example:connectedDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle --continue
       - bundle::export_instrumentation_test_results:
-          title: Export FC instrumentation test results
+          title: Export FC and Crypto instrumentation test results
           inputs:
-            - test_title: FC instrumentation tests
-  run-cardscan-instrumentation-tests:
+            - test_title: FC and Crypto instrumentation tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
+  run-cardscan-and-google-pay-tests:
     before_run:
       - start_cardscan_emulator
       - prepare_all
@@ -403,19 +454,36 @@ workflows:
           title: Export CardScan instrumentation test results
           inputs:
             - test_title: CardScan instrumentation tests
+      # Firebase Test Lab runs remotely, so it can share this job without
+      # competing with CardScan's local emulator.
+      - android-build-for-ui-testing@0:
+          title: Build PaymentSheet Google Pay E2E test APKs
+          is_always_run: true
+          timeout: 1200
+          inputs:
+            - module: paymentsheet-example
+            - variant: baseDebug
+            - arguments: -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
+      - virtual-device-testing-for-android@1:
+          title: Run TestGooglePay on virtual devices
+          is_always_run: true
+          timeout: 3600
+          inputs:
+            - test_type: instrumentation
+            - auto_google_login: "true"
+            - inst_test_targets: class com.stripe.android.lpm.TestGooglePay
+            - download_test_results: "true"
+            - test_timeout: "2700"
+      - deploy-to-bitrise-io@2:
+          title: Deploy Google Pay E2E test results
+          is_always_run: true
+          inputs:
+            - notify_user_groups: none
+            - is_enable_public_page: "false"
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-  build-paymentsheet-e2e:
-    before_run:
-      - prepare_all
-    steps:
-      - script@1:
-          title: Compile PaymentSheet E2E tests
-          timeout: 1200
-          inputs:
-            - content: ./gradlew :paymentsheet-example:assembleBaseDebugAndroidTest
   run-paymentsheet-e2e:
     before_run:
       - prepare_all
@@ -429,14 +497,14 @@ workflows:
             - content: |-
                 #!/usr/bin/env bash
                 set -euo pipefail
-                envman add --key PAYMENTSHEET_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
-                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards "$PAYMENTSHEET_E2E_SHARD_COUNT")
+                # Keep the explicit class list so tests with dedicated workflows stay excluded.
+                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index 0 --num-shards 1)
 
-                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=1 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=1 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:
-            - test_title: "PaymentSheet E2E tests (shard $PAYMENTSHEET_E2E_SHARD_DISPLAY)"
+            - test_title: PaymentSheet E2E tests
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
@@ -499,30 +567,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-  run-crypto-onramp-example-e2e-tests:
-    before_run:
-      - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
-          title: Run Crypto Onramp Example E2E Tests
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :crypto-onramp-example:connectedDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export Crypto Onramp Example E2E test results
-          inputs:
-            - test_title: Crypto Onramp E2E tests
-  check-dependencies:
+  check-dependencies-and-publish-pom:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true
     before_run:
@@ -534,22 +579,26 @@ workflows:
           inputs:
             - content: asdf install ruby 3.2.4
       - script@1:
+          title: Check dependencies and published POMs
+          timeout: 1200
           inputs:
-            - content: ruby scripts/dependencies/update_transitive_dependencies.rb
-      - script@1:
-          inputs:
-            - content: ruby scripts/dependencies/check_transitive_dependencies.rb
-  verify-publish-pom:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Verify Maven publish POMs
-          timeout: 1800
-          inputs:
-            - content: bash ./scripts/verify_publish_pom.sh
+            - content: |-
+                #!/usr/bin/env bash
+                set +e
+
+                ruby scripts/dependencies/update_transitive_dependencies.rb
+                dependencies_status=$?
+                if [ "$dependencies_status" -eq 0 ]; then
+                  ruby scripts/dependencies/check_transitive_dependencies.rb
+                  dependencies_status=$?
+                fi
+
+                bash ./scripts/verify_publish_pom.sh
+                publish_pom_status=$?
+
+                if [ "$dependencies_status" -ne 0 ] || [ "$publish_pom_status" -ne 0 ]; then
+                  exit 1
+                fi
   start_connections_emulator:
     steps:
       - avd-manager@2:

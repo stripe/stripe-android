@@ -2,9 +2,9 @@ package com.stripe.android.common.nfcscan
 
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.query
 
 private const val ANALYTICS_HOST = "q.stripe.com"
 private const val EVENT_PREFIX = "mc_"
@@ -36,7 +36,7 @@ internal fun NetworkRule.expectNfcScanAttemptFailed(
     expectAnalyticsEvent(
         eventName = "${EVENT_PREFIX}nfc_scan_attempt_failed",
         matchers = listOf(
-            query("error_code", errorCode),
+            analyticsPayloadField("error_code", errorCode),
         ) + errorMatchers,
     )
 }
@@ -47,8 +47,8 @@ internal fun createApduErrorMatchers(
     sw2: String
 ): List<RequestMatcher> {
     return listOf(
-        query("sw1", sw1),
-        query("sw2", sw2),
+        analyticsPayloadField("sw1", sw1),
+        analyticsPayloadField("sw2", sw2),
         RequestMatcher { request ->
             request.queryParameterValues("executed_commands[]") == executedCommands
         },
@@ -62,7 +62,7 @@ private fun NetworkRule.expectAnalyticsEvent(
     val matchers = buildList {
         add(host(ANALYTICS_HOST))
         add(method("GET"))
-        add(query("event", eventName))
+        add(analyticsPayloadField("event", eventName))
         addAll(matchers)
     }
 

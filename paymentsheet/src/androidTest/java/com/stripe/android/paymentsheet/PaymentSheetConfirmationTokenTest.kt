@@ -11,6 +11,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -164,7 +165,7 @@ internal class PaymentSheetConfirmationTokenTest {
                             it.customer(
                                 PaymentSheet.CustomerConfiguration(
                                     "cus_foobar",
-                                    "ek_test_foobar"
+                                    TestApiKeys.EPHEMERAL
                                 )
                             )
                         }

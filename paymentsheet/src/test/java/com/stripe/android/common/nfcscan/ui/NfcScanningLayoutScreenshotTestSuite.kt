@@ -56,11 +56,11 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             val status: NfcScanningStatus
 
             data object Idle : NfcScanningScreenshotStatus {
-                override val status = NfcScanningStatus.Idle
+                override val status = NfcScanningStatus.Idle()
             }
 
             data class Error(val message: String) : NfcScanningScreenshotStatus {
-                override val status = NfcScanningStatus.Error(message.resolvableString)
+                override val status = NfcScanningStatus.Idle(message.resolvableString)
 
                 override fun toString(): String {
                     return "withError(${message.filter { !it.isWhitespace() }})"
@@ -225,10 +225,10 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
         @Test
         fun idle() {
-            paparazziRule.gif(end = 1500L) {
+            paparazziRule.gif(end = 5000L) {
                 NfcScanningTheme {
                     NfcScanningLayout(
-                        status = NfcScanningStatus.Idle,
+                        status = NfcScanningStatus.Idle(),
                         tapZone = TapZone(xBias = 0.5f, yBias = 0.35f),
                         deviceRotation = DeviceRotation.Portrait,
                         onClose = {},
@@ -241,15 +241,15 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
         @Test
         fun error() {
-            paparazziRule.gif(end = 1500L) {
+            paparazziRule.gif(end = 2000L) {
                 NfcScanningTheme {
                     var status by remember {
-                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle)
+                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle())
                     }
 
                     LaunchedEffect(Unit) {
-                        delay(800L)
-                        status = NfcScanningStatus.Error(ERROR_TEXT.resolvableString)
+                        delay(1000)
+                        status = NfcScanningStatus.Idle(ERROR_TEXT.resolvableString)
                     }
 
                     NfcScanningLayout(
@@ -266,14 +266,14 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
         @Test
         fun scanned() {
-            paparazziRule.gif(end = 2500L) {
+            paparazziRule.gif(end = 3000L) {
                 NfcScanningTheme {
                     var status by remember {
-                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle)
+                        mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle())
                     }
 
                     LaunchedEffect(Unit) {
-                        delay(600L)
+                        delay(1200L)
                         status = NfcScanningStatus.Scanning
                         delay(400L)
                         status = NfcScanningStatus.Scanned

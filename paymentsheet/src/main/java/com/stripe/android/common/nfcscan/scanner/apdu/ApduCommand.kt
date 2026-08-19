@@ -90,7 +90,7 @@ internal abstract class ApduCommand<TResponseData> {
             onSuccess = { tlv ->
                 responseData(tlv)?.let { responseData ->
                     Result.success(responseData)
-                } ?: Result.failure(ApduResponseError.Invalid(rawData))
+                } ?: Result.failure(ApduResponseError.Invalid())
             },
             onFailure = { cause ->
                 Result.failure(ApduResponseError.Parsing(cause))

@@ -4,7 +4,6 @@ public abstract interface annotation class com/stripe/android/ExperimentalAllows
 public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt {
 	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt;
 	public fun <init> ()V
-	public final fun getLambda$-1325870959$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$-298415252$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
@@ -1746,6 +1745,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguratio
 public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display : java/lang/Enum {
 	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
 	public static final field Never Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
+	public static final field WalletButtonHidden Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
 	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;

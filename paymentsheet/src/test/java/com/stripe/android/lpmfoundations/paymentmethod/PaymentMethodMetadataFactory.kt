@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -61,6 +60,7 @@ internal object PaymentMethodMetadataFactory {
             PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
         canUpdateCardExpiryAndBillingDetails: Boolean = false,
+        customerEphemeralKeySecret: String = "ek_123",
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -82,7 +82,6 @@ internal object PaymentMethodMetadataFactory {
         disableSsdOcrCardScan: Boolean = false,
         cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
-        checkoutSessionResponse: CheckoutSessionResponse? = null,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
@@ -102,7 +101,7 @@ internal object PaymentMethodMetadataFactory {
                 if (customerSessionClientSecret != null) {
                     CustomerMetadata.CustomerSession(
                         id = "cus_123",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = customerEphemeralKeySecret,
                         customerSessionClientSecret = customerSessionClientSecret,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                         removePaymentMethod = removePaymentMethod,
@@ -113,7 +112,7 @@ internal object PaymentMethodMetadataFactory {
                 } else {
                     CustomerMetadata.LegacyEphemeralKey(
                         id = "cus_123",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = customerEphemeralKeySecret,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
@@ -156,7 +155,6 @@ internal object PaymentMethodMetadataFactory {
             disableSsdOcrCardScan = disableSsdOcrCardScan,
             cardArts = cardArts,
             shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
-            checkoutSessionResponse = checkoutSessionResponse,
             paymentMethodLayout = paymentMethodLayout,
         )
     }
