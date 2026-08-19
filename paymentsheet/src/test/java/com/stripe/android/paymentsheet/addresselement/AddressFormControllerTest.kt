@@ -27,13 +27,15 @@ class AddressFormControllerTest {
             autocompleteCountries = setOf("US"),
             googlePlacesApiKey = "123456",
         ),
-        launcherConfig = AddressLauncher.Configuration(
-            address = AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = "123 Apple Street",
-                )
+        launcherConfig = AddressLauncher.Configuration.Builder()
+            .address(
+                AddressDetails(
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                    ),
+                ),
             )
-        )
+            .build(),
     ) {
         val fields = awaitItem()
 
@@ -231,11 +233,13 @@ class AddressFormControllerTest {
         phoneNumberConfiguration: AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration,
         phoneNumberElementIsVisible: Boolean,
     ) = fieldsTest(
-        launcherConfig = AddressLauncher.Configuration(
-            additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
-                phone = phoneNumberConfiguration,
-            ),
-        ),
+        launcherConfig = AddressLauncher.Configuration.Builder()
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = phoneNumberConfiguration,
+                ),
+            )
+            .build(),
     ) {
         val fields = awaitItem()
 
@@ -252,7 +256,8 @@ class AddressFormControllerTest {
             autocompleteCountries = setOf("US"),
             googlePlacesApiKey = null,
         ),
-        launcherConfig: AddressLauncher.Configuration = AddressLauncher.Configuration(),
+        launcherConfig: AddressLauncher.Configuration =
+            AddressLauncher.Configuration.Builder().build(),
         test: suspend TurbineTestContext<List<SectionFieldElement>>.() -> Unit
     ) = addressElementTest(
         initialValues = initialValues,
@@ -272,7 +277,8 @@ class AddressFormControllerTest {
             autocompleteCountries = setOf("US"),
             googlePlacesApiKey = null,
         ),
-        launcherConfig: AddressLauncher.Configuration = AddressLauncher.Configuration(),
+        launcherConfig: AddressLauncher.Configuration =
+            AddressLauncher.Configuration.Builder().build(),
         test: suspend TurbineTestContext<AddressElement>.() -> Unit
     ) = test(autocompleteConfig) {
         val addressFormController = createAddressFormController(
@@ -316,11 +322,13 @@ class AddressFormControllerTest {
 
     private fun TestAutocompleteAddressInteractor.Scenario.createAddressFormController(
         initialValues: Map<IdentifierSpec, String?> = emptyMap(),
-        launcherConfig: AddressLauncher.Configuration = AddressLauncher.Configuration(
-            additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
-                phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+        launcherConfig: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                ),
             )
-        )
+            .build(),
     ) = AddressFormController(
         interactor = interactor,
         config = launcherConfig,

@@ -1,5 +1,9 @@
 # Migration Guide
 
+## Migrating from versions < 23.17.0
+- Changes to `AddressLauncher.Configuration`:
+  * The constructors have been deprecated and will be removed in a future release. Use `AddressLauncher.Configuration.Builder` instead.
+
 ## Migrating from versions < 23.0.0
 - The SDK now requires Android 6.0+ (API level 23+)
 - The SDK now targets `compileSdkVersion` and `targetSdkVersion` 36

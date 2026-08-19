@@ -83,7 +83,7 @@ class AddressLauncher internal constructor(
     @JvmOverloads
     fun present(
         publishableKey: String,
-        configuration: Configuration = Configuration()
+        configuration: Configuration = Configuration.Builder().build()
     ) {
         val args = AddressElementActivityContract.Args(
             publishableKey = publishableKey,
@@ -115,6 +115,21 @@ class AddressLauncher internal constructor(
         internal val useStripeHostedAutocomplete: Boolean = false,
     ) : Parcelable {
         @JvmOverloads
+        @Deprecated(
+            message = "This will be removed in a future release.",
+            replaceWith = ReplaceWith(
+                "AddressLauncher.Configuration.Builder()" +
+                    ".appearance(appearance)" +
+                    ".address(address)" +
+                    ".allowedCountries(allowedCountries)" +
+                    ".buttonTitle(buttonTitle)" +
+                    ".apply { additionalFields?.let { additionalFields(it) } }" +
+                    ".title(title)" +
+                    ".googlePlacesApiKey(googlePlacesApiKey)" +
+                    ".autocompleteCountries(autocompleteCountries)" +
+                    ".build()",
+            ),
+        )
         constructor(
             /**
              * Configuration for the look and feel of the UI

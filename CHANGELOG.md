@@ -1,7 +1,10 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### PaymentSheet
+* [DEPRECATED] Deprecated the `AddressLauncher.Configuration` constructors. Use `AddressLauncher.Configuration.Builder` instead.
 
 ## 23.16.0 - 2026-08-18
 
