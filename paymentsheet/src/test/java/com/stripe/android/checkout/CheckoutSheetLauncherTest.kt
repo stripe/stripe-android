@@ -194,6 +194,7 @@ internal class CheckoutSheetLauncherTest {
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
             customerState = customerState,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -288,6 +289,7 @@ internal class CheckoutSheetLauncherTest {
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             hasBeenConfirmed = true,
             customerState = null,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -366,6 +368,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             selection = selection,
             hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Manage,
         )
@@ -511,6 +514,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = null,
             selection = null,
             hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
@@ -532,6 +536,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             selection = selection,
             hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )

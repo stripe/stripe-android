@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -19,6 +20,7 @@ internal sealed interface EmbeddedActivityResult : Parcelable {
         val previousNewSelections: Bundle,
         val hasBeenConfirmed: Boolean,
         val customerState: CustomerState?,
+        val checkoutSessionResponse: CheckoutSessionResponse?,
         val shouldInvokeSelectionCallback: Boolean,
         override val launchMode: EmbeddedLaunchMode,
     ) : EmbeddedActivityResult

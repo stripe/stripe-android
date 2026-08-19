@@ -235,6 +235,7 @@ internal class EmbeddedNavigator private constructor(
                                 previousNewSelections = embeddedSelectionHolder.previousNewSelections,
                                 hasBeenConfirmed = true,
                                 customerState = customerStateHolder.customer.value,
+                                checkoutSessionResponse = null,
                                 shouldInvokeSelectionCallback = false,
                                 launchMode = launchMode,
                             )

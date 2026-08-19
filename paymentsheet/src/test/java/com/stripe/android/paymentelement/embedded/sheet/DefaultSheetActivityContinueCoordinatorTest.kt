@@ -24,6 +24,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 previousNewSelections = selectionHolder.previousNewSelections,
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
+                checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = false,
                 launchMode = LAUNCH_MODE,
             )

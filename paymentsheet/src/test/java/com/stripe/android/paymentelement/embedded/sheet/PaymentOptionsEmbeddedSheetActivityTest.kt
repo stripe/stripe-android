@@ -61,6 +61,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     selection = null,
                     hasBeenConfirmed = false,
                     customerState = null,
+                    checkoutSessionResponse = null,
                     shouldInvokeSelectionCallback = false,
                     launchMode = EmbeddedLaunchMode.PaymentOptions,
                 )
