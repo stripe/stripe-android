@@ -544,7 +544,7 @@ workflows:
       - avd-manager@2:
           inputs:
             - profile: "Nexus 5"
-            - abi: "x86_64"
+            - abi: "arm64-v8a"
             - api_level: 33
             - tag: "google_apis"
             - start_command_flags: >
@@ -556,13 +556,13 @@ workflows:
                 -no-snapshot
                 -no-audio
                 -no-window
-                -gpu software
+                -gpu swiftshader_indirect
   start_cardscan_emulator:
     steps:
       - avd-manager@2:
           inputs:
             - profile: "pixel_6"
-            - abi: "x86_64"
+            - abi: "arm64-v8a"
             - api_level: 33
             - tag: "google_apis_playstore"
             - start_command_flags: >
@@ -574,12 +574,13 @@ workflows:
                -no-snapshot
                -no-audio
                -no-window
+               -gpu swiftshader_indirect
   start_emulator:
     steps:
       - avd-manager@2:
           inputs:
             - profile: "pixel_6"
-            - abi: "x86_64"
+            - abi: "arm64-v8a"
             - api_level: 33
             - tag: "google_apis"
             - start_command_flags: >
@@ -591,12 +592,13 @@ workflows:
                -no-snapshot
                -no-audio
                -no-window
+               -gpu swiftshader_indirect
   start_screenshot_emulator:
     steps:
       - avd-manager@2:
           inputs:
             - profile: "Nexus 6"
-            - abi: "x86_64"
+            - abi: "arm64-v8a"
             - api_level: 28
             - start_command_flags: >
                 -camera-back none
