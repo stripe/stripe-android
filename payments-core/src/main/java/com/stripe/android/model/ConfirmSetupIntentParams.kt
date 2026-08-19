@@ -61,7 +61,7 @@ constructor(
      *   https://docs.stripe.com/api/setup_intents/confirm#confirm_setup_intent-payment_method_options
      * ).
      */
-    var paymentMethodOptions: PaymentMethodOptionsParams? = null,
+    val paymentMethodOptions: PaymentMethodOptionsParams? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
     private val clientAttributionMetadata: ClientAttributionMetadata? = null,
     /**
@@ -213,6 +213,25 @@ constructor(
         }
 
         /**
+         * Create the parameters necessary for confirming a [SetupIntent] with an attached
+         * PaymentMethod and [paymentMethodOptions].
+         */
+        @JvmStatic
+        fun create(
+            clientSecret: String,
+            paymentMethodType: PaymentMethod.Type,
+            paymentMethodOptions: PaymentMethodOptionsParams,
+        ): ConfirmSetupIntentParams {
+            return ConfirmSetupIntentParams(
+                clientSecret = clientSecret,
+                mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
+                    .takeIf { paymentMethodType.requiresMandate },
+                paymentMethodCode = paymentMethodType.code,
+                paymentMethodOptions = paymentMethodOptions,
+            )
+        }
+
+        /**
          * Create the parameters necessary for confirming a SetupIntent, without specifying a payment method
          * to attach to the SetupIntent. Only use this if a payment method has already been attached
          * to the SetupIntent.
@@ -227,6 +246,21 @@ constructor(
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 clientSecret = clientSecret
+            )
+        }
+
+        /**
+         * Create the parameters necessary for confirming a SetupIntent with an attached payment
+         * method and [paymentMethodOptions].
+         */
+        @JvmStatic
+        fun createWithoutPaymentMethod(
+            clientSecret: String,
+            paymentMethodOptions: PaymentMethodOptionsParams,
+        ): ConfirmSetupIntentParams {
+            return ConfirmSetupIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodOptions = paymentMethodOptions,
             )
         }
 
@@ -259,6 +293,27 @@ constructor(
         }
 
         /**
+         * Create the parameters necessary for confirming a SetupIntent with an existing
+         * PaymentMethod and [paymentMethodOptions].
+         */
+        @JvmStatic
+        fun create(
+            paymentMethodId: String,
+            clientSecret: String,
+            paymentMethodOptions: PaymentMethodOptionsParams,
+            mandateData: MandateDataParams? = null,
+            mandateId: String? = null,
+        ): ConfirmSetupIntentParams {
+            return ConfirmSetupIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodId = paymentMethodId,
+                mandateId = mandateId,
+                mandateData = mandateData,
+                paymentMethodOptions = paymentMethodOptions,
+            )
+        }
+
+        /**
          * Create the parameters necessary for confirming a SetupIntent with a new PaymentMethod
          *
          * @param paymentMethodCreateParams the params to create a new PaymentMethod that will be
@@ -282,6 +337,31 @@ constructor(
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 mandateId = mandateId,
                 mandateData = mandateData,
+                paymentMethodOptions = null,
+                setAsDefaultPaymentMethod = null,
+                radarOptions = null,
+                clientAttributionMetadata = null,
+            )
+        }
+
+        /**
+         * Create the parameters necessary for confirming a SetupIntent with a new PaymentMethod
+         * and [paymentMethodOptions].
+         */
+        @JvmStatic
+        fun create(
+            paymentMethodCreateParams: PaymentMethodCreateParams,
+            clientSecret: String,
+            paymentMethodOptions: PaymentMethodOptionsParams,
+            mandateData: MandateDataParams? = null,
+            mandateId: String? = null,
+        ): ConfirmSetupIntentParams {
+            return createWithSetAsDefaultPaymentMethod(
+                clientSecret = clientSecret,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                mandateId = mandateId,
+                mandateData = mandateData,
+                paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = null,
                 radarOptions = null,
                 clientAttributionMetadata = null,
@@ -293,6 +373,7 @@ constructor(
             clientSecret: String,
             mandateData: MandateDataParams? = null,
             mandateId: String? = null,
+            paymentMethodOptions: PaymentMethodOptionsParams?,
             setAsDefaultPaymentMethod: Boolean?,
             radarOptions: RadarOptions?,
             clientAttributionMetadata: ClientAttributionMetadata?
@@ -304,6 +385,7 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
+                paymentMethodOptions = paymentMethodOptions,
                 radarOptions = radarOptions,
                 clientAttributionMetadata = clientAttributionMetadata,
             )

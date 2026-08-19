@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.KlarnaSDKPrivatePreview
 import com.stripe.android.testing.RadarOptionsFactory
 import kotlin.test.Test
 
@@ -69,14 +68,14 @@ class ConfirmSetupIntentParamsTest {
         )
     }
 
-    @OptIn(KlarnaSDKPrivatePreview::class)
     @Test
     fun toParamMap_withKlarnaPaymentMethodOptions_shouldCreateExpectedMap() {
-        val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(CLIENT_SECRET).apply {
+        val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(
+            clientSecret = CLIENT_SECRET,
             paymentMethodOptions = PaymentMethodOptionsParams.Klarna(
                 interoperabilityToken = "interoperability_token"
-            )
-        }
+            ),
+        )
 
         assertThat(params.toParamMap()).isEqualTo(
             mapOf(
@@ -91,15 +90,15 @@ class ConfirmSetupIntentParamsTest {
         )
     }
 
-    @OptIn(KlarnaSDKPrivatePreview::class)
     @Test
     fun withShouldUseStripeSdk_preservesPaymentMethodOptions() {
         val paymentMethodOptions = PaymentMethodOptionsParams.Klarna(
             interoperabilityToken = "interoperability_token"
         )
-        val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(CLIENT_SECRET).apply {
-            this.paymentMethodOptions = paymentMethodOptions
-        }
+        val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(
+            clientSecret = CLIENT_SECRET,
+            paymentMethodOptions = paymentMethodOptions,
+        )
 
         val updatedParams = params.withShouldUseStripeSdk(true)
 
@@ -112,6 +111,7 @@ class ConfirmSetupIntentParamsTest {
             ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
+                paymentMethodOptions = null,
                 setAsDefaultPaymentMethod = true,
                 radarOptions = null,
                 clientAttributionMetadata = null,
@@ -316,6 +316,7 @@ class ConfirmSetupIntentParamsTest {
             .createWithSetAsDefaultPaymentMethod(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
+                paymentMethodOptions = null,
                 setAsDefaultPaymentMethod = true,
                 radarOptions = radarOptions,
                 clientAttributionMetadata = null,
