@@ -39,6 +39,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         walletButtons = null,
         opensCardScannerAutomatically = ConfigurationDefaults.opensCardScannerAutomatically,
         userOverrideCountry = ConfigurationDefaults.userOverrideCountry,
-        appearance = ConfigurationDefaults.appearance,
+        appearance = configuration.paymentElementConfiguration.appearance,
     )
 }

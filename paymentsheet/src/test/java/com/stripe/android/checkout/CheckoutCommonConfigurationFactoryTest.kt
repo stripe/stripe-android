@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.common.configuration.ConfigurationDefaults
@@ -17,6 +18,24 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutCommonConfigurationFactoryTest {
+
+    @Test
+    fun `propagates payment element appearance`() {
+        val appearance = PaymentSheet.Appearance(
+            colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
+        )
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration().appearance(appearance))
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.appearance).isEqualTo(appearance)
+    }
 
     @Test
     fun `matches the common configuration derived from the embedded configuration`() {

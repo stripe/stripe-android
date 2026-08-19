@@ -5,8 +5,10 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -38,10 +40,20 @@ class PaymentElement @Inject internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
+        private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
         private var embeddedViewDisplaysMandateText: Boolean = true
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
         private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
+
+        /**
+         * Sets the visual appearance of the payment element and any sheets it presents.
+         */
+        fun appearance(
+            appearance: PaymentSheet.Appearance
+        ): Configuration = apply {
+            this.appearance = appearance
+        }
 
         /**
          * Controls whether [Content] displays mandate text below the payment methods.
@@ -81,12 +93,14 @@ class PaymentElement @Inject internal constructor(
 
         @Parcelize
         internal data class State(
+            val appearance: PaymentSheet.Appearance,
             val embeddedViewDisplaysMandateText: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
             val paymentMethodLayout: PaymentMethodLayout,
         ) : Parcelable
 
         internal fun build(): State = State(
+            appearance = appearance,
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
             paymentMethodLayout = paymentMethodLayout,
