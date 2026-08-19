@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.ui.core.elements.AutomaticTaxBillingAddressSpec
 import com.stripe.android.ui.core.elements.BillingAddressCollectionMode
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.additionalAutomaticTaxFieldsByCountry
@@ -15,7 +14,7 @@ internal class AutomaticTaxBillingAddressFactory(
     private val arguments: UiDefinitionFactory.Arguments,
 ) {
     fun create(
-        spec: AutomaticTaxBillingAddressSpec,
+        allowedCountryCodes: Set<String>,
     ): List<FormElement> {
         val sameAsShippingElement = arguments.shippingValues
             ?.get(IdentifierSpec.SameAsShipping)
@@ -29,7 +28,7 @@ internal class AutomaticTaxBillingAddressFactory(
         val billingAddressElement = BillingAddressElement(
             identifier = IdentifierSpec.BillingAddress,
             rawValuesMap = arguments.initialValues,
-            countryCodes = spec.allowedCountryCodes,
+            countryCodes = allowedCountryCodes,
             autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = arguments.shippingValues,
