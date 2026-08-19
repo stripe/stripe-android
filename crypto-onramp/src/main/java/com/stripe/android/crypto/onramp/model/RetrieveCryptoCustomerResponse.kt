@@ -16,7 +16,25 @@ internal data class RetrieveCryptoCustomerResponse(
 @Serializable
 internal data class AdditionalKycRequirementsResponse(
     val entries: List<AdditionalKycRequirementResponse>,
-)
+) {
+    fun toAdditionalKycRequirements(): AdditionalKycRequirements {
+        return AdditionalKycRequirements(
+            userActionRequired = entries.filter { it.awaitingActionFrom == USER },
+            pendingPartnerAction = entries.filter { it.awaitingActionFrom == PARTNER },
+            pendingStripeAction = entries.filter { it.awaitingActionFrom == STRIPE },
+            unrecognizedActionOwner = entries.filter {
+                it.awaitingActionFrom !in RECOGNIZED_ACTION_OWNERS
+            },
+        )
+    }
+
+    private companion object {
+        const val USER = "user"
+        const val PARTNER = "partner"
+        const val STRIPE = "stripe"
+        val RECOGNIZED_ACTION_OWNERS = setOf(USER, PARTNER, STRIPE)
+    }
+}
 
 @Serializable
 internal data class AdditionalKycRequirementResponse(
