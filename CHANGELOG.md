@@ -4,7 +4,7 @@ NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Payments
-* [ADDED] Added Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens to PaymentIntent confirmation (private preview).
+* [ADDED] Added Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens to PaymentIntent confirmation.
 
 ## 23.16.0 - 2026-08-18
 
