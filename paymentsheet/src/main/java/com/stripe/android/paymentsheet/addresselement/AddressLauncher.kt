@@ -197,6 +197,7 @@ class AddressLauncher internal constructor(
             fun title(title: String?) =
                 apply { this.title = title }
 
+            @Deprecated("This will be removed in a future release.")
             fun googlePlacesApiKey(googlePlacesApiKey: String?) =
                 apply { this.googlePlacesApiKey = googlePlacesApiKey }
 

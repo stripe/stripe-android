@@ -7,7 +7,6 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentsheet.utils.PlacesClientProxyTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
@@ -19,7 +18,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(AddressAutocompletePreview::class)
 @RunWith(TestParameterInjector::class)
 class PaymentSheetAddressAutocompleteTest {
     private val placesClientProxyTestRule = PlacesClientProxyTestRule()
@@ -34,6 +32,7 @@ class PaymentSheetAddressAutocompleteTest {
 
     private val paymentSheetPage = PaymentSheetPage(composeTestRule)
 
+    @Suppress("DEPRECATION")
     @Test
     fun testUnfilled() = runPaymentSheetTest(
         networkRule = networkRule,
@@ -70,6 +69,7 @@ class PaymentSheetAddressAutocompleteTest {
         paymentSheetPage.clickPrimaryButton()
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun testPrefilled() = runPaymentSheetTest(
         networkRule = networkRule,

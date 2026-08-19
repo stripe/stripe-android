@@ -1,5 +1,9 @@
 # Migration Guide
 
+## Migrating from versions < 23.17.0
+- Changes to `PaymentSheet.Configuration.Builder` and `AddressLauncher.Configuration.Builder`:
+  * `googlePlacesApiKey` has been deprecated and will be removed in a future release. Stripe-hosted autocomplete does not require a merchant-provided Google Places API key.
+
 ## Migrating from versions < 23.0.0
 - The SDK now requires Android 6.0+ (API level 23+)
 - The SDK now targets `compileSdkVersion` and `targetSdkVersion` 36

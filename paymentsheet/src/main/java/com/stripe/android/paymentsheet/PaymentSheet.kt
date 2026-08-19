@@ -31,7 +31,6 @@ import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -1099,10 +1098,13 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Google Places API key to support autocomplete when collecting billing details
+             * Google Places API key to support autocomplete when collecting billing details.
              */
-            @AddressAutocompletePreview
-            fun googlePlacesApiKey(googlePlacesApiKey: String) = apply {
+            @Deprecated("This will be removed in a future release.")
+            fun googlePlacesApiKey(googlePlacesApiKey: String) =
+                setGooglePlacesApiKey(googlePlacesApiKey)
+
+            internal fun setGooglePlacesApiKey(googlePlacesApiKey: String?) = apply {
                 this.googlePlacesApiKey = googlePlacesApiKey
             }
 
@@ -1167,7 +1169,6 @@ class PaymentSheet internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             WalletButtonsPreview::class,
             CardFundingFilteringPrivatePreview::class,
-            AddressAutocompletePreview::class
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1192,7 +1193,7 @@ class PaymentSheet internal constructor(
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
-                googlePlacesApiKey?.let { googlePlacesApiKey(it) }
+                googlePlacesApiKey?.let { setGooglePlacesApiKey(it) }
                 userOverrideCountry?.let { userOverrideCountry(it) }
             }
     }
