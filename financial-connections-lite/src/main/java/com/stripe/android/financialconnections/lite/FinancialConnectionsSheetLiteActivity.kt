@@ -35,8 +35,9 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
 import com.stripe.android.financialconnections.launcher.flowType
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
-import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layout.stripe_activity_lite) {
@@ -68,14 +69,44 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
         setupWebView()
         setupBackButtonHandling()
 
+        if (!restoreWebViewState(savedInstanceState)) {
+            openAuthFlow()
+        }
+
         lifecycleScope.launch {
             viewModel.viewEffects.collect { viewEffect ->
                 when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> webView.loadUrl(viewEffect.url)
                     is FinishWithResult -> finishWithResult(viewEffect.result)
                     is OpenCustomTab -> openCustomTab(viewEffect.url)
                 }
             }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (::webView.isInitialized) {
+            webView.saveState(outState)
+        }
+    }
+
+    /**
+     * Puts the recreated web view back on the page the flow had reached, and reports whether it did.
+     *
+     * Without this the recreated web view starts blank, and the retained view model has already produced
+     * the hosted auth URL, so nothing would put a page back on screen.
+     */
+    private fun restoreWebViewState(savedInstanceState: Bundle?): Boolean {
+        return savedInstanceState != null && webView.restoreState(savedInstanceState) != null
+    }
+
+    /**
+     * Loads the hosted auth URL once it is known. Read from view model state rather than from an event so
+     * that an activity recreated before the flow had a page to restore still receives it.
+     */
+    private fun openAuthFlow() {
+        lifecycleScope.launch {
+            webView.loadUrl(viewModel.state.filterNotNull().first().hostedAuthUrl)
         }
     }
 

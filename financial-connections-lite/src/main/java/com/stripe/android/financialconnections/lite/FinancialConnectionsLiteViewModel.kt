@@ -18,7 +18,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
 import com.stripe.android.financialconnections.launcher.flowType
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
-import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
 import com.stripe.android.financialconnections.lite.di.Di
 import com.stripe.android.financialconnections.lite.repository.FinancialConnectionsLiteRepository
@@ -65,7 +64,6 @@ internal class FinancialConnectionsLiteViewModel(
                     hostedAuthUrl = requireNotNull(hostedAuthUrl)
                 )
                 _state.update { state }
-                _viewEffects.emit(OpenAuthFlowWithUrl(state.hostedAuthUrl))
             }.onFailure {
                 handleError(it, "Failed to synchronize session")
             }
@@ -180,7 +178,6 @@ internal class FinancialConnectionsLiteViewModel(
     )
 
     internal sealed class ViewEffect {
-        data class OpenAuthFlowWithUrl(val url: String) : ViewEffect()
         data class OpenCustomTab(val url: String) : ViewEffect()
         data class FinishWithResult(val result: FinancialConnectionsSheetActivityResult) : ViewEffect()
     }
