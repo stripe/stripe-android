@@ -1100,7 +1100,7 @@ class PaymentSheet internal constructor(
             /**
              * Google Places API key to support autocomplete when collecting billing details.
              */
-            @Deprecated("This will be removed in a future release.")
+            @Deprecated("Google Places API key is no longer required. This method will be removed in a future release.")
             fun googlePlacesApiKey(googlePlacesApiKey: String) =
                 setGooglePlacesApiKey(googlePlacesApiKey)
 
