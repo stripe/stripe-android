@@ -3,6 +3,7 @@ package com.stripe.android.elements.ece
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.checkout.CheckoutAnalyticsPerformer
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
@@ -25,6 +26,7 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
@@ -301,10 +303,17 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             logger = Logger.noop(),
             resultCallback = {},
         )
+        val paymentSheetEventReporter = FakeEventReporter()
+        val analyticsPerformer = CheckoutAnalyticsPerformer(
+            confirmationHandler = confirmationHandler,
+            eventReporter = paymentSheetEventReporter,
+            savedStateHandle = savedStateHandle,
+        )
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,
             confirmationHandler = confirmationHandler,
             operationCoordinator = operationCoordinator,
+            analyticsPerformer = analyticsPerformer,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             statusBarColor = null,
@@ -324,6 +333,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         sessionRefresher.ensureAllEventsConsumed()
         eventReporter.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
+        paymentSheetEventReporter.validate()
     }
 
     private class Scenario(

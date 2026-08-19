@@ -3,23 +3,66 @@ package com.stripe.android.checkout
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import javax.inject.Inject
+import javax.inject.Singleton
 
-// TODO-codex: hook up dependency inject for this.
+@Singleton
 internal class CheckoutAnalyticsPerformer @Inject constructor(
-    private val confirmationHander: ConfirmationHandler,
+    private val confirmationHandler: ConfirmationHandler,
     private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
 ) {
-    // TODO-codex: save in the saved state handle: integration type (payment element vs. express checkout element)
-    // TODO-codex: save in the saved state handle: the payment selection
-    // TODO-codex: checkout performers should set the above values when they kick off confirmation, then they should get cleared after confirmation finishes
+    fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
+        saveConfirmation(IntegrationType.PaymentElement, paymentSelection)
+    }
+
+    fun onExpressCheckoutElementConfirmationStarted(paymentSelection: PaymentSelection) {
+        saveConfirmation(IntegrationType.ExpressCheckoutElement, paymentSelection)
+    }
+
+    fun onConfirmationFinishedWithoutResult() {
+        clearConfirmation()
+    }
 
     suspend fun reportConfirmationResults() {
-        confirmationHander.state.collect { state ->
+        confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                // TODO-codex: report via eventReporter reportPaymentResult
+                val integrationType = savedStateHandle.get<IntegrationType>(INTEGRATION_TYPE_KEY)
+                val paymentSelection = savedStateHandle.get<PaymentSelection>(PAYMENT_SELECTION_KEY)
+
+                try {
+                    if (integrationType != null && paymentSelection != null) {
+                        eventReporter.reportPaymentResult(state.result, paymentSelection)
+                    }
+                } finally {
+                    clearConfirmation()
+                }
             }
         }
+    }
+
+    private fun saveConfirmation(
+        integrationType: IntegrationType,
+        paymentSelection: PaymentSelection,
+    ) {
+        savedStateHandle[INTEGRATION_TYPE_KEY] = integrationType
+        savedStateHandle[PAYMENT_SELECTION_KEY] = paymentSelection
+    }
+
+    private fun clearConfirmation() {
+        savedStateHandle.remove<IntegrationType>(INTEGRATION_TYPE_KEY)
+        savedStateHandle.remove<PaymentSelection>(PAYMENT_SELECTION_KEY)
+    }
+
+    private enum class IntegrationType {
+        PaymentElement,
+        ExpressCheckoutElement,
+    }
+
+    private companion object {
+        const val INTEGRATION_TYPE_KEY = "CheckoutAnalyticsPerformer.integrationType"
+        const val PAYMENT_SELECTION_KEY = "CheckoutAnalyticsPerformer.paymentSelection"
     }
 }
