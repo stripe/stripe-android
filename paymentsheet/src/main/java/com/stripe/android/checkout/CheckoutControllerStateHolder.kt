@@ -68,6 +68,13 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         )
     }
 
+    fun setAnalyticsMetadata(analyticsMetadata: AnalyticsMetadata) {
+        val current = requireState(operation = "setAnalyticsMetadata") ?: return
+        state = current.copy(
+            analyticsMetadata = analyticsMetadata,
+        )
+    }
+
     override fun setTemporarySelection(code: PaymentMethodCode?) {
         val current = requireState(operation = "setTemporarySelection") ?: return
         state = current.copy(temporarySelection = code)

@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
 
 @OptIn(CheckoutSessionPreview::class)
 @Parcelize
-internal data class CheckoutControllerState(
+internal data class CheckoutControllerState constructor(
     val configuration: CheckoutController.Configuration.State,
     val checkoutSessionResponse: CheckoutSessionResponse,
     val flagImages: Map<String, Bitmap>?,
@@ -26,6 +26,7 @@ internal data class CheckoutControllerState(
     val paymentSelection: PaymentSelection?,
     val temporarySelection: String?,
     val previousNewSelections: Bundle,
+    val analyticsMetadata: AnalyticsMetadata,
 ) : Parcelable {
     fun asCheckoutSession(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
@@ -43,4 +44,15 @@ internal data class CheckoutControllerState(
             )
         )
     }
+}
+
+@Parcelize
+internal data class AnalyticsMetadata(
+    val integrationType: IntegrationType,
+    val paymentSelection: PaymentSelection,
+): Parcelable
+
+enum class IntegrationType {
+    ExpressCheckoutElement,
+    PaymentElement,
 }

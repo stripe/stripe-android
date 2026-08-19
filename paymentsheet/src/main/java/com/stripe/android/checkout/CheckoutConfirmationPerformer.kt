@@ -22,6 +22,11 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         val arguments = operationCoordinator.tryBeginConfirmation(::confirmationArgs) ?: return
         viewModelScope.launch {
             try {
+                val analyticsMetadata = AnalyticsMetadata(
+                    integrationType = IntegrationType.PaymentElement,
+                    paymentSelection = TODO(),
+                )
+                stateHolder.setAnalyticsMetadata(analyticsMetadata)
                 confirmationHandler.start(arguments)
             } catch (error: CancellationException) {
                 throw error

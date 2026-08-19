@@ -1,9 +1,11 @@
 package com.stripe.android.elements.ece
 
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.checkout.AnalyticsMetadata
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
+import com.stripe.android.checkout.IntegrationType
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -52,6 +54,11 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
 
         viewModelScope.launch {
             try {
+                val analyticsMetadata = AnalyticsMetadata(
+                    integrationType = IntegrationType.ExpressCheckoutElement,
+                    paymentSelection = TODO(),
+                )
+                stateHolder.setAnalyticsMetadata(analyticsMetadata)
                 confirmationHandler.start(confirmationArgs)
 
                 when (val result = confirmationHandler.awaitResult()) {
