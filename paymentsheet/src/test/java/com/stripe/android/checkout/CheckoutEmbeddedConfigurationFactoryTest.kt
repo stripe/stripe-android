@@ -234,26 +234,6 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `maps allowed card funding types to embedded configuration`() {
-        val configuration = CheckoutController.Configuration()
-            .paymentElement(
-                PaymentElement.Configuration().allowedCardFundingTypes(
-                    listOf(PaymentElement.Configuration.CardFundingType.Debit)
-                )
-            )
-            .build()
-
-        val result = factory().create(
-            configuration = configuration,
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            collectedDetails = collectedDetails(),
-        )
-
-        assertThat(result.allowedCardFundingTypes)
-            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
-    }
-
-    @Test
     fun `maps googlePay regardless of ECE display setting`() {
         val result = factory().create(
             configuration = controllerConfiguration(

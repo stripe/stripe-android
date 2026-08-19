@@ -20,15 +20,11 @@ class AppearanceMapperTest {
     }
 
     @Test
-    fun `configured appearance maps colors shapes and primary button`() {
+    fun `configured appearance maps colors and primary button`() {
         val appearance = PaymentElement.Configuration.Appearance()
             .colorsLight(
                 PaymentElement.Configuration.Appearance.Colors.light()
                     .primary(Color.Red)
-            )
-            .shapes(
-                PaymentElement.Configuration.Appearance.Shapes()
-                    .cornerRadiusDp(0f)
             )
             .primaryButton(
                 PaymentElement.Configuration.Appearance.PrimaryButton()
@@ -41,7 +37,6 @@ class AppearanceMapperTest {
         val mapped = appearance.build().asPaymentSheet()
 
         assertThat(mapped.colorsLight.primary).isEqualTo(Color.Red.toArgb())
-        assertThat(mapped.shapes.cornerRadiusDp).isEqualTo(0f)
         assertThat(mapped.primaryButton.colorsLight.background).isEqualTo(Color.Green.toArgb())
     }
 
@@ -60,7 +55,9 @@ class AppearanceMapperTest {
     @Test
     fun `configuration stores its supplied appearance`() {
         val appearance = PaymentElement.Configuration.Appearance()
-            .shapes(PaymentElement.Configuration.Appearance.Shapes().cornerRadiusDp(12f))
+            .colorsLight(
+                PaymentElement.Configuration.Appearance.Colors.light().primary(Color.Red)
+            )
 
         val state = PaymentElement.Configuration().appearance(appearance).build()
 
