@@ -47,6 +47,7 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 internal class CheckoutSheetLauncherTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
