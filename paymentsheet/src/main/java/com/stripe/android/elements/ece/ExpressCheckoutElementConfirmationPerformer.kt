@@ -4,6 +4,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
+import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -21,7 +22,6 @@ internal interface ExpressCheckoutElementConfirmationPerformer {
     fun confirm(expressButton: ExpressButton)
 }
 
-@OptIn(CheckoutSessionPreview::class)
 internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val confirmationHandler: ConfirmationHandler,
@@ -68,20 +68,18 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         }
     }
 
+    @OptIn(CheckoutSessionPreview::class)
     private fun getConfirmationArgs(
         state: CheckoutControllerState,
         expressButton: ExpressButton,
     ): ConfirmationHandler.Args? {
         val configuration = state.commonConfiguration.copy(
+            link = state.configuration.expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
             billingDetailsCollectionConfiguration = state.configuration.expressCheckoutElementConfiguration
                 .billingDetailsCollectionConfiguration
                 .asPaymentSheet(
                     requiresBillingAddress = state.checkoutSessionResponse.requiresBillingAddress
-                )
-        )
-        val configuration = state.commonConfiguration.copy(
-            // TODO-codex: use the ECE configuration link configuration here.
-            link = TODO()
+                ),
         )
         val shippingAddressRequired = (expressButton as? ExpressButton.GooglePay)?.shippingAddressRequired == true
         val shippingAddressParameters = if (shippingAddressRequired) {
