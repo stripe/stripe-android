@@ -192,9 +192,6 @@ public abstract interface class com/stripe/android/IssuingCardPinService$Listene
 	public abstract fun onError (Lcom/stripe/android/IssuingCardPinService$CardPinActionError;Ljava/lang/String;Ljava/lang/Throwable;)V
 }
 
-public abstract interface annotation class com/stripe/android/KlarnaSDKPrivatePreview : java/lang/annotation/Annotation {
-}
-
 public abstract interface annotation class com/stripe/android/LinkDisallowFundingSourceCreationPreview : java/lang/annotation/Annotation {
 }
 
@@ -2809,11 +2806,7 @@ public final class com/stripe/android/model/PaymentMethodOptionsParams$Klarna : 
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getInteroperabilityToken ()Ljava/lang/String;
-	public final fun getPartnerConfirmationToken ()Ljava/lang/String;
 	public fun hashCode ()I
-	public final fun setInteroperabilityToken (Ljava/lang/String;)V
-	public final fun setPartnerConfirmationToken (Ljava/lang/String;)V
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }

@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.KlarnaSDKPrivatePreview
 import com.stripe.android.testing.RadarOptionsFactory
 import kotlin.test.Test
 
@@ -372,7 +371,6 @@ class ConfirmPaymentIntentParamsTest {
         )
     }
 
-    @OptIn(KlarnaSDKPrivatePreview::class)
     @Test
     fun toParamMap_withKlarnaPaymentMethodOptions_shouldCreateExpectedMap() {
         assertThat(

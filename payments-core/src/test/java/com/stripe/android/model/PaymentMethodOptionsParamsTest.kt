@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.KlarnaSDKPrivatePreview
 import kotlin.test.Test
 
 class PaymentMethodOptionsParamsTest {
@@ -47,7 +46,6 @@ class PaymentMethodOptionsParamsTest {
         ).isEmpty()
     }
 
-    @OptIn(KlarnaSDKPrivatePreview::class)
     @Test
     fun klarnaToParamMap_hasCorrectValues() {
         assertThat(
@@ -65,7 +63,6 @@ class PaymentMethodOptionsParamsTest {
         )
     }
 
-    @OptIn(KlarnaSDKPrivatePreview::class)
     @Test
     fun klarnaToParamMap_withNoData_shouldHaveEmptyParams() {
         assertThat(
