@@ -21,6 +21,15 @@ internal class ExpressCheckoutElementTest {
             ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.Pay
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).isEmpty()
+        assertThat(state.billingDetailsCollectionConfiguration.name).isEqualTo(
+            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+        )
+        assertThat(state.billingDetailsCollectionConfiguration.email).isEqualTo(
+            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+        )
+        assertThat(state.billingDetailsCollectionConfiguration.address).isEqualTo(
+            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+        )
     }
 
     @Test
@@ -56,5 +65,34 @@ internal class ExpressCheckoutElementTest {
             .build()
 
         assertThat(state.shippingAddressRequired).isTrue()
+    }
+
+    @Test
+    fun `configuration builds requested billing details collection values`() {
+        val state = ExpressCheckoutElement.Configuration()
+            .billingDetailsCollectionConfiguration(
+                ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
+                    .name(
+                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    )
+                    .email(
+                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
+                    )
+                    .address(
+                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
+                            .AddressCollectionMode.Full
+                    )
+            )
+            .build()
+
+        assertThat(state.billingDetailsCollectionConfiguration.name).isEqualTo(
+            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        )
+        assertThat(state.billingDetailsCollectionConfiguration.email).isEqualTo(
+            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
+        )
+        assertThat(state.billingDetailsCollectionConfiguration.address).isEqualTo(
+            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+        )
     }
 }

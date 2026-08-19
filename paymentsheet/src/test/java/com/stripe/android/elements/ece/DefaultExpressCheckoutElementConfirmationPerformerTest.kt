@@ -3,6 +3,7 @@ package com.stripe.android.elements.ece
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -20,6 +21,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
@@ -68,7 +70,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm starts confirmation with a Google Pay option`() {
-        val state = googlePayState()
+        val state = createState()
 
         runScenario(
             state = state,
@@ -88,7 +90,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm requests a Google Pay shipping address for allowed countries`() {
-        val state = googlePayState(
+        val state = createState(
             allowedShippingCountries = listOf("US", "CA"),
         )
 
@@ -108,6 +110,70 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                     isRequired = true,
                     allowedCountryCodes = setOf("US", "CA"),
                 )
+            )
+        }
+    }
+
+    @Test
+    fun `confirm uses ECE billing details collection configuration`() {
+        val state = createState(
+            eceBillingDetailsCollectionConfiguration =
+                ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
+                    .name(
+                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    )
+                    .email(
+                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
+                    )
+                    .address(
+                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
+                            .AddressCollectionMode.Full
+                    )
+        )
+
+        runScenario(
+            state = state,
+            expressButton = createGooglePayExpressButton(
+                paymentMethodMetadata = state.paymentMethodMetadata,
+            ),
+        ) {
+            performer.confirm(expressButton)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            val option = args.confirmationOption as GooglePayConfirmationOption
+            val billingDetails = option.config.billingDetailsCollectionConfiguration
+            assertThat(billingDetails.name).isEqualTo(
+                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+            )
+            assertThat(billingDetails.phone).isEqualTo(
+                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+            )
+            assertThat(billingDetails.email).isEqualTo(
+                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
+            )
+            assertThat(billingDetails.address).isEqualTo(
+                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            )
+            assertThat(billingDetails.attachDefaultsToPaymentMethod).isTrue()
+        }
+    }
+
+    @Test
+    fun `confirm collects a billing address when required by the Checkout Session`() {
+        val state = createState(requiresBillingAddress = true)
+
+        runScenario(
+            state = state,
+            expressButton = createGooglePayExpressButton(
+                paymentMethodMetadata = state.paymentMethodMetadata,
+            ),
+        ) {
+            performer.confirm(expressButton)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            val option = args.confirmationOption as GooglePayConfirmationOption
+            assertThat(option.config.billingDetailsCollectionConfiguration.address).isEqualTo(
+                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             )
         }
     }
@@ -139,13 +205,25 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         }
     }
 
-    private fun googlePayState(
+    private fun createState(
         allowedShippingCountries: List<String>? = null,
+        requiresBillingAddress: Boolean = false,
+        eceBillingDetailsCollectionConfiguration:
+            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration =
+            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration(),
     ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
+            configuration = CheckoutController.Configuration()
+                .expressCheckoutElement(
+                    ExpressCheckoutElement.Configuration().billingDetailsCollectionConfiguration(
+                        eceBillingDetailsCollectionConfiguration
+                    )
+                )
+                .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "US",
                 allowedShippingCountries = allowedShippingCountries,
+                requiresBillingAddress = requiresBillingAddress,
             ),
         )
     }
