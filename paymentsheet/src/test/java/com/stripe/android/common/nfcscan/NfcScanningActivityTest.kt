@@ -16,6 +16,7 @@ import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -228,7 +229,7 @@ internal class NfcScanningActivityTest {
         assertThat(shadowActivity.pendingTransitionEnterAnimationResourceId)
             .isEqualTo(AnimationConstants.FADE_IN)
         assertThat(shadowActivity.pendingTransitionExitAnimationResourceId)
-            .isEqualTo(AnimationConstants.FADE_OUT)
+            .isEqualTo(R.anim.stripe_nfc_screen_fade_out)
     }
 
     private fun test(
