@@ -7,6 +7,9 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFileParams
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -65,6 +68,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import org.json.JSONObject
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -154,6 +158,19 @@ internal class CryptoApiRepository @Inject constructor(
             url = fulfillAdditionalKycRequirementUrl,
             paramsJson = Json.encodeToJsonElement(request).jsonObject,
             responseSerializer = AdditionalKycSubmissionResponse.serializer(),
+        )
+    }
+
+    /**
+     * Uploads a document for an additional KYC requirement.
+     */
+    suspend fun uploadAdditionalKycDocument(file: File): Result<StripeFile> {
+        return stripeRepository.createFile(
+            fileParams = StripeFileParams(
+                file = file,
+                purpose = StripeFilePurpose.CryptoOnrampKycDocument,
+            ),
+            requestOptions = buildRequestOptions(),
         )
     }
 
