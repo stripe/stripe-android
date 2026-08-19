@@ -18,11 +18,14 @@ object AnimationConstants {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun Activity.fadeOut() {
+fun Activity.fadeOut(
+    fadeIn: Int = FADE_IN,
+    fadeOut: Int = FADE_OUT
+) {
     if (Build.VERSION.SDK_INT >= 34) {
-        overrideActivityTransition(Activity.OVERRIDE_TRANSITION_CLOSE, FADE_IN, FADE_OUT)
+        overrideActivityTransition(Activity.OVERRIDE_TRANSITION_CLOSE, fadeIn, fadeOut)
     } else {
         @Suppress("DEPRECATION")
-        overridePendingTransition(FADE_IN, FADE_OUT)
+        overridePendingTransition(fadeIn, fadeOut)
     }
 }
