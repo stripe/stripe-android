@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodBillingAddressPolicy
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.addSavePaymentOptionElements
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
@@ -63,7 +64,11 @@ private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
                     )
                 )
             )
-            .requireBillingAddressIfAllowed()
+            .billingAddressPolicy(
+                PaymentMethodBillingAddressPolicy.FullAddressIfAllowed(
+                    allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                )
+            )
             .apply {
                 val elements = mutableListOf<FormElement>()
 

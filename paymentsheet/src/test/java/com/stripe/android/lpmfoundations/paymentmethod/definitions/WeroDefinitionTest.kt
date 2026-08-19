@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -20,7 +21,10 @@ class WeroDefinitionTest {
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(
                     paymentMethodTypes = listOf("wero")
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
             )
         )
 
@@ -47,14 +51,14 @@ class WeroDefinitionTest {
 
         assertThat(formElements).hasSize(4)
 
-        checkCountryField(formElements, 0)
-        checkNameField(formElements, 1)
-        checkEmailField(formElements, 2)
-        checkPhoneField(formElements, 3)
+        checkNameField(formElements, 0)
+        checkEmailField(formElements, 1)
+        checkPhoneField(formElements, 2)
+        checkCountryField(formElements, 3)
     }
 
     @Test
-    fun `createFormElements returns country and billing address when full address collection enabled`() {
+    fun `createFormElements returns one allowlisted address owner when full address collection enabled`() {
         val formElements = WeroDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(
@@ -69,13 +73,19 @@ class WeroDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(5)
+        assertThat(formElements).hasSize(4)
 
-        checkCountryField(formElements, 0)
-        checkNameField(formElements, 1)
-        checkEmailField(formElements, 2)
-        checkPhoneField(formElements, 3)
-        checkBillingField(formElements, 4)
+        checkNameField(formElements, 0)
+        checkEmailField(formElements, 1)
+        checkPhoneField(formElements, 2)
+        checkBillingField(formElements, 3)
+
+        val addressElement = (formElements[3] as SectionElement).fields.single() as AddressElement
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "🇧🇪 Belgium",
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
     }
 
     @Test
