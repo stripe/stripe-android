@@ -1,12 +1,17 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.SetupIntentFactory
+import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal data class LpmBillingAddressTestConfiguration(
     val paymentMethodType: PaymentMethod.Type,
@@ -15,10 +20,32 @@ internal data class LpmBillingAddressTestConfiguration(
     val termsDisplay: PaymentSheet.TermsDisplay,
 ) {
     fun metadata(): PaymentMethodMetadata {
-        return PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(paymentMethodType),
+        return metadata(
             billingDetailsCollectionConfiguration = billingDetailsCollectionMode
                 .billingDetailsCollectionConfiguration(),
+            defaultBillingDetails = PaymentSheet.BillingDetails(),
+        )
+    }
+
+    fun metadataWithAttachedDefaultBillingDetails(
+        defaultBillingDetails: PaymentSheet.BillingDetails,
+    ): PaymentMethodMetadata {
+        return metadata(
+            billingDetailsCollectionConfiguration = billingDetailsCollectionMode
+                .billingDetailsCollectionConfiguration()
+                .copy(attachDefaultsToPaymentMethod = true),
+            defaultBillingDetails = defaultBillingDetails,
+        )
+    }
+
+    private fun metadata(
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        defaultBillingDetails: PaymentSheet.BillingDetails,
+    ): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            stripeIntent = intentScenario.stripeIntent(paymentMethodType),
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            defaultBillingDetails = defaultBillingDetails,
             termsDisplay = mapOf(paymentMethodType to termsDisplay),
         )
     }
@@ -70,5 +97,98 @@ internal enum class LpmBillingDetailsCollectionMode {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         }
+    }
+}
+
+internal data class LpmBillingAddressFormValuesToParamsTestCase(
+    val name: String,
+    val config: LpmBillingAddressTestConfiguration,
+    val rawValues: Map<IdentifierSpec, String?>,
+    val expectedParams: LpmBillingAddressFormParams,
+) {
+    override fun toString(): String = name
+}
+
+internal data class LpmBillingAddressFormParams(
+    val createParams: PaymentMethodCreateParams,
+    val optionsParams: PaymentMethodOptionsParams?,
+    val extraParams: PaymentMethodExtraParams?,
+)
+
+internal data class LpmBillingAddressTier1TestCase(
+    val config: LpmBillingAddressTestConfiguration,
+    val rawValues: Map<IdentifierSpec, String?>,
+    val attachedDefaultBillingDetails: PaymentSheet.BillingDetails?,
+    val expectedCreateParamsMap: Map<String, Any>,
+    val expectedRequiresMandate: Boolean,
+    val expectedOptionsParams: PaymentMethodOptionsParams?,
+    val expectedExtraParams: PaymentMethodExtraParams?,
+) {
+    override fun toString(): String = config.toString()
+}
+
+internal fun Map<String, Any>.flattenParams(prefix: String = ""): Map<String, Any> {
+    return buildMap {
+        this@flattenParams.forEach { (key, value) ->
+            val flattenedKey = if (prefix.isEmpty()) key else "$prefix.$key"
+            if (value is Map<*, *>) {
+                @Suppress("UNCHECKED_CAST")
+                val nestedMap = value as Map<String, Any>
+                putAll(nestedMap.flattenParams(flattenedKey))
+            } else {
+                put(flattenedKey, value)
+            }
+        }
+    }
+}
+
+internal fun Map<String, Any>.withoutClientAttributionMetadata(): Map<String, Any> {
+    return filterKeys { !it.startsWith("client_attribution_metadata.") }
+}
+
+internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
+    addAll(boletoTestCases)
+    addAll(sepaDebitTestCases)
+    addAll(weroTestCases)
+    addAll(klarnaTestCases)
+    addAll(bacsDebitTestCases)
+    addAll(oxxoTestCases)
+    addAll(auBecsDebitTestCases)
+    addAll(blikTestCases)
+    addAll(p24TestCases)
+    addAll(epsTestCases)
+    addAll(konbiniTestCases)
+    addAll(mobilePayTestCases)
+    addAll(multibancoTestCases)
+    addAll(promptPayTestCases)
+    addAll(idealTier2TestCases)
+}
+
+internal val lpmBillingAddressTier1TestCases = buildList {
+    addAll(idealTestCases)
+}
+
+internal val lpmBillingAddressTestConfigurations =
+    lpmBillingAddressFormValuesToParamsTestCases
+        .map { it.config }
+        .filterNot { tier2Config ->
+            lpmBillingAddressTier1TestCases.any { it.config == tier2Config }
+        } + lpmBillingAddressTier1TestCases.map { it.config }
+
+internal object LpmBillingAddressFormValuesToParamsTestCaseProvider : TestParameterValuesProvider() {
+    override fun provideValues(context: Context?): List<LpmBillingAddressFormValuesToParamsTestCase> {
+        return lpmBillingAddressFormValuesToParamsTestCases
+    }
+}
+
+internal object LpmBillingAddressTier1TestCaseProvider : TestParameterValuesProvider() {
+    override fun provideValues(context: Context?): List<LpmBillingAddressTier1TestCase> {
+        return lpmBillingAddressTier1TestCases
+    }
+}
+
+internal object LpmBillingAddressTestConfigurationProvider : TestParameterValuesProvider() {
+    override fun provideValues(context: Context?): List<LpmBillingAddressTestConfiguration> {
+        return lpmBillingAddressTestConfigurations
     }
 }

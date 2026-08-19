@@ -2,13 +2,10 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodExtraParams
-import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -41,6 +38,25 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     }
 
     @Test
+    fun `creates the expected flattened form params`(
+        @TestParameter(valuesProvider = LpmBillingAddressTier1TestCaseProvider::class)
+        testCase: LpmBillingAddressTier1TestCase,
+    ) = runTest {
+        val actual = createFormParamsFromFormValues(
+            config = testCase.config,
+            rawValues = testCase.rawValues,
+            attachedDefaultBillingDetails = testCase.attachedDefaultBillingDetails,
+        )
+
+        assertThat(
+            actual.createParams.toParamMap().flattenParams().withoutClientAttributionMetadata(),
+        ).containsExactlyEntriesIn(testCase.expectedCreateParamsMap)
+        assertThat(actual.createParams.requiresMandate).isEqualTo(testCase.expectedRequiresMandate)
+        assertThat(actual.optionsParams).isEqualTo(testCase.expectedOptionsParams)
+        assertThat(actual.extraParams).isEqualTo(testCase.expectedExtraParams)
+    }
+
+    @Test
     fun `has unique configs`() {
         assertThat(lpmBillingAddressTestConfigurations).containsNoDuplicates()
     }
@@ -60,7 +76,21 @@ internal class LpmBillingAddressFormValuesToParamsTest {
         config: LpmBillingAddressTestConfiguration,
         rawValues: Map<IdentifierSpec, String?>,
     ): LpmBillingAddressFormParams {
-        val metadata = config.metadata()
+        return createFormParamsFromFormValues(
+            config = config,
+            rawValues = rawValues,
+            attachedDefaultBillingDetails = null,
+        )
+    }
+
+    private suspend fun createFormParamsFromFormValues(
+        config: LpmBillingAddressTestConfiguration,
+        rawValues: Map<IdentifierSpec, String?>,
+        attachedDefaultBillingDetails: PaymentSheet.BillingDetails?,
+    ): LpmBillingAddressFormParams {
+        val metadata = attachedDefaultBillingDetails?.let {
+            config.metadataWithAttachedDefaultBillingDetails(it)
+        } ?: config.metadata()
         val formViewModel = createFormViewModel(
             paymentMethodType = config.paymentMethodType,
             metadata = metadata,
@@ -127,52 +157,5 @@ internal class LpmBillingAddressFormValuesToParamsTest {
             optionsParams = paymentSelection.paymentMethodOptionsParams,
             extraParams = paymentSelection.paymentMethodExtraParams,
         )
-    }
-}
-
-internal data class LpmBillingAddressFormValuesToParamsTestCase(
-    val name: String,
-    val config: LpmBillingAddressTestConfiguration,
-    val rawValues: Map<IdentifierSpec, String?>,
-    val expectedParams: LpmBillingAddressFormParams,
-) {
-    override fun toString(): String = name
-}
-
-internal data class LpmBillingAddressFormParams(
-    val createParams: PaymentMethodCreateParams,
-    val optionsParams: PaymentMethodOptionsParams?,
-    val extraParams: PaymentMethodExtraParams?,
-)
-
-internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
-    addAll(boletoTestCases)
-    addAll(sepaDebitTestCases)
-    addAll(weroTestCases)
-    addAll(klarnaTestCases)
-    addAll(bacsDebitTestCases)
-    addAll(oxxoTestCases)
-    addAll(auBecsDebitTestCases)
-    addAll(blikTestCases)
-    addAll(p24TestCases)
-    addAll(epsTestCases)
-    addAll(konbiniTestCases)
-    addAll(mobilePayTestCases)
-    addAll(multibancoTestCases)
-    addAll(promptPayTestCases)
-}
-
-internal val lpmBillingAddressTestConfigurations =
-    lpmBillingAddressFormValuesToParamsTestCases.map { it.config }
-
-internal object LpmBillingAddressFormValuesToParamsTestCaseProvider : TestParameterValuesProvider() {
-    override fun provideValues(context: Context?): List<LpmBillingAddressFormValuesToParamsTestCase> {
-        return lpmBillingAddressFormValuesToParamsTestCases
-    }
-}
-
-internal object LpmBillingAddressTestConfigurationProvider : TestParameterValuesProvider() {
-    override fun provideValues(context: Context?): List<LpmBillingAddressTestConfiguration> {
-        return lpmBillingAddressTestConfigurations
     }
 }
