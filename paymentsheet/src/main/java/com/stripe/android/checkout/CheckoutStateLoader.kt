@@ -146,6 +146,7 @@ internal class CheckoutStateLoader @Inject constructor(
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): CheckoutCollectedDetails {
     return CheckoutCollectedDetails(
+        email = defaults.email,
         shippingName = defaults.shippingDetails?.name,
         billingName = defaults.billingDetails?.name,
         shippingAddress = defaults.shippingDetails?.address,
