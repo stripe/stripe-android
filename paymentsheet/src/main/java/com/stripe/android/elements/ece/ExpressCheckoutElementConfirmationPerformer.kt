@@ -50,8 +50,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         viewModelScope.launch {
             try {
                 confirmationHandler.start(confirmationArgs)
-
-                confirmationHandler.awaitResult()
             } catch (error: CancellationException) {
                 throw error
             } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
