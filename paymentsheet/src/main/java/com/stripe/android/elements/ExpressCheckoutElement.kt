@@ -3,6 +3,8 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import com.stripe.android.CollectMissingLinkBillingDetailsPreview
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -39,7 +41,6 @@ class ExpressCheckoutElement @Inject internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
-
         /**
          * Configuration for how billing details are collected during checkout.
          */
@@ -121,11 +122,77 @@ class ExpressCheckoutElement @Inject internal constructor(
             )
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        /**
+         * Configuration related to Link.
+         */
         @CheckoutSessionPreview
-        enum class LinkVisibility {
-            Auto,
-            Never,
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class LinkConfiguration {
+            private var display: Display = Display.Automatic
+            private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+            private var disallowFundingSourceCreation: Set<String> = emptySet()
+
+            /**
+             * Display configuration for Link.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Display {
+                /**
+                 * Link will be displayed when available.
+                 */
+                Automatic,
+
+                /**
+                 * Link will never be displayed.
+                 */
+                Never,
+
+                /**
+                 * Link remains enabled but its button or row is hidden from the payment element UI.
+                 */
+                WalletButtonHidden,
+            }
+
+            /** Sets the display configuration for Link. */
+            fun display(display: Display): LinkConfiguration = apply {
+                this.display = display
+            }
+
+            /**
+             * Sets whether Link collects missing billing details for existing payment methods.
+             */
+            @CollectMissingLinkBillingDetailsPreview
+            fun collectMissingBillingDetailsForExistingPaymentMethods(
+                collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+            ): LinkConfiguration = apply {
+                this.collectMissingBillingDetailsForExistingPaymentMethods =
+                    collectMissingBillingDetailsForExistingPaymentMethods
+            }
+
+            /**
+             * Sets the funding source types that Link must not create.
+             */
+            @LinkDisallowFundingSourceCreationPreview
+            fun disallowFundingSourceCreation(
+                disallowFundingSourceCreation: Set<String>,
+            ): LinkConfiguration = apply {
+                this.disallowFundingSourceCreation = disallowFundingSourceCreation
+            }
+
+            @Parcelize
+            internal data class State(
+                val display: Display,
+                val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+                val disallowFundingSourceCreation: Set<String>,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                display = display,
+                collectMissingBillingDetailsForExistingPaymentMethods =
+                    collectMissingBillingDetailsForExistingPaymentMethods,
+                disallowFundingSourceCreation = disallowFundingSourceCreation.toSet(),
+            )
         }
 
         /**
@@ -265,17 +332,18 @@ class ExpressCheckoutElement @Inject internal constructor(
                 additionalEnabledNetworks = additionalEnabledNetworks,
             )
         }
-        private var linkVisibility: LinkVisibility = LinkVisibility.Auto
+        private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
         private var shippingAddressRequired: Boolean = false
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
 
-        fun linkVisibility(
-            linkVisibility: LinkVisibility
+        /** Sets the configuration for Link. */
+        fun linkConfiguration(
+            configuration: LinkConfiguration,
         ): Configuration = apply {
-            this.linkVisibility = linkVisibility
+            this.linkConfiguration = configuration
         }
 
         fun googlePayConfiguration(
@@ -299,14 +367,14 @@ class ExpressCheckoutElement @Inject internal constructor(
 
         @Parcelize
         internal data class State(
-            val linkVisibility: LinkVisibility,
+            val linkConfiguration: LinkConfiguration.State,
             val googlePayConfiguration: GooglePayConfiguration.State,
             val shippingAddressRequired: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
         ) : Parcelable
 
         internal fun build(): State = State(
-            linkVisibility = linkVisibility,
+            linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
             shippingAddressRequired = shippingAddressRequired,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),

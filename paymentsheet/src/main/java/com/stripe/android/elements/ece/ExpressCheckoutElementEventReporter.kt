@@ -104,7 +104,8 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
         return state.paymentMethodMetadata.analyticsMetadata.paramsMap + mapOf(
             FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
             FIELD_ECE_CONFIG to mapOf(
-                FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkVisibility.name.lowercase(),
+                FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkConfiguration.display
+                    .toAnalyticsValue(),
                 FIELD_GOOGLE_PAY_VISIBILITY to (
                     expressCheckoutElementConfiguration.googlePayConfiguration.display.toAnalyticsValue()
                     ),
@@ -145,6 +146,15 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
             return when (this) {
                 ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic -> "automatic"
                 ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never -> "never"
+            }
+        }
+
+        fun ExpressCheckoutElement.Configuration.LinkConfiguration.Display.toAnalyticsValue(): String {
+            return when (this) {
+                ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic -> "automatic"
+                ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never -> "never"
+                ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden ->
+                    "wallet_button_hidden"
             }
         }
     }
