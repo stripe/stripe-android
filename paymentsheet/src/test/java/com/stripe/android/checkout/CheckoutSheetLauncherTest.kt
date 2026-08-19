@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
@@ -209,6 +210,23 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `formActivityLauncher invokes immediate action when complete result has selection`() = testScenario {
+        launchForm("cashapp")
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            hasBeenConfirmed = false,
+            customerState = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+
+        assertThat(immediateActionWasInvoked()).isTrue()
+    }
+
+    @Test
     fun `formActivityLauncher sets customer state but keeps selection on cancelled result`() = testScenario {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         launchForm("card")
@@ -342,6 +360,23 @@ internal class CheckoutSheetLauncherTest {
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(immediateActionWasInvoked()).isFalse()
+    }
+
+    @Test
+    fun `manageSheetLauncher invokes immediate action for saved selection when flagged`() = testScenario {
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            customerState = null,
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            hasBeenConfirmed = false,
+            shouldInvokeSelectionCallback = true,
+            launchMode = EmbeddedLaunchMode.Manage,
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+
+        assertThat(immediateActionWasInvoked()).isTrue()
     }
 
     @Test
@@ -575,6 +610,7 @@ internal class CheckoutSheetLauncherTest {
     private fun testScenario(
         block: suspend Scenario.() -> Unit
     ) = runTest {
+        var immediateActionInvoked = false
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
@@ -598,6 +634,7 @@ internal class CheckoutSheetLauncherTest {
                 errorReporter = errorReporter,
                 statusBarColor = null,
                 paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
+                rowSelectionImmediateActionHandler = { immediateActionInvoked = true },
             )
             val registerCall = awaitRegisterCall()
             val launcher = awaitNextRegisteredLauncher()
@@ -615,6 +652,7 @@ internal class CheckoutSheetLauncherTest {
                 sheetLauncher = sheetLauncher,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
+                immediateActionWasInvoked = { immediateActionInvoked },
             ).block()
         }
     }
@@ -629,6 +667,7 @@ internal class CheckoutSheetLauncherTest {
         val sheetLauncher: EmbeddedSheetLauncher,
         val sheetStateHolder: SheetStateHolder,
         val errorReporter: FakeErrorReporter,
+        val immediateActionWasInvoked: () -> Boolean,
     ) {
         suspend fun launchForm(code: String) {
             sheetLauncher.launchForm(

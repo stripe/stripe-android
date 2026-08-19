@@ -126,6 +126,8 @@ internal interface CheckoutControllerComponent {
             @BindsInstance application: Application,
             @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
+            @BindsInstance @CheckoutRowSelectionImmediateActionCallback
+            rowSelectionImmediateActionCallback: InternalRowSelectionCallback?,
             @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
         ): CheckoutControllerComponent
     }
@@ -253,9 +255,9 @@ internal interface CheckoutControllerModule {
 
         @Provides
         fun providesInternalRowSelectionCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @CheckoutRowSelectionImmediateActionCallback callback: InternalRowSelectionCallback?,
         ): InternalRowSelectionCallback? {
-            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
+            return callback
         }
 
         @Provides

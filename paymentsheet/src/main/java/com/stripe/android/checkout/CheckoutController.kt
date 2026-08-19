@@ -23,6 +23,7 @@ import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -756,6 +757,7 @@ class CheckoutController @Inject internal constructor(
     ) {
         private var resultCallback: ResultCallback = ResultCallback {}
         private var integrationName: String = "stripe_checkout"
+        private var rowSelectionImmediateActionCallback: InternalRowSelectionCallback? = null
 
         /**
          * Sets the [ResultCallback] invoked when a payment flow finishes.
@@ -764,6 +766,16 @@ class CheckoutController @Inject internal constructor(
             resultCallback: ResultCallback
         ): Builder = apply {
             this.resultCallback = resultCallback
+        }
+
+        /**
+         * Sets the callback invoked after the customer selects a payment option that requires an
+         * immediate action.
+         */
+        fun rowSelectionImmediateActionCallback(
+            rowSelectionImmediateActionCallback: () -> Unit,
+        ): Builder = apply {
+            this.rowSelectionImmediateActionCallback = rowSelectionImmediateActionCallback
         }
 
         /**
@@ -793,6 +805,7 @@ class CheckoutController @Inject internal constructor(
                 application = application,
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
+                rowSelectionImmediateActionCallback = rowSelectionImmediateActionCallback,
                 checkoutControllerSavedState = checkoutControllerSavedState,
             )
 
