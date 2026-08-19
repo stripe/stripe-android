@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
@@ -71,6 +72,17 @@ internal class CheckoutStateLoaderTest {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `loadInitial reports immediate row selection action to payment element loader`() = runScenario(
+        internalRowSelectionCallback = {},
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        val integrationConfiguration = paymentElementLoader.lastIntegrationConfiguration
+            as PaymentElementLoader.Configuration.Embedded
+        assertThat(integrationConfiguration.isRowSelectionImmediateAction).isTrue()
     }
 
     @Test
@@ -452,6 +464,7 @@ internal class CheckoutStateLoaderTest {
         shouldFail: Boolean = false,
         isGooglePayAvailable: Boolean = false,
         customer: CustomerState? = null,
+        internalRowSelectionCallback: (() -> Unit)? = null,
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
@@ -493,6 +506,7 @@ internal class CheckoutStateLoaderTest {
             selectionChooser = chooser,
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
+            internalRowSelectionCallback = { internalRowSelectionCallback },
         )
 
         Scenario(

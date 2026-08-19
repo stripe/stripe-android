@@ -26,6 +26,7 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.DefaultAvailableExpressButtonTypesFactory
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
@@ -126,6 +127,7 @@ internal interface CheckoutControllerComponent {
             @BindsInstance application: Application,
             @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
+            @BindsInstance rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
             @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
         ): CheckoutControllerComponent
     }
@@ -253,9 +255,9 @@ internal interface CheckoutControllerModule {
 
         @Provides
         fun providesInternalRowSelectionCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
         ): InternalRowSelectionCallback? {
-            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
+            return PaymentElement.RowSelectionBehavior.getImmediateAction(rowSelectionBehavior)
         }
 
         @Provides

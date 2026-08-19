@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -35,6 +36,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -63,7 +65,12 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
+            is EmbeddedActivityResult.Complete -> {
+                applyCompleteResult(result)
+                if (!result.hasBeenConfirmed) {
+                    result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
+                }
+            }
             is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
         }
@@ -71,7 +78,12 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
+            is EmbeddedActivityResult.Complete -> {
+                applyCompleteResult(result)
+                if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
+                    rowSelectionImmediateActionHandler.invoke()
+                }
+            }
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
         }

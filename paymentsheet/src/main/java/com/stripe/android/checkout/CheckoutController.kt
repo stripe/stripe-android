@@ -754,6 +754,8 @@ class CheckoutController @Inject internal constructor(
     ) {
         private var resultCallback: ResultCallback = ResultCallback {}
         private var integrationName: String = "stripe_checkout"
+        private var rowSelectionBehavior: PaymentElement.RowSelectionBehavior =
+            PaymentElement.RowSelectionBehavior.default()
 
         /**
          * Sets the [ResultCallback] invoked when a payment flow finishes.
@@ -762,6 +764,15 @@ class CheckoutController @Inject internal constructor(
             resultCallback: ResultCallback
         ): Builder = apply {
             this.resultCallback = resultCallback
+        }
+
+        /**
+         * Sets how payment-option row selections are handled.
+         */
+        fun rowSelectionBehavior(
+            rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
+        ): Builder = apply {
+            this.rowSelectionBehavior = rowSelectionBehavior
         }
 
         /**
@@ -791,6 +802,7 @@ class CheckoutController @Inject internal constructor(
                 application = application,
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
+                rowSelectionBehavior = rowSelectionBehavior,
                 checkoutControllerSavedState = checkoutControllerSavedState,
             )
 
