@@ -79,6 +79,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                     requiresBillingAddress = state.checkoutSessionResponse.requiresBillingAddress
                 )
         )
+        val configuration = state.commonConfiguration.copy(
+            // TODO-codex: use the ECE configuration link configuration here.
+            link = TODO()
+        )
         val shippingAddressRequired = (expressButton as? ExpressButton.GooglePay)?.shippingAddressRequired == true
         val shippingAddressParameters = if (shippingAddressRequired) {
             GooglePayJsonFactory.ShippingAddressParameters(

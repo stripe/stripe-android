@@ -3,6 +3,8 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import com.stripe.android.CollectMissingLinkBillingDetailsPreview
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -40,6 +42,48 @@ class ExpressCheckoutElement @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
 
+        // TODO-codex: Fix issues with LinkConfiguration. Make it work like the other configuration classes.
+        /** Configuration related to Link. */
+        class LinkConfiguration {
+            /**
+             * Display configuration for Link.
+             */
+            enum class Display {
+                /**
+                 * Link will be displayed when available.
+                 */
+                Automatic,
+
+                /**
+                 * Link will never be displayed.
+                 */
+                Never,
+
+                /**
+                 * Link remains enabled but its button or row is hidden from the payment element UI.
+                 */
+                WalletButtonHidden,
+            }
+
+            /** Sets the display configuration for Link. */
+            fun display(display: Display): LinkConfiguration
+
+            /**
+             * Sets whether Link collects missing billing details for existing payment methods.
+             */
+            @CollectMissingLinkBillingDetailsPreview
+            fun collectMissingBillingDetailsForExistingPaymentMethods(
+                collectMissingBillingDetailsForExistingPaymentMethods: Boolean
+            ): LinkConfiguration
+
+            /**
+             * Sets the funding source types that Link must not create.
+             */
+            @LinkDisallowFundingSourceCreationPreview
+            fun disallowFundingSourceCreation(disallowFundingSourceCreation: Set<String>): LinkConfiguration
+        }
+
+        // TODO-codex: delete this.
         /**
          * Configuration for how billing details are collected during checkout.
          */
@@ -272,11 +316,19 @@ class ExpressCheckoutElement @Inject internal constructor(
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
 
+        // TODO-codex: delete this.
         fun linkVisibility(
             linkVisibility: LinkVisibility
         ): Configuration = apply {
             this.linkVisibility = linkVisibility
         }
+
+        // TODO-codex: make this work.
+        /** Sets the configuration for Link. */
+        fun linkConfiguration(
+            configuration: LinkConfiguration,
+        ): Configuration
+
 
         fun googlePayConfiguration(
             googlePayConfiguration: GooglePayConfiguration
