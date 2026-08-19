@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.CollectMissingLinkBillingDetailsPreview
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -47,6 +49,7 @@ class PaymentElement @Inject internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @OptIn(CardFundingFilteringPrivatePreview::class)
+    @Suppress("TooManyFunctions")
     class Configuration {
         private var embeddedViewDisplaysMandateText: Boolean = true
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
@@ -59,6 +62,7 @@ class PaymentElement @Inject internal constructor(
         private var allowedCardFundingTypes: List<CardFundingType> = CardFundingType.entries
         private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
         private var appearance: Appearance = Appearance()
+        private var linkConfiguration: LinkConfiguration = LinkConfiguration()
 
         /**
          * Controls whether [Content] displays mandate text below the payment methods.
@@ -161,6 +165,88 @@ class PaymentElement @Inject internal constructor(
             this.appearance = appearance
         }
 
+        /**
+         * Sets the Link configuration for the payment element.
+         */
+        fun linkConfiguration(configuration: LinkConfiguration): Configuration = apply {
+            this.linkConfiguration = configuration
+        }
+
+        /**
+         * Builder for Link configuration used by the payment element.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class LinkConfiguration {
+            private var display: Display = Display.Automatic
+            private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+            private var disallowFundingSourceCreation: Set<String> = emptySet()
+
+            /**
+             * Sets when Link is displayed in the payment element.
+             */
+            fun display(display: Display): LinkConfiguration = apply {
+                this.display = display
+            }
+
+            /**
+             * Sets whether Link collects missing billing details for existing payment methods.
+             */
+            @CollectMissingLinkBillingDetailsPreview
+            fun collectMissingBillingDetailsForExistingPaymentMethods(
+                collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+            ): LinkConfiguration = apply {
+                this.collectMissingBillingDetailsForExistingPaymentMethods =
+                    collectMissingBillingDetailsForExistingPaymentMethods
+            }
+
+            /**
+             * Sets Link funding sources that cannot be created.
+             */
+            @LinkDisallowFundingSourceCreationPreview
+            fun disallowFundingSourceCreation(
+                disallowFundingSourceCreation: Set<String>,
+            ): LinkConfiguration = apply {
+                this.disallowFundingSourceCreation = disallowFundingSourceCreation
+            }
+
+            @Parcelize
+            internal data class State(
+                val display: Display,
+                val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+                val disallowFundingSourceCreation: Set<String>,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                display = display,
+                collectMissingBillingDetailsForExistingPaymentMethods =
+                    collectMissingBillingDetailsForExistingPaymentMethods,
+                disallowFundingSourceCreation = disallowFundingSourceCreation.toSet(),
+            )
+
+            /**
+             * Display configuration for Link.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Display {
+                /**
+                 * Link is displayed when available.
+                 */
+                Automatic,
+
+                /**
+                 * Link is never displayed.
+                 */
+                Never,
+
+                /**
+                 * Link remains enabled but its button or row is hidden from the payment element UI.
+                 */
+                WalletButtonHidden,
+            }
+        }
+
         @Parcelize
         @OptIn(CardFundingFilteringPrivatePreview::class)
         internal data class State(
@@ -174,6 +260,7 @@ class PaymentElement @Inject internal constructor(
             val allowedCardFundingTypes: List<CardFundingType>,
             val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
             val appearance: Appearance.State,
+            val linkConfiguration: LinkConfiguration.State,
         ) : Parcelable
 
         @OptIn(CardFundingFilteringPrivatePreview::class)
@@ -188,6 +275,7 @@ class PaymentElement @Inject internal constructor(
             allowedCardFundingTypes = allowedCardFundingTypes,
             termsDisplay = termsDisplay,
             appearance = appearance.build(),
+            linkConfiguration = linkConfiguration.build(),
         )
 
         /** Options to allow or disallow card brands. */
