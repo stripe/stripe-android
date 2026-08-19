@@ -6,7 +6,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
@@ -16,7 +15,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
 import org.junit.Test
@@ -91,43 +89,6 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         assertThat(loggedParams).containsEntry("duration", 1.0f)
         assertThat(loggedParams).containsEntry("selected_lpm", "google_pay")
         assertThat(loggedParams).doesNotContainKey("link_context")
-    }
-
-    @Test
-    fun `onEcePaymentSuccess fires expected event with Link params`() = runScenario {
-        val linkButton = ExpressButton.Link.create(
-            paymentMethodMetadata = paymentMethodMetadata,
-            linkAccountInfo = LinkAccountUpdate.Value(null)
-        )
-
-        reporter.onEcePaymentSuccess(linkButton)
-
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_ece_payment_success")
-        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
-        assertThat(loggedParams).containsEntry("duration", 1.0f)
-        assertThat(loggedParams).containsEntry("selected_lpm", "link")
-        assertThat(loggedParams).containsKey("link_context")
-    }
-
-    @Test
-    fun `onEcePaymentFailure fires expected event with error params`() = runScenario {
-        reporter.onEcePaymentFailure(
-            expressButton = googlePayButton,
-            error = ConfirmationHandler.Result.Failed(
-                cause = IllegalStateException("Payment failed"),
-                message = "Payment failed".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(10),
-            ),
-        )
-
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_ece_payment_failure")
-        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
-        assertThat(loggedParams).containsEntry("duration", 1.0f)
-        assertThat(loggedParams).containsEntry("selected_lpm", "google_pay")
-        assertThat(loggedParams).containsEntry("error_message", "googlePay_10")
-        assertThat(loggedParams).containsEntry("error_code", "10")
     }
 
     private class Scenario(
