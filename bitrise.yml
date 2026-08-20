@@ -107,9 +107,21 @@ workflows:
             - module: connect-example
             - variant: $BUILD_VARIANT
             - build_type: apk
+      - script@1:
+          title: Build Connect Test Lab test APK
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                ./gradlew :connect-example-e2e:assembleDebug
+                test_apk=$(compgen -G 'connect-example-e2e/build/outputs/apk/debug/*.apk')
+                [[ -f "$test_apk" ]] || { echo "Missing Connect Test Lab test APK" >&2; exit 1; }
+                envman add --key FTL_TEST_APK_PATH --value "$BITRISE_SOURCE_DIR/$test_apk"
       - deploy-to-bitrise-io@2:
           inputs:
-            - pipeline_intermediate_files: "$BITRISE_APK_PATH:FTL_APP_APK_PATH"
+            - pipeline_intermediate_files: |-
+                $BITRISE_APK_PATH:FTL_APP_APK_PATH
+                $FTL_TEST_APK_PATH:FTL_TEST_APK_PATH
   build-connections-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -130,9 +142,25 @@ workflows:
             - module: financial-connections-example
             - variant: $BUILD_VARIANT
             - build_type: apk
+      - script@1:
+          title: Build Financial Connections Test Lab test APK
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                ./gradlew :financial-connections-example:assembleDebugAndroidTest \
+                  -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL="$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL"
+                test_apk=$(compgen -G 'financial-connections-example/build/outputs/apk/androidTest/debug/*.apk')
+                [[ -f "$test_apk" ]] || {
+                  echo "Missing Financial Connections Test Lab test APK" >&2
+                  exit 1
+                }
+                envman add --key FTL_TEST_APK_PATH --value "$BITRISE_SOURCE_DIR/$test_apk"
       - deploy-to-bitrise-io@2:
           inputs:
-            - pipeline_intermediate_files: "$BITRISE_APK_PATH:FTL_APP_APK_PATH"
+            - pipeline_intermediate_files: |-
+                $BITRISE_APK_PATH:FTL_APP_APK_PATH
+                $FTL_TEST_APK_PATH:FTL_TEST_APK_PATH
   build-firebase-test-artifacts:
     before_run:
       - prepare_all
@@ -154,70 +182,37 @@ workflows:
   run-ftl-connect-e2e-tests:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-connect-debug
-      - FTL_ROBO_SCENARIO: connect-account-onboarding
+      - FTL_TEST_TARGETS: class com.stripe.android.connect.example.e2e.AccountOnboardingTest
     before_run:
-      - _run-firebase-robo-tests
+      - _run-firebase-instrumentation-tests
   run-ftl-connections-e2e-tests:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-connections-.*
-      - FTL_ROBO_SCENARIO: financial-connections
+      - FTL_TEST_TARGETS: class com.stripe.android.financialconnections.example.FinancialConnectionsTestLabTest
+      - FTL_RUNNER_ARGUMENTS: |-
+          scenarioIndex=$BITRISE_IO_PARALLEL_INDEX
+          buildNumber=$BITRISE_BUILD_NUMBER
     before_run:
-      - _run-firebase-robo-tests
+      - _run-firebase-instrumentation-tests
   run-ftl-connect-e2e-tests-on-push:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
       - FTL_APP_APK_FILENAME: connect-example.apk
-      - FTL_ROBO_SCENARIO: connect-account-onboarding
+      - FTL_TEST_APK_FILENAME: connect-example-e2e-test.apk
+      - FTL_TEST_TARGETS: class com.stripe.android.connect.example.e2e.AccountOnboardingTest
     before_run:
-      - _run-firebase-robo-tests
+      - _run-firebase-instrumentation-tests
   run-ftl-connections-e2e-tests-on-push:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
       - FTL_APP_APK_FILENAME: financial-connections-example-release.apk
-      - FTL_ROBO_SCENARIO: financial-connections
+      - FTL_TEST_APK_FILENAME: financial-connections-example-test.apk
+      - FTL_TEST_TARGETS: class com.stripe.android.financialconnections.example.FinancialConnectionsTestLabTest
+      - FTL_RUNNER_ARGUMENTS: |-
+          scenarioIndex=$BITRISE_IO_PARALLEL_INDEX
+          buildNumber=$BITRISE_BUILD_NUMBER
     before_run:
-      - _run-firebase-robo-tests
-  _run-firebase-robo-tests:
-    before_run:
-      - prepare_firebase_test_lab
-    after_run:
-      - deploy_firebase_test_results
-    steps:
-      - script@1:
-          title: Generate Firebase Robo scenario
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                set -euo pipefail
-
-                if [[ -n "${FTL_APP_APK_FILENAME:-}" ]]; then
-                  envman add --key FTL_APP_APK_PATH --value "$FTL_ARTIFACTS_DIR/$FTL_APP_APK_FILENAME"
-                elif [[ -z "${FTL_APP_APK_PATH:-}" ]]; then
-                  echo "No Firebase Test Lab app APK was provided." >&2
-                  exit 1
-                fi
-
-                if [[ "$FTL_ROBO_SCENARIO" == "financial-connections" ]]; then
-                  scripts/generate_firebase_robo_scenario.py \
-                    --financial-connections-index "$BITRISE_IO_PARALLEL_INDEX" \
-                    --output /tmp/firebase-robo-scenario.json
-                else
-                  scripts/generate_firebase_robo_scenario.py \
-                    --scenario "$FTL_ROBO_SCENARIO" \
-                    --output /tmp/firebase-robo-scenario.json
-                fi
-      - virtual-device-testing-for-android@1:
-          title: Run $FTL_ROBO_SCENARIO Robo test on Firebase Test Lab
-          timeout: 4200
-          inputs:
-            - app_path: $FTL_APP_APK_PATH
-            - test_type: robo
-            - test_devices: MediumPhone.arm,33,en_US,portrait
-            - robo_scenario_file: /tmp/firebase-robo-scenario.json
-            - auto_google_login: "true"
-            - num_flaky_test_attempts: "0"
-            - download_test_results: "true"
-            - test_timeout: "1200"
+      - _run-firebase-instrumentation-tests
   notify-connections-e2e-failure:
     steps:
       # Notify all executions.
@@ -330,9 +325,13 @@ workflows:
                 #!/usr/bin/env bash
                 set -euo pipefail
 
-                test_apk_path="$FTL_ARTIFACTS_DIR/$FTL_TEST_APK_FILENAME"
-                app_apk_path=""
-                if [[ -n "${FTL_APP_APK_FILENAME:-}" ]]; then
+                test_apk_path="${FTL_TEST_APK_PATH:-}"
+                if [[ -z "$test_apk_path" && -n "${FTL_TEST_APK_FILENAME:-}" ]]; then
+                  test_apk_path="$FTL_ARTIFACTS_DIR/$FTL_TEST_APK_FILENAME"
+                fi
+
+                app_apk_path="${FTL_APP_APK_PATH:-}"
+                if [[ -z "$app_apk_path" && -n "${FTL_APP_APK_FILENAME:-}" ]]; then
                   app_apk_path="$FTL_ARTIFACTS_DIR/$FTL_APP_APK_FILENAME"
                 fi
 

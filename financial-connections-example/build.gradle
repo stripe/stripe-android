@@ -88,4 +88,7 @@ dependencies {
 
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.uiAutomator
 }

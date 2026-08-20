@@ -16,6 +16,7 @@ rm -f "$artifact_dir"/*.apk
   :connect:assembleDebugAndroidTest \
   :connect-example:assembleDebug \
   :connect-example:assembleDebugAndroidTest \
+  :connect-example-e2e:assembleDebug \
   :payment-method-messaging:assembleDebugAndroidTest \
   :payments-core:assembleDebugAndroidTest \
   :paymentsheet:assembleDebugAndroidTest \
@@ -23,6 +24,7 @@ rm -f "$artifact_dir"/*.apk
   :paymentsheet-example:assembleBaseDebugAndroidTest \
   :financial-connections:assembleDebugAndroidTest \
   :financial-connections-example:assembleDebug \
+  :financial-connections-example:assembleDebugAndroidTest \
   :financial-connections-example:assembleRelease \
   :crypto-onramp-example:assembleDebug \
   :crypto-onramp-example:assembleDebugAndroidTest \
@@ -52,6 +54,7 @@ copy_single_apk() {
 copy_single_apk "connect/build/outputs/apk/androidTest/debug/*.apk" "connect-test.apk"
 copy_single_apk "connect-example/build/outputs/apk/debug/*.apk" "connect-example.apk"
 copy_single_apk "connect-example/build/outputs/apk/androidTest/debug/*.apk" "connect-example-test.apk"
+copy_single_apk "connect-example-e2e/build/outputs/apk/debug/*.apk" "connect-example-e2e-test.apk"
 copy_single_apk "payment-method-messaging/build/outputs/apk/androidTest/debug/*.apk" "payment-method-messaging-test.apk"
 copy_single_apk "payments-core/build/outputs/apk/androidTest/debug/*.apk" "payments-core-test.apk"
 copy_single_apk "paymentsheet/build/outputs/apk/androidTest/debug/*.apk" "paymentsheet-test.apk"
@@ -59,6 +62,9 @@ copy_single_apk "paymentsheet-example/build/outputs/apk/base/debug/*.apk" "payme
 copy_single_apk "paymentsheet-example/build/outputs/apk/androidTest/base/debug/*.apk" "paymentsheet-example-test.apk"
 copy_single_apk "financial-connections/build/outputs/apk/androidTest/debug/*.apk" "financial-connections-test.apk"
 copy_single_apk "financial-connections-example/build/outputs/apk/debug/*.apk" "financial-connections-example.apk"
+copy_single_apk \
+  "financial-connections-example/build/outputs/apk/androidTest/debug/*.apk" \
+  "financial-connections-example-test.apk"
 copy_single_apk \
   "financial-connections-example/build/outputs/apk/release/*.apk" \
   "financial-connections-example-release.apk"
