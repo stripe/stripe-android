@@ -23,7 +23,6 @@ rm -f "$artifact_dir"/*.apk
   :paymentsheet-example:assembleBaseDebugAndroidTest \
   :financial-connections:assembleDebugAndroidTest \
   :financial-connections-example:assembleDebug \
-  :financial-connections-example:assembleDebugAndroidTest \
   :financial-connections-example:assembleRelease \
   :crypto-onramp-example:assembleDebug \
   :crypto-onramp-example:assembleDebugAndroidTest \
@@ -60,9 +59,6 @@ copy_single_apk "paymentsheet-example/build/outputs/apk/base/debug/*.apk" "payme
 copy_single_apk "paymentsheet-example/build/outputs/apk/androidTest/base/debug/*.apk" "paymentsheet-example-test.apk"
 copy_single_apk "financial-connections/build/outputs/apk/androidTest/debug/*.apk" "financial-connections-test.apk"
 copy_single_apk "financial-connections-example/build/outputs/apk/debug/*.apk" "financial-connections-example.apk"
-copy_single_apk \
-  "financial-connections-example/build/outputs/apk/androidTest/debug/*.apk" \
-  "financial-connections-example-test.apk"
 copy_single_apk \
   "financial-connections-example/build/outputs/apk/release/*.apk" \
   "financial-connections-example-release.apk"

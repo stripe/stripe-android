@@ -153,8 +153,8 @@ def launch(app_id: str) -> list[dict]:
 def open_link(uri: str) -> list[dict]:
     return [
         adb(
-            "am start -W -a android.intent.action.VIEW "
-            f"-d '{uri}' -p {CONNECTIONS_APP}"
+            f"am start -W -n {CONNECTIONS_APP}/.FinancialConnectionsPlaygroundActivity "
+            f"-a android.intent.action.VIEW -d '{uri}'"
         ),
     ]
 

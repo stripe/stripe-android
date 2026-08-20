@@ -33,8 +33,6 @@ pipelines:
         depends_on: [build-firebase-test-artifacts]
       run-ftl-financial-connections-instrumentation-tests:
         depends_on: [build-firebase-test-artifacts]
-      run-ftl-financial-connections-example-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
       run-ftl-crypto-onramp-example-instrumentation-tests:
         depends_on: [build-firebase-test-artifacts]
       run-ftl-camera-core-instrumentation-tests:
@@ -280,13 +278,6 @@ workflows:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
       - FTL_TEST_APK_FILENAME: financial-connections-test.apk
-    before_run:
-      - _run-firebase-instrumentation-tests
-  run-ftl-financial-connections-example-instrumentation-tests:
-    envs:
-      - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
-      - FTL_APP_APK_FILENAME: financial-connections-example.apk
-      - FTL_TEST_APK_FILENAME: financial-connections-example-test.apk
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-crypto-onramp-example-instrumentation-tests:

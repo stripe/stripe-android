@@ -10,6 +10,7 @@ import java.util.Locale
 
 internal class PaymentSheetTestRunner : AndroidJUnitRunner() {
     override fun onCreate(arguments: Bundle?) {
+        super.onCreate(arguments)
         arguments?.getString(TEST_LOCALE_ARGUMENT)?.let { languageTag ->
             val locale = Locale.forLanguageTag(languageTag)
             Locale.setDefault(locale)
@@ -20,7 +21,6 @@ internal class PaymentSheetTestRunner : AndroidJUnitRunner() {
                 LocaleListCompat.forLanguageTags(languageTag)
             )
         }
-        super.onCreate(arguments)
         configureLeakCanaryForManagedDevices()
     }
 
