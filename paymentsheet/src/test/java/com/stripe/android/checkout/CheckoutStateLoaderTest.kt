@@ -12,7 +12,6 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -85,16 +84,6 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial commits common configuration derived from the controller configuration`() = runScenario {
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration().build(),
-            checkoutSessionResponse = response(merchantCountry = "US"),
-        )
-
-        assertThat(stateHolder.state?.commonConfiguration?.googlePay?.countryCode).isEqualTo("US")
-    }
-
-    @Test
     fun `loadInitial applies payment element appearance to the global theme`() = runScenario {
         val previousTheme = StripeThemeSnapshot()
         try {
@@ -132,35 +121,6 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
             .isEqualTo(listOf("klarna", "card"))
-    }
-
-    @Test
-    fun `loadInitial passes preferred networks to common configuration`() = runScenario {
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration()
-                .paymentElement(
-                    PaymentElement.Configuration().preferredNetworks(
-                        listOf(CardBrand.CartesBancaires, CardBrand.Visa)
-                    )
-                )
-                .build(),
-            checkoutSessionResponse = response(),
-        )
-
-        assertThat(stateHolder.state?.commonConfiguration?.preferredNetworks)
-            .isEqualTo(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
-    }
-
-    @Test
-    fun `loadInitial passes opens card scanner automatically to common configuration`() = runScenario {
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration()
-                .paymentElement(PaymentElement.Configuration().opensCardScannerAutomatically(true))
-                .build(),
-            checkoutSessionResponse = response(),
-        )
-
-        assertThat(stateHolder.state?.commonConfiguration?.opensCardScannerAutomatically).isTrue()
     }
 
     @Test
@@ -415,11 +375,6 @@ internal class CheckoutStateLoaderTest {
         collectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration = CheckoutCommonConfigurationFactory(appName = "Example, Inc.").create(
-            configuration = CheckoutController.Configuration().build(),
-            checkoutSessionResponse = checkoutSessionResponse,
-            collectedDetails = CheckoutCollectedDetails(email = null),
-        ),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
