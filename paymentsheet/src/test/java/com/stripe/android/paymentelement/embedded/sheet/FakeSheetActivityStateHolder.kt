@@ -37,7 +37,7 @@ internal class FakeSheetActivityStateHolder(
     override val validationRequested: SharedFlow<Unit> = MutableSharedFlow<Unit>()
 
     override fun updateMandate(mandateText: ResolvableString?) {
-        error("This should never be called!")
+        _state.update { it.copy(mandateText = mandateText) }
     }
 
     override fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {

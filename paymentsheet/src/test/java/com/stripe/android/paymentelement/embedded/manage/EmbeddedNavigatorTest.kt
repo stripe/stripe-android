@@ -22,10 +22,11 @@ import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
-import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
-import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -33,7 +34,6 @@ import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
-import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
@@ -46,6 +46,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -438,21 +439,7 @@ internal class EmbeddedNavigatorTest {
 
     @Test
     fun `HorizontalSavedPaymentOptions topBarState maps state and handles edit`() {
-        val viewActionRecorder = ViewActionRecorder<SelectSavedPaymentMethodsInteractor.ViewAction>()
-        val screen = createHorizontalSavedPaymentOptionsScreen(
-            interactor = FakeSelectSavedPaymentMethodsInteractor(
-                initialState = SelectSavedPaymentMethodsInteractor.State(
-                    paymentOptionsItems = emptyList(),
-                    selectedPaymentOptionsItem = null,
-                    linkBrand = LinkBrand.Link,
-                    isEditing = false,
-                    isProcessing = false,
-                    canEdit = true,
-                    canRemove = true,
-                ),
-                viewActionRecorder = viewActionRecorder,
-            ),
-        )
+        val screen = createHorizontalSavedPaymentOptionsScreen()
 
         val topBarState = screen.topBarState().value!!
         assertThat(topBarState.showTestModeLabel).isFalse()
@@ -460,7 +447,7 @@ internal class EmbeddedNavigatorTest {
         assertThat(topBarState.isEditing).isFalse()
 
         topBarState.onEditIconPressed()
-        viewActionRecorder.consume(SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit)
+        assertThat(screen.topBarState().value!!.isEditing).isTrue()
     }
 
     @Test
@@ -895,6 +882,7 @@ internal class EmbeddedNavigatorTest {
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
+            launchMode = EmbeddedLaunchMode.Form("card"),
         )
         return EmbeddedNavigator.Screen.Form.Factory(
             interactorFactory = interactorFactory,
@@ -951,11 +939,47 @@ internal class EmbeddedNavigatorTest {
     }
 
     private fun createHorizontalSavedPaymentOptionsScreen(
-        interactor: SelectSavedPaymentMethodsInteractor = FakeSelectSavedPaymentMethodsInteractor(),
         isProcessing: Boolean = false,
     ): EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions {
+        val scope = coroutineScopeCleanupRule.track(TestScope(UnconfinedTestDispatcher()))
+        val metadata = PaymentMethodMetadataFactory.create(hasCustomerConfiguration = true)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        val customerStateHolder = DefaultCustomerStateHolder(
+            savedStateHandle = SavedStateHandle(),
+            selection = selectionHolder.selection,
+            customerMetadata = stateFlowOf(metadata.customerMetadata),
+            paymentMethodMetadataFlow = stateFlowOf(metadata),
+        )
+        customerStateHolder.setCustomerState(
+            PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = PaymentMethodFixtures.createCards(2),
+            )
+        )
+        val mutator = SavedPaymentMethodMutator(
+            paymentMethodMetadataFlow = stateFlowOf(metadata),
+            eventReporter = FakeEventReporter(),
+            coroutineScope = scope,
+            workContext = scope.coroutineContext,
+            uiContext = scope.coroutineContext,
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
+            selection = selectionHolder.selection,
+            setSelection = selectionHolder::setSelection,
+            customerStateHolder = customerStateHolder,
+            prePaymentMethodRemoveActions = {},
+            postPaymentMethodRemoveActions = {},
+            onUpdatePaymentMethod = { _, _, _, _, _ -> },
+            isLinkEnabled = stateFlowOf(false),
+            isNotPaymentFlow = false,
+            linkAccount = stateFlowOf(null),
+        )
         return EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
-            interactor = interactor,
+            mutator = mutator,
+            selection = selectionHolder.selection,
+            cvcControllerFlow = null,
+            isLiveMode = true,
+            onAddCardPressed = {},
+            onItemSelected = {},
+            onProcessingCompleted = {},
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
@@ -966,7 +990,7 @@ internal class EmbeddedNavigatorTest {
                 )
             ),
             onContinueClick = {},
-            onPrimaryButtonDisabledClick = {},
+            onDisabledClick = {},
         )
     }
 

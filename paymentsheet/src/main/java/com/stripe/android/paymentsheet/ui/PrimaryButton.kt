@@ -23,9 +23,9 @@ internal object PrimaryButton {
 
     internal data class UIState(
         val label: ResolvableString,
-        val canClickWhileDisabled: Boolean = false,
+        val canClickWhileDisabled: Boolean,
         val onClick: () -> Unit,
-        val onDisabledClick: () -> Unit = {},
+        val onDisabledClick: () -> Unit,
         val enabled: Boolean,
         val lockVisible: Boolean,
     )

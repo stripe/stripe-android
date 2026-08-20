@@ -35,8 +35,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -47,8 +45,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
@@ -201,11 +197,6 @@ internal abstract class PaymentSheetCommonModule {
         }
 
         @Provides
-        fun provideCustomerStateHolderFactory(): CustomerStateHolder.Factory {
-            return DefaultCustomerStateHolder.Factory
-        }
-
-        @Provides
         @Singleton
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
@@ -214,11 +205,6 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
-        }
-
-        @Provides
-        fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractor.Factory {
-            return DefaultCvcRecollectionInteractor.Factory
         }
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)

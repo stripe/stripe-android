@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.manage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -14,6 +15,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -34,6 +36,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val updateScreenInteractorFactoryProvider: Provider<EmbeddedUpdateScreenInteractorFactory>,
     private val launchMode: EmbeddedLaunchMode,
+    private val linkAccountHolder: LinkAccountHolder,
 ) {
     fun createSavedPaymentMethodMutator(): SavedPaymentMethodMutator {
         return SavedPaymentMethodMutator(
@@ -48,7 +51,8 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
                 val shouldNavigateBack = when (launchMode) {
-                    is EmbeddedLaunchMode.PaymentOptions -> true
+                    is EmbeddedLaunchMode.PaymentOptions,
+                    is EmbeddedLaunchMode.Complete -> true
                     is EmbeddedLaunchMode.Manage,
                     is EmbeddedLaunchMode.Form -> customerStateHolder.paymentMethods.value.size > 1
                 }
@@ -63,16 +67,17 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _, _ ->
                 onUpdatePaymentMethod(displayableSavedPaymentMethod)
             },
-            isLinkEnabled = stateFlowOf(false), // Link is never enabled in the manage screen.
-            isNotPaymentFlow = false,
-            linkAccount = stateFlowOf(null), // Link is never enabled in the manage screen.
+            isLinkEnabled = stateFlowOf(launchMode is EmbeddedLaunchMode.PaymentOptions),
+            isNotPaymentFlow = launchMode is EmbeddedLaunchMode.PaymentOptions,
+            linkAccount = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account },
         )
     }
 
     private fun onPaymentMethodRemoved() {
         if (customerStateHolder.paymentMethods.value.isEmpty()) {
             when (launchMode) {
-                is EmbeddedLaunchMode.PaymentOptions -> Unit
+                is EmbeddedLaunchMode.PaymentOptions,
+                is EmbeddedLaunchMode.Complete -> Unit
                 is EmbeddedLaunchMode.Manage,
                 is EmbeddedLaunchMode.Form -> {
                     embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Close())

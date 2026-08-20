@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -21,16 +23,19 @@ import com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentelement.embedded.form.USBankAccountMandate
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.CvcRecollectionField
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
-import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
@@ -44,9 +49,11 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutU
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
+import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
@@ -220,7 +227,7 @@ internal class EmbeddedNavigator private constructor(
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val customerStateHolder: CustomerStateHolder,
             private val linkAccountHolder: LinkAccountHolder,
-            private val launchMode: EmbeddedLaunchMode.Form,
+            private val launchMode: EmbeddedLaunchMode,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -271,12 +278,26 @@ internal class EmbeddedNavigator private constructor(
                 private val linkAccountHolder: LinkAccountHolder,
             ) {
                 fun create(launchMode: EmbeddedLaunchMode.Form): Form {
-                    val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
-                        it.type?.code == launchMode.selectedPaymentMethodCode
+                    return create(
+                        paymentMethodCode = launchMode.selectedPaymentMethodCode,
+                        launchMode = launchMode,
+                    )
+                }
+
+                fun create(
+                    paymentMethodCode: PaymentMethodCode,
+                    launchMode: EmbeddedLaunchMode,
+                ): Form {
+                    val hasSavedPaymentMethods = if (launchMode is EmbeddedLaunchMode.Form) {
+                        customerStateHolder.paymentMethods.value.any {
+                            it.type?.code == paymentMethodCode
+                        }
+                    } else {
+                        customerStateHolder.paymentMethods.value.isNotEmpty()
                     }
                     return Form(
                         formInteractor = interactorFactory.create(
-                            paymentMethodCode = launchMode.selectedPaymentMethodCode,
+                            paymentMethodCode = paymentMethodCode,
                             hasSavedPaymentMethods = hasSavedPaymentMethods,
                         ),
                         sheetActivityStateHolder = sheetActivityStateHolder,
@@ -370,6 +391,7 @@ internal class EmbeddedNavigator private constructor(
                     interactor = interactor,
                     modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
                 )
+                USBankAccountMandate(state)
                 FormActivityError(state)
                 Spacer(Modifier.height(40.dp))
                 FormActivityPrimaryButton(
@@ -431,23 +453,25 @@ internal class EmbeddedNavigator private constructor(
         }
 
         class HorizontalSavedPaymentOptions(
-            private val interactor: SelectSavedPaymentMethodsInteractor,
+            private val mutator: SavedPaymentMethodMutator,
+            private val selection: StateFlow<PaymentSelection?>,
+            private val cvcControllerFlow: StateFlow<CvcController>?,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
+            private val isLiveMode: Boolean,
+            private val onAddCardPressed: () -> Unit,
+            private val onItemSelected: (PaymentSelection?) -> Unit,
             private val onContinueClick: () -> Unit,
-            private val onPrimaryButtonDisabledClick: () -> Unit,
-        ) : Screen(), Closeable {
+            private val onDisabledClick: () -> Unit,
+            private val onProcessingCompleted: () -> Unit,
+        ) : Screen() {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
-                return interactor.state.mapAsStateFlow { state ->
+                return combineAsStateFlow(mutator.editing, mutator.canEdit) { isEditing, canEdit ->
                     PaymentSheetTopBarStateFactory.create(
-                        isLiveMode = interactor.isLiveMode,
+                        isLiveMode = isLiveMode,
                         editable = PaymentSheetTopBarState.Editable.Maybe(
-                            isEditing = state.isEditing,
-                            canEdit = state.canEdit,
-                            onEditIconPressed = {
-                                interactor.handleViewAction(
-                                    SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit
-                                )
-                            },
+                            isEditing = isEditing,
+                            canEdit = canEdit,
+                            onEditIconPressed = mutator::toggleEditing,
                         ),
                     )
                 }
@@ -463,24 +487,45 @@ internal class EmbeddedNavigator private constructor(
 
             @Composable
             override fun Content() {
-                SavedPaymentMethodTabLayoutUI(
-                    interactor = interactor,
-                    cvcRecollectionState = CvcRecollectionState.NotRequired,
-                    modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
-                )
+                val items by mutator.paymentOptionsItems.collectAsState()
+                val currentSelection by selection.collectAsState()
+                val isEditing by mutator.editing.collectAsState()
                 val state by sheetActivityState.collectAsState()
-                FormActivityError(state)
+                val requiresCvc = cvcControllerFlow != null &&
+                    (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.type == PaymentMethod.Type.Card
+                SavedPaymentMethodTabLayoutUI(
+                    paymentOptionsItems = items,
+                    selectedPaymentOptionsItem = PaymentOptionsStateFactory.getSelectedItem(
+                        items = items,
+                        currentSelection = currentSelection,
+                    ),
+                    linkBrand = items.filterIsInstance<PaymentOptionsItem.Link>()
+                        .firstOrNull()?.linkBrand ?: com.stripe.android.model.LinkBrand.Link,
+                    isEditing = isEditing,
+                    isProcessing = state.isProcessing,
+                    onAddCardPressed = onAddCardPressed,
+                    onItemSelected = onItemSelected,
+                    onModifyItem = mutator::updatePaymentMethod,
+                )
+                val isCvcComplete = if (requiresCvc) {
+                    cvcControllerFlow?.value?.isComplete?.collectAsState()?.value == true
+                } else {
+                    true
+                }
+                if (requiresCvc) {
+                    CvcRecollectionField(
+                        cvcControllerFlow = requireNotNull(cvcControllerFlow),
+                        isProcessing = state.isProcessing,
+                    )
+                }
                 Spacer(Modifier.height(40.dp))
                 FormActivityPrimaryButton(
-                    state = state,
+                    state = state.copy(isEnabled = state.isEnabled && isCvcComplete),
                     onClick = onContinueClick,
-                    onDisabledClick = onPrimaryButtonDisabledClick,
+                    onDisabledClick = onDisabledClick,
+                    onProcessingCompleted = onProcessingCompleted,
                 )
                 PaymentSheetContentPadding()
-            }
-
-            override fun close() {
-                interactor.close()
             }
         }
     }

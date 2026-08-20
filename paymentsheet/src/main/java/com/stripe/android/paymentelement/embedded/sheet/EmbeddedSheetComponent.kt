@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -68,6 +69,8 @@ internal interface EmbeddedSheetComponent {
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance promotions: List<PaymentMethodMessagePromotion>,
             @BindsInstance launchMode: EmbeddedLaunchMode,
+            @BindsInstance initialLinkAccountInfo: com.stripe.android.link.LinkAccountUpdate.Value,
+            @BindsInstance activityConfiguration: EmbeddedActivityArgs.ActivityConfiguration,
             @BindsInstance
             @ViewModelScope
             viewModelScope: CoroutineScope,

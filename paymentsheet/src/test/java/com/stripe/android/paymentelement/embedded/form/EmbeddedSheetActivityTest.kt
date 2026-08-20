@@ -265,6 +265,7 @@ internal class EmbeddedSheetActivityTest {
                     customerState = createCustomerState(paymentMethods = emptyList()),
                     linkAccountInfo = LinkAccountUpdate.Value(null),
                     promotions = emptyList(),
+                    activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
                     ),

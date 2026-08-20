@@ -51,6 +51,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         clientId = CLIENT_ID,
         origin = ORIGIN,
     )
+    private var interactedPaymentMethodCode: PaymentMethodCode? = null
 
     override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         durationProvider.start(DurationProvider.Key.Loading)
@@ -213,6 +214,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
         durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
+        interactedPaymentMethodCode = null
 
         fireAnalyticEvent(AnalyticEvent.DisplayedPaymentMethodForm(code))
         fireEvent(
@@ -223,6 +225,9 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+        if (interactedPaymentMethodCode == code) return
+        interactedPaymentMethodCode = code
+
         fireAnalyticEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm(code))
         fireEvent(
             PaymentSheetEvent.PaymentOptionFormInteraction(

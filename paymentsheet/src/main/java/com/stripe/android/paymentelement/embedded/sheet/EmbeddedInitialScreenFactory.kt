@@ -14,6 +14,7 @@ internal class EmbeddedInitialScreenFactory @Inject constructor(
         return when (launchMode) {
             is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
             is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
+            is EmbeddedLaunchMode.Complete,
             is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
         }
     }

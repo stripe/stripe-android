@@ -1,26 +1,17 @@
 package com.stripe.android.paymentsheet
 
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
-import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PaymentOptionsItemsMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -325,156 +316,6 @@ internal class SavedPaymentMethodMutator(
     private fun isSelectedPaymentMethod(paymentMethod: PaymentMethod): Boolean {
         val currentSelection = selection.value as? PaymentSelection.Saved
         return currentSelection?.paymentMethod?.id == paymentMethod.id
-    }
-
-    companion object {
-        private suspend fun popWithDelay(viewModel: BaseSheetViewModel) {
-            viewModel.navigationHandler.pop()
-            withContext(viewModel.workContext) {
-                delay(PaymentMethodRemovalDelayMillis)
-            }
-        }
-
-        private suspend fun navigateBackOnPaymentMethodRemoved(viewModel: BaseSheetViewModel) {
-            val previousScreen = viewModel.navigationHandler.previousScreen.value
-
-            when (previousScreen) {
-                is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                    if (viewModel.customerStateHolder.paymentMethods.value.size == 1) {
-                        // If we're removing the last payment method in horizontal mode, we want to transition
-                        // immediately to the AddFirstPaymentMethod screen.
-                        val interactor = DefaultAddPaymentMethodInteractor.create(
-                            viewModel = viewModel,
-                            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
-                            paymentMethodMessagePromotionsHelper = null
-                        )
-                        val screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor)
-                        viewModel.navigationHandler.resetTo(listOf(screen))
-                    } else {
-                        popWithDelay(viewModel)
-                    }
-                }
-                is PaymentSheetScreen.ManageSavedPaymentMethods,
-                is PaymentSheetScreen.VerticalMode -> popWithDelay(viewModel)
-                is PaymentSheetScreen.AddAnotherPaymentMethod,
-                is PaymentSheetScreen.AddFirstPaymentMethod,
-                is PaymentSheetScreen.CvcRecollection,
-                PaymentSheetScreen.Loading,
-                is PaymentSheetScreen.UpdatePaymentMethod,
-                is PaymentSheetScreen.VerticalModeForm,
-                is PaymentSheetScreen.SavedPaymentMethodConfirm,
-                null -> {
-                    // We don't allow navigating to the payment method remove screen from these screens.
-                }
-            }
-        }
-
-        private fun onUpdatePaymentMethod(
-            viewModel: BaseSheetViewModel,
-            displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-            canRemove: Boolean,
-            performRemove: suspend () -> Throwable?,
-            updatePaymentMethodExecutor: suspend (cardUpdateParams: CardUpdateParams) -> Result<PaymentMethod>,
-            setDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
-        ) {
-            if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
-                val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
-                val paymentMethodMetadata = viewModel.paymentMethodMetadata.value
-                viewModel.navigationHandler.transitionTo(
-                    PaymentSheetScreen.UpdatePaymentMethod(
-                        DefaultUpdatePaymentMethodInteractor(
-                            isLiveMode = isLiveMode,
-                            canRemove = canRemove,
-                            canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
-                                .canUpdateCardExpiryAndBillingDetails.value,
-                            canChangeCbc = viewModel.customerStateHolder.canChangeCbc.value,
-                            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-                            cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
-                            addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,
-                            allowedBillingCountries =
-                                viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                            removeExecutor = { method ->
-                                performRemove()
-                            },
-                            updatePaymentMethodExecutor = { method, cardUpdateParams ->
-                                updatePaymentMethodExecutor(cardUpdateParams)
-                            },
-                            setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
-                            onBrandChoiceSelected = {
-                                viewModel.eventReporter.onBrandChoiceSelected(
-                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                    selectedBrand = it
-                                )
-                            },
-                            shouldShowSetAsDefaultCheckbox = (
-                                paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
-                                ),
-                            isDefaultPaymentMethod = (
-                                displayableSavedPaymentMethod.isDefaultPaymentMethod(
-                                    defaultPaymentMethodId =
-                                        viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
-                                )
-                                ),
-                            removeMessage = paymentMethodMetadata?.customerMetadata?.removePaymentMethod
-                                ?.removeMessage(paymentMethodMetadata.merchantName),
-                            onUpdateSuccess = viewModel.navigationHandler::pop,
-                            autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                        )
-                    )
-                )
-            }
-        }
-
-        fun create(viewModel: BaseSheetViewModel): SavedPaymentMethodMutator {
-            return SavedPaymentMethodMutator(
-                paymentMethodMetadataFlow = viewModel.paymentMethodMetadata,
-                eventReporter = viewModel.eventReporter,
-                coroutineScope = viewModel.viewModelScope,
-                workContext = viewModel.workContext,
-                uiContext = Dispatchers.Main,
-                savedPaymentMethodRepository = viewModel.savedPaymentMethodRepository,
-                selection = viewModel.selection,
-                setSelection = viewModel::updateSelection,
-                customerStateHolder = viewModel.customerStateHolder,
-                prePaymentMethodRemoveActions = {
-                    navigateBackOnPaymentMethodRemoved(viewModel)
-                },
-                postPaymentMethodRemoveActions = {},
-                onUpdatePaymentMethod = {
-                        displayableSavedPaymentMethod,
-                        canRemove,
-                        performRemove,
-                        updatePaymentMethodExecutor,
-                        setDefaultPaymentMethodExecutor,
-                    ->
-                    onUpdatePaymentMethod(
-                        viewModel = viewModel,
-                        displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-                        canRemove = canRemove,
-                        performRemove = performRemove,
-                        updatePaymentMethodExecutor = updatePaymentMethodExecutor,
-                        setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
-                    )
-                },
-                isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
-                isNotPaymentFlow = !viewModel.isCompleteFlow,
-                linkAccount = viewModel.linkHandler.linkConfigurationCoordinator.accountFlow,
-            ).apply {
-                viewModel.viewModelScope.launch {
-                    viewModel.navigationHandler.currentScreen.collect { currentScreen ->
-                        when (currentScreen) {
-                            is PaymentSheetScreen.VerticalMode -> {
-                                // When returning to the vertical mode screen, reset editing to false.
-                                _editing.value = false
-                            }
-                            else -> {
-                                // Do nothing.
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 

@@ -9,8 +9,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
@@ -22,6 +25,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
@@ -90,11 +94,15 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
-    fun `no payment selection creates a single payment options screen`() = testScenario {
+    fun `single payment method creates a single form screen`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+    ) {
         val screens = factory.createInitialScreen()
 
         assertThat(screens).hasSize(1)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.Form>()
     }
 
     @Test
@@ -107,9 +115,8 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
         val screens = factory.createInitialScreen()
 
-        assertThat(screens).hasSize(2)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
-        assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.Form>()
     }
 
     @Test
@@ -139,6 +146,17 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
         assertThat(screens).hasSize(1)
         assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+    }
+
+    @Test
+    fun `embedded horizontal picker keeps new payment methods visible when Google Pay is ready`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            isGooglePayReady = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+    ) {
+        assertThat(factory.createInitialScreen().single())
+            .isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
     }
 
     @Test
@@ -211,6 +229,13 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
     }
 
+    @Test
+    fun `horizontal form continue click delegates to confirmation helper`() = testScenario {
+        factory.onHorizontalFormContinueClick()
+
+        assertThat(confirmationHelper.confirmCalls.awaitItem()).isEqualTo(Unit)
+    }
+
     @Suppress("LongMethod")
     private fun testScenario(
         isGooglePayReady: Boolean = true,
@@ -261,6 +286,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
                     eventReporter = FakeEventReporter(),
                     paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                     autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                    launchMode = EmbeddedLaunchMode.PaymentOptions,
                 ),
                 sheetActivityStateHolder = sheetActivityStateHolder,
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
@@ -297,6 +323,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         val savedPaymentMethodMutator = SavedPaymentMethodMutator(
             paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
@@ -316,6 +343,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             linkAccount = stateFlowOf(null),
         )
 
+        val confirmationHelper = FakeSheetActivityConfirmationHelper()
         val factory = InitialPaymentOptionsScreenFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
@@ -332,7 +360,12 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant, Inc.").build(),
+            confirmationHelper = confirmationHelper,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
             savedPaymentMethodMutator = savedPaymentMethodMutator,
+            cvcRecollectionHandler = FakeCvcRecollectionHandler(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
         )
 
         Scenario(
@@ -342,9 +375,11 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             navigator = navigator,
             sheetActivityStateHolder = sheetActivityStateHolder,
             continueCoordinator = continueCoordinator,
+            confirmationHelper = confirmationHelper,
         ).block()
         eventReporter.validate()
         continueCoordinator.validate()
+        confirmationHelper.validate()
     }
 
     private class Scenario(
@@ -354,6 +389,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val navigator: EmbeddedNavigator,
         val sheetActivityStateHolder: FakeSheetActivityStateHolder,
         val continueCoordinator: FakeSheetActivityContinueCoordinator,
+        val confirmationHelper: FakeSheetActivityConfirmationHelper,
     )
 }
 

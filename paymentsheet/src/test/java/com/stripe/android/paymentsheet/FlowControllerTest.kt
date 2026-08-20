@@ -12,6 +12,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.testing.CoroutineTestRule
@@ -41,7 +42,7 @@ internal class FlowControllerTest {
     ) = runScenario(construction, savedState = null) {
         flowController.presentPaymentOptions()
 
-        val args = requireNotNull(PaymentOptionContract.Args.fromIntent(shadowOf(activity).nextStartedActivity))
+        val args = requireNotNull(EmbeddedActivityArgs.fromIntent(shadowOf(activity).nextStartedActivity))
         assertThat(args.paymentElementCallbackIdentifier).isEqualTo(callbackIdentifier)
     }
 
@@ -97,7 +98,7 @@ internal class FlowControllerTest {
 
             flowController.presentPaymentOptions()
 
-            val args = requireNotNull(PaymentOptionContract.Args.fromIntent(shadowOf(activity).nextStartedActivity))
+            val args = requireNotNull(EmbeddedActivityArgs.fromIntent(shadowOf(activity).nextStartedActivity))
             assertThat(args.paymentElementCallbackIdentifier).isEqualTo(originalIdentifier)
         }
     }
@@ -133,7 +134,7 @@ internal class FlowControllerTest {
                 .isSameInstanceAs(sheetCallback)
             controller.start().resume()
             paymentSheet.presentWithPaymentIntent("pi_secret")
-            val args = requireNotNull(PaymentSheetContract.Args.fromIntent(shadowOf(activity).nextStartedActivity))
+            val args = requireNotNull(EmbeddedActivityArgs.fromIntent(shadowOf(activity).nextStartedActivity))
             assertThat(args.paymentElementCallbackIdentifier).isEqualTo(sheetIdentifier)
         } finally {
             controller.pause().stop().destroy()
@@ -161,7 +162,7 @@ internal class FlowControllerTest {
             assertThat(PaymentElementCallbackReferences[fragmentIdentifier]).isSameInstanceAs(unrelatedCallbacks)
             assertThat(PaymentElementCallbackReferences[callbackIdentifier]).isSameInstanceAs(activityCallbacks)
             flowController.presentPaymentOptions()
-            val args = requireNotNull(PaymentOptionContract.Args.fromIntent(shadowOf(activity).nextStartedActivity))
+            val args = requireNotNull(EmbeddedActivityArgs.fromIntent(shadowOf(activity).nextStartedActivity))
             assertThat(args.paymentElementCallbackIdentifier).isEqualTo(callbackIdentifier)
         }
 

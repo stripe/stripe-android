@@ -91,6 +91,7 @@ class EmbeddedPaymentElementConfigurationTest {
                 ApiConfiguration(DEFAULT_API_CONFIG.publishableKey)
                     .stripeAccountId(DEFAULT_API_CONFIG.stripeAccountId)
             )
+            .googlePlacesApiKey("test_api_key")
             .build()
 
         val roundTripped = original.newBuilder().build()
@@ -108,6 +109,6 @@ class EmbeddedPaymentElementConfigurationTest {
         // When a new property is added, this count will change, signaling that:
         // 1. newBuilder() needs to propagate the new property
         // 2. The round-trip test above needs a non-default value for it
-        assertThat(propertyCount).isEqualTo(24)
+        assertThat(propertyCount).isEqualTo(25)
     }
 }

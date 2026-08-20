@@ -14,6 +14,9 @@ internal class EmbeddedSheetActivityCoordinator(
     initialArgs: EmbeddedActivityArgs,
     private val presentationFactory: EmbeddedSheetPresentationFactory,
 ) {
+    val currentArgs: EmbeddedActivityArgs
+        get() = state.args
+
     private var state by mutableStateOf(
         State(
             args = initialArgs,
@@ -44,15 +47,20 @@ internal class EmbeddedSheetActivityCoordinator(
 
     fun handleNewIntent(intent: Intent) {
         val updatedArgs = EmbeddedActivityArgs.fromIntent(intent) ?: return
-        val isValidTransition =
-            !activity.isFinishing &&
-                state.args.presentationState == EmbeddedActivityArgs.PresentationState.Loading &&
-                state.args.launchMode is EmbeddedLaunchMode.PaymentOptions &&
-                updatedArgs.presentationState == EmbeddedActivityArgs.PresentationState.Ready &&
-                updatedArgs.launchMode is EmbeddedLaunchMode.PaymentOptions
-        if (!isValidTransition) return
+        transitionToReady(updatedArgs, intent)
+    }
 
-        activity.intent = intent
+    fun handleLoadedArgs(args: EmbeddedActivityArgs) {
+        transitionToReady(args, intent = null)
+    }
+
+    private fun transitionToReady(
+        updatedArgs: EmbeddedActivityArgs,
+        intent: Intent?,
+    ) {
+        if (!isValidTransition(updatedArgs)) return
+
+        intent?.let { activity.intent = it }
         state.presentation.onDestroy()
         state = State(
             args = updatedArgs,
@@ -66,6 +74,18 @@ internal class EmbeddedSheetActivityCoordinator(
             ),
         )
         state.presentation.register()
+    }
+
+    private fun isValidTransition(updatedArgs: EmbeddedActivityArgs): Boolean {
+        return !activity.isFinishing &&
+            state.args.presentationState == EmbeddedActivityArgs.PresentationState.Loading &&
+            updatedArgs.presentationState == EmbeddedActivityArgs.PresentationState.Ready &&
+            state.args.launchMode == updatedArgs.launchMode &&
+            state.args.activityConfiguration == updatedArgs.activityConfiguration &&
+            (
+                updatedArgs.launchMode is EmbeddedLaunchMode.PaymentOptions ||
+                    updatedArgs.launchMode is EmbeddedLaunchMode.Complete
+            )
     }
 
     fun onDestroy() {

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.manage
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
@@ -12,16 +13,17 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
-import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -34,9 +36,7 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `payment options removal from update screen navigates back before updating customer state`() = runScenario(
-        initialScreen = { horizontalSavedOptionsScreen() },
-    ) {
+    fun `payment options removal from update screen navigates back before updating customer state`() = runScenario {
         eventReporter.showExistingPaymentOptionsCalls.awaitItem()
         navigator.performAction(
             EmbeddedNavigator.Action.GoToScreen(
@@ -60,7 +60,6 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
     }
 
     private fun runScenario(
-        initialScreen: () -> EmbeddedNavigator.Screen,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
         ),
@@ -82,13 +81,8 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
             )
         }
         val eventReporter = FakeEventReporter()
-        val rootScreen = initialScreen()
         val lifecycleScope = TestScope(testScheduler)
-        val navigator = EmbeddedNavigator(
-            coroutineScope = lifecycleScope,
-            initialScreen = rootScreen,
-            eventReporter = eventReporter,
-        )
+        lateinit var navigator: EmbeddedNavigator
         val repository = FakeSavedPaymentMethodRepository(paymentMethods = listOf(paymentMethod))
         val factory = ManageSavedPaymentMethodMutatorFactory(
             eventReporter = eventReporter,
@@ -102,10 +96,19 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
             viewModelScope = lifecycleScope,
             updateScreenInteractorFactoryProvider = Provider { error("Not expected") },
             launchMode = launchMode,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        )
+
+        val mutator = factory.createSavedPaymentMethodMutator()
+        val rootScreen = horizontalSavedOptionsScreen(mutator, selectionHolder.selection)
+        navigator = EmbeddedNavigator(
+            coroutineScope = lifecycleScope,
+            initialScreen = rootScreen,
+            eventReporter = eventReporter,
         )
 
         Scenario(
-            mutator = factory.createSavedPaymentMethodMutator(),
+            mutator = mutator,
             navigator = navigator,
             rootScreen = rootScreen,
             paymentMethod = paymentMethod,
@@ -120,9 +123,18 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
         eventReporter.validate()
     }
 
-    private fun horizontalSavedOptionsScreen(): EmbeddedNavigator.Screen {
+    private fun horizontalSavedOptionsScreen(
+        mutator: SavedPaymentMethodMutator,
+        selection: StateFlow<PaymentSelection?>,
+    ): EmbeddedNavigator.Screen {
         return EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
-            interactor = FakeSelectSavedPaymentMethodsInteractor(),
+            mutator = mutator,
+            selection = selection,
+            cvcControllerFlow = null,
+            isLiveMode = false,
+            onAddCardPressed = {},
+            onItemSelected = {},
+            onProcessingCompleted = {},
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
@@ -133,7 +145,7 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
                 )
             ),
             onContinueClick = {},
-            onPrimaryButtonDisabledClick = {},
+            onDisabledClick = {},
         )
     }
 

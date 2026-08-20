@@ -15,6 +15,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -27,8 +28,13 @@ import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStat
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
@@ -37,6 +43,7 @@ import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfir
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.LocaleTestRule
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -131,7 +138,8 @@ internal class FormActivityScreenShotTest {
     @Test
     fun testFormActivity_confirmSavedPaymentMethod() {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val confirmationHandler = FakeConfirmationHandler()
         val customerStateHolder = FakeCustomerStateHolder()
         val launchMode = EmbeddedLaunchMode.Form(
@@ -149,6 +157,22 @@ internal class FormActivityScreenShotTest {
             customerStateHolder = customerStateHolder,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
+            linkHandler = LinkHandler(FakeLinkConfigurationCoordinator()),
+            eventReporterMode = EventReporter.Mode.Embedded,
+            autocompleteAddressInteractorFactory = PaymentElementAutocompleteAddressInteractor.Factory(
+                launcher = TestAutocompleteLauncher.noOp(),
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = emptySet(),
+                ),
+                placesClient = null,
+                stripeAutocompleteRepository = null,
+                coroutineScope = null,
+                shouldUseAutocompleteProxyEndpointsProvider = { false },
+                apiConfigurationProvider = { PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG },
+                eventReporter = FakeAddressLauncherEventReporter(),
+            ),
+            savedStateHandle = savedStateHandle,
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
@@ -209,6 +233,7 @@ internal class FormActivityScreenShotTest {
         }
     }
 
+    @Suppress("LongMethod")
     @Composable
     private fun TestFormActivityUi(
         confirmationState: ConfirmationHandler.State,
@@ -216,7 +241,8 @@ internal class FormActivityScreenShotTest {
         usBankMandate: ResolvableString? = null,
     ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val confirmationHandler = FakeConfirmationHandler()
         confirmationHandler.state.value = confirmationState
         val stateHolder = DefaultSheetActivityStateHolder(
@@ -233,6 +259,22 @@ internal class FormActivityScreenShotTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
+            linkHandler = LinkHandler(FakeLinkConfigurationCoordinator()),
+            eventReporterMode = EventReporter.Mode.Embedded,
+            autocompleteAddressInteractorFactory = PaymentElementAutocompleteAddressInteractor.Factory(
+                launcher = TestAutocompleteLauncher.noOp(),
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = emptySet(),
+                ),
+                placesClient = null,
+                stripeAutocompleteRepository = null,
+                coroutineScope = null,
+                shouldUseAutocompleteProxyEndpointsProvider = { false },
+                apiConfigurationProvider = { PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG },
+                eventReporter = FakeAddressLauncherEventReporter(),
+            ),
+            savedStateHandle = savedStateHandle,
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
@@ -254,6 +296,7 @@ internal class FormActivityScreenShotTest {
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
+            launchMode = EmbeddedLaunchMode.Form("card"),
         ).create(
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,

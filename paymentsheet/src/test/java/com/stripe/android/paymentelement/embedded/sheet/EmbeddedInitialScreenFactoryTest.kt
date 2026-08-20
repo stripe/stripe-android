@@ -10,7 +10,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
@@ -24,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
@@ -153,6 +156,7 @@ internal class EmbeddedInitialScreenFactoryTest {
                 eventReporter = eventReporter,
                 paymentMethodMessagePromotionsHelper = promotionsHelper,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                launchMode = launchMode,
             ),
             sheetActivityStateHolder = sheetActivityStateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
@@ -179,6 +183,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             paymentMethodMessagePromotionsHelper = promotionsHelper,
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            launchMode = launchMode,
         )
         val continueCoordinator = FakeSheetActivityContinueCoordinator()
         val savedPaymentMethodMutator = SavedPaymentMethodMutator(
@@ -221,7 +226,12 @@ internal class EmbeddedInitialScreenFactoryTest {
             linkAccountHolder = LinkAccountHolder(savedStateHandle),
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant, Inc.").build(),
+            confirmationHelper = FakeSheetActivityConfirmationHelper(),
+            launchMode = launchMode,
             savedPaymentMethodMutator = savedPaymentMethodMutator,
+            cvcRecollectionHandler = FakeCvcRecollectionHandler(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
         )
         val factory = EmbeddedInitialScreenFactory(
             launchMode = launchMode,

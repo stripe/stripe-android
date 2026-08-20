@@ -8,6 +8,7 @@ import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -21,8 +22,13 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationSt
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
@@ -34,6 +40,7 @@ import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLay
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -134,6 +141,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
 
     private fun createFormScreen(): EmbeddedNavigator.Screen.Form {
         val metadata = PaymentMethodMetadataFactory.create()
+        val launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card")
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val stateHolder = createSheetActivityStateHolder(metadata, selectionHolder)
         val eventReporter = FakeEventReporter()
@@ -153,6 +161,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
+            launchMode = launchMode,
         ).create(
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,
@@ -165,7 +174,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = FakeCustomerStateHolder(),
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            launchMode = launchMode,
         )
     }
 
@@ -213,6 +222,22 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             customerStateHolder = FakeCustomerStateHolder(),
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            linkHandler = LinkHandler(FakeLinkConfigurationCoordinator()),
+            eventReporterMode = EventReporter.Mode.Embedded,
+            autocompleteAddressInteractorFactory = PaymentElementAutocompleteAddressInteractor.Factory(
+                launcher = TestAutocompleteLauncher.noOp(),
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = emptySet(),
+                ),
+                placesClient = null,
+                stripeAutocompleteRepository = null,
+                coroutineScope = null,
+                shouldUseAutocompleteProxyEndpointsProvider = { false },
+                apiConfigurationProvider = { PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG },
+                eventReporter = FakeAddressLauncherEventReporter(),
+            ),
+            savedStateHandle = SavedStateHandle(),
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
@@ -232,7 +257,11 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
                 EventReporterProvider(eventReporter) {
-                    EmbeddedSheetScreenContent(navigator, screen)
+                    EmbeddedSheetScreenContent(
+                        navigator = navigator,
+                        screen = screen,
+                        walletsHeader = {},
+                    )
                 }
             }
         }

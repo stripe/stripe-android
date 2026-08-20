@@ -93,6 +93,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             promotions = listOf(promotion),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -395,6 +396,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             promotions = emptyList(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
@@ -581,6 +583,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             promotions = listOf(FakePaymentMethodMessagePromotionsHelper.klarnaPromotion),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )

@@ -277,6 +277,7 @@ internal class EmbeddedSheetActivityTest {
                     ),
                     linkAccountInfo = LinkAccountUpdate.Value(null),
                     promotions = emptyList(),
+                    activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
                     launchMode = EmbeddedLaunchMode.Manage,
                     presentationState = EmbeddedActivityArgs.PresentationState.Ready,
                 ),

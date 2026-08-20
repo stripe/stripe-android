@@ -195,7 +195,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `new selection requiring a form survives recreation and back returns to the list`() = launch(
+    fun `single payment method form survives recreation and back cancels`() = launch(
         selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) { scenario ->
         formPage.waitUntilVisible()
@@ -207,8 +207,11 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         Espresso.pressBack()
         onIdle()
 
-        formPage.assertIsNotDisplayed()
-        verticalModePage.waitUntilVisible()
+        val result = EmbeddedSheetContract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+        assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
     }
 
     @Test
@@ -361,9 +364,10 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     private fun launch(
         selection: PaymentSelection? = null,
         previousNewSelections: Bundle = Bundle(),
+        paymentMethodTypes: List<String> = listOf("card"),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "cashapp"),
+                paymentMethodTypes = paymentMethodTypes,
             ),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -462,6 +466,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             ),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             presentationState = presentationState,
         )
     }

@@ -12,6 +12,7 @@ import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -32,9 +33,10 @@ internal class PaymentSheetTest {
     ) = runScenario(construction, savedState = null) {
         paymentSheet.presentWithPaymentIntent("pi_secret")
 
-        val args = requireNotNull(PaymentSheetContract.Args.fromIntent(shadowOf(activity).nextStartedActivity))
+        val args = requireNotNull(EmbeddedActivityArgs.fromIntent(shadowOf(activity).nextStartedActivity))
         assertThat(args.paymentElementCallbackIdentifier).isEqualTo(callbackIdentifier)
-        assertThat(args.initializedViaCompose).isFalse()
+        val configuration = args.activityConfiguration as EmbeddedActivityArgs.ActivityConfiguration.PaymentSheet
+            assertThat(configuration.args.initializedViaCompose).isFalse()
     }
 
     @Test
@@ -92,7 +94,7 @@ internal class PaymentSheetTest {
 
             paymentSheet.presentWithPaymentIntent("pi_secret")
 
-            val args = requireNotNull(PaymentSheetContract.Args.fromIntent(shadowOf(activity).nextStartedActivity))
+            val args = requireNotNull(EmbeddedActivityArgs.fromIntent(shadowOf(activity).nextStartedActivity))
             assertThat(args.paymentElementCallbackIdentifier).isEqualTo(originalIdentifier)
         }
     }

@@ -103,7 +103,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
                     handleFormResult(result)
                 }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
-                is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
+                is EmbeddedLaunchMode.PaymentOptions,
+                is EmbeddedLaunchMode.Complete -> handlePaymentOptionsResult(result)
             }
         }
 
@@ -215,6 +216,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             customerState = customerState,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = listOfNotNull(promotion),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -248,6 +250,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             customerState = customerState,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = emptyList(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
@@ -334,6 +337,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             customerState = customerState,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = paymentMethodMessagePromotionsHelper.getPromotions().orEmpty(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,
         )

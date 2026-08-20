@@ -5,8 +5,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -22,6 +20,8 @@ import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules

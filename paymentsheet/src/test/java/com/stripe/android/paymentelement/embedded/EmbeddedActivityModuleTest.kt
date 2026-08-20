@@ -5,12 +5,14 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.BillingInlineAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -88,6 +90,9 @@ internal class EmbeddedActivityModuleTest {
     ) = runTest {
         val eventReporter = FakeAddressLauncherEventReporter()
         val factory = EmbeddedActivityModule.provideAutocompleteAddressInteractorFactory(
+            launcher = TestAutocompleteLauncher.noOp(),
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
             coroutineScope = this,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
