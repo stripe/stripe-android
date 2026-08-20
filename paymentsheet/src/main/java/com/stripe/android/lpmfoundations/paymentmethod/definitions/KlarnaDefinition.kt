@@ -13,16 +13,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.ui.core.elements.StaticTextElement
-import com.stripe.android.uicore.elements.CountryConfig
-import com.stripe.android.uicore.elements.CountryElement
-import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionElement
 
 internal object KlarnaDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Klarna
@@ -66,38 +61,11 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
-            .ignoreBillingAddressRequirements()
-            .element(
-                formElement = SectionElement.wrap(
-                    sectionFieldElement = CountryElement(
-                        identifier = IdentifierSpec.Country,
-                        controller = DropdownFieldController(
-                            config = CountryConfig(
-                                onlyShowCountryCodes =
-                                metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                            ),
-                            initialValue = arguments.initialValues[IdentifierSpec.Country],
-                        )
-                    )
-                )
+            .requireCountry(
+                allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                initialValue = arguments.initialValues[IdentifierSpec.Country],
             )
             .apply {
-                if (
-                    metadata.billingDetailsCollectionConfiguration.address ==
-                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-                ) {
-                    AddressSpec(
-                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                        hideCountry = true,
-                    ).transform(
-                        initialValues = arguments.initialValues,
-                        shippingValues = arguments.shippingValues,
-                        autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
-                    ).forEach {
-                        element(it)
-                    }
-                }
-
                 if (KlarnaDefinition.requiresMandate(metadata)) {
                     builder.footer(
                         formElement = MandateTextElement(
@@ -156,11 +124,9 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
                         stringResId = R.string.stripe_klarna_buy_now_pay_later
                     )
                 )
-                .element(
-                    getKlarnaCountryElement(
-                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                        initialValue = metadata.stripeIntent.countryCode
-                    )
+                .requireCountry(
+                    allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                    initialValue = metadata.stripeIntent.countryCode,
                 )
         }
 
@@ -172,22 +138,5 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
                 )
             )
         }
-    }
-
-    private fun getKlarnaCountryElement(
-        allowedCountryCodes: Set<String>,
-        initialValue: String?
-    ): FormElement {
-        val identifier = IdentifierSpec.Generic("billing_details[address][country]")
-
-        return SectionElement.wrap(
-            CountryElement(
-                identifier = identifier,
-                controller = DropdownFieldController(
-                    CountryConfig(allowedCountryCodes),
-                    initialValue = initialValue
-                )
-            )
-        )
     }
 }
