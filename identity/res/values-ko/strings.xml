@@ -234,8 +234,6 @@
   <string name="stripe_select">선택</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">셀카 캡처 완료</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">캡처된 셀카</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">좋습니다! 이미지를 확인하는 중입니다....</string>
   <!-- Content description of a captured selfie -->

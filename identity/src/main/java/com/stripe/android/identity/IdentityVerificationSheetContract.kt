@@ -17,6 +17,7 @@ internal class IdentityVerificationSheetContract :
         val verificationSessionId: String,
         val ephemeralKeySecret: String,
         val brandLogo: Uri,
+        val brandColor: Int?,
         @InjectorKey val injectorKey: String,
         val presentTime: Long
     ) : Parcelable {

@@ -28,6 +28,9 @@ NEXT_VERSION_BUMP: PATCH
 ### CryptoOnramp
 * [ADDED][13623](https://github.com/stripe/stripe-android/pull/13623) Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
 
+### Identity
+* [CHANGED][13176](https://github.com/stripe/stripe-android/pull/13176) Stripe Identity and Crypto Onramp now require Android API 24 or later to support MediaPipe-based 3D selfie capture.
+
 ## 23.14.0 - 2026-08-03
 
 ### CryptoOnramp
