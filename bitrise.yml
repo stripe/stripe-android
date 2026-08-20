@@ -10,7 +10,7 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
-    - FTL_TEST_DEVICES: MediumPhone.arm,33,en,portrait
+    - FTL_TEST_DEVICES: MediumPhone.arm,33,en_US,portrait
 
 pipelines:
   main-trigger-pipeline:
@@ -212,7 +212,7 @@ workflows:
           inputs:
             - app_path: $FTL_APP_APK_PATH
             - test_type: robo
-            - test_devices: MediumPhone.arm,33,en,portrait
+            - test_devices: MediumPhone.arm,33,en_US,portrait
             - robo_scenario_file: /tmp/firebase-robo-scenario.json
             - auto_google_login: "true"
             - num_flaky_test_attempts: "0"
@@ -264,7 +264,6 @@ workflows:
           numShards=$BITRISE_IO_PARALLEL_TOTAL
           shardIndex=$BITRISE_IO_PARALLEL_INDEX
           notAnnotation=com.stripe.android.paymentsheet.RequiresIme
-          stripeTestLocale=en-US
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-paymentsheet-ime-instrumentation-tests:
@@ -297,7 +296,7 @@ workflows:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
       - FTL_TEST_APK_FILENAME: stripecardscan-test.apk
-      - FTL_TEST_DEVICES: Pixel2.arm,33,en,portrait
+      - FTL_TEST_DEVICES: Pixel2.arm,33,en_US,portrait
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-paymentsheet-e2e:
@@ -307,7 +306,6 @@ workflows:
       - FTL_TEST_APK_FILENAME: paymentsheet-example-test.apk
       - FTL_GENERATE_E2E_SHARD: "true"
       - FTL_AUTO_GOOGLE_LOGIN: "true"
-      - FTL_RUNNER_ARGUMENTS: stripeTestLocale=en-US
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-paymentsheet-google-pay-e2e:
@@ -399,7 +397,7 @@ workflows:
           timeout: 4200
           inputs:
             - test_type: instrumentation
-            - test_devices: MediumPhone.arm,33,en,portrait
+            - test_devices: MediumPhone.arm,33,en_US,portrait
             - inst_test_targets: class com.stripe.android.latency.TestLatency
             - num_flaky_test_attempts: "0"
             - download_test_results: "true"
