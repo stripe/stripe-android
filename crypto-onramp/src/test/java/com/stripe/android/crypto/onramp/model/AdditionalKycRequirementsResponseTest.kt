@@ -44,6 +44,82 @@ class AdditionalKycRequirementsResponseTest {
         assertThat(requirements.unrecognizedActionOwner).isEmpty()
     }
 
+    @Test
+    fun `top-level questionnaire is normalized`() = runScenario(
+        entries = listOf(
+            requirement(
+                description = "screening_questions",
+                awaitingActionFrom = "user",
+                submissionType = "questionnaire",
+                questionnaire = questionnaire(questionId = "top_level_question"),
+            )
+        )
+    ) {
+        val requirement = requirements.userActionRequired.single()
+
+        assertThat(requirement.questionnaire?.questions?.single()?.id)
+            .isEqualTo("top_level_question")
+    }
+
+    @Test
+    fun `document questionnaire is normalized`() = runScenario(
+        entries = listOf(
+            requirement(
+                description = "source_of_funds",
+                awaitingActionFrom = "user",
+                submissionType = "document",
+                document = document(
+                    questionnaire = questionnaire(questionId = "document_question"),
+                ),
+            )
+        )
+    ) {
+        val requirement = requirements.userActionRequired.single()
+
+        assertThat(requirement.questionnaire?.questions?.single()?.id)
+            .isEqualTo("document_question")
+    }
+
+    @Test
+    fun `document submission uses document questionnaire when both locations exist`() = runScenario(
+        entries = listOf(
+            requirement(
+                description = "source_of_funds",
+                awaitingActionFrom = "user",
+                submissionType = "document",
+                document = document(
+                    questionnaire = questionnaire(questionId = "document_question"),
+                ),
+                questionnaire = questionnaire(questionId = "top_level_question"),
+            )
+        )
+    ) {
+        val requirement = requirements.userActionRequired.single()
+
+        assertThat(requirement.questionnaire?.questions?.single()?.id)
+            .isEqualTo("document_question")
+    }
+
+    @Test
+    fun `questionnaire submission uses top-level questionnaire when both locations exist`() = runScenario(
+        entries = listOf(
+            requirement(
+                description = "screening_questions",
+                awaitingActionFrom = "user",
+                submissionType = "questionnaire",
+                document = document(
+                    questionnaire = questionnaire(questionId = "document_question"),
+                ),
+                questionnaire = questionnaire(questionId = "top_level_question"),
+            )
+        )
+    ) {
+        val requirement = requirements.userActionRequired.single()
+
+        assertThat(requirement.questionnaire?.questions?.single()?.id)
+            .isEqualTo("top_level_question")
+    }
+
     private fun runScenario(
         entries: List<AdditionalKycRequirementResponse> = emptyList(),
         block: Scenario.() -> Unit,
@@ -61,12 +137,44 @@ class AdditionalKycRequirementsResponseTest {
         fun requirement(
             description: String,
             awaitingActionFrom: String,
+            submissionType: String = "document",
+            document: AdditionalKycDocumentRequirementResponse? = null,
+            questionnaire: AdditionalKycQuestionnaireResponse? = null,
         ): AdditionalKycRequirementResponse {
             return AdditionalKycRequirementResponse(
                 description = description,
                 requestedBy = "swapped",
                 awaitingActionFrom = awaitingActionFrom,
-                submissionType = "document",
+                submissionType = submissionType,
+                document = document,
+                questionnaire = questionnaire,
+            )
+        }
+
+        fun document(
+            questionnaire: AdditionalKycQuestionnaireResponse?,
+        ): AdditionalKycDocumentRequirementResponse {
+            return AdditionalKycDocumentRequirementResponse(
+                acceptedSubtypes = emptyList(),
+                acceptedFormats = emptyList(),
+                minDocuments = 1,
+                instructions = emptyList(),
+                additionalRequirements = AdditionalKycCollectionRequirementsResponse(
+                    questionnaire = questionnaire,
+                ),
+            )
+        }
+
+        fun questionnaire(questionId: String): AdditionalKycQuestionnaireResponse {
+            return AdditionalKycQuestionnaireResponse(
+                questions = listOf(
+                    AdditionalKycQuestionResponse(
+                        id = questionId,
+                        prompt = "Question prompt",
+                        answerType = "free_text",
+                        required = true,
+                    )
+                )
             )
         }
     }

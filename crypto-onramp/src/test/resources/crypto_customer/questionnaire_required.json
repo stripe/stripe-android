@@ -1,0 +1,25 @@
+{
+  "id": "crc_questionnaire",
+  "requirements": {
+    "entries": [
+      {
+        "description": "screening_questions",
+        "requested_by": "swapped",
+        "awaiting_action_from": "user",
+        "requested_reasons": ["kyc_step_up"],
+        "errors": [],
+        "submission_type": "questionnaire",
+        "questionnaire": {
+          "questions": [
+            {
+              "id": "purchase_purpose",
+              "prompt": "Why are you purchasing cryptocurrency?",
+              "answer_type": "free_text",
+              "required": true
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

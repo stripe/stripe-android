@@ -49,6 +49,18 @@ class RetrieveCryptoCustomerResponseTest {
     }
 
     @Test
+    fun `top-level questionnaire is parsed`() {
+        val response = parseFixture("questionnaire_required.json")
+        val requirement = response.requirements.entries.single()
+        val questions = requireNotNull(requirement.questionnaire).questions
+
+        assertThat(requirement.submissionType).isEqualTo("questionnaire")
+        assertThat(requirement.document).isNull()
+        assertThat(questions.single().id).isEqualTo("purchase_purpose")
+        assertThat(questions.single().answerType).isEqualTo("free_text")
+    }
+
+    @Test
     fun `requirement awaiting partner action is parsed`() {
         val response = parseFixture("pending_review.json")
         val requirement = response.requirements.entries.single()

@@ -18,11 +18,12 @@ internal data class AdditionalKycRequirementsResponse(
     val entries: List<AdditionalKycRequirementResponse>,
 ) {
     fun toAdditionalKycRequirements(): AdditionalKycRequirements {
+        val requirements = entries.map { it.toAdditionalKycRequirement() }
         return AdditionalKycRequirements(
-            userActionRequired = entries.filter { it.awaitingActionFrom == USER },
-            pendingPartnerAction = entries.filter { it.awaitingActionFrom == PARTNER },
-            pendingStripeAction = entries.filter { it.awaitingActionFrom == STRIPE },
-            unrecognizedActionOwner = entries.filter {
+            userActionRequired = requirements.filter { it.awaitingActionFrom == USER },
+            pendingPartnerAction = requirements.filter { it.awaitingActionFrom == PARTNER },
+            pendingStripeAction = requirements.filter { it.awaitingActionFrom == STRIPE },
+            unrecognizedActionOwner = requirements.filter {
                 it.awaitingActionFrom !in RECOGNIZED_ACTION_OWNERS
             },
         )
@@ -95,3 +96,55 @@ internal data class AdditionalKycQuestionResponse(
     val answerType: String,
     val required: Boolean,
 )
+
+private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(): AdditionalKycRequirement {
+    val normalizedQuestionnaire = when (submissionType) {
+        "document" -> document?.additionalRequirements?.questionnaire
+        "questionnaire" -> questionnaire
+        else -> null
+    }
+
+    return AdditionalKycRequirement(
+        description = description,
+        requestedBy = requestedBy,
+        awaitingActionFrom = awaitingActionFrom,
+        requestedReasons = requestedReasons,
+        errors = errors.map { error ->
+            AdditionalKycRequirementError(
+                code = error.code,
+                message = error.message,
+            )
+        },
+        submissionType = submissionType,
+        document = document?.toAdditionalKycDocumentRequirement(),
+        questionnaire = normalizedQuestionnaire?.toAdditionalKycQuestionnaire(),
+    )
+}
+
+private fun AdditionalKycDocumentRequirementResponse.toAdditionalKycDocumentRequirement():
+    AdditionalKycDocumentRequirement {
+    return AdditionalKycDocumentRequirement(
+        acceptedSubtypes = acceptedSubtypes.map { subtype ->
+            AdditionalKycDocumentSubtype(
+                id = subtype.id,
+                label = subtype.label,
+            )
+        },
+        acceptedFormats = acceptedFormats,
+        minDocuments = minDocuments,
+        instructions = instructions,
+    )
+}
+
+private fun AdditionalKycQuestionnaireResponse.toAdditionalKycQuestionnaire(): AdditionalKycQuestionnaire {
+    return AdditionalKycQuestionnaire(
+        questions = questions.map { question ->
+            AdditionalKycQuestion(
+                id = question.id,
+                prompt = question.prompt,
+                answerType = question.answerType,
+                required = question.required,
+            )
+        }
+    )
+}
