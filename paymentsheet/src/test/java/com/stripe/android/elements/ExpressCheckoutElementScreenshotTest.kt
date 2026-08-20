@@ -7,16 +7,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractorStateFactory
-import com.stripe.android.elements.ece.LocalExpressCheckoutGooglePayButton
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -24,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(CheckoutSessionPreview::class)
 internal class ExpressCheckoutElementScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -34,16 +31,11 @@ internal class ExpressCheckoutElementScreenshotTest {
 
     @Test
     fun rendersGooglePayAndLinkButtons() {
-        val element = ExpressCheckoutElement(
-            interactor = FakeExpressCheckoutElementInteractor(),
-        )
-
         paparazziRule.snapshot {
-            CompositionLocalProvider(
-                LocalExpressCheckoutGooglePayButton provides { _, _ -> FakeGooglePayButton() },
-            ) {
-                element.Content()
-            }
+            ExpressCheckoutElementContent(
+                interactor = FakeExpressCheckoutElementInteractor(),
+                googlePayButton = { _, _ -> FakeGooglePayButton() },
+            )
         }
     }
 
