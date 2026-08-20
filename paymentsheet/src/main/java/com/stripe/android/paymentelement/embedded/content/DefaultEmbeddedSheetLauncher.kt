@@ -84,7 +84,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     handleFormResult(result)
                 }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
-                is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
+                is EmbeddedLaunchMode.PaymentOptions,
+                is EmbeddedLaunchMode.Complete -> handlePaymentOptionsResult(result)
             }
         }
 
@@ -191,6 +192,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = listOfNotNull(promotion),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -223,6 +225,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
@@ -253,6 +256,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )

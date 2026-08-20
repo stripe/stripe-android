@@ -12,9 +12,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import kotlinx.coroutines.flow.update
 
 /**
  * [USBankAccountFormArguments] provides the arguments required to render the [USBankAccountForm].
@@ -68,38 +66,6 @@ internal class USBankAccountFormArguments(
     val clientAttributionMetadata: ClientAttributionMetadata,
 ) {
     companion object {
-        fun create(
-            viewModel: BaseSheetViewModel,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            hostedSurface: String,
-            selectedPaymentMethodCode: String,
-            bankFormInteractor: BankFormInteractor,
-        ): USBankAccountFormArguments {
-            return USBankAccountFormArgumentsFactory.create(
-                paymentMethodMetadata = paymentMethodMetadata,
-                selectedPaymentMethodCode = selectedPaymentMethodCode,
-                hostedSurface = hostedSurface,
-                integrationInputs = USBankAccountFormArgumentsFactory.IntegrationInputs(
-                    isCompleteFlow = viewModel.isCompleteFlow,
-                    shippingDetails = viewModel.config.shippingDetails,
-                    draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
-                    autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                    setAsDefaultMatchesSaveForFutureUse =
-                        viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
-                    termsDisplay = paymentMethodMetadata.termsDisplayForCode(selectedPaymentMethodCode),
-                    onAnalyticsEvent = viewModel.eventReporter::onUsBankAccountFormEvent,
-                    onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
-                    onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
-                    onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
-                    onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
-                    onError = viewModel::onError,
-                    onFormCompleted = {
-                        viewModel.eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code)
-                    },
-                )
-            )
-        }
-
         fun createForEmbedded(
             paymentMethodMetadata: PaymentMethodMetadata,
             selectedPaymentMethodCode: String,

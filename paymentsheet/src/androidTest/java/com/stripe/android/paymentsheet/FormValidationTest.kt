@@ -17,6 +17,8 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_BILLING_DETAILS
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -82,7 +84,15 @@ internal class FormValidationTest(
 
         navigateToFormFor(paymentMethodCode = "us_bank_account")
 
-        clickPrimaryButton()
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_BILLING_DETAILS))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeTestRule.waitForIdle()
+
+        clickPrimaryButton(expectedLabel = "Continue")
 
         assertDoesNotLaunchBankAccountFlow()
         assertFieldErrorsAreShown()
@@ -134,7 +144,16 @@ internal class FormValidationTest(
         )
     }
 
-    private fun clickPrimaryButton() {
+    private fun clickPrimaryButton(expectedLabel: String? = null) {
+        if (expectedLabel != null) {
+            composeTestRule.waitUntil(5_000) {
+                composeTestRule
+                    .onAllNodes(hasTestTag(PRIMARY_BUTTON_TEST_TAG).and(hasText(expectedLabel)))
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+        }
+
         composeTestRule.waitUntil(5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()))

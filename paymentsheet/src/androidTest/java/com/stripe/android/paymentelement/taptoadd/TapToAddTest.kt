@@ -190,7 +190,8 @@ internal class TapToAddTest {
 
     @Test
     fun successAfterCancelAfterCardCollectedWithCompleteMode(
-        @TestParameter(valuesProvider = TapToAddIntegrationType.Complete.Provider::class)
+        // PaymentSheet now closes when its confirmation screen is canceled; only Embedded returns to its picker.
+        @TestParameter(valuesProvider = TapToAddIntegrationType.Complete.EmbeddedProvider::class)
         integrationType: TapToAddIntegrationType.Complete,
         @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
         apiConfigurationTestType: ApiConfigurationTestType,

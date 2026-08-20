@@ -81,6 +81,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = listOf(promotion),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -408,6 +409,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
@@ -589,6 +591,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )

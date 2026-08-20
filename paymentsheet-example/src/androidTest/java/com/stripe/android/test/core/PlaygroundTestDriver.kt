@@ -781,7 +781,7 @@ internal class PlaygroundTestDriver(
             selectors.externalPaymentMethodCancelButton,
         )
 
-        waitForPaymentSheetActivity()
+        waitForSheetActivity()
         selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
@@ -835,7 +835,7 @@ internal class PlaygroundTestDriver(
             selectors.customPaymentMethodCancelButton,
         )
 
-        waitForPaymentSheetActivity()
+        waitForSheetActivity()
         selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
@@ -1182,8 +1182,8 @@ internal class PlaygroundTestDriver(
 
     /**
      * Here we wait for an activity different from the playground to be in view.  We
-     * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
-     * that would require exposing the activities publicly.
+     * don't specifically look for the sheet host because that would require exposing the activity
+     * publicly.
      */
     private fun waitForNotPlaygroundActivity() {
         awaitActivity(description = "an activity other than the playground") {
@@ -1259,7 +1259,7 @@ internal class PlaygroundTestDriver(
         )
         selectors.complete.click()
 
-        waitForPaymentSheetActivity()
+        waitForSheetActivity()
     }
 
     private fun launchCustom(clickMultiStep: Boolean = true) {
@@ -1274,7 +1274,7 @@ internal class PlaygroundTestDriver(
         if (clickMultiStep) {
             selectors.multiStepSelect.click()
 
-            // PaymentOptionsActivity is now on screen
+            // The sheet host is now on screen.
             waitForNotPlaygroundActivity()
         }
     }
@@ -1773,8 +1773,8 @@ internal class PlaygroundTestDriver(
         }.isSuccess
     }
 
-    private fun waitForPaymentSheetActivity() {
-        awaitActivityClass("com.stripe.android.paymentsheet.PaymentSheetActivity")
+    private fun waitForSheetActivity() {
+        awaitActivityClass("com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity")
     }
 
     private fun addPaymentMethodNode(): SemanticsNodeInteraction {

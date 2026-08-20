@@ -8,8 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 
 internal class LoadingEmbeddedSheetPresentation(
     private val activity: EmbeddedSheetActivity,
@@ -19,7 +17,7 @@ internal class LoadingEmbeddedSheetPresentation(
 
     override fun register() {
         backCallback = activity.onBackPressedDispatcher.addCallback {
-            activity.finishWithResult(createCancellationResult())
+            activity.finishLoading(args)
         }
     }
 
@@ -28,7 +26,7 @@ internal class LoadingEmbeddedSheetPresentation(
     }
 
     override fun onDismissed() {
-        activity.finishWithResult(createCancellationResult())
+        activity.finishLoading(args)
     }
 
     @Composable
@@ -40,13 +38,6 @@ internal class LoadingEmbeddedSheetPresentation(
 
     override fun onDestroy() {
         backCallback?.remove()
-    }
-
-    private fun createCancellationResult(): EmbeddedActivityResult {
-        return EmbeddedActivityResult.Cancelled(
-            customerState = args.customerState,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
-        )
     }
 
     object Factory : EmbeddedSheetPresentation.Factory {

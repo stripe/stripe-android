@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
@@ -34,7 +35,9 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
+    private val launchMode: EmbeddedLaunchMode,
 ) {
+    @Suppress("LongMethod")
     fun create(
         paymentMethodCode: PaymentMethodCode,
         hasSavedPaymentMethods: Boolean
@@ -70,7 +73,17 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             bankFormInteractor = bankFormInteractor,
         )
 
-        val formType = formHelper.formTypeForCode(paymentMethodCode)
+        val formElements = formHelper.formElementsForCode(paymentMethodCode)
+        val requiresFormScreen = formElements.any { it.allowsUserInteraction } ||
+            paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
+            paymentMethodCode == PaymentMethod.Type.Link.code
+        val formType = if (requiresFormScreen) {
+            FormHelper.FormType.UserInteractionRequired
+        } else {
+            formElements.firstNotNullOfOrNull { it.mandateText }
+                ?.let(FormHelper.FormType::MandateOnly)
+                ?: FormHelper.FormType.Empty
+        }
         val formArguments = formHelper.createFormArguments(paymentMethodCode)
         if (formType is FormHelper.FormType.MandateOnly) {
             embeddedSelectionHolder.setSelection(
@@ -85,7 +98,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         return DefaultVerticalModeFormInteractor(
             selectedPaymentMethodCode = paymentMethodCode,
             formArguments = formArguments,
-            formElements = formHelper.formElementsForCode(paymentMethodCode),
+            formElements = formElements,
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             usBankAccountArguments = usBankAccountFormArguments,
             reportFieldInteraction = eventReporter::onPaymentMethodFormInteraction,
@@ -111,8 +124,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            isCompleteFlow = false,
-            draftPaymentSelection = null,
+            isCompleteFlow = launchMode is EmbeddedLaunchMode.Complete,
+            draftPaymentSelection = embeddedSelectionHolder.selection.value,
             bankFormInteractor = bankFormInteractor,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,

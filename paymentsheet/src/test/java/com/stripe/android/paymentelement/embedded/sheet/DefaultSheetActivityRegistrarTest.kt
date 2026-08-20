@@ -8,6 +8,7 @@ import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -71,6 +72,7 @@ internal class DefaultSheetActivityRegistrarTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             paymentMethodMetadata = paymentMethodMetadata,
+            autocompleteLauncher = mock<AutocompleteActivityLauncher>(),
         )
 
         val scenario = Scenario(

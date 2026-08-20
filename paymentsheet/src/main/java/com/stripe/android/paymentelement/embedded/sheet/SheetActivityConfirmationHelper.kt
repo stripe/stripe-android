@@ -42,6 +42,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
 
             when (configuration.formSheetAction) {
                 EmbeddedPaymentElement.FormSheetAction.Continue -> {
+                    selectionHolder.selection.value?.let(eventReporter::onSelectPaymentOption)
                     continueCoordinator.onContinue()
                 }
                 EmbeddedPaymentElement.FormSheetAction.Confirm -> {

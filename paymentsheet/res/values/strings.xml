@@ -134,8 +134,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">Something went wrong when linking your account.\nPlease try again later.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Add</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Added card</string>
   <!-- Title for a button that when pressed saves the provided address. -->
