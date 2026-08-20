@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -11,8 +10,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.R
@@ -23,17 +20,13 @@ import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PromotionSupportedPaymentMethods
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -125,97 +118,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
 ) : PaymentMethodVerticalLayoutInteractor {
-
-    companion object {
-        fun create(
-            viewModel: BaseSheetViewModel,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            customerStateHolder: CustomerStateHolder,
-            bankFormInteractor: BankFormInteractor,
-            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
-        ): PaymentMethodVerticalLayoutInteractor {
-            val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Default)
-            val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
-            val formHelper = DefaultFormHelper.create(
-                viewModel = viewModel,
-                coroutineScope = formHelperScope,
-                paymentMethodMetadata = paymentMethodMetadata,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
-            )
-            val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
-                it is PaymentSheetScreen.VerticalMode
-            }
-            return DefaultPaymentMethodVerticalLayoutInteractor(
-                paymentMethodMetadata = paymentMethodMetadata,
-                processing = viewModel.processing,
-                temporarySelection = stateFlowOf(null),
-                selection = viewModel.selection,
-                paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,
-                formTypeForCode = { code ->
-                    formHelper.formTypeForCode(code)
-                },
-                onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
-                transitionToManageScreen = {
-                    val interactor = DefaultManageScreenInteractor.create(
-                        viewModel = viewModel,
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        customerStateHolder = customerStateHolder,
-                        savedPaymentMethodMutator = viewModel.savedPaymentMethodMutator,
-                    )
-                    val screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = interactor)
-                    viewModel.navigationHandler.transitionToWithDelay(screen)
-                },
-                transitionToFormScreen = { selectedPaymentMethodCode ->
-                    val interactor = DefaultVerticalModeFormInteractor.create(
-                        selectedPaymentMethodCode = selectedPaymentMethodCode,
-                        viewModel = viewModel,
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        customerStateHolder = customerStateHolder,
-                        bankFormInteractor = bankFormInteractor,
-                        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
-                    )
-                    val screen = PaymentSheetScreen.VerticalModeForm(interactor = interactor)
-                    viewModel.navigationHandler.transitionToWithDelay(screen)
-                },
-                paymentMethods = customerStateHolder.paymentMethods,
-                mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
-                canRemove = viewModel.customerStateHolder.canRemove,
-                onUpdatePaymentMethod = { viewModel.savedPaymentMethodMutator.updatePaymentMethod(it) },
-                updateSelection = { selection, isUserInput ->
-                    if (isUserInput) {
-                        viewModel.handlePaymentMethodSelected(selection)
-                    } else {
-                        viewModel.updateSelection(selection)
-                    }
-                },
-                walletsState = viewModel.walletsState,
-                canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
-                    .canUpdateCardExpiryAndBillingDetails,
-                canChangeCbc = viewModel.customerStateHolder.canChangeCbc,
-                isCurrentScreen = isCurrentScreen,
-                reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
-                reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
-                shouldUpdateVerticalModeSelection = { paymentMethodCode ->
-                    val requiresFormScreen = paymentMethodCode != null &&
-                        formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
-                    !requiresFormScreen
-                },
-                displaysMandatesInFormScreen = false,
-                onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
-                    viewModel.eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
-                        visiblePaymentMethods = visiblePaymentMethods,
-                        hiddenPaymentMethods = hiddenPaymentMethods,
-                        walletsState = viewModel.walletsState.value,
-                        isVerticalLayout = true,
-                    )
-                },
-                updateMandateText = viewModel.mandateHandler::updateMandateText,
-                linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
-                coroutineScope = coroutineScope,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
-            )
-        }
-    }
 
     private val _verticalModeScreenSelection = MutableStateFlow(selection.value)
     private val verticalModeScreenSelection = _verticalModeScreenSelection

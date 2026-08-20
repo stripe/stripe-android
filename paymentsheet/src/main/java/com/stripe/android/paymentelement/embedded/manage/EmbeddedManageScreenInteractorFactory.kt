@@ -40,18 +40,18 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                 val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                 selectionHolder.setSelection(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
+            },
+            onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
+            navigateBack = {
                 val action = when (launchMode) {
-                    is EmbeddedLaunchMode.PaymentOptions -> EmbeddedNavigator.Action.Back
+                    is EmbeddedLaunchMode.PaymentOptions,
+                    is EmbeddedLaunchMode.Complete -> EmbeddedNavigator.Action.Back
                     is EmbeddedLaunchMode.Manage,
                     is EmbeddedLaunchMode.Form -> EmbeddedNavigator.Action.Close(
                         shouldInvokeRowSelectionCallback = true
                     )
                 }
                 embeddedNavigatorProvider.get().performAction(action)
-            },
-            onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
-            navigateBack = {
-                embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
             linkAccount = linkAccountHolder.linkAccountInfo,

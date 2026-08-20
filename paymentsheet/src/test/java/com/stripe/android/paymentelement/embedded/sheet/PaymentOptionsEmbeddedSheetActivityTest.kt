@@ -108,23 +108,13 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `new selection requiring a form opens on the form and back returns to the list`() = launch(
+    fun `single payment method opens directly on the form`() = launch(
         selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) { scenario ->
         scenario.onActivity { activity ->
-            assertThat(activity.embeddedNavigator.canGoBack).isTrue()
-            assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.Form>()
-        }
-
-        Espresso.pressBack()
-        onIdle()
-
-        // Back returns to the payment options list rather than cancelling the sheet.
-        scenario.onActivity { activity ->
             assertThat(activity.embeddedNavigator.canGoBack).isFalse()
             assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+                .isInstanceOf<EmbeddedNavigator.Screen.Form>()
         }
     }
 
@@ -157,7 +147,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     selection = selection,
                     previousNewSelections = previousNewSelections,
                     customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-                    promotion = null,
+                    promotions = null,
                     launchMode = EmbeddedLaunchMode.PaymentOptions,
                 ),
             )

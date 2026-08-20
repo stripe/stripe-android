@@ -23,7 +23,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymen
 import com.stripe.android.paymentsheet.example.playground.settings.FeatureFlagSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
@@ -241,7 +241,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 .isNotEmpty()
         }
 
-        ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+        ComposeButton(rules.compose, hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON))
             .waitFor(isEnabled())
     }
 }

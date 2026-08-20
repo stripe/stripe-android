@@ -7,33 +7,35 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
 internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
     val selectionTurbine = Turbine<PaymentSelection.Saved?>()
 
-    override val state: StateFlow<SheetActivityStateHolder.State>
-        get() = stateFlowOf(
-            SheetActivityStateHolder.State(
-                primaryButtonLabel = "".resolvableString,
-                isEnabled = false,
-                processingState = PrimaryButtonProcessingState.Idle(null),
-                isProcessing = false,
-                shouldDisplayLockIcon = true,
-                savedPaymentSelectionToConfirm = null,
-            )
+    private val _state = MutableStateFlow(
+        SheetActivityStateHolder.State(
+            primaryButtonLabel = "".resolvableString,
+            isEnabled = false,
+            processingState = PrimaryButtonProcessingState.Idle(null),
+            isProcessing = false,
+            shouldDisplayLockIcon = true,
+            savedPaymentSelectionToConfirm = null,
         )
+    )
+    override val state: StateFlow<SheetActivityStateHolder.State> = _state
 
     val resultTurbine = Turbine<EmbeddedActivityResult>()
     val updateErrorTurbine = Turbine<ResolvableString?>()
 
     override val result: SharedFlow<EmbeddedActivityResult> = MutableSharedFlow<EmbeddedActivityResult>()
+    override val validationRequested: SharedFlow<Unit> = MutableSharedFlow<Unit>()
 
     override fun updateMandate(mandateText: ResolvableString?) {
-        error("This should never be called!")
+        _state.update { it.copy(mandateText = mandateText) }
     }
 
     override fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
@@ -43,6 +45,8 @@ internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
     override fun updateError(error: ResolvableString?) {
         updateErrorTurbine.add(error)
     }
+
+    override fun requestValidation() = Unit
 
     override fun setResult(result: EmbeddedActivityResult) {
         resultTurbine.add(result)

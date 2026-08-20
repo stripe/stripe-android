@@ -273,7 +273,7 @@ internal class EmbeddedSheetActivityTest {
                     customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                         paymentMethods = paymentMethods,
                     ),
-                    promotion = null,
+                    promotions = null,
                     launchMode = EmbeddedLaunchMode.Manage,
                 ),
             )

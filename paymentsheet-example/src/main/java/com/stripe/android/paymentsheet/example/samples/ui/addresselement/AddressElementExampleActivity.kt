@@ -36,14 +36,24 @@ class AddressElementExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         supportActionBar?.title = getString(R.string.address_element_title)
         val viewModel by viewModels<AddressElementExampleViewModel>()
+        val disableGooglePlacesAutocomplete = intent.getBooleanExtra(
+            DISABLE_GOOGLE_PLACES_AUTOCOMPLETE_EXTRA,
+            false,
+        )
         setContent {
-            AddressElementExampleScreen(viewModel)
+            AddressElementExampleScreen(
+                viewModel = viewModel,
+                disableGooglePlacesAutocomplete = disableGooglePlacesAutocomplete,
+            )
         }
     }
 }
 
 @Composable
-private fun AddressElementExampleScreen(viewModel: AddressElementExampleViewModel) {
+private fun AddressElementExampleScreen(
+    viewModel: AddressElementExampleViewModel,
+    disableGooglePlacesAutocomplete: Boolean,
+) {
     val viewState by viewModel.state.collectAsState()
     val addressLauncher = rememberAddressLauncher(
         callback = viewModel::handleResult,
@@ -72,7 +82,11 @@ private fun AddressElementExampleScreen(viewModel: AddressElementExampleViewMode
                     onClick = {
                         val config = AddressLauncher.Configuration.Builder()
                             // Provide your Google Places API key to enable autocomplete
-                            .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
+                            .googlePlacesApiKey(
+                                Settings(context).googlePlacesApiKey.takeUnless {
+                                    disableGooglePlacesAutocomplete
+                                },
+                            )
                             .build()
                         addressLauncher.present(
                             publishableKey = state.publishableKey,
@@ -128,3 +142,4 @@ private fun Address(addressDetails: AddressDetails) {
 }
 
 internal const val SELECT_ADDRESS_BUTTON = "SELECT_ADDRESS_BUTTON"
+internal const val DISABLE_GOOGLE_PLACES_AUTOCOMPLETE_EXTRA = "disable_google_places_autocomplete"

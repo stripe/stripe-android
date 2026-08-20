@@ -264,6 +264,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -301,6 +302,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -537,6 +539,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.userOverrideCountry = userOverrideCountry
             }
 
+            internal fun googlePlacesApiKey(googlePlacesApiKey: String?) = apply {
+                this.googlePlacesApiKey = googlePlacesApiKey
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -561,6 +567,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                googlePlacesApiKey = googlePlacesApiKey,
             )
         }
 
@@ -590,6 +597,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .termsDisplay(termsDisplay)
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .userOverrideCountry(userOverrideCountry)
+            .googlePlacesApiKey(googlePlacesApiKey)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
             }

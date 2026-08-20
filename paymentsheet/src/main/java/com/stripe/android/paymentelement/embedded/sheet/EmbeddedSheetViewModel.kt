@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
@@ -21,6 +21,8 @@ internal class EmbeddedSheetViewModel @Inject constructor(
 
     class Factory(
         private val argsSupplier: () -> EmbeddedActivityArgs,
+        private val sheetActivityArgs: SheetActivityArgs,
+        private val savedStateHandle: SavedStateHandle,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -31,9 +33,10 @@ internal class EmbeddedSheetViewModel @Inject constructor(
                 configuration = args.configuration,
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 application = extras.requireApplication(),
-                savedStateHandle = extras.createSavedStateHandle(),
-                promotion = args.promotion,
+                savedStateHandle = savedStateHandle,
+                promotions = args.promotions,
                 launchMode = args.launchMode,
+                sheetActivityArgs = sheetActivityArgs,
             )
 
             component.customerStateHolder.setCustomerState(args.customerState)

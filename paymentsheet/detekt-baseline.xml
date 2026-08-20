@@ -10,12 +10,10 @@
     <ID>CyclomaticComplexMethod:PlaceholderHelper.kt:PlaceholderHelper$@VisibleForTesting internal fun specForPlaceholderField</ID>
     <ID>CyclomaticComplexMethod:TransformBankIconCodeToBankIcon.kt:internal fun transformBankIconCodeToBankIcon: Int</ID>
     <ID>CyclomaticComplexMethod:TransformSpecToElements.kt:TransformSpecToElements$fun transform: List&lt;FormElement></ID>
-    <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt:PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:VerticalModeFormUITest.kt:VerticalModeFormUITest.&lt;no name provided>${}</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt:@Preview @Composable internal fun PaymentSheetTopBar_Preview</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt:@Preview @Composable internal fun TestModeBadge_Preview</ID>
     <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt:FlowControllerModule$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation</ID>
-    <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt:PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation</ID>
     <ID>LargeClass:CardDefinitionTest.kt:CardDefinitionTest</ID>
     <ID>LargeClass:CheckoutTest.kt:CheckoutTest</ID>
     <ID>LargeClass:ConfirmationHandlerOptionKtxTest.kt:ConfirmationHandlerOptionKtxTest</ID>
@@ -31,11 +29,7 @@
     <ID>LargeClass:InputAddressViewModelTest.kt:InputAddressViewModelTest</ID>
     <ID>LargeClass:LinkInlineSignupConfirmationDefinitionTest.kt:LinkInlineSignupConfirmationDefinitionTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt:PaymentMethodMetadataTest</ID>
-    <ID>LargeClass:PaymentOptionsViewModelTest.kt:PaymentOptionsViewModelTest</ID>
-    <ID>LargeClass:PaymentSheetActivityTest.kt:PaymentSheetActivityTest</ID>
-    <ID>LargeClass:PaymentSheetViewModelTest.kt:PaymentSheetViewModelTest</ID>
     <ID>LargeClass:PlaceholderHelperTest.kt:PlaceholderHelperTest</ID>
-    <ID>LargeClass:PrimaryButtonUiStateMapperTest.kt:PrimaryButtonUiStateMapperTest</ID>
     <ID>LargeClass:TapToAddCollectionHandlerTest.kt:TapToAddCollectionHandlerTest</ID>
     <ID>LargeClass:USBankAccountFormViewModel.kt:USBankAccountFormViewModel : ViewModel</ID>
     <ID>LargeClass:USBankAccountFormViewModelTest.kt:USBankAccountFormViewModelTest</ID>
@@ -65,9 +59,6 @@
     <ID>LongMethod:PaymentDetails.kt:@Preview(showBackground = true) @Composable private fun PaymentDetailsListItemPreview</ID>
     <ID>LongMethod:PaymentMethodVerticalLayoutInteractor.kt:DefaultPaymentMethodVerticalLayoutInteractor.Companion$fun create: PaymentMethodVerticalLayoutInteractor</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt:@OptIn(AppearanceAPIAdditionsPreview::class) internal fun PaymentSheet.Appearance.parseAppearance</ID>
-    <ID>LongMethod:PaymentSheetScreen.kt:@Composable private fun PaymentSheetContent</ID>
-    <ID>LongMethod:PaymentSheetViewModelTest.kt:PaymentSheetViewModelTest$@Test fun `Can complete payment after switching to another LPM from card selection with inline Link signup state`</ID>
-    <ID>LongMethod:PaymentSheetViewModelTest.kt:PaymentSheetViewModelTest$@Test fun `On inline link payment, should process with primary button`</ID>
     <ID>LongMethod:PlaceholderHelperTest.kt:PlaceholderHelperTest$@Test fun `Test correct placeholder is removed for placeholder spec`</ID>
     <ID>LongMethod:PlaceholderHelperTest.kt:PlaceholderHelperTest$@Test fun `Test correct spec is returned for placeholder fields`</ID>
     <ID>LongMethod:USBankAccountForm.kt:@Composable private fun BankAccountDetails</ID>
@@ -82,7 +73,6 @@
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.4f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.5f</ID>
     <ID>MagicNumber:PaymentDetails.kt:0.5f</ID>
-    <ID>MagicNumber:PrimaryButton.kt:PrimaryButton$0.5f</ID>
     <ID>MagicNumber:USBankAccountForm.kt:0.5f</ID>
     <ID>MatchingDeclarationName:ErrorText.kt:ErrorTextStyle</ID>
     <ID>MatchingDeclarationName:LinkTerms.kt:LinkTermsType</ID>
@@ -117,6 +107,5 @@
     <ID>TooManyFunctions:PaymentMethodsUiExtension.kt:com.stripe.android.paymentsheet.ui.PaymentMethodsUiExtension.kt</ID>
     <ID>TooManyFunctions:PaymentSheet.kt:PaymentSheet.Appearance$Builder</ID>
     <ID>TooManyFunctions:WalletViewModel.kt:WalletViewModel : ViewModel</ID>
-    <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt:PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
 </SmellBaseline>
