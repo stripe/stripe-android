@@ -76,7 +76,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         )
                     )
                 }
-                shouldRefreshOrPollIntent(stripeIntent, result.flowOutcome) -> {
+                shouldRefreshOrPollIntent(
+                    stripeIntent = stripeIntent,
+                    flowOutcome = result.flowOutcome,
+                    canCancelSource = result.canCancelSource
+                ) -> {
                     val intent = if (shouldCallRefreshIntent(stripeIntent)) {
                         refreshStripeIntent(
                             clientSecret = result.clientSecret,
@@ -167,8 +171,15 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
     private fun shouldRefreshOrPollIntent(
         stripeIntent: StripeIntent,
-        @StripeIntentResult.Outcome flowOutcome: Int
+        @StripeIntentResult.Outcome flowOutcome: Int,
+        canCancelSource: Boolean
     ): Boolean {
+        // An explicit WebView dismissal must cancel the source instead of polling. Unlike Custom
+        // Tabs, the in-app WebView can distinguish user cancellation from an ambiguous return.
+        if (flowOutcome == CANCELED && shouldCancelIntentSource(stripeIntent, canCancelSource)) {
+            return false
+        }
+
         // For some payment methods, after user confirmation(resulting in flowOutCome == SUCCEEDED),
         // there is a delay when Stripe backend transfers its state out of "requires_action".
         // For a PaymentIntent with such payment method, we will need to poll the refresh endpoint

@@ -622,7 +622,7 @@ class CustomerSheet internal constructor(
             return when (this) {
                 is PaymentSelection.GooglePay -> {
                     PaymentOptionSelection.GooglePay(
-                        paymentOption = paymentOptionFactory.create(this, null),
+                        paymentOption = paymentOptionFactory.create(this, null, appearance = null),
                     ).takeIf {
                         canUseGooglePay
                     }
@@ -630,7 +630,7 @@ class CustomerSheet internal constructor(
                 is PaymentSelection.Saved -> {
                     PaymentOptionSelection.PaymentMethod(
                         paymentMethod = this.paymentMethod,
-                        paymentOption = paymentOptionFactory.create(this, null)
+                        paymentOption = paymentOptionFactory.create(this, null, appearance = null)
                     )
                 }
                 else -> null

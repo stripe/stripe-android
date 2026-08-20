@@ -11,8 +11,6 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -44,9 +42,52 @@ class PaymentElement @Inject internal constructor(
         contentHelper.presentPaymentOptions()
     }
 
+    /**
+     * Describes how you handle row selections in [PaymentElement].
+     */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @OptIn(CardFundingFilteringPrivatePreview::class)
+    abstract class RowSelectionBehavior internal constructor() {
+        private object Default : RowSelectionBehavior()
+
+        private class ImmediateAction(
+            val didSelectPaymentOption: () -> Unit,
+        ) : RowSelectionBehavior()
+
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            /**
+             * When a payment option is selected, the customer taps a button to continue or confirm payment.
+             * This is the default recommended integration.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun default(): RowSelectionBehavior {
+                return Default
+            }
+
+            /**
+             * When a payment option is selected, [didSelectPaymentOption] is triggered.
+             * You can implement this method to immediately perform an action, such as calling confirm.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun immediateAction(didSelectPaymentOption: () -> Unit): RowSelectionBehavior {
+                return ImmediateAction(didSelectPaymentOption)
+            }
+
+            internal fun getImmediateAction(
+                rowSelectionBehavior: RowSelectionBehavior,
+            ): (() -> Unit)? {
+                return (rowSelectionBehavior as? ImmediateAction)?.didSelectPaymentOption
+            }
+        }
+    }
+
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Suppress("TooManyFunctions")
     class Configuration {
         private var embeddedViewDisplaysMandateText: Boolean = true
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
@@ -55,9 +96,11 @@ class PaymentElement @Inject internal constructor(
         private var opensCardScannerAutomatically: Boolean = false
         private var preferredNetworks: List<CardBrand> = emptyList()
         private var paymentMethodOrder: List<String> = emptyList()
-        private var allowedCardFundingTypes: List<CardFundingType> = CardFundingType.entries
+        private var cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.All
         private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
         private var appearance: Appearance = Appearance()
+        private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
+        private var linkConfiguration: LinkConfiguration = LinkConfiguration()
 
         /**
          * Controls whether [Content] displays mandate text below the payment methods.
@@ -125,16 +168,13 @@ class PaymentElement @Inject internal constructor(
         }
 
         /**
-         * Specifies the card funding types accepted by the payment element.
+         * Specifies the card brands accepted by the payment element.
          *
-         * By default, all card funding types are accepted. This is a client-side setting and is
-         * not currently supported in Link.
+         * By default, all card brands are accepted. This is a client-side setting and is not
+         * currently supported in Link.
          */
-        @CardFundingFilteringPrivatePreview
-        fun allowedCardFundingTypes(
-            allowedCardFundingTypes: List<CardFundingType>
-        ): Configuration = apply {
-            this.allowedCardFundingTypes = allowedCardFundingTypes
+        fun cardBrandAcceptance(cardBrandAcceptance: CardBrandAcceptance): Configuration = apply {
+            this.cardBrandAcceptance = cardBrandAcceptance
         }
 
         /**
@@ -150,8 +190,208 @@ class PaymentElement @Inject internal constructor(
             this.appearance = appearance
         }
 
+        /**
+         * Sets the Google Pay configuration for the payment element.
+         */
+        fun googlePayConfiguration(
+            googlePayConfiguration: GooglePayConfiguration
+        ): Configuration = apply {
+            this.googlePayConfiguration = googlePayConfiguration
+        }
+
+        /**
+         * Sets the Link configuration for the payment element.
+         */
+        fun linkConfiguration(configuration: LinkConfiguration): Configuration = apply {
+            this.linkConfiguration = configuration
+        }
+
+        /**
+         * Configuration related to Google Pay.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @CheckoutSessionPreview
+        class GooglePayConfiguration {
+
+            /**
+             * Display configuration for Google Pay.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Display {
+                /**
+                 * Google Pay will be displayed when available.
+                 */
+                Automatic,
+
+                /**
+                 * Google Pay will never be displayed.
+                 */
+                Never,
+            }
+
+            private var display: Display = Display.Automatic
+            private var label: String? = null
+            private var buttonType: ButtonType = ButtonType.Pay
+            private var additionalEnabledNetworks: List<String> = emptyList()
+
+            /**
+             * Sets the display configuration for Google Pay.
+             *
+             * @param display The display configuration for Google Pay.
+             */
+            fun display(display: Display): GooglePayConfiguration = apply {
+                this.display = display
+            }
+
+            /**
+             * Sets the label displayed with the amount.
+             *
+             * @param label An optional label to display with the amount. Google Pay may or may not display
+             * this label depending on its own internal logic. Defaults to a generic label if none is
+             * provided.
+             */
+            fun label(label: String): GooglePayConfiguration = apply {
+                this.label = label
+            }
+
+            /**
+             * Sets the Google Pay button type.
+             *
+             * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
+             * [Google's documentation](https://developers.google.com/pay/api/android/reference/request-objects#ButtonOptions)
+             * for more information on button types.
+             */
+            fun buttonType(buttonType: ButtonType): GooglePayConfiguration = apply {
+                this.buttonType = buttonType
+            }
+
+            /**
+             * Sets additional card networks that Google Pay can display.
+             *
+             * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to
+             * display additional enabled networks (e.g. 'INTERAC')
+             */
+            fun additionalEnabledNetworks(
+                additionalEnabledNetworks: List<String>
+            ): GooglePayConfiguration = apply {
+                this.additionalEnabledNetworks = additionalEnabledNetworks
+            }
+
+            @CheckoutSessionPreview
+            /**
+             * Google Pay button type options
+             *
+             * See
+             * [Google's documentation](https://developers.google.com/pay/api/android/reference/request-objects#ButtonOptions)
+             * for more information on button types.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class ButtonType {
+                /**
+                 * Displays "Buy with" alongside the Google Pay logo.
+                 */
+                Buy,
+
+                /**
+                 * Displays "Book with" alongside the Google Pay logo.
+                 */
+                Book,
+
+                /**
+                 * Displays "Checkout with" alongside the Google Pay logo.
+                 */
+                Checkout,
+
+                /**
+                 * Displays "Donate with" alongside the Google Pay logo.
+                 */
+                Donate,
+
+                /**
+                 * Displays "Order with" alongside the Google Pay logo.
+                 */
+                Order,
+
+                /**
+                 * Displays "Pay with" alongside the Google Pay logo.
+                 */
+                Pay,
+
+                /**
+                 * Displays "Subscribe with" alongside the Google Pay logo.
+                 */
+                Subscribe,
+
+                /**
+                 * Displays only the Google Pay logo.
+                 */
+                Plain
+            }
+
+            @Parcelize
+            internal data class State(
+                val display: Display,
+                val label: String?,
+                val buttonType: ButtonType,
+                val additionalEnabledNetworks: List<String>,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                display = display,
+                label = label,
+                buttonType = buttonType,
+                additionalEnabledNetworks = additionalEnabledNetworks,
+            )
+        }
+
+        /**
+         * Builder for Link configuration used by the payment element.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class LinkConfiguration {
+            private var display: Display = Display.Automatic
+
+            /**
+             * Sets when Link is displayed in the payment element.
+             */
+            fun display(display: Display): LinkConfiguration = apply {
+                this.display = display
+            }
+
+            @Parcelize
+            internal data class State(
+                val display: Display,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                display = display,
+            )
+
+            /**
+             * Display configuration for Link.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Display {
+                /**
+                 * Link is displayed when available.
+                 */
+                Automatic,
+
+                /**
+                 * Link is never displayed.
+                 */
+                Never,
+
+                /**
+                 * Link remains enabled but its button or row is hidden from the payment element UI.
+                 */
+                WalletButtonHidden,
+            }
+        }
+
         @Parcelize
-        @OptIn(CardFundingFilteringPrivatePreview::class)
         internal data class State(
             val embeddedViewDisplaysMandateText: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
@@ -159,12 +399,13 @@ class PaymentElement @Inject internal constructor(
             val opensCardScannerAutomatically: Boolean,
             val preferredNetworks: List<CardBrand>,
             val paymentMethodOrder: List<String>,
-            val allowedCardFundingTypes: List<CardFundingType>,
+            val cardBrandAcceptance: CardBrandAcceptance,
             val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
             val appearance: Appearance.State,
+            val googlePayConfiguration: GooglePayConfiguration.State,
+            val linkConfiguration: LinkConfiguration.State,
         ) : Parcelable
 
-        @OptIn(CardFundingFilteringPrivatePreview::class)
         internal fun build(): State = State(
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
@@ -172,49 +413,100 @@ class PaymentElement @Inject internal constructor(
             opensCardScannerAutomatically = opensCardScannerAutomatically,
             preferredNetworks = preferredNetworks,
             paymentMethodOrder = paymentMethodOrder,
-            allowedCardFundingTypes = allowedCardFundingTypes,
+            cardBrandAcceptance = cardBrandAcceptance,
             termsDisplay = termsDisplay,
             appearance = appearance.build(),
+            googlePayConfiguration = googlePayConfiguration.build(),
+            linkConfiguration = linkConfiguration.build(),
         )
 
+        /** Options to allow or disallow card brands. */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        sealed class CardBrandAcceptance : Parcelable {
+            /** Card brand categories that can be allowed or disallowed. */
+            @Parcelize
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class BrandCategory : Parcelable {
+                /** Visa branded cards. */
+                Visa,
+
+                /** Mastercard branded cards. */
+                Mastercard,
+
+                /** Amex branded cards. */
+                Amex,
+
+                /** Discover Global Network branded cards. */
+                Discover,
+            }
+
+            @Parcelize
+            internal data object All : CardBrandAcceptance()
+
+            @Parcelize
+            internal data class Allowed(
+                val brands: List<BrandCategory>
+            ) : CardBrandAcceptance()
+
+            @Parcelize
+            internal data class Disallowed(
+                val brands: List<BrandCategory>
+            ) : CardBrandAcceptance()
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            companion object {
+                /** Accepts all card brands supported by Stripe. */
+                @JvmStatic
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun all(): CardBrandAcceptance = All
+
+                /** Accepts only the specified card brands. */
+                @JvmStatic
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun allowed(brands: List<BrandCategory>): CardBrandAcceptance = Allowed(brands)
+
+                /** Accepts all card brands except the specified ones. */
+                @JvmStatic
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance = Disallowed(brands)
+            }
+        }
+
         /**
-         * Card funding categories that can be filtered.
+         * The layout of payment methods.
          */
         @CheckoutSessionPreview
-        @CardFundingFilteringPrivatePreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Parcelize
-        enum class CardFundingType : Parcelable {
-            /** Debit cards. */
-            Debit,
+        enum class PaymentMethodLayout {
+            /**
+             * Payment methods are arranged horizontally.
+             * Users can swipe left or right to navigate through different payment methods.
+             */
+            Horizontal,
 
-            /** Credit cards. */
-            Credit,
+            /**
+             * Payment methods are arranged vertically.
+             * Users can scroll up or down to navigate through different payment methods.
+             */
+            Vertical,
 
-            /** Prepaid cards. */
-            Prepaid,
-
-            /** Unknown funding type. */
-            Unknown,
+            /**
+             * This lets Stripe choose the best layout for payment methods.
+             */
+            Automatic
         }
 
         /** Appearance configuration for the Payment Element. */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
-        @OptIn(AppearanceAPIAdditionsPreview::class)
         class Appearance {
             private var colorsLight = Colors.light()
             private var colorsDark = Colors.dark()
             private var themeMode = ThemeMode.Automatic
-            private var shapes = Shapes()
-            private var typography = Typography()
             private var primaryButton = PrimaryButton()
             private var formInsetValues = Insets.defaultFormInsetValues
-            private var sectionSpacing = Spacing(-1f)
-            private var textFieldInsets = Insets.defaultTextFieldInsets
-            private var iconStyle = IconStyle.Filled
-            private var verticalModeRowPadding = StripeThemeDefaults.verticalModeRowPadding
 
             /** Sets the colors used in light mode. */
             fun colorsLight(colors: Colors): Appearance = apply { colorsLight = colors }
@@ -225,61 +517,27 @@ class PaymentElement @Inject internal constructor(
             /** Sets the color mode used by the Payment Element. */
             fun themeMode(themeMode: ThemeMode): Appearance = apply { this.themeMode = themeMode }
 
-            /** Sets the appearance of shapes. */
-            fun shapes(shapes: Shapes): Appearance = apply { this.shapes = shapes }
-
-            /** Sets the typography used by the Payment Element. */
-            fun typography(typography: Typography): Appearance = apply { this.typography = typography }
-
             /** Sets the appearance of the primary button. */
             fun primaryButton(primaryButton: PrimaryButton): Appearance = apply { this.primaryButton = primaryButton }
 
             /** Sets the insets used by forms. */
             fun formInsetValues(insets: Insets): Appearance = apply { formInsetValues = insets }
 
-            /** Sets the spacing between form sections. */
-            @AppearanceAPIAdditionsPreview
-            fun sectionSpacing(spacing: Spacing): Appearance = apply { sectionSpacing = spacing }
-
-            /** Sets the insets inside form fields. */
-            @AppearanceAPIAdditionsPreview
-            fun textFieldInsets(insets: Insets): Appearance = apply { textFieldInsets = insets }
-
-            /** Sets the visual style of Payment Element icons. */
-            @AppearanceAPIAdditionsPreview
-            fun iconStyle(iconStyle: IconStyle): Appearance = apply { this.iconStyle = iconStyle }
-
-            /** Sets the vertical padding of payment-method rows, in dp. */
-            @AppearanceAPIAdditionsPreview
-            fun verticalModeRowPadding(value: Float): Appearance = apply { verticalModeRowPadding = value }
-
             @Parcelize
             internal data class State(
                 val colorsLight: Colors.State,
                 val colorsDark: Colors.State,
                 val themeMode: ThemeMode,
-                val shapes: Shapes.State,
-                val typography: Typography.State,
                 val primaryButton: PrimaryButton.State,
                 val formInsetValues: Insets.State,
-                val sectionSpacing: Spacing.State,
-                val textFieldInsets: Insets.State,
-                val iconStyle: IconStyle,
-                val verticalModeRowPadding: Float,
             ) : Parcelable
 
             internal fun build(): State = State(
                 colorsLight = colorsLight.build(),
                 colorsDark = colorsDark.build(),
                 themeMode = themeMode,
-                shapes = shapes.build(),
-                typography = typography.build(),
                 primaryButton = primaryButton.build(),
                 formInsetValues = formInsetValues.build(),
-                sectionSpacing = sectionSpacing.build(),
-                textFieldInsets = textFieldInsets.build(),
-                iconStyle = iconStyle,
-                verticalModeRowPadding = verticalModeRowPadding,
             )
 
             /** Colors used to render the Payment Element. */
@@ -417,141 +675,6 @@ class PaymentElement @Inject internal constructor(
                 }
             }
 
-            /** Configures the shapes used by the Payment Element. */
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @AppearanceAPIAdditionsPreview
-            class Shapes {
-                private var cornerRadiusDp = StripeThemeDefaults.shapes.cornerRadius
-                private var borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
-                private var bottomSheetCornerRadiusDp: Float? = null
-
-                /** Sets the corner radius, in dp. */
-                fun cornerRadiusDp(value: Float): Shapes = apply { cornerRadiusDp = value }
-
-                /** Sets the border stroke width, in dp. */
-                fun borderStrokeWidthDp(value: Float): Shapes = apply { borderStrokeWidthDp = value }
-
-                /** Sets the bottom-sheet corner radius, in dp. */
-                fun bottomSheetCornerRadiusDp(value: Float): Shapes = apply { bottomSheetCornerRadiusDp = value }
-
-                @Parcelize
-                internal data class State(
-                    val cornerRadiusDp: Float,
-                    val borderStrokeWidthDp: Float,
-                    val bottomSheetCornerRadiusDp: Float,
-                ) : Parcelable
-
-                internal fun build(): State = State(
-                    cornerRadiusDp = cornerRadiusDp,
-                    borderStrokeWidthDp = borderStrokeWidthDp,
-                    bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp ?: cornerRadiusDp,
-                )
-            }
-
-            /** Configures typography used by the Payment Element. */
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @AppearanceAPIAdditionsPreview
-            class Typography {
-                private var sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier
-
-                @FontRes
-                private var fontResId: Int? = StripeThemeDefaults.typography.fontFamily
-                private var custom = Custom()
-
-                /** Sets the scale factor applied to text sizes. */
-                fun sizeScaleFactor(value: Float): Typography = apply { sizeScaleFactor = value }
-
-                /** Sets the font resource used by the Payment Element. */
-                fun fontResId(@FontRes value: Int?): Typography = apply { fontResId = value }
-
-                /** Sets custom typography for individual text styles. */
-                fun custom(value: Custom): Typography = apply { custom = value }
-
-                @Parcelize
-                internal data class State(
-                    val sizeScaleFactor: Float,
-                    @FontRes val fontResId: Int?,
-                    val custom: Custom.State,
-                ) : Parcelable
-
-                internal fun build(): State = State(sizeScaleFactor, fontResId, custom.build())
-
-                /** Configures custom typography for individual Payment Element text styles. */
-                @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                @AppearanceAPIAdditionsPreview
-                class Custom {
-                    private var h1: Font? = null
-
-                    /** Sets the typography for first-level headings. */
-                    fun h1(value: Font?): Custom = apply { h1 = value }
-
-                    @Parcelize
-                    internal data class State(val h1: Font.State?) : Parcelable
-
-                    internal fun build(): State = State(h1?.build())
-                }
-
-                /** Describes the typography of a text style. */
-                @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                @AppearanceAPIAdditionsPreview
-                class Font {
-                    @FontRes
-                    private var fontFamily: Int? = null
-                    private var fontSizeSp: Float? = null
-                    private var fontWeight: Int? = null
-                    private var letterSpacingSp: Float? = null
-
-                    /** Sets the font resource. */
-                    fun fontFamily(@FontRes value: Int?): Font = apply { fontFamily = value }
-
-                    /** Sets the font size, in sp. */
-                    fun fontSizeSp(value: Float?): Font = apply { fontSizeSp = value }
-
-                    /** Sets the font weight. */
-                    fun fontWeight(value: Int?): Font = apply { fontWeight = value }
-
-                    /** Sets the letter spacing, in sp. */
-                    fun letterSpacingSp(value: Float?): Font = apply { letterSpacingSp = value }
-
-                    @Parcelize
-                    internal data class State(
-                        @FontRes val fontFamily: Int?,
-                        val fontSizeSp: Float?,
-                        val fontWeight: Int?,
-                        val letterSpacingSp: Float?,
-                    ) : Parcelable
-
-                    internal fun build(): State = State(fontFamily, fontSizeSp, fontWeight, letterSpacingSp)
-                }
-            }
-
-            /** Defines spacing between form sections. */
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @AppearanceAPIAdditionsPreview
-            class Spacing(private val spacingDp: Float) {
-                @Parcelize
-                internal data class State(val spacingDp: Float) : Parcelable
-
-                internal fun build(): State = State(spacingDp)
-            }
-
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @AppearanceAPIAdditionsPreview
-            /** Visual styles available for Payment Element icons. */
-            enum class IconStyle {
-                /** Use filled icons. */
-                Filled,
-
-                /** Use outlined icons. */
-                Outlined,
-            }
-
             @CheckoutSessionPreview
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             /** Color modes available for the Payment Element. */
@@ -595,12 +718,6 @@ class PaymentElement @Inject internal constructor(
 
                 internal companion object {
                     val defaultFormInsetValues = Insets(20f, 0f, 20f, 40f)
-                    val defaultTextFieldInsets = Insets(
-                        StripeThemeDefaults.textFieldInsets.start,
-                        StripeThemeDefaults.textFieldInsets.top,
-                        StripeThemeDefaults.textFieldInsets.end,
-                        StripeThemeDefaults.textFieldInsets.bottom,
-                    )
                 }
             }
 
@@ -873,29 +990,5 @@ class PaymentElement @Inject internal constructor(
                 // It can be added at public preview/GA if that use case is supported.
             }
         }
-    }
-
-    /**
-     * The layout of payment methods.
-     */
-    @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    enum class PaymentMethodLayout {
-        /**
-         * Payment methods are arranged horizontally.
-         * Users can swipe left or right to navigate through different payment methods.
-         */
-        Horizontal,
-
-        /**
-         * Payment methods are arranged vertically.
-         * Users can scroll up or down to navigate through different payment methods.
-         */
-        Vertical,
-
-        /**
-         * This lets Stripe choose the best layout for payment methods.
-         */
-        Automatic
     }
 }

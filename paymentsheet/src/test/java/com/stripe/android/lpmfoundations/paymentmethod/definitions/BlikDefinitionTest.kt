@@ -5,6 +5,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.ui.core.elements.BlikElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 
@@ -22,6 +24,17 @@ class BlikDefinitionTest {
         val sectionElement = formElements[0] as SectionElement
         assertThat(sectionElement.fields).hasSize(1)
         assertThat(sectionElement.fields[0].identifier.v1).isEqualTo("blik[code]")
+    }
+
+    @Test
+    fun `createFormElements seeds the blik code from initialValues`() {
+        val formElements = BlikDefinition.formElements(
+            metadata = blikMetadata,
+            initialValues = mapOf(IdentifierSpec.BlikCode to "123456"),
+        )
+
+        val blikElement = (formElements[0] as SectionElement).fields[0] as BlikElement
+        assertThat(blikElement.controller.rawFieldValue.value).isEqualTo("123456")
     }
 
     @Test

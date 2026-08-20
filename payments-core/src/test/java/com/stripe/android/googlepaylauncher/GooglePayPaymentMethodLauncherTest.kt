@@ -1,7 +1,6 @@
 package com.stripe.android.googlepaylauncher
 
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -46,7 +45,7 @@ class GooglePayPaymentMethodLauncherTest {
             val firedEvents = mutableListOf<String>()
 
             val launcher = GooglePayPaymentMethodLauncher(
-                lifecycleScope = activity.lifecycleScope,
+                lifecycleOwner = activity,
                 config = CONFIG,
                 readyCallback = mock(),
                 activityResultLauncher = mock(),
@@ -78,7 +77,7 @@ class GooglePayPaymentMethodLauncherTest {
             val firedEvents = mutableListOf<String>()
 
             GooglePayPaymentMethodLauncher(
-                lifecycleScope = activity.lifecycleScope,
+                lifecycleOwner = activity,
                 config = CONFIG,
                 readyCallback = mock(),
                 activityResultLauncher = mock(),
@@ -95,7 +94,7 @@ class GooglePayPaymentMethodLauncherTest {
             )
 
             GooglePayPaymentMethodLauncher(
-                lifecycleScope = activity.lifecycleScope,
+                lifecycleOwner = activity,
                 config = CONFIG,
                 readyCallback = mock(),
                 activityResultLauncher = mock(),

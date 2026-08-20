@@ -3,6 +3,7 @@ package com.stripe.android.elements.ece
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -21,13 +22,12 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
-    fun `create filters out google pay when disabled by configuration`() {
+    fun `create filters out Google Pay when ECE disables it`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay),
             configuration = ExpressCheckoutElement.Configuration()
                 .googlePayConfiguration(
-                    ExpressCheckoutElement.Configuration.GooglePayConfiguration()
-                        .display(ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never)
+                    GooglePayConfiguration().display(GooglePayConfiguration.Display.Never)
                 ),
         )
 
@@ -35,16 +35,33 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
-    fun `create filters out buttons disabled by configuration`() {
+    fun `create filters out Link when disabled by configuration`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
             configuration = ExpressCheckoutElement.Configuration()
-                .linkVisibility(ExpressCheckoutElement.Configuration.LinkVisibility.Never),
+                .linkConfiguration(
+                    ExpressCheckoutElement.Configuration.LinkConfiguration()
+                        .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never)
+                ),
         )
 
         assertThat(availableExpressButtonTypes).containsExactly(
             ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
         )
+    }
+
+    @Test
+    fun `create filters out Link when its wallet button is hidden`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link),
+            configuration = ExpressCheckoutElement.Configuration()
+                .linkConfiguration(
+                    ExpressCheckoutElement.Configuration.LinkConfiguration()
+                        .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden)
+                ),
+        )
+
+        assertThat(availableExpressButtonTypes).isEmpty()
     }
 
     @Test
@@ -96,7 +113,6 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     private companion object {
-        val TEST_GOOGLE_PAY_CONFIGURATION =
-            ExpressCheckoutElement.Configuration.GooglePayConfiguration().build()
+        val TEST_GOOGLE_PAY_CONFIGURATION = GooglePayConfiguration().build()
     }
 }

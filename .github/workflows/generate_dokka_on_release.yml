@@ -13,17 +13,19 @@ jobs:
       - name: Check if latest release
         run: |
           LATEST_TAG=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName --jq '.[].tagName' | sort -V | tail -n 1)
-          CURRENT_TAG="${{ github.event.release.tag_name }}"
+          CURRENT_TAG="${GITHUB_EVENT_RELEASE_TAG_NAME}"
           if [ "$CURRENT_TAG" != "$LATEST_TAG" ]; then
             echo "Skipping: $CURRENT_TAG is not the latest release ($LATEST_TAG)"
             exit 1
           fi
         env:
           GH_TOKEN: ${{ github.token }}
+          GITHUB_EVENT_RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
 
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
 
       - uses: ./.github/actions/stripe_setup
 
@@ -48,6 +50,8 @@ jobs:
         with:
           app-id: ${{ secrets.ANDROID_TRANSLATIONS_APP_ID }}
           private-key: ${{ secrets.ANDROID_TRANSLATIONS_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
 
       - name: Create Pull Request
         if: steps.check-changes.outputs.has_changes == 'true'
@@ -66,6 +70,7 @@ jobs:
 
       - name: Enable Auto-Merge
         if: ${{ steps.create-pull-request.outputs.pull-request-url }}
-        run: gh pr merge --squash --auto ${{ steps.create-pull-request.outputs.pull-request-url }}
+        run: gh pr merge --squash --auto ${STEPS_CREATE_PULL_REQUEST_OUTPUTS_PULL_REQUEST_URL}
         env:
           GH_TOKEN: ${{ steps.generate-app-token.outputs.token }}
+          STEPS_CREATE_PULL_REQUEST_OUTPUTS_PULL_REQUEST_URL: ${{ steps.create-pull-request.outputs.pull-request-url }}

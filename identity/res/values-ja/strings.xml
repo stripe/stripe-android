@@ -234,8 +234,6 @@
   <string name="stripe_select">選択</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">顔写真の記録が完了しました</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">顔写真の記録</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">画像を確認しています....</string>
   <!-- Content description of a captured selfie -->

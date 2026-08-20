@@ -5,6 +5,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val konbiniFullRawValues = mapOf(
@@ -90,8 +91,12 @@ private val konbiniExpectedOptionsParams = PaymentMethodOptionsParams.Konbini(
 internal val konbiniTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Konbini Never",
-        paymentMethodType = PaymentMethod.Type.Konbini,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Konbini,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = konbiniFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = konbiniNoBillingDetailsExpectedPaymentMethodParams,
@@ -101,8 +106,12 @@ internal val konbiniTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Konbini Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.Konbini,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Konbini,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = konbiniFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = konbiniWithContactDetailsExpectedPaymentMethodParams,
@@ -112,8 +121,12 @@ internal val konbiniTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Konbini Full",
-        paymentMethodType = PaymentMethod.Type.Konbini,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Konbini,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = konbiniFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = konbiniWithBillingAddressExpectedPaymentMethodParams,

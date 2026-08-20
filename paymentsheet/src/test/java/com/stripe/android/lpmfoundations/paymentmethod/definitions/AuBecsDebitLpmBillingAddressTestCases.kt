@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val auBecsDebitFullRawValues = mapOf(
@@ -101,8 +102,12 @@ private val auBecsDebitWithBillingAddressExpectedPaymentMethodParams = PaymentMe
 internal val auBecsDebitTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "AU BECS Debit Never",
-        paymentMethodType = PaymentMethod.Type.AuBecsDebit,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.AuBecsDebit,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = auBecsDebitFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = auBecsDebitBankDetailsExpectedPaymentMethodParams,
@@ -112,8 +117,12 @@ internal val auBecsDebitTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "AU BECS Debit Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.AuBecsDebit,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.AuBecsDebit,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = auBecsDebitFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = auBecsDebitWithContactDetailsExpectedPaymentMethodParams,
@@ -123,8 +132,12 @@ internal val auBecsDebitTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "AU BECS Debit Full",
-        paymentMethodType = PaymentMethod.Type.AuBecsDebit,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.AuBecsDebit,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = auBecsDebitFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = auBecsDebitWithBillingAddressExpectedPaymentMethodParams,

@@ -48,7 +48,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                             embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
                         ),
                         embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
-                        appearance = currentState.appearance,
+                        appearance = currentState.configuration.appearance,
                         isImmediateAction = isImmediateAction,
                     )
                 }

@@ -2,7 +2,7 @@
 
 package com.stripe.android.elements.ece
 
-import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -20,8 +20,7 @@ internal object ExpressCheckoutElementInteractorStateFactory {
             ),
             ExpressButton.GooglePay.create(
                 paymentMethodMetadata = paymentMethodMetadata,
-                googlePayConfiguration =
-                    ExpressCheckoutElement.Configuration.GooglePayConfiguration().build(),
+                googlePayConfiguration = GooglePayConfiguration().build(),
                 shippingAddressRequired = false,
             ),
         ),

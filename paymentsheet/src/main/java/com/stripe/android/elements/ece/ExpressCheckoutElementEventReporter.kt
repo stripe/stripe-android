@@ -10,11 +10,8 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.analytics.linkContext
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.utils.filterNotNullValues
 import javax.inject.Inject
 
@@ -23,15 +20,6 @@ internal interface ExpressCheckoutElementEventReporter {
 
     fun onEceWalletTapped(
         expressButton: ExpressButton,
-    )
-
-    fun onEcePaymentSuccess(
-        expressButton: ExpressButton,
-    )
-
-    fun onEcePaymentFailure(
-        expressButton: ExpressButton,
-        error: ConfirmationHandler.Result.Failed,
     )
 }
 
@@ -59,32 +47,6 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
         )
     }
 
-    override fun onEcePaymentSuccess(expressButton: ExpressButton) {
-        fireEvent(
-            eventName = ECE_PAYMENT_SUCCESS_EVENT_NAME,
-            additionalParams = durationProvider.elapsed(DurationProvider.Key.ExpressCheckoutElement)
-                .mapOfDurationInSeconds() + paymentMethodParams(expressButton),
-        )
-    }
-
-    override fun onEcePaymentFailure(
-        expressButton: ExpressButton,
-        error: ConfirmationHandler.Result.Failed,
-    ) {
-        val confirmationError = error.toConfirmationError()
-            ?: PaymentSheetConfirmationError.Stripe(error.cause)
-        fireEvent(
-            eventName = ECE_PAYMENT_FAILURE_EVENT_NAME,
-            additionalParams = durationProvider.elapsed(DurationProvider.Key.ExpressCheckoutElement)
-                .mapOfDurationInSeconds() +
-                paymentMethodParams(expressButton) +
-                mapOf(
-                    FIELD_ERROR_MESSAGE to confirmationError.analyticsValue,
-                    FIELD_ERROR_CODE to confirmationError.errorCode,
-                ).filterNotNullValues(),
-        )
-    }
-
     private fun paymentMethodParams(expressButton: ExpressButton): Map<String, Any> {
         return mapOf(
             FIELD_SELECTED_LPM to expressButton.toWalletType().code,
@@ -104,7 +66,8 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
         return state.paymentMethodMetadata.analyticsMetadata.paramsMap + mapOf(
             FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
             FIELD_ECE_CONFIG to mapOf(
-                FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkVisibility.name.lowercase(),
+                FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkConfiguration.display
+                    .toAnalyticsValue(),
                 FIELD_GOOGLE_PAY_VISIBILITY to (
                     expressCheckoutElementConfiguration.googlePayConfiguration.display.toAnalyticsValue()
                     ),
@@ -129,13 +92,8 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     private companion object {
         const val ECE_DISPLAYED_EVENT_NAME = "mc_ece_init"
         const val ECE_WALLET_TAPPED_EVENT_NAME = "mc_ece_wallet_tapped"
-        const val ECE_PAYMENT_SUCCESS_EVENT_NAME = "mc_ece_payment_success"
-        const val ECE_PAYMENT_FAILURE_EVENT_NAME = "mc_ece_payment_failure"
-
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_LINK_CONTEXT = "link_context"
-        const val FIELD_ERROR_MESSAGE = "error_message"
-        const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_ECE_CONFIG = "ece_config"
         const val FIELD_LINK_VISIBILITY = "link_visibility"
@@ -145,6 +103,15 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
             return when (this) {
                 ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic -> "automatic"
                 ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never -> "never"
+            }
+        }
+
+        fun ExpressCheckoutElement.Configuration.LinkConfiguration.Display.toAnalyticsValue(): String {
+            return when (this) {
+                ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic -> "automatic"
+                ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never -> "never"
+                ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden ->
+                    "wallet_button_hidden"
             }
         }
     }

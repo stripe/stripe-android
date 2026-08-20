@@ -3,6 +3,8 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import com.stripe.android.CollectMissingLinkBillingDetailsPreview
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -39,12 +41,158 @@ class ExpressCheckoutElement @Inject internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
-
+        /**
+         * Configuration for how billing details are collected during checkout.
+         */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class BillingDetailsCollectionConfiguration {
+            private var name: CollectionMode = CollectionMode.Automatic
+            private var email: CollectionMode = CollectionMode.Automatic
+            private var address: AddressCollectionMode = AddressCollectionMode.Automatic
+
+            /**
+             * Billing details fields collection options.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class CollectionMode {
+                /**
+                 * The field will be collected depending on the Payment Method's requirements.
+                 */
+                Automatic,
+
+                /**
+                 * The field will never be collected.
+                 * If this field is required by the Payment Method, you must provide it as part of
+                 * the default billing details.
+                 */
+                Never,
+
+                /**
+                 * The field will always be collected, even if it isn't required for the Payment
+                 * Method.
+                 */
+                Always,
+            }
+
+            /**
+             * Billing address collection options.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class AddressCollectionMode {
+                /**
+                 * Only the fields required by the Payment Method will be collected, this may be
+                 * none.
+                 */
+                Automatic,
+
+                /**
+                 * Collect the full billing address, regardless of the Payment Method requirements.
+                 */
+                Full,
+            }
+
+            /** How to collect the name field. */
+            fun name(name: CollectionMode): BillingDetailsCollectionConfiguration = apply {
+                this.name = name
+            }
+
+            /** How to collect the email field. */
+            fun email(email: CollectionMode): BillingDetailsCollectionConfiguration = apply {
+                this.email = email
+            }
+
+            /** How to collect the billing address. */
+            fun address(address: AddressCollectionMode): BillingDetailsCollectionConfiguration = apply {
+                this.address = address
+            }
+
+            @Parcelize
+            internal data class State(
+                val name: CollectionMode,
+                val email: CollectionMode,
+                val address: AddressCollectionMode,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                name = name,
+                email = email,
+                address = address,
+            )
+        }
+
+        /**
+         * Configuration related to Link.
+         */
         @CheckoutSessionPreview
-        enum class LinkVisibility {
-            Auto,
-            Never,
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class LinkConfiguration {
+            private var display: Display = Display.Automatic
+            private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+            private var disallowFundingSourceCreation: Set<String> = emptySet()
+
+            /**
+             * Display configuration for Link.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Display {
+                /**
+                 * Link will be displayed when available.
+                 */
+                Automatic,
+
+                /**
+                 * Link will never be displayed.
+                 */
+                Never,
+
+                /**
+                 * Link remains enabled but its button or row is hidden from the payment element UI.
+                 */
+                WalletButtonHidden,
+            }
+
+            /** Sets the display configuration for Link. */
+            fun display(display: Display): LinkConfiguration = apply {
+                this.display = display
+            }
+
+            /**
+             * Sets whether Link collects missing billing details for existing payment methods.
+             */
+            @CollectMissingLinkBillingDetailsPreview
+            fun collectMissingBillingDetailsForExistingPaymentMethods(
+                collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+            ): LinkConfiguration = apply {
+                this.collectMissingBillingDetailsForExistingPaymentMethods =
+                    collectMissingBillingDetailsForExistingPaymentMethods
+            }
+
+            /**
+             * Sets the funding source types that Link must not create.
+             */
+            @LinkDisallowFundingSourceCreationPreview
+            fun disallowFundingSourceCreation(
+                disallowFundingSourceCreation: Set<String>,
+            ): LinkConfiguration = apply {
+                this.disallowFundingSourceCreation = disallowFundingSourceCreation
+            }
+
+            @Parcelize
+            internal data class State(
+                val display: Display,
+                val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+                val disallowFundingSourceCreation: Set<String>,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                display = display,
+                collectMissingBillingDetailsForExistingPaymentMethods =
+                    collectMissingBillingDetailsForExistingPaymentMethods,
+                disallowFundingSourceCreation = disallowFundingSourceCreation.toSet(),
+            )
         }
 
         /**
@@ -184,15 +332,18 @@ class ExpressCheckoutElement @Inject internal constructor(
                 additionalEnabledNetworks = additionalEnabledNetworks,
             )
         }
-        private var linkVisibility: LinkVisibility = LinkVisibility.Auto
+        private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
         private var shippingAddressRequired: Boolean = false
+        private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration()
 
-        fun linkVisibility(
-            linkVisibility: LinkVisibility
+        /** Sets the configuration for Link. */
+        fun linkConfiguration(
+            configuration: LinkConfiguration,
         ): Configuration = apply {
-            this.linkVisibility = linkVisibility
+            this.linkConfiguration = configuration
         }
 
         fun googlePayConfiguration(
@@ -207,17 +358,26 @@ class ExpressCheckoutElement @Inject internal constructor(
             this.shippingAddressRequired = shippingAddressRequired
         }
 
+        /** Sets how billing details are collected when displaying payment methods. */
+        fun billingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        ): Configuration = apply {
+            this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+        }
+
         @Parcelize
         internal data class State(
-            val linkVisibility: LinkVisibility,
+            val linkConfiguration: LinkConfiguration.State,
             val googlePayConfiguration: GooglePayConfiguration.State,
             val shippingAddressRequired: Boolean,
+            val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
         ) : Parcelable
 
         internal fun build(): State = State(
-            linkVisibility = linkVisibility,
+            linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
             shippingAddressRequired = shippingAddressRequired,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
         )
     }
 }

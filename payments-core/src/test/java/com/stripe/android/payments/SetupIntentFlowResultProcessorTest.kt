@@ -74,6 +74,32 @@ internal class SetupIntentFlowResultProcessorTest {
         }
 
     @Test
+    fun `3ds2 web view cancellation cancels source instead of polling`() =
+        runTest(testDispatcher) {
+            val intent = SetupIntentFixtures.SI_3DS2_PROCESSING.copy(
+                status = StripeIntent.Status.RequiresAction
+            )
+            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+                Result.success(intent)
+            )
+            whenever(mockStripeRepository.cancelSetupIntentSource(any(), any(), any())).thenReturn(
+                Result.success(SetupIntentFixtures.CANCELLED)
+            )
+
+            processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = requireNotNull(intent.clientSecret),
+                    sourceId = "source_id",
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                    canCancelSource = true
+                )
+            ).getOrThrow()
+
+            verify(mockStripeRepository).cancelSetupIntentSource(any(), eq("source_id"), any())
+            verify(mockStripeRepository).retrieveSetupIntent(any(), any(), any())
+        }
+
+    @Test
     fun `3ds2 canceled with processing intent should succeed`() =
         runTest(testDispatcher) {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(

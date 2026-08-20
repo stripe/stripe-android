@@ -8,8 +8,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.BlikConfig
 import com.stripe.android.ui.core.elements.BlikElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 
 internal object BlikDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Blik
@@ -42,6 +45,12 @@ private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        builder.element(SectionElement.wrap(BlikElement()))
+        val blikElement = BlikElement(
+            controller = SimpleTextFieldController(
+                textFieldConfig = BlikConfig(),
+                initialValue = arguments.initialValues[IdentifierSpec.BlikCode],
+            ),
+        )
+        builder.element(SectionElement.wrap(blikElement))
     }
 }
