@@ -1,27 +1,21 @@
 package com.stripe.android.googlepaylauncher
 
 import androidx.annotation.RestrictTo
+import java.util.Collections.synchronizedMap
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object GooglePayPaymentDataUpdateCallbackRegistry {
-    private val registeredCallbacks: MutableMap<String, GooglePayPaymentDataUpdateCallback> = mutableMapOf()
-    private val lock = Any()
+    private val registeredCallbacks = synchronizedMap(mutableMapOf<String, GooglePayPaymentDataUpdateCallback>())
 
     fun register(key: String, callback: GooglePayPaymentDataUpdateCallback) {
-        synchronized(lock) {
-            registeredCallbacks[key] = callback
-        }
+        registeredCallbacks[key] = callback
     }
 
     fun deregister(key: String) {
-        synchronized(lock) {
-            registeredCallbacks.remove(key)
-        }
+        registeredCallbacks.remove(key)
     }
 
     fun get(key: String): GooglePayPaymentDataUpdateCallback? {
-        synchronized(lock) {
-            return registeredCallbacks[key]
-        }
+        return registeredCallbacks[key]
     }
 }
