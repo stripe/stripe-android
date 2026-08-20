@@ -8,26 +8,21 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 internal class CheckoutAnalyticsPerformerTest {
 
     @Test
-    fun `payment element confirmation reports success and clears saved context`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
-        val eventReporter = FakeEventReporter()
-        val savedStateHandle = SavedStateHandle()
-        val performer = createPerformer(confirmationHandler, eventReporter, savedStateHandle)
+    fun `payment element confirmation reports success and clears saved context`() = runScenario {
         val selection = PaymentSelection.GooglePay
 
         performer.onPaymentElementConfirmationStarted(selection)
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            performer.reportConfirmationResults()
-        }
+        reportConfirmationResults(performer)
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successResult)
 
         val call = eventReporter.paymentSuccessCalls.awaitItem()
@@ -37,42 +32,70 @@ internal class CheckoutAnalyticsPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Idle
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successResult)
         runCurrent()
-
-        confirmationHandler.validate()
-        eventReporter.validate()
     }
 
     @Test
-    fun `express checkout confirmation context survives performer recreation`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
-        val eventReporter = FakeEventReporter()
-        val savedStateHandle = SavedStateHandle()
+    fun `express checkout confirmation context survives performer recreation`() = runScenario {
         val selection = PaymentSelection.Link(brand = LinkBrand.Link)
 
-        createPerformer(confirmationHandler, eventReporter, savedStateHandle)
-            .onExpressCheckoutElementConfirmationStarted(selection)
-        val restoredPerformer = createPerformer(confirmationHandler, eventReporter, savedStateHandle)
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            restoredPerformer.reportConfirmationResults()
-        }
+        performer.onExpressCheckoutElementConfirmationStarted(selection)
+        val restoredPerformer = recreatePerformer()
+        reportConfirmationResults(restoredPerformer)
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successResult)
 
         assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection).isEqualTo(selection)
-
-        confirmationHandler.validate()
-        eventReporter.validate()
     }
 
-    private fun createPerformer(
-        confirmationHandler: ConfirmationHandler,
-        eventReporter: FakeEventReporter,
-        savedStateHandle: SavedStateHandle,
-    ): CheckoutAnalyticsPerformer {
-        return CheckoutAnalyticsPerformer(
+    private fun runScenario(
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+        val eventReporter = FakeEventReporter()
+        val savedStateHandle = SavedStateHandle()
+        val performer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
         )
+
+        Scenario(
+            performer = performer,
+            confirmationHandler = confirmationHandler,
+            eventReporter = eventReporter,
+            savedStateHandle = savedStateHandle,
+            backgroundScope = backgroundScope,
+            testDispatcher = UnconfinedTestDispatcher(testScheduler),
+        ).block()
+
+        confirmationHandler.validate()
+        eventReporter.validate()
+    }
+
+    private class Scenario(
+        val performer: CheckoutAnalyticsPerformer,
+        val confirmationHandler: FakeConfirmationHandler,
+        val eventReporter: FakeEventReporter,
+        private val savedStateHandle: SavedStateHandle,
+        private val backgroundScope: CoroutineScope,
+        private val testDispatcher: TestDispatcher,
+    ) {
+        fun recreatePerformer(): CheckoutAnalyticsPerformer {
+            return CheckoutAnalyticsPerformer(
+                confirmationHandler = confirmationHandler,
+                eventReporter = eventReporter,
+                savedStateHandle = savedStateHandle,
+            )
+        }
+
+        fun reportConfirmationResults(performer: CheckoutAnalyticsPerformer) {
+            backgroundScope.launch(testDispatcher) {
+                performer.reportConfirmationResults()
+            }
+        }
+
+        fun runCurrent() {
+            testDispatcher.scheduler.runCurrent()
+        }
     }
 
     private companion object {
