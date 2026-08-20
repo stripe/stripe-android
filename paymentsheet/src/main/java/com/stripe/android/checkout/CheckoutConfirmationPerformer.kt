@@ -29,7 +29,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
               paymentSelection = paymentSelection,
           )
         } ?: return
-        analyticsPerformer.onPaymentElementConfirmationStarted(checkNotNull(paymentSelection))
+        analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
         viewModelScope.launch {
             try {
                 confirmationHandler.start(arguments)
