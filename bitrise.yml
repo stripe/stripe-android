@@ -215,9 +215,9 @@ workflows:
             - test_devices: MediumPhone.arm,33,en,portrait
             - robo_scenario_file: /tmp/firebase-robo-scenario.json
             - auto_google_login: "true"
-            - num_flaky_test_attempts: "2"
+            - num_flaky_test_attempts: "0"
             - download_test_results: "true"
-            - test_timeout: "3600"
+            - test_timeout: "1200"
   notify-connections-e2e-failure:
     steps:
       # Notify all executions.

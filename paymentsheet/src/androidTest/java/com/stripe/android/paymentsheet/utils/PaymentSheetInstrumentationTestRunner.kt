@@ -9,9 +9,15 @@ import androidx.test.runner.AndroidJUnitRunner
 import java.util.Locale
 
 internal class PaymentSheetInstrumentationTestRunner : AndroidJUnitRunner() {
+    private var testLocaleLanguageTag: String? = null
+
     override fun onCreate(arguments: Bundle?) {
+        testLocaleLanguageTag = arguments?.getString(TEST_LOCALE_ARGUMENT)
         super.onCreate(arguments)
-        arguments?.getString(TEST_LOCALE_ARGUMENT)?.let { languageTag ->
+    }
+
+    override fun onStart() {
+        testLocaleLanguageTag?.let { languageTag ->
             val locale = Locale.forLanguageTag(languageTag)
             Locale.setDefault(locale)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -21,6 +27,7 @@ internal class PaymentSheetInstrumentationTestRunner : AndroidJUnitRunner() {
                 LocaleListCompat.forLanguageTags(languageTag)
             )
         }
+        super.onStart()
     }
 
     private companion object {
