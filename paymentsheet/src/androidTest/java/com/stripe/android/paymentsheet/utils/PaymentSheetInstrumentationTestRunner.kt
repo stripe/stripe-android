@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.utils
 import android.os.Build
 import android.os.Bundle
 import android.os.LocaleList
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.test.runner.AndroidJUnitRunner
 import java.util.Locale
 
@@ -14,6 +16,9 @@ internal class PaymentSheetInstrumentationTestRunner : AndroidJUnitRunner() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 LocaleList.setDefault(LocaleList(locale))
             }
+            AppCompatDelegate.setApplicationLocales(
+                LocaleListCompat.forLanguageTags(languageTag)
+            )
         }
         super.onCreate(arguments)
     }

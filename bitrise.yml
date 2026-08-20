@@ -306,7 +306,7 @@ workflows:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
       - FTL_TEST_APK_FILENAME: stripecardscan-test.apk
-      - FTL_TEST_DEVICES: Pixel2Emulator,33,en,portrait
+      - FTL_TEST_DEVICES: Pixel2.arm,33,en,portrait
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-paymentsheet-e2e:
