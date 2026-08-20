@@ -261,6 +261,26 @@ public final class com/stripe/android/crypto/onramp/model/LinkUserInfo : android
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult;)V
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$Failed : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$Submitted : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
+	public static final field $stable I
+}
+
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAttachKycInfoResult {
 }
 
@@ -301,6 +321,7 @@ public final class com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult$
 public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun additionalKycCallback (Lcom/stripe/android/crypto/onramp/model/OnrampAdditionalKycCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun authorizeCallback (Lcom/stripe/android/crypto/onramp/model/OnrampAuthorizeCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun checkoutCallback (Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun collectPaymentCallback (Lcom/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
