@@ -20,32 +20,11 @@ internal data class LpmBillingAddressTestConfiguration(
     val termsDisplay: PaymentSheet.TermsDisplay,
 ) {
     fun metadata(): PaymentMethodMetadata {
-        return metadata(
+        return PaymentMethodMetadataFactory.create(
+            stripeIntent = intentScenario.stripeIntent(paymentMethodType),
             billingDetailsCollectionConfiguration = billingDetailsCollectionMode
                 .billingDetailsCollectionConfiguration(),
             defaultBillingDetails = PaymentSheet.BillingDetails(),
-        )
-    }
-
-    fun metadataWithAttachedDefaultBillingDetails(
-        defaultBillingDetails: PaymentSheet.BillingDetails,
-    ): PaymentMethodMetadata {
-        return metadata(
-            billingDetailsCollectionConfiguration = billingDetailsCollectionMode
-                .billingDetailsCollectionConfiguration()
-                .copy(attachDefaultsToPaymentMethod = true),
-            defaultBillingDetails = defaultBillingDetails,
-        )
-    }
-
-    private fun metadata(
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-        defaultBillingDetails: PaymentSheet.BillingDetails,
-    ): PaymentMethodMetadata {
-        return PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(paymentMethodType),
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            defaultBillingDetails = defaultBillingDetails,
             termsDisplay = mapOf(paymentMethodType to termsDisplay),
         )
     }
@@ -115,18 +94,6 @@ internal data class LpmBillingAddressFormParams(
     val extraParams: PaymentMethodExtraParams?,
 )
 
-internal data class LpmBillingAddressTier1TestCase(
-    val config: LpmBillingAddressTestConfiguration,
-    val rawValues: Map<IdentifierSpec, String?>,
-    val attachedDefaultBillingDetails: PaymentSheet.BillingDetails?,
-    val expectedCreateParamsMap: Map<String, Any>,
-    val expectedRequiresMandate: Boolean,
-    val expectedOptionsParams: PaymentMethodOptionsParams?,
-    val expectedExtraParams: PaymentMethodExtraParams?,
-) {
-    override fun toString(): String = config.toString()
-}
-
 internal fun Map<String, Any>.flattenParams(prefix: String = ""): Map<String, Any> {
     return buildMap {
         this@flattenParams.forEach { (key, value) ->
@@ -161,29 +128,15 @@ internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(mobilePayTestCases)
     addAll(multibancoTestCases)
     addAll(promptPayTestCases)
-    addAll(idealTier2TestCases)
-}
-
-internal val lpmBillingAddressTier1TestCases = buildList {
-    addAll(idealTestCases)
+    addAll(idealFormParamsTestCases)
 }
 
 internal val lpmBillingAddressTestConfigurations =
-    lpmBillingAddressFormValuesToParamsTestCases
-        .map { it.config }
-        .filterNot { tier2Config ->
-            lpmBillingAddressTier1TestCases.any { it.config == tier2Config }
-        } + lpmBillingAddressTier1TestCases.map { it.config }
+    lpmBillingAddressFormValuesToParamsTestCases.map { it.config }
 
 internal object LpmBillingAddressFormValuesToParamsTestCaseProvider : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<LpmBillingAddressFormValuesToParamsTestCase> {
         return lpmBillingAddressFormValuesToParamsTestCases
-    }
-}
-
-internal object LpmBillingAddressTier1TestCaseProvider : TestParameterValuesProvider() {
-    override fun provideValues(context: Context?): List<LpmBillingAddressTier1TestCase> {
-        return lpmBillingAddressTier1TestCases
     }
 }
 

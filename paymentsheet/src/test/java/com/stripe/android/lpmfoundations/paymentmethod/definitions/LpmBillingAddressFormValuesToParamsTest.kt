@@ -5,7 +5,6 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -34,26 +33,14 @@ internal class LpmBillingAddressFormValuesToParamsTest {
             rawValues = testCase.rawValues,
         )
 
-        assertThat(actual).isEqualTo(testCase.expectedParams)
-    }
-
-    @Test
-    fun `creates the expected flattened form params`(
-        @TestParameter(valuesProvider = LpmBillingAddressTier1TestCaseProvider::class)
-        testCase: LpmBillingAddressTier1TestCase,
-    ) = runTest {
-        val actual = createFormParamsFromFormValues(
-            config = testCase.config,
-            rawValues = testCase.rawValues,
-            attachedDefaultBillingDetails = testCase.attachedDefaultBillingDetails,
-        )
-
         assertThat(
             actual.createParams.toParamMap().flattenParams().withoutClientAttributionMetadata(),
-        ).containsExactlyEntriesIn(testCase.expectedCreateParamsMap)
-        assertThat(actual.createParams.requiresMandate).isEqualTo(testCase.expectedRequiresMandate)
-        assertThat(actual.optionsParams).isEqualTo(testCase.expectedOptionsParams)
-        assertThat(actual.extraParams).isEqualTo(testCase.expectedExtraParams)
+        ).containsExactlyEntriesIn(
+            testCase.expectedParams.createParams.toParamMap()
+                .flattenParams()
+                .withoutClientAttributionMetadata(),
+        )
+        assertThat(actual).isEqualTo(testCase.expectedParams)
     }
 
     @Test
@@ -76,21 +63,7 @@ internal class LpmBillingAddressFormValuesToParamsTest {
         config: LpmBillingAddressTestConfiguration,
         rawValues: Map<IdentifierSpec, String?>,
     ): LpmBillingAddressFormParams {
-        return createFormParamsFromFormValues(
-            config = config,
-            rawValues = rawValues,
-            attachedDefaultBillingDetails = null,
-        )
-    }
-
-    private suspend fun createFormParamsFromFormValues(
-        config: LpmBillingAddressTestConfiguration,
-        rawValues: Map<IdentifierSpec, String?>,
-        attachedDefaultBillingDetails: PaymentSheet.BillingDetails?,
-    ): LpmBillingAddressFormParams {
-        val metadata = attachedDefaultBillingDetails?.let {
-            config.metadataWithAttachedDefaultBillingDetails(it)
-        } ?: config.metadata()
+        val metadata = config.metadata()
         val formViewModel = createFormViewModel(
             paymentMethodType = config.paymentMethodType,
             metadata = metadata,
