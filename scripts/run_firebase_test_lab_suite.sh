@@ -272,7 +272,7 @@ for scenario_index in 0 1 2 3 4 5 6; do
   start_test \
     "financial-connections-e2e-scenario-$scenario_index" \
     "$artifact_dir/financial-connections-example-test.apk" \
-    "$artifact_dir/financial-connections-example-release.apk" \
+    "$artifact_dir/financial-connections-example.apk" \
     "$device_model" \
     "class com.stripe.android.financialconnections.example.FinancialConnectionsTestLabTest" \
     "scenarioIndex=$scenario_index,buildNumber=$build_number" \

@@ -222,7 +222,7 @@ workflows:
   run-ftl-connections-e2e-tests-on-push:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
-      - FTL_APP_APK_FILENAME: financial-connections-example-release.apk
+      - FTL_APP_APK_FILENAME: financial-connections-example.apk
       - FTL_TEST_APK_FILENAME: financial-connections-example-test.apk
       - FTL_TEST_TARGETS: class com.stripe.android.financialconnections.example.FinancialConnectionsTestLabTest
       - FTL_RUNNER_ARGUMENTS: |-
