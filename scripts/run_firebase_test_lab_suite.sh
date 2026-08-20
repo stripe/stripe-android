@@ -110,13 +110,18 @@ start_test() {
     exit 1
   fi
 
-  if [[ -n "$app_apk" ]]; then
-    if [[ ! -f "$app_apk" ]]; then
-      echo "Missing app APK for $name: $app_apk" >&2
-      exit 1
-    fi
-    command+=(--app="$app_apk")
+  # Android library instrumentation APKs in this repository target their own
+  # package. Bitrise's Test Lab step accepted them without an app path, but the
+  # gcloud CLI requires --app, so submit the self-instrumenting APK as both.
+  if [[ -z "$app_apk" ]]; then
+    app_apk=$test_apk
   fi
+
+  if [[ ! -f "$app_apk" ]]; then
+    echo "Missing app APK for $name: $app_apk" >&2
+    exit 1
+  fi
+  command+=(--app="$app_apk")
 
   if [[ -n "$test_targets" ]]; then
     command+=(--test-targets="$test_targets")
