@@ -38,6 +38,7 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.billingDetailsCollectionConfiguration.address).isEqualTo(
             ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
         )
+        assertThat(state.paymentMethodOrder).isEmpty()
     }
 
     @Test
@@ -81,6 +82,23 @@ internal class ExpressCheckoutElementTest {
             .build()
 
         assertThat(state.shippingAddressRequired).isTrue()
+    }
+
+    @Test
+    fun `configuration builds payment method order`() {
+        val state = ExpressCheckoutElement.Configuration()
+            .paymentMethodOrder(
+                listOf(
+                    ExpressCheckoutElement.PaymentMethod.Link(),
+                    ExpressCheckoutElement.PaymentMethod.GooglePay(),
+                )
+            )
+            .build()
+
+        assertThat(state.paymentMethodOrder[0])
+            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.Link::class.java)
+        assertThat(state.paymentMethodOrder[1])
+            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.GooglePay::class.java)
     }
 
     @Test
