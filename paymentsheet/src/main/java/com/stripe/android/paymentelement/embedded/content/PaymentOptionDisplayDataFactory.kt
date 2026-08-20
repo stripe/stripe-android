@@ -59,6 +59,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
+                    useDarkThemeIcon = null,
                 )
             },
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),

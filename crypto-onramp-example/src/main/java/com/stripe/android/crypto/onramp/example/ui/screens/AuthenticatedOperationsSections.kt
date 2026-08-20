@@ -35,13 +35,22 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.crypto.onramp.example.CHECKOUT_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.COLLECT_BANK_ACCOUNT_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.COLLECT_CARD_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.COLLECT_SAMSUNG_PAY_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_CRYPTO_TOKEN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_SESSION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.GET_WALLET_OWNERSHIP_CHALLENGE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.REGISTER_WALLET_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.SELECTED_PAYMENT_TYPE_TAG
+import com.stripe.android.crypto.onramp.example.SESSION_STATUS_TAG
+import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_INSTANT_TAG
+import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_STANDARD_TAG
+import com.stripe.android.crypto.onramp.example.START_IDENTITY_VERIFICATION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.USER_ATTESTATION_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.WALLET_ADDRESS_TAG
+import com.stripe.android.crypto.onramp.example.WALLET_NETWORK_DROPDOWN_TAG
 import com.stripe.android.crypto.onramp.example.deleteWalletButtonTag
 import com.stripe.android.crypto.onramp.example.model.SourceCurrency
 import com.stripe.android.crypto.onramp.example.network.CustomerWallet
@@ -90,7 +99,9 @@ internal fun SessionSummary(
         Text(
             text = "Session Status: ${response.status}",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier
+                .testTag(SESSION_STATUS_TAG)
+                .padding(bottom = 8.dp)
         )
         Text(
             text = "Total Amount: ${response.sourceTotalAmount}",
@@ -143,6 +154,7 @@ internal fun SelectedPaymentSummary(
                 val isSelected = selectedSettlementSpeed == speed
                 Box(
                     modifier = Modifier
+                        .testTag(speed.testTag)
                         .background(
                             if (isSelected) {
                                 MaterialTheme.colors.primary
@@ -172,7 +184,9 @@ internal fun SelectedPaymentSummary(
 
     Text(
         text = "Selected Payment Type: ${paymentData.label}",
-        modifier = Modifier.padding(bottom = 24.dp)
+        modifier = Modifier
+            .testTag(SELECTED_PAYMENT_TYPE_TAG)
+            .padding(bottom = 24.dp)
     )
 
     Text(
@@ -180,6 +194,12 @@ internal fun SelectedPaymentSummary(
         modifier = Modifier.padding(bottom = 24.dp)
     )
 }
+
+private val SettlementSpeed.testTag: String
+    get() = when (this) {
+        SettlementSpeed.INSTANT -> SETTLEMENT_SPEED_INSTANT_TAG
+        SettlementSpeed.STANDARD -> SETTLEMENT_SPEED_STANDARD_TAG
+    }
 
 @Composable
 internal fun WalletAddressSection(
@@ -238,9 +258,10 @@ private fun RegisterWalletAddressForm(
             readOnly = true,
             label = { Text("Network") },
             trailingIcon = {
-                TextButton(onClick = { onDropdownExpandedChange(true) }) {
-                    Text("▼")
-                }
+                TextButton(
+                    onClick = { onDropdownExpandedChange(true) },
+                    modifier = Modifier.testTag(WALLET_NETWORK_DROPDOWN_TAG),
+                ) { Text("▼") }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -270,6 +291,7 @@ private fun RegisterWalletAddressForm(
         label = { Text("Wallet Address") },
         placeholder = { Text("0x1234567890abcdef...") },
         modifier = Modifier
+            .testTag(WALLET_ADDRESS_TAG)
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     )
@@ -505,6 +527,7 @@ internal fun VerificationSection(
     Button(
         onClick = onStartVerification,
         modifier = Modifier
+            .testTag(START_IDENTITY_VERIFICATION_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
@@ -514,6 +537,7 @@ internal fun VerificationSection(
     Button(
         onClick = onShowUserAttestation,
         modifier = Modifier
+            .testTag(USER_ATTESTATION_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
@@ -553,6 +577,7 @@ internal fun PaymentSection(
     Button(
         onClick = { onCollectPayment(PaymentMethodSelection.BankAccount()) },
         modifier = Modifier
+            .testTag(COLLECT_BANK_ACCOUNT_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 8.dp)
     ) {

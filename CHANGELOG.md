@@ -1,10 +1,13 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Payments
 * [ADDED] Added Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens to PaymentIntent confirmation.
+
+### PaymentSheet
+* [DEPRECATED] Deprecated the `googlePlacesApiKey` builder methods and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key. Address autocomplete is now available to all merchants without providing a Google Places API key. Existing integrations can remove the key without losing autocomplete, and integrations that did not provide one receive autocomplete automatically.
 
 ## 23.16.0 - 2026-08-18
 
@@ -30,6 +33,9 @@ NEXT_VERSION_BUMP: PATCH
 
 ### CryptoOnramp
 * [ADDED][13623](https://github.com/stripe/stripe-android/pull/13623) Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
+
+### Identity
+* [CHANGED][13176](https://github.com/stripe/stripe-android/pull/13176) Stripe Identity and Crypto Onramp now require Android API 24 or later to support MediaPipe-based 3D selfie capture.
 
 ## 23.14.0 - 2026-08-03
 

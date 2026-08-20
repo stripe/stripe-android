@@ -51,6 +51,6 @@ internal class DefaultNfcScanningTimeoutManager @Inject constructor(
     }
 
     private companion object {
-        val INACTIVITY_TIMEOUT = 20.seconds
+        val INACTIVITY_TIMEOUT = 30.seconds
     }
 }

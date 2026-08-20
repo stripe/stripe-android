@@ -53,7 +53,6 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         selectionHolder.setSelection(state.confirmationState.selection)
         contentStateHolder.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,
-            appearance = state.confirmationState.configuration.appearance.embeddedAppearance,
             embeddedViewDisplaysMandateText = state.confirmationState.configuration.embeddedViewDisplaysMandateText,
             configuration = state.confirmationState.configuration,
         )

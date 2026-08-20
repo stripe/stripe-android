@@ -6,17 +6,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodEmbeddedLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
-import com.stripe.android.uicore.StripeTheme
 import java.io.Closeable
 
 @Immutable
 internal data class EmbeddedContent(
     private val interactor: PaymentMethodVerticalLayoutInteractor,
     private val embeddedViewDisplaysMandateText: Boolean,
-    private val appearance: Embedded,
+    private val appearance: PaymentSheet.Appearance,
     private val isImmediateAction: Boolean,
 ) : Closeable {
     override fun close() {
@@ -25,6 +26,8 @@ internal data class EmbeddedContent(
 
     @Composable
     fun Content() {
+        val embeddedAppearance = appearance.embeddedAppearance
+
         /**
          * This validation is here because of a weird interaction with 2-Step Integration.
          *
@@ -35,8 +38,8 @@ internal data class EmbeddedContent(
          *
          * Having validation here ensures that we only validate when the embedded content is shown.
          */
-        LaunchedEffect(appearance.style, isImmediateAction) {
-            if (appearance.style is Embedded.RowStyle.FlatWithDisclosure && !isImmediateAction) {
+        LaunchedEffect(embeddedAppearance.style, isImmediateAction) {
+            if (embeddedAppearance.style is Embedded.RowStyle.FlatWithDisclosure && !isImmediateAction) {
                 throw IllegalArgumentException(
                     "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
                         "FlatWithDisclosure RowStyle. Use a different style or enable ImmediateAction " +
@@ -45,7 +48,7 @@ internal data class EmbeddedContent(
             }
         }
 
-        StripeTheme {
+        PaymentElementTheme(appearance = appearance) {
             Column(
                 modifier = Modifier
                     .animateContentSize()
@@ -53,7 +56,7 @@ internal data class EmbeddedContent(
                 PaymentMethodEmbeddedLayoutUI(
                     interactor = interactor,
                     embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
-                    appearance = appearance
+                    appearance = embeddedAppearance
                 )
             }
         }

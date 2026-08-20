@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.nfcscan.ui.NfcScanningScreen
 import com.stripe.android.common.nfcscan.ui.NfcScanningTheme
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
@@ -92,6 +93,6 @@ internal class NfcScanningActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        fadeOut()
+        fadeOut(fadeOut = R.anim.stripe_nfc_screen_fade_out)
     }
 }

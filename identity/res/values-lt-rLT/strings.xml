@@ -234,8 +234,6 @@
   <string name="stripe_select">Pasirinkti</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Baigti asmenukių įrašai</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Asmenukių įrašai</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Puiku! Vykdomas nuotraukų patikrinimas…</string>
   <!-- Content description of a captured selfie -->

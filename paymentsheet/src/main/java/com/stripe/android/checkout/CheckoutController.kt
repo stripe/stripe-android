@@ -9,13 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.CollectMissingLinkBillingDetailsPreview
-import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
@@ -119,13 +116,6 @@ class CheckoutController @Inject internal constructor(
                     response
                 }
             }.mapCatching { response ->
-                val defaultEmail = configurationState.defaults.email
-                if (defaultEmail != null) {
-                    checkoutSessionRepository.updateEmail(sessionId, defaultEmail).getOrThrow()
-                } else {
-                    response
-                }
-            }.mapCatching { response ->
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
@@ -183,12 +173,17 @@ class CheckoutController @Inject internal constructor(
      * Updates the customer's email address.
      *
      * @param email The email address to set. Pass `null` to clear the customer's email.
-     * Leading/trailing whitespace is trimmed.
      */
     suspend fun updateEmail(
         email: String?,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateEmail(sessionId, email?.trim().orEmpty())
+    ): kotlin.Result<Unit> {
+        return withCheckoutState(
+            additionalStateMutations = {
+                copy(collectedDetails = collectedDetails.copy(email = email))
+            },
+        ) {
+            kotlin.Result.success(checkoutSessionResponse)
+        }
     }
 
     internal suspend fun updateBillingAddress(
@@ -676,6 +671,60 @@ class CheckoutController @Inject internal constructor(
              */
             val mandateText: AnnotatedString?,
         ) {
+            /**
+             * The billing details collected for a payment method.
+             */
+            @Poko
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class BillingDetails internal constructor(
+                /**
+                 * The customer's billing address.
+                 */
+                val address: Address?,
+                /**
+                 * The customer's email address.
+                 */
+                val email: String?,
+                /**
+                 * The customer's full name.
+                 */
+                val name: String?,
+            ) {
+                /**
+                 * A billing address.
+                 */
+                @Poko
+                @CheckoutSessionPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class Address internal constructor(
+                    /**
+                     * City, district, suburb, town, or village.
+                     */
+                    val city: String?,
+                    /**
+                     * Two-letter country code (ISO 3166-1 alpha-2).
+                     */
+                    val country: String?,
+                    /**
+                     * Address line 1 (e.g., street, PO Box, or company name).
+                     */
+                    val line1: String?,
+                    /**
+                     * Address line 2 (e.g., apartment, suite, unit, or building).
+                     */
+                    val line2: String?,
+                    /**
+                     * ZIP or postal code.
+                     */
+                    val postalCode: String?,
+                    /**
+                     * State, county, province, or region.
+                     */
+                    val state: String?,
+                )
+            }
+
             private val iconDrawable: Drawable by lazy {
                 DelegateDrawable(imageLoader)
             }
@@ -687,60 +736,6 @@ class CheckoutController @Inject internal constructor(
                 @Composable
                 get() = rememberDrawablePainter(iconDrawable)
         }
-    }
-
-    /**
-     * The billing details collected for a payment method.
-     */
-    @Poko
-    @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class BillingDetails internal constructor(
-        /**
-         * The customer's billing address.
-         */
-        val address: Address?,
-        /**
-         * The customer's email address.
-         */
-        val email: String?,
-        /**
-         * The customer's full name.
-         */
-        val name: String?,
-    ) {
-        /**
-         * A billing address.
-         */
-        @Poko
-        @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Address internal constructor(
-            /**
-             * City, district, suburb, town, or village.
-             */
-            val city: String?,
-            /**
-             * Two-letter country code (ISO 3166-1 alpha-2).
-             */
-            val country: String?,
-            /**
-             * Address line 1 (e.g., street, PO Box, or company name).
-             */
-            val line1: String?,
-            /**
-             * Address line 2 (e.g., apartment, suite, unit, or building).
-             */
-            val line2: String?,
-            /**
-             * ZIP or postal code.
-             */
-            val postalCode: String?,
-            /**
-             * State, county, province, or region.
-             */
-            val state: String?,
-        )
     }
 
     /**
@@ -758,6 +753,8 @@ class CheckoutController @Inject internal constructor(
     ) {
         private var resultCallback: ResultCallback = ResultCallback {}
         private var integrationName: String = "stripe_checkout"
+        private var rowSelectionBehavior: PaymentElement.RowSelectionBehavior =
+            PaymentElement.RowSelectionBehavior.default()
 
         /**
          * Sets the [ResultCallback] invoked when a payment flow finishes.
@@ -766,6 +763,15 @@ class CheckoutController @Inject internal constructor(
             resultCallback: ResultCallback
         ): Builder = apply {
             this.resultCallback = resultCallback
+        }
+
+        /**
+         * Sets how payment-option row selections are handled.
+         */
+        fun rowSelectionBehavior(
+            rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
+        ): Builder = apply {
+            this.rowSelectionBehavior = rowSelectionBehavior
         }
 
         /**
@@ -795,6 +801,7 @@ class CheckoutController @Inject internal constructor(
                 application = application,
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
+                rowSelectionBehavior = rowSelectionBehavior,
                 checkoutControllerSavedState = checkoutControllerSavedState,
             )
 
@@ -810,10 +817,7 @@ class CheckoutController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var adaptivePricing: AdaptivePricing = AdaptivePricing()
-        private var apiConfiguration: ApiConfiguration? = null
         private var merchantDisplayName: String? = null
-        private var googlePayConfiguration: GooglePayConfiguration? = null
-        private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var defaults: Defaults = Defaults()
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
@@ -830,15 +834,6 @@ class CheckoutController @Inject internal constructor(
             adaptivePricing: AdaptivePricing,
         ): Configuration = apply {
             this.adaptivePricing = adaptivePricing
-        }
-
-        /**
-         * Sets the API configuration for this checkout session.
-         */
-        fun apiConfiguration(
-            apiConfiguration: ApiConfiguration,
-        ): Configuration = apply {
-            this.apiConfiguration = apiConfiguration
         }
 
         /**
@@ -890,24 +885,6 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
-         * Sets the Google Pay configuration for this checkout session.
-         */
-        fun googlePayConfiguration(
-            configuration: GooglePayConfiguration,
-        ): Configuration = apply {
-            this.googlePayConfiguration = configuration
-        }
-
-        /**
-         * Sets the Link configuration for this checkout session.
-         */
-        fun linkConfiguration(
-            configuration: LinkConfiguration,
-        ): Configuration = apply {
-            this.linkConfiguration = configuration
-        }
-
-        /**
          * Prefill values for the customer's details. If known up front, these prepopulate the
          * elements (and the Checkout Session) so the customer doesn't re-enter them.
          */
@@ -920,10 +897,7 @@ class CheckoutController @Inject internal constructor(
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
-            val apiConfiguration: ApiConfiguration.State?,
             val merchantDisplayName: String?,
-            val googlePayConfiguration: GooglePayConfiguration.State?,
-            val linkConfiguration: LinkConfiguration.State,
             val defaults: Defaults.State,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
@@ -935,91 +909,13 @@ class CheckoutController @Inject internal constructor(
             val defaultsState = defaults.build()
             return State(
                 adaptivePricingAllowed = adaptivePricing.build().allowed,
-                apiConfiguration = apiConfiguration?.build(),
                 merchantDisplayName = merchantDisplayName,
                 paymentElementConfiguration = paymentElementConfiguration.build(),
                 currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
                 shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
                 expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
-                googlePayConfiguration = googlePayConfiguration?.build(),
-                linkConfiguration = linkConfiguration.build(),
                 defaults = defaultsState,
             )
-        }
-
-        /**
-         * Builder for Link configuration used by checkout.
-         */
-        @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class LinkConfiguration {
-            private var display: Display = Display.Automatic
-            private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
-            private var disallowFundingSourceCreation: Set<String> = emptySet()
-
-            /**
-             * Sets when Link is displayed in the payment element.
-             */
-            fun display(display: Display): LinkConfiguration = apply {
-                this.display = display
-            }
-
-            /**
-             * Sets whether Link collects missing billing details for existing payment methods.
-             */
-            @CollectMissingLinkBillingDetailsPreview
-            fun collectMissingBillingDetailsForExistingPaymentMethods(
-                collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
-            ): LinkConfiguration = apply {
-                this.collectMissingBillingDetailsForExistingPaymentMethods =
-                    collectMissingBillingDetailsForExistingPaymentMethods
-            }
-
-            /**
-             * Sets Link funding sources that cannot be created.
-             */
-            @LinkDisallowFundingSourceCreationPreview
-            fun disallowFundingSourceCreation(
-                disallowFundingSourceCreation: Set<String>,
-            ): LinkConfiguration = apply {
-                this.disallowFundingSourceCreation = disallowFundingSourceCreation
-            }
-
-            @Parcelize
-            internal data class State(
-                val display: Display,
-                val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
-                val disallowFundingSourceCreation: Set<String>,
-            ) : Parcelable
-
-            internal fun build(): State = State(
-                display = display,
-                collectMissingBillingDetailsForExistingPaymentMethods =
-                    collectMissingBillingDetailsForExistingPaymentMethods,
-                disallowFundingSourceCreation = disallowFundingSourceCreation.toSet(),
-            )
-
-            /**
-             * Display configuration for Link.
-             */
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            enum class Display {
-                /**
-                 * Link is displayed when available.
-                 */
-                Automatic,
-
-                /**
-                 * Link is never displayed.
-                 */
-                Never,
-
-                /**
-                 * Link remains enabled but its button or row is hidden from the payment element UI.
-                 */
-                WalletButtonHidden,
-            }
         }
 
         /**
@@ -1087,7 +983,7 @@ class CheckoutController @Inject internal constructor(
             internal fun build(): State = State(
                 billingDetails = billingDetails?.build(),
                 shippingDetails = shippingDetails?.build(),
-                email = email?.trim()?.takeIf { it.isNotEmpty() },
+                email = email,
             )
 
             /**

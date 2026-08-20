@@ -4,10 +4,11 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
+import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -25,7 +26,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     private val stateHolder: CheckoutControllerStateHolder,
     private val confirmationHandler: ConfirmationHandler,
     private val operationCoordinator: CheckoutOperationCoordinator,
-    private val eventReporter: ExpressCheckoutElementEventReporter,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -52,13 +52,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         viewModelScope.launch {
             try {
                 confirmationHandler.start(confirmationArgs)
-
-                when (val result = confirmationHandler.awaitResult()) {
-                    is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess(expressButton)
-                    is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure(expressButton, result)
-                    is ConfirmationHandler.Result.Canceled,
-                    null -> Unit
-                }
             } catch (error: CancellationException) {
                 throw error
             } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
@@ -67,11 +60,19 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         }
     }
 
+    @OptIn(CheckoutSessionPreview::class)
     private fun getConfirmationArgs(
         state: CheckoutControllerState,
         expressButton: ExpressButton,
     ): ConfirmationHandler.Args? {
-        val configuration = state.commonConfiguration
+        val configuration = state.commonConfiguration.copy(
+            link = state.configuration.expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
+            billingDetailsCollectionConfiguration = state.configuration.expressCheckoutElementConfiguration
+                .billingDetailsCollectionConfiguration
+                .asPaymentSheet(
+                    requiresBillingAddress = state.checkoutSessionResponse.requiresBillingAddress
+                ),
+        )
         val shippingAddressRequired = (expressButton as? ExpressButton.GooglePay)?.shippingAddressRequired == true
         val shippingAddressParameters = if (shippingAddressRequired) {
             GooglePayJsonFactory.ShippingAddressParameters(
@@ -85,7 +86,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-            googlePayDisplayItems = GooglePayDisplayItemsFactory.create(state.paymentMethodMetadata),
             googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                 configuration = configuration,
                 paymentMethodMetadata = state.paymentMethodMetadata,

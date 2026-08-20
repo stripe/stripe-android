@@ -84,7 +84,7 @@ internal class Selectors(
         } else if (testParameters.paymentMethodCode == Blik.code) {
             30.seconds
         } else {
-            5.seconds
+            DEFAULT_UI_TIMEOUT
         }
     )
 

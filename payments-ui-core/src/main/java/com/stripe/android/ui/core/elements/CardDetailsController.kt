@@ -230,6 +230,7 @@ internal class CardDetailsController(
     private fun dismissCardPill() {
         numberElement.controller.onRawValueChange("")
         expirationDateElement.controller.onRawValueChange("")
+        cvcElement.controller.onRawValueChange("")
         cardPillElement.value = null
     }
 
