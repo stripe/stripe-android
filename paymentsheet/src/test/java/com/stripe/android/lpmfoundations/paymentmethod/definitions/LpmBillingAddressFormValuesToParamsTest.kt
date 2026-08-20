@@ -37,13 +37,6 @@ internal class LpmBillingAddressFormValuesToParamsTest {
             rawValues = testCase.rawValues,
         )
 
-        assertThat(
-            actual.createParams.toParamMap().flattenParams().withoutClientAttributionMetadata(),
-        ).containsExactlyEntriesIn(
-            testCase.expectedParams.createParams.toParamMap()
-                .flattenParams()
-                .withoutClientAttributionMetadata(),
-        )
         assertThat(actual).isEqualTo(testCase.expectedParams)
     }
 
@@ -151,25 +144,6 @@ internal data class LpmBillingAddressFormParams(
     val optionsParams: PaymentMethodOptionsParams?,
     val extraParams: PaymentMethodExtraParams?,
 )
-
-internal fun Map<String, Any>.flattenParams(prefix: String = ""): Map<String, Any> {
-    return buildMap {
-        this@flattenParams.forEach { (key, value) ->
-            val flattenedKey = if (prefix.isEmpty()) key else "$prefix.$key"
-            if (value is Map<*, *>) {
-                @Suppress("UNCHECKED_CAST")
-                val nestedMap = value as Map<String, Any>
-                putAll(nestedMap.flattenParams(flattenedKey))
-            } else {
-                put(flattenedKey, value)
-            }
-        }
-    }
-}
-
-internal fun Map<String, Any>.withoutClientAttributionMetadata(): Map<String, Any> {
-    return filterKeys { !it.startsWith("client_attribution_metadata.") }
-}
 
 internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(boletoTestCases)
