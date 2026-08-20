@@ -19,7 +19,6 @@ internal data class LpmBillingAddressTestConfiguration(
             stripeIntent = intentScenario.stripeIntent(paymentMethodType),
             billingDetailsCollectionConfiguration = billingDetailsCollectionMode
                 .billingDetailsCollectionConfiguration(),
-            defaultBillingDetails = PaymentSheet.BillingDetails(),
             termsDisplay = mapOf(paymentMethodType to termsDisplay),
         )
     }
