@@ -144,11 +144,6 @@ class AddressLauncher internal constructor(
              */
             title: String? = null,
             /**
-             * Google Places api key used to provide autocomplete suggestions
-             * When null, autocomplete is disabled.
-             */
-            googlePlacesApiKey: String? = null,
-            /**
              * A list of two-letter country codes that support autocomplete. Defaults to a list of
              * countries that Stripe has audited to ensure a good autocomplete experience.
              */
@@ -160,8 +155,69 @@ class AddressLauncher internal constructor(
             buttonTitle = buttonTitle,
             additionalFields = additionalFields,
             title = title,
+            googlePlacesApiKey = null,
+            autocompleteCountries = autocompleteCountries,
+            billingAddress = null,
+        )
+
+        /**
+         * @param googlePlacesApiKey Google Places API key. This is no longer required for address
+         * autocomplete.
+         */
+        @Deprecated(
+            message = "Google Places API key is no longer required. " +
+                "This constructor will be removed in a future release.",
+            replaceWith = ReplaceWith(
+                "Configuration(appearance, address, allowedCountries, buttonTitle, " +
+                    "additionalFields, title, autocompleteCountries)",
+            ),
+        )
+        constructor(
+            appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+            address: AddressDetails? = null,
+            allowedCountries: Set<String> = emptySet(),
+            buttonTitle: String? = null,
+            additionalFields: AdditionalFieldsConfiguration? = null,
+            title: String? = null,
+            googlePlacesApiKey: String? = null,
+            autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+        ) : this(
+            appearance = appearance,
+            address = address,
+            allowedCountries = allowedCountries,
+            buttonTitle = buttonTitle,
+            additionalFields = additionalFields,
+            title = title,
             googlePlacesApiKey = googlePlacesApiKey,
             autocompleteCountries = autocompleteCountries,
+            billingAddress = null,
+        )
+
+        @Deprecated(
+            message = "Google Places API key is no longer required. " +
+                "This constructor will be removed in a future release.",
+            replaceWith = ReplaceWith(
+                "Configuration(appearance, address, allowedCountries, buttonTitle, " +
+                    "additionalFields, title)",
+            ),
+        )
+        constructor(
+            appearance: PaymentSheet.Appearance,
+            address: AddressDetails?,
+            allowedCountries: Set<String>,
+            buttonTitle: String?,
+            additionalFields: AdditionalFieldsConfiguration?,
+            title: String?,
+            googlePlacesApiKey: String?,
+        ) : this(
+            appearance = appearance,
+            address = address,
+            allowedCountries = allowedCountries,
+            buttonTitle = buttonTitle,
+            additionalFields = additionalFields,
+            title = title,
+            googlePlacesApiKey = googlePlacesApiKey,
+            autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
             billingAddress = null,
         )
 
