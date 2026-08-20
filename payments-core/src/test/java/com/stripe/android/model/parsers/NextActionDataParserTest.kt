@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 import org.junit.runner.RunWith
@@ -110,5 +111,44 @@ internal class NextActionDataParserTest {
         val nextActionData = NextActionDataParser().parse(nextActionJson)
 
         assertThat(nextActionData).isNull()
+    }
+
+    @Test
+    fun `parse with alipay_handle_redirect and native_data present should create AlipayRedirect with data`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "alipay_handle_redirect",
+                "alipay_handle_redirect": {
+                    "native_data": "native_data_value",
+                    "url": "https://example.com/alipay"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+        assertThat(nextActionData).isInstanceOf<StripeIntent.NextActionData.AlipayRedirect>()
+        val alipayRedirect = nextActionData as StripeIntent.NextActionData.AlipayRedirect
+        assertThat(alipayRedirect.data).isEqualTo("native_data_value")
+    }
+
+    @Test
+    fun `parse with alipay_handle_redirect and native_data missing should create AlipayRedirect with null data`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "alipay_handle_redirect",
+                "alipay_handle_redirect": {
+                    "url": "https://example.com/alipay"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+        assertThat(nextActionData).isInstanceOf<StripeIntent.NextActionData.AlipayRedirect>()
+        val alipayRedirect = nextActionData as StripeIntent.NextActionData.AlipayRedirect
+        assertThat(alipayRedirect.data).isNull()
     }
 }

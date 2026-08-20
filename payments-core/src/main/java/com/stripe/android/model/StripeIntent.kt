@@ -264,13 +264,13 @@ sealed interface StripeIntent : StripeModel {
 
         @Parcelize
         internal data class AlipayRedirect constructor(
-            val data: String,
+            val data: String?,
             val authCompleteUrl: String?,
             val webViewUrl: Uri,
             val returnUrl: String? = null
         ) : NextActionData() {
 
-            internal constructor(data: String, webViewUrl: String, returnUrl: String? = null) :
+            internal constructor(data: String?, webViewUrl: String, returnUrl: String? = null) :
                 this(data, extractReturnUrl(data), Uri.parse(webViewUrl), returnUrl)
 
             private companion object {
@@ -280,8 +280,8 @@ sealed interface StripeIntent : StripeModel {
                  * return_url param, as a hint to the backend to ping Alipay for
                  * the updated state
                  */
-                private fun extractReturnUrl(data: String): String? = runCatching {
-                    Uri.parse("alipay://url?$data")
+                private fun extractReturnUrl(data: String?): String? = runCatching {
+                    Uri.parse("alipay://url?$${requireNotNull(data)}")
                         .getQueryParameter("return_url")?.takeIf {
                             StripeUrlUtils.isStripeUrl(it)
                         }
