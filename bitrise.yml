@@ -472,6 +472,9 @@ workflows:
           title: Deploy Firebase Test Lab results
           is_always_run: true
           inputs:
+            - deploy_path: $VDTESTING_DOWNLOADED_FILES_DIR
+            - is_compress: "true"
+            - zip_name: firebase-test-lab-results
             - notify_user_groups: none
             - is_enable_public_page: "false"
   prepare_all:
