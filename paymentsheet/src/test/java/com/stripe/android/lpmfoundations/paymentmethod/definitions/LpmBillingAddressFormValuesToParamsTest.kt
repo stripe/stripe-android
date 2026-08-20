@@ -139,6 +139,7 @@ internal data class LpmBillingAddressFormParams(
 
 internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(afterpayClearpayTestCases)
+    addAll(amazonPayTestCases)
     addAll(boletoTestCases)
     addAll(sepaDebitTestCases)
     addAll(weroTestCases)
@@ -159,11 +160,15 @@ internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(alipayTestCases)
     addAll(almaTestCases)
     addAll(billieTestCases)
+    addAll(cashAppPayTestCases)
     addAll(cryptoTestCases)
     addAll(grabPayTestCases)
     addAll(payByBankTestCases)
     addAll(payNowTestCases)
     addAll(payPayTestCases)
+    addAll(payPalTestCases)
+    addAll(revolutPayTestCases)
+    addAll(satispayTestCases)
     addAll(sunbitTestCases)
     addAll(swishTestCases)
     addAll(weChatPayTestCases)
