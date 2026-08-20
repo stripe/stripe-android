@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
@@ -14,9 +15,15 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.LinkHandler
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.computeBillingEditDistance
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -70,6 +77,10 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val tapToAddHelper: TapToAddHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val launchMode: EmbeddedLaunchMode,
+    private val linkHandler: LinkHandler,
+    private val eventReporterMode: EventReporter.Mode,
+    private val autocompleteAddressInteractorFactory: PaymentElementAutocompleteAddressInteractor.Factory,
+    private val savedStateHandle: SavedStateHandle,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
 ) : SheetActivityStateHolder {
@@ -92,8 +103,17 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     override val validationRequested: SharedFlow<Unit> = _validationRequested
 
     private var usBankAccountFormPrimaryButtonUiState: PrimaryButton.UIState? = null
+    private var confirmationSelection: PaymentSelection?
+        get() = savedStateHandle[IN_PROGRESS_SELECTION_KEY]
+        set(value) {
+            savedStateHandle[IN_PROGRESS_SELECTION_KEY] = value
+        }
 
     init {
+        if (confirmationHandler.state.value is ConfirmationHandler.State.Idle) {
+            confirmationSelection = null
+        }
+
         coroutineScope.launch {
             tapToAddHelper.nextStep.collect { result ->
                 val activityResult = when (result) {
@@ -143,8 +163,38 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
 
         coroutineScope.launch {
             confirmationHandler.state.collectLatest { confirmationState ->
+                if (confirmationState is ConfirmationHandler.State.Confirming && confirmationSelection == null) {
+                    confirmationSelection = selectionHolder.selection.value
+                }
+                val selection = confirmationSelection ?: selectionHolder.selection.value
+                if (confirmationState is ConfirmationHandler.State.Complete) {
+                    eventReporter.reportPaymentResult(confirmationState.result, selection)
+                }
                 _state.update {
                     it.updateWithConfirmationState(confirmationState)
+                }
+                if ((confirmationState as? ConfirmationHandler.State.Complete)?.result
+                    is ConfirmationHandler.Result.Succeeded
+                ) {
+                    reportBillingAddressCompleted(selection)
+                    if (eventReporterMode == EventReporter.Mode.Complete && selection?.isLink == true) {
+                        linkHandler.setupLink(paymentMethodMetadata.linkState)
+                        linkHandler.logOut()
+                    }
+                    setResult(
+                        EmbeddedActivityResult.Complete(
+                            selection = null,
+                            previousNewSelections = selectionHolder.previousNewSelections,
+                            hasBeenConfirmed = true,
+                            customerState = customerStateHolder.customer.value,
+                            checkoutSessionResponse = null,
+                            shouldInvokeSelectionCallback = false,
+                            launchMode = launchMode,
+                        )
+                    )
+                }
+                if (confirmationState is ConfirmationHandler.State.Complete) {
+                    confirmationSelection = null
                 }
             }
         }
@@ -159,6 +209,10 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                 }
             }
         }
+    }
+
+    internal fun setInProgressSelection(selection: PaymentSelection) {
+        confirmationSelection = selection
     }
 
     override fun setResult(result: EmbeddedActivityResult) {
@@ -242,11 +296,10 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     ): SheetActivityStateHolder.State {
         return when (state) {
             is ConfirmationHandler.State.Complete -> {
-                eventReporter.reportPaymentResult(state.result, selectionHolder.selection.value)
                 when (state.result) {
                     is ConfirmationHandler.Result.Succeeded -> copy(
                         processingState = PrimaryButtonProcessingState.Completed,
-                        isEnabled = false
+                        isEnabled = false,
                     )
                     is ConfirmationHandler.Result.Failed -> copy(
                         processingState = PrimaryButtonProcessingState.Idle(null),
@@ -276,6 +329,20 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
         }
     }
 
+    private fun reportBillingAddressCompleted(selection: PaymentSelection?) {
+        if (eventReporterMode != EventReporter.Mode.Complete || selection !is PaymentSelection.New) return
+        val billingAddress = selection.billingDetails?.address ?: return
+        val countryCode = billingAddress.country ?: return
+        val autocompleteFilledAddress = autocompleteAddressInteractorFactory.autocompleteFilledAddress
+        eventReporter.onBillingAddressCompleted(
+            addressCountryCode = countryCode,
+            autocompleteResultSelected = autocompleteFilledAddress != null,
+            editDistance = autocompleteFilledAddress?.let {
+                computeBillingEditDistance(it, billingAddress)
+            },
+        )
+    }
+
     private fun primaryButtonLabel(
         stripeIntent: StripeIntent,
         configuration: EmbeddedPaymentElement.Configuration
@@ -294,5 +361,11 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
 
     private fun amount(amount: Long?, currency: String?): Amount? {
         return if (amount != null && currency != null) Amount(amount, currency) else null
+    }
+
+    private companion object {
+        const val IN_PROGRESS_SELECTION_KEY = "SHEET_ACTIVITY_IN_PROGRESS_PAYMENT_SELECTION"
+        const val VALIDATION_STATE_RETRY_COUNT = 32
+        const val VALIDATION_STATE_RETRY_DELAY_MILLIS = 16L
     }
 }

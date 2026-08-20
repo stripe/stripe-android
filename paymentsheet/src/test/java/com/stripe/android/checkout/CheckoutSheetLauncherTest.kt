@@ -78,6 +78,7 @@ internal class CheckoutSheetLauncherTest {
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = listOf(promotion),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -371,6 +372,7 @@ internal class CheckoutSheetLauncherTest {
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.Manage,
         )
 
@@ -499,6 +501,7 @@ internal class CheckoutSheetLauncherTest {
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
+            activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
 

@@ -8,14 +8,11 @@
     <ID>ConstructorParameterNaming:PaymentOption.kt:PaymentOption$private val _shippingDetails: AddressDetails?</ID>
     <ID>CyclomaticComplexMethod:CustomerSheetViewModel.kt:CustomerSheetViewModel$fun handleViewAction</ID>
     <ID>CyclomaticComplexMethod:TransformBankIconCodeToBankIcon.kt:internal fun transformBankIconCodeToBankIcon: Int</ID>
-    <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt:PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:VerticalModeFormUITest.kt:VerticalModeFormUITest.&lt;no name provided>${}</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt:@Preview @Composable internal fun PaymentSheetTopBar_Preview</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt:@Preview @Composable internal fun TestModeBadge_Preview</ID>
     <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt:FlowControllerModule$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation</ID>
-    <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt:PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation</ID>
     <ID>LargeClass:CardDefinitionTest.kt:CardDefinitionTest</ID>
-    <ID>LargeClass:CheckoutTest.kt:CheckoutTest</ID>
     <ID>LargeClass:ConfirmationHandlerOptionKtxTest.kt:ConfirmationHandlerOptionKtxTest</ID>
     <ID>LargeClass:CustomerAdapterTest.kt:CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt:CustomerSheetViewModel : ViewModel</ID>
@@ -29,17 +26,12 @@
     <ID>LargeClass:InputAddressViewModelTest.kt:InputAddressViewModelTest</ID>
     <ID>LargeClass:LinkInlineSignupConfirmationDefinitionTest.kt:LinkInlineSignupConfirmationDefinitionTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt:PaymentMethodMetadataTest</ID>
-    <ID>LargeClass:PaymentOptionsViewModelTest.kt:PaymentOptionsViewModelTest</ID>
-    <ID>LargeClass:PaymentSheetActivityTest.kt:PaymentSheetActivityTest</ID>
-    <ID>LargeClass:PaymentSheetViewModelTest.kt:PaymentSheetViewModelTest</ID>
-    <ID>LargeClass:PrimaryButtonUiStateMapperTest.kt:PrimaryButtonUiStateMapperTest</ID>
     <ID>LargeClass:TapToAddCollectionHandlerTest.kt:TapToAddCollectionHandlerTest</ID>
     <ID>LargeClass:USBankAccountFormViewModel.kt:USBankAccountFormViewModel : ViewModel</ID>
     <ID>LargeClass:USBankAccountFormViewModelTest.kt:USBankAccountFormViewModelTest</ID>
     <ID>LargeClass:WalletScreenTest.kt:WalletScreenTest</ID>
     <ID>LargeClass:WalletViewModelTest.kt:WalletViewModelTest</ID>
     <ID>LongMethod:AutocompleteScreen.kt:@Composable internal fun AutocompleteScreenUI</ID>
-    <ID>LongMethod:AutocompleteViewModelTest.kt:AutocompleteViewModelTest$@Test fun `selectPrediction emits go back event with selected prediction`</ID>
     <ID>LongMethod:CardDefinition.kt:CardUiDefinitionFactory$override fun createFormElements: List&lt;FormElement></ID>
     <ID>LongMethod:CustomerSheetScreen.kt:@Composable internal fun SelectPaymentMethod</ID>
     <ID>LongMethod:DefaultConfirmationHandlerTest.kt:DefaultConfirmationHandlerTest$private fun test</ID>
@@ -60,24 +52,17 @@
     <ID>LongMethod:LinkInlineSignupConfirmationDefinitionTest.kt:LinkInlineSignupConfirmationDefinitionTest$private fun testSuccessfulSignupWithNewCard</ID>
     <ID>LongMethod:LinkInlineSignupConfirmationDefinitionTest.kt:LinkInlineSignupConfirmationDefinitionTest$private fun testSuccessfulSignupWithSavedLinkCard</ID>
     <ID>LongMethod:PaymentDetails.kt:@Preview(showBackground = true) @Composable private fun PaymentDetailsListItemPreview</ID>
-    <ID>LongMethod:PaymentMethodVerticalLayoutInteractor.kt:DefaultPaymentMethodVerticalLayoutInteractor.Companion$fun create: PaymentMethodVerticalLayoutInteractor</ID>
-    <ID>LongMethod:PaymentSheetConfigurationKtx.kt:@OptIn(AppearanceAPIAdditionsPreview::class) internal fun PaymentSheet.Appearance.parseAppearance</ID>
-    <ID>LongMethod:PaymentSheetScreen.kt:@Composable private fun PaymentSheetContent</ID>
-    <ID>LongMethod:PaymentSheetViewModelTest.kt:PaymentSheetViewModelTest$@Test fun `Can complete payment after switching to another LPM from card selection with inline Link signup state`</ID>
-    <ID>LongMethod:PaymentSheetViewModelTest.kt:PaymentSheetViewModelTest$@Test fun `On inline link payment, should process with primary button`</ID>
     <ID>LongMethod:USBankAccountForm.kt:@Composable private fun BankAccountDetails</ID>
     <ID>LongMethod:USBankAccountForm.kt:@Composable private fun BillingDetailsForm</ID>
     <ID>LongMethod:USBankAccountFormViewModel.kt:USBankAccountFormViewModel$private fun createNewPaymentSelection: PaymentSelection.New.USBankAccount</ID>
     <ID>LongMethod:UpdatePaymentMethodUI.kt:@Composable internal fun UpdatePaymentMethodUI</ID>
     <ID>LongMethod:WalletScreen.kt:@Composable internal fun WalletBody</ID>
     <ID>LongMethod:WalletScreen.kt:@Composable private fun PaymentMethodSection</ID>
-    <ID>LoopWithTooManyJumpStatements:NfcCardReader.kt:ApduCardReader$for</ID>
     <ID>MagicNumber:FlagImageRepository.kt:FlagImageRepository$4</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.3f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.4f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.5f</ID>
     <ID>MagicNumber:PaymentDetails.kt:0.5f</ID>
-    <ID>MagicNumber:PrimaryButton.kt:PrimaryButton$0.5f</ID>
     <ID>MagicNumber:USBankAccountForm.kt:0.5f</ID>
     <ID>MatchingDeclarationName:ErrorText.kt:ErrorTextStyle</ID>
     <ID>MatchingDeclarationName:LinkTerms.kt:LinkTermsType</ID>
@@ -97,7 +82,6 @@
     <ID>MaxLineLength:PaymentSheet.kt:PaymentSheet.IntentConfiguration.Mode.Payment$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt:PaymentSheet.IntentConfiguration.Mode.Setup$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt:PaymentSheet.IntentConfiguration.SetupFutureUse$*</ID>
-    <ID>MaxLineLength:PrimaryButtonTest.kt:PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
     <ID>MaxLineLength:SupportedPaymentMethod.kt:SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
     <ID>TooManyFunctions:CustomerSheetEventReporter.kt:CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultCustomerSheetEventReporter.kt:DefaultCustomerSheetEventReporter : CustomerSheetEventReporter</ID>
@@ -112,6 +96,5 @@
     <ID>TooManyFunctions:PaymentMethodsUiExtension.kt:com.stripe.android.paymentsheet.ui.PaymentMethodsUiExtension.kt</ID>
     <ID>TooManyFunctions:PaymentSheet.kt:PaymentSheet.Appearance$Builder</ID>
     <ID>TooManyFunctions:WalletViewModel.kt:WalletViewModel : ViewModel</ID>
-    <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt:PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
 </SmellBaseline>

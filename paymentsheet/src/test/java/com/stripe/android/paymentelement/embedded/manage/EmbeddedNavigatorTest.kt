@@ -813,6 +813,7 @@ internal class EmbeddedNavigatorTest {
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
+            launchMode = EmbeddedLaunchMode.Form("card"),
         )
         return EmbeddedNavigator.Screen.Form.Factory(
             interactorFactory = interactorFactory,
