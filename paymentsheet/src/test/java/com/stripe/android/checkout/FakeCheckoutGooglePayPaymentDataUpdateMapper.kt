@@ -4,7 +4,6 @@ import app.cash.turbine.Turbine
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 @OptIn(CheckoutSessionPreview::class)
@@ -14,13 +13,13 @@ internal class FakeCheckoutGooglePayPaymentDataUpdateMapper(
     val toResponseCalls = Turbine<ToResponseCall>()
 
     override fun toResponse(
-        configuration: PaymentSheet.GooglePayConfiguration,
+        countryCode: String?,
         response: CheckoutSessionResponse,
         paymentDataUpdate: GooglePayPaymentDataUpdate,
     ): GooglePayPaymentDataUpdateResponse {
         toResponseCalls.add(
             ToResponseCall(
-                configuration = configuration,
+                countryCode = countryCode,
                 response = response,
                 paymentDataUpdate = paymentDataUpdate,
             )
@@ -33,7 +32,7 @@ internal class FakeCheckoutGooglePayPaymentDataUpdateMapper(
     }
 
     data class ToResponseCall(
-        val configuration: PaymentSheet.GooglePayConfiguration,
+        val countryCode: String?,
         val response: CheckoutSessionResponse,
         val paymentDataUpdate: GooglePayPaymentDataUpdate,
     )
