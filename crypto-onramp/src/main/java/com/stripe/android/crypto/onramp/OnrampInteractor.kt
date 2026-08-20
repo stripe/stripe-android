@@ -11,6 +11,7 @@ import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent.ErrorOccurred.Operation
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.exception.MissingAdditionalKycFileIdException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
@@ -21,7 +22,13 @@ import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
 import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
+import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
+import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmissionRequest
+import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswerRequest
+import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
+import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
+import com.stripe.android.crypto.onramp.model.AdditionalKycSubmissionResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
@@ -453,6 +460,72 @@ internal class OnrampInteractor @Inject constructor(
                 Result.failure(mappedError)
             }
         )
+    }
+
+    suspend fun fulfillAdditionalKycRequirement(
+        submission: AdditionalKycSubmission,
+    ): Result<AdditionalKycSubmissionResponse> {
+        val secret = consumerSessionClientSecret()
+            ?: return fulfillAdditionalKycRequirementFailure(MissingConsumerSecretException())
+
+        val documents = uploadAdditionalKycDocuments(submission.documents)
+            .getOrElse { error -> return fulfillAdditionalKycRequirementFailure(error) }
+
+        val questionnaire = submission.questionnaire?.let { questionnaire ->
+            AdditionalKycQuestionnaireSubmissionRequest(
+                answers = questionnaire.answers.map { answer ->
+                    AdditionalKycQuestionnaireAnswerRequest(
+                        questionId = answer.questionId,
+                        value = answer.value,
+                    )
+                }
+            )
+        }
+
+        return cryptoApiRepository.fulfillAdditionalKycRequirement(
+            liquidityProvider = submission.liquidityProvider,
+            submissionType = submission.submissionType,
+            documents = documents,
+            questionnaire = questionnaire,
+            consumerSessionClientSecret = secret,
+        ).fold(
+            onSuccess = { response -> Result.success(response) },
+            onFailure = { error -> fulfillAdditionalKycRequirementFailure(error) },
+        )
+    }
+
+    private suspend fun uploadAdditionalKycDocuments(
+        documents: List<AdditionalKycDocumentSubmission>?,
+    ): Result<List<AdditionalKycDocumentSubmissionRequest>?> {
+        if (documents == null) {
+            return Result.success(null)
+        }
+
+        val requests = mutableListOf<AdditionalKycDocumentSubmissionRequest>()
+        for (document in documents) {
+            val fileIds = mutableListOf<String>()
+            for (file in document.files) {
+                val uploadedFile = cryptoApiRepository.uploadAdditionalKycDocument(file)
+                    .getOrElse { error -> return Result.failure(error) }
+                val fileId = uploadedFile.id
+                    ?: return Result.failure(MissingAdditionalKycFileIdException())
+
+                fileIds += fileId
+            }
+            requests += AdditionalKycDocumentSubmissionRequest(
+                documentType = document.documentType,
+                documentSubtype = document.documentSubtype,
+                fileIds = fileIds,
+            )
+        }
+
+        return Result.success(requests)
+    }
+
+    private fun <T> fulfillAdditionalKycRequirementFailure(error: Throwable): Result<T> {
+        val mappedError = mapError(Operation.FulfillAdditionalKycRequirement, error)
+        trackError(Operation.FulfillAdditionalKycRequirement, mappedError)
+        return Result.failure(mappedError)
     }
 
     suspend fun retrieveMissingIdentifiers(): OnrampRetrieveMissingIdentifiersResult {
