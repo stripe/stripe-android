@@ -11,44 +11,15 @@ app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
     - FTL_TEST_DEVICES: MediumPhone.arm,33,en_US,portrait
+    - FTL_GOOGLE_CLOUD_PROJECT: stripe-payments-sdk-prod
+    - FTL_RESULTS_BUCKET: gs://stripe-payments-sdk-prod-test-lab-results
 
 pipelines:
   main-trigger-pipeline:
     workflows:
       check-and-test: { }
       check-dependencies-and-publish-pom: { }
-      build-firebase-test-artifacts: { }
-      run-ftl-connect-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-connect-example-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-payment-method-messaging-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-payments-core-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-paymentsheet-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-        parallel: 6
-      run-ftl-paymentsheet-ime-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-financial-connections-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-crypto-onramp-example-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-camera-core-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-cardscan-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-paymentsheet-e2e:
-        depends_on: [build-firebase-test-artifacts]
-        parallel: 6
-      run-ftl-paymentsheet-google-pay-e2e:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-connect-e2e-tests-on-push:
-        depends_on: [build-firebase-test-artifacts]
-      run-ftl-connections-e2e-tests-on-push:
-        depends_on: [build-firebase-test-artifacts]
-        parallel: 7
+      run-all-firebase-test-lab-tests: { }
   pipeline-connect-e2e-debug-tests:
     workflows:
       build-connect-debug: { }
@@ -179,6 +150,52 @@ workflows:
           title: Share Firebase Test Lab APKs
           inputs:
             - pipeline_intermediate_files: "$BITRISE_SOURCE_DIR/ftl-artifacts:FTL_ARTIFACTS_DIR"
+  run-all-firebase-test-lab-tests:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Build Firebase Test Lab APKs
+          timeout: 1800
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                scripts/build_firebase_test_lab_artifacts.sh "$BITRISE_SOURCE_DIR/ftl-artifacts"
+      - script@1:
+          title: Ensure Google Cloud CLI is installed
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                if ! command -v gcloud >/dev/null; then
+                  brew install --cask gcloud-cli
+                fi
+                gcloud version
+      - authenticate-with-gcp@0.0.4:
+          inputs:
+            - service_account_key: $PAYMENTS_GOOGLE_CLOUD_KEY
+      - script@1:
+          title: Run all tests on Firebase Test Lab
+          timeout: 7200
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                scripts/run_firebase_test_lab_suite.sh \
+                  "$BITRISE_SOURCE_DIR/ftl-artifacts" \
+                  /tmp/firebase-test-lab-results
+      - deploy-to-bitrise-io@2:
+          title: Deploy consolidated Firebase Test Lab results
+          is_always_run: true
+          inputs:
+            - deploy_path: /tmp/firebase-test-lab-results
+            - is_compress: "true"
+            - zip_name: firebase-test-lab-results
+            - notify_user_groups: none
+            - is_enable_public_page: "false"
   run-ftl-connect-e2e-tests:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-connect-debug
