@@ -154,7 +154,7 @@ def open_link(uri: str) -> list[dict]:
     return [
         adb(
             "am start -W -a android.intent.action.VIEW "
-            f"-d '{uri}' {CONNECTIONS_APP}"
+            f"-d '{uri}' -p {CONNECTIONS_APP}"
         ),
     ]
 

@@ -41,8 +41,6 @@ pipelines:
         depends_on: [build-firebase-test-artifacts]
       run-ftl-cardscan-instrumentation-tests:
         depends_on: [build-firebase-test-artifacts]
-      run-ftl-cardscan-example-instrumentation-tests:
-        depends_on: [build-firebase-test-artifacts]
       run-ftl-paymentsheet-e2e:
         depends_on: [build-firebase-test-artifacts]
         parallel: 6
@@ -308,14 +306,7 @@ workflows:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
       - FTL_TEST_APK_FILENAME: stripecardscan-test.apk
-      - FTL_TEST_DEVICES: panther,33,en,portrait
-    before_run:
-      - _run-firebase-instrumentation-tests
-  run-ftl-cardscan-example-instrumentation-tests:
-    envs:
-      - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
-      - FTL_APP_APK_FILENAME: stripecardscan-example.apk
-      - FTL_TEST_APK_FILENAME: stripecardscan-example-test.apk
+      - FTL_TEST_DEVICES: Pixel2Emulator,33,en,portrait
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-paymentsheet-e2e:

@@ -29,8 +29,6 @@ rm -f "$artifact_dir"/*.apk
   :crypto-onramp-example:assembleDebugAndroidTest \
   :camera-core:assembleDebugAndroidTest \
   :stripecardscan:assembleDebugAndroidTest \
-  :stripecardscan-example:assembleDebug \
-  :stripecardscan-example:assembleDebugAndroidTest \
   -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL="$connections_backend_url" \
   -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN="${STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN:-}"
 
@@ -72,8 +70,6 @@ copy_single_apk "crypto-onramp-example/build/outputs/apk/debug/*.apk" "crypto-on
 copy_single_apk "crypto-onramp-example/build/outputs/apk/androidTest/debug/*.apk" "crypto-onramp-example-test.apk"
 copy_single_apk "camera-core/build/outputs/apk/androidTest/debug/*.apk" "camera-core-test.apk"
 copy_single_apk "stripecardscan/build/outputs/apk/androidTest/debug/*.apk" "stripecardscan-test.apk"
-copy_single_apk "stripecardscan-example/build/outputs/apk/debug/*.apk" "stripecardscan-example.apk"
-copy_single_apk "stripecardscan-example/build/outputs/apk/androidTest/debug/*.apk" "stripecardscan-example-test.apk"
 
 echo "Firebase Test Lab artifacts:"
 ls -lh "$artifact_dir"
