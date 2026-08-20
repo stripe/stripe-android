@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -28,15 +29,34 @@ import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirmi
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
+import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
+import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import javax.inject.Provider
 
-class DefaultSheetActivityStateHolderTest {
+@Suppress("LargeClass")
+internal class DefaultSheetActivityStateHolderTest {
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val closeFormInteractorRule = CleanupTestRule(VerticalModeFormInteractor::close)
+
     @Test
     fun `state initializes correctly`() = testScenario {
         stateHolder.state.test {
@@ -473,27 +493,89 @@ class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
-    fun `TapToAddResult confirm saved payment method sets saved payment method confirm selection`() {
+    fun `TapToAddResult confirm saved payment method replaces current screen`() {
         val tapToAddHelper = FakeTapToAddHelper()
-        val customerStateHolder = FakeCustomerStateHolder()
+        val interactorFactory = RecordingSavedPaymentMethodConfirmInteractorFactory()
         val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         testScenario(
             tapToAddHelper = tapToAddHelper,
-            customerStateHolder = customerStateHolder,
+            initialScreen = createHorizontalPaymentOptionsScreen(),
+            savedPaymentMethodConfirmInteractorFactory = interactorFactory,
         ) {
-            stateHolder.state.test {
-                awaitAndVerifyInitialState()
-
-                tapToAddHelper.emitNextStep(
-                    TapToAddNextStep.ConfirmSavedPaymentMethod(
-                        paymentSelection = expectedSelection,
+            stateHolder.result.test {
+                navigator.screen.test {
+                    assertThat(awaitItem()).isInstanceOf(
+                        EmbeddedNavigator.Screen.HorizontalPaymentOptions::class.java
                     )
-                )
 
-                assertThat(awaitItem().savedPaymentSelectionToConfirm).isEqualTo(
-                    expectedSelection,
-                )
+                    tapToAddHelper.emitNextStep(
+                        TapToAddNextStep.ConfirmSavedPaymentMethod(
+                            paymentSelection = expectedSelection,
+                        )
+                    )
+
+                    assertThat(awaitItem()).isInstanceOf(
+                        EmbeddedNavigator.Screen.SavedPaymentMethodConfirm::class.java
+                    )
+                    assertThat(navigator.canGoBack).isFalse()
+                }
+
+                expectNoEvents()
             }
+
+            assertThat(interactorFactory.createCalls.awaitItem()).isEqualTo(expectedSelection)
+            interactorFactory.createCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `TapToAddResult confirm saved payment method preserves previous screen and closes replaced form`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        val confirmInteractor = FakeSavedPaymentMethodConfirmInteractor()
+        val interactorFactory = RecordingSavedPaymentMethodConfirmInteractorFactory(confirmInteractor)
+        val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = createVerticalPaymentOptionsScreen(paymentOptionsInteractor)
+        val formInteractor = RecordingVerticalModeFormInteractor()
+        closeFormInteractorRule.track(formInteractor)
+        val formScreen = createFormScreen(formInteractor)
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            initialBackStack = listOf(paymentOptionsScreen, formScreen),
+            savedPaymentMethodConfirmInteractorFactory = interactorFactory,
+        ) {
+            stateHolder.result.test {
+                navigator.screen.test {
+                    assertThat(awaitItem()).isSameInstanceAs(formScreen)
+
+                    tapToAddHelper.emitNextStep(
+                        TapToAddNextStep.ConfirmSavedPaymentMethod(
+                            paymentSelection = expectedSelection,
+                        )
+                    )
+
+                    assertThat(awaitItem()).isInstanceOf(
+                        EmbeddedNavigator.Screen.SavedPaymentMethodConfirm::class.java
+                    )
+                    assertThat(navigator.canGoBack).isTrue()
+                    assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+
+                    navigator.performAction(EmbeddedNavigator.Action.Back)
+
+                    assertThat(awaitItem()).isSameInstanceAs(paymentOptionsScreen)
+                    assertThat(navigator.canGoBack).isFalse()
+                    assertThat(confirmInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+                }
+
+                expectNoEvents()
+            }
+
+            assertThat(interactorFactory.createCalls.awaitItem()).isEqualTo(expectedSelection)
+            interactorFactory.validate()
+            formInteractor.validate()
+            confirmInteractor.validate()
+            paymentOptionsInteractor.validate()
         }
     }
 
@@ -502,6 +584,7 @@ class DefaultSheetActivityStateHolderTest {
         val stateHolder: DefaultSheetActivityStateHolder,
         val confirmationHandler: FakeConfirmationHandler,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
+        val navigator: EmbeddedNavigator,
     )
 
     private fun testScenario(
@@ -512,21 +595,46 @@ class DefaultSheetActivityStateHolderTest {
         launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.Form(
             selectedPaymentMethodCode = "card",
         ),
+        initialScreen: EmbeddedNavigator.Screen = EmbeddedNavigator.Screen.ManageAll(
+            FakeManageScreenInteractor()
+        ),
+        initialBackStack: List<EmbeddedNavigator.Screen> = listOf(initialScreen),
+        savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory =
+            FakeSavedPaymentMethodConfirmInteractor.Factory(),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val confirmationHandler = FakeConfirmationHandler()
+        val viewModelScope = TestScope(UnconfinedTestDispatcher())
+        val navigator = EmbeddedNavigator(
+            coroutineScope = viewModelScope,
+            initialBackStack = initialBackStack,
+            eventReporter = FakeEventReporter(),
+        )
+        lateinit var screenFactory: SavedPaymentMethodConfirmScreenFactory
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = config,
-            coroutineScope = TestScope(UnconfinedTestDispatcher()),
+            coroutineScope = viewModelScope,
             onClickDelegate = onClickOverrideDelegate,
             eventReporter = FakeEventReporter(),
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
+            launchMode = launchMode,
+            embeddedNavigatorProvider = Provider { navigator },
+            savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
+        )
+        screenFactory = SavedPaymentMethodConfirmScreenFactory(
+            interactorFactory = savedPaymentMethodConfirmInteractorFactory,
+            paymentMethodMetadata = paymentMethodMetadata,
+            eventReporter = FakeEventReporter(),
+            sheetActivityStateHolder = stateHolder,
+            confirmationHelper = FakeSheetActivityConfirmationHelper(),
+            embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             launchMode = launchMode,
         )
@@ -536,7 +644,98 @@ class DefaultSheetActivityStateHolderTest {
             stateHolder = stateHolder,
             confirmationHandler = confirmationHandler,
             onClickOverrideDelegate = onClickOverrideDelegate,
+            navigator = navigator,
         ).block()
+    }
+
+    private class RecordingSavedPaymentMethodConfirmInteractorFactory(
+        private val interactor: SavedPaymentMethodConfirmInteractor = FakeSavedPaymentMethodConfirmInteractor(),
+    ) : SavedPaymentMethodConfirmInteractor.Factory {
+        val createCalls = Turbine<PaymentSelection.Saved>()
+
+        override fun create(
+            initialSelection: PaymentSelection.Saved,
+            updateSelection: (PaymentSelection.Saved) -> Unit,
+        ): SavedPaymentMethodConfirmInteractor {
+            createCalls.add(initialSelection)
+            return interactor
+        }
+
+        fun validate() {
+            createCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    private class RecordingVerticalModeFormInteractor : VerticalModeFormInteractor {
+        override val isLiveMode: Boolean = true
+        override val state: StateFlow<VerticalModeFormInteractor.State>
+            get() = error("Not expected")
+
+        val handleViewActionCalls = Turbine<VerticalModeFormInteractor.ViewAction>()
+        val closeCalls = Turbine<Unit>()
+
+        override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
+            handleViewActionCalls.add(viewAction)
+        }
+
+        override fun close() {
+            closeCalls.add(Unit)
+        }
+
+        fun validate() {
+            handleViewActionCalls.ensureAllEventsConsumed()
+            closeCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    private fun createFormScreen(
+        interactor: VerticalModeFormInteractor,
+    ): EmbeddedNavigator.Screen.Form {
+        return EmbeddedNavigator.Screen.Form(
+            formInteractor = interactor,
+            eventReporter = FakeEventReporter(),
+            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+            confirmationHelper = FakeSheetActivityConfirmationHelper(),
+            embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+            customerStateHolder = FakeCustomerStateHolder(),
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        )
+    }
+
+    private fun createVerticalPaymentOptionsScreen(
+        interactor: FakePaymentMethodVerticalLayoutInteractor,
+    ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
+        return EmbeddedNavigator.Screen.VerticalPaymentOptions(
+            interactor = interactor,
+            isLiveMode = true,
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "Continue".resolvableString,
+                    isEnabled = true,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = false,
+                    shouldDisplayLockIcon = false,
+                )
+            ),
+            onContinueClick = {},
+        )
+    }
+
+    private fun createHorizontalPaymentOptionsScreen(): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
+        return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
+            interactor = FakeAddPaymentMethodInteractor(FakeAddPaymentMethodInteractor.createState()),
+            eventReporter = FakeEventReporter(),
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "Continue".resolvableString,
+                    isEnabled = true,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = false,
+                    shouldDisplayLockIcon = false,
+                )
+            ),
+            onContinueClick = {},
+        )
     }
 
     private suspend fun TurbineTestContext<SheetActivityStateHolder.State>.awaitAndVerifyInitialState() {

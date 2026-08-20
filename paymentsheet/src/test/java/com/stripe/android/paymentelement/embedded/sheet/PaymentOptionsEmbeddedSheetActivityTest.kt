@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import org.junit.Rule
@@ -134,6 +135,36 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             assertThat(activity.embeddedNavigator.screen.value)
                 .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         }
+    }
+
+    @Test
+    fun `configuration change keeps saved payment method confirmation screen`() = launch { scenario ->
+        val interactor = FakeSavedPaymentMethodConfirmInteractor()
+        lateinit var originalScreen: EmbeddedNavigator.Screen.SavedPaymentMethodConfirm
+        scenario.onActivity { activity ->
+            originalScreen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
+                interactor = interactor,
+                isLiveMode = true,
+                eventReporter = activity.eventReporter,
+                sheetActivityStateHolder = activity.sheetActivityStateHolder,
+                confirmationHelper = FakeSheetActivityConfirmationHelper(),
+                embeddedSelectionHolder = activity.selectionHolder,
+                customerStateHolder = activity.customerStateHolder,
+                launchMode = EmbeddedLaunchMode.PaymentOptions,
+            )
+            activity.embeddedNavigator.performAction(
+                EmbeddedNavigator.Action.ReplaceCurrentScreen(originalScreen)
+            )
+        }
+        onIdle()
+
+        scenario.recreate()
+        onIdle()
+
+        scenario.onActivity { activity ->
+            assertThat(activity.embeddedNavigator.screen.value).isSameInstanceAs(originalScreen)
+        }
+        interactor.validate()
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
+import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.utils.addPaymentMethodTitle
@@ -37,6 +39,7 @@ import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeFormInsets
@@ -124,6 +127,7 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageAll -> eventReporter.onShowManageSavedPaymentMethods()
             is Screen.ManageUpdate -> eventReporter.onShowEditablePaymentOption()
             is Screen.Form -> Unit
+            is Screen.SavedPaymentMethodConfirm -> Unit
             is Screen.VerticalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
             is Screen.HorizontalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
         }
@@ -134,6 +138,7 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageAll -> Unit
             is Screen.ManageUpdate -> eventReporter.onHideEditablePaymentOption()
             is Screen.Form -> Unit
+            is Screen.SavedPaymentMethodConfirm -> Unit
             is Screen.VerticalPaymentOptions -> Unit
             is Screen.HorizontalPaymentOptions -> Unit
         }
@@ -209,7 +214,6 @@ internal class EmbeddedNavigator private constructor(
             private val sheetActivityStateHolder: SheetActivityStateHolder,
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
-            private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
             private val customerStateHolder: CustomerStateHolder,
             private val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen(), Closeable {
@@ -237,19 +241,14 @@ internal class EmbeddedNavigator private constructor(
                     },
                     onProcessingCompleted = {
                         sheetActivityStateHolder.setResult(
-                            EmbeddedActivityResult.Complete(
-                                selection = null,
-                                previousNewSelections = embeddedSelectionHolder.previousNewSelections,
-                                hasBeenConfirmed = true,
-                                customerState = customerStateHolder.customer.value,
-                                shouldInvokeSelectionCallback = false,
+                            successfulConfirmationResult(
+                                embeddedSelectionHolder = embeddedSelectionHolder,
+                                customerStateHolder = customerStateHolder,
                                 launchMode = launchMode,
                             )
                         )
                     },
                     state = state,
-                    updateSelection = embeddedSelectionHolder::setSelection,
-                    savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
                 )
             }
 
@@ -263,7 +262,6 @@ internal class EmbeddedNavigator private constructor(
                 private val sheetActivityStateHolder: SheetActivityStateHolder,
                 private val confirmationHelper: SheetActivityConfirmationHelper,
                 private val embeddedSelectionHolder: EmbeddedSelectionHolder,
-                private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
                 private val customerStateHolder: CustomerStateHolder,
             ) {
                 fun create(launchMode: EmbeddedLaunchMode.Form): Form {
@@ -279,12 +277,62 @@ internal class EmbeddedNavigator private constructor(
                         sheetActivityStateHolder = sheetActivityStateHolder,
                         confirmationHelper = confirmationHelper,
                         embeddedSelectionHolder = embeddedSelectionHolder,
-                        savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
                         customerStateHolder = customerStateHolder,
                         launchMode = launchMode,
                     )
                 }
             }
+        }
+
+        class SavedPaymentMethodConfirm(
+            private val interactor: SavedPaymentMethodConfirmInteractor,
+            private val isLiveMode: Boolean,
+            private val eventReporter: EventReporter,
+            private val sheetActivityStateHolder: SheetActivityStateHolder,
+            private val confirmationHelper: SheetActivityConfirmationHelper,
+            private val embeddedSelectionHolder: EmbeddedSelectionHolder,
+            private val customerStateHolder: CustomerStateHolder,
+            private val launchMode: EmbeddedLaunchMode,
+        ) : Screen(), Closeable {
+            override fun topBarState() = stateFlowOf(
+                PaymentSheetTopBarStateFactory.create(isLiveMode, PaymentSheetTopBarState.Editable.Never)
+            )
+
+            override fun title() = stateFlowOf<ResolvableString?>(null)
+            override fun isPerformingNetworkOperation() = sheetActivityStateHolder.state.mapAsStateFlow {
+                it.isProcessing
+            }
+
+            @Composable
+            override fun Content() {
+                val state by sheetActivityStateHolder.state.collectAsState()
+                DismissKeyboardOnProcessing(state.isProcessing)
+
+                EventReporterProvider(eventReporter) {
+                    Column {
+                        SavedPaymentMethodConfirmUI(interactor)
+                        USBankAccountMandate(state)
+                        FormActivityError(state)
+                        Spacer(Modifier.height(40.dp))
+                        FormActivityPrimaryButton(
+                            state = state,
+                            onProcessingCompleted = {
+                                sheetActivityStateHolder.setResult(
+                                    successfulConfirmationResult(
+                                        embeddedSelectionHolder = embeddedSelectionHolder,
+                                        customerStateHolder = customerStateHolder,
+                                        launchMode = launchMode,
+                                    )
+                                )
+                            },
+                            onClick = confirmationHelper::confirm,
+                        )
+                        PaymentSheetContentPadding()
+                    }
+                }
+            }
+
+            override fun close() = interactor.close()
         }
 
         class VerticalPaymentOptions(
@@ -386,3 +434,16 @@ internal class EmbeddedNavigator private constructor(
         data class ReplaceCurrentScreen(val screen: Screen) : Action()
     }
 }
+
+private fun successfulConfirmationResult(
+    embeddedSelectionHolder: EmbeddedSelectionHolder,
+    customerStateHolder: CustomerStateHolder,
+    launchMode: EmbeddedLaunchMode,
+) = EmbeddedActivityResult.Complete(
+    selection = null,
+    previousNewSelections = embeddedSelectionHolder.previousNewSelections,
+    hasBeenConfirmed = true,
+    customerState = customerStateHolder.customer.value,
+    shouldInvokeSelectionCallback = false,
+    launchMode = launchMode,
+)
