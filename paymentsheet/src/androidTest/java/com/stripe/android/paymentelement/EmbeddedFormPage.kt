@@ -1,6 +1,8 @@
 package com.stripe.android.paymentelement
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -75,17 +77,7 @@ internal class EmbeddedFormPage(
     }
 
     fun clickPrimaryButton() {
-        waitUntilVisible()
-
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(isEnabled()))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
-
-        composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
-            .performScrollTo()
-            .performClick()
+        clickPrimaryButtonWithoutWaitingForDismissal()
 
         composeTestRule.waitUntil(5.seconds.inWholeMilliseconds) {
             composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
@@ -94,6 +86,31 @@ internal class EmbeddedFormPage(
         }
 
         composeTestRule.waitForIdle()
+    }
+
+    fun clickPrimaryButtonWithoutWaitingForDismissal() {
+        waitUntilVisible()
+        waitUntilPrimaryButtonIsEnabled()
+
+        primaryButton()
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun assertPrimaryButtonIsEnabled() {
+        waitUntilPrimaryButtonIsEnabled()
+        primaryButton().assertIsEnabled()
+    }
+
+    fun assertErrorIsShown(message: String) {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.onAllNodes(hasText(message))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+        composeTestRule.onNode(hasText(message))
+            .performScrollTo()
+            .assertIsDisplayed()
     }
 
     fun assertMandateIsShown() {
@@ -108,5 +125,17 @@ internal class EmbeddedFormPage(
 
         composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
             .assertDoesNotExist()
+    }
+
+    private fun waitUntilPrimaryButtonIsEnabled() {
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(isEnabled()))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+    }
+
+    private fun primaryButton(): SemanticsNodeInteraction {
+        return composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
     }
 }
