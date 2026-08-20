@@ -3,8 +3,10 @@ package com.stripe.android.checkout
 import com.stripe.android.checkout.injection.AppName
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.ece.asPaymentSheet
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
 
@@ -16,17 +18,45 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
+    ): CommonConfiguration = createCommonConfiguration(
+        configuration = configuration,
+        checkoutSessionResponse = checkoutSessionResponse,
+        collectedDetails = collectedDetails,
+        linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
+        billingDetailsCollectionConfiguration =
+            configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
+    )
+
+    fun createForExpressCheckoutElement(
+        configuration: CheckoutController.Configuration.State,
+        checkoutSessionResponse: CheckoutSessionResponse,
+        collectedDetails: CheckoutCollectedDetails,
+    ): CommonConfiguration = createCommonConfiguration(
+        configuration = configuration,
+        checkoutSessionResponse = checkoutSessionResponse,
+        collectedDetails = collectedDetails,
+        linkConfiguration = configuration.expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
+        billingDetailsCollectionConfiguration = configuration.expressCheckoutElementConfiguration
+            .billingDetailsCollectionConfiguration
+            .asPaymentSheet(requiresBillingAddress = checkoutSessionResponse.requiresBillingAddress),
+    )
+
+    private fun createCommonConfiguration(
+        configuration: CheckoutController.Configuration.State,
+        checkoutSessionResponse: CheckoutSessionResponse,
+        collectedDetails: CheckoutCollectedDetails,
+        linkConfiguration: PaymentSheet.LinkConfiguration,
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
         customer = ConfigurationDefaults.customer,
         googlePay = configuration.toGooglePayConfiguration(checkoutSessionResponse),
-        link = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
+        link = linkConfiguration,
         defaultBillingDetails = collectedDetails.toBillingDetails(checkoutSessionResponse),
         shippingDetails = collectedDetails.toShippingDetails(),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
-        billingDetailsCollectionConfiguration =
-            configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
+        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         preferredNetworks = configuration.paymentElementConfiguration.preferredNetworks,
         allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
         paymentMethodOrder = configuration.paymentElementConfiguration.paymentMethodOrder,

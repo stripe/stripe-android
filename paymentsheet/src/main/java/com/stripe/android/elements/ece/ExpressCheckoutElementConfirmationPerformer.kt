@@ -2,10 +2,10 @@ package com.stripe.android.elements.ece
 
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutAnalyticsPerformer
+import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
-import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -28,6 +28,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     private val confirmationHandler: ConfirmationHandler,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val analyticsPerformer: CheckoutAnalyticsPerformer,
+    private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -69,13 +70,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         state: CheckoutControllerState,
         expressButton: ExpressButton,
     ): ConfirmationHandler.Args? {
-        val configuration = state.commonConfiguration.copy(
-            link = state.configuration.expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
-            billingDetailsCollectionConfiguration = state.configuration.expressCheckoutElementConfiguration
-                .billingDetailsCollectionConfiguration
-                .asPaymentSheet(
-                    requiresBillingAddress = state.checkoutSessionResponse.requiresBillingAddress
-                ),
+        val configuration = commonConfigurationFactory.createForExpressCheckoutElement(
+            configuration = state.configuration,
+            checkoutSessionResponse = state.checkoutSessionResponse,
+            collectedDetails = state.collectedDetails,
         )
         val shippingAddressRequired = (expressButton as? ExpressButton.GooglePay)?.shippingAddressRequired == true
         val shippingAddressParameters = if (shippingAddressRequired) {
