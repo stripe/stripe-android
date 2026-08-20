@@ -48,11 +48,13 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
         }
     }
 
-    private fun ExpressCheckoutElement.PaymentMethod.matches(expressButtonType: ExpressButtonType): Boolean {
+    private fun ExpressCheckoutElement.Configuration.PaymentMethodType.matches(
+        expressButtonType: ExpressButtonType,
+    ): Boolean {
         return when (this) {
-            is ExpressCheckoutElement.PaymentMethod.GooglePay -> expressButtonType is ExpressButtonType.GooglePay
-            is ExpressCheckoutElement.PaymentMethod.Link -> expressButtonType is ExpressButtonType.Link
-            else -> false
+            ExpressCheckoutElement.Configuration.PaymentMethodType.GooglePay ->
+                expressButtonType is ExpressButtonType.GooglePay
+            ExpressCheckoutElement.Configuration.PaymentMethodType.Link -> expressButtonType is ExpressButtonType.Link
         }
     }
 }

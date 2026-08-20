@@ -29,14 +29,12 @@ class ExpressCheckoutElement @Inject internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     /** Payment methods supported by the Express Checkout Element. */
-    abstract class PaymentMethod private constructor() : Parcelable {
+    abstract class PaymentMethod private constructor() {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Parcelize
         class GooglePay internal constructor() : PaymentMethod()
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Parcelize
         class Link internal constructor() : PaymentMethod()
     }
 
@@ -387,15 +385,26 @@ class ExpressCheckoutElement @Inject internal constructor(
             val googlePayConfiguration: GooglePayConfiguration.State,
             val shippingAddressRequired: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
-            val paymentMethodOrder: List<PaymentMethod>,
+            val paymentMethodOrder: List<PaymentMethodType>,
         ) : Parcelable
+
+        internal enum class PaymentMethodType {
+            GooglePay,
+            Link,
+        }
 
         internal fun build(): State = State(
             linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
             shippingAddressRequired = shippingAddressRequired,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
-            paymentMethodOrder = paymentMethodOrder.toList(),
+            paymentMethodOrder = paymentMethodOrder.map { paymentMethod ->
+                when (paymentMethod) {
+                    is PaymentMethod.GooglePay -> PaymentMethodType.GooglePay
+                    is PaymentMethod.Link -> PaymentMethodType.Link
+                    else -> error("Unsupported payment method: ${paymentMethod::class.java.name}")
+                }
+            },
         )
     }
 }
