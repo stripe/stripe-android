@@ -141,6 +141,7 @@ internal class FinancialConnectionsTestLabTest {
         ui.waitForText("Search")
         ui.swipeUp(4)
         ui.clickText("Down (Unscheduled)")
+        ui.waitForText("Down (Unscheduled) is currently unavailable")
         ui.clickTextOrDescription("Close icon")
         ui.swipeUp(2)
         ui.waitForTextRegex("Failed! Request-id: .*")
@@ -432,8 +433,6 @@ private class TestLabUi(
         timeoutMs: Long,
     ) {
         val deadline = System.currentTimeMillis() + timeoutMs
-        var lastClickAt: Long? = null
-        var missingSince: Long? = null
         while (System.currentTimeMillis() < deadline) {
             val matchedNode = selectors.firstNotNullOfOrNull { selector ->
                 try {
@@ -443,24 +442,14 @@ private class TestLabUi(
                     null
                 }
             }
-            if (matchedNode == null) {
-                val now = System.currentTimeMillis()
-                missingSince = missingSince ?: now
-                if (lastClickAt != null && now - missingSince >= STABLE_ABSENCE_MS) {
+            if (matchedNode?.isEnabled == true) {
+                try {
+                    val bounds = matchedNode.visibleBounds
+                    device.click(bounds.centerX(), bounds.centerY())
+                    device.waitForIdle()
                     return
-                }
-            } else {
-                missingSince = null
-                val now = System.currentTimeMillis()
-                if (lastClickAt == null || now - lastClickAt >= REPEATED_CLICK_INTERVAL_MS) {
-                    try {
-                        val bounds = matchedNode.visibleBounds
-                        device.click(bounds.centerX(), bounds.centerY())
-                        device.waitForIdle()
-                        lastClickAt = now
-                    } catch (_: StaleObjectException) {
-                        // The hosted or Compose hierarchy changed; reacquire the control.
-                    }
+                } catch (_: StaleObjectException) {
+                    // The hosted or Compose hierarchy changed; reacquire the control.
                 }
             }
             Thread.sleep(POLL_INTERVAL_MS)
@@ -511,8 +500,6 @@ private class TestLabUi(
         const val CHROME_PROMPT_TIMEOUT_MS = 3_000L
         const val MAX_HIERARCHY_LENGTH = 8_000
         const val POLL_INTERVAL_MS = 250L
-        const val REPEATED_CLICK_INTERVAL_MS = 1_000L
-        const val STABLE_ABSENCE_MS = 1_000L
     }
 }
 
