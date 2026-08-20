@@ -234,8 +234,6 @@
   <string name="stripe_select">Sélectionner</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Les captures d\'égoportraits sont terminées</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Captures d\'égoportraits</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Génial! Vérification de vos images…</string>
   <!-- Content description of a captured selfie -->

@@ -234,26 +234,6 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `maps allowed card funding types to embedded configuration`() {
-        val configuration = CheckoutController.Configuration()
-            .paymentElement(
-                PaymentElement.Configuration().allowedCardFundingTypes(
-                    listOf(PaymentElement.Configuration.CardFundingType.Debit)
-                )
-            )
-            .build()
-
-        val result = factory().create(
-            configuration = configuration,
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            collectedDetails = collectedDetails(),
-        )
-
-        assertThat(result.allowedCardFundingTypes)
-            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
-    }
-
-    @Test
     fun `maps googlePay regardless of ECE display setting`() {
         val result = factory().create(
             configuration = controllerConfiguration(
@@ -288,14 +268,14 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `sources the billing email from the checkout session customer email`() {
+    fun `sources the collected billing email over the checkout session customer email`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
-            collectedDetails = collectedDetails(),
+            collectedDetails = collectedDetails(email = "collected@example.com"),
         )
 
-        assertThat(result.defaultBillingDetails?.email).isEqualTo("checkout@example.com")
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("collected@example.com")
     }
 
     @Test
@@ -392,12 +372,14 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     private fun collectedDetails(
+        email: String? = null,
         shippingName: String? = null,
         billingName: String? = null,
         shippingAddress: Address.State? = null,
         billingAddress: Address.State? = null,
     ): CheckoutCollectedDetails {
         return CheckoutCollectedDetails(
+            email = email,
             shippingName = shippingName,
             billingName = billingName,
             shippingAddress = shippingAddress,

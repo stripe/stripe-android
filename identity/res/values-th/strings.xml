@@ -234,8 +234,6 @@
   <string name="stripe_select">เลือก</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">ถ่ายเซลฟีเรียบร้อยแล้ว</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">ถ่ายเซลฟี</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">เยี่ยม! กำลังตรวจสอบรูปภาพของคุณ....</string>
   <!-- Content description of a captured selfie -->

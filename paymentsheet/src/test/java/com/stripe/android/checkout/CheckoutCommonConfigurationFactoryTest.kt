@@ -247,34 +247,14 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `maps allowed card funding types to common configuration`() {
-        val configuration = CheckoutController.Configuration()
-            .paymentElement(
-                PaymentElement.Configuration().allowedCardFundingTypes(
-                    listOf(PaymentElement.Configuration.CardFundingType.Debit)
-                )
-            )
-            .build()
-
-        val result = factory().create(
-            configuration = configuration,
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            collectedDetails = collectedDetails(),
-        )
-
-        assertThat(result.allowedCardFundingTypes)
-            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
-    }
-
-    @Test
-    fun `sources the billing email from the checkout session customer email`() {
+    fun `sources the collected billing email over the checkout session customer email`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
-            collectedDetails = collectedDetails(),
+            collectedDetails = collectedDetails(email = "collected@example.com"),
         )
 
-        assertThat(result.defaultBillingDetails?.email).isEqualTo("checkout@example.com")
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("collected@example.com")
     }
 
     @Test
@@ -319,13 +299,15 @@ internal class CheckoutCommonConfigurationFactoryTest {
         val result = factory().create(
             configuration = controllerConfiguration(
                 appearance = PaymentElement.Configuration.Appearance()
-                    .shapes(PaymentElement.Configuration.Appearance.Shapes().cornerRadiusDp(3f))
+                    .colorsLight(
+                        PaymentElement.Configuration.Appearance.Colors.light().primary(0xFF123456.toInt())
+                    )
             ),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.appearance.shapes.cornerRadiusDp).isEqualTo(3f)
+        assertThat(result.appearance.colorsLight.primary).isEqualTo(0xFF123456.toInt())
     }
 
     private fun factory(appName: String = "Test App") = CheckoutCommonConfigurationFactory(appName)
@@ -361,12 +343,14 @@ internal class CheckoutCommonConfigurationFactoryTest {
     )
 
     private fun collectedDetails(
+        email: String? = null,
         shippingName: String? = null,
         billingName: String? = null,
         shippingAddress: Address.State? = null,
         billingAddress: Address.State? = null,
     ): CheckoutCollectedDetails {
         return CheckoutCollectedDetails(
+            email = email,
             shippingName = shippingName,
             billingName = billingName,
             shippingAddress = shippingAddress,

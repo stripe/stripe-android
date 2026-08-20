@@ -40,7 +40,7 @@ internal interface PaymentElementModule {
 
     @Binds
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
-        handler: DefaultEmbeddedRowSelectionImmediateActionHandler
+        handler: DefaultEmbeddedRowSelectionImmediateActionHandler,
     ): EmbeddedRowSelectionImmediateActionHandler
 
     @Binds
@@ -63,7 +63,6 @@ internal interface PaymentElementModule {
                 state?.let {
                     EmbeddedContentHelperStateHolder.State(
                         paymentMethodMetadata = it.paymentMethodMetadata,
-                        appearance = it.embeddedConfiguration.appearance.embeddedAppearance,
                         embeddedViewDisplaysMandateText = it.embeddedConfiguration.embeddedViewDisplaysMandateText,
                         configuration = it.embeddedConfiguration,
                     )

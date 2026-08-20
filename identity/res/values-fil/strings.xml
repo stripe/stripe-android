@@ -234,8 +234,6 @@
   <string name="stripe_select">Piliin</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Kumpleto na ang mga pagkuha ng selfie</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Mga pagkuha ng selfie</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Mahusay! Sinusuri ang iyong mga larawan....</string>
   <!-- Content description of a captured selfie -->

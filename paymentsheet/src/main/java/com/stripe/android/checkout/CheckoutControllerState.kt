@@ -32,6 +32,7 @@ internal data class CheckoutControllerState(
         availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
     ): Session {
         return checkoutSessionResponse.asCheckoutSession(
+            collectedEmail = collectedDetails.email,
             flagImages = flagImages,
             paymentOptionDisplayData = paymentOptionFactory.create(
                 selection = paymentSelection,

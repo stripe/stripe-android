@@ -10,11 +10,10 @@ internal fun PaymentElement.Configuration.LinkConfiguration.State.asPaymentSheet
     PaymentSheet.LinkConfiguration =
     PaymentSheet.LinkConfiguration(
         display = display.asPaymentSheet(),
-        collectMissingBillingDetailsForExistingPaymentMethods =
-            collectMissingBillingDetailsForExistingPaymentMethods,
+        collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = true,
         allowLogOut = true,
-        disallowFundingSourceCreation = disallowFundingSourceCreation,
+        disallowFundingSourceCreation = emptySet(),
     )
 
 @OptIn(CheckoutSessionPreview::class)

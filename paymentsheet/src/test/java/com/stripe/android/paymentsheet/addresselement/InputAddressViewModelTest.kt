@@ -984,6 +984,7 @@ class InputAddressViewModelTest {
     // Core controller logic (predictions, debouncing, selection, suppression, dismissal)
     // is tested in InlineAutocompleteControllerTest.
 
+    @Suppress("DEPRECATION")
     private fun createInlineViewModel(
         googlePlacesApiKey: String = "test_key",
         autocompleteCountries: Set<String> = emptySet(),

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -37,8 +38,8 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -302,7 +303,7 @@ internal class EmbeddedNavigator private constructor(
             override fun Content() {
                 PaymentMethodVerticalLayoutUI(
                     interactor = interactor,
-                    modifier = Modifier.padding(StripeTheme.getOuterFormInsets()),
+                    modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
                 )
                 Spacer(Modifier.height(40.dp))
                 val state by sheetActivityState.collectAsState()

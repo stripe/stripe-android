@@ -215,6 +215,7 @@ internal fun createTestConfirmationHandlerFactory(
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 ),
                 GooglePayConfirmationDefinition(
+                    instanceId = paymentElementCallbackIdentifier,
                     context = ApplicationProvider.getApplicationContext(),
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                     userFacingLogger = FakeUserFacingLogger(),

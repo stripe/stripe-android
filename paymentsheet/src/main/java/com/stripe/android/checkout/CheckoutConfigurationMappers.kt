@@ -37,9 +37,14 @@ internal fun CheckoutCollectedDetails.toBillingDetails(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(
     address = billingAddress?.asPaymentSheet(),
-    email = checkoutSessionResponse.customerEmail,
+    email = resolveEmail(checkoutSessionResponse),
     name = billingName,
 )
+
+@OptIn(CheckoutSessionPreview::class)
+internal fun CheckoutCollectedDetails.resolveEmail(
+    response: CheckoutSessionResponse,
+): String? = email ?: response.customerEmail
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutCollectedDetails.toShippingDetails(): AddressDetails = AddressDetails(

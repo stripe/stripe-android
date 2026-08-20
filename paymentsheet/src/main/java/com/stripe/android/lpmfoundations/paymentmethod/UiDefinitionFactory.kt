@@ -32,7 +32,7 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal sealed interface UiDefinitionFactory {
-    class Arguments(
+    data class Arguments(
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
         val initialValues: Map<IdentifierSpec, String?>,

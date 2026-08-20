@@ -24,12 +24,12 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
@@ -71,6 +71,17 @@ internal class CheckoutStateLoaderTest {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `loadInitial reports immediate row selection action to payment element loader`() = runScenario(
+        internalRowSelectionCallback = {},
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        val integrationConfiguration = paymentElementLoader.lastIntegrationConfiguration
+            as PaymentElementLoader.Configuration.Embedded
+        assertThat(integrationConfiguration.isRowSelectionImmediateAction).isTrue()
     }
 
     @Test
@@ -150,23 +161,6 @@ internal class CheckoutStateLoaderTest {
         )
 
         assertThat(stateHolder.state?.commonConfiguration?.opensCardScannerAutomatically).isTrue()
-    }
-
-    @Test
-    fun `loadInitial passes allowed card funding types to common configuration`() = runScenario {
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration()
-                .paymentElement(
-                    PaymentElement.Configuration().allowedCardFundingTypes(
-                        listOf(PaymentElement.Configuration.CardFundingType.Debit)
-                    )
-                )
-                .build(),
-            checkoutSessionResponse = response(),
-        )
-
-        assertThat(stateHolder.state?.commonConfiguration?.allowedCardFundingTypes)
-            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
     }
 
     @Test
@@ -418,13 +412,13 @@ internal class CheckoutStateLoaderTest {
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
-        collectedDetails = CheckoutCollectedDetails(),
+        collectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         commonConfiguration = CheckoutCommonConfigurationFactory(appName = "Example, Inc.").create(
             configuration = CheckoutController.Configuration().build(),
             checkoutSessionResponse = checkoutSessionResponse,
-            collectedDetails = CheckoutCollectedDetails(),
+            collectedDetails = CheckoutCollectedDetails(email = null),
         ),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
@@ -452,6 +446,7 @@ internal class CheckoutStateLoaderTest {
         shouldFail: Boolean = false,
         isGooglePayAvailable: Boolean = false,
         customer: CustomerState? = null,
+        internalRowSelectionCallback: (() -> Unit)? = null,
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
@@ -493,6 +488,7 @@ internal class CheckoutStateLoaderTest {
             selectionChooser = chooser,
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
+            internalRowSelectionCallback = { internalRowSelectionCallback },
         )
 
         Scenario(
