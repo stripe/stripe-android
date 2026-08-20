@@ -1,5 +1,6 @@
 package com.stripe.android.elements.ece
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -16,6 +17,30 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun ExpressCheckoutElementContent(
     interactor: ExpressCheckoutElementInteractor,
 ) {
+    ExpressCheckoutElementContent(
+        interactor = interactor,
+        googlePayButton = { button, onPressed ->
+            GooglePayButton(
+                state = PrimaryButton.State.Ready,
+                allowCreditCards = button.allowCreditCards,
+                buttonType = button.googlePayButtonType,
+                billingAddressParameters = button.billingAddressParameters,
+                isEnabled = true,
+                cardBrandFilter = button.cardBrandFilter,
+                cardFundingFilter = button.cardFundingFilter,
+                additionalEnabledNetworks = button.additionalEnabledNetworks,
+                onPressed = onPressed,
+            )
+        },
+    )
+}
+
+@VisibleForTesting
+@Composable
+internal fun ExpressCheckoutElementContent(
+    interactor: ExpressCheckoutElementInteractor,
+    googlePayButton: @Composable (ExpressButton.GooglePay, () -> Unit) -> Unit,
+) {
     val state by interactor.state.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -28,23 +53,13 @@ internal fun ExpressCheckoutElementContent(
         state.expressButtons.forEach { button ->
             key(button) {
                 when (button) {
-                    is ExpressButton.GooglePay -> GooglePayButton(
-                        state = PrimaryButton.State.Ready,
-                        allowCreditCards = button.allowCreditCards,
-                        buttonType = button.googlePayButtonType,
-                        billingAddressParameters = button.billingAddressParameters,
-                        isEnabled = true,
-                        cardBrandFilter = button.cardBrandFilter,
-                        cardFundingFilter = button.cardFundingFilter,
-                        additionalEnabledNetworks = button.additionalEnabledNetworks,
-                        onPressed = {
-                            interactor.handleViewAction(
-                                ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
-                                    expressButton = button,
-                                )
+                    is ExpressButton.GooglePay -> googlePayButton(button) {
+                        interactor.handleViewAction(
+                            ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
+                                expressButton = button,
                             )
-                        },
-                    )
+                        )
+                    }
                     is ExpressButton.Link -> LinkButton(
                         state = button.state,
                         enabled = true,
