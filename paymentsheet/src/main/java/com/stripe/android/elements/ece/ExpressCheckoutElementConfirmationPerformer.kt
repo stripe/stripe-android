@@ -67,11 +67,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             } catch (error: CancellationException) {
                 throw error
             } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
-                try {
-                    operationCoordinator.failConfirmation(error)
-                } finally {
-                    analyticsPerformer.onConfirmationFinishedWithoutResult()
-                }
+                operationCoordinator.failConfirmation(error)
             }
         }
     }

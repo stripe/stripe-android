@@ -22,23 +22,17 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         saveConfirmation(IntegrationType.ExpressCheckoutElement, paymentSelection)
     }
 
-    fun onConfirmationFinishedWithoutResult() {
-        clearConfirmation()
-    }
-
     suspend fun reportConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
                 val integrationType = savedStateHandle.get<IntegrationType>(INTEGRATION_TYPE_KEY)
                 val paymentSelection = savedStateHandle.get<PaymentSelection>(PAYMENT_SELECTION_KEY)
 
-                try {
-                    if (integrationType != null && paymentSelection != null) {
-                        eventReporter.reportPaymentResult(state.result, paymentSelection)
-                    }
-                } finally {
-                    clearConfirmation()
+                if (integrationType != null && paymentSelection != null) {
+                    eventReporter.reportPaymentResult(state.result, paymentSelection)
                 }
+
+                clearConfirmation()
             }
         }
     }
