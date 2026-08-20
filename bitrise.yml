@@ -148,9 +148,9 @@ workflows:
             - content: |-
                 #!/usr/bin/env bash
                 set -euo pipefail
-                ./gradlew :financial-connections-example:assembleDebugAndroidTest \
+                ./gradlew :financial-connections-example-e2e:assembleDebug \
                   -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL="$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL"
-                test_apk=$(compgen -G 'financial-connections-example/build/outputs/apk/androidTest/debug/*.apk')
+                test_apk=$(compgen -G 'financial-connections-example-e2e/build/outputs/apk/debug/*.apk')
                 [[ -f "$test_apk" ]] || {
                   echo "Missing Financial Connections Test Lab test APK" >&2
                   exit 1

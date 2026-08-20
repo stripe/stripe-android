@@ -2,9 +2,9 @@ apply plugin: 'com.android.test'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace 'com.stripe.android.connect.example.e2e'
+    namespace 'com.stripe.android.financialconnections.example.e2e'
     compileSdkVersion rootProject.ext.compileSdkVersion
-    targetProjectPath = ':connect-example'
+    targetProjectPath = ':financial-connections-example'
 
     defaultConfig {
         minSdkVersion 23
