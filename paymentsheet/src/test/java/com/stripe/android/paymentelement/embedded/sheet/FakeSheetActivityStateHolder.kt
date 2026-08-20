@@ -4,28 +4,30 @@ import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
-internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
-    val selectionTurbine = Turbine<PaymentSelection.Saved?>()
+internal class FakeSheetActivityStateHolder(
+    initialState: SheetActivityStateHolder.State = SheetActivityStateHolder.State(
+        primaryButtonLabel = "".resolvableString,
+        isEnabled = false,
+        processingState = PrimaryButtonProcessingState.Idle(null),
+        isProcessing = false,
+        shouldDisplayLockIcon = true,
+    ),
+) : SheetActivityStateHolder {
+    private val _state = MutableStateFlow(initialState)
+    override val state: StateFlow<SheetActivityStateHolder.State> = _state.asStateFlow()
 
-    override val state: StateFlow<SheetActivityStateHolder.State>
-        get() = stateFlowOf(
-            SheetActivityStateHolder.State(
-                primaryButtonLabel = "".resolvableString,
-                isEnabled = false,
-                processingState = PrimaryButtonProcessingState.Idle(null),
-                isProcessing = false,
-                shouldDisplayLockIcon = true,
-                savedPaymentSelectionToConfirm = null,
-            )
-        )
+    fun updateState(transform: (SheetActivityStateHolder.State) -> SheetActivityStateHolder.State) {
+        _state.update(transform)
+    }
 
     val resultTurbine = Turbine<EmbeddedActivityResult>()
     val updateErrorTurbine = Turbine<ResolvableString?>()
@@ -46,10 +48,6 @@ internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
 
     override fun setResult(result: EmbeddedActivityResult) {
         resultTurbine.add(result)
-    }
-
-    override fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?) {
-        selectionTurbine.add(selection)
     }
 
     fun validate() {

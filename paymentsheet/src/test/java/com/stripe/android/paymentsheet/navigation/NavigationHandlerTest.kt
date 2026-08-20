@@ -261,6 +261,78 @@ internal class NavigationHandlerTest {
     }
 
     @Test
+    fun `replaceCurrentScreen preserves backstack and closes replaced screen`() = runTest {
+        val initialScreen = mock<PaymentSheetScreen>()
+        val replacedScreen = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+        val replacementScreen = mock<PaymentSheetScreen>()
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = this,
+            initialScreen = initialScreen,
+            shouldRemoveInitialScreenOnTransition = false,
+        ) {}
+
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigationHandler.transitionTo(replacedScreen)
+            assertThat(awaitItem()).isEqualTo(replacedScreen)
+
+            val replaced = navigationHandler.replaceCurrentScreen(replacementScreen)
+
+            assertThat(replaced).isTrue()
+            assertThat(awaitItem()).isEqualTo(replacementScreen)
+            assertThat(navigationHandler.previousScreen.value).isEqualTo(initialScreen)
+            assertThat(navigationHandler.canGoBack).isTrue()
+            verify(replacedScreen as Closeable).close()
+        }
+    }
+
+    @Test
+    fun `replaceCurrentScreen replaces root without adding to backstack`() = runTest {
+        val initialScreen = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+        val replacementScreen = mock<PaymentSheetScreen>()
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = this,
+            initialScreen = initialScreen,
+            shouldRemoveInitialScreenOnTransition = false,
+        ) {}
+
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+
+            val replaced = navigationHandler.replaceCurrentScreen(replacementScreen)
+
+            assertThat(replaced).isTrue()
+            assertThat(awaitItem()).isEqualTo(replacementScreen)
+            assertThat(navigationHandler.previousScreen.value).isNull()
+            assertThat(navigationHandler.canGoBack).isFalse()
+            verify(initialScreen as Closeable).close()
+        }
+    }
+
+    @Test
+    fun `replaceCurrentScreen closes replacement while transition is in progress`() = runTest {
+        val testScope = TestScope()
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = testScope,
+            initialScreen = PaymentSheetScreen.Loading,
+        ) {}
+
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
+            val pendingScreen = mock<PaymentSheetScreen>()
+            navigationHandler.transitionToWithDelay(pendingScreen)
+            val droppedReplacement = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+
+            val replaced = navigationHandler.replaceCurrentScreen(droppedReplacement)
+
+            assertThat(replaced).isFalse()
+            verify(droppedReplacement as Closeable).close()
+            testScope.testScheduler.advanceTimeBy(251.milliseconds)
+            assertThat(awaitItem()).isEqualTo(pendingScreen)
+        }
+    }
+
+    @Test
     fun `pop removes the top screen from the backstack`() = runTest {
         var calledPopHandler = false
         val screenOne = mock<PaymentSheetScreen>()
