@@ -4,7 +4,7 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
-* [DEPRECATED] Deprecated the `googlePlacesApiKey` builder methods. Stripe-hosted autocomplete does not require a merchant-provided Google Places API key.
+* [DEPRECATED] Deprecated the `googlePlacesApiKey` builder methods. Address autocomplete is now available to all merchants without providing a Google Places API key. Existing integrations can remove the key without losing autocomplete, and integrations that did not provide one receive autocomplete automatically.
 
 ## 23.16.0 - 2026-08-18
 
