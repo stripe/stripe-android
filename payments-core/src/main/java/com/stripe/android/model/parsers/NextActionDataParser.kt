@@ -157,9 +157,9 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             json: JSONObject
         ): StripeIntent.NextActionData.AlipayRedirect {
             return StripeIntent.NextActionData.AlipayRedirect(
-                json.getString(FIELD_NATIVE_DATA),
-                json.getString(FIELD_URL),
-                optString(json, FIELD_RETURN_URL)
+                data = optString(json, FIELD_NATIVE_DATA),
+                webViewUrl = json.getString(FIELD_URL),
+                returnUrl = optString(json, FIELD_RETURN_URL),
             )
         }
 

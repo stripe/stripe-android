@@ -26,7 +26,7 @@ internal class DefaultAlipayRepository(
 
         val nextActionData = paymentIntent.nextActionData
 
-        if (nextActionData is StripeIntent.NextActionData.AlipayRedirect) {
+        if (nextActionData is StripeIntent.NextActionData.AlipayRedirect && nextActionData.data != null) {
             val output = authenticator.onAuthenticationRequest(nextActionData.data)
             val result = output[ALIPAY_RESULT_FIELD]
 
