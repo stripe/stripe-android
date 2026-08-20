@@ -76,8 +76,6 @@ fi
 run_identifier=${BITRISE_BUILD_SLUG:-local-$(date -u +%Y%m%dT%H%M%SZ)}
 run_identifier=${run_identifier//[^[:alnum:]._-]/-}
 results_prefix="bitrise/$run_identifier"
-build_number=${BITRISE_BUILD_NUMBER:-local}
-
 declare -a test_names=()
 declare -a test_pids=()
 
@@ -275,7 +273,7 @@ for scenario_index in 0 1 2 3 4 5 6; do
     "$artifact_dir/financial-connections-example.apk" \
     "$device_model" \
     "class com.stripe.android.financialconnections.example.FinancialConnectionsTestLabTest" \
-    "scenarioIndex=$scenario_index,buildNumber=$build_number" \
+    "scenarioIndex=$scenario_index" \
     false
 done
 

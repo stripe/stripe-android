@@ -9,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
+import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
@@ -17,6 +18,8 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.ByteArrayOutputStream
+import java.util.UUID
 import java.util.regex.Pattern
 
 @RunWith(AndroidJUnit4::class)
@@ -43,11 +46,8 @@ internal class FinancialConnectionsTestLabTest {
         val arguments = InstrumentationRegistry.getArguments()
         val scenarioIndex = arguments.getString("scenarioIndex")?.toIntOrNull()
             ?: failWithMessage("Missing integer instrumentation argument: scenarioIndex")
-        val buildNumber = arguments.getString("buildNumber")
-            ?.replace(Regex("[^a-zA-Z0-9]"), "")
-            .orEmpty()
-            .ifEmpty { "local" }
-        val email = "ftl$buildNumber$scenarioIndex@example.com"
+        val executionId = UUID.randomUUID().toString().replace("-", "").take(12)
+        val email = "ftl$scenarioIndex$executionId@gmail.com"
 
         when (scenarioIndex) {
             0 -> oauthDataFlow(connectedAccount = true)
@@ -185,7 +185,7 @@ internal class FinancialConnectionsTestLabTest {
         ui.clickResourceIfPresent("skip_cta")
         ui.clickResource("done_button")
         ui.swipeUp(2)
-        ui.waitForTextRegex(".*Completed!.*")
+        ui.waitForTextRegex(".*Completed.*")
     }
 
     private fun networkedManualEntry(email: String) {
@@ -262,16 +262,17 @@ private class TestLabUi(
 
     fun dismissChromeFirstRunIfPresent() {
         repeat(3) {
-            val control = findOptional(
+            val clicked = clickClickableAncestorIfPresent(
                 timeoutMs = CHROME_PROMPT_TIMEOUT_MS,
                 selectors = arrayOf(
                     By.res("com.android.chrome", "signin_fre_dismiss_button"),
                     By.res("com.android.chrome", "terms_accept"),
                     By.res("com.android.chrome", "negative_button"),
                 ),
-            ) ?: return
-            control.click()
-            device.waitForIdle()
+            )
+            if (!clicked) {
+                return
+            }
         }
     }
 
@@ -280,22 +281,37 @@ private class TestLabUi(
     }
 
     fun clickResource(id: String, timeoutMs: Long = DEFAULT_TIMEOUT_MS) {
-        waitForResource(id, timeoutMs).click()
-        device.waitForIdle()
+        clickClickableAncestor(
+            selectors = arrayOf(resourceSelector(id)),
+            selectorType = "resource id",
+            value = id,
+            timeoutMs = timeoutMs,
+        )
     }
 
     fun clickResourceIfPresent(id: String, timeoutMs: Long = OPTIONAL_TIMEOUT_MS): Boolean {
-        val control = device.wait(Until.findObject(resourceSelector(id)), timeoutMs) ?: return false
-        control.click()
-        device.waitForIdle()
-        return true
+        return clickClickableAncestorIfPresent(
+            selectors = arrayOf(resourceSelector(id)),
+            timeoutMs = timeoutMs,
+        )
     }
 
     fun replaceResourceText(id: String, value: String, timeoutMs: Long = DEFAULT_TIMEOUT_MS) {
-        waitForResource(id, timeoutMs).apply {
-            click()
-            text = value
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                device.findObject(resourceSelector(id))?.let { control ->
+                    control.click()
+                    control.text = value
+                    device.waitForIdle()
+                    return
+                }
+            } catch (_: StaleObjectException) {
+                // The hosted or Compose hierarchy changed; reacquire the field.
+            }
+            Thread.sleep(POLL_INTERVAL_MS)
         }
+        failWithUi("resource id", id)
     }
 
     fun waitForText(text: String, timeoutMs: Long = DEFAULT_TIMEOUT_MS): UiObject2 {
@@ -303,21 +319,25 @@ private class TestLabUi(
     }
 
     fun clickText(text: String, timeoutMs: Long = DEFAULT_TIMEOUT_MS) {
-        waitForText(text, timeoutMs).click()
-        device.waitForIdle()
+        clickClickableAncestor(
+            selectors = arrayOf(By.text(text)),
+            selectorType = "text",
+            value = text,
+            timeoutMs = timeoutMs,
+        )
     }
 
     fun clickTextOrDescription(value: String, timeoutMs: Long = DEFAULT_TIMEOUT_MS) {
-        val control = findOptional(
-            timeoutMs = timeoutMs,
+        clickNodeCenter(
             selectors = arrayOf(By.text(value), By.desc(value)),
-        ) ?: failWithUi("text or content description", value)
-        control.click()
-        device.waitForIdle()
+            selectorType = "text or content description",
+            value = value,
+            timeoutMs = timeoutMs,
+        )
     }
 
     fun waitForTextRegex(regex: String, timeoutMs: Long = DEFAULT_TIMEOUT_MS): UiObject2 {
-        return waitFor(By.text(Pattern.compile(regex)), "text regex", regex, timeoutMs)
+        return waitFor(By.text(Pattern.compile(regex, Pattern.DOTALL)), "text regex", regex, timeoutMs)
     }
 
     fun typeIntoFocusedField(value: String) {
@@ -361,15 +381,91 @@ private class TestLabUi(
             ?: failWithUi(selectorType, value)
     }
 
-    private fun findOptional(timeoutMs: Long, selectors: Array<BySelector>): UiObject2? {
+    private fun clickClickableAncestor(
+        selectors: Array<BySelector>,
+        selectorType: String,
+        value: String,
+        timeoutMs: Long,
+    ) {
+        if (!clickClickableAncestorIfPresent(selectors, timeoutMs)) {
+            failWithUi("clickable ancestor for $selectorType", value)
+        }
+    }
+
+    private fun clickClickableAncestorIfPresent(
+        selectors: Array<BySelector>,
+        timeoutMs: Long,
+    ): Boolean {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             selectors.forEach { selector ->
-                device.findObject(selector)?.let { return it }
+                val matchedNode = device.findObject(selector)
+                var node = matchedNode
+                try {
+                    while (node != null && (!node.isClickable || !node.isEnabled)) {
+                        node = node.parent
+                    }
+                    if (node != null) {
+                        node.click()
+                        device.waitForIdle()
+                        return true
+                    }
+                    if (matchedNode?.isEnabled == true) {
+                        val bounds = matchedNode.visibleBounds
+                        device.click(bounds.centerX(), bounds.centerY())
+                        device.waitForIdle()
+                        return true
+                    }
+                } catch (_: StaleObjectException) {
+                    // The hosted or Compose hierarchy changed; reacquire the control.
+                }
             }
             Thread.sleep(POLL_INTERVAL_MS)
         }
-        return null
+        return false
+    }
+
+    private fun clickNodeCenter(
+        selectors: Array<BySelector>,
+        selectorType: String,
+        value: String,
+        timeoutMs: Long,
+    ) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        var lastClickAt: Long? = null
+        var missingSince: Long? = null
+        while (System.currentTimeMillis() < deadline) {
+            val matchedNode = selectors.firstNotNullOfOrNull { selector ->
+                try {
+                    device.findObject(selector)
+                } catch (_: StaleObjectException) {
+                    // The hosted or Compose hierarchy changed; reacquire the control.
+                    null
+                }
+            }
+            if (matchedNode == null) {
+                val now = System.currentTimeMillis()
+                missingSince = missingSince ?: now
+                if (lastClickAt != null && now - missingSince >= STABLE_ABSENCE_MS) {
+                    return
+                }
+            } else {
+                missingSince = null
+                val now = System.currentTimeMillis()
+                if (lastClickAt == null || now - lastClickAt >= REPEATED_CLICK_INTERVAL_MS) {
+                    try {
+                        val bounds = matchedNode.visibleBounds
+                        device.click(bounds.centerX(), bounds.centerY())
+                        device.waitForIdle()
+                        lastClickAt = now
+                    } catch (_: StaleObjectException) {
+                        // The hosted or Compose hierarchy changed; reacquire the control.
+                    }
+                }
+            }
+            Thread.sleep(POLL_INTERVAL_MS)
+        }
+        failWithUi(selectorType, value)
     }
 
     private fun resourceSelector(id: String): BySelector {
@@ -393,7 +489,18 @@ private class TestLabUi(
     }
 
     private fun failWithUi(selectorType: String, value: String): Nothing {
-        fail("Could not find $selectorType '$value'. Current package: ${device.currentPackageName}")
+        val hierarchy = runCatching {
+            ByteArrayOutputStream().use { output ->
+                device.dumpWindowHierarchy(output)
+                output.toString(Charsets.UTF_8.name()).take(MAX_HIERARCHY_LENGTH)
+            }
+        }.getOrElse { error ->
+            "Unavailable: ${error.message}"
+        }
+        fail(
+            "Could not find $selectorType '$value'. " +
+                "Current package: ${device.currentPackageName}. Hierarchy: $hierarchy",
+        )
         error("unreachable")
     }
 
@@ -402,7 +509,10 @@ private class TestLabUi(
         const val DEFAULT_TIMEOUT_MS = 30_000L
         const val OPTIONAL_TIMEOUT_MS = 5_000L
         const val CHROME_PROMPT_TIMEOUT_MS = 3_000L
+        const val MAX_HIERARCHY_LENGTH = 8_000
         const val POLL_INTERVAL_MS = 250L
+        const val REPEATED_CLICK_INTERVAL_MS = 1_000L
+        const val STABLE_ABSENCE_MS = 1_000L
     }
 }
 

@@ -208,7 +208,6 @@ workflows:
       - FTL_TEST_TARGETS: class com.stripe.android.financialconnections.example.FinancialConnectionsTestLabTest
       - FTL_RUNNER_ARGUMENTS: |-
           scenarioIndex=$BITRISE_IO_PARALLEL_INDEX
-          buildNumber=$BITRISE_BUILD_NUMBER
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-connect-e2e-tests-on-push:
@@ -227,7 +226,6 @@ workflows:
       - FTL_TEST_TARGETS: class com.stripe.android.financialconnections.example.FinancialConnectionsTestLabTest
       - FTL_RUNNER_ARGUMENTS: |-
           scenarioIndex=$BITRISE_IO_PARALLEL_INDEX
-          buildNumber=$BITRISE_BUILD_NUMBER
     before_run:
       - _run-firebase-instrumentation-tests
   notify-connections-e2e-failure:
