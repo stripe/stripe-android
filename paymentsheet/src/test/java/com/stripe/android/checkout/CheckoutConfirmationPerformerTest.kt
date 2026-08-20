@@ -6,7 +6,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -16,6 +18,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -81,6 +85,20 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
     }
 
+    @Test
+    fun `confirm records the payment selection for analytics`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+    ) {
+        performer.confirm()
+        confirmationHandler.startTurbine.awaitItem()
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+
+        assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection)
+            .isEqualTo(PaymentSelection.GooglePay)
+    }
+
     private fun googlePayState(
         paymentSelection: PaymentSelection?,
     ): CheckoutControllerState {
@@ -113,6 +131,9 @@ internal class CheckoutConfirmationPerformerTest {
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
         )
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            analyticsPerformer.reportConfirmationResults()
+        }
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
             stateHolder = stateHolder,
@@ -125,6 +146,7 @@ internal class CheckoutConfirmationPerformerTest {
         Scenario(
             performer = performer,
             confirmationHandler = confirmationHandler,
+            eventReporter = eventReporter,
             stateHolder = stateHolder,
         ).block()
 
@@ -136,6 +158,7 @@ internal class CheckoutConfirmationPerformerTest {
     private class Scenario(
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
+        val eventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
     )
 

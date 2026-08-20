@@ -31,6 +31,8 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -249,6 +251,21 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         assertThat(failureCall.error.cause.message).isEqualTo("Payment failed")
     }
 
+    @Test
+    fun `confirm records the express checkout selection for analytics`() = runScenario(
+        state = createState(),
+        expressButton = createGooglePayExpressButton(),
+    ) {
+        performer.confirm(expressButton)
+        confirmationHandler.startTurbine.awaitItem()
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+
+        assertThat(paymentSheetEventReporter.paymentSuccessCalls.awaitItem().paymentSelection)
+            .isEqualTo(expressButton.toSelection())
+    }
+
     private fun createState(
         allowedShippingCountries: List<String>? = null,
         requiresBillingAddress: Boolean = false,
@@ -309,6 +326,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             eventReporter = paymentSheetEventReporter,
             savedStateHandle = savedStateHandle,
         )
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            analyticsPerformer.reportConfirmationResults()
+        }
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,
             confirmationHandler = confirmationHandler,
@@ -325,6 +345,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
+            paymentSheetEventReporter = paymentSheetEventReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
         ).block()
@@ -341,6 +362,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val confirmationHandler: FakeConfirmationHandler,
         val eventReporter: FakeExpressCheckoutElementEventReporter,
         val errorReporter: FakeErrorReporter,
+        val paymentSheetEventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
     )
