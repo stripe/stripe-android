@@ -5,6 +5,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -15,11 +16,20 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val stateHolder: CheckoutControllerStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
+    private val analyticsPerformer: CheckoutAnalyticsPerformer,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     fun confirm() {
-        val arguments = operationCoordinator.tryBeginConfirmation(::confirmationArgs) ?: return
+        val state = stateHolder.state ?: return
+        val paymentSelection = state.paymentSelection ?: return
+        val arguments = operationCoordinator.tryBeginConfirmation {
+          confirmationArgs(
+              state = state,
+              paymentSelection = paymentSelection,
+          )
+        } ?: return
+        analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
         viewModelScope.launch {
             try {
                 confirmationHandler.start(arguments)
@@ -31,10 +41,12 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         }
     }
 
-    private fun confirmationArgs(): ConfirmationHandler.Args? {
-        val state = stateHolder.state ?: return null
+    private fun confirmationArgs(
+        state: CheckoutControllerState,
+        paymentSelection: PaymentSelection,
+    ): ConfirmationHandler.Args? {
         val configuration = state.commonConfiguration
-        val confirmationOption = state.paymentSelection?.toConfirmationOption(
+        val confirmationOption = paymentSelection.toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,

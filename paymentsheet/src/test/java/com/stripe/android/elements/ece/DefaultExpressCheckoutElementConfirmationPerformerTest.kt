@@ -3,6 +3,7 @@ package com.stripe.android.elements.ece
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.checkout.CheckoutAnalyticsPerformer
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
@@ -22,10 +23,13 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -258,10 +262,20 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             logger = Logger.noop(),
             resultCallback = {},
         )
+        val paymentSheetEventReporter = FakeEventReporter()
+        val analyticsPerformer = CheckoutAnalyticsPerformer(
+            confirmationHandler = confirmationHandler,
+            eventReporter = paymentSheetEventReporter,
+            savedStateHandle = savedStateHandle,
+        )
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            analyticsPerformer.reportConfirmationResults()
+        }
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,
             confirmationHandler = confirmationHandler,
             operationCoordinator = operationCoordinator,
+            analyticsPerformer = analyticsPerformer,
             errorReporter = errorReporter,
             statusBarColor = null,
             viewModelScope = backgroundScope,
@@ -271,6 +285,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer = performer,
             confirmationHandler = confirmationHandler,
             errorReporter = errorReporter,
+            paymentSheetEventReporter = paymentSheetEventReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
         ).block()
@@ -278,12 +293,14 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
+        paymentSheetEventReporter.validate()
     }
 
     private class Scenario(
         val performer: DefaultExpressCheckoutElementConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val errorReporter: FakeErrorReporter,
+        val paymentSheetEventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
     )

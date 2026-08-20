@@ -1,6 +1,7 @@
 package com.stripe.android.elements.ece
 
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.checkout.CheckoutAnalyticsPerformer
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
@@ -26,6 +27,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     private val stateHolder: CheckoutControllerStateHolder,
     private val confirmationHandler: ConfirmationHandler,
     private val operationCoordinator: CheckoutOperationCoordinator,
+    private val analyticsPerformer: CheckoutAnalyticsPerformer,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -48,6 +50,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                 null
             }
         } ?: return
+
+        analyticsPerformer.onExpressCheckoutElementConfirmationStarted(expressButton.toSelection())
 
         viewModelScope.launch {
             try {

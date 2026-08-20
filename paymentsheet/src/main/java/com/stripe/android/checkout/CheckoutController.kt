@@ -63,6 +63,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
+    private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -78,6 +79,10 @@ class CheckoutController @Inject internal constructor(
     init {
         viewModelScope.launch {
             operationCoordinator.observeConfirmationResults()
+        }
+
+        viewModelScope.launch {
+            checkoutAnalyticsPerformer.reportConfirmationResults()
         }
     }
 
