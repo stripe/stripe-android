@@ -21,9 +21,13 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     fun confirm() {
-        var paymentSelection: PaymentSelection? = null
+        val state = stateHolder.state ?: return
+        val paymentSelection = state.paymentSelection ?: return
         val arguments = operationCoordinator.tryBeginConfirmation {
-            confirmationArgs { paymentSelection = it }
+          confirmationArgs(
+              state = state,
+              paymentSelection = paymentSelection,
+          )
         } ?: return
         analyticsPerformer.onPaymentElementConfirmationStarted(checkNotNull(paymentSelection))
         viewModelScope.launch {
@@ -42,11 +46,10 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     }
 
     private fun confirmationArgs(
-        onPaymentSelection: (PaymentSelection) -> Unit,
+        state: CheckoutControllerState,
+        paymentSelection: PaymentSelection,
     ): ConfirmationHandler.Args? {
-        val state = stateHolder.state ?: return null
         val configuration = state.commonConfiguration
-        val paymentSelection = state.paymentSelection ?: return null
         val confirmationOption = paymentSelection.toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
@@ -56,7 +59,6 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
                 paymentMethodMetadata = state.paymentMethodMetadata,
             ),
         ) ?: return null
-        onPaymentSelection(paymentSelection)
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
