@@ -407,14 +407,22 @@ class GooglePayJsonFactory internal constructor(
     @Parcelize
     @Poko
     class TransactionInfo @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
-        internal val currencyCode: String,
-        internal val totalPriceStatus: TotalPriceStatus,
-        internal val countryCode: String?,
-        internal val transactionId: String?,
-        internal val totalPrice: Long?,
-        internal val totalPriceLabel: String?,
-        internal val checkoutOption: CheckoutOption?,
-        internal val displayItems: List<DisplayItem> = emptyList(),
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val currencyCode: String,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPriceStatus: TotalPriceStatus,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val countryCode: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val transactionId: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPrice: Long?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPriceLabel: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val checkoutOption: CheckoutOption?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val displayItems: List<DisplayItem> = emptyList(),
     ) : Parcelable {
 
         /**

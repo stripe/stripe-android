@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.R
-import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
@@ -30,64 +29,51 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
         val response = CheckoutSessionResponseFactory.create(
             currency = "usd",
             amount = 1500L,
-            merchantCountry = "US",
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
 
         val result = mapper.toResponse(
-            configuration = CommonConfigurationFactory.create(),
+            configuration = googlePayConfiguration(countryCode = "US"),
             response = response,
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
 
         assertThat(result.error).isNull()
-        assertThat(result.newTransactionInfo).isEqualTo(
-            expectedTransactionInfo(
-                countryCode = "US",
-                totalPrice = 1500L,
-                transactionId = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.id,
-            )
-        )
+
+        val transactionInfo = result.newTransactionInfo
+        assertThat(transactionInfo).isNotNull()
+        assertThat(transactionInfo?.currencyCode).isEqualTo("USD")
+        assertThat(transactionInfo?.totalPriceStatus)
+            .isEqualTo(GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated)
+        assertThat(transactionInfo?.countryCode).isEqualTo("US")
+        assertThat(transactionInfo?.transactionId).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.id)
+        assertThat(transactionInfo?.totalPrice).isEqualTo(1500L)
+        assertThat(transactionInfo?.totalPriceLabel).isEqualTo(context.getString(R.string.stripe_google_pay_total))
+        assertThat(transactionInfo?.checkoutOption)
+            .isEqualTo(GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default)
     }
 
     @Test
-    fun `toResponse uses country code from common configuration google pay when present`() {
-        val configuration = CommonConfigurationFactory.create(
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                countryCode = "CA",
-            ),
-        )
-
+    fun `toResponse uses country code from configuration`() {
         val result = mapper.toResponse(
-            configuration = configuration,
-            response = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
+            configuration = googlePayConfiguration(countryCode = "CA"),
+            response = CheckoutSessionResponseFactory.create(),
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
 
-        assertThat(result.newTransactionInfo).isEqualTo(expectedTransactionInfo(countryCode = "CA"))
+        assertThat(result.newTransactionInfo?.countryCode).isEqualTo("CA")
     }
 
     @Test
-    fun `toResponse falls back to checkout session merchant country when common configuration has no google pay`() {
+    fun `toResponse returns null country code when configuration country code is blank`() {
         val result = mapper.toResponse(
-            configuration = CommonConfigurationFactory.create(googlePay = null),
-            response = CheckoutSessionResponseFactory.create(merchantCountry = "GB"),
+            configuration = googlePayConfiguration(countryCode = ""),
+            response = CheckoutSessionResponseFactory.create(),
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
 
-        assertThat(result.newTransactionInfo).isEqualTo(expectedTransactionInfo(countryCode = "GB"))
-    }
-
-    @Test
-    fun `toResponse returns null country code when neither common configuration nor merchant country are set`() {
-        val result = mapper.toResponse(
-            configuration = CommonConfigurationFactory.create(googlePay = null),
-            response = CheckoutSessionResponseFactory.create(merchantCountry = null),
-            paymentDataUpdate = PAYMENT_DATA_UPDATE,
-        )
-
-        assertThat(result.newTransactionInfo).isEqualTo(expectedTransactionInfo(countryCode = null))
+        assertThat(result.newTransactionInfo).isNotNull()
+        assertThat(result.newTransactionInfo?.countryCode).isNull()
     }
 
     @Test
@@ -98,23 +84,18 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
         )
 
         val result = mapper.toResponse(
-            configuration = CommonConfigurationFactory.create(),
+            configuration = googlePayConfiguration(),
             response = response,
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
 
-        assertThat(result.newTransactionInfo).isEqualTo(
-            expectedTransactionInfo(
-                totalPrice = 2500L,
-                displayItems = GooglePayDisplayItemsFactory.create(response).map { it.resolve(context) },
-            )
-        )
+        assertThat(result.newTransactionInfo?.totalPrice).isEqualTo(2500L)
     }
 
     @Test
     fun `toResponse uses checkout session amount when total summary is absent`() {
         val result = mapper.toResponse(
-            configuration = CommonConfigurationFactory.create(),
+            configuration = googlePayConfiguration(),
             response = CheckoutSessionResponseFactory.create(
                 amount = 1000L,
                 totalSummary = null,
@@ -122,13 +103,13 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
 
-        assertThat(result.newTransactionInfo).isEqualTo(expectedTransactionInfo(totalPrice = 1000L))
+        assertThat(result.newTransactionInfo?.totalPrice).isEqualTo(1000L)
     }
 
     @Test
     fun `toResponse uses payment intent id as transaction id`() {
         val result = mapper.toResponse(
-            configuration = CommonConfigurationFactory.create(),
+            configuration = googlePayConfiguration(),
             response = CheckoutSessionResponseFactory.create(
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 setupIntent = null,
@@ -136,15 +117,14 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
 
-        assertThat(result.newTransactionInfo).isEqualTo(
-            expectedTransactionInfo(transactionId = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.id)
-        )
+        assertThat(result.newTransactionInfo?.transactionId)
+            .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.id)
     }
 
     @Test
     fun `toResponse uses setup intent id as transaction id when no payment intent`() {
         val result = mapper.toResponse(
-            configuration = CommonConfigurationFactory.create(),
+            configuration = googlePayConfiguration(),
             response = CheckoutSessionResponseFactory.create(
                 paymentIntent = null,
                 setupIntent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
@@ -152,25 +132,31 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
 
-        assertThat(result.newTransactionInfo).isEqualTo(
-            expectedTransactionInfo(transactionId = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.id)
-        )
+        assertThat(result.newTransactionInfo?.transactionId)
+            .isEqualTo(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.id)
     }
 
-    private fun expectedTransactionInfo(
-        countryCode: String? = "US",
-        totalPrice: Long? = 1000L,
-        transactionId: String? = null,
-        displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
-    ) = GooglePayJsonFactory.TransactionInfo(
-        currencyCode = "USD",
-        totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+    @Test
+    fun `toResponse uses display items built from response`() {
+        val response = CheckoutSessionResponseFactory.create(
+            totalSummary = totalSummary(totalAmountDue = 2500L),
+        )
+
+        val result = mapper.toResponse(
+            configuration = googlePayConfiguration(),
+            response = response,
+            paymentDataUpdate = PAYMENT_DATA_UPDATE,
+        )
+
+        assertThat(result.newTransactionInfo?.displayItems)
+            .isEqualTo(GooglePayDisplayItemsFactory.create(response, context))
+    }
+
+    private fun googlePayConfiguration(
+        countryCode: String = "US",
+    ) = PaymentSheet.GooglePayConfiguration(
+        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
         countryCode = countryCode,
-        transactionId = transactionId,
-        totalPrice = totalPrice,
-        totalPriceLabel = context.getString(R.string.stripe_google_pay_total),
-        checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
-        displayItems = displayItems,
     )
 
     private fun totalSummary(
