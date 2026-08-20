@@ -80,10 +80,10 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): CheckoutController.BillingDetails {
-    return CheckoutController.BillingDetails(
+private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): PaymentOptionDisplayData.BillingDetails {
+    return PaymentOptionDisplayData.BillingDetails(
         address = address?.let { modelAddress ->
-            CheckoutController.BillingDetails.Address(
+            PaymentOptionDisplayData.BillingDetails.Address(
                 city = modelAddress.city,
                 country = modelAddress.country,
                 line1 = modelAddress.line1,

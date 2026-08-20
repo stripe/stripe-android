@@ -671,6 +671,60 @@ class CheckoutController @Inject internal constructor(
              */
             val mandateText: AnnotatedString?,
         ) {
+            /**
+             * The billing details collected for a payment method.
+             */
+            @Poko
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class BillingDetails internal constructor(
+                /**
+                 * The customer's billing address.
+                 */
+                val address: Address?,
+                /**
+                 * The customer's email address.
+                 */
+                val email: String?,
+                /**
+                 * The customer's full name.
+                 */
+                val name: String?,
+            ) {
+                /**
+                 * A billing address.
+                 */
+                @Poko
+                @CheckoutSessionPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class Address internal constructor(
+                    /**
+                     * City, district, suburb, town, or village.
+                     */
+                    val city: String?,
+                    /**
+                     * Two-letter country code (ISO 3166-1 alpha-2).
+                     */
+                    val country: String?,
+                    /**
+                     * Address line 1 (e.g., street, PO Box, or company name).
+                     */
+                    val line1: String?,
+                    /**
+                     * Address line 2 (e.g., apartment, suite, unit, or building).
+                     */
+                    val line2: String?,
+                    /**
+                     * ZIP or postal code.
+                     */
+                    val postalCode: String?,
+                    /**
+                     * State, county, province, or region.
+                     */
+                    val state: String?,
+                )
+            }
+
             private val iconDrawable: Drawable by lazy {
                 DelegateDrawable(imageLoader)
             }
@@ -682,60 +736,6 @@ class CheckoutController @Inject internal constructor(
                 @Composable
                 get() = rememberDrawablePainter(iconDrawable)
         }
-    }
-
-    /**
-     * The billing details collected for a payment method.
-     */
-    @Poko
-    @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class BillingDetails internal constructor(
-        /**
-         * The customer's billing address.
-         */
-        val address: Address?,
-        /**
-         * The customer's email address.
-         */
-        val email: String?,
-        /**
-         * The customer's full name.
-         */
-        val name: String?,
-    ) {
-        /**
-         * A billing address.
-         */
-        @Poko
-        @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Address internal constructor(
-            /**
-             * City, district, suburb, town, or village.
-             */
-            val city: String?,
-            /**
-             * Two-letter country code (ISO 3166-1 alpha-2).
-             */
-            val country: String?,
-            /**
-             * Address line 1 (e.g., street, PO Box, or company name).
-             */
-            val line1: String?,
-            /**
-             * Address line 2 (e.g., apartment, suite, unit, or building).
-             */
-            val line2: String?,
-            /**
-             * ZIP or postal code.
-             */
-            val postalCode: String?,
-            /**
-             * State, county, province, or region.
-             */
-            val state: String?,
-        )
     }
 
     /**
