@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContent
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
@@ -89,7 +90,9 @@ internal class PaymentElementTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             ),
             embeddedViewDisplaysMandateText = true,
-            appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
+            appearance = PaymentSheet.Appearance(
+                embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
+            ),
             isImmediateAction = false,
         )
         val contentHelper = FakeEmbeddedContentHelper(embeddedContent = MutableStateFlow(content))
