@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Selfiebilder</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Flott! Kontrollerer bildene dine …</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Med din tillatelse kan Stripe bruke bildene dine til å forbedre påvisning av bedrageri. Hvis du avslår, vil dette ikke påvirke bekreftelsen.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Bekreft med en selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">en selfie tatt</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

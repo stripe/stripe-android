@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Chụp ảnh selfie</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Tuyệt vời! Đang kiểm tra hình ảnh của bạn…</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Với sự cho phép của bạn, Stripe có thể sử dụng hình ảnh của bạn để cải thiện việc phát hiện hành vi lừa đảo. Việc từ chối không ảnh hưởng đến việc xác minh của bạn.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Xác minh bằng một hình tự chụp</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">đã chụp một ảnh selfie</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">顔写真の記録</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">画像を確認しています....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">許可をいただいた場合、Stripe は不正利用の検出を改善するために画像を使用する場合があります。拒否しても、本人確認には影響しません。</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">顔写真による確認</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">1 件の顔写真が記録されました</string>
   <!-- Status text instructing the user to turn left for selfie capture -->
