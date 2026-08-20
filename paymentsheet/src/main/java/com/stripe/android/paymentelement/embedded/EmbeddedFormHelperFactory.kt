@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.FormDefinitionFactory
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
@@ -21,8 +22,22 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import dagger.Module
+import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
+
+@Module
+internal object EmbeddedFormHelperModule {
+    @Provides
+    fun provideAutocompleteAddressInteractorFactoryProvider(): AutocompleteAddressInteractorFactoryProvider {
+        return AutocompleteAddressInteractorFactoryProvider { null }
+    }
+}
+
+internal fun interface AutocompleteAddressInteractorFactoryProvider {
+    fun get(): PaymentElementAutocompleteAddressInteractor.Factory?
+}
 
 internal class EmbeddedFormHelperFactory @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
@@ -30,7 +45,23 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val isNfcScanningAvailable: IsNfcScanningAvailable,
+    private val autocompleteAddressInteractorFactoryProvider: AutocompleteAddressInteractorFactoryProvider,
 ) {
+    constructor(
+        linkConfigurationCoordinator: LinkConfigurationCoordinator,
+        embeddedSelectionHolder: EmbeddedSelectionHolder,
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        savedStateHandle: SavedStateHandle,
+        isNfcScanningAvailable: IsNfcScanningAvailable,
+    ) : this(
+        linkConfigurationCoordinator = linkConfigurationCoordinator,
+        embeddedSelectionHolder = embeddedSelectionHolder,
+        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+        savedStateHandle = savedStateHandle,
+        isNfcScanningAvailable = isNfcScanningAvailable,
+        autocompleteAddressInteractorFactoryProvider = AutocompleteAddressInteractorFactoryProvider { null },
+    )
+
     fun create(
         coroutineScope: CoroutineScope,
         setAsDefaultMatchesSaveForFutureUse: Boolean,

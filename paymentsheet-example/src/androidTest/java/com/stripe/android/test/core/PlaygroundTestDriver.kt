@@ -58,7 +58,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.MerchantSetti
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_ERROR
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -781,7 +781,7 @@ internal class PlaygroundTestDriver(
             selectors.externalPaymentMethodCancelButton,
         )
 
-        waitForPaymentSheetActivity()
+        waitForSheetActivity()
         selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
@@ -800,7 +800,7 @@ internal class PlaygroundTestDriver(
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG).and(hasText(FawryActivity.FAILED_DISPLAY_MESSAGE)))
+                .onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_ERROR).and(hasText(FawryActivity.FAILED_DISPLAY_MESSAGE)))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
@@ -835,7 +835,7 @@ internal class PlaygroundTestDriver(
             selectors.customPaymentMethodCancelButton,
         )
 
-        waitForPaymentSheetActivity()
+        waitForSheetActivity()
         selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
@@ -855,7 +855,7 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodes(
-                    hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG)
+                    hasTestTag(EMBEDDED_FORM_ACTIVITY_ERROR)
                         .and(hasText(CustomPaymentMethodActivity.FAILED_DISPLAY_MESSAGE))
                 )
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -1182,8 +1182,8 @@ internal class PlaygroundTestDriver(
 
     /**
      * Here we wait for an activity different from the playground to be in view.  We
-     * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
-     * that would require exposing the activities publicly.
+     * don't specifically look for the sheet host because that would require exposing the activity
+     * publicly.
      */
     private fun waitForNotPlaygroundActivity() {
         awaitActivity(description = "an activity other than the playground") {
@@ -1259,7 +1259,7 @@ internal class PlaygroundTestDriver(
         )
         selectors.complete.click()
 
-        waitForPaymentSheetActivity()
+        waitForSheetActivity()
     }
 
     private fun launchCustom(clickMultiStep: Boolean = true) {
@@ -1274,7 +1274,7 @@ internal class PlaygroundTestDriver(
         if (clickMultiStep) {
             selectors.multiStepSelect.click()
 
-            // PaymentOptionsActivity is now on screen
+            // The sheet host is now on screen.
             waitForNotPlaygroundActivity()
         }
     }
@@ -1773,8 +1773,8 @@ internal class PlaygroundTestDriver(
         }.isSuccess
     }
 
-    private fun waitForPaymentSheetActivity() {
-        awaitActivityClass("com.stripe.android.paymentsheet.PaymentSheetActivity")
+    private fun waitForSheetActivity() {
+        awaitActivityClass("com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity")
     }
 
     private fun addPaymentMethodNode(): SemanticsNodeInteraction {

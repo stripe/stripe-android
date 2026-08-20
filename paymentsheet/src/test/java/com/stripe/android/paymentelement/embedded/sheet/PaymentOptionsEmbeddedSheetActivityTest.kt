@@ -24,6 +24,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
@@ -137,23 +138,13 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `new selection requiring a form opens on the form and back returns to the list`() = launch(
+    fun `single payment method opens directly on the form`() = launch(
         selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) { scenario ->
         scenario.onActivity { activity ->
-            assertThat(activity.embeddedNavigator.canGoBack).isTrue()
-            assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.Form>()
-        }
-
-        Espresso.pressBack()
-        onIdle()
-
-        // Back returns to the payment options list rather than cancelling the sheet.
-        scenario.onActivity { activity ->
             assertThat(activity.embeddedNavigator.canGoBack).isFalse()
             assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+                .isInstanceOf<EmbeddedNavigator.Screen.Form>()
         }
     }
 
@@ -223,7 +214,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `processing blocks back and disables vertical payment method rows`() = launch { scenario ->
+    fun `processing blocks back and disables vertical payment method rows`() = launch(
+        paymentMethodTypes = listOf("card", "cashapp"),
+    ) { scenario ->
         val cardRow = composeTestRule.onNodeWithTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_card")
         cardRow.assertIsEnabled()
 
@@ -245,7 +238,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `vertical payment options displays activity error`() = launch { scenario ->
+    fun `vertical payment options displays activity error`() = launch(
+        paymentMethodTypes = listOf("card", "cashapp"),
+    ) { scenario ->
         val errorMessage = "Unable to update the tax region."
 
         scenario.onActivity { activity ->
@@ -291,7 +286,11 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     private fun launch(
         selection: PaymentSelection? = null,
         previousNewSelections: Bundle = Bundle(),
+        paymentMethodTypes: List<String> = listOf("card"),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes,
+            ),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
@@ -339,8 +338,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     selection = selection,
                     previousNewSelections = previousNewSelections,
                     customerState = customerState,
-                    promotion = null,
+                    promotions = null,
                     launchMode = EmbeddedLaunchMode.PaymentOptions,
+                    activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
                 ),
             )
         ).use { scenario ->

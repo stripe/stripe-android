@@ -5,8 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
-import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityArgs
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -18,7 +19,10 @@ internal class PaymentSheetContract :
         context: Context,
         input: Args
     ): Intent {
-        return Intent(context, PaymentSheetActivity::class.java).putExtra(EXTRA_ARGS, input)
+        return Intent(context, EmbeddedSheetActivity::class.java).putExtra(
+            SheetActivityArgs.EXTRA_ARGS,
+            SheetActivityArgs.PaymentSheet(input),
+        )
     }
 
     override fun parseResult(
@@ -42,13 +46,6 @@ internal class PaymentSheetContract :
     ) : ActivityStarter.Args {
 
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config.googlePay
-
-        companion object {
-            internal fun fromIntent(intent: Intent): Args? {
-                @Suppress("DEPRECATION")
-                return intent.getParcelableExtra(EXTRA_ARGS)
-            }
-        }
     }
 
     @Parcelize
@@ -60,11 +57,7 @@ internal class PaymentSheetContract :
         }
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal companion object {
-        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-        const val EXTRA_ARGS =
-            "com.stripe.android.paymentsheet.PaymentSheetContract.extra_args"
+    private companion object {
         private const val EXTRA_RESULT =
             "com.stripe.android.paymentsheet.PaymentSheetContract.extra_result"
     }

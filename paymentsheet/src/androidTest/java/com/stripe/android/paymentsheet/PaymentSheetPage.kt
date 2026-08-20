@@ -2,13 +2,15 @@
 
 package com.stripe.android.paymentsheet
 
-import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Button
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -25,14 +27,12 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_ERROR
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_MANDATE
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
@@ -226,28 +226,28 @@ internal class PaymentSheetPage(
     fun clickPrimaryButton() {
         composeTestRule.waitUntil(5_000) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
+                .onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(isEnabled()))
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+        composeTestRule.onNode(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON))
             .performScrollTo()
             .performClick()
 
         composeTestRule.waitForIdle()
     }
 
-    fun assertPrimaryButton(expectedStateDescription: String, canPay: Boolean) {
-        onView(withId(R.id.primary_button)).check { view, _ ->
-            val nodeInfo = AccessibilityNodeInfo()
-            view.onInitializeAccessibilityNodeInfo(nodeInfo)
-            assertThat(nodeInfo.stateDescription).isEqualTo(expectedStateDescription)
-            assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
+    fun assertPrimaryButton(expectedLabel: String, canPay: Boolean) {
+        composeTestRule.onNode(
+            hasTestTag(PRIMARY_BUTTON_TEST_TAG)
+                .and(hasParent(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)))
+        ).apply {
+            assertTextEquals(expectedLabel)
+            assertHasClickAction()
             if (canPay) {
-                assertThat(nodeInfo.isClickable).isTrue()
-                assertThat(nodeInfo.isEnabled).isTrue()
+                assertIsEnabled()
             } else {
-                assertThat(nodeInfo.isEnabled).isFalse()
+                assertIsNotEnabled()
             }
         }
     }
@@ -255,12 +255,12 @@ internal class PaymentSheetPage(
     fun assertErrorMessageShown() {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
-                .onAllNodesWithTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG)
+                .onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_ERROR)
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
 
-        composeTestRule.onNodeWithTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_ERROR).assertIsDisplayed()
     }
 
     fun fillCvcRecollection(cvc: String) {
@@ -428,7 +428,7 @@ internal class PaymentSheetPage(
     fun waitUntilVisible() {
         composeTestRule.waitUntil(5000) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                .onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
@@ -437,7 +437,7 @@ internal class PaymentSheetPage(
     fun waitUntilMissing() {
         composeTestRule.waitUntil(5000) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                .onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
@@ -536,7 +536,7 @@ internal class PaymentSheetPage(
         composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
             .assertDoesNotExist()
 
-        composeTestRule.onNodeWithTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG)
+        composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_MANDATE)
             .assertDoesNotExist()
     }
 

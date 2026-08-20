@@ -11,9 +11,9 @@ import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
-import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -31,7 +31,7 @@ internal class FlowControllerTestRunnerContext(
     fun configureFlowController(
         block: PaymentSheet.FlowController.() -> Unit,
     ) {
-        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
+        val activityLaunchObserver = ActivityLaunchObserver(EmbeddedSheetActivity::class.java)
         scenario.onActivity {
             activityLaunchObserver.prepareForLaunch(it)
             flowController.block()

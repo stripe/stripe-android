@@ -22,8 +22,13 @@ import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFac
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -36,6 +41,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FormElement
@@ -313,7 +319,8 @@ internal class DefaultVerticalModeFormInteractorTest {
         paymentMethodCode: String = "card",
         hasSavedPaymentMethods: Boolean = false,
     ): DefaultVerticalModeFormInteractor {
-        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         selectionHolder.setSelection(paymentSelection)
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -328,6 +335,21 @@ internal class DefaultVerticalModeFormInteractorTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = paymentMethodCode,
             ),
+            linkHandler = LinkHandler(FakeLinkConfigurationCoordinator()),
+            eventReporterMode = EventReporter.Mode.Embedded,
+            autocompleteAddressInteractorFactory = PaymentElementAutocompleteAddressInteractor.Factory(
+                launcher = TestAutocompleteLauncher.noOp(),
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = emptySet(),
+                ),
+                placesClient = null,
+                stripeAutocompleteRepository = null,
+                coroutineScope = null,
+                shouldUseAutocompleteProxyEndpointsProvider = { false },
+                eventReporter = FakeAddressLauncherEventReporter(),
+            ),
+            savedStateHandle = savedStateHandle,
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
@@ -348,6 +370,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
+            launchMode = EmbeddedLaunchMode.Form(paymentMethodCode),
         ).create(
             paymentMethodCode = paymentMethodCode,
             hasSavedPaymentMethods = hasSavedPaymentMethods,

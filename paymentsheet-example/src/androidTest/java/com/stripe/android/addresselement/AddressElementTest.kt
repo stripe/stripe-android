@@ -1,5 +1,6 @@
 package com.stripe.android.addresselement
 
+import android.content.Intent
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -7,8 +8,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
+import com.stripe.android.paymentsheet.example.samples.ui.addresselement.DISABLE_GOOGLE_PLACES_AUTOCOMPLETE_EXTRA
+import com.stripe.android.paymentsheet.example.samples.ui.addresselement.PUBLISHABLE_KEY_OVERRIDE_EXTRA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.SELECT_ADDRESS_BUTTON
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.utils.TestRules
@@ -18,7 +22,16 @@ import org.junit.Test
 internal class AddressElementTest {
     @get:Rule
     val rules = TestRules.create {
-        around(ActivityScenarioRule(AddressElementExampleActivity::class.java))
+        around(
+            ActivityScenarioRule<AddressElementExampleActivity>(
+                Intent(
+                    ApplicationProvider.getApplicationContext(),
+                    AddressElementExampleActivity::class.java,
+                )
+                    .putExtra(PUBLISHABLE_KEY_OVERRIDE_EXTRA, "pk_test_123")
+                    .putExtra(DISABLE_GOOGLE_PLACES_AUTOCOMPLETE_EXTRA, true),
+            )
+        )
     }
 
     @Test

@@ -15,8 +15,8 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_DISABLED_BUTTON_OVERLAY
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -130,17 +130,17 @@ internal class FormValidationTest {
     private fun clickPrimaryButton() {
         composeTestRule.waitUntil(5_000) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()))
+                .onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(isNotEnabled()))
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
         composeTestRule.waitUntil(5_000) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
+                .onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_DISABLED_BUTTON_OVERLAY))
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
+        composeTestRule.onNode(hasTestTag(EMBEDDED_FORM_ACTIVITY_DISABLED_BUTTON_OVERLAY))
             .performScrollTo()
             .performClick()
 

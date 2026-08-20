@@ -9,7 +9,10 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 internal object EmbeddedSheetContract : ActivityResultContract<EmbeddedActivityArgs, EmbeddedActivityResult>() {
     override fun createIntent(context: Context, input: EmbeddedActivityArgs): Intent {
         return Intent(context, EmbeddedSheetActivity::class.java)
-            .putExtra(EmbeddedActivityArgs.EXTRA_ARGS, input)
+            .putExtra(
+                SheetActivityArgs.EXTRA_ARGS,
+                SheetActivityArgs.Embedded(input),
+            )
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): EmbeddedActivityResult {

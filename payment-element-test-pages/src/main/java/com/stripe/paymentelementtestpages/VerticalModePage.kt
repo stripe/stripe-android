@@ -11,8 +11,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_MANDATE
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_EDIT_SAVED_CARD
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -63,19 +63,19 @@ class VerticalModePage(
 
     fun assertPrimaryButton(matcher: SemanticsMatcher) {
         composeTestRule
-            .onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(matcher))
+            .onNode(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(matcher))
             .assertExists()
     }
 
     fun assertMandateExists() {
         composeTestRule
-            .onNode(hasTestTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG))
+            .onNode(hasTestTag(EMBEDDED_FORM_ACTIVITY_MANDATE))
             .assertExists()
     }
 
     fun assertMandateDoesNotExists() {
         composeTestRule
-            .onNode(hasTestTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG))
+            .onNode(hasTestTag(EMBEDDED_FORM_ACTIVITY_MANDATE))
             .assertDoesNotExist()
     }
 

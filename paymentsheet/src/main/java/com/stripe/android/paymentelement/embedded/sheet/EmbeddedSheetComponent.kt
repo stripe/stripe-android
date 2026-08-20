@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -10,6 +11,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -22,6 +24,7 @@ import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsE
 import com.stripe.android.paymentsheet.injection.PaymentSheetAutocompleteModule
 import dagger.BindsInstance
 import dagger.Component
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -40,7 +43,6 @@ import javax.inject.Singleton
 )
 @Singleton
 internal interface EmbeddedSheetComponent {
-    val viewModel: EmbeddedSheetViewModel
     val selectionHolder: EmbeddedSelectionHolder
     val customerStateHolder: CustomerStateHolder
 
@@ -62,8 +64,12 @@ internal interface EmbeddedSheetComponent {
             paymentElementCallbackIdentifier: String,
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
-            @BindsInstance promotion: PaymentMethodMessagePromotion?,
+            @BindsInstance promotions: List<PaymentMethodMessagePromotion>?,
             @BindsInstance launchMode: EmbeddedLaunchMode,
+            @BindsInstance activityConfiguration: EmbeddedActivityArgs.ActivityConfiguration,
+            @BindsInstance
+            @ViewModelScope
+            viewModelScope: CoroutineScope,
         ): EmbeddedSheetComponent
     }
 }
