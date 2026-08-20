@@ -138,6 +138,7 @@ internal data class LpmBillingAddressFormParams(
 )
 
 internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
+    addAll(afterpayClearpayTestCases)
     addAll(boletoTestCases)
     addAll(sepaDebitTestCases)
     addAll(weroTestCases)
@@ -148,6 +149,7 @@ internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(blikTestCases)
     addAll(p24TestCases)
     addAll(epsTestCases)
+    addAll(fpxTestCases)
     addAll(konbiniTestCases)
     addAll(mobilePayTestCases)
     addAll(multibancoTestCases)
