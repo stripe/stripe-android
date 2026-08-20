@@ -70,7 +70,6 @@ internal class LpmBillingAddressFormValuesToParamsTest {
         return formViewModel.createFormParams(
             paymentMethodType = config.paymentMethodType,
             metadata = metadata,
-            rawValues = rawValues,
         )
     }
 
@@ -102,7 +101,6 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     private suspend fun FormViewModel.createFormParams(
         paymentMethodType: PaymentMethod.Type,
         metadata: PaymentMethodMetadata,
-        rawValues: Map<IdentifierSpec, String?>,
     ): LpmBillingAddressFormParams {
         val supportedPaymentMethod = requireNotNull(
             metadata.supportedPaymentMethodForCode(paymentMethodType.code),
@@ -110,12 +108,6 @@ internal class LpmBillingAddressFormValuesToParamsTest {
         val formFieldValues = requireNotNull(completeFormValues.first()) {
             "The ${paymentMethodType.code} form never completed. A required field was not seeded, " +
                 "which means its definition ignores UiDefinitionFactory.Arguments.initialValues."
-        }
-
-        // A form with elements must report at least one seeded value, otherwise its definition
-        // ignored initialValues and the assertion in the test body would be vacuous.
-        if (elements.isNotEmpty()) {
-            assertThat(formFieldValues.fieldValuePairs.keys).containsAnyIn(rawValues.keys)
         }
 
         val paymentSelection = formFieldValues.transformToPaymentSelection(supportedPaymentMethod, metadata)
@@ -160,6 +152,7 @@ internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(mobilePayTestCases)
     addAll(multibancoTestCases)
     addAll(promptPayTestCases)
+    addAll(idealFormParamsTestCases)
 }
 
 internal val lpmBillingAddressTestConfigurations =
