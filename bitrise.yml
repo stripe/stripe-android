@@ -10,6 +10,7 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
+    - FTL_TEST_DEVICES: MediumPhone.arm,33,en,portrait
 
 pipelines:
   main-trigger-pipeline:
@@ -267,6 +268,7 @@ workflows:
           numShards=$BITRISE_IO_PARALLEL_TOTAL
           shardIndex=$BITRISE_IO_PARALLEL_INDEX
           notAnnotation=com.stripe.android.paymentsheet.RequiresIme
+          stripeTestLocale=en-US
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-paymentsheet-ime-instrumentation-tests:
@@ -306,6 +308,7 @@ workflows:
     envs:
       - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
       - FTL_TEST_APK_FILENAME: stripecardscan-test.apk
+      - FTL_TEST_DEVICES: panther,33,en,portrait
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-cardscan-example-instrumentation-tests:
@@ -322,6 +325,7 @@ workflows:
       - FTL_TEST_APK_FILENAME: paymentsheet-example-test.apk
       - FTL_GENERATE_E2E_SHARD: "true"
       - FTL_AUTO_GOOGLE_LOGIN: "true"
+      - FTL_RUNNER_ARGUMENTS: stripeTestLocale=en-US
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-paymentsheet-google-pay-e2e:
@@ -378,7 +382,7 @@ workflows:
             - app_path: $FTL_APP_APK_PATH
             - test_apk_path: $FTL_TEST_APK_PATH
             - test_type: instrumentation
-            - test_devices: MediumPhone.arm,33,en,portrait
+            - test_devices: $FTL_TEST_DEVICES
             - inst_test_targets: $FTL_TEST_TARGETS
             - environment_variables: $FTL_RUNNER_ARGUMENTS
             - auto_google_login: $FTL_AUTO_GOOGLE_LOGIN

@@ -8,6 +8,10 @@ apply plugin: 'app.cash.paparazzi'
 apply plugin: 'dev.drewhamilton.poko'
 
 android {
+    defaultConfig {
+        testInstrumentationRunner "com.stripe.android.paymentsheet.utils.PaymentSheetInstrumentationTestRunner"
+    }
+
     testOptions {
         managedDevices {
             localDevices {

@@ -144,16 +144,14 @@ def chrome_first_run_actions() -> list[dict]:
     ]
 
 
-def clear_and_launch(app_id: str) -> list[dict]:
+def launch(app_id: str) -> list[dict]:
     return [
-        adb(f"pm clear {app_id}"),
         adb(f"monkey -p {app_id} -c android.intent.category.LAUNCHER 1"),
     ]
 
 
-def clear_and_open_link(uri: str) -> list[dict]:
+def open_link(uri: str) -> list[dict]:
     return [
-        adb(f"pm clear {CONNECTIONS_APP}"),
         adb(
             "am start -W -a android.intent.action.VIEW "
             f"-d '{uri}' {CONNECTIONS_APP}"
@@ -171,7 +169,7 @@ def finish(name: str, assertion: dict) -> list[dict]:
 
 def connect_account_onboarding() -> list[dict]:
     return [
-        *clear_and_launch(CONNECT_APP),
+        *launch(CONNECT_APP),
         wait_id("settings_button", 60_000),
         click_id("settings_button"),
         *swipe_up(2),
@@ -188,7 +186,7 @@ def connect_account_onboarding() -> list[dict]:
 
 def open_connections(uri: str) -> list[dict]:
     return [
-        *clear_and_open_link(uri),
+        *open_link(uri),
         *swipe_up(2),
         wait_id("connect_accounts", 30_000),
         click_id("connect_accounts"),
@@ -242,7 +240,7 @@ def instant_debits(email: str) -> list[dict]:
         "&financial_connections_confirm_intent=false"
     )
     return [
-        *clear_and_open_link(uri),
+        *open_link(uri),
         *swipe_up(2),
         wait_id("Customer email setting", 30_000),
         click_id("Customer email setting"),
@@ -377,7 +375,7 @@ def networked_manual_entry(email: str) -> list[dict]:
         "&financial_connections_confirm_intent=true"
     )
     return [
-        *clear_and_open_link(uri),
+        *open_link(uri),
         *swipe_up(2),
         wait_id("Customer email setting", 30_000),
         click_id("Customer email setting"),
