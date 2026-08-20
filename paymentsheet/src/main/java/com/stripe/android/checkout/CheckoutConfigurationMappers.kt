@@ -21,11 +21,23 @@ internal fun CheckoutController.Configuration.State.resolveMerchantDisplayName(
 ): String = merchantDisplayName ?: checkoutSessionResponse.businessName ?: appName
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.toGooglePayConfiguration(
+internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
     checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
         expressCheckoutElementConfiguration.googlePayConfiguration.asPaymentSheet(
+            merchantCountry = merchantCountry,
+            liveMode = checkoutSessionResponse.liveMode,
+            isDebugBuild = BuildConfig.DEBUG,
+        )
+    }
+
+@OptIn(CheckoutSessionPreview::class)
+internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayConfiguration(
+    checkoutSessionResponse: CheckoutSessionResponse,
+): PaymentSheet.GooglePayConfiguration? =
+    checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
+        paymentElementConfiguration.googlePayConfiguration.asPaymentSheet(
             merchantCountry = merchantCountry,
             liveMode = checkoutSessionResponse.liveMode,
             isDebugBuild = BuildConfig.DEBUG,

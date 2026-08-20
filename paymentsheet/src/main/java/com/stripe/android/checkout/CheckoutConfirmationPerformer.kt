@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -17,6 +18,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val analyticsPerformer: CheckoutAnalyticsPerformer,
+    private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
@@ -41,11 +43,16 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         }
     }
 
+    @OptIn(CheckoutSessionPreview::class)
     private fun confirmationArgs(
         state: CheckoutControllerState,
         paymentSelection: PaymentSelection,
     ): ConfirmationHandler.Args? {
-        val configuration = state.commonConfiguration
+        val configuration = commonConfigurationFactory.createForPaymentElement(
+            configuration = state.configuration,
+            checkoutSessionResponse = state.checkoutSessionResponse,
+            collectedDetails = state.collectedDetails,
+        )
         val confirmationOption = paymentSelection.toConfirmationOption(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,

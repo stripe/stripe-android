@@ -222,6 +222,56 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
+    fun `createForPaymentElement uses payment element configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration()
+                    .googlePayConfiguration(
+                        PaymentElement.Configuration.GooglePayConfiguration()
+                            .label("PE total")
+                            .buttonType(PaymentElement.Configuration.GooglePayConfiguration.ButtonType.Buy)
+                    )
+                    .linkConfiguration(
+                        PaymentElement.Configuration.LinkConfiguration().display(
+                            PaymentElement.Configuration.LinkConfiguration.Display.Never
+                        )
+                    )
+                    .billingDetailsCollectionConfiguration(
+                        BillingDetailsCollectionConfiguration().address(Full)
+                    )
+            )
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration()
+                    .googlePayConfiguration(
+                        GooglePayConfiguration()
+                            .label("ECE total")
+                            .buttonType(GooglePayConfiguration.ButtonType.Donate)
+                    )
+                    .linkConfiguration(
+                        ExpressCheckoutElement.Configuration.LinkConfiguration().display(
+                            ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic
+                        )
+                    )
+                    .billingDetailsCollectionConfiguration(
+                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
+                    )
+            )
+            .build()
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US")
+        val collectedDetails = collectedDetails()
+
+        val result = factory().createForPaymentElement(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
+        )
+        assertThat(result.googlePay?.label).isEqualTo("PE total")
+        assertThat(result.googlePay?.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Buy)
+        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSFull)
+    }
+
+    @Test
     fun `maps terms display to common configuration`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(
