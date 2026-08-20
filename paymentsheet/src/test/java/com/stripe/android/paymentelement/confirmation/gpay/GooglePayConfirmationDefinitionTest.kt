@@ -13,6 +13,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
@@ -122,6 +123,33 @@ class GooglePayConfirmationDefinitionTest {
                 callback.onActivityResult(GooglePayPaymentMethodLauncher.Result.Completed(PaymentMethodFactory.card()))
 
                 assertThat(onResultCalled).isTrue()
+            }
+        }
+
+    @Test
+    fun `'createLauncher' should pass 'onPaymentDataChangedCallback' to launcher factory`() =
+        RecordingInternalGooglePayPaymentMethodLauncherFactory.test(mock()) {
+            val onPaymentDataChangedCallback = mock<GooglePayPaymentDataUpdateCallback>()
+            val definition = createGooglePayConfirmationDefinition(
+                googlePayPaymentMethodLauncherFactory = factory,
+                instanceId = "instanceId",
+                onPaymentDataChangedCallback = onPaymentDataChangedCallback,
+            )
+
+            DummyActivityResultCaller.test {
+                definition.createLauncher(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = fakeLifecycleOwner(),
+                    onResult = {},
+                )
+
+                assertThat(awaitRegisterCall()).isNotNull()
+                assertThat(awaitNextRegisteredLauncher()).isNotNull()
+
+                val createCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
+
+                assertThat(createCall.instanceId).isEqualTo("instanceId")
+                assertThat(createCall.onPaymentDataChangedCallback).isEqualTo(onPaymentDataChangedCallback)
             }
         }
 
@@ -784,11 +812,15 @@ class GooglePayConfirmationDefinitionTest {
             RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(launcher = mock()),
         userFacingLogger: UserFacingLogger = FakeUserFacingLogger(),
         context: Context = ApplicationProvider.getApplicationContext(),
+        instanceId: String = "instanceId",
+        onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback? = null,
     ): GooglePayConfirmationDefinition {
         return GooglePayConfirmationDefinition(
+            instanceId = instanceId,
             context = context,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             userFacingLogger = userFacingLogger,
+            onPaymentDataChangedCallback = onPaymentDataChangedCallback,
         )
     }
 

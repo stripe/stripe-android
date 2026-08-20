@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
@@ -14,6 +15,7 @@ import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMe
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
@@ -24,9 +26,11 @@ import javax.inject.Inject
 import com.stripe.android.R as PaymentsCoreR
 
 internal class GooglePayConfirmationDefinition @Inject constructor(
+    @PaymentElementCallbackIdentifier val instanceId: String,
     private val context: Context,
     private val googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory,
     private val userFacingLogger: UserFacingLogger?,
+    private val onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback? = null,
 ) : ConfirmationDefinition<
     GooglePayConfirmationOption,
     InternalGooglePayPaymentMethodLauncher,
@@ -76,7 +80,10 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         )
 
         return googlePayPaymentMethodLauncherFactory.create(
+            instanceId = instanceId,
+            lifecycleOwner = lifecycleOwner,
             activityResultLauncher = activityResultLauncher,
+            onPaymentDataChangedCallback = onPaymentDataChangedCallback,
         )
     }
 
