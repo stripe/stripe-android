@@ -32,7 +32,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         paymentMethodOrder = configuration.paymentElementConfiguration.paymentMethodOrder,
         externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
         cardBrandAcceptance = configuration.paymentElementConfiguration.cardBrandAcceptance.asPaymentSheet(),
-        allowedCardFundingTypes = configuration.paymentElementConfiguration.allowedCardFundingTypes.asPaymentSheet(),
+        allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
         customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
         googlePlacesApiKey = null,
         termsDisplay = configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet(),

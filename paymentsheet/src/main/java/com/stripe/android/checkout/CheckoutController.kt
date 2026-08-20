@@ -13,7 +13,6 @@ import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
@@ -818,7 +817,6 @@ class CheckoutController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var adaptivePricing: AdaptivePricing = AdaptivePricing()
-        private var apiConfiguration: ApiConfiguration? = null
         private var merchantDisplayName: String? = null
         private var defaults: Defaults = Defaults()
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
@@ -836,15 +834,6 @@ class CheckoutController @Inject internal constructor(
             adaptivePricing: AdaptivePricing,
         ): Configuration = apply {
             this.adaptivePricing = adaptivePricing
-        }
-
-        /**
-         * Sets the API configuration for this checkout session.
-         */
-        fun apiConfiguration(
-            apiConfiguration: ApiConfiguration,
-        ): Configuration = apply {
-            this.apiConfiguration = apiConfiguration
         }
 
         /**
@@ -908,7 +897,6 @@ class CheckoutController @Inject internal constructor(
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
-            val apiConfiguration: ApiConfiguration.State?,
             val merchantDisplayName: String?,
             val defaults: Defaults.State,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
@@ -921,7 +909,6 @@ class CheckoutController @Inject internal constructor(
             val defaultsState = defaults.build()
             return State(
                 adaptivePricingAllowed = adaptivePricing.build().allowed,
-                apiConfiguration = apiConfiguration?.build(),
                 merchantDisplayName = merchantDisplayName,
                 paymentElementConfiguration = paymentElementConfiguration.build(),
                 currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
