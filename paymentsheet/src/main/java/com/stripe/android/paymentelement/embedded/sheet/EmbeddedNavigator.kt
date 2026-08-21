@@ -235,6 +235,7 @@ internal class EmbeddedNavigator private constructor(
                                 previousNewSelections = embeddedSelectionHolder.previousNewSelections,
                                 hasBeenConfirmed = true,
                                 customerState = customerStateHolder.customer.value,
+                                checkoutSessionResponse = null,
                                 shouldInvokeSelectionCallback = false,
                                 launchMode = launchMode,
                             )
@@ -297,16 +298,19 @@ internal class EmbeddedNavigator private constructor(
                 R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
             )
 
-            override fun isPerformingNetworkOperation(): StateFlow<Boolean> = stateFlowOf(false)
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
+                return sheetActivityState.mapAsStateFlow { it.isProcessing }
+            }
 
             @Composable
             override fun Content() {
+                val state by sheetActivityState.collectAsState()
                 PaymentMethodVerticalLayoutUI(
                     interactor = interactor,
                     modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
                 )
+                FormActivityError(state)
                 Spacer(Modifier.height(40.dp))
-                val state by sheetActivityState.collectAsState()
                 FormActivityPrimaryButton(
                     state = state,
                     onClick = onContinueClick,
@@ -340,7 +344,9 @@ internal class EmbeddedNavigator private constructor(
                 }
             }
 
-            override fun isPerformingNetworkOperation(): StateFlow<Boolean> = stateFlowOf(false)
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
+                return sheetActivityState.mapAsStateFlow { it.isProcessing }
+            }
 
             @Composable
             override fun Content() {

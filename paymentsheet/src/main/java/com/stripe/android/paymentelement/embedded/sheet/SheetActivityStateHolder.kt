@@ -41,6 +41,7 @@ internal interface SheetActivityStateHolder {
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
+    fun updateProcessing(isProcessing: Boolean)
 
     fun setResult(result: EmbeddedActivityResult)
 
@@ -105,6 +106,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
+                            checkoutSessionResponse = null,
                             shouldInvokeSelectionCallback = false,
                             launchMode = launchMode,
                         )
@@ -115,6 +117,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = true,
                             customerState = customerStateHolder.customer.value,
+                            checkoutSessionResponse = null,
                             shouldInvokeSelectionCallback = false,
                             launchMode = launchMode,
                         )
@@ -126,6 +129,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
+                            checkoutSessionResponse = null,
                             shouldInvokeSelectionCallback = false,
                             launchMode = launchMode,
                         )
@@ -176,6 +180,25 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             it.copy(
                 error = error
             )
+        }
+    }
+
+    override fun updateProcessing(isProcessing: Boolean) {
+        _state.update {
+            if (isProcessing) {
+                it.copy(
+                    isProcessing = true,
+                    processingState = PrimaryButtonProcessingState.Processing,
+                    isEnabled = false,
+                    error = null,
+                )
+            } else {
+                it.copy(
+                    isProcessing = false,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isEnabled = selectionHolder.selection.value != null,
+                )
+            }
         }
     }
 

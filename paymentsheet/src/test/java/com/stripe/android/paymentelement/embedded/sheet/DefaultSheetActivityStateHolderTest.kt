@@ -233,6 +233,56 @@ class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
+    fun `updateProcessing starts processing and clears error`() = testScenario {
+        stateHolder.updateError("Something went wrong".resolvableString)
+
+        stateHolder.state.test {
+            assertThat(awaitItem().error).isEqualTo("Something went wrong".resolvableString)
+
+            stateHolder.updateProcessing(true)
+
+            val state = awaitItem()
+            assertThat(state.isProcessing).isTrue()
+            assertThat(state.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
+            assertThat(state.isEnabled).isFalse()
+            assertThat(state.error).isNull()
+        }
+    }
+
+    @Test
+    fun `updateProcessing stops processing and re-enables for selection`() = testScenario {
+        val error = "Something went wrong".resolvableString
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        stateHolder.updateProcessing(true)
+        stateHolder.updateError(error)
+
+        stateHolder.state.test {
+            assertThat(awaitItem().isProcessing).isTrue()
+
+            stateHolder.updateProcessing(false)
+
+            val state = awaitItem()
+            assertThat(state.isProcessing).isFalse()
+            assertThat(state.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
+            assertThat(state.isEnabled).isTrue()
+            assertThat(state.error).isEqualTo(error)
+        }
+    }
+
+    @Test
+    fun `updateProcessing stops processing and stays disabled without selection`() = testScenario {
+        stateHolder.updateProcessing(true)
+
+        stateHolder.state.test {
+            assertThat(awaitItem().isProcessing).isTrue()
+
+            stateHolder.updateProcessing(false)
+
+            assertThat(awaitItem().isEnabled).isFalse()
+        }
+    }
+
+    @Test
     fun `updateMandate updates mandateText`() = testScenario {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
@@ -349,6 +399,7 @@ class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
                             selectedPaymentMethodCode = "card",
@@ -376,6 +427,7 @@ class DefaultSheetActivityStateHolderTest {
                         selection = null,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
+                        checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
                             selectedPaymentMethodCode = "card",
@@ -409,6 +461,7 @@ class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
                             selectedPaymentMethodCode = "card",

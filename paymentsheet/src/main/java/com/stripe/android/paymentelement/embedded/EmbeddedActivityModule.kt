@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
@@ -18,6 +19,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -42,6 +44,7 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmatio
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -183,6 +186,19 @@ internal interface EmbeddedActivityModule {
             @ViewModelScope coroutineScope: CoroutineScope,
         ): ConfirmationHandler {
             return confirmationHandlerFactory.create(coroutineScope)
+        }
+
+        @Provides
+        @Singleton
+        fun provideSheetTaxRegionUpdater(
+            paymentMethodMetadata: PaymentMethodMetadata,
+            taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+        ): SheetTaxRegionUpdater? {
+            val response = (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
+                ?.checkoutSessionResponse
+                ?.takeIf { it.collectsTaxFromBillingAddress }
+                ?: return null
+            return SheetTaxRegionUpdater(response, taxRegionUpdater)
         }
 
         @Provides
