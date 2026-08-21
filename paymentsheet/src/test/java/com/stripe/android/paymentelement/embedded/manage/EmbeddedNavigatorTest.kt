@@ -243,6 +243,46 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `ReplaceCurrentScreen reports replaced screen hidden and replacement shown`() = testScenario {
+        val updateInteractor = FakeUpdatePaymentMethodInteractor()
+        val manageUpdateScreen = EmbeddedNavigator.Screen.ManageUpdate(updateInteractor)
+        val paymentOptionsScreen = createPaymentOptionsScreen()
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(manageUpdateScreen))
+            assertThat(awaitItem()).isEqualTo(manageUpdateScreen)
+            assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(paymentOptionsScreen))
+
+            assertThat(awaitItem()).isEqualTo(paymentOptionsScreen)
+        }
+
+        assertThat(eventReporter.hideEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(updateInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `ReplaceCurrentScreen does not report dropped replacement shown`() = testScenario {
+        val (formScreen, formInteractor) = createFormScreen()
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = createPaymentOptionsScreen(interactor = paymentOptionsInteractor)
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(paymentOptionsScreen))
+
+            assertThat(paymentOptionsInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(awaitItem()).isEqualTo(formScreen)
+        }
+
+        paymentOptionsInteractor.validate()
+        formInteractor.validate()
+    }
+
+    @Test
     fun `initial screen ManageUpdate calls onShowEditablePaymentOption`() = runTest {
         val eventReporter = FakeEventReporter()
         EmbeddedNavigator(
@@ -725,9 +765,11 @@ internal class EmbeddedNavigatorTest {
     private fun createPaymentOptionsScreen(
         isLiveMode: Boolean = true,
         isProcessing: Boolean = false,
+        interactor: FakePaymentMethodVerticalLayoutInteractor =
+            FakePaymentMethodVerticalLayoutInteractor.create(),
     ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
         return EmbeddedNavigator.Screen.VerticalPaymentOptions(
-            interactor = FakePaymentMethodVerticalLayoutInteractor.create(),
+            interactor = interactor,
             isLiveMode = isLiveMode,
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(

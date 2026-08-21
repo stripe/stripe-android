@@ -109,6 +109,13 @@ internal class EmbeddedNavigator private constructor(
                 navigationHandler.transitionToWithDelay(action.screen)
                 onScreenShown(action.screen)
             }
+            is Action.ReplaceCurrentScreen -> {
+                val replacedScreen = screen.value
+                if (navigationHandler.replaceCurrentScreen(action.screen)) {
+                    onScreenHidden(replacedScreen)
+                    onScreenShown(action.screen)
+                }
+            }
         }
     }
 
@@ -375,5 +382,7 @@ internal class EmbeddedNavigator private constructor(
         data class Close(val shouldInvokeRowSelectionCallback: Boolean = false) : Action()
 
         data class GoToScreen(val screen: Screen) : Action()
+
+        data class ReplaceCurrentScreen(val screen: Screen) : Action()
     }
 }

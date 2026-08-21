@@ -132,6 +132,19 @@ internal class NavigationHandler<T : Any>(
         navigateWithDelay { popInternal() }
     }
 
+    fun replaceCurrentScreen(target: T): Boolean {
+        return if (!isTransitioning.get()) {
+            val previousBackStack = backStack.value
+            val replacedScreen = previousBackStack.last()
+            backStack.value = previousBackStack.dropLast(1) + target
+            replacedScreen.onClose()
+            true
+        } else {
+            target.onClose()
+            false
+        }
+    }
+
     private fun popInternal() {
         backStack.update { screens ->
             val modifiableScreens = screens.toMutableList()
