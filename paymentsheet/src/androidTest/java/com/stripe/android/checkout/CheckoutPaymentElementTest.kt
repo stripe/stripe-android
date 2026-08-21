@@ -12,6 +12,7 @@ import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.testBodyFromFile
@@ -19,11 +20,13 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
+import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestName
 import org.json.JSONObject
 import kotlin.time.Duration.Companion.seconds
 
@@ -35,14 +38,20 @@ internal class CheckoutPaymentElementTest {
     )
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
+        around(AdvancedFraudSignalsTestRule())
+            .around(GooglePayRepositoryTestRule())
+    }
+
+    @get:Rule
+    val testName = TestName()
 
     private val contentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
 
     @Before
     fun setup() {
-        AnalyticsRequestExecutor.ENABLED = false
+        AnalyticsRequestExecutor.ENABLED = testName.methodName == "testTotalChangeFailureSendsAnalyticsErrorCode"
     }
 
     @After
@@ -108,6 +117,27 @@ internal class CheckoutPaymentElementTest {
     fun testTotalChangeFailureSendsAnalyticsErrorCode() {
         val initialTotal = 5099
         val updatedTotal = 5399
+        // Initial configuration and the post-failure session refresh each report loading.
+        repeat(2) {
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_started",
+                productUsage = setOf("Checkout"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_succeeded",
+                productUsage = setOf("Checkout"),
+            )
+        }
+        networkRule.validateAnalyticsRequest(
+            eventName = "mc_initial_displayed_payment_methods",
+            productUsage = setOf("Checkout"),
+        )
+        networkRule.validateAnalyticsRequest(
+            eventName = "mc_embedded_payment_failure",
+            productUsage = setOf("Checkout"),
+            analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
+            analyticsPayloadField("error_code", "checkout_session_total_changed"),
+        )
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
             resultCallback = { result ->
@@ -119,6 +149,7 @@ internal class CheckoutPaymentElementTest {
                 response.testBodyFromFile("checkout-session-init.json") { json ->
                     json.put("customer_email", "checkout@example.com")
                     json.getJSONObject("elements_session").remove("link_settings")
+                    json.put("account_settings", JSONObject("""{"country":"US"}"""))
                     json.getJSONObject("total_summary").apply {
                         put("subtotal", initialTotal)
                         put("due", initialTotal)
@@ -176,16 +207,11 @@ internal class CheckoutPaymentElementTest {
                 }
             }
             networkRule.checkoutInit { response ->
-                response.testBodyFromFile("checkout-session-init.json")
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put("account_settings", JSONObject("""{"country":"US"}"""))
+                }
             }
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_failure",
-                productUsage = setOf("Checkout"),
-                analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
-                analyticsPayloadField("error_code", "checkout_session_total_changed"),
-            )
 
-            AnalyticsRequestExecutor.ENABLED = true
             context.confirm()
         }
     }
