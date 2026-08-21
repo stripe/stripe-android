@@ -3,6 +3,7 @@ import groovy.xml.XmlSlurper
 
 class InstrumentationTestReportSplitter {
     private static final XmlSlurper SLURPER = new XmlSlurper(false, false)
+    private static final String INSTRUMENTATION_TEST_RETRY_LOG_TAG = 'STRIPE_INSTRUMENTATION_TEST_RETRY_MARKER'
 
     static void split(File moduleDir, File outDir) {
         def resultRoots = [
@@ -115,34 +116,147 @@ class InstrumentationTestReportSplitter {
         }
     }
 
+    private static List buildExpandedRows(String className, List rows, Map<String, File> logcatByTest) {
+        def expanded = []
+        rows.each { tc ->
+            def testName = tc.@name?.toString() ?: ''
+            def fqcn = tc.@classname?.toString() ?: className
+            def logcatFile = findLogcatFile(logcatByTest, fqcn, testName)
+            def segments = splitLogcatByRetryMarkers(logcatFile)
+
+            segments.retries.each { retry ->
+                expanded << [
+                    kind: 'synthetic_retry',
+                    fqcn: fqcn,
+                    baseName: "${testName} [retry attempt ${retry.attempt}]",
+                    logLine: retry.markerLine,
+                    logSegment: retry.log,
+                ]
+            }
+
+            expanded << [
+                kind: 'original',
+                tc: tc,
+                logSegment: segments.finalLog,
+            ]
+        }
+        expanded
+    }
+
+    private static Map splitLogcatByRetryMarkers(File logcatFile) {
+        if (!logcatFile?.file) {
+            return [retries: [], finalLog: null]
+        }
+
+        def retries = []
+        def currentSegment = []
+
+        logcatFile.eachLine('UTF-8') { line ->
+            def attempt = retryAttemptFromLogLine(line)
+            if (attempt != null) {
+                retries << [
+                    attempt: attempt,
+                    markerLine: line,
+                    log: currentSegment.join('\n'),
+                ]
+                currentSegment = []
+            } else {
+                currentSegment << line
+            }
+        }
+
+        [
+            retries: retries,
+            finalLog: currentSegment.isEmpty() ? null : currentSegment.join('\n'),
+        ]
+    }
+
+    private static String retryAttemptFromLogLine(String line) {
+        if (!line.contains(INSTRUMENTATION_TEST_RETRY_LOG_TAG)) {
+            return null
+        }
+        def afterTag = line.substring(line.indexOf(INSTRUMENTATION_TEST_RETRY_LOG_TAG) +
+                INSTRUMENTATION_TEST_RETRY_LOG_TAG.length())
+        def matcher = (afterTag =~ /:\s*(\d+)/)
+        return matcher.find() ? matcher.group(1) : null
+    }
+
     private static void writeReport(File outFile, String className, List rows, Map<String, File> logcatByTest) {
         outFile.parentFile.mkdirs()
+        def expanded = buildExpandedRows(className, rows, logcatByTest)
+        def failures = 0
+        def errors = 0
+        def skipped = 0
+        def time = 0d
+        expanded.each { row ->
+            if (row.kind == 'synthetic_retry') {
+                failures++
+            } else {
+                if (row.tc.failure.size() > 0) {
+                    failures++
+                }
+                if (row.tc.error.size() > 0) {
+                    errors++
+                }
+                if (row.tc.skipped.size() > 0) {
+                    skipped++
+                }
+                time += parseTime(row.tc)
+            }
+        }
         def writer = new StringWriter()
         writer << '<?xml version="1.0" encoding="UTF-8"?>\n'
         def mb = new MarkupBuilder(writer)
         mb.setDoubleQuotes(true)
         mb.testsuite(
-                name: className,
-                tests: rows.size(),
-                failures: rows.count { it.failure.size() > 0 },
-                errors: rows.count { it.error.size() > 0 },
-                skipped: rows.count { it.skipped.size() > 0 },
-                time: String.format(Locale.US, '%.3f', rows.sum { parseTime(it) }),
+            name: className,
+            tests: expanded.size(),
+            failures: failures,
+            errors: errors,
+            skipped: skipped,
+            time: String.format(Locale.US, '%.3f', time),
         ) {
-            rows.each { tc ->
-                emitTestCase(mb, tc, logcatByTest, className)
+            expanded.each { row ->
+                if (row.kind == 'synthetic_retry') {
+                    emitSyntheticRetryTestCase(mb, row)
+                } else {
+                    emitOriginalTestCase(mb, row, logcatByTest, className)
+                }
             }
         }
         outFile.setText(writer.toString(), 'UTF-8')
     }
 
-    private static void emitTestCase(MarkupBuilder mb, def tc, Map<String, File> logcatByTest, String bucketFqcn) {
+    private static void emitSyntheticRetryTestCase(MarkupBuilder mb, Map row) {
+        mb.testcase(
+            classname: row.fqcn,
+            name: row.baseName.toString(),
+            time: '0',
+        ) {
+            failure(type: 'com.stripe.android.testing.RetryRule') {
+                mkp.yield(row.logLine.toString())
+            }
+            if (row.logSegment) {
+                'system-out' {
+                    mkp.yield(row.logSegment.toString())
+                }
+            }
+        }
+    }
+
+    private static void emitOriginalTestCase(
+        MarkupBuilder mb,
+        Map row,
+        Map<String, File> logcatByTest,
+        String bucketFqcn
+    ) {
+        def tc = row.tc
         def testName = tc.@name?.toString() ?: ''
         def fqcn = tc.@classname?.toString() ?: bucketFqcn
         mb.testcase(
-                classname: fqcn,
-                name: testName,
-                time: tc.@time.toString(),
+            classname: fqcn,
+            name: testName,
+            time: tc.@time.toString(),
         ) {
             tc.failure.each { f ->
                 failure(type: f.@type.toString()) {
@@ -167,10 +281,16 @@ class InstrumentationTestReportSplitter {
                     mkp.yield(se.text().toString())
                 }
             }
-            def logcatFile = findLogcatFile(logcatByTest, fqcn, testName)
-            if (logcatFile?.file) {
+            def logcatContent = row.logSegment
+            if (!logcatContent) {
+                def logcatFile = findLogcatFile(logcatByTest, fqcn, testName)
+                if (logcatFile?.file) {
+                    logcatContent = logcatFile.getText('UTF-8')
+                }
+            }
+            if (logcatContent) {
                 'system-out' {
-                    mkp.yield(logcatFile.getText('UTF-8'))
+                    mkp.yield(logcatContent)
                 }
             }
         }
