@@ -9,9 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 
 internal class FakeCustomerStateHolder(
     paymentMethods: List<PaymentMethod> = emptyList(),
+    private val customerState: CustomerState? = null,
 ) : CustomerStateHolder {
     override val customer: StateFlow<CustomerState?>
-        get() = stateFlowOf<CustomerState?>(null)
+        get() = stateFlowOf(customerState)
 
     override val paymentMethods: StateFlow<List<PaymentMethod>> = stateFlowOf(paymentMethods)
 
