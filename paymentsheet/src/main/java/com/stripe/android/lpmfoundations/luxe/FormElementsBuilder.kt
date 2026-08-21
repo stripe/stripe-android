@@ -3,7 +3,12 @@ package com.stripe.android.lpmfoundations.luxe
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
@@ -19,6 +24,7 @@ internal class FormElementsBuilder(
     private var requireBillingAddressCollection: Boolean = false
     private var availableCountries: Set<String> =
         arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
+    private var countryRequirement: CountryRequirement? = null
 
     init {
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.
@@ -78,6 +84,16 @@ internal class FormElementsBuilder(
         }
     }
 
+    fun requireCountry(
+        allowedCountryCodes: Set<String>,
+        initialValue: String?,
+    ): FormElementsBuilder = apply {
+        countryRequirement = CountryRequirement(
+            allowedCountryCodes = allowedCountryCodes,
+            initialValue = initialValue,
+        )
+    }
+
     fun footer(formElement: FormElement): FormElementsBuilder = apply {
         footerFormElements += formElement
     }
@@ -94,17 +110,41 @@ internal class FormElementsBuilder(
 
             addAll(uiFormElements)
 
-            if (requireBillingAddressCollection) {
-                val elements = AddressSpec(allowedCountryCodes = availableCountries).transform(
-                    initialValues = arguments.initialValues,
-                    shippingValues = arguments.shippingValues,
-                    autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
+            countryRequirement?.let { requirement ->
+                add(
+                    SectionElement.wrap(
+                        CountryElement(
+                            identifier = IdentifierSpec.Country,
+                            controller = DropdownFieldController(
+                                config = CountryConfig(requirement.allowedCountryCodes),
+                                initialValue = requirement.initialValue,
+                            )
+                        )
+                    )
                 )
+            }
 
-                addAll(elements)
+            if (requireBillingAddressCollection) {
+                addAll(createAddressElements(hideCountry = countryRequirement != null))
             }
 
             addAll(footerFormElements) // Order footers last.
         }
     }
+
+    private fun createAddressElements(hideCountry: Boolean): List<FormElement> {
+        return AddressSpec(
+            allowedCountryCodes = availableCountries,
+            hideCountry = hideCountry,
+        ).transform(
+            initialValues = arguments.initialValues,
+            shippingValues = arguments.shippingValues,
+            autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
+        )
+    }
+
+    private data class CountryRequirement(
+        val allowedCountryCodes: Set<String>,
+        val initialValue: String?,
+    )
 }
