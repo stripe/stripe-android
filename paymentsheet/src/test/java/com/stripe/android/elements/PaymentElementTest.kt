@@ -37,7 +37,7 @@ internal class PaymentElementTest {
 
         assertThat(googlePayConfiguration.display).isEqualTo(CheckoutGooglePayConfiguration.Display.Automatic)
         assertThat(googlePayConfiguration.label).isNull()
-        assertThat(googlePayConfiguration.buttonType).isEqualTo(CheckoutGooglePayConfiguration.ButtonType.Pay)
+        assertThat(googlePayConfiguration.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Pay)
         assertThat(googlePayConfiguration.additionalEnabledNetworks).isEmpty()
     }
 
@@ -56,7 +56,8 @@ internal class PaymentElementTest {
 
         assertThat(googlePayConfiguration.display).isEqualTo(CheckoutGooglePayConfiguration.Display.Never)
         assertThat(googlePayConfiguration.label).isEqualTo("Complete your purchase")
-        assertThat(googlePayConfiguration.buttonType).isEqualTo(CheckoutGooglePayConfiguration.ButtonType.Checkout)
+        assertThat(googlePayConfiguration.buttonType)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
         assertThat(googlePayConfiguration.additionalEnabledNetworks).containsExactly("INTERAC")
     }
 

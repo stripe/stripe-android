@@ -17,19 +17,6 @@ internal fun CheckoutGooglePayConfiguration.asPaymentSheet(
     },
     countryCode = merchantCountry,
     label = label,
-    buttonType = buttonType.asPaymentSheet(),
+    buttonType = buttonType,
     additionalEnabledNetworks = additionalEnabledNetworks,
 )
-
-@OptIn(CheckoutSessionPreview::class)
-private fun CheckoutGooglePayConfiguration.ButtonType.asPaymentSheet():
-    PaymentSheet.GooglePayConfiguration.ButtonType = when (this) {
-    CheckoutGooglePayConfiguration.ButtonType.Buy -> PaymentSheet.GooglePayConfiguration.ButtonType.Buy
-    CheckoutGooglePayConfiguration.ButtonType.Book -> PaymentSheet.GooglePayConfiguration.ButtonType.Book
-    CheckoutGooglePayConfiguration.ButtonType.Checkout -> PaymentSheet.GooglePayConfiguration.ButtonType.Checkout
-    CheckoutGooglePayConfiguration.ButtonType.Donate -> PaymentSheet.GooglePayConfiguration.ButtonType.Donate
-    CheckoutGooglePayConfiguration.ButtonType.Order -> PaymentSheet.GooglePayConfiguration.ButtonType.Order
-    CheckoutGooglePayConfiguration.ButtonType.Pay -> PaymentSheet.GooglePayConfiguration.ButtonType.Pay
-    CheckoutGooglePayConfiguration.ButtonType.Subscribe -> PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe
-    CheckoutGooglePayConfiguration.ButtonType.Plain -> PaymentSheet.GooglePayConfiguration.ButtonType.Plain
-}

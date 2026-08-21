@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
 @OptIn(
@@ -26,7 +27,7 @@ internal class ExpressCheckoutElementTest {
         )
         assertThat(state.googlePayConfiguration.label).isNull()
         assertThat(state.googlePayConfiguration.buttonType).isEqualTo(
-            CheckoutGooglePayConfiguration.ButtonType.Pay
+            PaymentSheet.GooglePayConfiguration.ButtonType.Pay
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).isEmpty()
         assertThat(state.billingDetailsCollectionConfiguration.name).isEqualTo(
@@ -70,7 +71,7 @@ internal class ExpressCheckoutElementTest {
         )
         assertThat(state.googlePayConfiguration.label).isEqualTo("Complete your purchase")
         assertThat(state.googlePayConfiguration.buttonType).isEqualTo(
-            CheckoutGooglePayConfiguration.ButtonType.Checkout
+            PaymentSheet.GooglePayConfiguration.ButtonType.Checkout
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).containsExactly("INTERAC")
     }
