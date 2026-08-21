@@ -102,7 +102,8 @@ internal fun ExpressCheckoutElementContent(
 
 private val ButtonSpacing = 12.dp
 
-private fun calculateVisibleButtonCount(
+@VisibleForTesting
+internal fun calculateVisibleButtonCount(
     buttonCount: Int,
     maxColumns: Int?,
     maxRows: Int?,
@@ -119,7 +120,8 @@ private fun calculateVisibleButtonCount(
     )
 }
 
-private fun calculateColumnCount(
+@VisibleForTesting
+internal fun calculateColumnCount(
     buttonCount: Int,
     maxColumns: Int?,
     maxRows: Int?,
