@@ -36,6 +36,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -171,9 +172,8 @@ class CheckoutSessionConfirmationInterceptorTest {
             assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
             val failAction = result as ConfirmationDefinition.Action.Fail
             assertThat(failAction.cause).isInstanceOf<LocalStripeException>()
-            assertThat(failAction.cause.message).isEqualTo(
-                "The estimated total changed from 5099 to 5399."
-            )
+            assertThat(failAction.cause.message)
+                .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
             val error = failAction.cause as LocalStripeException
             assertThat(error.analyticsValue()).isEqualTo("checkoutSessionTotalChanged")
             assertThat(error.stripeError?.code).isEqualTo("checkout_session_total_changed")

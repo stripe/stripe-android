@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
@@ -55,6 +56,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 ) : IntentConfirmationInterceptor {
 
     private val returnUrl: String = DefaultReturnUrl.create(context).value
+    private val genericErrorMessage: String = context.getString(R.string.stripe_something_went_wrong)
     private val isSaveEnabled: Boolean =
         customerMetadata?.saveConsent is PaymentMethodSaveConsentBehavior.Enabled
 
@@ -130,7 +132,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         val finalEstimatedTotal = updatedCheckoutSessionResponse?.totalSummary?.totalAmountDue
         if (initialEstimatedTotal != finalEstimatedTotal) {
             val error = LocalStripeException(
-                displayMessage = "The estimated total changed from $initialEstimatedTotal to $finalEstimatedTotal.",
+                displayMessage = genericErrorMessage,
                 analyticsValue = "checkoutSessionTotalChanged",
                 errorCode = "checkout_session_total_changed",
             )
