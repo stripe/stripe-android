@@ -30,7 +30,6 @@ internal class ExpressCheckoutElementContentCalculationTest {
     ) {
         val result = calculateColumnCount(
             buttonCount = testCase.buttonCount,
-            maxColumns = testCase.maxColumns,
             maxRows = testCase.maxRows,
         )
 
@@ -104,44 +103,44 @@ internal object ColumnCountCaseProvider : TestParameterValuesProvider() {
         ColumnCountCase(
             name = "No buttons",
             buttonCount = 0,
-            maxColumns = 2,
             maxRows = 2,
             expected = 1,
         ),
         ColumnCountCase(
             name = "No limits",
             buttonCount = 5,
-            maxColumns = null,
             maxRows = null,
             expected = 1,
-        ),
-        ColumnCountCase(
-            name = "Maximum columns below button count",
-            buttonCount = 5,
-            maxColumns = 2,
-            maxRows = null,
-            expected = 2,
-        ),
-        ColumnCountCase(
-            name = "Maximum columns above button count",
-            buttonCount = 3,
-            maxColumns = 5,
-            maxRows = null,
-            expected = 3,
-        ),
-        ColumnCountCase(
-            name = "Rows require uneven columns",
-            buttonCount = 5,
-            maxColumns = null,
-            maxRows = 2,
-            expected = 3,
         ),
         ColumnCountCase(
             name = "Maximum rows above button count",
             buttonCount = 3,
-            maxColumns = null,
             maxRows = 5,
             expected = 1,
+        ),
+        ColumnCountCase(
+            name = "Maximum rows equals button count",
+            buttonCount = 3,
+            maxRows = 3,
+            expected = 1,
+        ),
+        ColumnCountCase(
+            name = "Rows require even columns",
+            buttonCount = 4,
+            maxRows = 2,
+            expected = 2,
+        ),
+        ColumnCountCase(
+            name = "Rows require uneven columns",
+            buttonCount = 5,
+            maxRows = 2,
+            expected = 3,
+        ),
+        ColumnCountCase(
+            name = "Single row requires one column per button",
+            buttonCount = 5,
+            maxRows = 1,
+            expected = 5,
         ),
     )
 }
@@ -149,7 +148,6 @@ internal object ColumnCountCaseProvider : TestParameterValuesProvider() {
 internal data class ColumnCountCase(
     val name: String,
     val buttonCount: Int,
-    val maxColumns: Int?,
     val maxRows: Int?,
     val expected: Int,
 ) {
