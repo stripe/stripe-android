@@ -1,22 +1,119 @@
 package com.stripe.android.elements
 
 import android.os.Parcelable
+import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutShippingAddressEventReporter
+import com.stripe.android.checkout.asPaymentSheet
+import com.stripe.android.checkout.toShippingDetails
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
+import com.stripe.android.paymentsheet.addresselement.CheckoutShippingAddressUpdaterRegistry
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ShippingAddressElement @Inject internal constructor() {
+class ShippingAddressElement @Inject internal constructor(
+    private val activityResultCaller: ActivityResultCaller,
+    private val paymentConfiguration: PaymentConfiguration,
+    private val checkoutController: CheckoutController,
+    private val stateHolder: CheckoutControllerStateHolder,
+    private val errorReporter: ErrorReporter,
+    private val eventReporter: CheckoutShippingAddressEventReporter,
+) : CheckoutShippingAddressUpdaterRegistry.Updater {
+
+    private var isPresenting = false
+    private var updaterKey: String? = null
+    private var presentedAddress: AddressDetails? = null
+
+    private val activityResultLauncher = activityResultCaller.registerForActivityResult(
+        AddressElementActivityContract,
+    ) { result ->
+        isPresenting = false
+        CheckoutShippingAddressUpdaterRegistry.remove(updaterKey)
+        updaterKey = null
+        if (result is AddressLauncherResult.Canceled) {
+            eventReporter.onCanceled(presentedAddress)
+        }
+        presentedAddress = null
+    }
 
     fun present() {
-        TODO("Not yet implemented")
+        val state = stateHolder.state ?: run {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent
+                    .CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_BEFORE_CONFIGURATION
+            )
+            return
+        }
+        if (isPresenting) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_ALREADY_PRESENTING
+            )
+            return
+        }
+        val address = state.collectedDetails.toShippingDetails()
+        presentedAddress = address
+        eventReporter.onShown(address)
+        isPresenting = true
+        updaterKey = CheckoutShippingAddressUpdaterRegistry.register(this)
+        val configuration = state.configuration.shippingAddressElementConfiguration
+        val args = AddressElementActivityContract.Args(
+            publishableKey = paymentConfiguration.publishableKey,
+            config = AddressLauncher.Configuration(
+                appearance = configuration.appearance.asPaymentSheet(),
+                address = address,
+                allowedCountries = state.checkoutSessionResponse.allowedShippingCountries?.toSet()
+                    ?: emptySet(),
+                buttonTitle = configuration.buttonTitle,
+                title = configuration.title,
+            ),
+            mode = AddressElementActivityContract.Args.Mode.Checkout,
+            updaterKey = updaterKey,
+        )
+        activityResultLauncher.launch(args)
     }
+
+    override suspend fun update(address: AddressDetails): Result<Unit> {
+        eventReporter.onSaveStarted(address)
+        val result = runCatching { address.toCheckoutAddress() }.fold(
+            onSuccess = { checkoutAddress ->
+                checkoutController.updateShippingAddress(
+                    name = address.name,
+                    address = checkoutAddress,
+                )
+            },
+            onFailure = { Result.failure(it) },
+        )
+        return result.also {
+            if (it.isSuccess) {
+                eventReporter.onSaveCompleted(address)
+            } else {
+                eventReporter.onSaveFailed(address)
+            }
+        }
+    }
+
+    private fun AddressDetails.toCheckoutAddress(): CheckoutController.Address =
+        CheckoutController.Address()
+            .city(address?.city)
+            .country(requireNotNull(address?.country))
+            .line1(address?.line1)
+            .line2(address?.line2)
+            .postalCode(address?.postalCode)
+            .state(address?.state)
 
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

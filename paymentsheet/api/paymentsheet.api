@@ -2190,6 +2190,15 @@ public final class com/stripe/android/paymentsheet/addresselement/ComposableSing
 	public final fun getLambda$-1578841985$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
 }
 
+public final class com/stripe/android/paymentsheet/addresselement/ComposableSingletons$InputAddressScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/addresselement/ComposableSingletons$InputAddressScreenKt;
+	public fun <init> ()V
+	public final fun getLambda$-755774322$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1178432077$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$396347463$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$822901961$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/paymentsheet/databinding/StripeAndroidPrimaryButtonBinding : androidx/viewbinding/ViewBinding {
 	public final field confirmedIcon Landroid/widget/ImageView;
 	public final field confirmingIcon Lcom/google/android/material/progressindicator/CircularProgressIndicator;

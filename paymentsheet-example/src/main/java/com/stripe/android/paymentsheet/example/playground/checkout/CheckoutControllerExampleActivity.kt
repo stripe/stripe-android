@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
@@ -48,13 +49,9 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val presenter = viewModel.controller.createPresenter(this)
         val paymentElement = presenter.paymentElement()
+        val shippingAddressElement = presenter.shippingAddressElement()
 
-        lifecycleScope.launch {
-            viewModel.sessionComplete.collect {
-                Toast.makeText(this@CheckoutControllerExampleActivity, "Payment complete!", Toast.LENGTH_LONG).show()
-                finish()
-            }
-        }
+        observeSessionComplete()
 
         setContent {
             val status by viewModel.status.collectAsState()
@@ -73,6 +70,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
+                                ShippingAddressSection(session)
                                 if (session.availableExpressCheckoutPaymentMethods.isNotEmpty()) {
                                     presenter.expressCheckoutElement().Content()
                                 }
@@ -92,7 +90,10 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                     ) {
                         Text("Select Payment Method")
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    ShippingAddressButton(
+                        shippingAddressElement = shippingAddressElement,
+                        enabled = configured != null,
+                    )
                     Button(
                         onClick = { presenter.confirm() },
                         modifier = Modifier.fillMaxWidth(),
@@ -103,6 +104,31 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
             )
         }
     }
+
+    private fun observeSessionComplete() {
+        lifecycleScope.launch {
+            viewModel.sessionComplete.collect {
+                Toast.makeText(this@CheckoutControllerExampleActivity, "Payment complete!", Toast.LENGTH_LONG).show()
+                finish()
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShippingAddressButton(
+    shippingAddressElement: ShippingAddressElement,
+    enabled: Boolean,
+) {
+    Spacer(modifier = Modifier.height(8.dp))
+    Button(
+        onClick = { shippingAddressElement.present() },
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text("Add Shipping Address")
+    }
+    Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable
@@ -221,6 +247,26 @@ private fun TotalSummarySection(session: Session) {
                 style = MaterialTheme.typography.subtitle1,
             )
         }
+    }
+}
+
+@Composable
+private fun ShippingAddressSection(session: Session) {
+    val shippingAddress = session.shippingAddress ?: return
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Divider(modifier = Modifier.padding(vertical = 12.dp))
+        Text(text = "Shipping Address", style = MaterialTheme.typography.h6)
+        Text(text = shippingAddress.name.orEmpty())
+        Text(
+            text = listOfNotNull(
+                shippingAddress.address.line1,
+                shippingAddress.address.line2,
+                shippingAddress.address.city,
+                shippingAddress.address.state,
+                shippingAddress.address.postalCode,
+                shippingAddress.address.country,
+            ).joinToString(", ")
+        )
     }
 }
 

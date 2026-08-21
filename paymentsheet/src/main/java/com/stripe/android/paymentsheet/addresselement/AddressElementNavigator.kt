@@ -24,6 +24,14 @@ internal interface AddressElementNavigator {
 
     fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled())
 
+    fun requestDismiss()
+
+    fun setDismissRequestHandler(handler: (() -> Unit)?)
+
+    fun canDismiss(): Boolean
+
+    fun setDismissGuard(guard: (() -> Boolean)?)
+
     fun onBack()
 
     sealed interface AutocompleteEvent : Parcelable {
@@ -45,6 +53,8 @@ internal interface AddressElementNavigator {
 internal class NavHostAddressElementNavigator @Inject constructor() : AddressElementNavigator {
     var navigationController: NavHostController? = null
     var onDismiss: ((AddressLauncherResult) -> Unit)? = null
+    var onDismissRequest: (() -> Unit)? = null
+    var onDismissGuard: (() -> Boolean)? = null
 
     override fun navigateTo(
         target: AddressElementScreen
@@ -68,10 +78,24 @@ internal class NavHostAddressElementNavigator @Inject constructor() : AddressEle
         onDismiss?.invoke(result)
     }
 
+    override fun requestDismiss() {
+        onDismissRequest?.invoke() ?: dismiss()
+    }
+
+    override fun setDismissRequestHandler(handler: (() -> Unit)?) {
+        onDismissRequest = handler
+    }
+
+    override fun canDismiss(): Boolean = onDismissGuard?.invoke() ?: true
+
+    override fun setDismissGuard(guard: (() -> Boolean)?) {
+        onDismissGuard = guard
+    }
+
     override fun onBack() {
         navigationController?.let { navController ->
             if (!navController.popBackStack()) {
-                dismiss()
+                requestDismiss()
             }
         }
     }

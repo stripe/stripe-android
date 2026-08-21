@@ -11,6 +11,8 @@ import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFacto
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutSessionResponse.asCheckoutSession(
     collectedEmail: String?,
+    collectedShippingName: String? = null,
+    collectedShippingAddress: CheckoutController.Address.State? = null,
     flagImages: Map<String, Bitmap>?,
     paymentOptionDisplayData: PaymentOptionDisplayData?,
     availableExpressButtonTypes: List<ExpressButtonType>,
@@ -21,6 +23,12 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         liveMode = liveMode,
         currency = currency,
         email = collectedEmail ?: customerEmail,
+        shippingAddress = collectedShippingAddress?.let {
+            Session.ShippingAddress(
+                name = collectedShippingName,
+                address = it.asPostalAddress(),
+            )
+        },
         tax = taxStatus.asTax(),
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },
@@ -33,6 +41,17 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         availableExpressButtonTypes = availableExpressButtonTypes,
     )
 }
+
+@OptIn(CheckoutSessionPreview::class)
+internal fun CheckoutController.Address.State.asPostalAddress(): CheckoutController.PostalAddress =
+    CheckoutController.PostalAddress(
+        city = city,
+        country = country,
+        line1 = line1,
+        line2 = line2,
+        postalCode = postalCode,
+        state = state,
+    )
 
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.Status.asStatus(): Session.Status {
