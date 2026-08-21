@@ -290,7 +290,12 @@ for index in "${!test_pids[@]}"; do
 done
 
 mkdir -p "$results_dir/google-cloud"
-if ! gcloud storage cp --recursive \
+# Test Lab keeps the complete result set in GCS. Avoid copying the duplicated
+# APKs, videos, and per-test logcats into Bitrise's artifact, which has a 2 GB
+# per-file limit. The Bitrise bundle still contains the JUnit XML, screenshots,
+# matrix metadata, and the gcloud command logs collected above.
+if ! gcloud storage rsync --recursive \
+  --exclude='.*\.apk$|.*\.mp4$|.*_logcat$' \
   "${results_bucket%/}/$results_prefix" \
   "$results_dir/google-cloud"; then
   echo "Failed to download Firebase Test Lab result artifacts" >&2
