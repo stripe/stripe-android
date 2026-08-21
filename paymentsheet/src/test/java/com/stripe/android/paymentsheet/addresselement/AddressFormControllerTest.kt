@@ -26,6 +26,7 @@ class AddressFormControllerTest {
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
             googlePlacesApiKey = "123456",
+            isPlacesAvailable = false,
         ),
         launcherConfig = AddressLauncher.Configuration(
             address = AddressDetails(

@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.content.Context
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
@@ -63,38 +61,28 @@ internal class AddressElementViewModelModule {
 
     @Provides
     @Singleton
+    internal fun providePlacesClient(
+        stripeAutocompleteRepository: StripeAutocompleteRepository,
+        addressLauncherEventReporter: AddressLauncherEventReporter,
+    ): PlacesClientProxy? = PlacesClientProxy.override
+        ?: StripeHostedPlacesClientProxy(
+            repository = stripeAutocompleteRepository,
+            eventReporter = addressLauncherEventReporter,
+        )
+
+    @Provides
+    @Singleton
     @Named(INLINE_PLACES_CLIENT)
     internal fun provideInlinePlacesClient(
         args: AddressElementActivityContract.Args,
         stripeAutocompleteRepository: StripeAutocompleteRepository,
-        googlePlacesClient: PlacesClientProxy?,
         addressLauncherEventReporter: AddressLauncherEventReporter,
     ): PlacesClientProxy? {
-        val config = args.config ?: return null
-        return if (config.useStripeHostedAutocomplete) {
-            StripeHostedPlacesClientProxy(
-                repository = stripeAutocompleteRepository,
-                eventReporter = addressLauncherEventReporter,
-            )
-        } else {
-            googlePlacesClient
-        }
-    }
-
-    @Provides
-    @Singleton
-    internal fun provideGooglePlacesClient(
-        context: Context,
-        args: AddressElementActivityContract.Args,
-    ): PlacesClientProxy? {
-        val config = args.config ?: return null
-        return config.googlePlacesApiKey?.let {
-            PlacesClientProxy.create(
-                context,
-                it,
-                errorReporter = ErrorReporter.createFallbackInstance(context),
-            )
-        }
+        if (args.config == null) return null
+        return PlacesClientProxy.override ?: StripeHostedPlacesClientProxy(
+            repository = stripeAutocompleteRepository,
+            eventReporter = addressLauncherEventReporter,
+        )
     }
 
     @Module
