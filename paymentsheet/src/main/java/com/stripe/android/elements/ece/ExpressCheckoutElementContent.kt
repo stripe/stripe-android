@@ -56,25 +56,26 @@ internal fun ExpressCheckoutElementContent(
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(ButtonSpacing),
-    ) {
-        val visibleButtons = state.expressButtons.take(
-            calculateVisibleButtonCount(
-                buttonCount = state.expressButtons.size,
-                maxColumns = state.buttonLayout.maxColumns,
-                maxRows = state.buttonLayout.maxRows,
-            )
-        )
-        val columnCount = calculateColumnCount(
-            buttonCount = visibleButtons.size,
+    val visibleButtons = state.expressButtons.take(
+        calculateVisibleButtonCount(
+            buttonCount = state.expressButtons.size,
             maxColumns = state.buttonLayout.maxColumns,
             maxRows = state.buttonLayout.maxRows,
         )
-        visibleButtons.chunked(columnCount).forEach { rowButtons ->
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val buttonWidth = ((maxWidth - ButtonSpacing * (columnCount - 1)) / columnCount)
-                    .coerceAtLeast(0.dp)
+    )
+    val columnCount = calculateColumnCount(
+        buttonCount = visibleButtons.size,
+        maxColumns = state.buttonLayout.maxColumns,
+        maxRows = state.buttonLayout.maxRows,
+    )
+
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val buttonWidth = ((maxWidth - ButtonSpacing * (columnCount - 1)) / columnCount)
+            .coerceAtLeast(0.dp)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(ButtonSpacing),
+        ) {
+            visibleButtons.chunked(columnCount).forEach { rowButtons ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(
