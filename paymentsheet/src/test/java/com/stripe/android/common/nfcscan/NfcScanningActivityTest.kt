@@ -9,6 +9,7 @@ import android.os.Vibrator
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -16,6 +17,8 @@ import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -38,6 +41,7 @@ import kotlin.use
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
+@OptIn(AppearanceAPIAdditionsPreview::class)
 internal class NfcScanningActivityTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -73,6 +77,38 @@ internal class NfcScanningActivityTest {
         waitForIdle()
 
         assertThat(nfcAdapter?.isInReaderMode).isTrue()
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q], qualifiers = "notnight")
+    fun `always dark appearance uses light system bar icons in system light`() = test(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            appearance = PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysDark),
+        ),
+    ) {
+        val insetsController = WindowCompat.getInsetsController(
+            activity.window,
+            activity.window.decorView,
+        )
+
+        assertThat(insetsController.isAppearanceLightStatusBars).isFalse()
+        assertThat(insetsController.isAppearanceLightNavigationBars).isFalse()
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q], qualifiers = "night")
+    fun `always light appearance uses dark system bar icons in system dark`() = test(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            appearance = PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysLight),
+        ),
+    ) {
+        val insetsController = WindowCompat.getInsetsController(
+            activity.window,
+            activity.window.decorView,
+        )
+
+        assertThat(insetsController.isAppearanceLightStatusBars).isTrue()
+        assertThat(insetsController.isAppearanceLightNavigationBars).isTrue()
     }
 
     @Test

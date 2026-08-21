@@ -18,6 +18,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowNfcAdapter
 
 internal class NfcScanningActivityScenario(
+    val activity: NfcScanningActivity,
     private val activityScenario: ActivityScenario<NfcScanningActivity>,
     val composeRule: ComposeTestRule,
     val isoDep: FakeIsoDep,
