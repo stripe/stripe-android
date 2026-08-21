@@ -82,6 +82,18 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
+    fun `on init, state should use appearance from arguments`() = runTest {
+        val appearance = PaymentSheet.Appearance()
+        val interactor = createInteractor(
+            arguments = createArguments(appearance = appearance),
+        )
+
+        interactor.state.test {
+            assertThat(awaitItem().appearance).isSameInstanceAs(appearance)
+        }
+    }
+
+    @Test
     fun `on init with GPay enabled in arguments, state should have only GPay button`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(

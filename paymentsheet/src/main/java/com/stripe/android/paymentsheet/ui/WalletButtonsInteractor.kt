@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.link.LinkExpressMode
@@ -61,6 +62,7 @@ internal interface WalletButtonsInteractor {
     val state: StateFlow<State>
 
     class State(
+        val appearance: PaymentSheet.Appearance,
         val link2FAState: LinkOtpState?,
         val walletButtons: List<WalletButton>,
         val buttonsEnabled: Boolean,
@@ -223,6 +225,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         }
 
         WalletButtonsInteractor.State(
+            appearance = arguments?.appearance ?: ConfigurationDefaults.appearance,
             link2FAState = linkOTPState,
             walletButtons = walletButtons,
             buttonsEnabled = confirmationState !is ConfirmationHandler.State.Confirming,
