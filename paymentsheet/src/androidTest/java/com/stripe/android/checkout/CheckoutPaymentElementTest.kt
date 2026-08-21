@@ -106,6 +106,8 @@ internal class CheckoutPaymentElementTest {
 
     @Test
     fun testTotalChangeFailureSendsAnalyticsErrorCode() {
+        val initialTotal = 5099
+        val updatedTotal = 5399
         var checkoutResult: CheckoutController.Result? = null
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
@@ -114,6 +116,11 @@ internal class CheckoutPaymentElementTest {
                 response.testBodyFromFile("checkout-session-init.json") { json ->
                     json.put("customer_email", "checkout@example.com")
                     json.getJSONObject("elements_session").remove("link_settings")
+                    json.getJSONObject("total_summary").apply {
+                        put("subtotal", initialTotal)
+                        put("due", initialTotal)
+                        put("total", initialTotal)
+                    }
                     json.put(
                         "tax_context",
                         JSONObject(
@@ -162,7 +169,7 @@ internal class CheckoutPaymentElementTest {
             contentPage.assertHasSelectedSavedPaymentMethod("pm_12345")
             networkRule.checkoutUpdate { response ->
                 response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                    json.getJSONObject("total_summary").put("total", 5399)
+                    json.getJSONObject("total_summary").put("total", updatedTotal)
                 }
             }
             networkRule.checkoutInit { response ->
