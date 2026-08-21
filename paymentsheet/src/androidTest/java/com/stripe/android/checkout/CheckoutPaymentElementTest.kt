@@ -108,10 +108,13 @@ internal class CheckoutPaymentElementTest {
     fun testTotalChangeFailureSendsAnalyticsErrorCode() {
         val initialTotal = 5099
         val updatedTotal = 5399
-        var checkoutResult: CheckoutController.Result? = null
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
-            resultCallback = { result -> checkoutResult = result },
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
+                val failure = result as CheckoutController.Result.Failed
+                assertThat(failure.error).isInstanceOf(LocalStripeException::class.java)
+            },
             checkoutInitResponse = { response ->
                 response.testBodyFromFile("checkout-session-init.json") { json ->
                     json.put("customer_email", "checkout@example.com")
@@ -185,10 +188,6 @@ internal class CheckoutPaymentElementTest {
             AnalyticsRequestExecutor.ENABLED = true
             context.confirm()
         }
-
-        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Failed::class.java)
-        val failure = checkoutResult as CheckoutController.Result.Failed
-        assertThat(failure.error).isInstanceOf(LocalStripeException::class.java)
     }
 
     private companion object {
