@@ -69,11 +69,94 @@ class ConfirmSetupIntentParamsTest {
     }
 
     @Test
+    fun toParamMap_withKlarnaPaymentMethodOptions_shouldCreateExpectedMap() {
+        val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(
+            clientSecret = CLIENT_SECRET,
+            paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+                .setInteroperabilityToken("interoperability_token")
+                .build(),
+        )
+
+        assertThat(params.toParamMap()).isEqualTo(
+            mapOf(
+                "client_secret" to CLIENT_SECRET,
+                "use_stripe_sdk" to false,
+                "payment_method_options" to mapOf(
+                    "klarna" to mapOf(
+                        "interoperability_token" to "interoperability_token"
+                    )
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun create_withAttachedPaymentMethod_preservesPaymentMethodOptions() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+            .setInteroperabilityToken("interoperability_token")
+            .build()
+
+        val params = ConfirmSetupIntentParams.createWithAttachedPaymentMethod(
+            clientSecret = CLIENT_SECRET,
+            paymentMethodType = PaymentMethod.Type.Klarna,
+            paymentMethodOptions = paymentMethodOptions,
+        )
+
+        assertThat(params.paymentMethodOptions).isSameInstanceAs(paymentMethodOptions)
+    }
+
+    @Test
+    fun create_withPaymentMethodId_preservesPaymentMethodOptions() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+            .setInteroperabilityToken("interoperability_token")
+            .build()
+
+        val params = ConfirmSetupIntentParams.createWithPaymentMethodId(
+            paymentMethodId = "pm_12345",
+            clientSecret = CLIENT_SECRET,
+            paymentMethodOptions = paymentMethodOptions,
+        )
+
+        assertThat(params.paymentMethodOptions).isSameInstanceAs(paymentMethodOptions)
+    }
+
+    @Test
+    fun create_withPaymentMethodCreateParams_preservesPaymentMethodOptions() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+            .setInteroperabilityToken("interoperability_token")
+            .build()
+
+        val params = ConfirmSetupIntentParams.createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams = PaymentMethodCreateParams.createKlarna(),
+            clientSecret = CLIENT_SECRET,
+            paymentMethodOptions = paymentMethodOptions,
+        )
+
+        assertThat(params.paymentMethodOptions).isSameInstanceAs(paymentMethodOptions)
+    }
+
+    @Test
+    fun withShouldUseStripeSdk_preservesPaymentMethodOptions() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+            .setInteroperabilityToken("interoperability_token")
+            .build()
+        val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(
+            clientSecret = CLIENT_SECRET,
+            paymentMethodOptions = paymentMethodOptions,
+        )
+
+        val updatedParams = params.withShouldUseStripeSdk(true)
+
+        assertThat(updatedParams.paymentMethodOptions).isSameInstanceAs(paymentMethodOptions)
+    }
+
+    @Test
     fun toParamMap_withSetAsDefaultPaymentMethod_shouldCreateExpectedMap() {
         assertThat(
             ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
+                paymentMethodOptions = null,
                 setAsDefaultPaymentMethod = true,
                 radarOptions = null,
                 clientAttributionMetadata = null,
@@ -278,6 +361,7 @@ class ConfirmSetupIntentParamsTest {
             .createWithSetAsDefaultPaymentMethod(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
+                paymentMethodOptions = null,
                 setAsDefaultPaymentMethod = true,
                 radarOptions = radarOptions,
                 clientAttributionMetadata = null,

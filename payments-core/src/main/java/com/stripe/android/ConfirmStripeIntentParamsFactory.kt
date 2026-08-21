@@ -191,6 +191,7 @@ internal class ConfirmSetupIntentParamsFactory(
         return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
+            paymentMethodOptions = null,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             radarOptions = radarOptions,
             clientAttributionMetadata = clientAttributionMetadata,
