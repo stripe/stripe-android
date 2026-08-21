@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.isInstanceOf
@@ -169,10 +170,13 @@ class CheckoutSessionConfirmationInterceptorTest {
 
             assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
             val failAction = result as ConfirmationDefinition.Action.Fail
-            assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
+            assertThat(failAction.cause).isInstanceOf<LocalStripeException>()
             assertThat(failAction.cause.message).isEqualTo(
                 "The estimated total changed from 5099 to 5399."
             )
+            val error = failAction.cause as LocalStripeException
+            assertThat(error.analyticsValue()).isEqualTo("checkoutSessionTotalChanged")
+            assertThat(error.stripeError?.code).isEqualTo("checkout_session_total_changed")
             assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
         }
 

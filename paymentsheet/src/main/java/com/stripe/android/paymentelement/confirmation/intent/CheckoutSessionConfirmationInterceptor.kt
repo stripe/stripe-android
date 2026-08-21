@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -128,8 +129,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         }
         val finalEstimatedTotal = updatedCheckoutSessionResponse?.totalSummary?.totalAmountDue
         if (initialEstimatedTotal != finalEstimatedTotal) {
-            val error = IllegalStateException(
-                "The estimated total changed from $initialEstimatedTotal to $finalEstimatedTotal."
+            val error = LocalStripeException(
+                displayMessage = "The estimated total changed from $initialEstimatedTotal to $finalEstimatedTotal.",
+                analyticsValue = "checkoutSessionTotalChanged",
+                errorCode = "checkout_session_total_changed",
             )
             return Result.failure(error)
         }
