@@ -7,12 +7,9 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
-import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -28,12 +25,10 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val selectionHolder: EmbeddedSelectionHolder,
-    private val stateHelper: SheetActivityStateHolder,
+    private val continueCoordinator: SheetActivityContinueCoordinator,
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
-    private val customerStateHolder: CustomerStateHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    private val launchMode: EmbeddedLaunchMode,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
 ) : SheetActivityConfirmationHelper {
 
@@ -47,16 +42,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
 
             when (configuration.formSheetAction) {
                 EmbeddedPaymentElement.FormSheetAction.Continue -> {
-                    stateHelper.setResult(
-                        EmbeddedActivityResult.Complete(
-                            selection = selectionHolder.selection.value,
-                            previousNewSelections = selectionHolder.previousNewSelections,
-                            hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value,
-                            shouldInvokeSelectionCallback = false,
-                            launchMode = launchMode,
-                        )
-                    )
+                    continueCoordinator.onContinue()
                 }
                 EmbeddedPaymentElement.FormSheetAction.Confirm -> {
                     confirmationArgs()?.let { args ->
