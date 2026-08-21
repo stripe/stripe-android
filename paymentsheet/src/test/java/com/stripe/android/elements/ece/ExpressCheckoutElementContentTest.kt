@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.elements.ece
 
 import android.content.Context
@@ -8,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
@@ -78,6 +81,57 @@ internal class ExpressCheckoutElementContentTest {
 
         composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
         composeRule.onNodeWithTag(LinkButtonTestTag).assertDoesNotExist()
+    }
+
+    @Test
+    fun `renders wallet buttons in one row when max rows is one`() {
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractorStateFactory.create(
+                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                        .maxRows(1)
+                        .build(),
+                )
+            ),
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        val googlePayPosition = composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
+            .fetchSemanticsNode().positionInRoot
+        val linkPosition = composeRule.onNodeWithTag(LinkButtonTestTag)
+            .fetchSemanticsNode().positionInRoot
+
+        assertThat(googlePayPosition.y).isEqualTo(linkPosition.y)
+        assertThat(googlePayPosition.x).isNotEqualTo(linkPosition.x)
+    }
+
+    @Test
+    fun `renders wallet buttons in one column when max columns is one`() {
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractorStateFactory.create(
+                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                        .maxColumns(1)
+                        .maxRows(1)
+                        .build(),
+                )
+            ),
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        val googlePayPosition = composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
+            .fetchSemanticsNode().positionInRoot
+        val linkPosition = composeRule.onNodeWithTag(LinkButtonTestTag)
+            .fetchSemanticsNode().positionInRoot
+
+        assertThat(googlePayPosition.x).isEqualTo(linkPosition.x)
+        assertThat(googlePayPosition.y).isNotEqualTo(linkPosition.y)
     }
 
     @Test

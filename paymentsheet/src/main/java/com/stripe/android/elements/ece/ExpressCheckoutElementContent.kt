@@ -1,12 +1,19 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.elements.ece
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.ui.GooglePayButton
@@ -50,31 +57,76 @@ internal fun ExpressCheckoutElementContent(
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        state.expressButtons.forEach { button ->
-            key(button) {
-                when (button) {
-                    is ExpressButton.GooglePay -> googlePayButton(button) {
-                        interactor.handleViewAction(
-                            ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
-                                expressButton = button,
-                            )
+        val columnCount = calculateColumnCount(
+            buttonCount = state.expressButtons.size,
+            maxColumns = state.buttonLayout.maxColumns,
+            maxRows = state.buttonLayout.maxRows,
+        )
+        state.expressButtons.chunked(columnCount).forEach { rowButtons ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                rowButtons.forEach { button ->
+                    Box(modifier = Modifier.weight(1f)) {
+                        ExpressButtonContent(
+                            button = button,
+                            interactor = interactor,
+                            googlePayButton = googlePayButton,
                         )
                     }
-                    is ExpressButton.Link -> LinkButton(
-                        state = button.state,
-                        enabled = true,
-                        theme = button.theme,
-                        linkBrand = button.linkBrand,
-                        onClick = {
-                            interactor.handleViewAction(
-                                ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
-                                    expressButton = button,
-                                )
-                            )
-                        },
-                    )
+                }
+                repeat(columnCount - rowButtons.size) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
+        }
+    }
+}
+
+private fun calculateColumnCount(
+    buttonCount: Int,
+    maxColumns: Int?,
+    maxRows: Int?,
+): Int {
+    if (buttonCount == 0) {
+        return 1
+    }
+
+    val columnsNeededForMaxRows = maxRows?.let { (buttonCount + it - 1) / it } ?: 1
+    return columnsNeededForMaxRows
+        .coerceAtMost(maxColumns ?: buttonCount)
+        .coerceIn(1, buttonCount)
+}
+
+@Composable
+private fun ExpressButtonContent(
+    button: ExpressButton,
+    interactor: ExpressCheckoutElementInteractor,
+    googlePayButton: @Composable (ExpressButton.GooglePay, () -> Unit) -> Unit,
+) {
+    key(button) {
+        when (button) {
+            is ExpressButton.GooglePay -> googlePayButton(button) {
+                interactor.handleViewAction(
+                    ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
+                        expressButton = button,
+                    )
+                )
+            }
+            is ExpressButton.Link -> LinkButton(
+                state = button.state,
+                enabled = true,
+                theme = button.theme,
+                linkBrand = button.linkBrand,
+                onClick = {
+                    interactor.handleViewAction(
+                        ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
+                            expressButton = button,
+                        )
+                    )
+                },
+            )
         }
     }
 }

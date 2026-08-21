@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.elements
 
 import androidx.compose.foundation.background
@@ -34,6 +36,24 @@ internal class ExpressCheckoutElementScreenshotTest {
         paparazziRule.snapshot {
             ExpressCheckoutElementContent(
                 interactor = FakeExpressCheckoutElementInteractor(),
+                googlePayButton = { _, _ -> FakeGooglePayButton() },
+            )
+        }
+    }
+
+    @Test
+    fun rendersGooglePayAndLinkButtonsInOneRow() {
+        paparazziRule.snapshot {
+            ExpressCheckoutElementContent(
+                interactor = FakeExpressCheckoutElementInteractor(
+                    state = stateFlowOf(
+                        ExpressCheckoutElementInteractorStateFactory.create(
+                            buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                                .maxRows(1)
+                                .build(),
+                        )
+                    ),
+                ),
                 googlePayButton = { _, _ -> FakeGooglePayButton() },
             )
         }
