@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
-import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
@@ -207,7 +206,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
                 sheetActivityStateHolder = sheetActivityStateHolder,
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = selectionHolder,
-                savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
                 customerStateHolder = customerStateHolder,
             ),
         )

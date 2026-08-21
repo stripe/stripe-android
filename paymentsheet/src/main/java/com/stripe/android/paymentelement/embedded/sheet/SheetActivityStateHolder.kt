@@ -15,7 +15,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -33,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 internal interface SheetActivityStateHolder {
@@ -44,8 +44,6 @@ internal interface SheetActivityStateHolder {
 
     fun setResult(result: EmbeddedActivityResult)
 
-    fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?)
-
     data class State(
         val primaryButtonLabel: ResolvableString,
         val isEnabled: Boolean,
@@ -54,7 +52,6 @@ internal interface SheetActivityStateHolder {
         val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
-        val savedPaymentSelectionToConfirm: PaymentSelection.Saved? = null,
     )
 }
 
@@ -70,6 +67,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val tapToAddHelper: TapToAddHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val launchMode: EmbeddedLaunchMode,
+    private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
+    private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(
         SheetActivityStateHolder.State(
@@ -79,7 +78,6 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             isProcessing = false,
             shouldDisplayLockIcon = launchMode !is EmbeddedLaunchMode.PaymentOptions &&
                 configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
-            savedPaymentSelectionToConfirm = null,
         )
     )
     override val state: StateFlow<SheetActivityStateHolder.State> = _state
@@ -92,33 +90,32 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     init {
         coroutineScope.launch {
             tapToAddHelper.nextStep.collect { result ->
-                val formResult = when (result) {
+                val activityResult = when (result) {
                     is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
-                        updateSavedPaymentSelectionToConfirm(
-                            result.paymentSelection,
+                        val screen = savedPaymentMethodConfirmScreenFactoryProvider.get().create(
+                            selection = result.paymentSelection,
+                        )
+                        embeddedNavigatorProvider.get().performAction(
+                            EmbeddedNavigator.Action.ReplaceCurrentScreen(screen)
                         )
                         null
                     }
-                    is TapToAddNextStep.ShowSavedPaymentMethods -> {
-                        EmbeddedActivityResult.Complete(
-                            selection = result.paymentSelection,
-                            previousNewSelections = selectionHolder.previousNewSelections,
-                            hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value,
-                            shouldInvokeSelectionCallback = false,
-                            launchMode = launchMode,
-                        )
-                    }
-                    TapToAddNextStep.Complete -> {
-                        EmbeddedActivityResult.Complete(
-                            selection = null,
-                            previousNewSelections = selectionHolder.previousNewSelections,
-                            hasBeenConfirmed = true,
-                            customerState = customerStateHolder.customer.value,
-                            shouldInvokeSelectionCallback = false,
-                            launchMode = launchMode,
-                        )
-                    }
+                    is TapToAddNextStep.ShowSavedPaymentMethods -> EmbeddedActivityResult.Complete(
+                        selection = result.paymentSelection,
+                        previousNewSelections = selectionHolder.previousNewSelections,
+                        hasBeenConfirmed = false,
+                        customerState = customerStateHolder.customer.value,
+                        shouldInvokeSelectionCallback = false,
+                        launchMode = launchMode,
+                    )
+                    TapToAddNextStep.Complete -> EmbeddedActivityResult.Complete(
+                        selection = null,
+                        previousNewSelections = selectionHolder.previousNewSelections,
+                        hasBeenConfirmed = true,
+                        customerState = customerStateHolder.customer.value,
+                        shouldInvokeSelectionCallback = false,
+                        launchMode = launchMode,
+                    )
                     is TapToAddNextStep.Continue -> {
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         EmbeddedActivityResult.Complete(
@@ -131,9 +128,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         )
                     }
                 }
-                formResult?.let {
-                    setResult(it)
-                }
+                activityResult?.let(::setResult)
             }
         }
 
@@ -176,12 +171,6 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             it.copy(
                 error = error
             )
-        }
-    }
-
-    override fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?) {
-        _state.update {
-            it.copy(savedPaymentSelectionToConfirm = selection)
         }
     }
 
