@@ -39,21 +39,17 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
-                    useDarkThemeIcon = useDarkThemeIcon(appearance),
+                    useDarkThemeIcon = appearance?.shouldUseDarkThemeIcon(context),
                 )
             },
         )
     }
+}
 
-    private fun useDarkThemeIcon(appearance: PaymentSheet.Appearance?): Boolean? {
-        if (appearance == null) {
-            return null
-        }
-
-        val isDark = appearance.themeMode.isDarkTheme(context.isSystemDarkTheme())
-        val componentColor = Color(appearance.getColors(isDark).component)
-        return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
-    }
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(context: Context): Boolean {
+    val isDark = themeMode.isDarkTheme(context.isSystemDarkTheme())
+    val componentColor = Color(getColors(isDark).component)
+    return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }
 
 internal val PaymentSelection.shippingDetails: AddressDetails?
