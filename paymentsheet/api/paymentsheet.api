@@ -2340,4 +2340,3 @@ public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingle
 	public fun <init> ()V
 	public final fun getLambda$-301581598$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
-

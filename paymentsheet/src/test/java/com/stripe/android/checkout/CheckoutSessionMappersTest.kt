@@ -71,6 +71,30 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
+    fun `maps collected shipping address`() {
+        val response = CheckoutSessionResponseFactory.create()
+        val session = response.asCheckoutSession(
+            collectedEmail = null,
+            collectedShippingName = "Jenny Rosen",
+            collectedShippingAddress = CheckoutController.Address.State(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = null,
+                postalCode = "94103",
+                state = "CA",
+            ),
+            flagImages = null,
+            paymentOptionDisplayData = null,
+            availableExpressButtonTypes = emptyList(),
+        )
+
+        assertThat(session.shippingAddress?.name).isEqualTo("Jenny Rosen")
+        assertThat(session.shippingAddress?.address?.country).isEqualTo("US")
+        assertThat(session.shippingAddress?.address?.postalCode).isEqualTo("94103")
+    }
+
+    @Test
     fun `null customerEmail maps to null`() {
         val session = createSession(customerEmail = null)
         assertThat(session.email).isNull()

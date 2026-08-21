@@ -360,6 +360,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
             partialEventName = "checkout.google_pay.unexpected_callback_trigger"
+        ),
+        CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_BEFORE_CONFIGURATION(
+            partialEventName = "checkout.shipping_address_element.present_before_configuration"
+        ),
+        CHECKOUT_SHIPPING_ADDRESS_ELEMENT_ALREADY_PRESENTING(
+            partialEventName = "checkout.shipping_address_element.already_presenting"
         );
 
         override val eventName: String

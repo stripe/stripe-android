@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.annotation.ColorInt
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.StripeThemeDefaults

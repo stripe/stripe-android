@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +33,7 @@ import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -50,6 +52,9 @@ internal class AddressElementActivity : ComponentActivity() {
         AddressElementActivityContract.Args.fromIntent(intent)
     }
 
+    private val activityArgs: AddressElementActivityContract.Args
+        get() = requireNotNull(starterArgs)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,7 +63,6 @@ internal class AddressElementActivity : ComponentActivity() {
             finish()
             return
         }
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
         starterArgs.config?.appearance?.parseAppearance()
 
@@ -68,10 +72,20 @@ internal class AddressElementActivity : ComponentActivity() {
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberStripeBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState(
+                confirmValueChange = { targetValue ->
+                    when {
+                        targetValue != ModalBottomSheetValue.Hidden -> true
+                        CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey) -> false
+                        else -> true
+                    }
+                },
+            )
 
             BackHandler {
-                viewModel.onBack()
+                if (!CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey)) {
+                    viewModel.onBack()
+                }
             }
 
             viewModel.navigator.onDismiss = { result ->
@@ -82,7 +96,7 @@ internal class AddressElementActivity : ComponentActivity() {
                 }
             }
 
-            AddressElementUi(bottomSheetState, navController)
+            AddressElementUi(bottomSheetState, navController, coroutineScope)
         }
     }
 
@@ -90,13 +104,22 @@ internal class AddressElementActivity : ComponentActivity() {
     private fun AddressElementUi(
         bottomSheetState: StripeBottomSheetState,
         navController: NavHostController,
+        coroutineScope: CoroutineScope,
     ) {
         val showDiscardConfirmation by viewModel.showDiscardConfirmation.collectAsState()
 
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = viewModel::dismiss,
+                onDismissed = {
+                    if (!CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey)) {
+                        viewModel.dismiss()
+                    } else {
+                        coroutineScope.launch {
+                            bottomSheetState.show()
+                        }
+                    }
+                },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
@@ -107,7 +130,11 @@ internal class AddressElementActivity : ComponentActivity() {
                             InputAddressScreen(
                                 inputAddressViewModelSubcomponentFactoryProvider =
                                 viewModel.inputAddressViewModelSubcomponentFactoryProvider,
-                                onCloseClick = viewModel::dismiss,
+                                onCloseClick = {
+                                    if (!CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey)) {
+                                        viewModel.dismiss()
+                                    }
+                                },
                             )
                         }
                         composable(

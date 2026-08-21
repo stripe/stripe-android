@@ -103,15 +103,16 @@ class CheckoutController @Inject internal constructor(
             return integrationLaunchedFailure()
         }
         return operationCoordinator.runMutation {
-            val configurationState = configuration.build()
+            var configurationState = configuration.build()
             val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).mapCatching { response ->
+                configurationState = configurationState.normalizeShippingDefaults(response)
                 val defaultBillingAddress = configurationState.defaults.billingDetails?.address
-                if (defaultBillingAddress != null) {
+                val responseWithBillingTax = if (defaultBillingAddress != null) {
                     checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
                         addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
@@ -120,6 +121,14 @@ class CheckoutController @Inject internal constructor(
                 } else {
                     response
                 }
+                configurationState.defaults.shippingDetails?.address?.let {
+                    normalizedShippingAddress ->
+                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = responseWithBillingTax,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                        address = normalizedShippingAddress,
+                    ).getOrThrow()
+                } ?: responseWithBillingTax
             }.mapCatching { response ->
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
@@ -352,6 +361,19 @@ class CheckoutController @Inject internal constructor(
         )
     }
 
+    /** An immutable postal address shared by Checkout session projections. */
+    @Poko
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class PostalAddress internal constructor(
+        val city: String?,
+        val country: String?,
+        val line1: String?,
+        val line2: String?,
+        val postalCode: String?,
+        val state: String?,
+    )
+
     /**
      * A [Session] tracks the process of collecting a payment from your customer.
      *
@@ -383,6 +405,10 @@ class CheckoutController @Inject internal constructor(
          */
         val email: String?,
         /**
+         * The shipping details currently collected for this checkout session.
+         */
+        val shippingAddress: ShippingAddress? = null,
+        /**
          * The tax computation status for this checkout session.
          */
         val tax: Tax,
@@ -405,6 +431,15 @@ class CheckoutController @Inject internal constructor(
         internal val currencySelectorOptions: CurrencySelectorOptions?,
         internal val availableExpressButtonTypes: List<ExpressButtonType>,
     ) {
+
+        /** The customer's shipping name and postal address. */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class ShippingAddress internal constructor(
+            val name: String?,
+            val address: PostalAddress,
+        )
 
         /** Payment methods ready to be displayed in [ExpressCheckoutElement].
          *
@@ -686,7 +721,7 @@ class CheckoutController @Inject internal constructor(
                 /**
                  * The customer's billing address.
                  */
-                val address: Address?,
+                val address: PostalAddress?,
                 /**
                  * The customer's email address.
                  */
@@ -695,40 +730,7 @@ class CheckoutController @Inject internal constructor(
                  * The customer's full name.
                  */
                 val name: String?,
-            ) {
-                /**
-                 * A billing address.
-                 */
-                @Poko
-                @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                class Address internal constructor(
-                    /**
-                     * City, district, suburb, town, or village.
-                     */
-                    val city: String?,
-                    /**
-                     * Two-letter country code (ISO 3166-1 alpha-2).
-                     */
-                    val country: String?,
-                    /**
-                     * Address line 1 (e.g., street, PO Box, or company name).
-                     */
-                    val line1: String?,
-                    /**
-                     * Address line 2 (e.g., apartment, suite, unit, or building).
-                     */
-                    val line2: String?,
-                    /**
-                     * ZIP or postal code.
-                     */
-                    val postalCode: String?,
-                    /**
-                     * State, county, province, or region.
-                     */
-                    val state: String?,
-                )
-            }
+            )
 
             private val iconDrawable: Drawable by lazy {
                 DelegateDrawable(imageLoader)
