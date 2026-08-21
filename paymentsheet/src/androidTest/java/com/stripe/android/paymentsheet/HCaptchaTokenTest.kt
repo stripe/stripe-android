@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
+import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -24,7 +25,10 @@ internal class HCaptchaTokenTest {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
-    private val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    private val testRules: TestRules = TestRules.create(
+        networkRule = networkRule,
+        retryRule = RetryRule(5),
+    )
 
     @get:Rule
     val rules: RuleChain = RuleChain.emptyRuleChain()
