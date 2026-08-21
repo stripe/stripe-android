@@ -57,12 +57,19 @@ internal fun ExpressCheckoutElementContent(
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        val visibleButtons = state.expressButtons.take(
+            calculateVisibleButtonCount(
+                buttonCount = state.expressButtons.size,
+                maxColumns = state.buttonLayout.maxColumns,
+                maxRows = state.buttonLayout.maxRows,
+            )
+        )
         val columnCount = calculateColumnCount(
-            buttonCount = state.expressButtons.size,
+            buttonCount = visibleButtons.size,
             maxColumns = state.buttonLayout.maxColumns,
             maxRows = state.buttonLayout.maxRows,
         )
-        state.expressButtons.chunked(columnCount).forEach { rowButtons ->
+        visibleButtons.chunked(columnCount).forEach { rowButtons ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -82,6 +89,20 @@ internal fun ExpressCheckoutElementContent(
             }
         }
     }
+}
+
+private fun calculateVisibleButtonCount(
+    buttonCount: Int,
+    maxColumns: Int?,
+    maxRows: Int?,
+): Int {
+    if (maxColumns == null || maxRows == null) {
+        return buttonCount
+    }
+
+    return (maxColumns.toLong() * maxRows.toLong())
+        .coerceAtMost(buttonCount.toLong())
+        .toInt()
 }
 
 private fun calculateColumnCount(
