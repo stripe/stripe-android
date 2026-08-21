@@ -190,16 +190,13 @@ internal class FinancialConnectionsTestLabTest {
     }
 
     private fun networkedManualEntry(email: String) {
-        ui.launch(
+        val uri =
             "stripeconnectionsexample://playground?experience=FinancialConnections&flow=Token" +
                 "&financial_connections_override_native=native&merchant=networking" +
                 "&financial_connections_test_mode=true&permissions=payment_method" +
-                "&financial_connections_confirm_intent=true"
-        )
-        ui.swipeUp(2)
-        ui.clickResource("Customer email setting")
-        ui.typeIntoFocusedField(email)
-        ui.hideKeyboard()
+                "&financial_connections_confirm_intent=true&email=$email"
+
+        ui.launch(uri)
         ui.swipeUp(2)
         ui.clickResource("connect_accounts")
         ui.dismissChromeFirstRunIfPresent()
@@ -213,6 +210,8 @@ internal class FinancialConnectionsTestLabTest {
         ui.swipeUp(2)
         ui.waitForTextRegex(".*Completed.*")
 
+        ui.launch(uri)
+        ui.swipeUp(2)
         ui.clickResource("connect_accounts")
         ui.clickResource("consent_cta")
         ui.clickResource("existing_email-button")
