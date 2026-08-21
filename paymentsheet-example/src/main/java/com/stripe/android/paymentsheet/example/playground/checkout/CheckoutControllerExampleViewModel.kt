@@ -34,23 +34,41 @@ internal class CheckoutControllerExampleViewModel(
     private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
 
-    val controller = CheckoutController.Builder(
-        application = application,
-        savedStateHandle = savedStateHandle,
-    ).resultCallback { result ->
-        Log.d(TAG, "Result: $result")
-        if (result is CheckoutController.Result.Completed) {
-            _sessionComplete.tryEmit(Unit)
-        }
-    }.build()
+    private val _confirmationResult = MutableStateFlow<ConfirmationResult?>(null)
+    val confirmationResult: StateFlow<ConfirmationResult?> = _confirmationResult.asStateFlow()
+
+    val controller: CheckoutController
 
     init {
+        controller = CheckoutController.Builder(
+            application = application,
+            savedStateHandle = savedStateHandle,
+        ).resultCallback(::onConfirmationResult).build()
+
         viewModelScope.launch {
             fetchAndConfigure()
         }
         viewModelScope.launch {
             controller.session.collect { session ->
                 updateConfiguredState { it.copy(session = session) }
+            }
+        }
+    }
+
+    fun clearConfirmationResult() {
+        _confirmationResult.value = null
+    }
+
+    private fun onConfirmationResult(result: CheckoutController.Result) {
+        Log.d(TAG, "Result: $result")
+        _confirmationResult.value = when (result) {
+            is CheckoutController.Result.Completed -> {
+                _sessionComplete.tryEmit(Unit)
+                ConfirmationResult.Completed(controller.session.value)
+            }
+            is CheckoutController.Result.Canceled -> ConfirmationResult.Canceled
+            is CheckoutController.Result.Failed -> {
+                ConfirmationResult.Failed(result.error.message ?: "Confirmation failed")
             }
         }
     }
@@ -97,6 +115,12 @@ internal class CheckoutControllerExampleViewModel(
             val session: Session?,
         ) : Status
         data class Error(val message: String) : Status
+    }
+
+    sealed interface ConfirmationResult {
+        data class Completed(val session: Session?) : ConfirmationResult
+        data object Canceled : ConfirmationResult
+        data class Failed(val message: String) : ConfirmationResult
     }
 
     companion object {

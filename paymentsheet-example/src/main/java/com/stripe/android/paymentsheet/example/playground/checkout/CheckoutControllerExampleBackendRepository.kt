@@ -28,6 +28,7 @@ internal class CheckoutControllerExampleBackendRepository(
             .customerEmail("email@example.com")
             .currency("usd")
             .amount(5000)
+            .setShippingAddress(true)
             .customer("new")
             .build()
 

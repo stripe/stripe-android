@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -117,11 +119,22 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
+    val saveError by viewModel.saveError.collectAsState()
+    val showDiscardConfirmation by viewModel.showDiscardConfirmation.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
+    DisposableEffect(viewModel) {
+        viewModel.navigator.setDismissRequestHandler(viewModel::requestDismiss)
+        viewModel.navigator.setDismissGuard(viewModel::canDismiss)
+        onDispose {
+            viewModel.navigator.setDismissRequestHandler(null)
+            viewModel.navigator.setDismissGuard(null)
+        }
+    }
+
     InputAddressScreen(
-        primaryButtonEnabled = completeValues != null,
+        primaryButtonEnabled = completeValues != null && formEnabled,
         primaryButtonText = buttonText,
         title = titleText,
         onPrimaryButtonClick = {
@@ -136,7 +149,9 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        onCloseClick = { viewModel.navigator.dismiss() },
+        onCloseClick = {
+            if (formEnabled) viewModel.navigator.requestDismiss()
+        },
         topContent = {
             val currentState = billingSameAsShippingState
 
@@ -155,6 +170,9 @@ internal fun InputAddressScreen(
             }
         },
         formContent = {
+            saveError?.let { error ->
+                Text(error.resolve(), color = MaterialTheme.colors.error)
+            }
             FormUI(
                 hiddenIdentifiersFlow = remember {
                     stateFlowOf(emptySet())
@@ -180,4 +198,22 @@ internal fun InputAddressScreen(
             }
         }
     )
+
+    if (showDiscardConfirmation) {
+        AlertDialog(
+            onDismissRequest = viewModel::cancelDismiss,
+            title = { Text("Keep editing?") },
+            text = { Text("Your shipping address changes have not been saved.") },
+            confirmButton = {
+                androidx.compose.material.TextButton(onClick = viewModel::cancelDismiss) {
+                    Text("Keep Editing")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material.TextButton(onClick = viewModel::confirmDismiss) {
+                    Text("Discard Changes")
+                }
+            },
+        )
+    }
 }

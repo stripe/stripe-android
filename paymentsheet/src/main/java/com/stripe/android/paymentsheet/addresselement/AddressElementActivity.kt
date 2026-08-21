@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,6 +28,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -45,6 +47,9 @@ internal class AddressElementActivity : ComponentActivity() {
         AddressElementActivityContract.Args.fromIntent(intent)
     }
 
+    private val activityArgs: AddressElementActivityContract.Args
+        get() = requireNotNull(starterArgs)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -53,7 +58,6 @@ internal class AddressElementActivity : ComponentActivity() {
             finish()
             return
         }
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
         starterArgs.config?.appearance?.parseAppearance()
 
@@ -63,10 +67,20 @@ internal class AddressElementActivity : ComponentActivity() {
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberStripeBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState(
+                confirmValueChange = { targetValue ->
+                    when {
+                        targetValue != ModalBottomSheetValue.Hidden -> true
+                        CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey) -> false
+                        else -> viewModel.navigator.canDismiss()
+                    }
+                },
+            )
 
             BackHandler {
-                viewModel.navigator.onBack()
+                if (!CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey)) {
+                    viewModel.navigator.onBack()
+                }
             }
 
             viewModel.navigator.onDismiss = { result ->
@@ -77,7 +91,7 @@ internal class AddressElementActivity : ComponentActivity() {
                 }
             }
 
-            AddressElementUi(bottomSheetState, navController)
+            AddressElementUi(bottomSheetState, navController, coroutineScope)
         }
     }
 
@@ -85,11 +99,22 @@ internal class AddressElementActivity : ComponentActivity() {
     private fun AddressElementUi(
         bottomSheetState: StripeBottomSheetState,
         navController: NavHostController,
+        coroutineScope: CoroutineScope,
     ) {
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = viewModel.navigator::dismiss,
+                onDismissed = {
+                    if (!CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey)) {
+                        if (viewModel.navigator.canDismiss()) {
+                            viewModel.navigator.requestDismiss()
+                        } else {
+                            coroutineScope.launch {
+                                bottomSheetState.show()
+                            }
+                        }
+                    }
+                },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(

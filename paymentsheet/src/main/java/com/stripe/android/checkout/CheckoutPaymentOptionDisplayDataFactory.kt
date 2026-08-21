@@ -83,7 +83,7 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
 private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): PaymentOptionDisplayData.BillingDetails {
     return PaymentOptionDisplayData.BillingDetails(
         address = address?.let { modelAddress ->
-            PaymentOptionDisplayData.BillingDetails.Address(
+            CheckoutController.PostalAddress(
                 city = modelAddress.city,
                 country = modelAddress.country,
                 line1 = modelAddress.line1,

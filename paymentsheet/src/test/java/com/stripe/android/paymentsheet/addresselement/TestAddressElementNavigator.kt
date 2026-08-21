@@ -29,6 +29,16 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
         dismissCalls.add(Call.Dismiss(result))
     }
 
+    override fun requestDismiss() {
+        dismiss()
+    }
+
+    override fun setDismissRequestHandler(handler: (() -> Unit)?) = Unit
+
+    override fun canDismiss(): Boolean = true
+
+    override fun setDismissGuard(guard: (() -> Boolean)?) = Unit
+
     override fun onBack() {
         onBackCalls.add(Call.OnBack)
     }

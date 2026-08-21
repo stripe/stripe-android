@@ -13,8 +13,10 @@ import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.CheckoutSessionRefresher
+import com.stripe.android.checkout.CheckoutShippingAddressEventReporter
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
+import com.stripe.android.checkout.DefaultCheckoutShippingAddressEventReporter
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
@@ -181,6 +183,11 @@ internal interface CheckoutControllerModule {
     @Binds
     @Singleton
     fun bindsLoadingReporter(eventReporter: DefaultEventReporter): LoadingEventReporter
+
+    @Binds
+    fun bindsCheckoutShippingAddressEventReporter(
+        eventReporter: DefaultCheckoutShippingAddressEventReporter,
+    ): CheckoutShippingAddressEventReporter
 
     @Binds
     fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
