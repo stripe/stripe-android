@@ -338,6 +338,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         private var shippingAddressRequired: Boolean = false
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
+        private var paymentMethodOrder: List<PaymentMethod> = emptyList()
 
         /** Sets the configuration for Link. */
         fun linkConfiguration(
@@ -365,19 +366,45 @@ class ExpressCheckoutElement @Inject internal constructor(
             this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
         }
 
+        /**
+         * Sets the order in which express payment methods are displayed.
+         *
+         * By default, the Express Checkout Element uses dynamic ordering. Payment methods omitted
+         * from [paymentMethodOrder] are displayed after the specified payment methods. Payment
+         * methods that are unavailable are ignored.
+         */
+        fun paymentMethodOrder(
+            paymentMethodOrder: List<PaymentMethod>,
+        ): Configuration = apply {
+            this.paymentMethodOrder = paymentMethodOrder
+        }
+
         @Parcelize
         internal data class State(
             val linkConfiguration: LinkConfiguration.State,
             val googlePayConfiguration: GooglePayConfiguration.State,
             val shippingAddressRequired: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
+            val paymentMethodOrder: List<PaymentMethodType>,
         ) : Parcelable
+
+        internal enum class PaymentMethodType {
+            GooglePay,
+            Link,
+        }
 
         internal fun build(): State = State(
             linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
             shippingAddressRequired = shippingAddressRequired,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
+            paymentMethodOrder = paymentMethodOrder.map { paymentMethod ->
+                when (paymentMethod) {
+                    is PaymentMethod.GooglePay -> PaymentMethodType.GooglePay
+                    is PaymentMethod.Link -> PaymentMethodType.Link
+                    else -> error("Unsupported payment method: ${paymentMethod::class.java.name}")
+                }
+            },
         )
     }
 }
