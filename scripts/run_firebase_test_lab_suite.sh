@@ -197,14 +197,16 @@ start_test \
   "" \
   false
 
-start_test \
-  crypto-onramp-example-instrumentation \
-  "$artifact_dir/crypto-onramp-example-test.apk" \
-  "$artifact_dir/crypto-onramp-example.apk" \
-  "$device_model" \
-  "" \
-  "" \
-  false
+for shard_index in 0 1; do
+  start_test \
+    "crypto-onramp-example-instrumentation-shard-$shard_index" \
+    "$artifact_dir/crypto-onramp-example-test.apk" \
+    "$artifact_dir/crypto-onramp-example.apk" \
+    "$device_model" \
+    "" \
+    "numShards=2,shardIndex=$shard_index" \
+    false
+done
 
 start_test \
   camera-core-instrumentation \
