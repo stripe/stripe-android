@@ -553,7 +553,8 @@ internal class DefaultFlowController @Inject internal constructor(
             // we present the mandate directly.
             sepaMandateActivityLauncher.launch(
                 SepaMandateContract.Args(
-                    merchantName = state.config.merchantDisplayName
+                    merchantName = state.config.merchantDisplayName,
+                    appearance = state.config.appearance,
                 )
             )
         } else {

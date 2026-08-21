@@ -1268,6 +1268,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirm() with default sepa saved payment method should show sepa mandate`() = confirmationTest {
+        val appearance = PaymentSheet.Appearance()
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         val flowController = createFlowController(
             paymentSelection = paymentSelection,
@@ -1280,12 +1281,18 @@ internal class DefaultFlowControllerTest {
         flowController.configureExpectingSuccess(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .allowsDelayedPaymentMethods(true)
+                .appearance(appearance)
                 .build()
         )
 
         flowController.confirm()
 
-        verify(sepaMandateActivityLauncher).launch(any())
+        verify(sepaMandateActivityLauncher).launch(
+            SepaMandateContract.Args(
+                merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+                appearance = appearance,
+            )
+        )
 
         flowController.onSepaMandateResult(SepaMandateResult.Acknowledged)
 
