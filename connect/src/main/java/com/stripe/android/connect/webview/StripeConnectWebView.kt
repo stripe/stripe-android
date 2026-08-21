@@ -56,6 +56,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
+import kotlin.math.roundToInt
 
 /**
  * WebView to display an embedded Stripe.js component.
@@ -130,7 +131,7 @@ internal class StripeConnectWebView private constructor(
         result: FinancialConnectionsSheetResult
     ) {
         val payload = SetCollectMobileFinancialConnectionsResultPayloadJs.from(id, result)
-        callSetterWithSerializableValue(
+        evaluateSetterWithSerializableValue(
             setter = "setCollectMobileFinancialConnectionsResult",
             value = ConnectJson.encodeToJsonElement(payload).jsonObject
         )
@@ -153,6 +154,22 @@ internal class StripeConnectWebView private constructor(
                 put("url", url)
             },
         )
+    }
+
+    fun callSetterWithSerializableValue(setter: String, value: JsonElement) {
+        evaluateSetterWithSerializableValue(setter, value)
+    }
+
+    fun startObservingContentHeight() {
+        post {
+            evaluateJavascript(CONTENT_HEIGHT_OBSERVER_SCRIPT, null)
+        }
+    }
+
+    fun requestContentHeightUpdate() {
+        post {
+            evaluateJavascript("window.__stripeConnectReportContentHeight?.()", null)
+        }
     }
 
     override fun onAttachedToWindow() {
@@ -319,6 +336,16 @@ internal class StripeConnectWebView private constructor(
          * Callback to invoke upon receiving 'openAuthenticatedWebView' message.
          */
         fun onReceivedOpenAuthenticatedWebView(activity: Activity, message: OpenAuthenticatedWebViewMessage)
+
+        /**
+         * Callback to invoke upon receiving 'openNotificationBannerForm' message.
+         */
+        fun onReceivedOpenNotificationBannerForm(task: JsonObject)
+
+        /**
+         * Callback to invoke when content-driven WebView height changes.
+         */
+        fun onContentHeightChanged(height: Int)
 
         /**
          * Callback to invoke upon receiving 'openFinancialConnections' message.
@@ -578,6 +605,26 @@ internal class StripeConnectWebView private constructor(
         }
 
         @JavascriptInterface
+        fun openNotificationBannerForm(message: String) {
+            val task = tryDeserializeWebMessage<JsonObject>(
+                webFunctionName = "openNotificationBannerForm",
+                message = message,
+            ) ?: return
+
+            logger.debug("($loggerTag) Open notification banner form")
+            delegate.onReceivedOpenNotificationBannerForm(task)
+        }
+
+        @JavascriptInterface
+        fun contentHeightChanged(height: Double) {
+            if (!height.isFinite() || height < 0) {
+                return
+            }
+            val heightPx = (height * resources.displayMetrics.density).roundToInt()
+            delegate.onContentHeightChanged(heightPx)
+        }
+
+        @JavascriptInterface
         fun pageDidLoad(message: String) {
             val pageLoadMessage = tryDeserializeWebMessage<PageLoadMessage>(
                 webFunctionName = "pageDidLoad",
@@ -647,7 +694,7 @@ internal class StripeConnectWebView private constructor(
         }
     }
 
-    private fun WebView.callSetterWithSerializableValue(setter: String, value: JsonElement) {
+    private fun WebView.evaluateSetterWithSerializableValue(setter: String, value: JsonElement) {
         evaluateSdkJs(
             "callSetterWithSerializableValue",
             buildJsonObject {
@@ -693,5 +740,23 @@ internal class StripeConnectWebView private constructor(
     internal companion object {
         private const val ANDROID_JS_INTERFACE = "Android"
         private const val EVALUATE_SDK_JS_ERROR_PREFIX = "__STRIPE_EVALUATE_SDK_JS_ERROR__:"
+        private val CONTENT_HEIGHT_OBSERVER_SCRIPT = """
+            (function() {
+              if (window.__stripeConnectHeightObserver) return;
+              window.__stripeConnectHeightObserver = true;
+              var last = -1;
+              function report(force) {
+                var body = document.body;
+                if (!body) return;
+                var height = body.getBoundingClientRect().height;
+                if (!force && last >= 0 && Math.abs(height - last) < 0.5) return;
+                last = height;
+                Android.contentHeightChanged(height);
+              }
+              window.__stripeConnectReportContentHeight = function() { report(true); };
+              new ResizeObserver(function() { report(false); }).observe(document.body);
+              report(false);
+            })();
+        """.trimIndent()
     }
 }
