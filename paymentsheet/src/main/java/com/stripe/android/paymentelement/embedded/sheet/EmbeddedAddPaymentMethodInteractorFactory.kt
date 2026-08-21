@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveIntera
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 
 internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
@@ -62,7 +61,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             initiallySelectedPaymentMethodType = initialCode,
             selection = embeddedSelectionHolder.selection,
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
-            validationRequested = MutableSharedFlow(),
+            validationRequested = sheetActivityStateHolder.validationRequested,
             incentive = PaymentMethodIncentiveInteractor(
                 paymentMethodMetadata.paymentMethodIncentive
             ).displayedIncentive,

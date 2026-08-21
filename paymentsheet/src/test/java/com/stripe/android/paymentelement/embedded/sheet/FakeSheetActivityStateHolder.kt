@@ -31,6 +31,7 @@ internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
     val updateErrorTurbine = Turbine<ResolvableString?>()
 
     override val result: SharedFlow<EmbeddedActivityResult> = MutableSharedFlow<EmbeddedActivityResult>()
+    override val validationRequested: SharedFlow<Unit> = MutableSharedFlow<Unit>()
 
     override fun updateMandate(mandateText: ResolvableString?) {
         error("This should never be called!")
@@ -43,6 +44,8 @@ internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
     override fun updateError(error: ResolvableString?) {
         updateErrorTurbine.add(error)
     }
+
+    override fun onPrimaryButtonDisabledClick() = Unit
 
     override fun setResult(result: EmbeddedActivityResult) {
         resultTurbine.add(result)
