@@ -152,6 +152,76 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
+    fun `createForExpressCheckoutElement maps Link configuration from express checkout element configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().linkConfiguration(
+                    PaymentElement.Configuration.LinkConfiguration().display(
+                        PaymentElement.Configuration.LinkConfiguration.Display.Never
+                    )
+                )
+            )
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration().linkConfiguration(
+                    ExpressCheckoutElement.Configuration.LinkConfiguration().display(
+                        ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden
+                    )
+                )
+            )
+            .build()
+
+        val result = factory().createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.link.display)
+            .isEqualTo(PaymentSheet.LinkConfiguration.Display.WalletButtonHidden)
+    }
+
+    @Test
+    fun `createForExpressCheckoutElement maps billing configuration from express checkout element configuration`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
+                    BillingDetailsCollectionConfiguration().address(Automatic)
+                )
+            )
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration().billingDetailsCollectionConfiguration(
+                    ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
+                        .name(
+                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
+                                .CollectionMode.Always
+                        )
+                        .email(
+                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
+                                .CollectionMode.Never
+                        )
+                        .address(
+                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
+                                .AddressCollectionMode.Full
+                        )
+                )
+            )
+            .build()
+
+        val result = factory().createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.billingDetailsCollectionConfiguration.name)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+        assertThat(result.billingDetailsCollectionConfiguration.email)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+        assertThat(result.billingDetailsCollectionConfiguration.address)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+    }
+
+    @Test
     fun `maps terms display to common configuration`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(

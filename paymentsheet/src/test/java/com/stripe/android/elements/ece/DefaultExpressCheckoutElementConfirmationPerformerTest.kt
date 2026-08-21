@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutAnalyticsPerformer
+import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
@@ -276,6 +277,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             operationCoordinator = operationCoordinator,
             analyticsPerformer = analyticsPerformer,
+            commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Test App"),
             errorReporter = errorReporter,
             statusBarColor = null,
             viewModelScope = backgroundScope,
