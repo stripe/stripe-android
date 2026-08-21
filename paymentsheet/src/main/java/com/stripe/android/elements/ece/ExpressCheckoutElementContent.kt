@@ -65,7 +65,6 @@ internal fun ExpressCheckoutElementContent(
 
     val columnCount = calculateColumnCount(
         buttonCount = visibleButtonCount,
-        maxColumns = state.buttonLayout.maxColumns,
         maxRows = state.buttonLayout.maxRows,
     )
 
@@ -123,18 +122,17 @@ internal fun calculateVisibleButtonCount(
 @VisibleForTesting
 internal fun calculateColumnCount(
     buttonCount: Int,
-    maxColumns: Int?,
     maxRows: Int?,
 ): Int {
     if (buttonCount == 0) {
         return 1
     }
 
-    return if (maxColumns != null) {
-        min(maxColumns, buttonCount)
-    } else if (maxRows != null) {
-        val numRows = min(maxRows, buttonCount)
-        (buttonCount + numRows - 1) / numRows
+    // We prefer to use one column but we are forced to have multiple columns if maxRows is less than buttonCount
+    return if (maxRows != null && maxRows < buttonCount) {
+        // It's safe to do this without checking maxColumns, because we've already updated the total button count to
+        // ensure we won't overflow our bounds.
+        (buttonCount + maxRows - 1) / maxRows
     } else {
         1
     }
