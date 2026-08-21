@@ -6,14 +6,11 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -192,37 +189,6 @@ internal class DefaultManageScreenInteractor(
     }
 
     companion object {
-        fun create(
-            viewModel: BaseSheetViewModel,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            customerStateHolder: CustomerStateHolder,
-            savedPaymentMethodMutator: SavedPaymentMethodMutator,
-        ): ManageScreenInteractor {
-            return DefaultManageScreenInteractor(
-                paymentMethods = customerStateHolder.paymentMethods,
-                paymentMethodMetadata = paymentMethodMetadata,
-                selection = viewModel.selection,
-                editing = savedPaymentMethodMutator.editing,
-                canEdit = savedPaymentMethodMutator.canEdit,
-                toggleEdit = savedPaymentMethodMutator::toggleEditing,
-                onSelectPaymentMethod = {
-                    val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                    viewModel.updateSelection(savedPmSelection)
-                    viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
-                },
-                onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },
-                navigateBack = { withDelay ->
-                    if (withDelay) {
-                        viewModel.navigationHandler.popWithDelay()
-                    } else {
-                        viewModel.navigationHandler.pop()
-                    }
-                },
-                defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
-                linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
-            )
-        }
-
         private fun paymentSelectionToDisplayableSavedPaymentMethod(
             selection: PaymentSelection?,
             displayableSavedPaymentMethods: List<DisplayableSavedPaymentMethod>

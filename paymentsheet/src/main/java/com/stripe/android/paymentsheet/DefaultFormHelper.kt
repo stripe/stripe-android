@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -52,50 +51,6 @@ internal class DefaultFormHelper(
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
-        fun create(
-            viewModel: BaseSheetViewModel,
-            coroutineScope: CoroutineScope,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
-            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
-            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
-        ): FormHelper {
-            return DefaultFormHelper(
-                coroutineScope = coroutineScope,
-                linkInlineHandler = linkInlineHandler,
-                cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
-                paymentMethodMetadata = paymentMethodMetadata,
-                newPaymentSelectionProvider = {
-                    viewModel.newPaymentSelection
-                },
-                linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
-                selectionUpdater = {
-                    viewModel.updateSelection(it)
-                },
-                setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
-                eventReporter = viewModel.eventReporter,
-                savedStateHandle = viewModel.savedStateHandle,
-                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                automaticallyLaunchedCardScanFormDataHelper =
-                if (shouldCreateAutomaticallyLaunchedCardScanFormDataHelper) {
-                    val hasSeenAutomaticCardScanLaunch =
-                        viewModel.newPaymentSelection?.paymentSelection is PaymentSelection.New.Card &&
-                            viewModel.newPaymentSelection?.getPaymentMethodCreateParams() != null
-
-                    AutomaticallyLaunchedCardScanFormDataHelper(
-                        openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomatically,
-                        savedStateHandle = viewModel.savedStateHandle,
-                        hasAutomaticallyLaunchedCardScanInitialValue = hasSeenAutomaticCardScanLaunch,
-                    )
-                } else {
-                    null
-                },
-                tapToAddHelper = viewModel.tapToAddHelper,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
-                isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
-            )
-        }
-
         fun create(
             coroutineScope: CoroutineScope,
             cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,

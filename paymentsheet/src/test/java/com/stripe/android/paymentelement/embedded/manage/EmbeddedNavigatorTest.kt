@@ -449,6 +449,8 @@ internal class EmbeddedNavigatorTest {
                 )
             ),
             onContinueClick = {},
+            onDisabledClick = {},
+            onProcessingCompleted = {},
         )
         val (formScreen, formInteractor) = createFormScreen()
 
@@ -696,6 +698,7 @@ internal class EmbeddedNavigatorTest {
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            launchMode = EmbeddedLaunchMode.Form("card"),
         )
         return EmbeddedNavigator.Screen.Form.Factory(
             interactorFactory = interactorFactory,
@@ -725,6 +728,8 @@ internal class EmbeddedNavigatorTest {
                 )
             ),
             onContinueClick = {},
+            onDisabledClick = {},
+            onProcessingCompleted = {},
         )
     }
 
@@ -746,6 +751,8 @@ internal class EmbeddedNavigatorTest {
                 )
             ),
             onContinueClick = {},
+            onDisabledClick = {},
+            onProcessingCompleted = {},
         )
     }
 

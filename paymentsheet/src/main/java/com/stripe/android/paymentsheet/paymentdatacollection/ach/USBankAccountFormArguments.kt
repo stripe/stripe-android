@@ -16,9 +16,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import kotlinx.coroutines.flow.update
 
 /**
  * [USBankAccountFormArguments] provides the arguments required to render the [USBankAccountForm].
@@ -72,62 +70,12 @@ internal class USBankAccountFormArguments(
     val clientAttributionMetadata: ClientAttributionMetadata,
 ) {
     companion object {
-        fun create(
-            viewModel: BaseSheetViewModel,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            hostedSurface: String,
-            selectedPaymentMethodCode: String,
-            bankFormInteractor: BankFormInteractor,
-        ): USBankAccountFormArguments {
-            val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
-                code = selectedPaymentMethodCode,
-                intent = paymentMethodMetadata.stripeIntent,
-                paymentMethodSaveConsentBehavior = paymentMethodMetadata.customerMetadata?.saveConsent,
-                hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
-            )
-            val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
-            val stripeIntent = paymentMethodMetadata.stripeIntent
-            return USBankAccountFormArguments(
-                showCheckbox = isSaveForFutureUseValueChangeable &&
-                    // Instant Debits does not support saving for future use
-                    instantDebits.not(),
-                hostedSurface = hostedSurface,
-                instantDebits = instantDebits,
-                linkMode = paymentMethodMetadata.linkMode,
-                onBehalfOf = paymentMethodMetadata.onBehalfOf,
-                isCompleteFlow = viewModel.isCompleteFlow,
-                isPaymentFlow = stripeIntent is PaymentIntent,
-                stripeIntentId = stripeIntent.id,
-                clientSecret = stripeIntent.clientSecret,
-                shippingDetails = viewModel.config.shippingDetails,
-                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                onAnalyticsEvent = { viewModel.eventReporter.onUsBankAccountFormEvent(it) },
-                draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
-                onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
-                onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
-                onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
-                onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
-                onError = viewModel::onError,
-                onFormCompleted = {
-                    viewModel.eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code)
-                },
-                incentive = paymentMethodMetadata.paymentMethodIncentive,
-                setAsDefaultPaymentMethodEnabled =
-                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
-                    ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
-                financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
-                setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
-                termsDisplay = paymentMethodMetadata.termsDisplayForCode(selectedPaymentMethodCode),
-                sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
-                forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
-                clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
-            )
-        }
-
         fun createForEmbedded(
             paymentMethodMetadata: PaymentMethodMetadata,
             selectedPaymentMethodCode: String,
             hostedSurface: String,
+            isCompleteFlow: Boolean,
+            draftPaymentSelection: PaymentSelection?,
             setSelection: (PaymentSelection?) -> Unit,
             hasSavedPaymentMethods: Boolean,
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
@@ -156,12 +104,12 @@ internal class USBankAccountFormArguments(
                 instantDebits = instantDebits,
                 linkMode = paymentMethodMetadata.linkMode,
                 onBehalfOf = paymentMethodMetadata.onBehalfOf,
-                isCompleteFlow = false,
+                isCompleteFlow = isCompleteFlow,
                 isPaymentFlow = paymentMethodMetadata.stripeIntent is PaymentIntent,
                 stripeIntentId = paymentMethodMetadata.stripeIntent.id,
                 clientSecret = paymentMethodMetadata.stripeIntent.clientSecret,
                 shippingDetails = paymentMethodMetadata.shippingDetails,
-                draftPaymentSelection = null,
+                draftPaymentSelection = draftPaymentSelection,
                 onMandateTextChanged = onMandateTextChanged,
                 autocompleteAddressInteractorFactory = null,
                 onAnalyticsEvent = onAnalyticsEvent,

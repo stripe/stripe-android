@@ -166,7 +166,7 @@ internal class EmbeddedSheetActivityTest {
                     selection = null,
                     previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),
-                    promotion = null,
+                    promotions = null,
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
                     ),

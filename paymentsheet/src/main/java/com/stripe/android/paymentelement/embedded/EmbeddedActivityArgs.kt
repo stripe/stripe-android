@@ -1,9 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -20,16 +18,6 @@ internal data class EmbeddedActivityArgs(
     val selection: PaymentSelection?,
     val previousNewSelections: Bundle,
     val customerState: CustomerState?,
-    val promotion: PaymentMethodMessagePromotion?,
+    val promotions: List<PaymentMethodMessagePromotion>?,
     val launchMode: EmbeddedLaunchMode,
-) : Parcelable {
-    companion object {
-        internal const val EXTRA_ARGS: String = "extra_activity_args"
-
-        fun fromIntent(intent: Intent): EmbeddedActivityArgs? {
-            return intent.extras?.let { bundle ->
-                BundleCompat.getParcelable(bundle, EXTRA_ARGS, EmbeddedActivityArgs::class.java)
-            }
-        }
-    }
-}
+) : Parcelable

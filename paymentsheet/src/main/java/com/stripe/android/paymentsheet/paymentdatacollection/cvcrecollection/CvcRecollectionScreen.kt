@@ -25,7 +25,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -57,7 +56,6 @@ import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.stripeThemeIsDark
-import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun CvcRecollectionScreen(
@@ -86,27 +84,6 @@ internal fun CvcRecollectionScreen(
         CvcRecollectionButton(cvcState.isValid) {
             viewActionHandler.invoke(CvcRecollectionViewAction.OnConfirmPressed)
         }
-    }
-}
-
-@Composable
-internal fun CvcRecollectionPaymentSheetScreen(
-    interactor: CvcRecollectionInteractor,
-) {
-    val state by interactor.viewState.collectAsState()
-
-    Column(
-        Modifier
-            .background(MaterialTheme.stripeColors.materialColors.surface)
-            .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
-    ) {
-        CvcRecollectionTitle()
-        CvcRecollectionField(
-            lastFour = state.lastFour,
-            enabled = state.isEnabled,
-            cvcState = state.cvcState,
-            onValueChanged = interactor::onCvcChanged,
-        )
     }
 }
 

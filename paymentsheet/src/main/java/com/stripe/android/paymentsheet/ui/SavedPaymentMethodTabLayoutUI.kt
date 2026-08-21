@@ -55,7 +55,6 @@ import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.key
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
@@ -72,52 +71,6 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.R as StripeR
-
-@Composable
-internal fun SavedPaymentMethodTabLayoutUI(
-    interactor: SelectSavedPaymentMethodsInteractor,
-    cvcRecollectionState: CvcRecollectionState,
-    modifier: Modifier,
-) {
-    val state by interactor.state.collectAsState()
-
-    SavedPaymentMethodTabLayoutUI(
-        paymentOptionsItems = state.paymentOptionsItems,
-        selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
-        linkBrand = state.linkBrand,
-        isEditing = state.isEditing,
-        isProcessing = state.isProcessing,
-        onAddCardPressed = {
-            interactor.handleViewAction(
-                SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed
-            )
-        },
-        onItemSelected = {
-            interactor.handleViewAction(
-                SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod(
-                    it
-                )
-            )
-        },
-        onModifyItem = {
-            interactor.handleViewAction(
-                SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(it)
-            )
-        },
-        modifier = modifier,
-    )
-
-    if (
-        cvcRecollectionState is CvcRecollectionState.Required &&
-        (state.selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)
-            ?.paymentMethod?.type == PaymentMethod.Type.Card
-    ) {
-        CvcRecollectionField(
-            cvcControllerFlow = cvcRecollectionState.cvcControllerFlow,
-            state.isProcessing
-        )
-    }
-}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -613,33 +566,28 @@ internal fun CvcRecollectionField(
     cvcControllerFlow: StateFlow<CvcController>,
     isProcessing: Boolean,
     animationDuration: Int = ANIMATION_DURATION,
-    animationDelay: Int = ANIMATION_DELAY
+    animationDelay: Int = ANIMATION_DELAY,
 ) {
     val controller by cvcControllerFlow.collectAsState()
     val validationMessage by controller.validationMessage.collectAsState()
-    val element = CvcElement(
-        IdentifierSpec(),
-        controller
-    )
+    val element = CvcElement(IdentifierSpec(), controller)
     val focusRequester = remember { FocusRequester() }
     var visible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+
     LaunchedEffect(isProcessing) {
-        // Clear focus once primary button is clicked
         if (isProcessing) {
             focusManager.clearFocus()
         }
     }
-
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(Unit) {
         delay(animationDelay.toLong())
         visible = true
     }
+
     AnimatedVisibility(
         visible = visible,
-        enter = expandVertically(tween(animationDuration, animationDelay)) {
-            it
-        }
+        enter = expandVertically(tween(animationDuration, animationDelay)) { it },
     ) {
         Column(
             Modifier
@@ -649,11 +597,11 @@ internal fun CvcRecollectionField(
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
                 style = MaterialTheme.typography.body1,
-                color = MaterialTheme.stripeColors.subtitle
+                color = MaterialTheme.stripeColors.subtitle,
             )
             SectionCard(
                 Modifier
-                    .padding(0.dp, 8.dp, 0.dp, 8.dp)
+                    .padding(vertical = 8.dp)
                     .height(IntrinsicSize.Min)
             ) {
                 element.controller.ComposeUI(
@@ -662,8 +610,8 @@ internal fun CvcRecollectionField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester),
-                    hiddenIdentifiers = setOf(),
-                    lastTextFieldIdentifier = null
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
                 )
             }
             validationMessage?.let {

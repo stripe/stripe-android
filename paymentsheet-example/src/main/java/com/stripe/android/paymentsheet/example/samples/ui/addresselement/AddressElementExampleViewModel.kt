@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.samples.ui.addresselement
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.requests.suspendable
@@ -18,16 +19,28 @@ import kotlinx.coroutines.launch
 
 internal class AddressElementExampleViewModel(
     application: Application,
+    savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
+    private val publishableKeyOverride = savedStateHandle.get<String>(PUBLISHABLE_KEY_OVERRIDE_EXTRA)
+
     private val _state = MutableStateFlow<AddressElementExampleViewState>(
-        value = AddressElementExampleViewState.Loading,
+        value = publishableKeyOverride?.let {
+            AddressElementExampleViewState.Content(publishableKey = it)
+        } ?: AddressElementExampleViewState.Loading,
     )
     val state: StateFlow<AddressElementExampleViewState> = _state
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            loadPublishableKey()
+        if (publishableKeyOverride != null) {
+            PaymentConfiguration.init(
+                context = application,
+                publishableKey = publishableKeyOverride,
+            )
+        } else {
+            viewModelScope.launch(Dispatchers.IO) {
+                loadPublishableKey()
+            }
         }
     }
 
@@ -77,3 +90,5 @@ internal class AddressElementExampleViewModel(
         const val backendUrl = "https://stripe-mobile-payment-sheet.stripedemos.com"
     }
 }
+
+internal const val PUBLISHABLE_KEY_OVERRIDE_EXTRA = "publishable_key_override"

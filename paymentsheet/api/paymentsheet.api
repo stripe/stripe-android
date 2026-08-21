@@ -2190,34 +2190,6 @@ public final class com/stripe/android/paymentsheet/addresselement/ComposableSing
 	public final fun getLambda$-1578841985$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/StripeAndroidPrimaryButtonBinding : androidx/viewbinding/ViewBinding {
-	public final field confirmedIcon Landroid/widget/ImageView;
-	public final field confirmingIcon Lcom/google/android/material/progressindicator/CircularProgressIndicator;
-	public final field label Landroidx/compose/ui/platform/ComposeView;
-	public final field lockIcon Landroid/widget/ImageView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeAndroidPrimaryButtonBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeAndroidPrimaryButtonBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding : androidx/viewbinding/ViewBinding {
-	public final field primaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding : androidx/viewbinding/ViewBinding {
-	public final field googlePayButtonLayout Landroid/widget/RelativeLayout;
-	public final field googlePayPaymentButton Lcom/google/android/gms/wallet/button/PayButton;
-	public final field googlePayPrimaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
-}
-
 public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public static final field $stable I
 	public fun <init> (ILjava/lang/String;)V
@@ -2287,12 +2259,6 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$Defau
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$DefaultPaymentMethodLabelKt;
 	public fun <init> ()V
 	public final fun getLambda$-2033318068$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetScreenKt;
-	public fun <init> ()V
-	public final fun getLambda$2125430138$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt {

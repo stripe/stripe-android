@@ -1932,9 +1932,11 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     callback = {
                         PrimaryButton.UIState(
                             label = "Continue".resolvableString,
+                            canClickWhileDisabled = false,
+                            onClick = {},
+                            onDisabledClick = {},
                             enabled = true,
                             lockVisible = false,
-                            onClick = {}
                         )
                     }
                 )

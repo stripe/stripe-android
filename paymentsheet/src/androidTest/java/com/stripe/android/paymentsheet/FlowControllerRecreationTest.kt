@@ -9,6 +9,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -36,7 +37,7 @@ class FlowControllerRecreationTest {
         }
 
         val results = Turbine<PaymentSheetResult>()
-        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
+        val activityLaunchObserver = ActivityLaunchObserver(EmbeddedSheetActivity::class.java)
         val paymentOptionCallbackCountDownLatch = CountDownLatch(1)
         lateinit var flowController: PaymentSheet.FlowController
 

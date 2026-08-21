@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -10,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -34,6 +37,7 @@ internal fun FormScreenContent(
     interactor: VerticalModeFormInteractor,
     eventReporter: EventReporter,
     onClick: () -> Unit,
+    onDisabledClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
     state: SheetActivityStateHolder.State,
     updateSelection: (PaymentSelection.Saved) -> Unit,
@@ -63,6 +67,7 @@ internal fun FormScreenContent(
         FormActivityPrimaryButton(
             state = state,
             onClick = onClick,
+            onDisabledClick = onDisabledClick,
             onProcessingCompleted = onProcessingCompleted,
         )
         PaymentSheetContentPadding()
@@ -79,6 +84,7 @@ internal fun USBankAccountMandate(
             modifier = Modifier
                 .padding(vertical = 8.dp)
                 .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+                .testTag(EMBEDDED_FORM_ACTIVITY_MANDATE)
         )
     }
 }
@@ -93,6 +99,7 @@ internal fun FormActivityError(
             modifier = Modifier
                 .padding(vertical = 8.dp)
                 .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+                .testTag(EMBEDDED_FORM_ACTIVITY_ERROR)
         )
     }
 }
@@ -101,13 +108,18 @@ internal fun FormActivityError(
 internal fun FormActivityPrimaryButton(
     state: SheetActivityStateHolder.State,
     onProcessingCompleted: () -> Unit = {},
+    onDisabledClick: () -> Unit,
     onClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
     ) {
         PrimaryButton(
-            modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),
+            modifier = Modifier
+                .testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+                .semantics {
+                    if (!state.isEnabled) disabled()
+                },
             label = state.primaryButtonLabel.resolve(),
             locked = state.shouldDisplayLockIcon,
             enabled = state.isEnabled,
@@ -115,8 +127,25 @@ internal fun FormActivityPrimaryButton(
             onProcessingCompleted = onProcessingCompleted,
             processingState = state.processingState
         )
+        if (!state.isEnabled && !state.isProcessing) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .testTag(EMBEDDED_FORM_ACTIVITY_DISABLED_BUTTON_OVERLAY)
+                    .clickable(onClick = onDisabledClick),
+            )
+        }
     }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON = "EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EMBEDDED_FORM_ACTIVITY_MANDATE = "EMBEDDED_FORM_ACTIVITY_MANDATE"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EMBEDDED_FORM_ACTIVITY_ERROR = "EMBEDDED_FORM_ACTIVITY_ERROR"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EMBEDDED_FORM_ACTIVITY_DISABLED_BUTTON_OVERLAY = "EMBEDDED_FORM_ACTIVITY_DISABLED_BUTTON_OVERLAY"

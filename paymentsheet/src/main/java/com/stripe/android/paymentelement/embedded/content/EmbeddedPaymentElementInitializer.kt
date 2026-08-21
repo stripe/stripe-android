@@ -6,8 +6,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener.Companion.PREVIOUSLY_SENT_DEEP_LINK_EVENT
 import javax.inject.Inject
+
+private const val PREVIOUSLY_SENT_DEEP_LINK_EVENT = "previously_sent_deep_link_event"
 
 @EmbeddedPaymentElementScope
 internal class EmbeddedPaymentElementInitializer @Inject constructor(
