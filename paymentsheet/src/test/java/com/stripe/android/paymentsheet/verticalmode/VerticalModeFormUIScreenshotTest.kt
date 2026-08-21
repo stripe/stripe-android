@@ -458,6 +458,25 @@ internal class VerticalModeFormUIScreenshotTest {
         }
     }
 
+    @Test
+    fun klarnaFullBillingAddressForm() {
+        paparazziRule.snapshot {
+            val metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("klarna"),
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    allowedCountries = setOf("US"),
+                ),
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(country = "US"),
+                ),
+            )
+            CreateTestScenario(paymentMethodCode = "klarna", metadata = metadata)
+        }
+    }
+
     @Composable
     private fun CreateTestScenario(
         paymentMethodCode: PaymentMethodCode,
