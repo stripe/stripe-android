@@ -273,14 +273,6 @@ workflows:
       - FTL_RUNNER_ARGUMENTS: |-
           numShards=$BITRISE_IO_PARALLEL_TOTAL
           shardIndex=$BITRISE_IO_PARALLEL_INDEX
-          notAnnotation=com.stripe.android.paymentsheet.RequiresIme
-    before_run:
-      - _run-firebase-instrumentation-tests
-  run-ftl-paymentsheet-ime-instrumentation-tests:
-    envs:
-      - FTL_ARTIFACTS_WORKFLOW: build-firebase-test-artifacts
-      - FTL_TEST_APK_FILENAME: paymentsheet-test.apk
-      - FTL_RUNNER_ARGUMENTS: annotation=com.stripe.android.paymentsheet.RequiresIme
     before_run:
       - _run-firebase-instrumentation-tests
   run-ftl-financial-connections-instrumentation-tests:

@@ -184,18 +184,9 @@ for shard_index in 0 1 2 3 4 5; do
     "" \
     "$device_model" \
     "" \
-    "numShards=6,shardIndex=$shard_index,notAnnotation=com.stripe.android.paymentsheet.RequiresIme" \
+    "numShards=6,shardIndex=$shard_index" \
     false
 done
-
-start_test \
-  paymentsheet-ime-instrumentation \
-  "$artifact_dir/paymentsheet-test.apk" \
-  "" \
-  "$device_model" \
-  "" \
-  "annotation=com.stripe.android.paymentsheet.RequiresIme" \
-  false
 
 start_test \
   financial-connections-instrumentation \
