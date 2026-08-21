@@ -71,6 +71,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
+            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
         )
         return buildList {
             add(paymentOptionsScreen)
@@ -91,6 +92,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             eventReporter = eventReporter,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
+            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
         )
     }
 

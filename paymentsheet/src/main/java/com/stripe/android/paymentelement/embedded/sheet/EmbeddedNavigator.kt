@@ -249,6 +249,7 @@ internal class EmbeddedNavigator private constructor(
                         )
                     },
                     state = state,
+                    onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
                 )
             }
 
@@ -326,6 +327,7 @@ internal class EmbeddedNavigator private constructor(
                                 )
                             },
                             onClick = confirmationHelper::confirm,
+                            onDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
                         )
                         PaymentSheetContentPadding()
                     }
@@ -340,6 +342,7 @@ internal class EmbeddedNavigator private constructor(
             private val isLiveMode: Boolean,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
             private val onContinueClick: () -> Unit,
+            private val onPrimaryButtonDisabledClick: () -> Unit,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -368,6 +371,7 @@ internal class EmbeddedNavigator private constructor(
                 FormActivityPrimaryButton(
                     state = state,
                     onClick = onContinueClick,
+                    onDisabledClick = onPrimaryButtonDisabledClick,
                 )
                 PaymentSheetContentPadding()
             }
@@ -382,6 +386,7 @@ internal class EmbeddedNavigator private constructor(
             private val eventReporter: EventReporter,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
             private val onContinueClick: () -> Unit,
+            private val onPrimaryButtonDisabledClick: () -> Unit,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -413,6 +418,7 @@ internal class EmbeddedNavigator private constructor(
                     FormActivityPrimaryButton(
                         state = state,
                         onClick = onContinueClick,
+                        onDisabledClick = onPrimaryButtonDisabledClick,
                     )
                     PaymentSheetContentPadding()
                 }
