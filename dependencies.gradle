@@ -73,6 +73,7 @@ ext.versions = [
         linkedinDexmaker            : '2.28.1',
         testParameterInjector       : '1.20',
         terminal                    : '5.4.1',
+        tensorflowLite              : '2.16.1',
         truth                       : '1.4.5',
         turbine                     : '1.2.1',
         uiAutomator                 : '2.3.0',
@@ -199,6 +200,7 @@ ext.libs = [
         litertSupport                       : "com.google.ai.edge.litert:litert-support:${versions.litert}",
         tensorflowLitePlayServices          : "com.google.android.gms:play-services-tflite-java:${versions.playServicesTfLite}",
         tensorflowLitePlayServicesSupport   : "com.google.android.gms:play-services-tflite-support:${versions.playServicesTfLite}",
+        tensorflowLite                      : "org.tensorflow:tensorflow-lite:${versions.tensorflowLite}",
         mlKitTextRecognition                : "com.google.android.gms:play-services-mlkit-text-recognition:${versions.playServicesMlKitTextRecognition}",
         zxing                               : "com.google.zxing:core:${versions.zxing}",
 ]
