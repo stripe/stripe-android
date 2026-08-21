@@ -372,6 +372,30 @@ class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
+    fun toParamMap_withKlarnaPaymentMethodOptions_shouldCreateExpectedMap() {
+        assertThat(
+            ConfirmPaymentIntentParams(
+                clientSecret = CLIENT_SECRET,
+                paymentMethodOptions = PaymentMethodOptionsParams.Klarna.Builder()
+                    .setInteroperabilityToken("interoperability_token")
+                    .setPartnerConfirmationToken("partner_confirmation_token")
+                    .build(),
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "client_secret" to CLIENT_SECRET,
+                "use_stripe_sdk" to false,
+                "payment_method_options" to mapOf(
+                    "klarna" to mapOf(
+                        "interoperability_token" to "interoperability_token",
+                        "partner_confirmation_token" to "partner_confirmation_token",
+                    )
+                ),
+            )
+        )
+    }
+
+    @Test
     fun toParamMap_withBlikPaymentMethodOptions_shouldCreateExpectedMap() {
         val blikCode = "123456"
         assertThat(

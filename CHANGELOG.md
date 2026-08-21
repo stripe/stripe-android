@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [ADDED] Added Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens to PaymentIntent confirmation.
+
 ### PaymentSheet
 * [DEPRECATED] Deprecated the `googlePlacesApiKey` builder methods and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key. Address autocomplete is now available to all merchants without providing a Google Places API key. Existing integrations can remove the key without losing autocomplete, and integrations that did not provide one receive autocomplete automatically.
 

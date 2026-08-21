@@ -2796,6 +2796,25 @@ public final class com/stripe/android/model/PaymentMethodOptionsParams$Card : co
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/model/PaymentMethodOptionsParams$Klarna : com/stripe/android/model/PaymentMethodOptionsParams {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/PaymentMethodOptionsParams$Klarna$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/model/PaymentMethodOptionsParams$Klarna;
+	public final fun setInteroperabilityToken (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodOptionsParams$Klarna$Builder;
+	public final fun setPartnerConfirmationToken (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodOptionsParams$Klarna$Builder;
+}
+
 public final class com/stripe/android/model/PaymentMethodOptionsParams$USBankAccount : com/stripe/android/model/PaymentMethodOptionsParams {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
