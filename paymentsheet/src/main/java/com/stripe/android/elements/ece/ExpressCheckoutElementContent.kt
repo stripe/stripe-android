@@ -83,7 +83,8 @@ internal fun ExpressCheckoutElementContent(
                         )
                     }
                 }
-                repeat(columnCount - rowButtons.size) {
+                val emptyColumnCount = columnCount - rowButtons.size
+                repeat(emptyColumnCount) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
             }
