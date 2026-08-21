@@ -14,7 +14,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.ui.core.elements.StaticTextElement
@@ -67,29 +66,12 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
-            .ignoreBillingAddressRequirements()
             .billingAddressPolicy(
                 PaymentMethodBillingAddressPolicy.CountryOnly(
                     allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
                 ),
             )
             .apply {
-                if (
-                    metadata.billingDetailsCollectionConfiguration.address ==
-                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-                ) {
-                    AddressSpec(
-                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                        hideCountry = true,
-                    ).transform(
-                        initialValues = arguments.initialValues,
-                        shippingValues = arguments.shippingValues,
-                        autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
-                    ).forEach {
-                        element(it)
-                    }
-                }
-
                 if (KlarnaDefinition.requiresMandate(metadata)) {
                     builder.footer(
                         formElement = MandateTextElement(

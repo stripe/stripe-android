@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodBillingAddressPolicy
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -66,6 +67,8 @@ private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .element(SectionElement.wrap(taxIdElement))
-            .requireBillingAddressIfAllowed(setOf("BR"))
+            .billingAddressPolicy(
+                PaymentMethodBillingAddressPolicy.FullAddressIfAllowed(allowedCountryCodes = setOf("BR")),
+            )
     }
 }

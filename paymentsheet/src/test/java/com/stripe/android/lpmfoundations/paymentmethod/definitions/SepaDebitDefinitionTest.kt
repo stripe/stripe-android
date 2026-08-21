@@ -15,7 +15,9 @@ import com.stripe.android.ui.core.elements.IbanConfig
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import org.junit.Test
@@ -80,6 +82,27 @@ class SepaDebitDefinitionTest {
         checkIbanField(formElements, 3)
         checkBillingField(formElements, 4)
         checkMandateField(formElements, metadata, 5)
+    }
+
+    @Test
+    fun `'createFormElements' uses merchant allowed countries for billing address`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("sepa_debit")
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                allowedCountries = setOf("DE", "FR"),
+            )
+        )
+
+        val formElements = SepaDebitDefinition.formElements(metadata)
+
+        val addressElement = (formElements[3] as SectionElement).fields.single() as AddressElement
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
     }
 
     @Test

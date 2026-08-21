@@ -11,4 +11,14 @@ internal sealed interface PaymentMethodBillingAddressPolicy {
     data class CountryOnly(
         val allowedCountryCodes: Set<String>,
     ) : PaymentMethodBillingAddressPolicy
+
+    /**
+     * Collects a full address from [allowedCountryCodes] when merchant settings allow address collection.
+     */
+    data class FullAddressIfAllowed(
+        val allowedCountryCodes: Set<String>,
+    ) : PaymentMethodBillingAddressPolicy
+
+    /** Prevents this payment method from collecting a billing address in every resolution stage. */
+    data object Suppressed : PaymentMethodBillingAddressPolicy
 }
