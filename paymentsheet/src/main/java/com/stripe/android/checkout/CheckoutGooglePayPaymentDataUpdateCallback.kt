@@ -8,7 +8,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
@@ -29,16 +28,12 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
             return notConfiguredResponse()
         }
 
-        val googlePayConfiguration = currentState.commonConfiguration.googlePay ?: run {
-            reportUnexpectedCallbackTrigger(VALUE_WITHOUT_CONFIG)
-
-            return notConfiguredResponse()
-        }
+        val countryCode = currentState.checkoutSessionResponse.merchantCountry
 
         return when (val trigger = paymentDataUpdate.callbackTrigger) {
             GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress -> {
-                updateShippingAddress(googlePayConfiguration, currentState, paymentDataUpdate)
+                updateShippingAddress(countryCode, currentState, paymentDataUpdate)
             }
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingOption,
             GooglePayPaymentDataUpdate.CallbackTrigger.Offer -> {
@@ -51,7 +46,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
                 )
 
                 mapToResponse(
-                    configuration = googlePayConfiguration,
+                    countryCode = countryCode,
                     response = currentState.checkoutSessionResponse,
                     paymentDataUpdate = paymentDataUpdate,
                 )
@@ -60,14 +55,14 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     }
 
     private suspend fun updateShippingAddress(
-        googlePayConfiguration: PaymentSheet.GooglePayConfiguration,
+        countryCode: String?,
         currentState: CheckoutControllerState,
         paymentDataUpdate: GooglePayPaymentDataUpdate,
     ): GooglePayPaymentDataUpdateResponse {
         val address = when (val result = addressBuilder.build(paymentDataUpdate)) {
             is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> {
                 return mapToResponse(
-                    configuration = googlePayConfiguration,
+                    countryCode = countryCode,
                     response = currentState.checkoutSessionResponse,
                     paymentDataUpdate = paymentDataUpdate,
                 )
@@ -83,7 +78,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
             address = address,
         ).fold(
             onSuccess = { response ->
-                mapToResponse(googlePayConfiguration, response, paymentDataUpdate)
+                mapToResponse(countryCode, response, paymentDataUpdate)
             },
             onFailure = { error ->
                 GooglePayPaymentDataUpdateResponse(
@@ -99,11 +94,11 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     }
 
     private fun mapToResponse(
-        configuration: PaymentSheet.GooglePayConfiguration,
+        countryCode: String?,
         response: CheckoutSessionResponse,
         paymentDataUpdate: GooglePayPaymentDataUpdate
     ): GooglePayPaymentDataUpdateResponse {
-        return mapper.toResponse(configuration, response, paymentDataUpdate)
+        return mapper.toResponse(countryCode, response, paymentDataUpdate)
     }
 
     private fun reportUnexpectedCallbackTrigger(trigger: String) {
@@ -130,6 +125,5 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         const val FIELD_UNEXPECTED_TRIGGER_TYPE = "unexpected_trigger_type"
         const val VALUE_SHIPPING_OPTION_TRIGGER = "shipping_option"
         const val VALUE_OFFER_TRIGGER = "offer"
-        const val VALUE_WITHOUT_CONFIG = "without_config"
     }
 }

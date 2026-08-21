@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
@@ -33,7 +32,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
         )
 
         val result = mapper.toResponse(
-            configuration = googlePayConfiguration(countryCode = "US"),
+            countryCode = "US",
             response = response,
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
@@ -54,9 +53,9 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
     }
 
     @Test
-    fun `toResponse uses country code from configuration`() {
+    fun `toResponse uses provided country code`() {
         val result = mapper.toResponse(
-            configuration = googlePayConfiguration(countryCode = "CA"),
+            countryCode = "CA",
             response = CheckoutSessionResponseFactory.create(),
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
@@ -65,9 +64,21 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
     }
 
     @Test
-    fun `toResponse returns null country code when configuration country code is blank`() {
+    fun `toResponse returns null country code when provided country code is blank`() {
         val result = mapper.toResponse(
-            configuration = googlePayConfiguration(countryCode = ""),
+            countryCode = "",
+            response = CheckoutSessionResponseFactory.create(),
+            paymentDataUpdate = PAYMENT_DATA_UPDATE,
+        )
+
+        assertThat(result.newTransactionInfo).isNotNull()
+        assertThat(result.newTransactionInfo?.countryCode).isNull()
+    }
+
+    @Test
+    fun `toResponse returns null country code when country code is unavailable`() {
+        val result = mapper.toResponse(
+            countryCode = null,
             response = CheckoutSessionResponseFactory.create(),
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
@@ -84,7 +95,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
         )
 
         val result = mapper.toResponse(
-            configuration = googlePayConfiguration(),
+            countryCode = "US",
             response = response,
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
@@ -95,7 +106,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
     @Test
     fun `toResponse uses checkout session amount when total summary is absent`() {
         val result = mapper.toResponse(
-            configuration = googlePayConfiguration(),
+            countryCode = "US",
             response = CheckoutSessionResponseFactory.create(
                 amount = 1000L,
                 totalSummary = null,
@@ -109,7 +120,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
     @Test
     fun `toResponse uses payment intent id as transaction id`() {
         val result = mapper.toResponse(
-            configuration = googlePayConfiguration(),
+            countryCode = "US",
             response = CheckoutSessionResponseFactory.create(
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 setupIntent = null,
@@ -124,7 +135,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
     @Test
     fun `toResponse uses setup intent id as transaction id when no payment intent`() {
         val result = mapper.toResponse(
-            configuration = googlePayConfiguration(),
+            countryCode = "US",
             response = CheckoutSessionResponseFactory.create(
                 paymentIntent = null,
                 setupIntent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
@@ -143,7 +154,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
         )
 
         val result = mapper.toResponse(
-            configuration = googlePayConfiguration(),
+            countryCode = "US",
             response = response,
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
@@ -151,13 +162,6 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
         assertThat(result.newTransactionInfo?.displayItems)
             .isEqualTo(GooglePayDisplayItemsFactory.create(response, context))
     }
-
-    private fun googlePayConfiguration(
-        countryCode: String = "US",
-    ) = PaymentSheet.GooglePayConfiguration(
-        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-        countryCode = countryCode,
-    )
 
     private fun totalSummary(
         totalAmountDue: Long,

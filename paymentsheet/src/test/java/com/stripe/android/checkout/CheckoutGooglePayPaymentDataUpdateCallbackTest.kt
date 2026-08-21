@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
@@ -49,34 +48,27 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     }
 
     @Test
-    fun `onPaymentDataChanged returns error and reports when google pay is not configured`() = runScenario(
+    fun `onPaymentDataChanged maps state when merchant country is unavailable`() = runScenario(
         state = CheckoutControllerStateFactory.create(
-            commonConfiguration = CommonConfigurationFactory.create(
-                googlePay = null,
-            ),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
         ),
+        addressBuilderResult = CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable,
+        mapperResponse = GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null),
     ) {
-        val response = callback.onPaymentDataChanged(
-            GooglePayPaymentDataUpdate(
-                callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
-                shippingAddress = null,
-            )
+        val paymentDataUpdate = GooglePayPaymentDataUpdate(
+            callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
+            shippingAddress = null,
         )
 
-        assertThat(response.newTransactionInfo).isNull()
+        val response = callback.onPaymentDataChanged(paymentDataUpdate)
 
-        val error = response.error
-        assertThat(error).isNotNull()
-        assertThat(error?.reason).isEqualTo(GooglePayPaymentDataError.Reason.OtherError)
-        assertThat(error?.message).isEqualTo("Something went wrong")
-        assertThat(error?.intent).isEqualTo(GooglePayPaymentDataError.Intent.ShippingAddress)
+        assertThat(response).isEqualTo(providedMapperResponse)
+        assertThat(addressBuilder.buildCalls.awaitItem()).isEqualTo(paymentDataUpdate)
 
-        val call = errorReporter.awaitCall()
-        assertThat(call.errorEvent).isEqualTo(
-            ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER
-        )
-        assertThat(call.additionalNonPiiParams)
-            .isEqualTo(mapOf("unexpected_trigger_type" to "without_config"))
+        val toResponseCall = mapper.toResponseCalls.awaitItem()
+        assertThat(toResponseCall.countryCode).isNull()
+        assertThat(toResponseCall.response).isEqualTo(providedState?.checkoutSessionResponse)
+        assertThat(toResponseCall.paymentDataUpdate).isEqualTo(paymentDataUpdate)
     }
 
     @Test
@@ -154,7 +146,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
 
         val toResponseCall = mapper.toResponseCalls.awaitItem()
 
-        assertThat(toResponseCall.configuration).isEqualTo(providedState?.commonConfiguration?.googlePay)
+        assertThat(toResponseCall.countryCode).isEqualTo(providedState?.checkoutSessionResponse?.merchantCountry)
         assertThat(toResponseCall.response).isEqualTo(providedState?.checkoutSessionResponse)
         assertThat(toResponseCall.paymentDataUpdate).isEqualTo(paymentDataUpdate)
 
@@ -188,7 +180,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             assertThat(response).isEqualTo(providedMapperResponse)
 
             val toResponseCall = mapper.toResponseCalls.awaitItem()
-            assertThat(toResponseCall.configuration).isEqualTo(providedState?.commonConfiguration?.googlePay)
+            assertThat(toResponseCall.countryCode).isEqualTo(providedState?.checkoutSessionResponse?.merchantCountry)
             assertThat(toResponseCall.response).isEqualTo(providedState?.checkoutSessionResponse)
             assertThat(toResponseCall.paymentDataUpdate).isEqualTo(paymentDataUpdate)
         }
@@ -228,7 +220,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             assertThat(updateCall.checkoutSessionResponse).isEqualTo(providedState?.checkoutSessionResponse)
 
             val toResponseCall = mapper.toResponseCalls.awaitItem()
-            assertThat(toResponseCall.configuration).isEqualTo(providedState?.commonConfiguration?.googlePay)
+            assertThat(toResponseCall.countryCode).isEqualTo(providedState?.checkoutSessionResponse?.merchantCountry)
             assertThat(toResponseCall.response).isEqualTo(providedUpdateResult.getOrNull())
             assertThat(toResponseCall.paymentDataUpdate.callbackTrigger).isEqualTo(callbackTrigger)
             assertThat(toResponseCall.paymentDataUpdate.shippingAddress).isEqualTo(SHIPPING_ADDRESS)

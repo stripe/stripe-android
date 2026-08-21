@@ -8,14 +8,13 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
 
 @OptIn(CheckoutSessionPreview::class)
 internal interface CheckoutGooglePayPaymentDataUpdateMapper {
     fun toResponse(
-        configuration: PaymentSheet.GooglePayConfiguration,
+        countryCode: String?,
         response: CheckoutSessionResponse,
         paymentDataUpdate: GooglePayPaymentDataUpdate,
     ): GooglePayPaymentDataUpdateResponse
@@ -26,7 +25,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapper @Inject construct
     private val context: Context,
 ) : CheckoutGooglePayPaymentDataUpdateMapper {
     override fun toResponse(
-        configuration: PaymentSheet.GooglePayConfiguration,
+        countryCode: String?,
         response: CheckoutSessionResponse,
         paymentDataUpdate: GooglePayPaymentDataUpdate
     ): GooglePayPaymentDataUpdateResponse {
@@ -36,7 +35,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapper @Inject construct
             newTransactionInfo = GooglePayJsonFactory.TransactionInfo(
                 currencyCode = response.currency.uppercase(),
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
-                countryCode = configuration.countryCode.takeIf { it.isNotEmpty() },
+                countryCode = countryCode?.takeIf { it.isNotEmpty() },
                 transactionId = response.stripeIntent()?.id,
                 totalPrice = response.totalSummary?.totalAmountDue ?: response.amount,
                 totalPriceLabel = context.getString(R.string.stripe_google_pay_total),
