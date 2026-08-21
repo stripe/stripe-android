@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
 @OptIn(
@@ -22,11 +23,11 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.linkConfiguration.collectMissingBillingDetailsForExistingPaymentMethods).isTrue()
         assertThat(state.linkConfiguration.disallowFundingSourceCreation).isEmpty()
         assertThat(state.googlePayConfiguration.display).isEqualTo(
-            ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic
+            CheckoutGooglePayConfiguration.Display.Automatic
         )
         assertThat(state.googlePayConfiguration.label).isNull()
         assertThat(state.googlePayConfiguration.buttonType).isEqualTo(
-            ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.Pay
+            PaymentSheet.GooglePayConfiguration.ButtonType.Pay
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).isEmpty()
         assertThat(state.billingDetailsCollectionConfiguration.name).isEqualTo(
@@ -66,11 +67,11 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.linkConfiguration.disallowFundingSourceCreation)
             .containsExactly("card", "bank_account")
         assertThat(state.googlePayConfiguration.display).isEqualTo(
-            ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never
+            CheckoutGooglePayConfiguration.Display.Never
         )
         assertThat(state.googlePayConfiguration.label).isEqualTo("Complete your purchase")
         assertThat(state.googlePayConfiguration.buttonType).isEqualTo(
-            ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.Checkout
+            PaymentSheet.GooglePayConfiguration.ButtonType.Checkout
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).containsExactly("INTERAC")
     }

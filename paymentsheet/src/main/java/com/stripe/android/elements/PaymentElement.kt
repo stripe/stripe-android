@@ -328,18 +328,10 @@ class PaymentElement @Inject internal constructor(
                 Plain
             }
 
-            @Parcelize
-            internal data class State(
-                val display: Display,
-                val label: String?,
-                val buttonType: ButtonType,
-                val additionalEnabledNetworks: List<String>,
-            ) : Parcelable
-
-            internal fun build(): State = State(
-                display = display,
+            internal fun build(): CheckoutGooglePayConfiguration = CheckoutGooglePayConfiguration(
+                display = display.asCheckout(),
                 label = label,
-                buttonType = buttonType,
+                buttonType = buttonType.asCheckout(),
                 additionalEnabledNetworks = additionalEnabledNetworks,
             )
         }
@@ -402,7 +394,7 @@ class PaymentElement @Inject internal constructor(
             val cardBrandAcceptance: CardBrandAcceptance,
             val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
             val appearance: Appearance.State,
-            val googlePayConfiguration: GooglePayConfiguration.State,
+            val googlePayConfiguration: CheckoutGooglePayConfiguration,
             val linkConfiguration: LinkConfiguration.State,
         ) : Parcelable
 

@@ -35,9 +35,9 @@ internal class PaymentElementTest {
     fun `configuration builds default Google Pay values`() {
         val googlePayConfiguration = PaymentElement.Configuration().build().googlePayConfiguration
 
-        assertThat(googlePayConfiguration.display).isEqualTo(GooglePayConfiguration.Display.Automatic)
+        assertThat(googlePayConfiguration.display).isEqualTo(CheckoutGooglePayConfiguration.Display.Automatic)
         assertThat(googlePayConfiguration.label).isNull()
-        assertThat(googlePayConfiguration.buttonType).isEqualTo(GooglePayConfiguration.ButtonType.Pay)
+        assertThat(googlePayConfiguration.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Pay)
         assertThat(googlePayConfiguration.additionalEnabledNetworks).isEmpty()
     }
 
@@ -54,9 +54,10 @@ internal class PaymentElementTest {
             .build()
             .googlePayConfiguration
 
-        assertThat(googlePayConfiguration.display).isEqualTo(GooglePayConfiguration.Display.Never)
+        assertThat(googlePayConfiguration.display).isEqualTo(CheckoutGooglePayConfiguration.Display.Never)
         assertThat(googlePayConfiguration.label).isEqualTo("Complete your purchase")
-        assertThat(googlePayConfiguration.buttonType).isEqualTo(GooglePayConfiguration.ButtonType.Checkout)
+        assertThat(googlePayConfiguration.buttonType)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
         assertThat(googlePayConfiguration.additionalEnabledNetworks).containsExactly("INTERAC")
     }
 

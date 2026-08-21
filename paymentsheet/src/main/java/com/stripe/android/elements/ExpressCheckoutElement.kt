@@ -317,18 +317,10 @@ class ExpressCheckoutElement @Inject internal constructor(
                 Plain
             }
 
-            @Parcelize
-            internal data class State(
-                val display: Display,
-                val label: String?,
-                val buttonType: ButtonType,
-                val additionalEnabledNetworks: List<String>,
-            ) : Parcelable
-
-            internal fun build(): State = State(
-                display = display,
+            internal fun build(): CheckoutGooglePayConfiguration = CheckoutGooglePayConfiguration(
+                display = display.asCheckout(),
                 label = label,
-                buttonType = buttonType,
+                buttonType = buttonType.asCheckout(),
                 additionalEnabledNetworks = additionalEnabledNetworks,
             )
         }
@@ -382,7 +374,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         @Parcelize
         internal data class State(
             val linkConfiguration: LinkConfiguration.State,
-            val googlePayConfiguration: GooglePayConfiguration.State,
+            val googlePayConfiguration: CheckoutGooglePayConfiguration,
             val shippingAddressRequired: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
             val paymentMethodOrder: List<PaymentMethodType>,
