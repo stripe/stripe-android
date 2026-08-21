@@ -201,11 +201,6 @@ internal class CheckoutControllerStateHolderTest {
         collectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration = CheckoutCommonConfigurationFactory(appName = "Example, Inc.").create(
-            configuration = CheckoutController.Configuration().build(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            collectedDetails = CheckoutCollectedDetails(email = null),
-        ),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,

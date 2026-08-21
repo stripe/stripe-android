@@ -108,7 +108,6 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
-            commonConfiguration = commonConfiguration,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
