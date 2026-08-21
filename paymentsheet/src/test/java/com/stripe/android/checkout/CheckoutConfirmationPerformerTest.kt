@@ -36,15 +36,13 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Test
     fun `confirm does nothing when there is no selection`() = runScenario(
-        state = googlePayState(paymentSelection = null),
+        state = CheckoutControllerStateFactory.create(paymentSelection = null),
     ) {
         performer.confirm()
     }
 
     @Test
     fun `confirm does nothing when the selection cannot be converted to a confirmation option`() = runScenario(
-        // Google Pay is selected but the checkout session has no merchant country, so toConfirmationOption
-        // returns null and there is nothing to confirm.
         state = CheckoutControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
             paymentSelection = PaymentSelection.GooglePay,
@@ -68,16 +66,7 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Test
     fun `confirm starts confirmation with a Link option`() = runScenario(
-        state = CheckoutControllerStateFactory.create(
-            paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                linkState = LinkState(
-                    configuration = LinkTestUtils.createLinkConfiguration(),
-                    loginState = LinkState.LoginState.NeedsVerification,
-                    signupMode = null,
-                ),
-            ),
-        ),
+        state = linkState(),
     ) {
         performer.confirm()
 
@@ -105,6 +94,19 @@ internal class CheckoutConfirmationPerformerTest {
         return CheckoutControllerStateFactory.create(
             paymentSelection = paymentSelection,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
+        )
+    }
+
+    private fun linkState(): CheckoutControllerState {
+        return CheckoutControllerStateFactory.create(
+            paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                linkState = LinkState(
+                    configuration = LinkTestUtils.createLinkConfiguration(),
+                    loginState = LinkState.LoginState.NeedsVerification,
+                    signupMode = null,
+                ),
+            ),
         )
     }
 
@@ -139,6 +141,7 @@ internal class CheckoutConfirmationPerformerTest {
             stateHolder = stateHolder,
             operationCoordinator = operationCoordinator,
             analyticsPerformer = analyticsPerformer,
+            commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Test App"),
             statusBarColor = statusBarColor,
             viewModelScope = backgroundScope,
         )
