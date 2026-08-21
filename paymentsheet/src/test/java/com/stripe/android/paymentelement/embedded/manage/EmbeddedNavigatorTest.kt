@@ -431,6 +431,13 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `HorizontalPaymentOptions isPerformingNetworkOperation returns processing state`() {
+        val screen = createHorizontalPaymentOptionsScreen(isProcessing = true)
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
+    }
+
+    @Test
     fun `initial back stack with a form on top starts on the form and can go back`() = runTest {
         val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
         val eventReporter = FakeEventReporter()
@@ -501,6 +508,13 @@ internal class EmbeddedNavigatorTest {
     fun `PaymentOptions isPerformingNetworkOperation returns false`() {
         val screen = createPaymentOptionsScreen()
         assertThat(screen.isPerformingNetworkOperation().value).isFalse()
+    }
+
+    @Test
+    fun `PaymentOptions isPerformingNetworkOperation returns processing state`() {
+        val screen = createPaymentOptionsScreen(isProcessing = true)
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
     }
 
     @Test
@@ -710,6 +724,7 @@ internal class EmbeddedNavigatorTest {
 
     private fun createPaymentOptionsScreen(
         isLiveMode: Boolean = true,
+        isProcessing: Boolean = false,
     ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
         return EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = FakePaymentMethodVerticalLayoutInteractor.create(),
@@ -719,7 +734,7 @@ internal class EmbeddedNavigatorTest {
                     primaryButtonLabel = "".resolvableString,
                     isEnabled = false,
                     processingState = PrimaryButtonProcessingState.Idle(null),
-                    isProcessing = false,
+                    isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
                     savedPaymentSelectionToConfirm = null,
                 )
@@ -731,6 +746,7 @@ internal class EmbeddedNavigatorTest {
     private fun createHorizontalPaymentOptionsScreen(
         interactor: AddPaymentMethodInteractor =
             FakeAddPaymentMethodInteractor(FakeAddPaymentMethodInteractor.createState()),
+        isProcessing: Boolean = false,
     ): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = interactor,
@@ -740,7 +756,7 @@ internal class EmbeddedNavigatorTest {
                     primaryButtonLabel = "".resolvableString,
                     isEnabled = false,
                     processingState = PrimaryButtonProcessingState.Idle(null),
-                    isProcessing = false,
+                    isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
                     savedPaymentSelectionToConfirm = null,
                 )
