@@ -329,10 +329,9 @@ class PaymentElement @Inject internal constructor(
             }
 
             internal fun build(): CheckoutGooglePayConfiguration = CheckoutGooglePayConfiguration(
-                // TODO-codex: need to map the display and buttontype types to the CheckoutGPC type
-                display = display,
+                display = display.asCheckout(),
                 label = label,
-                buttonType = buttonType,
+                buttonType = buttonType.asCheckout(),
                 additionalEnabledNetworks = additionalEnabledNetworks,
             )
         }

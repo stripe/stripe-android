@@ -5,7 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.asGooglePayButtonType
-import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.ui.LinkButtonState
@@ -75,7 +75,7 @@ internal sealed interface ExpressButton {
         companion object {
             fun create(
                 paymentMethodMetadata: PaymentMethodMetadata,
-                googlePayConfiguration: ExpressCheckoutElement.Configuration.GooglePayConfiguration.State,
+                googlePayConfiguration: CheckoutGooglePayConfiguration,
                 shippingAddressRequired: Boolean,
             ): GooglePay {
                 return GooglePay(

@@ -1,13 +1,11 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration as EceGooglePayConfiguration
-import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration as PeGooglePayConfiguration
 
-// TODO-codex: replace this file with just a mapping of CheckoutGooglePayConfiguration to the PaymentSheet type that both ECE and PE can use now.
 @OptIn(CheckoutSessionPreview::class)
-internal fun EceGooglePayConfiguration.State.asPaymentSheet(
+internal fun CheckoutGooglePayConfiguration.asPaymentSheet(
     merchantCountry: String,
     liveMode: Boolean,
     isDebugBuild: Boolean,
@@ -24,52 +22,14 @@ internal fun EceGooglePayConfiguration.State.asPaymentSheet(
 )
 
 @OptIn(CheckoutSessionPreview::class)
-private fun EceGooglePayConfiguration.ButtonType.asPaymentSheet():
+private fun CheckoutGooglePayConfiguration.ButtonType.asPaymentSheet():
     PaymentSheet.GooglePayConfiguration.ButtonType = when (this) {
-    EceGooglePayConfiguration.ButtonType.Buy ->
-        PaymentSheet.GooglePayConfiguration.ButtonType.Buy
-    EceGooglePayConfiguration.ButtonType.Book ->
-        PaymentSheet.GooglePayConfiguration.ButtonType.Book
-    EceGooglePayConfiguration.ButtonType.Checkout ->
-        PaymentSheet.GooglePayConfiguration.ButtonType.Checkout
-    EceGooglePayConfiguration.ButtonType.Donate ->
-        PaymentSheet.GooglePayConfiguration.ButtonType.Donate
-    EceGooglePayConfiguration.ButtonType.Order ->
-        PaymentSheet.GooglePayConfiguration.ButtonType.Order
-    EceGooglePayConfiguration.ButtonType.Pay ->
-        PaymentSheet.GooglePayConfiguration.ButtonType.Pay
-    EceGooglePayConfiguration.ButtonType.Subscribe ->
-        PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe
-    EceGooglePayConfiguration.ButtonType.Plain ->
-        PaymentSheet.GooglePayConfiguration.ButtonType.Plain
-}
-
-@OptIn(CheckoutSessionPreview::class)
-internal fun PeGooglePayConfiguration.State.asPaymentSheet(
-    merchantCountry: String,
-    liveMode: Boolean,
-    isDebugBuild: Boolean,
-): PaymentSheet.GooglePayConfiguration = PaymentSheet.GooglePayConfiguration(
-    environment = if (liveMode && !isDebugBuild) {
-        PaymentSheet.GooglePayConfiguration.Environment.Production
-    } else {
-        PaymentSheet.GooglePayConfiguration.Environment.Test
-    },
-    countryCode = merchantCountry,
-    label = label,
-    buttonType = buttonType.asPaymentSheet(),
-    additionalEnabledNetworks = additionalEnabledNetworks,
-)
-
-@OptIn(CheckoutSessionPreview::class)
-private fun PeGooglePayConfiguration.ButtonType.asPaymentSheet():
-    PaymentSheet.GooglePayConfiguration.ButtonType = when (this) {
-    PeGooglePayConfiguration.ButtonType.Buy -> PaymentSheet.GooglePayConfiguration.ButtonType.Buy
-    PeGooglePayConfiguration.ButtonType.Book -> PaymentSheet.GooglePayConfiguration.ButtonType.Book
-    PeGooglePayConfiguration.ButtonType.Checkout -> PaymentSheet.GooglePayConfiguration.ButtonType.Checkout
-    PeGooglePayConfiguration.ButtonType.Donate -> PaymentSheet.GooglePayConfiguration.ButtonType.Donate
-    PeGooglePayConfiguration.ButtonType.Order -> PaymentSheet.GooglePayConfiguration.ButtonType.Order
-    PeGooglePayConfiguration.ButtonType.Pay -> PaymentSheet.GooglePayConfiguration.ButtonType.Pay
-    PeGooglePayConfiguration.ButtonType.Subscribe -> PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe
-    PeGooglePayConfiguration.ButtonType.Plain -> PaymentSheet.GooglePayConfiguration.ButtonType.Plain
+    CheckoutGooglePayConfiguration.ButtonType.Buy -> PaymentSheet.GooglePayConfiguration.ButtonType.Buy
+    CheckoutGooglePayConfiguration.ButtonType.Book -> PaymentSheet.GooglePayConfiguration.ButtonType.Book
+    CheckoutGooglePayConfiguration.ButtonType.Checkout -> PaymentSheet.GooglePayConfiguration.ButtonType.Checkout
+    CheckoutGooglePayConfiguration.ButtonType.Donate -> PaymentSheet.GooglePayConfiguration.ButtonType.Donate
+    CheckoutGooglePayConfiguration.ButtonType.Order -> PaymentSheet.GooglePayConfiguration.ButtonType.Order
+    CheckoutGooglePayConfiguration.ButtonType.Pay -> PaymentSheet.GooglePayConfiguration.ButtonType.Pay
+    CheckoutGooglePayConfiguration.ButtonType.Subscribe -> PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe
+    CheckoutGooglePayConfiguration.ButtonType.Plain -> PaymentSheet.GooglePayConfiguration.ButtonType.Plain
 }

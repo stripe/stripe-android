@@ -1,6 +1,7 @@
 @file:OptIn(CheckoutSessionPreview::class)
 package com.stripe.android.elements.ece
 
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -26,7 +27,7 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
                         googlePayConfiguration = expressCheckoutElementConfiguration.googlePayConfiguration,
                     ).takeIf {
                     expressCheckoutElementConfiguration.googlePayConfiguration.display ==
-                        ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic
+                        CheckoutGooglePayConfiguration.Display.Automatic
                 }
                 WalletType.Link -> ExpressButtonType.Link.takeIf {
                     expressCheckoutElementConfiguration.linkConfiguration.display ==

@@ -1,19 +1,17 @@
 package com.stripe.android.checkout
 
-import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
-import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 
-@OptIn(CheckoutSessionPreview::class)
-internal fun GooglePayConfiguration.ButtonType.asGooglePayButtonType(): GooglePayButtonType {
+internal fun CheckoutGooglePayConfiguration.ButtonType.asGooglePayButtonType(): GooglePayButtonType {
     return when (this) {
-        GooglePayConfiguration.ButtonType.Buy -> GooglePayButtonType.Buy
-        GooglePayConfiguration.ButtonType.Book -> GooglePayButtonType.Book
-        GooglePayConfiguration.ButtonType.Checkout -> GooglePayButtonType.Checkout
-        GooglePayConfiguration.ButtonType.Donate -> GooglePayButtonType.Donate
-        GooglePayConfiguration.ButtonType.Order -> GooglePayButtonType.Order
-        GooglePayConfiguration.ButtonType.Pay -> GooglePayButtonType.Pay
-        GooglePayConfiguration.ButtonType.Subscribe -> GooglePayButtonType.Subscribe
-        GooglePayConfiguration.ButtonType.Plain -> GooglePayButtonType.Plain
+        CheckoutGooglePayConfiguration.ButtonType.Buy -> GooglePayButtonType.Buy
+        CheckoutGooglePayConfiguration.ButtonType.Book -> GooglePayButtonType.Book
+        CheckoutGooglePayConfiguration.ButtonType.Checkout -> GooglePayButtonType.Checkout
+        CheckoutGooglePayConfiguration.ButtonType.Donate -> GooglePayButtonType.Donate
+        CheckoutGooglePayConfiguration.ButtonType.Order -> GooglePayButtonType.Order
+        CheckoutGooglePayConfiguration.ButtonType.Pay -> GooglePayButtonType.Pay
+        CheckoutGooglePayConfiguration.ButtonType.Subscribe -> GooglePayButtonType.Subscribe
+        CheckoutGooglePayConfiguration.ButtonType.Plain -> GooglePayButtonType.Plain
     }
 }

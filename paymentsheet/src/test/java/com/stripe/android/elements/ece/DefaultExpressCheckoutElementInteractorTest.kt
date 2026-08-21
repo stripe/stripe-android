@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
@@ -198,7 +199,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
-        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration(),
+        googlePayConfiguration: CheckoutGooglePayConfiguration = createGooglePayConfiguration(),
         availableExpressButtonTypes: List<ExpressButtonType> = paymentMethodMetadata.availableWallets.map {
             when (it) {
                 WalletType.Link -> ExpressButtonType.Link
@@ -273,7 +274,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         val confirmationPerformer: FakeExpressCheckoutElementConfirmationPerformer,
         val linkAccountHolder: LinkAccountHolder,
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val googlePayConfiguration: GooglePayConfiguration.State,
+        val googlePayConfiguration: CheckoutGooglePayConfiguration,
         private val interactorFactory: () -> DefaultExpressCheckoutElementInteractor,
     ) {
         fun createInteractor(): DefaultExpressCheckoutElementInteractor {
@@ -284,7 +285,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     private fun createGooglePayConfiguration(
         buttonType: GooglePayConfiguration.ButtonType = GooglePayConfiguration.ButtonType.Pay,
         additionalEnabledNetworks: List<String> = emptyList(),
-    ): GooglePayConfiguration.State {
+    ): CheckoutGooglePayConfiguration {
         return GooglePayConfiguration()
             .buttonType(buttonType)
             .additionalEnabledNetworks(additionalEnabledNetworks)
