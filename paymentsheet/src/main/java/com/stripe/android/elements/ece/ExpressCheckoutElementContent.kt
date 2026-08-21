@@ -109,9 +109,8 @@ private fun calculateVisibleButtonCount(
         return buttonCount
     }
 
-    return (maxColumns.toLong() * maxRows.toLong())
-        .coerceAtMost(buttonCount.toLong())
-        .toInt()
+    val buttonCapacity = maxColumns.toLong() * maxRows.toLong()
+    return minOf(buttonCapacity, buttonCount.toLong()).toInt()
 }
 
 private fun calculateColumnCount(
@@ -126,7 +125,7 @@ private fun calculateColumnCount(
     val configuredColumnCount = maxColumns
         ?: maxRows?.let { (buttonCount + it - 1) / it }
         ?: 1
-    return configuredColumnCount.coerceIn(1, buttonCount)
+    return minOf(configuredColumnCount, buttonCount)
 }
 
 @Composable
