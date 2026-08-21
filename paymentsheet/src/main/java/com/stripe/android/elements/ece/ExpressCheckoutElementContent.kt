@@ -21,6 +21,7 @@ import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.uicore.utils.collectAsState
+import kotlin.math.min
 
 @Composable
 internal fun ExpressCheckoutElementContent(
@@ -56,13 +57,19 @@ internal fun ExpressCheckoutElementContent(
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
     }
 
-    val columnCount = calculateColumnCount(
+    val visibleButtonCount = calculateVisibleButtonCount(
         buttonCount = state.expressButtons.size,
         maxColumns = state.buttonLayout.maxColumns,
         maxRows = state.buttonLayout.maxRows,
     )
-    val allButtonRows = state.expressButtons.chunked(columnCount)
-    val buttonRows = state.buttonLayout.maxRows?.let(allButtonRows::take) ?: allButtonRows
+
+    val columnCount = calculateColumnCount(
+        buttonCount = visibleButtonCount,
+        maxColumns = state.buttonLayout.maxColumns,
+        maxRows = state.buttonLayout.maxRows,
+    )
+
+    val visibleButtons = state.expressButtons.take(visibleButtonCount)
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val buttonWidth = ((maxWidth - ButtonSpacing * (columnCount - 1)) / columnCount)
@@ -70,7 +77,7 @@ internal fun ExpressCheckoutElementContent(
         Column(
             verticalArrangement = Arrangement.spacedBy(ButtonSpacing),
         ) {
-            buttonRows.forEach { rowButtons ->
+            visibleButtons.chunked(columnCount).forEach { rowButtons ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(
@@ -95,6 +102,23 @@ internal fun ExpressCheckoutElementContent(
 
 private val ButtonSpacing = 12.dp
 
+private fun calculateVisibleButtonCount(
+    buttonCount: Int,
+    maxColumns: Int?,
+    maxRows: Int?,
+): Int {
+    if (maxColumns == null || maxRows == null) {
+        return buttonCount
+    }
+
+    val displayableInGrid = maxRows * maxColumns
+
+    return min(
+        displayableInGrid,
+        buttonCount,
+    )
+}
+
 private fun calculateColumnCount(
     buttonCount: Int,
     maxColumns: Int?,
@@ -104,10 +128,14 @@ private fun calculateColumnCount(
         return 1
     }
 
-    val configuredColumnCount = maxColumns
-        ?: maxRows?.let { (buttonCount + it - 1) / it }
-        ?: 1
-    return minOf(configuredColumnCount, buttonCount)
+    return if (maxColumns != null) {
+        min(maxColumns, buttonCount)
+    } else if (maxRows != null) {
+        val numRows = min(maxRows, buttonCount)
+        (buttonCount + numRows - 1) / numRows
+    } else {
+        1
+    }
 }
 
 @Composable
