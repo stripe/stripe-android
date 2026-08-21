@@ -7,28 +7,27 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 
 internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
     val selectionTurbine = Turbine<PaymentSelection.Saved?>()
 
-    override val state: StateFlow<SheetActivityStateHolder.State>
-        get() = stateFlowOf(
-            SheetActivityStateHolder.State(
-                primaryButtonLabel = "".resolvableString,
-                isEnabled = false,
-                processingState = PrimaryButtonProcessingState.Idle(null),
-                isProcessing = false,
-                shouldDisplayLockIcon = true,
-                savedPaymentSelectionToConfirm = null,
-            )
+    override val state = MutableStateFlow(
+        SheetActivityStateHolder.State(
+            primaryButtonLabel = "".resolvableString,
+            isEnabled = false,
+            processingState = PrimaryButtonProcessingState.Idle(null),
+            isProcessing = false,
+            shouldDisplayLockIcon = true,
+            savedPaymentSelectionToConfirm = null,
         )
+    )
 
     val resultTurbine = Turbine<EmbeddedActivityResult>()
     val updateErrorTurbine = Turbine<ResolvableString?>()
+    val updateProcessingTurbine = Turbine<Boolean>()
 
     override val result: SharedFlow<EmbeddedActivityResult> = MutableSharedFlow<EmbeddedActivityResult>()
 
@@ -44,6 +43,10 @@ internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
         updateErrorTurbine.add(error)
     }
 
+    override fun updateProcessing(isProcessing: Boolean) {
+        updateProcessingTurbine.add(isProcessing)
+    }
+
     override fun setResult(result: EmbeddedActivityResult) {
         resultTurbine.add(result)
     }
@@ -55,5 +58,6 @@ internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
     fun validate() {
         resultTurbine.ensureAllEventsConsumed()
         updateErrorTurbine.ensureAllEventsConsumed()
+        updateProcessingTurbine.ensureAllEventsConsumed()
     }
 }
