@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration as EceGooglePayConfiguration
 import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration as PeGooglePayConfiguration
 
+// TODO-codex: replace this file with just a mapping of CheckoutGooglePayConfiguration to the PaymentSheet type that both ECE and PE can use now.
 @OptIn(CheckoutSessionPreview::class)
 internal fun EceGooglePayConfiguration.State.asPaymentSheet(
     merchantCountry: String,

@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
+// TODO-codex: update ECE to use CheckoutGPC like PE was updated
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ExpressCheckoutElement @Inject internal constructor(
