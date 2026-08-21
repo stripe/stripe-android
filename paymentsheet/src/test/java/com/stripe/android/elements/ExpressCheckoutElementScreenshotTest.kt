@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.ece.ExpressButton
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractorStateFactory
@@ -50,6 +51,32 @@ internal class ExpressCheckoutElementScreenshotTest {
                         ExpressCheckoutElementInteractorStateFactory.create(
                             buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
                                 .maxRows(1)
+                                .build(),
+                        )
+                    ),
+                ),
+                googlePayButton = { _, _ -> FakeGooglePayButton() },
+            )
+        }
+    }
+
+    @Test
+    fun rendersThreeButtonsInTwoByTwoGrid() {
+        val defaultState = ExpressCheckoutElementInteractorStateFactory.create()
+        val thirdButton = defaultState.expressButtons
+            .filterIsInstance<ExpressButton.GooglePay>()
+            .single()
+            .copy(shippingAddressRequired = true)
+
+        paparazziRule.snapshot {
+            ExpressCheckoutElementContent(
+                interactor = FakeExpressCheckoutElementInteractor(
+                    state = stateFlowOf(
+                        defaultState.copy(
+                            expressButtons = defaultState.expressButtons + thirdButton,
+                            buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                                .maxColumns(2)
+                                .maxRows(2)
                                 .build(),
                         )
                     ),
