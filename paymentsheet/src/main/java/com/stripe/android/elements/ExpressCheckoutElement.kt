@@ -332,6 +332,71 @@ class ExpressCheckoutElement @Inject internal constructor(
                 additionalEnabledNetworks = additionalEnabledNetworks,
             )
         }
+
+        /** Appearance configuration for the Express Checkout Element. */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @CheckoutSessionPreview
+        class Appearance {
+            private var buttonLayout: ButtonLayout = ButtonLayout()
+
+            /** Determines how express buttons are arranged. */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @CheckoutSessionPreview
+            class ButtonLayout {
+                private var maxColumns: Int? = null
+                private var maxRows: Int? = null
+
+                /**
+                 * Sets the maximum number of columns the Express Checkout Element can use.
+                 *
+                 * Defaults to null, meaning unlimited.
+                 */
+                fun maxColumns(maxColumns: Int?): ButtonLayout = apply {
+                    require(maxColumns == null || maxColumns > 0) {
+                        "maxColumns must be greater than zero or null."
+                    }
+                    this.maxColumns = maxColumns
+                }
+
+                /**
+                 * Sets the maximum number of rows the Express Checkout Element can use.
+                 *
+                 * Defaults to null, meaning unlimited.
+                 */
+                fun maxRows(maxRows: Int?): ButtonLayout = apply {
+                    require(maxRows == null || maxRows > 0) {
+                        "maxRows must be greater than zero or null."
+                    }
+                    this.maxRows = maxRows
+                }
+
+                @Parcelize
+                internal data class State(
+                    val maxColumns: Int?,
+                    val maxRows: Int?,
+                ) : Parcelable
+
+                internal fun build(): State = State(
+                    maxColumns = maxColumns,
+                    maxRows = maxRows,
+                )
+            }
+
+            /** Configures how payment methods are arranged within the Express Checkout Element. */
+            fun buttonLayout(buttonLayout: ButtonLayout): Appearance = apply {
+                this.buttonLayout = buttonLayout
+            }
+
+            @Parcelize
+            internal data class State(
+                val buttonLayout: ButtonLayout.State,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                buttonLayout = buttonLayout.build(),
+            )
+        }
+
         private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
@@ -339,6 +404,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
         private var paymentMethodOrder: List<PaymentMethod> = emptyList()
+        private var appearance: Appearance = Appearance()
 
         /** Sets the configuration for Link. */
         fun linkConfiguration(
@@ -379,6 +445,11 @@ class ExpressCheckoutElement @Inject internal constructor(
             this.paymentMethodOrder = paymentMethodOrder
         }
 
+        /** Sets the appearance of the Express Checkout Element. */
+        fun appearance(appearance: Appearance): Configuration = apply {
+            this.appearance = appearance
+        }
+
         @Parcelize
         internal data class State(
             val linkConfiguration: LinkConfiguration.State,
@@ -386,6 +457,7 @@ class ExpressCheckoutElement @Inject internal constructor(
             val shippingAddressRequired: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
             val paymentMethodOrder: List<PaymentMethodType>,
+            val appearance: Appearance.State,
         ) : Parcelable
 
         internal enum class PaymentMethodType {
@@ -405,6 +477,7 @@ class ExpressCheckoutElement @Inject internal constructor(
                     else -> error("Unsupported payment method: ${paymentMethod::class.java.name}")
                 }
             },
+            appearance = appearance.build(),
         )
     }
 }

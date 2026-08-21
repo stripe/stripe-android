@@ -39,6 +39,8 @@ internal class ExpressCheckoutElementTest {
             ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
         )
         assertThat(state.paymentMethodOrder).isEmpty()
+        assertThat(state.appearance.buttonLayout.maxColumns).isNull()
+        assertThat(state.appearance.buttonLayout.maxRows).isNull()
     }
 
     @Test
@@ -128,5 +130,40 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.billingDetailsCollectionConfiguration.address).isEqualTo(
             ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         )
+    }
+
+    @Test
+    fun `configuration builds requested appearance`() {
+        val state = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .buttonLayout(
+                        ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                            .maxColumns(2)
+                            .maxRows(1)
+                    )
+            )
+            .build()
+
+        assertThat(state.appearance.buttonLayout.maxColumns).isEqualTo(2)
+        assertThat(state.appearance.buttonLayout.maxRows).isEqualTo(1)
+    }
+
+    @Test
+    fun `button layout rejects non-positive maximum columns`() {
+        val exception = runCatching {
+            ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxColumns(0)
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
+    fun `button layout rejects non-positive maximum rows`() {
+        val exception = runCatching {
+            ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxRows(-1)
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
     }
 }
