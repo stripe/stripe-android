@@ -227,6 +227,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             isLiveMode = true,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
         )
         val navigator = EmbeddedNavigator(
             coroutineScope = testScope,

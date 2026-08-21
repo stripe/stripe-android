@@ -243,6 +243,34 @@ class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
+    fun `disabled primary button click requests form validation`() = testScenario {
+        stateHolder.validationRequested.test {
+            stateHolder.onPrimaryButtonDisabledClick()
+
+            assertThat(awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `disabled primary button click invokes US bank validation`() = testScenario {
+        var validationRequested = false
+        stateHolder.updatePrimaryButton {
+            PrimaryButton.UIState(
+                label = "Continue".resolvableString,
+                canClickWhileDisabled = true,
+                onClick = {},
+                onDisabledClick = { validationRequested = true },
+                enabled = false,
+                lockVisible = false,
+            )
+        }
+
+        stateHolder.onPrimaryButtonDisabledClick()
+
+        assertThat(validationRequested).isTrue()
+    }
+
+    @Test
     fun `updatePrimaryButton updates primary button state`() = testScenario {
         stateHolder.state.test {
             awaitAndVerifyInitialState()

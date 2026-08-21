@@ -233,6 +233,7 @@ internal class FormActivityScreenShotTest {
                     state = state.copy(isEnabled = enabled),
                     updateSelection = {},
                     savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
+                    onPrimaryButtonDisabledClick = {},
                 )
             }
         }

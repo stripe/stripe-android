@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -9,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
@@ -38,6 +40,7 @@ internal fun FormScreenContent(
     state: SheetActivityStateHolder.State,
     updateSelection: (PaymentSelection.Saved) -> Unit,
     savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
+    onPrimaryButtonDisabledClick: () -> Unit,
 ) {
     val interactorState by interactor.state.collectAsState()
 
@@ -63,6 +66,7 @@ internal fun FormScreenContent(
         FormActivityPrimaryButton(
             state = state,
             onClick = onClick,
+            onDisabledClick = onPrimaryButtonDisabledClick,
             onProcessingCompleted = onProcessingCompleted,
         )
         PaymentSheetContentPadding()
@@ -100,8 +104,9 @@ internal fun FormActivityError(
 @Composable
 internal fun FormActivityPrimaryButton(
     state: SheetActivityStateHolder.State,
-    onProcessingCompleted: () -> Unit = {},
+    onDisabledClick: () -> Unit,
     onClick: () -> Unit,
+    onProcessingCompleted: () -> Unit = {},
 ) {
     Box(
         modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
@@ -115,6 +120,15 @@ internal fun FormActivityPrimaryButton(
             onProcessingCompleted = onProcessingCompleted,
             processingState = state.processingState
         )
+        if (!state.isEnabled && !state.isProcessing) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures { onDisabledClick() }
+                    }
+            )
+        }
     }
 }
 
