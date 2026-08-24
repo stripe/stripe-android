@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -140,8 +141,7 @@ internal interface CustomerSheetTestHelper {
                     },
                     stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
                         override fun create(
-                            publishableKey: () -> String,
-                            stripeAccountId: () -> String?,
+                            apiConfigurationProvider: () -> ApiConfiguration.State,
                             statusBarColor: Int?,
                             includePaymentSheetNextHandlers: Boolean,
                             hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
