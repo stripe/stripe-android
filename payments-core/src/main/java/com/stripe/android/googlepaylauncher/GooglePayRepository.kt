@@ -9,6 +9,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -56,7 +57,8 @@ internal class DefaultGooglePayRepository(
     private val logger: Logger = Logger.noop(),
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter,
-    private val additionalEnabledNetworks: List<String> = emptyList()
+    private val additionalEnabledNetworks: List<String> = emptyList(),
+    private val apiConfiguration: ApiConfiguration.State? = null
 ) : GooglePayRepository {
 
     @Inject
@@ -82,7 +84,9 @@ internal class DefaultGooglePayRepository(
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(
-        GooglePayConfig(context),
+        apiConfiguration?.let {
+            GooglePayConfig(it.publishableKey, it.stripeAccountId)
+        } ?: GooglePayConfig(context),
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         additionalEnabledNetworks = additionalEnabledNetworks

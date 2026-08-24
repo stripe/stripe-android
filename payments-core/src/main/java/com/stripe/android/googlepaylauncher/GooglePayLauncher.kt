@@ -87,6 +87,7 @@ class GooglePayLauncher internal constructor(
                 allowCreditCards = config.allowCreditCards,
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
+                    publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
@@ -94,9 +95,9 @@ class GooglePayLauncher internal constructor(
             )
         },
         PaymentAnalyticsRequestFactory(
-            activity,
-            PaymentConfiguration.getInstance(activity).publishableKey,
-            setOf(PRODUCT_USAGE)
+            context = activity,
+            publishableKeyProvider = { PaymentConfiguration.getInstance(activity).publishableKey },
+            defaultProductUsageTokens = setOf(PRODUCT_USAGE)
         ),
         DefaultAnalyticsRequestExecutor()
     )
@@ -131,15 +132,16 @@ class GooglePayLauncher internal constructor(
                 allowCreditCards = config.allowCreditCards,
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
+                    publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 cardFundingFilter = DefaultCardFundingFilter
             )
         },
         PaymentAnalyticsRequestFactory(
-            activity,
-            PaymentConfiguration.getInstance(activity).publishableKey,
-            setOf(PRODUCT_USAGE)
+            context = activity,
+            publishableKeyProvider = { PaymentConfiguration.getInstance(activity).publishableKey },
+            defaultProductUsageTokens = setOf(PRODUCT_USAGE)
         ),
         DefaultAnalyticsRequestExecutor()
     )
@@ -179,7 +181,8 @@ class GooglePayLauncher internal constructor(
                 allowCreditCards = config.allowCreditCards,
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
-                    productUsage = setOf(PRODUCT_USAGE)
+                    publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                    productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
                 cardFundingFilter = DefaultCardFundingFilter
@@ -187,7 +190,7 @@ class GooglePayLauncher internal constructor(
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = fragment.requireContext(),
-            publishableKey = PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
+            publishableKeyProvider = { PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey },
             defaultProductUsageTokens = setOf(PRODUCT_USAGE),
         ),
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
@@ -418,16 +421,17 @@ fun rememberGooglePayLauncher(
                     allowCreditCards = config.allowCreditCards,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
-                        productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
+                        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                        productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE),
                     ),
                     additionalEnabledNetworks = config.additionalEnabledNetworks,
                     cardFundingFilter = DefaultCardFundingFilter
                 )
             },
             PaymentAnalyticsRequestFactory(
-                context,
-                PaymentConfiguration.getInstance(context).publishableKey,
-                setOf(GooglePayLauncher.PRODUCT_USAGE)
+                context = context,
+                publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                defaultProductUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE)
             ),
             DefaultAnalyticsRequestExecutor()
         )
