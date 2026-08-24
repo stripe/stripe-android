@@ -586,8 +586,6 @@ internal class LinkActivityViewModel @Inject constructor(
                     .create(
                         configuration = args.configuration,
                         paymentMethodMetadata = args.paymentMethodMetadata,
-                        publishableKeyProvider = { args.publishableKey },
-                        stripeAccountIdProvider = { args.stripeAccountId },
                         paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                         context = app,
                         savedStateHandle = handle,
