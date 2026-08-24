@@ -54,7 +54,14 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         val shippingAddressElement = presenter.shippingAddressElement()
 
         observeSessionComplete()
+        setCheckoutContent(presenter, paymentElement, shippingAddressElement)
+    }
 
+    private fun setCheckoutContent(
+        presenter: CheckoutPresenter,
+        paymentElement: PaymentElement,
+        shippingAddressElement: ShippingAddressElement,
+    ) {
         setContent {
             val status by viewModel.status.collectAsState()
             val confirmationResult by viewModel.confirmationResult.collectAsState()
@@ -65,22 +72,43 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                         status = status,
                         presenter = presenter,
                         paymentElement = paymentElement,
+                        confirmationResult = confirmationResult,
                         onScenarioSelected = viewModel::start,
                     )
                 },
                 bottomBarContent = {
                     val configured = status as? CheckoutControllerExampleViewModel.Status.Configured
                     if (configured != null) {
+                        val isUpdating by viewModel.controller.isUpdating.collectAsState()
+                        val isShippingScenario =
+                            configured.scenario == CheckoutControllerExampleScenario.ShippingTax
+                        val isComplete =
+                            confirmationResult is CheckoutControllerExampleViewModel.ConfirmationResult.Completed
+                        val canEdit = configured.session != null && !isUpdating && !isComplete
+                        val canConfirm = if (isShippingScenario) {
+                            configured.session?.let { session ->
+                                session.shippingAddress != null &&
+                                    session.paymentOptionDisplayData != null &&
+                                    session.tax.status == Session.Tax.Status.Ready &&
+                                    !isUpdating &&
+                                    !isComplete
+                            } == true
+                        } else {
+                            !isUpdating && !isComplete
+                        }
                         if (configured.scenario == CheckoutControllerExampleScenario.ShippingTax) {
                             ShippingAddressButton(
                                 shippingAddressElement = shippingAddressElement,
-                                enabled = configured.session != null,
+                                enabled = canEdit,
                             )
                         }
                         ConfirmationControls(
+                            scenario = configured.scenario,
                             paymentOption = configured.session?.paymentOptionDisplayData,
                             confirmationResult = confirmationResult,
                             onSelectPaymentMethod = paymentElement::present,
+                            selectPaymentMethodEnabled = canEdit,
+                            confirmEnabled = canConfirm,
                             onConfirm = {
                                 viewModel.clearConfirmationResult()
                                 presenter.confirm()
@@ -113,7 +141,7 @@ private fun ShippingAddressButton(
         enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text("Add Shipping Address")
+        Text("1. Add Shipping Address")
     }
     Spacer(modifier = Modifier.height(8.dp))
 }
@@ -123,6 +151,7 @@ private fun CheckoutContent(
     status: CheckoutControllerExampleViewModel.Status,
     presenter: CheckoutPresenter,
     paymentElement: PaymentElement,
+    confirmationResult: CheckoutControllerExampleViewModel.ConfirmationResult?,
     onScenarioSelected: (CheckoutControllerExampleScenario) -> Unit,
 ) {
     when (status) {
@@ -137,7 +166,11 @@ private fun CheckoutContent(
         }
         is CheckoutControllerExampleViewModel.Status.Configured -> {
             status.session?.let { session ->
-                ScenarioSummary(status.scenario, session.tax.status)
+                if (status.scenario == CheckoutControllerExampleScenario.ShippingTax) {
+                    ShippingTaxSummary(session, confirmationResult)
+                } else {
+                    ScenarioSummary(status.scenario, session.tax.status)
+                }
                 LineItemsSection(session)
                 TotalSummarySection(session)
                 if (session.availableExpressCheckoutPaymentMethods.isNotEmpty()) {
@@ -218,36 +251,186 @@ private fun ScenarioSummary(
 }
 
 @Composable
+private fun ShippingTaxSummary(
+    session: Session,
+    confirmationResult: CheckoutControllerExampleViewModel.ConfirmationResult?,
+) {
+    Text(
+        text = "Scenario: ${CheckoutControllerExampleScenario.ShippingTax.displayName}",
+        style = MaterialTheme.typography.h6,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Text("Complete each action in order, then verify persistence in Admin.")
+    Spacer(modifier = Modifier.height(16.dp))
+    ActionStatus(
+        step = "1. Add shipping address",
+        detail = if (session.shippingAddress != null) "Ready" else "Required",
+        isReady = session.shippingAddress != null,
+    )
+    ActionStatus(
+        step = "Automatic tax",
+        detail = session.tax.status.displayName(),
+        isReady = session.tax.status == Session.Tax.Status.Ready,
+    )
+    ActionStatus(
+        step = "2. Select payment method",
+        detail = session.paymentOptionDisplayData?.label ?: "Required",
+        isReady = session.paymentOptionDisplayData != null,
+    )
+    ActionStatus(
+        step = "3. Confirm session",
+        detail = confirmationResult.confirmationDetail(),
+        isReady = confirmationResult is CheckoutControllerExampleViewModel.ConfirmationResult.Completed,
+    )
+    if (confirmationResult is CheckoutControllerExampleViewModel.ConfirmationResult.Completed) {
+        CompletionVerification(confirmationResult.session)
+    }
+}
+
+@Composable
+private fun ActionStatus(
+    step: String,
+    detail: String,
+    isReady: Boolean,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(step, style = MaterialTheme.typography.subtitle1)
+        Text(
+            text = detail,
+            color = if (isReady) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface,
+        )
+    }
+}
+
+@Composable
+private fun CompletionVerification(session: Session?) {
+    val shippingAddress = session?.shippingAddress
+    Spacer(modifier = Modifier.height(24.dp))
+    Text("Completed Controller State", style = MaterialTheme.typography.h6)
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(
+        "Controller state can carry shipping locally. Verify collected_information.shipping_details " +
+            "on this Checkout Session in Admin to prove backend persistence."
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    VerificationRow("Session ID", session?.id, !session?.id.isNullOrBlank())
+    VerificationRow(
+        label = "Status",
+        value = session?.status.displayName(),
+        passes = session?.status is Session.Status.Complete,
+    )
+    VerificationRow(
+        label = "Automatic tax",
+        value = session?.tax?.status.displayName(),
+        passes = session?.tax?.status == Session.Tax.Status.Ready,
+    )
+    VerificationRow("Name", shippingAddress?.name, !shippingAddress?.name.isNullOrBlank())
+    VerificationRow(
+        label = "Line 1",
+        value = shippingAddress?.address?.line1,
+        passes = !shippingAddress?.address?.line1.isNullOrBlank(),
+    )
+    VerificationRow(
+        label = "Line 2",
+        value = shippingAddress?.address?.line2,
+        passes = !shippingAddress?.address?.line2.isNullOrBlank(),
+    )
+    VerificationRow("City", shippingAddress?.address?.city, !shippingAddress?.address?.city.isNullOrBlank())
+    VerificationRow("State", shippingAddress?.address?.state, !shippingAddress?.address?.state.isNullOrBlank())
+    VerificationRow(
+        label = "Postal code",
+        value = shippingAddress?.address?.postalCode,
+        passes = !shippingAddress?.address?.postalCode.isNullOrBlank(),
+    )
+    VerificationRow(
+        label = "Country",
+        value = shippingAddress?.address?.country,
+        passes = !shippingAddress?.address?.country.isNullOrBlank(),
+    )
+}
+
+@Composable
+private fun VerificationRow(
+    label: String,
+    value: String?,
+    passes: Boolean,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 3.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.body2)
+            Text(value ?: "Missing", style = MaterialTheme.typography.caption)
+        }
+        Text(
+            text = if (passes) "PASS" else "FAIL",
+            color = if (passes) MaterialTheme.colors.primary else MaterialTheme.colors.error,
+            style = MaterialTheme.typography.subtitle2,
+        )
+    }
+}
+
+@Composable
 private fun ConfirmationControls(
+    scenario: CheckoutControllerExampleScenario,
     paymentOption: PaymentOptionDisplayData?,
     confirmationResult: CheckoutControllerExampleViewModel.ConfirmationResult?,
     onSelectPaymentMethod: () -> Unit,
+    selectPaymentMethodEnabled: Boolean,
+    confirmEnabled: Boolean,
     onConfirm: () -> Unit,
 ) {
     PaymentOptionRow(paymentOption)
     confirmationResult?.let { result ->
-        Spacer(modifier = Modifier.height(8.dp))
         val message = when (result) {
-            CheckoutControllerExampleViewModel.ConfirmationResult.Canceled -> "Confirmation canceled"
+            is CheckoutControllerExampleViewModel.ConfirmationResult.Completed -> null
+            CheckoutControllerExampleViewModel.ConfirmationResult.Canceled -> {
+                "Confirmation canceled. You can retry."
+            }
             is CheckoutControllerExampleViewModel.ConfirmationResult.Failed -> {
-                "Confirmation failed: ${result.message}"
+                "Confirmation failed: ${result.message}. You can retry."
             }
         }
-        Text(text = message, color = Color.Red)
+        message?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = it, color = Color.Red)
+        }
     }
     Spacer(modifier = Modifier.height(8.dp))
     Button(
         onClick = onSelectPaymentMethod,
+        enabled = selectPaymentMethodEnabled,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text("Select Payment Method")
+        Text(
+            if (scenario == CheckoutControllerExampleScenario.ShippingTax) {
+                "2. Select Payment Method"
+            } else {
+                "Select Payment Method"
+            }
+        )
     }
     Spacer(modifier = Modifier.height(8.dp))
     Button(
         onClick = onConfirm,
+        enabled = confirmEnabled,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text("Confirm")
+        Text(
+            if (scenario == CheckoutControllerExampleScenario.ShippingTax) {
+                "3. Confirm Session"
+            } else {
+                "Confirm"
+            }
+        )
     }
 }
 
@@ -344,26 +527,6 @@ private fun TotalSummarySection(session: Session) {
 }
 
 @Composable
-private fun ShippingAddressSection(session: Session) {
-    val shippingAddress = session.shippingAddress ?: return
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Divider(modifier = Modifier.padding(vertical = 12.dp))
-        Text(text = "Shipping Address", style = MaterialTheme.typography.h6)
-        Text(text = shippingAddress.name.orEmpty())
-        Text(
-            text = listOfNotNull(
-                shippingAddress.address.line1,
-                shippingAddress.address.line2,
-                shippingAddress.address.city,
-                shippingAddress.address.state,
-                shippingAddress.address.postalCode,
-                shippingAddress.address.country,
-            ).joinToString(", ")
-        )
-    }
-}
-
-@Composable
 private fun SummaryRow(label: String, amount: String) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
@@ -376,4 +539,32 @@ private fun SummaryRow(label: String, amount: String) {
 
 private fun formatAmount(amount: Long, currency: String): String {
     return CurrencyFormatter.format(amount, currency)
+}
+
+private fun CheckoutControllerExampleViewModel.ConfirmationResult?.confirmationDetail(): String {
+    return when (this) {
+        null -> "Pending"
+        CheckoutControllerExampleViewModel.ConfirmationResult.Canceled -> "Canceled"
+        is CheckoutControllerExampleViewModel.ConfirmationResult.Failed -> "Failed"
+        is CheckoutControllerExampleViewModel.ConfirmationResult.Completed -> "Completed"
+    }
+}
+
+private fun Session.Status?.displayName(): String {
+    return when (this) {
+        is Session.Status.Open -> "Open"
+        is Session.Status.Complete -> "Complete"
+        is Session.Status.Expired -> "Expired"
+        null -> "Missing"
+    }
+}
+
+private fun Session.Tax.Status?.displayName(): String {
+    return when (this) {
+        Session.Tax.Status.Ready -> "Ready"
+        Session.Tax.Status.RequiresShippingAddress -> "Requires shipping address"
+        Session.Tax.Status.RequiresBillingAddress -> "Requires billing address"
+        Session.Tax.Status.Unknown -> "Unknown"
+        null -> "Missing"
+    }
 }
