@@ -1,11 +1,9 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
@@ -28,12 +26,12 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
@@ -50,7 +48,7 @@ internal class DefaultCustomerSheetLoader(
     private val eventReporter: CustomerSheetEventReporter,
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val apiConfigurationResolver: ApiConfigurationResolver,
 ) : CustomerSheetLoader {
 
     @Inject
@@ -61,7 +59,7 @@ internal class DefaultCustomerSheetLoader(
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
-        paymentConfiguration: Provider<PaymentConfiguration>,
+        apiConfigurationResolver: ApiConfigurationResolver,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
@@ -71,7 +69,7 @@ internal class DefaultCustomerSheetLoader(
         eventReporter = eventReporter,
         errorReporter = errorReporter,
         workContext = workContext,
-        paymentConfiguration = paymentConfiguration,
+        apiConfigurationResolver = apiConfigurationResolver,
     )
 
     override suspend fun load(
@@ -159,12 +157,7 @@ internal class DefaultCustomerSheetLoader(
             },
             cardBrandFilter = cardBrandFilter,
             cardFundingFilter = cardFundingFilter,
-            apiConfiguration = paymentConfiguration.get().let {
-                ApiConfiguration.State(
-                    publishableKey = it.publishableKey,
-                    stripeAccountId = it.stripeAccountId,
-                )
-            },
+            apiConfiguration = apiConfigurationResolver.resolve(null),
         ).isReady().first()
         val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && isGooglePaySupportedOnDevice
 
@@ -190,6 +183,7 @@ internal class DefaultCustomerSheetLoader(
                     IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach
                 }
             ),
+            apiConfiguration = apiConfigurationResolver.resolve(null),
         )
     }
 

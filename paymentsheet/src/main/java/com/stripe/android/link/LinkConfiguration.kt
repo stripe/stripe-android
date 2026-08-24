@@ -3,6 +3,8 @@ package com.stripe.android.link
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
@@ -15,7 +17,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class LinkConfiguration(
+internal data class LinkConfiguration constructor(
     val stripeIntent: StripeIntent,
     val merchantName: String,
     val sellerBusinessName: String?,
@@ -51,7 +53,14 @@ internal data class LinkConfiguration(
     val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
     val clientAttributionMetadata: ClientAttributionMetadata,
     val linkBrand: LinkBrand,
+    val apiConfiguration: ApiConfiguration.State,
 ) : Parcelable {
+
+    val requestOptions: ApiRequest.Options
+        get() = ApiRequest.Options(
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
+        )
 
     val customerIdForEceDefaultValues: String?
         get() = if (enableDisplayableDefaultValuesInEce) customerId else null
