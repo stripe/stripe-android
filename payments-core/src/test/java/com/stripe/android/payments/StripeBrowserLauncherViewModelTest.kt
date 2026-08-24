@@ -30,8 +30,8 @@ class StripeBrowserLauncherViewModelTest {
         analyticsRequests.add(it)
     }
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        application,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = application,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
 
     private val savedStateHandle = SavedStateHandle()
