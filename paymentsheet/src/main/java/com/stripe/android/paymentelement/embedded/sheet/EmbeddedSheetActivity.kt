@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -105,7 +106,9 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
 
         setContent {
             PaymentElementTheme(appearance = activityArgs.configuration.appearance) {
-                SheetContent()
+                EventReporterProvider(eventReporter) {
+                    SheetContent()
+                }
             }
         }
     }

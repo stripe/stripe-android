@@ -145,7 +145,6 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             originalScreen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
                 interactor = interactor,
                 isLiveMode = true,
-                eventReporter = activity.eventReporter,
                 sheetActivityStateHolder = activity.sheetActivityStateHolder,
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = activity.selectionHolder,

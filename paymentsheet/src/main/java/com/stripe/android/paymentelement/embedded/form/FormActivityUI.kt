@@ -14,11 +14,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
-import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
@@ -31,7 +29,6 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun FormScreenContent(
     interactor: VerticalModeFormInteractor,
-    eventReporter: EventReporter,
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
     state: SheetActivityStateHolder.State,
@@ -41,19 +38,17 @@ internal fun FormScreenContent(
 
     DismissKeyboardOnProcessing(interactorState.isProcessing)
 
-    EventReporterProvider(eventReporter) {
-        VerticalModeFormUI(interactor = interactor, showsWalletHeader = false)
-        USBankAccountMandate(state)
-        FormActivityError(state)
-        Spacer(Modifier.height(40.dp))
-        FormActivityPrimaryButton(
-            state = state,
-            onClick = onClick,
-            onDisabledClick = onPrimaryButtonDisabledClick,
-            onProcessingCompleted = onProcessingCompleted,
-        )
-        PaymentSheetContentPadding()
-    }
+    VerticalModeFormUI(interactor = interactor, showsWalletHeader = false)
+    USBankAccountMandate(state)
+    FormActivityError(state)
+    Spacer(Modifier.height(40.dp))
+    FormActivityPrimaryButton(
+        state = state,
+        onClick = onClick,
+        onDisabledClick = onPrimaryButtonDisabledClick,
+        onProcessingCompleted = onProcessingCompleted,
+    )
+    PaymentSheetContentPadding()
 }
 
 @Composable

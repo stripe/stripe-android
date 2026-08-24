@@ -210,7 +210,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
                     eventReporter = FakeEventReporter(),
                     paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 ),
-                eventReporter = FakeEventReporter(),
                 sheetActivityStateHolder = sheetActivityStateHolder,
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = selectionHolder,
