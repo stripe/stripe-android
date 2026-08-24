@@ -22,12 +22,13 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.addresselement.CheckoutShippingAddressUpdaterRegistry
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Provider
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ShippingAddressElement @Inject internal constructor(
     private val activityResultCaller: ActivityResultCaller,
-    private val paymentConfiguration: PaymentConfiguration,
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val checkoutController: CheckoutController,
     private val stateHolder: CheckoutControllerStateHolder,
     private val errorReporter: ErrorReporter,
@@ -71,7 +72,7 @@ class ShippingAddressElement @Inject internal constructor(
         updaterKey = CheckoutShippingAddressUpdaterRegistry.register(this)
         val configuration = state.configuration.shippingAddressElementConfiguration
         val args = AddressElementActivityContract.Args(
-            publishableKey = paymentConfiguration.publishableKey,
+            publishableKey = paymentConfiguration.get().publishableKey,
             config = AddressLauncher.Configuration(
                 appearance = configuration.appearance.asPaymentSheet(),
                 address = address,
