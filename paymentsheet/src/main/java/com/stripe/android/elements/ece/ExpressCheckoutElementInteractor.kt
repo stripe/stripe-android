@@ -57,22 +57,25 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
             )
         }
 
+        val configuration = state.configuration.expressCheckoutElementConfiguration
+
         ExpressCheckoutElementInteractor.State(
             expressButtons = session.availableExpressButtonTypes.map { expressButtonType ->
                 when (expressButtonType) {
                     ExpressButtonType.Link -> ExpressButton.Link.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
                         linkAccountInfo = linkAccountInfo,
+                        buttonTheme = configuration.appearance.buttonTheme,
                     )
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
                         googlePayConfiguration = expressButtonType.googlePayConfiguration,
-                        shippingAddressRequired =
-                            state.configuration.expressCheckoutElementConfiguration.shippingAddressRequired,
+                        shippingAddressRequired = configuration.shippingAddressRequired,
+                        buttonTheme = configuration.appearance.buttonTheme,
                     )
                 }
             },
-            buttonLayout = state.configuration.expressCheckoutElementConfiguration.appearance.buttonLayout,
+            buttonLayout = configuration.appearance.buttonLayout,
         )
     }
 

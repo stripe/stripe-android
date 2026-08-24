@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,9 +18,13 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.GooglePayButton
+import com.stripe.android.paymentsheet.ui.GooglePayButtonTheme
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import kotlin.math.min
 
@@ -39,6 +44,7 @@ internal fun ExpressCheckoutElementContent(
                 cardBrandFilter = button.cardBrandFilter,
                 cardFundingFilter = button.cardFundingFilter,
                 additionalEnabledNetworks = button.additionalEnabledNetworks,
+                theme = button.buttonTheme.toGooglePayButtonTheme(),
                 onPressed = onPressed,
             )
         },
@@ -156,7 +162,7 @@ private fun ExpressButtonContent(
             is ExpressButton.Link -> LinkButton(
                 state = button.state,
                 enabled = true,
-                theme = button.theme,
+                theme = button.buttonTheme.toLinkButtonTheme(),
                 linkBrand = button.linkBrand,
                 onClick = {
                     interactor.handleViewAction(
@@ -166,6 +172,32 @@ private fun ExpressButtonContent(
                     )
                 },
             )
+        }
+    }
+}
+
+@Composable
+private fun ButtonTheme.toLinkButtonTheme(): PaymentSheet.ButtonThemes.LinkButtonTheme {
+    return when (this) {
+        ButtonTheme.Light -> PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
+        ButtonTheme.Dark -> PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT
+        ButtonTheme.Automatic -> if (MaterialTheme.stripeThemeIsDark) {
+            PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
+        } else {
+            PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT
+        }
+    }
+}
+
+@Composable
+private fun ButtonTheme.toGooglePayButtonTheme(): GooglePayButtonTheme {
+    return when (this) {
+        ButtonTheme.Light -> GooglePayButtonTheme.Light
+        ButtonTheme.Dark -> GooglePayButtonTheme.Dark
+        ButtonTheme.Automatic -> if (MaterialTheme.stripeThemeIsDark) {
+            GooglePayButtonTheme.Light
+        } else {
+            GooglePayButtonTheme.Dark
         }
     }
 }

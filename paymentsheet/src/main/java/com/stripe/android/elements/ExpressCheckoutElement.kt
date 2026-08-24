@@ -330,6 +330,21 @@ class ExpressCheckoutElement @Inject internal constructor(
         @CheckoutSessionPreview
         class Appearance {
             private var buttonLayout: ButtonLayout = ButtonLayout()
+            private var buttonTheme: ButtonTheme = ButtonTheme.Automatic
+
+            /** Themes for express buttons. */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @CheckoutSessionPreview
+            enum class ButtonTheme {
+                /** Light theme which contrasts with a dark background. */
+                Light,
+
+                /** Dark theme which contrasts with a light background. */
+                Dark,
+
+                /** Automatic theme which contrasts with the current system theme. */
+                Automatic,
+            }
 
             /** Determines how express buttons are arranged. */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -379,13 +394,20 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.buttonLayout = buttonLayout
             }
 
+            /** Sets the theme of the express buttons. */
+            fun buttonTheme(buttonTheme: ButtonTheme): Appearance = apply {
+                this.buttonTheme = buttonTheme
+            }
+
             @Parcelize
             internal data class State(
                 val buttonLayout: ButtonLayout.State,
+                val buttonTheme: ButtonTheme,
             ) : Parcelable
 
             internal fun build(): State = State(
                 buttonLayout = buttonLayout.build(),
+                buttonTheme = buttonTheme,
             )
         }
 

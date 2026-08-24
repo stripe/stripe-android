@@ -49,11 +49,13 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             ExpressButton.Link.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
+                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
             ),
             ExpressButton.GooglePay.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 googlePayConfiguration = googlePayConfiguration,
                 shippingAddressRequired = false,
+                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
             ),
         )
     }
@@ -88,6 +90,23 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
+    fun `state contains configured button theme`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+        ),
+        configuration = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
+            ),
+    ) {
+        assertThat(interactor.state.value.expressButtons.map { it.buttonTheme }).containsExactly(
+            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
+            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
+        )
+    }
+
+    @Test
     fun `state updates when link account info changes`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.Link),
@@ -116,6 +135,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                         ExpressButton.Link.create(
                             paymentMethodMetadata = paymentMethodMetadata,
                             linkAccountInfo = LinkAccountUpdate.Value(null),
+                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                         ),
                     ),
                     buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
@@ -130,6 +150,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                         ExpressButton.Link.create(
                             paymentMethodMetadata = paymentMethodMetadata,
                             linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
+                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                         ),
                     ),
                     buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
@@ -165,6 +186,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     googlePayConfiguration = googlePayConfiguration,
                     shippingAddressRequired = false,
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
         }

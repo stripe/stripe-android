@@ -5,6 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.ui.LinkButtonState
@@ -13,12 +14,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 
 internal sealed interface ExpressButton {
+
+    val buttonTheme: ButtonTheme
 
     fun toSelection(): PaymentSelection
     fun toWalletType(): WalletType
@@ -26,7 +28,7 @@ internal sealed interface ExpressButton {
     data class Link(
         val state: LinkButtonState,
         val linkBrand: LinkBrand,
-        val theme: PaymentSheet.ButtonThemes.LinkButtonTheme,
+        override val buttonTheme: ButtonTheme,
     ) : ExpressButton {
 
         override fun toSelection(): PaymentSelection {
@@ -42,6 +44,7 @@ internal sealed interface ExpressButton {
             fun create(
                 paymentMethodMetadata: PaymentMethodMetadata,
                 linkAccountInfo: LinkAccountUpdate.Value,
+                buttonTheme: ButtonTheme,
             ): Link {
                 val linkConfiguration = paymentMethodMetadata.linkState?.configuration
                 val linkAccount = linkAccountInfo.account
@@ -51,8 +54,8 @@ internal sealed interface ExpressButton {
                         linkEmail = linkAccount?.email,
                         paymentDetails = linkAccount?.displayablePaymentDetails,
                     ),
-                    theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
                     linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
+                    buttonTheme = buttonTheme,
                 )
             }
         }
@@ -66,6 +69,7 @@ internal sealed interface ExpressButton {
         val cardFundingFilter: CardFundingFilter,
         val additionalEnabledNetworks: List<String>,
         val shippingAddressRequired: Boolean,
+        override val buttonTheme: ButtonTheme,
     ) : ExpressButton {
 
         override fun toSelection(): PaymentSelection = PaymentSelection.GooglePay
@@ -77,6 +81,7 @@ internal sealed interface ExpressButton {
                 paymentMethodMetadata: PaymentMethodMetadata,
                 googlePayConfiguration: CheckoutGooglePayConfiguration,
                 shippingAddressRequired: Boolean,
+                buttonTheme: ButtonTheme,
             ): GooglePay {
                 return GooglePay(
                     allowCreditCards = paymentMethodMetadata.cardFundingFilter.isAccepted(CardFunding.Credit),
@@ -87,6 +92,7 @@ internal sealed interface ExpressButton {
                         .toBillingAddressParameters(),
                     additionalEnabledNetworks = googlePayConfiguration.additionalEnabledNetworks,
                     shippingAddressRequired = shippingAddressRequired,
+                    buttonTheme = buttonTheme,
                 )
             }
         }
