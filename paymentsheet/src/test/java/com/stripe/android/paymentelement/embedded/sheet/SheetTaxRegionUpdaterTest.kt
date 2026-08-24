@@ -6,6 +6,9 @@ import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -34,7 +37,44 @@ internal class SheetTaxRegionUpdaterTest {
     val networkRule = NetworkRule()
 
     @Test
-    fun `update sends the selection billing address and returns the updated response`() = runScenario {
+    fun `prepareUpdate returns null when checkout session does not collect tax from billing address`() = runScenario(
+        paymentMethodMetadata = paymentMethodMetadata(
+            checkoutSessionResponse(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            )
+        )
+    ) {
+        val update = updater.prepareUpdate(selectionWithAddress(ADDRESS))
+
+        assertThat(update).isNull()
+    }
+
+    @Test
+    fun `prepareUpdate returns null for non-checkout session integration`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+    ) {
+        val update = updater.prepareUpdate(selectionWithAddress(ADDRESS))
+
+        assertThat(update).isNull()
+    }
+
+    @Test
+    fun `prepareUpdate returns null when automatic tax is disabled`() = runScenario(
+        paymentMethodMetadata = paymentMethodMetadata(
+            checkoutSessionResponse(
+                automaticTaxEnabled = false,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            )
+        )
+    ) {
+        val update = updater.prepareUpdate(selectionWithAddress(ADDRESS))
+
+        assertThat(update).isNull()
+    }
+
+    @Test
+    fun `prepared update sends the selection billing address and returns the updated response`() = runScenario {
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[line1]", "510 Townsend St"),
@@ -46,53 +86,75 @@ internal class SheetTaxRegionUpdaterTest {
             response.testBodyFromFile("checkout-session-init.json")
         }
 
-        val result = updater.update(selectionWithAddress(ADDRESS))
+        val result = requireNotNull(updater.prepareUpdate(selectionWithAddress(ADDRESS))).invoke()
 
-        assertThat(result.getOrThrow()?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
 
     @Test
-    fun `update returns null when selection is null`() = runScenario {
-        val result = updater.update(selection = null)
+    fun `prepareUpdate returns null when selection is null`() = runScenario {
+        val update = updater.prepareUpdate(selection = null)
 
-        assertThat(result.getOrThrow()).isNull()
+        assertThat(update).isNull()
     }
 
     @Test
-    fun `update returns null when selection has no billing address`() = runScenario {
+    fun `prepareUpdate returns null when selection has no billing address`() = runScenario {
         val selection = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                 billingDetails = PaymentMethod.BillingDetails(address = null),
             ),
         )
 
-        val result = updater.update(selection)
+        val update = updater.prepareUpdate(selection)
 
-        assertThat(result.getOrThrow()).isNull()
+        assertThat(update).isNull()
     }
 
     @Test
-    fun `update returns null when billing address has no country`() = runScenario {
-        val result = updater.update(selectionWithAddress(ADDRESS.copy(country = null)))
+    fun `prepareUpdate returns null when billing address has no country`() = runScenario {
+        val update = updater.prepareUpdate(selectionWithAddress(ADDRESS.copy(country = null)))
 
-        assertThat(result.getOrThrow()).isNull()
+        assertThat(update).isNull()
     }
 
     @Test
-    fun `update returns failure when the tax region update fails`() = runScenario {
+    fun `prepared update returns failure when the tax region update fails`() = runScenario {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Invalid tax region"}}""")
         }
 
-        val result = updater.update(selectionWithAddress(ADDRESS))
+        val result = requireNotNull(updater.prepareUpdate(selectionWithAddress(ADDRESS))).invoke()
 
         assertThat(result.exceptionOrNull()?.message).contains("Invalid tax region")
     }
 
     private fun runScenario(
         block: suspend Scenario.() -> Unit,
+    ) = runScenario(
+        paymentMethodMetadata = paymentMethodMetadata(
+            checkoutSessionResponse(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            )
+        ),
+        block = block,
+    )
+
+    private fun runScenario(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val updater = SheetTaxRegionUpdater(
+            paymentMethodMetadata = paymentMethodMetadata,
+            taxRegionUpdater = checkoutSessionTaxRegionUpdater(),
+        )
+
+        Scenario(updater = updater).block()
+    }
+
+    private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         val checkoutSessionRepository = CheckoutSessionRepository(
             clientParams = ElementsSessionClientParams(
                 mobileAppId = "com.stripe.android.paymentsheet.test",
@@ -107,17 +169,27 @@ internal class SheetTaxRegionUpdaterTest {
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
         )
-        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-        )
-        val updater = SheetTaxRegionUpdater(
-            checkoutSessionResponse = checkoutSessionResponse,
-            taxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
-        )
 
-        Scenario(updater = updater).block()
+        return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
     }
+
+    private fun paymentMethodMetadata(
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ) = PaymentMethodMetadataFactory.create(
+        integrationMetadata = IntegrationMetadata.CheckoutSession(
+            id = checkoutSessionResponse.id,
+            instancesKey = "test_instances_key",
+            checkoutSessionResponse = checkoutSessionResponse,
+        )
+    )
+
+    private fun checkoutSessionResponse(
+        automaticTaxEnabled: Boolean,
+        taxAddressSource: CheckoutSessionResponse.TaxAddressSource,
+    ) = CheckoutSessionResponseFactory.create(
+        automaticTaxEnabled = automaticTaxEnabled,
+        taxAddressSource = taxAddressSource,
+    )
 
     private data class Scenario(
         val updater: SheetTaxRegionUpdater,

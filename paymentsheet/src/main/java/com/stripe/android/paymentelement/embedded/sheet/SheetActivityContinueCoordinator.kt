@@ -17,7 +17,7 @@ internal interface SheetActivityContinueCoordinator {
 }
 
 internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
-    private val taxRegionUpdater: SheetTaxRegionUpdater?,
+    private val taxRegionUpdater: SheetTaxRegionUpdater,
     private val stateHolder: SheetActivityStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
@@ -27,15 +27,15 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
 
     override fun onContinue() {
         val selection = selectionHolder.selection.value
-        val updater = taxRegionUpdater
-        if (updater == null) {
+        val taxRegionUpdate = taxRegionUpdater.prepareUpdate(selection)
+        if (taxRegionUpdate == null) {
             stateHolder.setResult(createResult(selection, checkoutSessionResponse = null))
             return
         }
 
         coroutineScope.launch {
             stateHolder.updateProcessing(true)
-            updater.update(selection).fold(
+            taxRegionUpdate().fold(
                 onSuccess = { response ->
                     stateHolder.setResult(createResult(selection, response))
                 },
