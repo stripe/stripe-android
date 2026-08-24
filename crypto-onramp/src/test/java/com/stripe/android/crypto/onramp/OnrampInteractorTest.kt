@@ -97,6 +97,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -796,7 +797,10 @@ class OnrampInteractorTest {
 
     @Test
     fun uncategorizedExceptionFallsBackToSafeUserMessage() = runTest {
+        val runtimeApp = RuntimeEnvironment.getApplication()
         val application = mock<Application> {
+            on { applicationContext } doReturn runtimeApp
+            on { resources } doReturn runtimeApp.resources
             on { packageName } doReturn "com.example.app"
             on { getString(any()) } doReturn "Something went wrong. Please try again later."
         }
@@ -846,7 +850,10 @@ class OnrampInteractorTest {
 
     @Test
     fun appAttestationExceptionUsesSingleLocalizedFallbackUserMessage() = runTest {
+        val runtimeApp = RuntimeEnvironment.getApplication()
         val application = mock<Application> {
+            on { applicationContext } doReturn runtimeApp
+            on { resources } doReturn runtimeApp.resources
             on { packageName } doReturn "com.example.app"
             on { getString(any()) } doReturn
                 "This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists."
@@ -1974,7 +1981,15 @@ class OnrampInteractorTest {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 
         return mock {
+            on { applicationContext } doReturn runtimeApplication
+            on { resources } doReturn runtimeApplication.resources
             on { packageName } doReturn runtimeApplication.packageName
+            on { getSharedPreferences(any(), any()) } doAnswer { invocation ->
+                runtimeApplication.getSharedPreferences(
+                    invocation.getArgument(0),
+                    invocation.getArgument(1),
+                )
+            }
             on { getString(R.string.stripe_onramp_default_api_error_user_message) } doReturn
                 defaultApiErrorUserMessage
             on { getString(R.string.stripe_onramp_app_attestation_default_user_message) } doReturn
