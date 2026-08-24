@@ -40,6 +40,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
@@ -127,6 +128,7 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
         PaymentElementConfirmationTestModule::class,
         GooglePayLauncherModule::class,
         ApiRequestOptionsModule::class,
+        GooglePayPaymentDataUpdateNoOpModule::class,
     ]
 )
 @Singleton

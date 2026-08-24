@@ -141,6 +141,9 @@ internal class CardDetailsController(
                     scannedCardDetails.expirationYear,
                 )
             )
+            cvcElement.controller.onRawValueChange("")
+            cvcElement.controller.requestFocus()
+            return
         } else {
             numberElement.controller.onRawValueChange(scannedCardDetails.cardNumber)
 
@@ -227,6 +230,7 @@ internal class CardDetailsController(
     private fun dismissCardPill() {
         numberElement.controller.onRawValueChange("")
         expirationDateElement.controller.onRawValueChange("")
+        cvcElement.controller.onRawValueChange("")
         cardPillElement.value = null
     }
 

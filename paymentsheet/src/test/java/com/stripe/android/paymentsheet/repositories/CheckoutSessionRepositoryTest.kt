@@ -68,38 +68,6 @@ class CheckoutSessionRepositoryTest {
     }
 
     @Test
-    fun `updateEmail sends customer_email and returns response on success`() = runTest {
-        networkRule.checkoutUpdate(
-            bodyPart("customer_email", "checkout@example.com"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-        ) { response ->
-            response.testBodyFromFile("checkout-session-init.json")
-        }
-
-        val result = repository.updateEmail(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            email = "checkout@example.com",
-        )
-
-        assertThat(result.isSuccess).isTrue()
-    }
-
-    @Test
-    fun `updateEmail returns failure on error response`() = runTest {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "Invalid email"}}""")
-        }
-
-        val result = repository.updateEmail(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            email = "invalid",
-        )
-
-        assertThat(result.isFailure).isTrue()
-    }
-
-    @Test
     fun `updateCurrency sends currency code and returns response on success`() = runTest {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "eur"),

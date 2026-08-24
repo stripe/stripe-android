@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,13 +32,14 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.launch
@@ -75,7 +77,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (args == null) {
+        val activityArgs = args ?: run {
             finish()
             return
         }
@@ -102,7 +104,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         }
 
         setContent {
-            StripeTheme {
+            PaymentElementTheme(appearance = activityArgs.configuration.appearance) {
                 SheetContent()
             }
         }
@@ -168,7 +170,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 )
             },
             content = {
-                val horizontalPadding = StripeTheme.getOuterFormInsets()
+                val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
                 val headerText by remember(screen) {
                     screen.title()
                 }.collectAsState()

@@ -4,20 +4,17 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
-import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
-import com.stripe.android.uicore.elements.AddressFieldsElement
-import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -31,67 +28,62 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
-    fun `creates the expected payment method params`(
-        @TestParameter(valuesProvider = TestCaseProvider::class)
+    fun `creates the expected form params`(
+        @TestParameter(valuesProvider = LpmBillingAddressFormValuesToParamsTestCaseProvider::class)
         testCase: LpmBillingAddressFormValuesToParamsTestCase,
     ) = runTest {
-        assertThat(
-            createPaymentMethodCreateParamsFromFormValues(
-                paymentMethodType = testCase.paymentMethodType,
-                mode = testCase.mode,
-                rawValues = testCase.rawValues,
-            ),
-        ).isEqualTo(testCase.expectedPaymentMethodParams)
-    }
-
-    private suspend fun createPaymentMethodCreateParamsFromFormValues(
-        paymentMethodType: PaymentMethod.Type,
-        mode: LpmBillingAddressBaselineMode,
-        rawValues: Map<IdentifierSpec, String?>,
-    ): PaymentMethodCreateParams {
-        val metadata = createMetadata(paymentMethodType, mode)
-        val formViewModel = createFormViewModel(
-            paymentMethodType = paymentMethodType,
-            metadata = metadata,
-            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        val actual = createFormParamsFromFormValues(
+            config = testCase.config,
+            rawValues = testCase.rawValues,
         )
 
-        val sectionFields = formViewModel.elements
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-
-        sectionFields.forEach { it.setRawValue(rawValues) }
-        sectionFields
-            .filterIsInstance<AddressFieldsElement>()
-            .forEach { it.countryElement.setRawValue(rawValues) }
-        formViewModel.elements
-            .filterIsInstance<CheckboxFieldElement>()
-            .forEach { element ->
-                rawValues[element.identifier]?.let { element.controller.onValueChange(it.toBoolean()) }
-            }
-
-        return formViewModel.createPaymentMethodCreateParams(paymentMethodType, metadata)
+        assertThat(actual).isEqualTo(testCase.expectedParams)
     }
 
-    private fun createMetadata(
-        paymentMethodType: PaymentMethod.Type,
-        mode: LpmBillingAddressBaselineMode,
-    ) = PaymentMethodMetadataFactory.create(
-        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodTypes = listOf(paymentMethodType.code),
-        ),
-        billingDetailsCollectionConfiguration = mode.billingDetailsCollectionConfiguration(),
-    )
+    @Test
+    fun `has unique configs`() {
+        assertThat(lpmBillingAddressTestConfigurations).containsNoDuplicates()
+    }
+
+    @Test
+    fun `covers every billing mode for every payment method`() {
+        lpmBillingAddressTestConfigurations
+            .groupBy { it.paymentMethodType }
+            .values
+            .forEach { configs ->
+                assertThat(configs.map { it.billingDetailsCollectionMode })
+                    .containsAtLeastElementsIn(LpmBillingDetailsCollectionMode.entries)
+            }
+    }
+
+    private suspend fun createFormParamsFromFormValues(
+        config: LpmBillingAddressTestConfiguration,
+        rawValues: Map<IdentifierSpec, String?>,
+    ): LpmBillingAddressFormParams {
+        val metadata = config.metadata()
+        val formViewModel = createFormViewModel(
+            paymentMethodType = config.paymentMethodType,
+            metadata = metadata,
+            initialValues = rawValues,
+        )
+
+        return formViewModel.createFormParams(
+            paymentMethodType = config.paymentMethodType,
+            metadata = metadata,
+        )
+    }
 
     private fun createFormViewModel(
         paymentMethodType: PaymentMethod.Type,
         metadata: PaymentMethodMetadata,
-        uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
+        initialValues: Map<IdentifierSpec, String?>,
     ): FormViewModel {
         val formElements = requireNotNull(
             metadata.formElementsForCode(
                 code = paymentMethodType.code,
-                uiDefinitionFactoryArgumentsFactory = uiDefinitionFactoryArgumentsFactory,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(
+                    initialValues = initialValues,
+                ),
             ),
         )
 
@@ -106,39 +98,96 @@ internal class LpmBillingAddressFormValuesToParamsTest {
         )
     }
 
-    private suspend fun FormViewModel.createPaymentMethodCreateParams(
+    private suspend fun FormViewModel.createFormParams(
         paymentMethodType: PaymentMethod.Type,
         metadata: PaymentMethodMetadata,
-    ): PaymentMethodCreateParams {
-        return requireNotNull(completeFormValues.first())
-            .transformToPaymentMethodCreateParams(
-                paymentMethodCode = paymentMethodType.code,
-                paymentMethodMetadata = metadata,
-            )
-    }
-
-    private companion object {
-        object TestCaseProvider : TestParameterValuesProvider() {
-            override fun provideValues(
-                context: Context?,
-            ): List<LpmBillingAddressFormValuesToParamsTestCase> = buildList {
-                addAll(boletoTestCases)
-                addAll(sepaDebitTestCases)
-                addAll(weroTestCases)
-                addAll(klarnaTestCases)
-                addAll(bacsDebitTestCases)
-                addAll(oxxoTestCases)
-            }
+    ): LpmBillingAddressFormParams {
+        val supportedPaymentMethod = requireNotNull(
+            metadata.supportedPaymentMethodForCode(paymentMethodType.code),
+        )
+        val formFieldValues = requireNotNull(completeFormValues.first()) {
+            "The ${paymentMethodType.code} form never completed. A required field was not seeded, " +
+                "which means its definition ignores UiDefinitionFactory.Arguments.initialValues."
         }
+
+        val paymentSelection = formFieldValues.transformToPaymentSelection(supportedPaymentMethod, metadata)
+
+        require(paymentSelection is PaymentSelection.New)
+
+        return LpmBillingAddressFormParams(
+            createParams = paymentSelection.paymentMethodCreateParams,
+            optionsParams = paymentSelection.paymentMethodOptionsParams,
+            extraParams = paymentSelection.paymentMethodExtraParams,
+        )
     }
 }
 
 internal data class LpmBillingAddressFormValuesToParamsTestCase(
     val name: String,
-    val paymentMethodType: PaymentMethod.Type,
-    val mode: LpmBillingAddressBaselineMode,
+    val config: LpmBillingAddressTestConfiguration,
     val rawValues: Map<IdentifierSpec, String?>,
-    val expectedPaymentMethodParams: PaymentMethodCreateParams,
+    val expectedParams: LpmBillingAddressFormParams,
 ) {
     override fun toString(): String = name
+}
+
+internal data class LpmBillingAddressFormParams(
+    val createParams: PaymentMethodCreateParams,
+    val optionsParams: PaymentMethodOptionsParams?,
+    val extraParams: PaymentMethodExtraParams?,
+)
+
+internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
+    addAll(afterpayClearpayTestCases)
+    addAll(amazonPayTestCases)
+    addAll(bancontactTestCases)
+    addAll(boletoTestCases)
+    addAll(sepaDebitTestCases)
+    addAll(weroTestCases)
+    addAll(klarnaTestCases)
+    addAll(bacsDebitTestCases)
+    addAll(oxxoTestCases)
+    addAll(auBecsDebitTestCases)
+    addAll(blikTestCases)
+    addAll(p24TestCases)
+    addAll(epsTestCases)
+    addAll(fpxTestCases)
+    addAll(konbiniTestCases)
+    addAll(mobilePayTestCases)
+    addAll(multibancoTestCases)
+    addAll(promptPayTestCases)
+    addAll(idealFormParamsTestCases)
+    addAll(affirmTestCases)
+    addAll(alipayTestCases)
+    addAll(almaTestCases)
+    addAll(billieTestCases)
+    addAll(cashAppPayTestCases)
+    addAll(cryptoTestCases)
+    addAll(grabPayTestCases)
+    addAll(payByBankTestCases)
+    addAll(payNowTestCases)
+    addAll(payPayTestCases)
+    addAll(payPalTestCases)
+    addAll(revolutPayTestCases)
+    addAll(satispayTestCases)
+    addAll(sunbitTestCases)
+    addAll(swishTestCases)
+    addAll(twintTestCases)
+    addAll(weChatPayTestCases)
+    addAll(zipTestCases)
+}
+
+internal val lpmBillingAddressTestConfigurations =
+    lpmBillingAddressFormValuesToParamsTestCases.map { it.config }
+
+internal object LpmBillingAddressFormValuesToParamsTestCaseProvider : TestParameterValuesProvider() {
+    override fun provideValues(context: Context?): List<LpmBillingAddressFormValuesToParamsTestCase> {
+        return lpmBillingAddressFormValuesToParamsTestCases
+    }
+}
+
+internal object LpmBillingAddressTestConfigurationProvider : TestParameterValuesProvider() {
+    override fun provideValues(context: Context?): List<LpmBillingAddressTestConfiguration> {
+        return lpmBillingAddressTestConfigurations
+    }
 }

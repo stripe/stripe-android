@@ -6,11 +6,13 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
 
 /**
- * Re-fetches the current checkout session and reloads the controller's state from the fresh
- * response, so state that was loaded before a confirmation doesn't outlive it.
+ * Reloads the controller's state after confirmation, either by fetching the current checkout
+ * session or by committing a response returned by confirmation.
  */
-internal fun interface CheckoutSessionRefresher {
+internal interface CheckoutSessionRefresher {
     suspend fun refresh()
+
+    suspend fun refresh(response: CheckoutSessionResponse)
 }
 
 @OptIn(CheckoutSessionPreview::class)
@@ -37,7 +39,12 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
             state.checkoutSessionResponse.id,
             state.configuration.adaptivePricingAllowed,
         ).getOrThrow()
-        val latestState = stateHolder.state ?: return
-        reloadState(latestState.copy(checkoutSessionResponse = response))
+
+        refresh(response)
+    }
+
+    override suspend fun refresh(response: CheckoutSessionResponse) {
+        val state = stateHolder.state ?: return
+        reloadState(state.copy(checkoutSessionResponse = response))
     }
 }

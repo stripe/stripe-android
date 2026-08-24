@@ -9,7 +9,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
-import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
@@ -62,15 +62,15 @@ class CustomPaymentMethodsAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
-            query("mpe_config[custom_payment_methods]", "cpmt_123")
+            analyticsPayloadField("mpe_config[custom_payment_methods]", "cpmt_123")
         )
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("cpmt_123,card")),
-            query("payment_method_layout", "horizontal"),
+            analyticsPayloadField("hidden_payment_methods", ""),
+            analyticsPayloadField("visible_payment_methods", Uri.encode("cpmt_123,card")),
+            analyticsPayloadField("payment_method_layout", "horizontal"),
         )
 
         context.presentPaymentSheet {
@@ -95,11 +95,11 @@ class CustomPaymentMethodsAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         validateAnalyticsRequest(
             eventName = "paymentsheet.custom_payment_method.launch_success",
-            query("custom_payment_method_type", "cpmt_123")
+            analyticsPayloadField("custom_payment_method_type", "cpmt_123")
         )
         validateAnalyticsRequest(
             eventName = "mc_complete_payment_newpm_success",
-            query("selected_lpm", "cpmt_123")
+            analyticsPayloadField("selected_lpm", "cpmt_123")
         )
 
         page.clickPrimaryButton()

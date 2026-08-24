@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
@@ -149,31 +150,33 @@ internal suspend fun createIntentConfirmationInterceptor(
                 customerMetadata: CustomerMetadata?,
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): CheckoutSessionConfirmationInterceptor {
+                val checkoutSessionRepository = CheckoutSessionRepository(
+                    clientParams = ElementsSessionClientParams(
+                        mobileAppId = "com.stripe.android.test",
+                        mobileSessionIdProvider = { "test_session" },
+                    ),
+                    stripeNetworkClient = DefaultStripeNetworkClient(),
+                    analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+                    paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                        context = ApplicationProvider.getApplicationContext(),
+                        publishableKeyProvider = { "pk" },
+                    ),
+                    apiConfigurationProvider = {
+                        ApiConfiguration.State(
+                            publishableKey = "pk",
+                            stripeAccountId = null
+                        )
+                    },
+                )
                 return CheckoutSessionConfirmationInterceptor(
                     integrationMetadata = integrationMetadata,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
-                    checkoutSessionRepository = CheckoutSessionRepository(
-                        clientParams = ElementsSessionClientParams(
-                            mobileAppId = "com.stripe.android.test",
-                            mobileSessionIdProvider = { "test_session" },
-                        ),
-                        stripeNetworkClient = DefaultStripeNetworkClient(),
-                        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-                        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                            context = ApplicationProvider.getApplicationContext(),
-                            publishableKeyProvider = { "pk" },
-                        ),
-                        apiConfigurationProvider = {
-                            ApiConfiguration.State(
-                                publishableKey = "pk",
-                                stripeAccountId = null,
-                            )
-                        },
-                    ),
                     requestOptionsProvider = { requestOptions },
+                    checkoutSessionRepository = checkoutSessionRepository,
+                    checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
                 )
             }
         },
@@ -221,6 +224,7 @@ internal fun createTestConfirmationHandlerFactory(
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 ),
                 GooglePayConfirmationDefinition(
+                    instanceId = paymentElementCallbackIdentifier,
                     context = ApplicationProvider.getApplicationContext(),
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                     userFacingLogger = FakeUserFacingLogger(),

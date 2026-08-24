@@ -4,6 +4,7 @@ package com.stripe.android.checkout
 
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private var pendingMutations = 0
     private var confirmationInFlight = confirmationHandler.hasReloadedFromProcessDeath ||
         confirmationHandler.state.value is ConfirmationHandler.State.Confirming
+    private var confirmationWasRestored = confirmationHandler.hasReloadedFromProcessDeath
     private var confirmationCompletionClaimed = false
     private val mutex = Mutex(locked = confirmationInFlight)
 
@@ -80,45 +82,37 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     fun tryBeginConfirmation(
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
-        val admission = synchronized(admissionLock) {
-            when {
-                sheetStateHolder.sheetIsOpen -> ConfirmationAdmission.Rejected(
-                    IllegalStateException("Cannot confirm checkout session while a payment flow is presented.")
-                )
-                pendingMutations > 0 || confirmationInFlight -> ConfirmationAdmission.Rejected(
-                    IllegalStateException("Cannot confirm checkout session while another mutation is in progress.")
-                )
-                else -> {
-                    val confirmationArguments = arguments()
-                        ?: return@synchronized ConfirmationAdmission.NoArguments
-                    check(mutex.tryLock()) {
-                        "Checkout operation gate should be available after confirmation admission."
-                    }
-                    confirmationInFlight = true
-                    updateIsUpdating()
-                    ConfirmationAdmission.Accepted(confirmationArguments)
-                }
+        return synchronized(admissionLock) {
+            if (sheetStateHolder.sheetIsOpen || pendingMutations > 0 || confirmationInFlight) {
+                return@synchronized null
             }
-        }
-
-        return when (admission) {
-            is ConfirmationAdmission.Accepted -> admission.arguments
-            is ConfirmationAdmission.Rejected -> {
-                resultCallback.onResult(CheckoutController.Result.Failed(admission.error))
-                null
+            val confirmationArguments = arguments() ?: return@synchronized null
+            check(mutex.tryLock()) {
+                "Checkout operation gate should be available after confirmation admission."
             }
-            is ConfirmationAdmission.NoArguments -> null
+            confirmationInFlight = true
+            confirmationWasRestored = false
+            updateIsUpdating()
+            confirmationArguments
         }
     }
 
     suspend fun observeConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                completeConfirmation {
-                    if (state.result !is ConfirmationHandler.Result.Succeeded) {
-                        refreshSession()
+                completeConfirmation { wasRestored ->
+                    // A confirmation returning through an activity result has no fresh response to
+                    // commit, but the session changed server-side, so re-fetch it.
+                    val response = (state.result as? ConfirmationHandler.Result.Succeeded)
+                        ?.metadata?.get(CheckoutSessionResponseKey)
+                    refreshSession {
+                        if (response != null) {
+                            sessionRefresher.refresh(response)
+                        } else {
+                            sessionRefresher.refresh()
+                        }
                     }
-                    state.result.asCheckoutResult()
+                    state.result.asCheckoutResult(wasRestored)
                 }
             }
         }
@@ -126,27 +120,29 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 
     suspend fun failConfirmation(error: Throwable) {
         completeConfirmation {
-            refreshSession()
+            refreshSession { sessionRefresher.refresh() }
             CheckoutController.Result.Failed(error)
         }
     }
 
-    private suspend fun completeConfirmation(result: suspend () -> CheckoutController.Result) {
-        val shouldComplete = synchronized(admissionLock) {
+    private suspend fun completeConfirmation(
+        mapResult: suspend (confirmationWasRestored: Boolean) -> CheckoutController.Result?,
+    ) {
+        val wasRestored = synchronized(admissionLock) {
             if (!confirmationInFlight || confirmationCompletionClaimed) {
-                false
+                return
             } else {
                 confirmationCompletionClaimed = true
-                true
+                confirmationWasRestored
             }
         }
-        if (!shouldComplete) return
 
         try {
-            resultCallback.onResult(result())
+            mapResult(wasRestored)?.let(resultCallback::onResult)
         } finally {
             synchronized(admissionLock) {
                 confirmationInFlight = false
+                confirmationWasRestored = false
                 confirmationCompletionClaimed = false
                 mutex.unlock()
                 updateIsUpdating()
@@ -158,9 +154,9 @@ internal class CheckoutOperationCoordinator @Inject constructor(
      * The refreshed state has to be committed before the result reaches the integrator, but a failed
      * refresh must not replace the confirmation result the integrator is waiting on.
      */
-    private suspend fun refreshSession() {
+    private suspend fun refreshSession(refresh: suspend () -> Unit) {
         try {
-            sessionRefresher.refresh()
+            refresh()
         } catch (error: CancellationException) {
             throw error
         } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
@@ -171,18 +167,20 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private fun updateIsUpdating() {
         _isUpdating.value = confirmationInFlight || pendingMutations > 0
     }
-
-    private sealed interface ConfirmationAdmission {
-        data class Accepted(val arguments: ConfirmationHandler.Args) : ConfirmationAdmission
-        data class Rejected(val error: Throwable) : ConfirmationAdmission
-        data object NoArguments : ConfirmationAdmission
-    }
 }
 
-private fun ConfirmationHandler.Result.asCheckoutResult(): CheckoutController.Result {
+private fun ConfirmationHandler.Result.asCheckoutResult(
+    confirmationWasRestored: Boolean,
+): CheckoutController.Result? {
     return when (this) {
         is ConfirmationHandler.Result.Succeeded -> CheckoutController.Result.Completed()
-        is ConfirmationHandler.Result.Canceled -> CheckoutController.Result.Canceled()
+        is ConfirmationHandler.Result.Canceled -> when (action) {
+            ConfirmationHandler.Result.Canceled.Action.InformCancellation ->
+                CheckoutController.Result.Canceled()
+            ConfirmationHandler.Result.Canceled.Action.None ->
+                CheckoutController.Result.Canceled().takeIf { confirmationWasRestored }
+            ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails -> null
+        }
         is ConfirmationHandler.Result.Failed -> CheckoutController.Result.Failed(cause)
     }
 }

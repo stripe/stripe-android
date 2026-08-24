@@ -35,7 +35,7 @@ internal sealed class ApduResponseError(
             when {
                 isDeclined() -> R.string.stripe_nfc_scan_error_declined_card.resolvableString
                 isUnsupported() -> R.string.stripe_nfc_scan_unsupported_card.resolvableString
-                else -> R.string.stripe_tap_to_add_card_default_error_action.resolvableString
+                else -> R.string.stripe_nfc_try_again_error.resolvableString
             }
         }
 
@@ -89,10 +89,8 @@ internal sealed class ApduResponseError(
         override val userMessage: ResolvableString = R.string.stripe_nfc_scan_internal_error_message.resolvableString
     }
 
-    class Invalid(
-        val data: ByteArray
-    ) : ApduResponseError(
-        message = "Invalid data in response: ${data.toHexString()}"
+    class Invalid : ApduResponseError(
+        message = "Invalid data in response!"
     ) {
         override val errorCode: String = "cardUnsupportedByNfc"
         override val userMessage: ResolvableString = R.string.stripe_nfc_scan_internal_error_message.resolvableString

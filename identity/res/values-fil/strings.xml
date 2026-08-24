@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Kasama sa mga tinatanggap na uri ng ID</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Panatilihin ang lebel ng ID</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Payagan</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Mga Setting ng App</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Pahintulot ng kamera</string>
   <string name="stripe_camera_permission_rationale">Ginagamit ng app na ito ang camera para i-scan ang iyong mga dokumento ng pagkakakilanlan at kumuha ng mga larawan para patunayan ang iyong pagkakakilanlan.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Nakuhanan na nang nakaharap</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Nakuhanan ang kaliwa</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Nakuhanan ang kanan</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Kinukunan...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Puwede mong subukan muli o mag-upload ng imahe mula sa iyong device.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Hindi makunan ng imahe</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Tanggihan</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Hindi nakikita ang mga detalye</string>
   <string name="stripe_decrease_lighting_2">Lumipat sa mas madilim na lugar</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Kailangan namin ng pahintulot na gamitin ang iyong kamera. Mangyaring payagan ang pag-access ng kamera sa mga setting ng app.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Huwag gumalaw, ini-iscan</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Huwag gumalaw...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">ID</string>
   <!-- Label for ID number section -->
@@ -224,10 +236,28 @@
   <string name="stripe_selfie_capture_complete">Kumpleto na ang mga pagkuha ng selfie</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Mga pagkuha ng selfie</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Mahusay! Sinusuri ang iyong mga larawan....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Sa iyong pahintulot, maaaring gamitin ng Stripe ang iyong mga larawan para mapabuti ang pagtuklas ng pandaraya. Hindi makakaapekto sa iyong pag-verify ang pagtanggi.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">I-verify gamit ang selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">nakunan ang isang selfie</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Humarap sa kaliwa</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Humarap sa kanan</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Lumapit</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Hindi pa na-save Ang iyong mga imaheng selfie. Gusto mo bang umalis?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Ilagay ang iyong mukha sa loob ng frame</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Selfie</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Tulungan kaming pagbutihin ang mga pag-verify</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Awtomatikong kukunin ang ilang larawan sa susunod na hakbang upang patunayan na ikaw nga ito</string>
   <!-- Title for selfie warmup page -->

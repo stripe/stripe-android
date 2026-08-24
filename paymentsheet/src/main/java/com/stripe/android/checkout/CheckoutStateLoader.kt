@@ -3,12 +3,15 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
+import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutStateLoader @Inject constructor(
@@ -19,6 +22,7 @@ internal class CheckoutStateLoader @Inject constructor(
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHolder: CheckoutControllerStateHolder,
     private val customerStateHolder: CustomerStateHolder,
+    private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) {
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
@@ -61,6 +65,7 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
+        embeddedConfig.appearance.parseAppearance()
 
         val commonConfiguration = commonConfigurationFactory.create(
             configuration = configuration,
@@ -74,7 +79,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 checkoutSessionResponse = response,
             ),
             integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
-                isRowSelectionImmediateAction = false,
+                isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
                 configuration = embeddedConfig,
                 paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
             ),
@@ -103,7 +108,6 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
-            commonConfiguration = commonConfiguration,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
@@ -144,6 +148,7 @@ internal class CheckoutStateLoader @Inject constructor(
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): CheckoutCollectedDetails {
     return CheckoutCollectedDetails(
+        email = defaults.email,
         shippingName = defaults.shippingDetails?.name,
         billingName = defaults.billingDetails?.name,
         shippingAddress = defaults.shippingDetails?.address,

@@ -22,7 +22,7 @@ internal object LinkTypeSettingsDefinition :
 
         return (
             LinkSettingsDefinition.applicable(configurationData, settings) &&
-                settings[LinkSettingsDefinition] == true
+                settings[LinkSettingsDefinition] != LinkDisplaySetting.Never
             )
     }
 

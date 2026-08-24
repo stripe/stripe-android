@@ -89,7 +89,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = googlePayConfig()?.let {
         GooglePayPaymentMethodLauncher(
             context = activity,
-            lifecycleScope = activity.lifecycleScope,
+            lifecycleOwner = activity,
             activityResultLauncher = googlePayActivityResultLauncher,
             config = it,
             readyCallback = ::handleGooglePayIsReady,

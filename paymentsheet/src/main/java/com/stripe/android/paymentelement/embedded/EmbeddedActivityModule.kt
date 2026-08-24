@@ -32,12 +32,14 @@ import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFact
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -118,6 +120,11 @@ internal interface EmbeddedActivityModule {
     fun bindsConfirmationHelper(
         confirmationHelper: DefaultSheetActivityConfirmationHelper
     ): SheetActivityConfirmationHelper
+
+    @Binds
+    fun bindsContinueCoordinator(
+        continueCoordinator: DefaultSheetActivityContinueCoordinator
+    ): SheetActivityContinueCoordinator
 
     @Suppress("TooManyFunctions")
     companion object {

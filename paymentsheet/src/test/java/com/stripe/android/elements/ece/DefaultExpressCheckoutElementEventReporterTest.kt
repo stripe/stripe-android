@@ -5,18 +5,17 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
-import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
 import org.junit.Test
@@ -33,8 +32,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         assertThat(loggedParams).containsEntry(
             "ece_config",
             mapOf(
-                "link_visibility" to "auto",
-                "google_pay_visibility" to "auto",
+                "link_visibility" to "automatic",
+                "google_pay_visibility" to "automatic",
             ),
         )
         assertThat(
@@ -45,10 +44,51 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
     }
 
     @Test
+    fun `onEceDisplayed reports google pay as not visible when disabled`() = runScenario(
+        expressCheckoutElementConfiguration = ExpressCheckoutElement.Configuration()
+            .googlePayConfiguration(
+                ExpressCheckoutElement.Configuration.GooglePayConfiguration()
+                    .display(ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never)
+            ),
+    ) {
+        reporter.onEceDisplayed()
+
+        val loggedParams = executor.getExecutedRequests().single().params
+        assertThat(loggedParams).containsEntry(
+            "ece_config",
+            mapOf(
+                "link_visibility" to "automatic",
+                "google_pay_visibility" to "never",
+            ),
+        )
+    }
+
+    @Test
+    fun `onEceDisplayed reports Link wallet button as hidden`() = runScenario(
+        expressCheckoutElementConfiguration = ExpressCheckoutElement.Configuration()
+            .linkConfiguration(
+                ExpressCheckoutElement.Configuration.LinkConfiguration()
+                    .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden)
+            ),
+    ) {
+        reporter.onEceDisplayed()
+
+        val loggedParams = executor.getExecutedRequests().single().params
+        assertThat(loggedParams).containsEntry(
+            "ece_config",
+            mapOf(
+                "link_visibility" to "wallet_button_hidden",
+                "google_pay_visibility" to "automatic",
+            ),
+        )
+    }
+
+    @Test
     fun `onEceWalletTapped fires expected event for Link`() = runScenario {
         val linkButton = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            linkAccountInfo = LinkAccountUpdate.Value(null)
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            buttonTheme = ButtonTheme.Automatic,
         )
 
         reporter.onEceWalletTapped(linkButton)
@@ -73,43 +113,6 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         assertThat(loggedParams).doesNotContainKey("link_context")
     }
 
-    @Test
-    fun `onEcePaymentSuccess fires expected event with Link params`() = runScenario {
-        val linkButton = ExpressButton.Link.create(
-            paymentMethodMetadata = paymentMethodMetadata,
-            linkAccountInfo = LinkAccountUpdate.Value(null)
-        )
-
-        reporter.onEcePaymentSuccess(linkButton)
-
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_ece_payment_success")
-        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
-        assertThat(loggedParams).containsEntry("duration", 1.0f)
-        assertThat(loggedParams).containsEntry("selected_lpm", "link")
-        assertThat(loggedParams).containsKey("link_context")
-    }
-
-    @Test
-    fun `onEcePaymentFailure fires expected event with error params`() = runScenario {
-        reporter.onEcePaymentFailure(
-            expressButton = googlePayButton,
-            error = ConfirmationHandler.Result.Failed(
-                cause = IllegalStateException("Payment failed"),
-                message = "Payment failed".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(10),
-            ),
-        )
-
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_ece_payment_failure")
-        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
-        assertThat(loggedParams).containsEntry("duration", 1.0f)
-        assertThat(loggedParams).containsEntry("selected_lpm", "google_pay")
-        assertThat(loggedParams).containsEntry("error_message", "googlePay_10")
-        assertThat(loggedParams).containsEntry("error_code", "10")
-    }
-
     private class Scenario(
         val reporter: ExpressCheckoutElementEventReporter,
         val executor: FakeAnalyticsRequestExecutor,
@@ -119,6 +122,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
     )
 
     private fun runScenario(
+        expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration =
+            ExpressCheckoutElement.Configuration(),
         block: Scenario.() -> Unit,
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
@@ -129,9 +134,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 mapOf("example_analytics_metadata" to AnalyticsMetadata.Value.SimpleBoolean(true))
             ),
         )
-        val googlePayConfiguration = GooglePayConfiguration(
-            environment = GooglePayConfiguration.Environment.Test,
-        ).build()
+        val googlePayConfiguration = GooglePayConfiguration().build()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(
             savedStateHandle = SavedStateHandle(),
             availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
@@ -143,8 +146,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         )
         stateHolder.state = CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
-                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+                .expressCheckoutElement(expressCheckoutElementConfiguration)
                 .build(),
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -172,6 +174,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     googlePayConfiguration = googlePayConfiguration,
                     shippingAddressRequired = false,
+                    buttonTheme = ButtonTheme.Automatic,
                 ),
             )
         )

@@ -204,16 +204,16 @@ private fun DismissButton(
         tint = dismissColor,
         modifier = Modifier
             .size(8.dp)
-            .clearAndSetSemantics {
-                contentDescription = dismissLabel
-                role = Role.Button
-            }
             .clickable(
                 enabled = enabled,
                 interactionSource = dismissInteractionSource,
                 indication = null,
                 onClick = onDismiss,
-            ),
+            )
+            .clearAndSetSemantics {
+                contentDescription = dismissLabel
+                role = Role.Button
+            },
     )
 }
 

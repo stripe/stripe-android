@@ -38,7 +38,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -223,7 +222,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) { isLinkAvailable, linkEmail, account, buttonsEnabled, paymentMethodMetadata ->
         val linkBrand = paymentMethodMetadata?.effectiveLinkBrand(account) ?: LinkBrand.Link
         WalletsState.create(
-            isLinkAvailable = isLinkAvailable,
+            isLinkAvailable = isLinkAvailable == true && paymentMethodMetadata?.shouldShowLinkButton == true,
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
             buttonsEnabled = buttonsEnabled,
@@ -589,7 +588,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
                         cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-                        googlePayDisplayItems = GooglePayDisplayItemsFactory.create(paymentMethodMetadata),
                         googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                             configuration = config.asCommonConfiguration(),
                             paymentMethodMetadata = paymentMethodMetadata,

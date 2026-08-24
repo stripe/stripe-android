@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
@@ -29,6 +30,7 @@ import javax.inject.Singleton
         PaymentElementRequestSurfaceModule::class,
         PaymentSheetLauncherModule::class,
         GooglePayLauncherModule::class,
+        GooglePayPaymentDataUpdateNoOpModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,

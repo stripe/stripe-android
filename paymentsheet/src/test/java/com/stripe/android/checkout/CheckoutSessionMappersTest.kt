@@ -21,25 +21,19 @@ class CheckoutSessionMappersTest {
     @Test
     fun `maps status open`() {
         val session = createSession(status = CheckoutSessionResponse.Status.OPEN)
-        assertThat(session.status).isEqualTo(Session.Status.Open)
+        assertThat(session.status).isInstanceOf(Session.Status.Open::class.java)
     }
 
     @Test
     fun `maps status complete`() {
         val session = createSession(status = CheckoutSessionResponse.Status.COMPLETE)
-        assertThat(session.status).isEqualTo(Session.Status.Complete)
+        assertThat(session.status).isInstanceOf(Session.Status.Complete::class.java)
     }
 
     @Test
     fun `maps status expired`() {
         val session = createSession(status = CheckoutSessionResponse.Status.EXPIRED)
-        assertThat(session.status).isEqualTo(Session.Status.Expired)
-    }
-
-    @Test
-    fun `maps status unknown`() {
-        val session = createSession(status = CheckoutSessionResponse.Status.UNKNOWN)
-        assertThat(session.status).isEqualTo(Session.Status.Unknown)
+        assertThat(session.status).isInstanceOf(Session.Status.Expired::class.java)
     }
 
     @Test
@@ -64,6 +58,16 @@ class CheckoutSessionMappersTest {
     fun `maps customerEmail`() {
         val session = createSession(customerEmail = "test@example.com")
         assertThat(session.email).isEqualTo("test@example.com")
+    }
+
+    @Test
+    fun `maps collected email over customerEmail`() {
+        val session = createSession(
+            customerEmail = "checkout@example.com",
+            collectedEmail = "collected@example.com",
+        )
+
+        assertThat(session.email).isEqualTo("collected@example.com")
     }
 
     @Test
@@ -313,6 +317,7 @@ class CheckoutSessionMappersTest {
         liveMode: Boolean = false,
         currency: String = "usd",
         customerEmail: String? = null,
+        collectedEmail: String? = null,
         taxStatus: CheckoutSessionResponse.TaxStatus = CheckoutSessionResponse.TaxStatus.READY,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
@@ -331,6 +336,7 @@ class CheckoutSessionMappersTest {
             shippingOptions = shippingOptions,
             adaptivePricingInfo = adaptivePricingInfo,
         ).asCheckoutSession(
+            collectedEmail = collectedEmail,
             flagImages = null,
             paymentOptionDisplayData = null,
             availableExpressButtonTypes = emptyList(),

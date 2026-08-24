@@ -358,6 +358,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CHECKOUT_SELECTION_SET_BEFORE_LOAD(
             partialEventName = "checkout.selection_set_before_load"
+        ),
+        CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
+            partialEventName = "checkout.google_pay.unexpected_callback_trigger"
         );
 
         override val eventName: String

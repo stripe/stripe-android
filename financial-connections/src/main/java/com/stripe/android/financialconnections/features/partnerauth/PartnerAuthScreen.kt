@@ -10,12 +10,17 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun PartnerAuthScreen(
     pane: Pane,
-    inModal: Boolean
+    inModal: Boolean,
+    autoLaunchAuthSession: Boolean,
 ) {
     val viewModel: PartnerAuthViewModel = paneViewModel {
         PartnerAuthViewModel.factory(
             parentComponent = it,
-            args = PartnerAuthViewModel.Args(inModal, pane)
+            args = PartnerAuthViewModel.Args(
+                inModal = inModal,
+                pane = pane,
+                autoLaunchAuthSession = autoLaunchAuthSession,
+            )
         )
     }
     val state by viewModel.stateFlow.collectAsState()

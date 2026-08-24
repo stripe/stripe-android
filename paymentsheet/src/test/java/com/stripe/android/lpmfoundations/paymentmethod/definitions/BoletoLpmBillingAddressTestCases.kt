@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val boletoNoBillingAddressRawValues = mapOf(
@@ -73,23 +74,47 @@ private val boletoWithBillingAddressExpectedPaymentMethodParams = PaymentMethodC
 internal val boletoTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Never",
-        paymentMethodType = PaymentMethod.Type.Boleto,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Boleto,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = boletoNoBillingAddressRawValues,
-        expectedPaymentMethodParams = boletoNoBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = boletoNoBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.Boleto,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Boleto,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = boletoWithBillingAddressRawValues,
-        expectedPaymentMethodParams = boletoWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = boletoWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Full",
-        paymentMethodType = PaymentMethod.Type.Boleto,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Boleto,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = boletoWithBillingAddressRawValues,
-        expectedPaymentMethodParams = boletoWithBillingAddressExpectedPaymentMethodParams,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = boletoWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
     ),
 )

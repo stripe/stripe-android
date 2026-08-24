@@ -1,6 +1,9 @@
 package com.stripe.android.financialconnections.domain
 
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
@@ -11,6 +14,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetConfigur
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.model.genericErrorPane
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -89,6 +93,28 @@ internal class PollAuthorizationSessionAccountsTest {
     }
 
     @Test
+    fun `an error carrying a server-driven pane surfaces unwrapped`() = runTest {
+        val sync = syncResponse(
+            sessionManifest().copy(
+                activeAuthSession = authorizationSession(),
+                activeInstitution = institution()
+            )
+        )
+
+        whenever(repository.postAuthorizationSessionAccounts(any(), any()))
+            .thenAnswer { throw genericErrorPaneException() }
+
+        val exception: Throwable? = runCatching {
+            pollAuthorizationSessionAccounts.invoke(true, sync)
+        }.exceptionOrNull()
+
+        // Wrapping it in an AccountLoadError would bury the pane and make the Account Picker
+        // render its own inline error instead.
+        assertIs<InvalidRequestException>(exception)
+        assertThat(exception.genericErrorPane()?.heading).isEqualTo("Something went wrong")
+    }
+
+    @Test
     fun `test empty account list retrieved`() = runTest {
         val sync = syncResponse(
             sessionManifest().copy(
@@ -118,3 +144,17 @@ internal class PollAuthorizationSessionAccountsTest {
 }
 
 private fun retryException() = APIException(statusCode = HttpURLConnection.HTTP_ACCEPTED)
+
+private fun genericErrorPaneException() = InvalidRequestException(
+    stripeError = StripeError(
+        extraFields = mapOf(
+            "reason" to "missing_required_data",
+            "use_generic_error_pane" to "true",
+            "generic_error_pane_heading" to "Something went wrong",
+            "generic_error_pane_subheading" to "Please try again.",
+            "generic_error_pane_primary_cta" to "Try again",
+            "generic_error_pane_primary_cta_action" to "restart_auth_flow",
+        )
+    ),
+    statusCode = HttpURLConnection.HTTP_BAD_REQUEST,
+)

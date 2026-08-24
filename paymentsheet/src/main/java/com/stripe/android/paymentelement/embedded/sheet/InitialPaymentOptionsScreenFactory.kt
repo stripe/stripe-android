@@ -1,14 +1,13 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
@@ -26,6 +25,7 @@ import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +53,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val formScreenFactory: EmbeddedFormScreenFactory,
     private val linkAccountHolder: LinkAccountHolder,
     private val addPaymentMethodInteractorFactory: EmbeddedAddPaymentMethodInteractorFactory,
+    private val continueCoordinator: SheetActivityContinueCoordinator,
 ) {
     fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
         return when (paymentMethodMetadata.paymentMethodOrientation()) {
@@ -70,6 +71,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
+            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
         )
         return buildList {
             add(paymentOptionsScreen)
@@ -90,20 +92,13 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             eventReporter = eventReporter,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
+            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
         )
     }
 
-    private fun onContinueClick() {
-        sheetActivityStateHolder.setResult(
-            EmbeddedActivityResult.Complete(
-                selection = selectionHolder.selection.value,
-                previousNewSelections = selectionHolder.previousNewSelections,
-                hasBeenConfirmed = false,
-                customerState = customerStateHolder.customer.value,
-                shouldInvokeSelectionCallback = false,
-                launchMode = EmbeddedLaunchMode.PaymentOptions,
-            )
-        )
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun onContinueClick() {
+        continueCoordinator.onContinue()
     }
 
     private fun createFormHelper(coroutineScope: CoroutineScope): FormHelper {
@@ -123,7 +118,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     ): PaymentMethodVerticalLayoutInteractor {
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
-            processing = stateFlowOf(false),
+            processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
             temporarySelection = stateFlowOf(null),
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
@@ -227,7 +222,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private fun walletsState(): WalletsState? {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         return WalletsState.create(
-            isLinkAvailable = paymentMethodMetadata.linkState != null,
+            isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton,
             linkEmail = null,
             isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
             buttonsEnabled = true,

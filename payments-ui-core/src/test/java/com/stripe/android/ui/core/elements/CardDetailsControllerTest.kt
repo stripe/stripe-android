@@ -1,8 +1,18 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
+import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.isFocused
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -10,7 +20,11 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FieldValidationMessageComparator
@@ -32,6 +46,12 @@ class CardDetailsControllerTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -331,6 +351,57 @@ class CardDetailsControllerTest {
     }
 
     @Test
+    fun `When card pill is dismissed, pill is hidden and fields are cleared`() = composeTest { controller ->
+        turbineScope {
+            val cardPillTurbine = controller.cardPillElement.testIn(this)
+            val numberControllerValueTurbine =
+                controller.numberElement.controller.rawFieldValue.testIn(this)
+            val expirationControllerValueTurbine =
+                controller.expirationDateElement.controller.rawFieldValue.testIn(this)
+            val cvcControllerValueTurbine = controller.cvcElement.controller.rawFieldValue.testIn(this)
+
+            assertThat(cardPillTurbine.awaitItem()).isNull()
+            assertThat(numberControllerValueTurbine.awaitItem()).isEmpty()
+            assertThat(expirationControllerValueTurbine.awaitItem()).isEmpty()
+            assertThat(cvcControllerValueTurbine.awaitItem()).isEmpty()
+
+            controller.onScannedCard(
+                ScannedCardDetails.Validated(
+                    cardNumber = "4242424242424242",
+                    expirationYear = 2030,
+                    expirationMonth = 6,
+                )
+            )
+
+            controller.cvcElement.controller.onRawValueChange("323")
+
+            idleLooper()
+
+            assertThat(cardPillTurbine.awaitItem()).isNotNull()
+            assertThat(numberControllerValueTurbine.awaitItem()).isEqualTo("4242424242424242")
+            assertThat(expirationControllerValueTurbine.awaitItem()).isEqualTo("0630")
+            assertThat(cvcControllerValueTurbine.awaitItem()).isEqualTo("323")
+
+            composeTestRule.onNodeWithContentDescription(
+                label = context.getString(R.string.stripe_scanned_card_pill_clear_content_description),
+            )
+                .performClick()
+
+            composeTestRule.waitForIdle()
+
+            assertThat(cardPillTurbine.awaitItem()).isNull()
+            assertThat(numberControllerValueTurbine.awaitItem()).isEmpty()
+            assertThat(expirationControllerValueTurbine.awaitItem()).isEmpty()
+            assertThat(cvcControllerValueTurbine.awaitItem()).isEmpty()
+
+            cardPillTurbine.cancelAndIgnoreRemainingEvents()
+            numberControllerValueTurbine.cancelAndIgnoreRemainingEvents()
+            expirationControllerValueTurbine.cancelAndIgnoreRemainingEvents()
+            cvcControllerValueTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `When new card scanned with no expiry date, should clear date`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
@@ -361,6 +432,68 @@ class CardDetailsControllerTest {
             .isEqualTo("5555555555554444")
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
             .isEqualTo("")
+    }
+
+    @Test
+    fun `When validated card scanned, CVC field gains focus`() = composeTest { controller ->
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(!isFocused())
+
+        controller.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationYear = 2030,
+                expirationMonth = 6,
+            )
+        )
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(isFocused())
+    }
+
+    @Test
+    fun `When card scanned via camera, CVC field does not gain focus`() = composeTest { controller ->
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(!isFocused())
+
+        controller.onScannedCard(
+            ScannedCardDetails.Unvalidated(
+                cardNumber = "5555555555554444",
+                expirationYear = 2044,
+                expirationMonth = 4,
+            )
+        )
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(!isFocused())
+    }
+
+    private fun composeTest(
+        block: suspend (controller: CardDetailsController) -> Unit,
+    ) = runTest {
+        val cardController = cardDetailsController()
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalCardNumberCompletedEventReporter provides FakeCardNumberCompletedEventReporter
+            ) {
+                Column {
+                    cardController.ComposeUI(
+                        enabled = true,
+                        field = CardDetailsElement(
+                            identifier = IdentifierSpec.Generic("card_details"),
+                            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+                            initialValues = mapOf(),
+                        ),
+                        modifier = Modifier,
+                        hiddenIdentifiers = emptySet(),
+                        lastTextFieldIdentifier = null,
+                    )
+                }
+            }
+        }
+
+        block(cardController)
     }
 
     private fun cardDetailsController(
@@ -433,5 +566,15 @@ class CardDetailsControllerTest {
         override fun determineState(input: String): TextFieldState {
             return textFieldState
         }
+    }
+
+    private object FakeCardNumberCompletedEventReporter : CardNumberCompletedEventReporter {
+        override fun onCardNumberCompleted() {
+            // No-op
+        }
+    }
+
+    private companion object {
+        const val CVC_TEXT = "CVC"
     }
 }

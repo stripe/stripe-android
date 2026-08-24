@@ -8,8 +8,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
-import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -48,11 +49,13 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             ExpressButton.Link.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
+                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
             ),
             ExpressButton.GooglePay.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 googlePayConfiguration = googlePayConfiguration,
                 shippingAddressRequired = false,
+                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
             ),
         )
     }
@@ -68,6 +71,39 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         val googlePayButton = interactor.state.value.expressButtons.single() as ExpressButton.GooglePay
 
         assertThat(googlePayButton.shippingAddressRequired).isTrue()
+    }
+
+    @Test
+    fun `state contains configured button layout`() = runScenario(
+        configuration = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .buttonLayout(
+                        ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                            .maxColumns(2)
+                            .maxRows(1)
+                    )
+            ),
+    ) {
+        assertThat(interactor.state.value.buttonLayout.maxColumns).isEqualTo(2)
+        assertThat(interactor.state.value.buttonLayout.maxRows).isEqualTo(1)
+    }
+
+    @Test
+    fun `state contains configured button theme`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+        ),
+        configuration = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
+            ),
+    ) {
+        assertThat(interactor.state.value.expressButtons.map { it.buttonTheme }).containsExactly(
+            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
+            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
+        )
     }
 
     @Test
@@ -99,8 +135,10 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                         ExpressButton.Link.create(
                             paymentMethodMetadata = paymentMethodMetadata,
                             linkAccountInfo = LinkAccountUpdate.Value(null),
+                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                         ),
                     ),
+                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
                 ),
             )
 
@@ -112,8 +150,10 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                         ExpressButton.Link.create(
                             paymentMethodMetadata = paymentMethodMetadata,
                             linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
+                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                         ),
                     ),
+                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
                 ),
             )
 
@@ -146,6 +186,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     googlePayConfiguration = googlePayConfiguration,
                     shippingAddressRequired = false,
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
         }
@@ -198,7 +239,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
-        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration(),
+        googlePayConfiguration: CheckoutGooglePayConfiguration = createGooglePayConfiguration(),
         availableExpressButtonTypes: List<ExpressButtonType> = paymentMethodMetadata.availableWallets.map {
             when (it) {
                 WalletType.Link -> ExpressButtonType.Link
@@ -273,7 +314,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         val confirmationPerformer: FakeExpressCheckoutElementConfirmationPerformer,
         val linkAccountHolder: LinkAccountHolder,
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val googlePayConfiguration: GooglePayConfiguration.State,
+        val googlePayConfiguration: CheckoutGooglePayConfiguration,
         private val interactorFactory: () -> DefaultExpressCheckoutElementInteractor,
     ) {
         fun createInteractor(): DefaultExpressCheckoutElementInteractor {
@@ -284,10 +325,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     private fun createGooglePayConfiguration(
         buttonType: GooglePayConfiguration.ButtonType = GooglePayConfiguration.ButtonType.Pay,
         additionalEnabledNetworks: List<String> = emptyList(),
-    ): GooglePayConfiguration.State {
-        return GooglePayConfiguration(
-            GooglePayConfiguration.Environment.Test,
-        )
+    ): CheckoutGooglePayConfiguration {
+        return GooglePayConfiguration()
             .buttonType(buttonType)
             .additionalEnabledNetworks(additionalEnabledNetworks)
             .build()

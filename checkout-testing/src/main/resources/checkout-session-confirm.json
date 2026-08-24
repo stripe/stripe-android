@@ -1,6 +1,7 @@
 {
   "session_id": "cs_test_abc123",
   "ui_mode": "custom",
+  "status": "complete",
   "currency": "usd",
   "total_summary": {
     "subtotal": 5099,

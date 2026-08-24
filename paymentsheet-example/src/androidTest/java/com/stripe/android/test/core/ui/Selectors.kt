@@ -84,7 +84,7 @@ internal class Selectors(
         } else if (testParameters.paymentMethodCode == Blik.code) {
             30.seconds
         } else {
-            5.seconds
+            DEFAULT_UI_TIMEOUT
         }
     )
 
@@ -366,9 +366,14 @@ internal class Selectors(
 
     fun getName(labelText: String) = composeTestRule.onNodeWithText(labelText)
 
-    fun getLine1() = composeTestRule.onNodeWithText(
-        getResourceString(CoreR.string.stripe_address_label_address_line1)
-    )
+    fun enterAddressManually() {
+        composeTestRule.onNodeWithTextAfterWaiting(
+            getResourceString(UiCoreR.string.stripe_address_enter_manually)
+        ).performClick()
+        composeTestRule.onNodeWithTextAfterWaiting(
+            getResourceString(CoreR.string.stripe_address_label_city)
+        )
+    }
 
     fun getCity() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_city)

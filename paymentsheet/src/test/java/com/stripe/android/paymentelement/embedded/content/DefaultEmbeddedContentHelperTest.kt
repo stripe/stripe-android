@@ -35,12 +35,7 @@ internal class DefaultEmbeddedContentHelperTest {
     fun `embeddedContent is populated when state is set`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            state.value = EmbeddedContentHelperStateHolder.State(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-            )
+            state.value = EmbeddedContentHelperStateFactory.create()
             assertThat(awaitItem()).isNotNull()
         }
     }
@@ -49,12 +44,7 @@ internal class DefaultEmbeddedContentHelperTest {
     fun `clearing content closes the current interactor and emits null`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            state.value = EmbeddedContentHelperStateHolder.State(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-            )
+            state.value = EmbeddedContentHelperStateFactory.create()
             assertThat(awaitItem()).isNotNull()
             val interactor = verticalLayoutInteractors.single()
 
@@ -70,13 +60,13 @@ internal class DefaultEmbeddedContentHelperTest {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
             state.value = EmbeddedContentHelperStateFactory.create(
-                appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
+                embeddedAppearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
             )
             assertThat(awaitItem()).isNotNull()
             val previousInteractor = verticalLayoutInteractors.single()
 
             state.value = EmbeddedContentHelperStateFactory.create(
-                appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
+                embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             )
 
             assertThat(awaitItem()).isNotNull()
@@ -89,7 +79,7 @@ internal class DefaultEmbeddedContentHelperTest {
     @Test
     fun `initializing embeddedContentHelper with paymentMethodMetadata emits correct initial event`() = testScenario(
         initialState = EmbeddedContentHelperStateFactory.create(
-            appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
+            embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
         )
     ) {
         embeddedContentHelper.embeddedContent.test {

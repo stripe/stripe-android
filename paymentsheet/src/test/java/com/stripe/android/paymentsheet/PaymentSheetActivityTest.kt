@@ -24,6 +24,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -38,6 +39,7 @@ import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
@@ -1378,7 +1380,10 @@ internal class PaymentSheetActivityTest {
     private fun createGooglePayPaymentMethodLauncherFactory() =
         object : InternalGooglePayPaymentMethodLauncherFactory {
             override fun create(
+                instanceId: String,
+                lifecycleOwner: LifecycleOwner,
                 activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+                onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
             ): InternalGooglePayPaymentMethodLauncher {
                 return mock<InternalGooglePayPaymentMethodLauncher>()
             }

@@ -13,8 +13,10 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -206,19 +208,12 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure sends the trimmed default email to the checkout session`() = runConfigureScenario(
+    fun `configure seeds the default email locally`() = runConfigureScenario(
         configuration = CheckoutController.Configuration().defaults(
-            CheckoutController.Configuration.Defaults().email("  prefill@example.com  ")
+            CheckoutController.Configuration.Defaults().email("prefill@example.com")
         ),
         networkSetup = {
             networkRule.checkoutInit(responseFactory = ::successResponse)
-            networkRule.checkoutUpdate(
-                bodyPart("customer_email", "prefill@example.com"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-                responseFactory = successResponseFactory { json ->
-                    json.put("customer_email", "prefill@example.com")
-                },
-            )
         },
     ) {
         result.getOrThrow()
@@ -336,6 +331,24 @@ internal class CheckoutControllerTest {
         val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
         assertThat(setup.controller.session.value).isNull()
         assertThat(setup.stateHolder.state).isNull()
+    }
+
+    @Test
+    fun `session exposes available express checkout payment methods`() {
+        val session = createSession(
+            availableExpressButtonTypes = listOf(
+                ExpressButtonType.GooglePay(
+                    ExpressCheckoutElement.Configuration.GooglePayConfiguration().build()
+                ),
+                ExpressButtonType.Link,
+            ),
+        )
+
+        assertThat(session.availableExpressCheckoutPaymentMethods).hasSize(2)
+        assertThat(session.availableExpressCheckoutPaymentMethods[0])
+            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.GooglePay::class.java)
+        assertThat(session.availableExpressCheckoutPaymentMethods[1])
+            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.Link::class.java)
     }
 
     @Test
@@ -591,13 +604,9 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `updateEmail sends customer_email and updates session on success`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("customer_email", "checkout@example.com"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-            responseFactory = successResponseFactory(),
-        )
-
+    fun `updateEmail stores email locally without a network call`() = runMutationScenario {
+        // No checkoutUpdate is enqueued: email is client-only state and reloads from the existing
+        // response, so NetworkRule will fail the test if a request is made.
         val result = controller.updateEmail("checkout@example.com")
 
         result.getOrThrow()
@@ -605,41 +614,20 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `updateEmail trims whitespace`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("customer_email", "checkout@example.com"),
-            responseFactory = successResponseFactory(),
-        )
-
-        val result = controller.updateEmail("  checkout@example.com  ")
-
-        assertThat(result.isSuccess).isTrue()
-    }
-
-    @Test
-    fun `updateEmail sends empty customer_email when cleared with null`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("customer_email", ""),
-            responseFactory = successResponseFactory(),
-        )
-
+    fun `updateEmail clears email when session has no customer email`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
         val result = controller.updateEmail(null)
 
-        assertThat(result.isSuccess).isTrue()
+        result.getOrThrow()
+        assertThat(controller.session.value?.email).isNull()
     }
 
     @Test
-    fun `updateEmail returns failure and preserves session on error`() = runMutationScenario {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "Invalid email"}}""")
-        }
-        val before = controller.session.value
+    fun `updateEmail takes precedence over the session customer email`() = runMutationScenario {
+        controller.updateEmail("local@example.com").getOrThrow()
 
-        val result = controller.updateEmail("invalid")
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(controller.session.value).isEqualTo(before)
+        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
     }
 
     @Test
@@ -805,6 +793,19 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `refresh commits a complete session status to the state holder`() = runMutationScenario {
+        networkRule.checkoutInit(
+            responseFactory = successResponseFactory { json -> json.put("status", "complete") },
+        )
+
+        val result = controller.runServerUpdate { Result.success(Unit) }
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(controller.session.value?.status)
+            .isInstanceOf(CheckoutController.Session.Status.Complete::class.java)
+    }
+
+    @Test
     fun `runServerUpdate returns failure when serverUpdate throws`() = runMutationScenario {
         val before = controller.session.value
 
@@ -921,14 +922,14 @@ internal class CheckoutControllerTest {
             // The second mutation must target the session id produced by the first, proving the
             // mutex serialized them (an unserialized call would hit the original id and fail).
             networkRule.checkoutUpdate(
-                bodyPart("customer_email", "example3@example.com"),
+                bodyPart("updated_currency", "eur"),
                 sessionId = "cs_test_after_promo",
                 responseFactory = successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") },
             )
 
             val results = listOf(
                 async { controller.applyPromotionCode("10OFF") },
-                async { controller.updateEmail("example3@example.com") },
+                async { controller.updateCurrency("eur") },
             ).awaitAll()
 
             assertThat(results[0].isSuccess).isTrue()
@@ -1077,8 +1078,8 @@ internal class CheckoutControllerTest {
         checkoutInit(responseFactory = ::successResponse)
     }
 
-    // The merged loader configuration requires a billing email, which `configure` sources from the
-    // session's customer_email. The base fixture omits it, so inject one for the success paths.
+    // The base fixture omits customer_email. Inject one for standard success paths; a test can
+    // remove it in the JSON modifier when exercising an absent session email.
     // Link is disabled so the loader doesn't fire a consumer session lookup that's unrelated to
     // what these tests verify.
     private fun successResponse(response: MockResponse) {
@@ -1160,6 +1161,25 @@ internal class CheckoutControllerTest {
         )
     }
 
+    private fun createSession(
+        availableExpressButtonTypes: List<ExpressButtonType>,
+    ): CheckoutController.Session {
+        return CheckoutController.Session(
+            id = DEFAULT_CHECKOUT_SESSION_ID,
+            status = CheckoutController.Session.Status.Open(),
+            liveMode = false,
+            currency = "usd",
+            email = null,
+            tax = CheckoutController.Session.Tax(CheckoutController.Session.Tax.Status.Ready),
+            totalSummary = null,
+            lineItems = emptyList(),
+            shippingOptions = emptyList(),
+            paymentOptionDisplayData = null,
+            currencySelectorOptions = null,
+            availableExpressButtonTypes = availableExpressButtonTypes,
+        )
+    }
+
     private fun createControllerSetup(
         savedStateHandle: SavedStateHandle,
         integrationName: String,
@@ -1173,6 +1193,7 @@ internal class CheckoutControllerTest {
                 application = applicationContext,
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = CheckoutController.ResultCallback {},
+                rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
                 checkoutControllerSavedState = controllerSavedState,
             ).checkoutController
         )
@@ -1225,7 +1246,11 @@ internal class CheckoutControllerTest {
         assertLoadingConsumed: Boolean = false,
         block: suspend MutationScenario.() -> Unit,
     ) = runTest {
-        networkRule.checkoutInit(responseFactory = successResponseFactory(initModifier))
+        networkRule.checkoutInit(
+            responseFactory = successResponseFactory(
+                jsonModifier = initModifier,
+            )
+        )
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller

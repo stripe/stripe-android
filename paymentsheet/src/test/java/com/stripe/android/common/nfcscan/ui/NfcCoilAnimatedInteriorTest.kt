@@ -1,17 +1,16 @@
 package com.stripe.android.common.nfcscan.ui
 
 import android.os.Build
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.StateRestorationTester
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
@@ -29,10 +28,12 @@ import java.util.concurrent.TimeUnit
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class NfcCoilAnimatedInteriorTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    val stateRestorer = StateRestorationTester(composeRule)
 
     @Before
     fun setUp() {
@@ -120,10 +121,7 @@ internal class NfcCoilAnimatedInteriorTest {
 
     @Test
     fun `config change during checkmark animation resumes from saved progress`() {
-        val visible = mutableStateOf(true)
-
-        composeRule.setNfcCoilContent(
-            visible = visible,
+        stateRestorer.setNfcCoilContent(
             status = NfcScanningStatus.Scanned,
         )
 
@@ -134,7 +132,7 @@ internal class NfcCoilAnimatedInteriorTest {
         assertThat(progressBeforeConfigChange).isGreaterThan(0.1f)
         assertThat(progressBeforeConfigChange).isLessThan(0.99f)
 
-        composeRule.simulateConfigChange(visible)
+        stateRestorer.emulateSavedInstanceStateRestore()
 
         val progressAfterConfigChange = composeRule.checkmarkProgress()
         assertThat(progressAfterConfigChange)
@@ -145,10 +143,7 @@ internal class NfcCoilAnimatedInteriorTest {
 
     @Test
     fun `config change after animation complete does not restart success animation`() {
-        val visible = mutableStateOf(true)
-
-        composeRule.setNfcCoilContent(
-            visible = visible,
+        stateRestorer.setNfcCoilContent(
             status = NfcScanningStatus.Scanned,
         )
 
@@ -156,7 +151,7 @@ internal class NfcCoilAnimatedInteriorTest {
         composeRule.advanceThroughSuccessAnimation()
         assertCheckmarkProgressComplete(composeRule.checkmarkProgress())
 
-        composeRule.simulateConfigChange(visible)
+        stateRestorer.emulateSavedInstanceStateRestore()
 
         assertCheckmarkProgressComplete(composeRule.checkmarkProgress())
     }
@@ -164,10 +159,8 @@ internal class NfcCoilAnimatedInteriorTest {
     @Test
     fun `config change after success shown does not invoke onSuccessShown again`() {
         var successShownCount by mutableIntStateOf(0)
-        val visible = mutableStateOf(true)
 
-        composeRule.setNfcCoilContent(
-            visible = visible,
+        stateRestorer.setNfcCoilContent(
             status = NfcScanningStatus.Scanned,
             onSuccessShown = { successShownCount++ },
         )
@@ -177,7 +170,7 @@ internal class NfcCoilAnimatedInteriorTest {
         composeRule.advanceSuccessDelayBy(SUCCESS_SHOWN_DELAY_MS + FRAME_BUFFER_MS)
         assertThat(successShownCount).isEqualTo(1)
 
-        composeRule.simulateConfigChange(visible)
+        stateRestorer.emulateSavedInstanceStateRestore()
         composeRule.waitForIdle()
 
         assertThat(successShownCount).isEqualTo(1)
@@ -187,10 +180,8 @@ internal class NfcCoilAnimatedInteriorTest {
     @Test
     fun `config change during success delay resumes remaining delay`() {
         var successShownCount by mutableIntStateOf(0)
-        val visible = mutableStateOf(true)
 
-        composeRule.setNfcCoilContent(
-            visible = visible,
+        stateRestorer.setNfcCoilContent(
             status = NfcScanningStatus.Scanned,
             onSuccessShown = { successShownCount++ },
         )
@@ -202,7 +193,7 @@ internal class NfcCoilAnimatedInteriorTest {
         composeRule.advanceSuccessDelayBy(elapsedDelayMs)
         assertThat(successShownCount).isEqualTo(0)
 
-        composeRule.simulateConfigChange(visible)
+        stateRestorer.emulateSavedInstanceStateRestore()
         assertThat(successShownCount).isEqualTo(0)
 
         val remainingDelayMs = SUCCESS_SHOWN_DELAY_MS - elapsedDelayMs
@@ -228,31 +219,17 @@ internal class NfcCoilAnimatedInteriorTest {
         waitForIdle()
     }
 
-    private fun ComposeContentTestRule.setNfcCoilContent(
-        visible: MutableState<Boolean>,
+    private fun StateRestorationTester.setNfcCoilContent(
         status: NfcScanningStatus,
         onSuccessShown: () -> Unit = {},
     ) {
         setContent {
-            val saveableStateHolder = rememberSaveableStateHolder()
-
-            if (visible.value) {
-                saveableStateHolder.SaveableStateProvider(NFC_COIL_SAVABLE_KEY) {
-                    NfcCoilAnimatedInterior(
-                        status = status,
-                        onSuccessShown = onSuccessShown,
-                        modifier = Modifier.size(CoilSize),
-                    )
-                }
-            }
+            NfcCoilAnimatedInterior(
+                status = status,
+                onSuccessShown = onSuccessShown,
+                modifier = Modifier.size(CoilSize),
+            )
         }
-    }
-
-    private fun ComposeContentTestRule.simulateConfigChange(visible: MutableState<Boolean>) {
-        runOnUiThread { visible.value = false }
-        waitForIdle()
-        runOnUiThread { visible.value = true }
-        waitForIdle()
     }
 
     private fun assertCheckmarkProgressComplete(progress: Float) {
@@ -266,7 +243,6 @@ internal class NfcCoilAnimatedInteriorTest {
     }
 
     private companion object {
-        const val NFC_COIL_SAVABLE_KEY = "nfc_coil_animated_interior"
         const val FRAME_BUFFER_MS = 32L
         val CoilSize = 200.dp
         const val PROGRESS_TOLERANCE = 0.02f

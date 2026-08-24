@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFacto
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutSessionResponse.asCheckoutSession(
+    collectedEmail: String?,
     flagImages: Map<String, Bitmap>?,
     paymentOptionDisplayData: PaymentOptionDisplayData?,
     availableExpressButtonTypes: List<ExpressButtonType>,
@@ -19,7 +20,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         status = status.asStatus(),
         liveMode = liveMode,
         currency = currency,
-        email = customerEmail,
+        email = collectedEmail ?: customerEmail,
         tax = taxStatus.asTax(),
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },
@@ -36,10 +37,9 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.Status.asStatus(): Session.Status {
     return when (this) {
-        CheckoutSessionResponse.Status.OPEN -> Session.Status.Open
-        CheckoutSessionResponse.Status.COMPLETE -> Session.Status.Complete
-        CheckoutSessionResponse.Status.EXPIRED -> Session.Status.Expired
-        CheckoutSessionResponse.Status.UNKNOWN -> Session.Status.Unknown
+        CheckoutSessionResponse.Status.OPEN -> Session.Status.Open()
+        CheckoutSessionResponse.Status.COMPLETE -> Session.Status.Complete()
+        CheckoutSessionResponse.Status.EXPIRED -> Session.Status.Expired()
     }
 }
 

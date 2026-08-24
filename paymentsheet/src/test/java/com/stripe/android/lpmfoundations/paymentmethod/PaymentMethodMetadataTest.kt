@@ -1835,6 +1835,66 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `shouldShowLinkButton returns false when linkState is null`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = null,
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isFalse()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true when linkState is present and display is Automatic`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns false when linkState is present and display is Never`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Never,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isFalse()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns false when linkState is present and display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isFalse()
+    }
+
+    @Test
     fun `requiresMandate returns true for PMO SFU`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(

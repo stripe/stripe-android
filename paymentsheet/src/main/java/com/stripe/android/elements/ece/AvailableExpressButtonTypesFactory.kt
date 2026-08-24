@@ -1,7 +1,7 @@
 @file:OptIn(CheckoutSessionPreview::class)
 package com.stripe.android.elements.ece
 
-import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -12,7 +12,6 @@ internal fun interface AvailableExpressButtonTypesFactory {
     fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
-        googlePayConfiguration: GooglePayConfiguration.State?,
     ): List<ExpressButtonType>
 }
 
@@ -21,24 +20,42 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
     override fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
-        googlePayConfiguration: GooglePayConfiguration.State?,
     ): List<ExpressButtonType> {
-        return paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
+        val availableExpressButtonTypes = paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
             when (walletType) {
-                WalletType.GooglePay -> googlePayConfiguration?.let {
-                    ExpressButtonType.GooglePay(
-                        googlePayConfiguration = it,
+                WalletType.GooglePay -> ExpressButtonType.GooglePay(
+                        googlePayConfiguration = expressCheckoutElementConfiguration.googlePayConfiguration,
                     ).takeIf {
-                        expressCheckoutElementConfiguration.googlePayVisibility !=
-                            ExpressCheckoutElement.Configuration.GooglePayVisibility.Never
-                    }
+                    expressCheckoutElementConfiguration.googlePayConfiguration.display ==
+                        CheckoutGooglePayConfiguration.Display.Automatic
                 }
                 WalletType.Link -> ExpressButtonType.Link.takeIf {
-                    expressCheckoutElementConfiguration.linkVisibility !=
-                        ExpressCheckoutElement.Configuration.LinkVisibility.Never &&
+                    expressCheckoutElementConfiguration.linkConfiguration.display ==
+                        ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic &&
                         !expressCheckoutElementConfiguration.shippingAddressRequired
                 }
             }
+        }
+
+        val paymentMethodOrder = expressCheckoutElementConfiguration.paymentMethodOrder
+        if (paymentMethodOrder.isEmpty()) {
+            return availableExpressButtonTypes
+        }
+
+        return availableExpressButtonTypes.sortedBy { expressButtonType ->
+            paymentMethodOrder.indexOfFirst { paymentMethod ->
+                paymentMethod.matches(expressButtonType)
+            }.takeIf { it >= 0 } ?: Int.MAX_VALUE
+        }
+    }
+
+    private fun ExpressCheckoutElement.Configuration.PaymentMethodType.matches(
+        expressButtonType: ExpressButtonType,
+    ): Boolean {
+        return when (this) {
+            ExpressCheckoutElement.Configuration.PaymentMethodType.GooglePay ->
+                expressButtonType is ExpressButtonType.GooglePay
+            ExpressCheckoutElement.Configuration.PaymentMethodType.Link -> expressButtonType is ExpressButtonType.Link
         }
     }
 }

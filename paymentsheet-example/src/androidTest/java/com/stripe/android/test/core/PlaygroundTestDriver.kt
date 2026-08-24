@@ -781,7 +781,7 @@ internal class PlaygroundTestDriver(
             selectors.externalPaymentMethodCancelButton,
         )
 
-        isSelectPaymentMethodScreen()
+        waitForPaymentSheetActivity()
         selectors.buyButton.waitProcessingComplete()
         selectors.buyButton.isEnabled()
 
@@ -1259,8 +1259,7 @@ internal class PlaygroundTestDriver(
         )
         selectors.complete.click()
 
-        // PaymentSheetActivity is now on screen
-        waitForNotPlaygroundActivity()
+        waitForPaymentSheetActivity()
     }
 
     private fun launchCustom(clickMultiStep: Boolean = true) {

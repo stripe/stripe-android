@@ -98,11 +98,6 @@ internal data class CommonConfiguration(
                     "Customer information is provided by the checkout session."
             )
         }
-        if (defaultBillingDetails?.email == null) {
-            throw IllegalArgumentException(
-                "configuration.defaultBillingDetails.email must be set when using CheckoutSession initialization mode."
-            )
-        }
         if (externalPaymentMethods.isNotEmpty()) {
             throw IllegalArgumentException(
                 "configuration.externalPaymentMethods must not be set when using CheckoutSession initialization mode."

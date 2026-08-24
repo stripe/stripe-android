@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Parcelable
 import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -22,7 +21,6 @@ internal data class CheckoutControllerState(
     val collectedDetails: CheckoutCollectedDetails,
     val paymentMethodMetadata: PaymentMethodMetadata,
     val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
-    val commonConfiguration: CommonConfiguration,
     val paymentSelection: PaymentSelection?,
     val temporarySelection: String?,
     val previousNewSelections: Bundle,
@@ -32,6 +30,7 @@ internal data class CheckoutControllerState(
         availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
     ): Session {
         return checkoutSessionResponse.asCheckoutSession(
+            collectedEmail = collectedDetails.email,
             flagImages = flagImages,
             paymentOptionDisplayData = paymentOptionFactory.create(
                 selection = paymentSelection,
@@ -40,7 +39,6 @@ internal data class CheckoutControllerState(
             availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
-                googlePayConfiguration = configuration.googlePayConfiguration,
             )
         )
     }

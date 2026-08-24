@@ -128,6 +128,14 @@ internal data class PaymentMethodMetadata(
         }
 
     /**
+     * Canonical source of truth for whether the Link button/row should be rendered in the
+     * payment element UI. Link may remain functionally enabled ([linkState] non-null) even when
+     * its button is hidden via [PaymentSheet.LinkConfiguration.Display.WalletButtonHidden].
+     */
+    val shouldShowLinkButton: Boolean
+        get() = linkState != null && linkConfiguration.shouldShowButton
+
+    /**
      * Returns the consumer's LinkBrand if logged in, otherwise falls back to the metadata's brand.
      */
     internal fun effectiveLinkBrand(account: LinkAccount?): LinkBrand {

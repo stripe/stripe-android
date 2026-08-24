@@ -3,12 +3,18 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
@@ -19,7 +25,10 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -129,6 +138,36 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
+    fun `configuration change keeps saved payment method confirmation screen`() = launch { scenario ->
+        val interactor = FakeSavedPaymentMethodConfirmInteractor()
+        lateinit var originalScreen: EmbeddedNavigator.Screen.SavedPaymentMethodConfirm
+        scenario.onActivity { activity ->
+            originalScreen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
+                interactor = interactor,
+                isLiveMode = true,
+                eventReporter = activity.eventReporter,
+                sheetActivityStateHolder = activity.sheetActivityStateHolder,
+                confirmationHelper = FakeSheetActivityConfirmationHelper(),
+                embeddedSelectionHolder = activity.selectionHolder,
+                customerStateHolder = activity.customerStateHolder,
+                launchMode = EmbeddedLaunchMode.PaymentOptions,
+            )
+            activity.embeddedNavigator.performAction(
+                EmbeddedNavigator.Action.ReplaceCurrentScreen(originalScreen)
+            )
+        }
+        onIdle()
+
+        scenario.recreate()
+        onIdle()
+
+        scenario.onActivity { activity ->
+            assertThat(activity.embeddedNavigator.screen.value).isSameInstanceAs(originalScreen)
+        }
+        interactor.validate()
+    }
+
+    @Test
     fun `cancelled result contains customer state`() = launch { scenario ->
         Espresso.pressBack()
 
@@ -137,6 +176,40 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.customerState).isNotNull()
+    }
+
+    @Test
+    fun `processing blocks back and disables vertical payment method rows`() = launch { scenario ->
+        val cardRow = composeTestRule.onNodeWithTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_card")
+        cardRow.assertIsEnabled()
+
+        scenario.onActivity { activity ->
+            activity.sheetActivityStateHolder.updateProcessing(true)
+        }
+        composeTestRule.waitForIdle()
+
+        cardRow.assertIsNotEnabled()
+        composeTestRule.onNodeWithText(
+            applicationContext.getString(R.string.stripe_paymentsheet_primary_button_processing)
+        ).assertIsDisplayed()
+        Espresso.pressBack()
+        onIdle()
+        scenario.onActivity { activity ->
+            assertThat(activity.embeddedNavigator.screen.value)
+                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+        }
+    }
+
+    @Test
+    fun `vertical payment options displays activity error`() = launch { scenario ->
+        val errorMessage = "Unable to update the tax region."
+
+        scenario.onActivity { activity ->
+            activity.sheetActivityStateHolder.updateError(errorMessage.resolvableString)
+        }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(errorMessage).assertIsDisplayed()
     }
 
     private fun launch(

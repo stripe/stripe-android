@@ -17,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
@@ -65,6 +66,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         EmbeddedPaymentElementViewModelModule::class,
+        GooglePayPaymentDataUpdateNoOpModule::class,
         GooglePayLauncherModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         TapToAddConnectionStarterModule::class,

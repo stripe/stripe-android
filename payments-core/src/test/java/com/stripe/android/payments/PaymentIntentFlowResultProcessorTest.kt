@@ -147,6 +147,59 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
+    fun `3ds2 web view cancellation cancels source instead of polling`() =
+        runTest(testDispatcher) {
+            val intent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.RequiresAction
+            )
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(intent)
+            )
+            whenever(mockStripeRepository.cancelPaymentIntentSource(any(), any(), any())).thenReturn(
+                Result.success(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE)
+            )
+
+            createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = requireNotNull(intent.clientSecret),
+                    sourceId = "source_id",
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                    canCancelSource = true
+                )
+            ).getOrThrow()
+
+            verify(mockStripeRepository).cancelPaymentIntentSource(any(), eq("source_id"), any())
+            verify(mockStripeRepository).retrievePaymentIntent(any(), any(), any())
+        }
+
+    @Test
+    fun `ambiguous redirect return polls instead of canceling source`() =
+        runTest(testDispatcher) {
+            val intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethodTypes = listOf("card", "revolut_pay")
+            )
+            val succeededIntent = intent.copy(status = StripeIntent.Status.Succeeded)
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(intent),
+                Result.success(succeededIntent)
+            )
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = requireNotNull(intent.clientSecret),
+                    sourceId = "source_id",
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                    canCancelSource = true
+                )
+            ).getOrThrow()
+
+            assertThat(result.intent.status).isEqualTo(StripeIntent.Status.Succeeded)
+            verify(mockStripeRepository, never()).cancelPaymentIntentSource(any(), any(), any())
+        }
+
+    @Test
     fun `no refresh when user cancels the payment`() = runTest(testDispatcher) {
         whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
             Result.success(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)

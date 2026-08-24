@@ -9,6 +9,7 @@ import android.os.Vibrator
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -16,6 +17,9 @@ import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -37,6 +41,7 @@ import kotlin.use
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
+@OptIn(AppearanceAPIAdditionsPreview::class)
 internal class NfcScanningActivityTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -72,6 +77,38 @@ internal class NfcScanningActivityTest {
         waitForIdle()
 
         assertThat(nfcAdapter?.isInReaderMode).isTrue()
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q], qualifiers = "notnight")
+    fun `always dark appearance uses light system bar icons in system light`() = test(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            appearance = PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysDark),
+        ),
+    ) {
+        val insetsController = WindowCompat.getInsetsController(
+            activity.window,
+            activity.window.decorView,
+        )
+
+        assertThat(insetsController.isAppearanceLightStatusBars).isFalse()
+        assertThat(insetsController.isAppearanceLightNavigationBars).isFalse()
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q], qualifiers = "night")
+    fun `always light appearance uses dark system bar icons in system dark`() = test(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            appearance = PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysLight),
+        ),
+    ) {
+        val insetsController = WindowCompat.getInsetsController(
+            activity.window,
+            activity.window.decorView,
+        )
+
+        assertThat(insetsController.isAppearanceLightStatusBars).isTrue()
+        assertThat(insetsController.isAppearanceLightNavigationBars).isTrue()
     }
 
     @Test
@@ -152,7 +189,7 @@ internal class NfcScanningActivityTest {
         autoAdvance = false,
     ) {
         dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
-        assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
+        assertErrorIsDisplayed(errorText = "Card declined. Try another.")
         assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
@@ -165,7 +202,7 @@ internal class NfcScanningActivityTest {
     @Test
     fun `unsupported card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
-        assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+        assertErrorIsDisplayed(errorText = "Card not supported. Try another.")
         assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
@@ -180,7 +217,7 @@ internal class NfcScanningActivityTest {
             paymentMethodMetadata = NfcScanningActivityTestFixtures.paymentMethodMetadataWithVisaDisallowed(),
         ) {
             dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
-            assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+            assertErrorIsDisplayed(errorText = "Card not supported. Try another.")
             assertErrorDisappears()
 
             isoDep.assertSuccess()
@@ -192,7 +229,7 @@ internal class NfcScanningActivityTest {
     @Test
     fun `expired card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
-        assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
+        assertErrorIsDisplayed(errorText = "Card expired. Try another.")
         assertErrorDisappears()
 
         isoDep.assertSuccess()
@@ -202,7 +239,7 @@ internal class NfcScanningActivityTest {
 
     @Test
     fun `inactivity timeout returns canceled result`() = test {
-        ShadowSystemClock.advanceBy(20.seconds.inWholeSeconds, TimeUnit.SECONDS)
+        ShadowSystemClock.advanceBy(30.seconds.inWholeSeconds, TimeUnit.SECONDS)
         waitForIdle()
 
         assertThat(getResult()).isEqualTo(NfcScanningContract.Result.Canceled)
@@ -228,7 +265,7 @@ internal class NfcScanningActivityTest {
         assertThat(shadowActivity.pendingTransitionEnterAnimationResourceId)
             .isEqualTo(AnimationConstants.FADE_IN)
         assertThat(shadowActivity.pendingTransitionExitAnimationResourceId)
-            .isEqualTo(AnimationConstants.FADE_OUT)
+            .isEqualTo(R.anim.stripe_nfc_screen_fade_out)
     }
 
     private fun test(

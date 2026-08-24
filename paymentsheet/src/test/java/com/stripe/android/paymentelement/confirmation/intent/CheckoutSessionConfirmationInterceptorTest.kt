@@ -3,8 +3,11 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.isInstanceOf
@@ -34,10 +37,12 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
+import com.stripe.android.paymentsheet.repositories.TotalSummaryResponseFactory
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -133,6 +138,82 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+    }
+
+    @Test
+    fun `intercept with saved payment method fails when updating the billing tax region fails`() = runScenario(
+        checkoutSessionResponse = AUTOMATIC_TAX_RESPONSE,
+    ) {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid billing address"}}""")
+        }
+
+        val result = interceptSavedPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
+        val failAction = result as ConfirmationDefinition.Action.Fail
+        assertThat(failAction.cause.message).contains("Invalid billing address")
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+    }
+
+    @Test
+    fun `intercept with saved payment method fails when updating the billing tax region changes the total`() =
+        runScenario(
+            checkoutSessionResponse = AUTOMATIC_TAX_RESPONSE,
+        ) {
+            networkRule.checkoutUpdate { response ->
+                response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                    json.getJSONObject("total_summary").put("total", 5399)
+                }
+            }
+
+            val result = interceptSavedPm()
+
+            assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
+            val failAction = result as ConfirmationDefinition.Action.Fail
+            assertThat(failAction.cause).isInstanceOf<LocalStripeException>()
+            assertThat(failAction.cause.message)
+                .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+            val error = failAction.cause as LocalStripeException
+            assertThat(error.analyticsValue()).isEqualTo("checkoutSessionTotalChanged")
+            assertThat(error.stripeError?.code).isEqualTo("checkout_session_total_changed")
+            assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        }
+
+    @Test
+    fun `intercept with saved payment method confirms when billing tax update keeps total unchanged`() =
+        runScenario(
+            checkoutSessionResponse = AUTOMATIC_TAX_RESPONSE,
+        ) {
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[line1]", "1234 Main Street"),
+                bodyPart("tax_region[postal_code]", "94111"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+            networkRule.checkoutConfirm { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            val result = interceptSavedPm()
+
+            assertThat(result)
+                .isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+        }
+
+    @Test
+    fun `intercept with new payment method skips billing tax region update`() = runScenario(
+        checkoutSessionResponse = AUTOMATIC_TAX_RESPONSE,
+    ) {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = interceptNewPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
     }
 
     @Test
@@ -358,6 +439,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
+        checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) {
         val stripeRepository = FakeCreatePaymentMethodRepository(
@@ -383,8 +465,6 @@ class CheckoutSessionConfirmationInterceptorTest {
             },
         )
 
-        val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
-
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = checkoutSessionResponse.id,
@@ -402,6 +482,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
             requestOptionsProvider = { ApiRequest.Options(apiKey = "pk_test_123") },
+            checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
         )
 
         runTest {
@@ -450,6 +531,12 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     private companion object {
+        val AUTOMATIC_TAX_RESPONSE = CheckoutSessionResponseFactory.create(
+            totalSummary = TotalSummaryResponseFactory.create(totalAmountDue = 5099L),
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+
         val NEW_PM_OPTION = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,
