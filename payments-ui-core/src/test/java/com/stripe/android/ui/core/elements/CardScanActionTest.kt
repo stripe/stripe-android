@@ -136,6 +136,7 @@ internal class CardScanActionTest {
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
             disableSsdOcrCardScan = false,
+            publishableKey = "pk_test_123",
             automaticallyLaunchedCardScanFormDataHelper = helper,
         )
         val scenario = Scenario(onScannedCardCalls = onScannedCardCalls)
