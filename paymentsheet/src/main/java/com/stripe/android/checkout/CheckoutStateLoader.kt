@@ -89,6 +89,9 @@ internal class CheckoutStateLoader @Inject constructor(
             ),
         ).getOrThrow()
 
+        // TODO-codex: in parallel with paymentElementLoader.load create a separate paymentMethodMetadata for
+        // ECE which uses ECE's gpay, link, and bdcc configs.
+
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
         // previous selection comes from the incoming state, not a separate holder.
@@ -107,6 +110,7 @@ internal class CheckoutStateLoader @Inject constructor(
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
+            // TODO-codex: set the ECE payment method metadata here
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,

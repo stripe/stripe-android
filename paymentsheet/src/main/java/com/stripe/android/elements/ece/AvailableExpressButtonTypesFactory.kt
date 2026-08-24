@@ -17,6 +17,7 @@ internal fun interface AvailableExpressButtonTypesFactory {
 
 internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constructor() :
     AvailableExpressButtonTypesFactory {
+        // TODO-codex: update this to use the ECE payment method metadata, not the generic one.
     override fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,

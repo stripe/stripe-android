@@ -20,6 +20,7 @@ internal data class CheckoutControllerState(
     val flagImages: Map<String, Bitmap>?,
     val collectedDetails: CheckoutCollectedDetails,
     val paymentMethodMetadata: PaymentMethodMetadata,
+    // TODO-codex: add ECE specific payment method metadata
     val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
     val paymentSelection: PaymentSelection?,
     val temporarySelection: String?,
