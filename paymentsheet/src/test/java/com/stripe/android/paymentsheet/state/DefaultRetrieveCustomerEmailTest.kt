@@ -102,6 +102,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             configuration = configuration,
             customerMetadata = customerMetadata,
             customerEmail = customerEmail,
+            stripeAccountId = null,
         )
 
         Scenario(

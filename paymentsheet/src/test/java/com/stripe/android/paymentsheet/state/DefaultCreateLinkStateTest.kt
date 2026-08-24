@@ -5,6 +5,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -45,6 +46,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 
         assertThat(retrieveCustomerEmail.invokedWith?.customerEmail).isEqualTo(customerWithEmail.email)
@@ -103,6 +105,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = initializationMode,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 
         assertThat(result).isInstanceOf<LinkDisabledState>()
@@ -125,6 +128,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 
         assertThat(linkStateResult).isInstanceOf<LinkState>()
@@ -162,6 +166,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 
         assertThat(cardFundingFilterFactory.invokedWith).isEqualTo(expectedFundingTypes)
@@ -244,6 +249,7 @@ internal class DefaultCreateLinkStateTest {
             configuration: CommonConfiguration,
             customerMetadata: CustomerMetadata?,
             customerEmail: String?,
+            stripeAccountId: String?,
         ): String? {
             invokedWith = Invocation(
                 configuration = configuration,
@@ -270,6 +276,11 @@ internal class DefaultCreateLinkStateTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             checkoutSessionId = null,
+        )
+
+        val DEFAULT_API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = "pk_test_123",
+            stripeAccountId = null,
         )
     }
 }
