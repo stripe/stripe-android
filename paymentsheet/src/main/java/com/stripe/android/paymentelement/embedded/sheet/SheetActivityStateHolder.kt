@@ -38,10 +38,12 @@ import javax.inject.Singleton
 internal interface SheetActivityStateHolder {
     val state: StateFlow<State>
     val result: SharedFlow<EmbeddedActivityResult>
+    val validationRequested: SharedFlow<Unit>
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
     fun updateProcessing(isProcessing: Boolean)
+    fun onPrimaryButtonDisabledClick()
 
     fun setResult(result: EmbeddedActivityResult)
 
@@ -85,6 +87,9 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
 
     private val _result = MutableSharedFlow<EmbeddedActivityResult>()
     override val result: SharedFlow<EmbeddedActivityResult> = _result
+
+    private val _validationRequested = MutableSharedFlow<Unit>()
+    override val validationRequested: SharedFlow<Unit> = _validationRequested
 
     private var usBankAccountFormPrimaryButtonUiState: PrimaryButton.UIState? = null
 
@@ -190,6 +195,19 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isEnabled = selectionHolder.selection.value != null,
                 )
+            }
+        }
+    }
+
+    override fun onPrimaryButtonDisabledClick() {
+        val primaryButtonUiState = usBankAccountFormPrimaryButtonUiState
+        if (primaryButtonUiState != null) {
+            if (primaryButtonUiState.canClickWhileDisabled) {
+                primaryButtonUiState.onDisabledClick()
+            }
+        } else if (!_state.value.isProcessing) {
+            coroutineScope.launch {
+                _validationRequested.emit(Unit)
             }
         }
     }

@@ -495,6 +495,7 @@ internal class EmbeddedNavigatorTest {
                 )
             ),
             onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
         )
         val (formScreen, formInteractor) = createFormScreen()
 
@@ -840,6 +841,7 @@ internal class EmbeddedNavigatorTest {
                 )
             ),
             onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
         )
     }
 
@@ -861,6 +863,7 @@ internal class EmbeddedNavigatorTest {
                 )
             ),
             onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
         )
     }
 

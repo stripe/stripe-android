@@ -113,6 +113,33 @@ internal class EmbeddedPaymentElementTest {
     }
 
     @Test
+    fun testCardFormValidation() = runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_12345")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.configure {
+            formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+        }
+
+        embeddedContentPage.clickOnLpm("card")
+        formPage.clickDisabledPrimaryButton()
+        formPage.assertCardNumberError("This field cannot be blank.")
+
+        formPage.fillOutCardDetails()
+        enqueueDeferredIntentConfirmationRequests()
+        formPage.clickPrimaryButton()
+        formPage.waitUntilMissing()
+    }
+
+    @Test
     fun testRemoveCard() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->

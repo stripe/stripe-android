@@ -262,6 +262,7 @@ internal class FormActivityScreenShotTest {
                     onClick = {},
                     onProcessingCompleted = {},
                     state = state.copy(isEnabled = enabled),
+                    onPrimaryButtonDisabledClick = {},
                 )
             }
         }

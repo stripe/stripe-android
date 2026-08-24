@@ -1,18 +1,24 @@
 package com.stripe.android.paymentelement
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
 import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import kotlin.time.Duration.Companion.seconds
 
@@ -94,6 +100,38 @@ internal class EmbeddedFormPage(
         }
 
         composeTestRule.waitForIdle()
+    }
+
+    fun clickDisabledPrimaryButton() {
+        waitUntilVisible()
+
+        composeTestRule.waitUntil(
+            conditionDescription = "embedded form primary button to become disabled",
+            timeoutMillis = 5.seconds.inWholeMilliseconds,
+        ) {
+            composeTestRule.onAllNodes(
+                hasTestTag(PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled())
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+            .performScrollTo()
+            .performTouchInput { click() }
+
+        composeTestRule.waitForIdle()
+    }
+
+    fun assertCardNumberError(errorMessage: String) {
+        composeTestRule.waitUntil(
+            conditionDescription = "card number field to show error '$errorMessage'",
+            timeoutMillis = 5.seconds.inWholeMilliseconds,
+        ) {
+            composeTestRule.onAllNodes(
+                hasText("Card number").and(
+                    SemanticsMatcher.expectValue(SemanticsProperties.Error, errorMessage)
+                )
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     fun assertMandateIsShown() {
