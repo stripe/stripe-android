@@ -136,7 +136,7 @@ internal class StripeBrowserLauncherViewModel(
                 analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = application,
-                    publishableKey = config.publishableKey,
+                    publishableKeyProvider = { config.publishableKey },
                 ),
                 browserCapabilities = browserCapabilitiesSupplier.get(),
                 customTabsPackage = CustomTabsClient.getPackageName(application, null),

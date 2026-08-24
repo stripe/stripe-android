@@ -4,8 +4,8 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
@@ -23,7 +23,7 @@ import kotlin.coroutines.CoroutineContext
  * through a JavaScript-based WebView implementation.
  */
 internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     @UIContext private val uiContext: CoroutineContext
 ) : PaymentNextActionHandler<StripeIntent>() {
@@ -75,7 +75,7 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
         val intentConfirmationChallengeNextActionStarter = intentConfirmationChallengeNextActionStarterFactory(host)
         intentConfirmationChallengeNextActionStarter.start(
             IntentConfirmationChallengeActivityContract.Args(
-                publishableKey = publishableKeyProvider(),
+                publishableKey = apiConfigProvider().publishableKey,
                 intent = actionable,
                 productUsage = productUsageTokens
             )
