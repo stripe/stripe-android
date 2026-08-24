@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
@@ -37,6 +38,7 @@ internal interface SavedPaymentMethodRepository {
 internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val apiConfigProvider: () -> ApiConfiguration.State,
 ) : SavedPaymentMethodRepository {
 
     override suspend fun detachPaymentMethod(
@@ -57,6 +59,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
                 paymentMethodId = paymentMethodId,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
@@ -64,6 +67,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             )
         }
     }
@@ -89,6 +93,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
                 params = params,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
@@ -97,6 +102,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
                 params = params,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             )
         }
     }
@@ -113,6 +119,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
@@ -120,6 +127,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             )
         }
     }
@@ -138,6 +146,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
@@ -145,6 +154,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             )
         }
     }
