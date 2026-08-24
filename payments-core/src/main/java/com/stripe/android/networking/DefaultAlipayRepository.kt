@@ -26,12 +26,15 @@ internal class DefaultAlipayRepository(
 
         val nextActionData = paymentIntent.nextActionData
 
-        if (nextActionData is StripeIntent.NextActionData.AlipayRedirect && nextActionData.data != null) {
-            val output = authenticator.onAuthenticationRequest(nextActionData.data)
+        if (
+            nextActionData is StripeIntent.NextActionData.AlipayRedirect &&
+            nextActionData.type is StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData
+        ) {
+            val output = authenticator.onAuthenticationRequest(nextActionData.type.data)
             val result = output[ALIPAY_RESULT_FIELD]
 
             if (result == AlipayAuthResult.RESULT_CODE_SUCCESS) {
-                pingAlipayEndpointBeforeRetrievingPaymentIntentStatus(nextActionData, requestOptions)
+                pingAlipayEndpointBeforeRetrievingPaymentIntentStatus(nextActionData.type, requestOptions)
             }
 
             val outcome = when (output[ALIPAY_RESULT_FIELD]) {
@@ -48,13 +51,15 @@ internal class DefaultAlipayRepository(
     }
 
     private suspend fun pingAlipayEndpointBeforeRetrievingPaymentIntentStatus(
-        redirect: StripeIntent.NextActionData.AlipayRedirect,
+        withNativeData: StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData,
         requestOptions: ApiRequest.Options,
     ) {
+        val authCompleteUrl = withNativeData.authCompleteUrl
+
         // Alipay requires us to hit an endpoint before retrieving the PaymentIntent to ensure the
         // status is up-to-date.
-        if (redirect.authCompleteUrl != null) {
-            stripeRepository.retrieveObject(redirect.authCompleteUrl, requestOptions)
+        if (authCompleteUrl != null) {
+            stripeRepository.retrieveObject(authCompleteUrl, requestOptions)
         }
     }
 

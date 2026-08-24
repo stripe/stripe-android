@@ -130,11 +130,13 @@ internal class NextActionDataParserTest {
         val nextActionData = NextActionDataParser().parse(nextActionJson)
         assertThat(nextActionData).isInstanceOf<StripeIntent.NextActionData.AlipayRedirect>()
         val alipayRedirect = nextActionData as StripeIntent.NextActionData.AlipayRedirect
-        assertThat(alipayRedirect.data).isEqualTo("native_data_value")
+        assertThat(alipayRedirect.type).isInstanceOf<StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData>()
+        val type = alipayRedirect.type as StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData
+        assertThat(type.data).isEqualTo("native_data_value")
     }
 
     @Test
-    fun `parse with alipay_handle_redirect and native_data missing should create AlipayRedirect with null data`() {
+    fun `parse with alipay_handle_redirect and native_data missing should create default AlipayRedirect`() {
         val nextActionJson = JSONObject(
             """
             {
@@ -149,6 +151,6 @@ internal class NextActionDataParserTest {
         val nextActionData = NextActionDataParser().parse(nextActionJson)
         assertThat(nextActionData).isInstanceOf<StripeIntent.NextActionData.AlipayRedirect>()
         val alipayRedirect = nextActionData as StripeIntent.NextActionData.AlipayRedirect
-        assertThat(alipayRedirect.data).isNull()
+        assertThat(alipayRedirect.type).isEqualTo(StripeIntent.NextActionData.AlipayRedirect.Type.Default)
     }
 }
