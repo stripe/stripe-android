@@ -14,6 +14,8 @@ import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLaunch
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -110,7 +112,12 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             transactionId = intent.id,
             label = config.customLabel,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = PaymentConfiguration.getInstance(context).let {
+                ApiConfiguration.State(
+                    publishableKey = it.publishableKey,
+                    stripeAccountId = it.stripeAccountId,
+                )
+            },
             displayItems = GooglePayDisplayItemsFactory.create(confirmationArgs.paymentMethodMetadata, context),
             billingEmailOverride = config.billingEmailOverride,
             shippingAddressParameters = config.shippingAddressParameters,
