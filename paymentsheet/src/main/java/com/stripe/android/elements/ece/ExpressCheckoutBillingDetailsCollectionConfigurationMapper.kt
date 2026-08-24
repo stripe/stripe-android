@@ -13,7 +13,7 @@ internal fun State.asPaymentSheet(
     PaymentSheetBillingDetails(
         name = name.asPaymentSheet(),
         phone = PaymentSheetBillingDetails.CollectionMode.Automatic,
-        email = email.asPaymentSheet(),
+        email = PaymentSheetBillingDetails.CollectionMode.Automatic,
         address = address.asPaymentSheet(requiresBillingAddress),
         attachDefaultsToPaymentMethod = true,
     )

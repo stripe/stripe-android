@@ -195,10 +195,6 @@ internal class CheckoutCommonConfigurationFactoryTest {
                             ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
                                 .CollectionMode.Always
                         )
-                        .email(
-                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                                .CollectionMode.Never
-                        )
                         .address(
                             ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
                                 .AddressCollectionMode.Full
@@ -216,7 +212,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(result.billingDetailsCollectionConfiguration.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
         assertThat(result.billingDetailsCollectionConfiguration.email)
-            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
         assertThat(result.billingDetailsCollectionConfiguration.address)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }

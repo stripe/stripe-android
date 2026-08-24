@@ -33,9 +33,6 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.billingDetailsCollectionConfiguration.name).isEqualTo(
             ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
         )
-        assertThat(state.billingDetailsCollectionConfiguration.email).isEqualTo(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
-        )
         assertThat(state.billingDetailsCollectionConfiguration.address).isEqualTo(
             ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
         )
@@ -112,9 +109,6 @@ internal class ExpressCheckoutElementTest {
                     .name(
                         ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
                     )
-                    .email(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
-                    )
                     .address(
                         ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
                             .AddressCollectionMode.Full
@@ -124,9 +118,6 @@ internal class ExpressCheckoutElementTest {
 
         assertThat(state.billingDetailsCollectionConfiguration.name).isEqualTo(
             ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
-        )
-        assertThat(state.billingDetailsCollectionConfiguration.email).isEqualTo(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
         )
         assertThat(state.billingDetailsCollectionConfiguration.address).isEqualTo(
             ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full

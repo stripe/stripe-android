@@ -47,7 +47,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class BillingDetailsCollectionConfiguration {
             private var name: CollectionMode = CollectionMode.Automatic
-            private var email: CollectionMode = CollectionMode.Automatic
             private var address: AddressCollectionMode = AddressCollectionMode.Automatic
 
             /**
@@ -98,11 +97,6 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.name = name
             }
 
-            /** How to collect the email field. */
-            fun email(email: CollectionMode): BillingDetailsCollectionConfiguration = apply {
-                this.email = email
-            }
-
             /** How to collect the billing address. */
             fun address(address: AddressCollectionMode): BillingDetailsCollectionConfiguration = apply {
                 this.address = address
@@ -111,13 +105,11 @@ class ExpressCheckoutElement @Inject internal constructor(
             @Parcelize
             internal data class State(
                 val name: CollectionMode,
-                val email: CollectionMode,
                 val address: AddressCollectionMode,
             ) : Parcelable
 
             internal fun build(): State = State(
                 name = name,
-                email = email,
                 address = address,
             )
         }

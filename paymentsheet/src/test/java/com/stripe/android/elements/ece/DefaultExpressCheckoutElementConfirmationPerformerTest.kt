@@ -127,9 +127,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                     .name(
                         ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
                     )
-                    .email(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
-                    )
                     .address(
                         ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
                             .AddressCollectionMode.Full
@@ -154,7 +151,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                 PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
             )
             assertThat(billingDetails.email).isEqualTo(
-                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
+                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
             )
             assertThat(billingDetails.address).isEqualTo(
                 PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
