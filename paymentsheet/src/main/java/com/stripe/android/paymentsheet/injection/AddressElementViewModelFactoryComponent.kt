@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsOnlyModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementViewModel
@@ -16,6 +18,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentSheetCommonModule::class,
+        ApiRequestOptionsOnlyModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
         StripeRepositoryModule::class,
@@ -32,6 +35,7 @@ internal interface AddressElementViewModelFactoryComponent {
         fun create(
             @BindsInstance context: Context,
             @BindsInstance starterArgs: AddressElementActivityContract.Args,
+            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
         ): AddressElementViewModelFactoryComponent
     }
 }
