@@ -48,32 +48,35 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         publishableKey: String,
         defaultProductUsageTokens: Set<String> = emptySet()
     ) : this(
-        context,
-        { publishableKey },
-        defaultProductUsageTokens
+        context = context,
+        publishableKeyProvider = { publishableKey },
+        defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
-    internal constructor(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         context: Context,
-        publishableKeyProvider: Provider<String>
+        publishableKeyProvider: () -> String,
+        defaultProductUsageTokens: Set<String> = emptySet()
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
         publishableKeyProvider = publishableKeyProvider,
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
     @Inject
     internal constructor(
         context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: Provider<() -> String>,
         @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = Provider { publishableKeyProvider.get()() },
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
