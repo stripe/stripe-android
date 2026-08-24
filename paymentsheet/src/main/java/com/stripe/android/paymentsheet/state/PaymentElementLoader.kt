@@ -315,11 +315,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             isLiveMode = apiConfiguration.isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
-            isTapToAddSupported = tapToAddConnectionStarter.isSupported,
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported(
+                apiConfiguration.publishableKey,
+                apiConfiguration.isLiveMode(),
+            ),
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose, apiConfiguration.publishableKey)
-        tapToAddConnectionStarter.start(configuration)
+        tapToAddConnectionStarter.start(configuration, apiConfiguration.publishableKey, apiConfiguration.isLiveMode())
 
         val isGooglePaySupportedOnDevice = async {
             durationProvider.measureDuration(
@@ -590,7 +593,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentElementCallbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
         )
 
-        val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(elementsSession, customerMetadata)
+        val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(
+            elementsSession,
+            customerMetadata,
+            apiConfiguration.publishableKey,
+            apiConfiguration.isLiveMode(),
+        )
 
         val analyticsMetadata = analyticsMetadataFactory.create(
             initializationMode = initializationMode,
