@@ -234,8 +234,14 @@
   <string name="stripe_select">Atlasīt</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Pašportreta uzņēmumi ir pabeigti</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_captures">Pašportreta uzņēmumi</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Lieliski! Pārbaudām jūsu attēlus…</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Ar jūsu atļauju Stripe var izmantot jūsu attēlus, lai uzlabotu krāpniecības noteikšanu. Atteikšanās neietekmē jūsu verificēšanu.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Verificēt ar pašbildi</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">uzņemts viens pašportrets</string>
   <!-- Status text instructing the user to turn left for selfie capture -->
