@@ -10,7 +10,8 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
-    # Limit concurrent managed devices so each emulator has reliable network connectivity.
+    # Split PaymentSheet E2E across two machines so no host runs more than three emulators.
+    - PAYMENTSHEET_E2E_MACHINE_SHARD_COUNT: 2
     - PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT: 3
 
 pipelines:
@@ -22,7 +23,8 @@ pipelines:
       run-financial-connections-and-crypto-instrumentation-tests: { }
       run-connections-e2e-tests-on-push: { }
       run-cardscan-and-google-pay-tests: { }
-      run-paymentsheet-e2e: { }
+      run-paymentsheet-e2e:
+        parallel: $PAYMENTSHEET_E2E_MACHINE_SHARD_COUNT
       check-dependencies-and-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
     stages:
@@ -498,13 +500,13 @@ workflows:
                 #!/usr/bin/env bash
                 set -euo pipefail
                 # Keep the explicit class list so tests with dedicated workflows stay excluded.
-                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index 0 --num-shards 1)
+                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards "$PAYMENTSHEET_E2E_MACHINE_SHARD_COUNT")
 
                 ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:
-            - test_title: PaymentSheet E2E tests
+            - test_title: "PaymentSheet E2E tests (worker $BITRISE_IO_PARALLEL_INDEX)"
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
