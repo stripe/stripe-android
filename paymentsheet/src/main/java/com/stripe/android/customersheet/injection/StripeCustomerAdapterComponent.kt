@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.injection
 
 import android.content.Context
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.IOContext
@@ -9,7 +10,6 @@ import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
 import com.stripe.android.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.customersheet.StripeCustomerAdapter
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -25,7 +25,6 @@ import kotlin.coroutines.CoroutineContext
     modules = [
         StripeCustomerAdapterModule::class,
         CustomerSheetDataCommonModule::class,
-        ApiConfigurationFromPaymentConfigurationModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
@@ -43,6 +42,7 @@ internal interface StripeCustomerAdapterComponent {
             @BindsInstance customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
             @BindsInstance setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
             @BindsInstance paymentMethodTypes: List<String>?,
+            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
         ): StripeCustomerAdapterComponent
     }
 }
@@ -50,6 +50,11 @@ internal interface StripeCustomerAdapterComponent {
 @Module
 internal interface StripeCustomerAdapterModule {
     companion object {
+        @Provides
+        fun provideApiConfigurationState(
+            apiConfigurationProvider: () -> ApiConfiguration.State
+        ): ApiConfiguration.State = apiConfigurationProvider()
+
         @Provides
         fun providePrefsRepositoryFactory(
             appContext: Context,
