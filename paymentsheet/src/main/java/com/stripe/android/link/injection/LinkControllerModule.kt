@@ -2,7 +2,6 @@ package com.stripe.android.link.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
@@ -62,24 +61,25 @@ internal interface LinkControllerModule {
     companion object {
         @Provides
         @Singleton
-        fun provideApiConfigurationProvider(
-            paymentConfiguration: Provider<PaymentConfiguration>,
-        ): () -> ApiConfiguration.State = {
-            val configuration = paymentConfiguration.get()
-            ApiConfiguration.State(
-                publishableKey = configuration.publishableKey,
-                stripeAccountId = configuration.stripeAccountId,
-            )
-        }
-
-        @Provides
-        @Singleton
         fun provideAppContext(application: Application): Context = application.applicationContext
 
         @Provides
         @Singleton
         fun providePaymentMethodMetadata(interactor: LinkControllerInteractor): PaymentMethodMetadata? {
             return interactor.paymentMethodMetadata
+        }
+
+        @Provides
+        fun provideApiConfigurationStateProvider(
+            interactor: Provider<LinkControllerInteractor>
+        ): () -> ApiConfiguration.State {
+            return {
+                val config = requireNotNull(interactor.get().configuration)
+                ApiConfiguration.State(
+                    publishableKey = config.publishableKey,
+                    stripeAccountId = config.stripeAccountId,
+                )
+            }
         }
 
         // TODO

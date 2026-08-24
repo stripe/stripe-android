@@ -15,8 +15,8 @@ import javax.inject.Singleton
 @Component(
     modules = [
         LinkControllerModule::class,
-        ApiRequestOptionsOnlyModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
+        ApiRequestOptionsOnlyModule::class,
     ]
 )
 internal interface LinkControllerComponent {
