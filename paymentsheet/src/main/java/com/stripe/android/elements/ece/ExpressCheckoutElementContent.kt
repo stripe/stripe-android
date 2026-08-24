@@ -178,31 +178,26 @@ private fun ExpressButtonContent(
 
 @Composable
 private fun ButtonTheme.toLinkButtonTheme(): PaymentSheet.ButtonThemes.LinkButtonTheme {
-    return when (resolveAutomatic()) {
+    return when (this) {
         ButtonTheme.Light -> PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
         ButtonTheme.Dark -> PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT
-        ButtonTheme.Automatic -> error("Button theme was not resolved")
+        ButtonTheme.Automatic -> if (MaterialTheme.stripeThemeIsDark) {
+            PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
+        } else {
+            PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT
+        }
     }
 }
 
 @Composable
 private fun ButtonTheme.toGooglePayButtonTheme(): GooglePayButtonTheme {
-    return when (resolveAutomatic()) {
+    return when (this) {
         ButtonTheme.Light -> GooglePayButtonTheme.Light
         ButtonTheme.Dark -> GooglePayButtonTheme.Dark
-        ButtonTheme.Automatic -> error("Button theme was not resolved")
-    }
-}
-
-@Composable
-private fun ButtonTheme.resolveAutomatic(): ButtonTheme {
-    return if (this == ButtonTheme.Automatic) {
-        if (MaterialTheme.stripeThemeIsDark) {
-            ButtonTheme.Light
+        ButtonTheme.Automatic -> if (MaterialTheme.stripeThemeIsDark) {
+            GooglePayButtonTheme.Light
         } else {
-            ButtonTheme.Dark
+            GooglePayButtonTheme.Dark
         }
-    } else {
-        this
     }
 }
