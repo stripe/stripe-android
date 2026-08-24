@@ -5,7 +5,6 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
-import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkExpressMode
