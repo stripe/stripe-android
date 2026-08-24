@@ -93,17 +93,14 @@ internal class CheckoutPaymentElementAnalyticsTest {
             }
         },
         setup = { controller ->
-            // Initial configuration and the post-failure session refresh each report loading.
-            repeat(2) {
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_started",
-                    productUsage = setOf("Checkout"),
-                )
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_succeeded",
-                    productUsage = setOf("Checkout"),
-                )
-            }
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_started",
+                productUsage = setOf("Checkout"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_succeeded",
+                productUsage = setOf("Checkout"),
+            )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("Checkout"),
@@ -127,6 +124,15 @@ internal class CheckoutPaymentElementAnalyticsTest {
             productUsage = setOf("Checkout"),
             analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
             analyticsPayloadField("error_code", "checkout_session_total_changed"),
+        )
+        // The Checkout Session is refreshed after confirmation fails.
+        networkRule.validateAnalyticsRequest(
+            eventName = "mc_load_started",
+            productUsage = setOf("Checkout"),
+        )
+        networkRule.validateAnalyticsRequest(
+            eventName = "mc_load_succeeded",
+            productUsage = setOf("Checkout"),
         )
 
         context.confirm()
