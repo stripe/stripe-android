@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -9,7 +10,7 @@ import kotlin.test.Test
 class AlipayRedirectTest {
     @Test
     fun `Alipay data should parse return_url correctly`() {
-        val data = StripeIntent.NextActionData.AlipayRedirect(
+        val data = StripeIntent.NextActionData.AlipayRedirect.create(
             "_input_charset=utf-8&app_pay=Y" +
                 "&currency=USD&forex_biz=FP" +
                 "&notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1Gt188KlwPmebFhp4SWhZwn1" +
@@ -30,21 +31,27 @@ class AlipayRedirectTest {
                 "&total_fee=1.00",
             WEB_URL
         )
-        assertThat(data.authCompleteUrl).isEqualTo(
+        assertThat(data.withNativeDataType().authCompleteUrl).isEqualTo(
             "https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1Gt188KlwPmebFhp4SWhZwn1/src_client_secret_RMaQKPfAmHOdUwcNhXEjolR4"
         )
     }
 
     @Test
     fun `Alipay data should handle missing data`() {
-        val data = StripeIntent.NextActionData.AlipayRedirect("", WEB_URL)
-        assertThat(data.authCompleteUrl).isNull()
+        val data = StripeIntent.NextActionData.AlipayRedirect.create("", WEB_URL)
+        assertThat(data.withNativeDataType().authCompleteUrl).isNull()
     }
 
     @Test
     fun `Alipay data should ignore non-stripe urls`() {
-        val data = StripeIntent.NextActionData.AlipayRedirect("return_url=https://google.com", WEB_URL)
-        assertThat(data.authCompleteUrl).isNull()
+        val data = StripeIntent.NextActionData.AlipayRedirect.create("return_url=https://google.com", WEB_URL)
+        assertThat(data.withNativeDataType().authCompleteUrl).isNull()
+    }
+
+    private fun StripeIntent.NextActionData.AlipayRedirect.withNativeDataType():
+        StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData {
+        assertThat(type).isInstanceOf<StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData>()
+        return type as StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData
     }
 
     private companion object {
