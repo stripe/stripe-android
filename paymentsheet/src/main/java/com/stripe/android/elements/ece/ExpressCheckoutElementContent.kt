@@ -34,7 +34,7 @@ internal fun ExpressCheckoutElementContent(
 ) {
     ExpressCheckoutElementContent(
         interactor = interactor,
-        googlePayButton = { button, theme, onPressed ->
+        googlePayButton = { button, onPressed ->
             GooglePayButton(
                 state = PrimaryButton.State.Ready,
                 allowCreditCards = button.allowCreditCards,
@@ -44,7 +44,7 @@ internal fun ExpressCheckoutElementContent(
                 cardBrandFilter = button.cardBrandFilter,
                 cardFundingFilter = button.cardFundingFilter,
                 additionalEnabledNetworks = button.additionalEnabledNetworks,
-                theme = theme,
+                theme = button.buttonTheme.toGooglePayButtonTheme(),
                 onPressed = onPressed,
             )
         },
@@ -55,7 +55,7 @@ internal fun ExpressCheckoutElementContent(
 @Composable
 internal fun ExpressCheckoutElementContent(
     interactor: ExpressCheckoutElementInteractor,
-    googlePayButton: @Composable (ExpressButton.GooglePay, GooglePayButtonTheme, () -> Unit) -> Unit,
+    googlePayButton: @Composable (ExpressButton.GooglePay, () -> Unit) -> Unit,
 ) {
     val state by interactor.state.collectAsState()
 
@@ -94,7 +94,6 @@ internal fun ExpressCheckoutElementContent(
                         Box(modifier = Modifier.width(buttonWidth)) {
                             ExpressButtonContent(
                                 button = button,
-                                buttonTheme = state.buttonTheme,
                                 interactor = interactor,
                                 googlePayButton = googlePayButton,
                             )
@@ -148,13 +147,12 @@ internal fun calculateColumnCount(
 @Composable
 private fun ExpressButtonContent(
     button: ExpressButton,
-    buttonTheme: ButtonTheme,
     interactor: ExpressCheckoutElementInteractor,
-    googlePayButton: @Composable (ExpressButton.GooglePay, GooglePayButtonTheme, () -> Unit) -> Unit,
+    googlePayButton: @Composable (ExpressButton.GooglePay, () -> Unit) -> Unit,
 ) {
-    key(button, buttonTheme) {
+    key(button) {
         when (button) {
-            is ExpressButton.GooglePay -> googlePayButton(button, buttonTheme.toGooglePayButtonTheme()) {
+            is ExpressButton.GooglePay -> googlePayButton(button) {
                 interactor.handleViewAction(
                     ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
                         expressButton = button,
@@ -164,7 +162,7 @@ private fun ExpressButtonContent(
             is ExpressButton.Link -> LinkButton(
                 state = button.state,
                 enabled = true,
-                theme = buttonTheme.toLinkButtonTheme(),
+                theme = button.buttonTheme.toLinkButtonTheme(),
                 linkBrand = button.linkBrand,
                 onClick = {
                     interactor.handleViewAction(

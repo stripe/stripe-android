@@ -3,6 +3,7 @@
 package com.stripe.android.elements.ece
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -34,6 +35,7 @@ internal class ExpressButtonTest {
         val button = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
             linkAccountInfo = LinkAccountUpdate.Value(null),
+            buttonTheme = ButtonTheme.Automatic,
         )
 
         assertThat(button.linkBrand).isEqualTo(LinkBrand.Onelink)
@@ -51,6 +53,7 @@ internal class ExpressButtonTest {
         val button = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
             linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
+            buttonTheme = ButtonTheme.Automatic,
         )
 
         assertThat(button.linkBrand).isEqualTo(LinkBrand.Link)
@@ -63,6 +66,7 @@ internal class ExpressButtonTest {
         val button = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+            buttonTheme = ButtonTheme.Automatic,
         )
 
         assertThat(button.state).isEqualTo(LinkButtonState.Email(TestFactory.LINK_ACCOUNT.email))
@@ -91,6 +95,7 @@ internal class ExpressButtonTest {
         val button = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
             linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
+            buttonTheme = ButtonTheme.Automatic,
         )
 
         val buttonState = button.state as LinkButtonState.DefaultPayment
@@ -104,6 +109,7 @@ internal class ExpressButtonTest {
                 linkBrand = LinkBrand.Onelink,
             ),
             linkAccountInfo = LinkAccountUpdate.Value(null),
+            buttonTheme = ButtonTheme.Automatic,
         ).toSelection()
 
         assertThat(selection).isInstanceOf<PaymentSelection.Link>()
@@ -241,6 +247,7 @@ internal class ExpressButtonTest {
             paymentMethodMetadata = paymentMethodMetadata,
             googlePayConfiguration = googlePayConfiguration,
             shippingAddressRequired = shippingAddressRequired,
+            buttonTheme = ButtonTheme.Automatic,
         )
     }
 

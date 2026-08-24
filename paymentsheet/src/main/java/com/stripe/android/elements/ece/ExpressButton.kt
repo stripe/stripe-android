@@ -6,6 +6,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.asGooglePayButtonType
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.ui.LinkButtonState
@@ -19,12 +20,15 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal sealed interface ExpressButton {
 
+    val buttonTheme: ButtonTheme
+
     fun toSelection(): PaymentSelection
     fun toWalletType(): WalletType
 
     data class Link(
         val state: LinkButtonState,
         val linkBrand: LinkBrand,
+        override val buttonTheme: ButtonTheme,
     ) : ExpressButton {
 
         override fun toSelection(): PaymentSelection {
@@ -40,6 +44,7 @@ internal sealed interface ExpressButton {
             fun create(
                 paymentMethodMetadata: PaymentMethodMetadata,
                 linkAccountInfo: LinkAccountUpdate.Value,
+                buttonTheme: ButtonTheme,
             ): Link {
                 val linkConfiguration = paymentMethodMetadata.linkState?.configuration
                 val linkAccount = linkAccountInfo.account
@@ -50,6 +55,7 @@ internal sealed interface ExpressButton {
                         paymentDetails = linkAccount?.displayablePaymentDetails,
                     ),
                     linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
+                    buttonTheme = buttonTheme,
                 )
             }
         }
@@ -63,6 +69,7 @@ internal sealed interface ExpressButton {
         val cardFundingFilter: CardFundingFilter,
         val additionalEnabledNetworks: List<String>,
         val shippingAddressRequired: Boolean,
+        override val buttonTheme: ButtonTheme,
     ) : ExpressButton {
 
         override fun toSelection(): PaymentSelection = PaymentSelection.GooglePay
@@ -74,6 +81,7 @@ internal sealed interface ExpressButton {
                 paymentMethodMetadata: PaymentMethodMetadata,
                 googlePayConfiguration: ExpressCheckoutElement.Configuration.GooglePayConfiguration.State,
                 shippingAddressRequired: Boolean,
+                buttonTheme: ButtonTheme,
             ): GooglePay {
                 return GooglePay(
                     allowCreditCards = paymentMethodMetadata.cardFundingFilter.isAccepted(CardFunding.Credit),
@@ -84,6 +92,7 @@ internal sealed interface ExpressButton {
                         .toBillingAddressParameters(),
                     additionalEnabledNetworks = googlePayConfiguration.additionalEnabledNetworks,
                     shippingAddressRequired = shippingAddressRequired,
+                    buttonTheme = buttonTheme,
                 )
             }
         }

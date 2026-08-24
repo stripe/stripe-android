@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.elements.ece.ExpressButton
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
@@ -38,7 +39,7 @@ internal class ExpressCheckoutElementScreenshotTest {
         paparazziRule.snapshot {
             ExpressCheckoutElementContent(
                 interactor = FakeExpressCheckoutElementInteractor(),
-                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
+                googlePayButton = { _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -56,7 +57,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                         )
                     ),
                 ),
-                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
+                googlePayButton = { _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -82,7 +83,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                         )
                     ),
                 ),
-                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
+                googlePayButton = { _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -99,23 +100,25 @@ internal class ExpressCheckoutElementScreenshotTest {
                     interactor = FakeExpressCheckoutElementInteractor(
                         state = stateFlowOf(
                             ExpressCheckoutElementInteractorStateFactory.create(
-                                expressButtons = listOf(linkButton),
-                                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
+                                expressButtons = listOf(
+                                    linkButton.copy(buttonTheme = ButtonTheme.Light)
+                                ),
                             )
                         ),
                     ),
-                    googlePayButton = { _, _, _ -> FakeGooglePayButton() },
+                    googlePayButton = { _, _ -> FakeGooglePayButton() },
                 )
                 ExpressCheckoutElementContent(
                     interactor = FakeExpressCheckoutElementInteractor(
                         state = stateFlowOf(
                             ExpressCheckoutElementInteractorStateFactory.create(
-                                expressButtons = listOf(linkButton),
-                                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Dark,
+                                expressButtons = listOf(
+                                    linkButton.copy(buttonTheme = ButtonTheme.Dark)
+                                ),
                             )
                         ),
                     ),
-                    googlePayButton = { _, _, _ -> FakeGooglePayButton() },
+                    googlePayButton = { _, _ -> FakeGooglePayButton() },
                 )
             }
         }

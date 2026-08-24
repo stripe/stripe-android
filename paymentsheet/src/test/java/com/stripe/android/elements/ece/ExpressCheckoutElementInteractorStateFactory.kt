@@ -14,24 +14,25 @@ internal object ExpressCheckoutElementInteractorStateFactory {
     )
 
     fun create(
+        buttonTheme: Appearance.ButtonTheme = Appearance.ButtonTheme.Automatic,
         expressButtons: List<ExpressButton> = listOf(
             ExpressButton.Link.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
+                buttonTheme = buttonTheme,
             ),
             ExpressButton.GooglePay.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 googlePayConfiguration = GooglePayConfiguration().build(),
                 shippingAddressRequired = false,
+                buttonTheme = buttonTheme,
             ),
         ),
         buttonLayout: Appearance.ButtonLayout.State = Appearance.ButtonLayout().build(),
-        buttonTheme: Appearance.ButtonTheme = Appearance.ButtonTheme.Automatic,
     ): ExpressCheckoutElementInteractor.State {
         return ExpressCheckoutElementInteractor.State(
             expressButtons = expressButtons,
             buttonLayout = buttonLayout,
-            buttonTheme = buttonTheme,
         )
     }
 }

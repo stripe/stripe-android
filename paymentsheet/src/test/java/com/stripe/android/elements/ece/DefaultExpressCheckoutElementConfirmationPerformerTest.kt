@@ -13,6 +13,7 @@ import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
 import com.stripe.android.core.Logger
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -200,6 +201,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             expressButton = ExpressButton.Link.create(
                 paymentMethodMetadata = state.paymentMethodMetadata,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
+                buttonTheme = ButtonTheme.Automatic,
             ),
         ) {
             performer.confirm(expressButton)
@@ -242,6 +244,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             googlePayConfiguration =
                 ExpressCheckoutElement.Configuration.GooglePayConfiguration().build(),
             shippingAddressRequired = shippingAddressRequired,
+            buttonTheme = ButtonTheme.Automatic,
         )
     }
 

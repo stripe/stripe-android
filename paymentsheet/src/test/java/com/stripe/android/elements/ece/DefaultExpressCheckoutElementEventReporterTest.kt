@@ -8,6 +8,7 @@ import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
@@ -86,7 +87,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
     fun `onEceWalletTapped fires expected event for Link`() = runScenario {
         val linkButton = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            linkAccountInfo = LinkAccountUpdate.Value(null)
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            buttonTheme = ButtonTheme.Automatic,
         )
 
         reporter.onEceWalletTapped(linkButton)
@@ -172,6 +174,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     googlePayConfiguration = googlePayConfiguration,
                     shippingAddressRequired = false,
+                    buttonTheme = ButtonTheme.Automatic,
                 ),
             )
         )
