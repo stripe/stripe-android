@@ -110,37 +110,45 @@ internal class FormElementsBuilder(
 
             addAll(uiFormElements)
 
-            countryRequirement?.let { requirement ->
-                add(
-                    SectionElement.wrap(
-                        CountryElement(
-                            identifier = IdentifierSpec.Country,
-                            controller = DropdownFieldController(
-                                config = CountryConfig(requirement.allowedCountryCodes),
-                                initialValue = requirement.initialValue,
-                            )
-                        )
-                    )
-                )
-            }
-
             if (requireBillingAddressCollection) {
-                addAll(createAddressElements(hideCountry = countryRequirement != null))
+                addAll(createAddressElements())
+            } else {
+                countryRequirement?.let { requirement ->
+                    add(createCountryElement(requirement))
+                }
             }
 
             addAll(footerFormElements) // Order footers last.
         }
     }
 
-    private fun createAddressElements(hideCountry: Boolean): List<FormElement> {
+    private fun createCountryElement(requirement: CountryRequirement): FormElement {
+        return SectionElement.wrap(
+            CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = DropdownFieldController(
+                    config = CountryConfig(requirement.allowedCountryCodes),
+                    initialValue = requirement.initialValue,
+                )
+            )
+        )
+    }
+
+    private fun createAddressElements(): List<FormElement> {
         return AddressSpec(
-            allowedCountryCodes = availableCountries,
-            hideCountry = hideCountry,
+            allowedCountryCodes = countryRequirement?.allowedCountryCodes ?: availableCountries,
         ).transform(
-            initialValues = arguments.initialValues,
+            initialValues = countryRequirement?.overrideInitialCountry(arguments.initialValues)
+                ?: arguments.initialValues,
             shippingValues = arguments.shippingValues,
             autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
         )
+    }
+
+    private fun CountryRequirement.overrideInitialCountry(
+        initialValues: Map<IdentifierSpec, String?>,
+    ): Map<IdentifierSpec, String?> {
+        return initialValues + (IdentifierSpec.Country to initialValue)
     }
 
     private data class CountryRequirement(
