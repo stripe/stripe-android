@@ -89,17 +89,22 @@ class FormElementsBuilderTest {
     }
 
     @Test
-    fun `country requirement contains only allowed countries`() {
-        val countryElement = FormElementsBuilder(arguments())
+    fun `standalone country requirement uses explicit countries instead of merchant countries`() {
+        val countryElement = FormElementsBuilder(
+            arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    allowedCountries = setOf("US"),
+                )
+            )
+        )
             .requireCountry(
-                allowedCountryCodes = setOf("US", "CA"),
+                allowedCountryCodes = setOf("CA"),
                 initialValue = null,
             )
             .build()
             .countryElement()
 
         assertThat(countryElement.controller.displayItems).containsExactly(
-            "\uD83C\uDDFA\uD83C\uDDF8 United States",
             "\uD83C\uDDE8\uD83C\uDDE6 Canada",
         )
     }
@@ -115,6 +120,49 @@ class FormElementsBuilderTest {
             .countryElement()
 
         assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
+    }
+
+    @Test
+    fun `billing address requirement inherits merchant countries and initial country`() {
+        val formElements = FormElementsBuilder(
+            arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    allowedCountries = setOf("US", "CA"),
+                ),
+                initialValues = mapOf(IdentifierSpec.Country to "CA"),
+            )
+        )
+            .requireBillingAddressIfAllowed()
+            .build()
+
+        val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDFA\uD83C\uDDF8 United States",
+            "\uD83C\uDDE8\uD83C\uDDE6 Canada",
+        )
+        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("CA")
+    }
+
+    @Test
+    fun `billing address requirement uses explicit countries and initial country`() {
+        val formElements = FormElementsBuilder(
+            arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    allowedCountries = setOf("US"),
+                ),
+                initialValues = mapOf(IdentifierSpec.Country to "CA"),
+            )
+        )
+            .requireBillingAddressIfAllowed(availableCountries = setOf("CA"))
+            .build()
+
+        val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDE8\uD83C\uDDE6 Canada",
+        )
+        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("CA")
     }
 
     @Test
@@ -405,10 +453,11 @@ class FormElementsBuilderTest {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
-            initialValues = emptyMap(),
+            initialValues = initialValues,
             initialLinkUserInput = null,
             shippingValues = emptyMap(),
             saveForFutureUseInitialValue = false,
