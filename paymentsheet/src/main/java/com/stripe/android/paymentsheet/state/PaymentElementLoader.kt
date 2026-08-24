@@ -56,6 +56,7 @@ import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -75,6 +76,39 @@ internal interface PaymentElementLoader {
         integrationConfiguration: Configuration,
         metadata: Metadata,
     ): Result<State>
+
+    suspend fun loadWithAdditionalPaymentMethodMetadata(
+        initializationMode: InitializationMode,
+        integrationConfiguration: Configuration,
+        additionalIntegrationConfiguration: Configuration,
+        metadata: Metadata,
+    ): Result<StateWithAdditionalPaymentMethodMetadata> = coroutineScope {
+        val state = async {
+            load(
+                initializationMode = initializationMode,
+                integrationConfiguration = integrationConfiguration,
+                metadata = metadata,
+            )
+        }
+        val additionalState = async {
+            load(
+                initializationMode = initializationMode,
+                integrationConfiguration = additionalIntegrationConfiguration,
+                metadata = metadata,
+            )
+        }
+        state.await().fold(
+            onSuccess = { loadedState ->
+                additionalState.await().map { additionalLoadedState ->
+                    StateWithAdditionalPaymentMethodMetadata(
+                        state = loadedState,
+                        additionalPaymentMethodMetadata = additionalLoadedState.paymentMethodMetadata,
+                    )
+                }
+            },
+            onFailure = { error -> Result.failure(error) },
+        )
+    }
 
     data class Metadata(
         val isReloadingAfterProcessDeath: Boolean = false,
@@ -109,6 +143,11 @@ internal interface PaymentElementLoader {
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
+
+        data class Checkout(
+            override val commonConfiguration: CommonConfiguration,
+            val paymentMethodLayout: PaymentMethodLayout,
+        ) : Configuration
     }
 
     sealed class InitializationMode : Parcelable {
@@ -247,6 +286,11 @@ internal interface PaymentElementLoader {
         val stripeIntent: StripeIntent
             get() = paymentMethodMetadata.stripeIntent
     }
+
+    data class StateWithAdditionalPaymentMethodMetadata(
+        val state: State,
+        val additionalPaymentMethodMetadata: PaymentMethodMetadata,
+    )
 }
 
 /**
@@ -300,16 +344,52 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         ): AnalyticsMetadata
     }
 
-    @Suppress("LongMethod")
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
-    ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
+    ): Result<PaymentElementLoader.State> {
+        return loadInternal(
+            initializationMode = initializationMode,
+            integrationConfiguration = integrationConfiguration,
+            additionalIntegrationConfiguration = null,
+            metadata = metadata,
+        ).map { it.state }
+    }
+
+    override suspend fun loadWithAdditionalPaymentMethodMetadata(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        additionalIntegrationConfiguration: PaymentElementLoader.Configuration,
+        metadata: PaymentElementLoader.Metadata,
+    ): Result<PaymentElementLoader.StateWithAdditionalPaymentMethodMetadata> {
+        return loadInternal(
+            initializationMode = initializationMode,
+            integrationConfiguration = integrationConfiguration,
+            additionalIntegrationConfiguration = additionalIntegrationConfiguration,
+            metadata = metadata,
+        )
+    }
+
+    @Suppress("LongMethod")
+    private suspend fun loadInternal(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        additionalIntegrationConfiguration: PaymentElementLoader.Configuration?,
+        metadata: PaymentElementLoader.Metadata,
+    ): Result<PaymentElementLoader.StateWithAdditionalPaymentMethodMetadata> =
+        workContext.runCatching(::reportFailedLoad) {
         val configuration = integrationConfiguration.commonConfiguration
+        val additionalConfiguration = additionalIntegrationConfiguration?.commonConfiguration
         // Validate configuration before loading
         initializationMode.validate()
         configuration.validate(
+            initializationMode = initializationMode,
+            isLiveMode = paymentConfiguration.get().isLiveMode(),
+            callbackIdentifier = paymentElementCallbackIdentifier,
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported,
+        )
+        additionalConfiguration?.validate(
             initializationMode = initializationMode,
             isLiveMode = paymentConfiguration.get().isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
@@ -331,6 +411,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 DurationProvider.Key.PaymentSheetLoadIsGooglePayReady
             ) {
                 configuration.isGooglePayReady()
+            }
+        }
+        val isGooglePaySupportedByAdditionalConfiguration = additionalConfiguration?.let {
+            async {
+                durationProvider.measureDuration(
+                    DurationProvider.Key.PaymentSheetLoadIsGooglePayReady
+                ) {
+                    it.isGooglePayReady()
+                }
             }
         }
 
@@ -390,6 +479,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
         }
 
+        val additionalLinkState = additionalConfiguration?.let {
+            async {
+                createLinkState(
+                    elementsSession = elementsSession,
+                    configuration = it,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
+        }
+
         val paymentMethodMetadata = async {
             val linkStateResult = linkState.await()
             val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
@@ -401,6 +502,34 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     integrationConfiguration = integrationConfiguration,
                     elementsSession = elementsSession,
                     configuration = configuration,
+                    linkStateResult = linkStateResult,
+                    isGooglePayReady = isGooglePayReady,
+                    isGooglePaySupported = isGooglePaySupported,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
+        }
+
+        val additionalPaymentMethodMetadata = additionalIntegrationConfiguration?.let { additionalIntegration ->
+            async {
+                val linkStateResult = requireNotNull(additionalLinkState).await()
+                val isGooglePayReady = isGooglePayReady(
+                    configuration = additionalIntegration.commonConfiguration,
+                    elementsSession = elementsSession,
+                    initializationMode = initializationMode,
+                    isGooglePaySupportedByConfiguration =
+                        requireNotNull(isGooglePaySupportedByAdditionalConfiguration),
+                )
+                val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
+                    errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
+                } ?: false
+
+                createPaymentMethodMetadata(
+                    integrationConfiguration = additionalIntegration,
+                    elementsSession = elementsSession,
+                    configuration = additionalIntegration.commonConfiguration,
                     linkStateResult = linkStateResult,
                     isGooglePayReady = isGooglePayReady,
                     isGooglePaySupported = isGooglePaySupported,
@@ -444,6 +573,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val stripeIntent = elementsSession.stripeIntent
         val pmMetadata = paymentMethodMetadata.await()
+        val additionalPmMetadata = additionalPaymentMethodMetadata?.await() ?: pmMetadata
 
         warnUnactivatedIfNeeded(stripeIntent)
 
@@ -474,7 +604,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = state.paymentMethodMetadata,
         )
 
-        return@runCatching state
+        PaymentElementLoader.StateWithAdditionalPaymentMethodMetadata(
+            state = state,
+            additionalPaymentMethodMetadata = additionalPmMetadata,
+        )
     }
 
     private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
@@ -624,6 +757,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
             is PaymentElementLoader.Configuration.StandaloneLink -> PaymentMethodLayout.Vertical
+            is PaymentElementLoader.Configuration.Checkout -> integrationConfiguration.paymentMethodLayout
             is PaymentElementLoader.Configuration.Embedded ->
                 if (
                     elementsSession.forceVerticalPaymentMethodLayout &&

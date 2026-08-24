@@ -42,6 +42,9 @@ internal class FakePaymentElementLoader(
     var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
         private set
 
+    var lastAdditionalIntegrationConfiguration: PaymentElementLoader.Configuration? = null
+        private set
+
     fun updateStripeIntent(intent: StripeIntent) {
         this.stripeIntent = intent
     }
@@ -82,6 +85,7 @@ internal class FakePaymentElementLoader(
                 is PaymentElementLoader.Configuration.CryptoOnramp,
                 is PaymentElementLoader.Configuration.StandaloneLink,
                 is PaymentElementLoader.Configuration.Embedded -> PaymentSheet.PaymentMethodLayout.Vertical
+                is PaymentElementLoader.Configuration.Checkout -> integrationConfiguration.paymentMethodLayout
                 is PaymentElementLoader.Configuration.PaymentSheet ->
                     integrationConfiguration.configuration.paymentMethodLayout
             }
@@ -118,5 +122,28 @@ internal class FakePaymentElementLoader(
                 )
             )
         }
+    }
+
+    override suspend fun loadWithAdditionalPaymentMethodMetadata(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        additionalIntegrationConfiguration: PaymentElementLoader.Configuration,
+        metadata: PaymentElementLoader.Metadata,
+    ): Result<PaymentElementLoader.StateWithAdditionalPaymentMethodMetadata> {
+        lastAdditionalIntegrationConfiguration = additionalIntegrationConfiguration
+        val state = load(initializationMode, integrationConfiguration, metadata)
+        val additionalState = load(initializationMode, additionalIntegrationConfiguration, metadata)
+        lastIntegrationConfiguration = integrationConfiguration
+        return state.fold(
+            onSuccess = { loadedState ->
+                additionalState.map { additionalLoadedState ->
+                    PaymentElementLoader.StateWithAdditionalPaymentMethodMetadata(
+                        state = loadedState,
+                        additionalPaymentMethodMetadata = additionalLoadedState.paymentMethodMetadata,
+                    )
+                }
+            },
+            onFailure = { error -> Result.failure(error) },
+        )
     }
 }

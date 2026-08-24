@@ -61,11 +61,11 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
             expressButtons = session.availableExpressButtonTypes.map { expressButtonType ->
                 when (expressButtonType) {
                     ExpressButtonType.Link -> ExpressButton.Link.create(
-                        paymentMethodMetadata = state.paymentMethodMetadata,
+                        paymentMethodMetadata = state.expressCheckoutPaymentMethodMetadata,
                         linkAccountInfo = linkAccountInfo,
                     )
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
-                        paymentMethodMetadata = state.paymentMethodMetadata,
+                        paymentMethodMetadata = state.expressCheckoutPaymentMethodMetadata,
                         googlePayConfiguration = expressButtonType.googlePayConfiguration,
                         shippingAddressRequired =
                             state.configuration.expressCheckoutElementConfiguration.shippingAddressRequired,

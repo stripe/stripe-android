@@ -11,7 +11,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-// TODO-codex: update this and all its dependencies to use the ECE payment method metadata rather than the generic PMM.
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ExpressCheckoutElement @Inject internal constructor(

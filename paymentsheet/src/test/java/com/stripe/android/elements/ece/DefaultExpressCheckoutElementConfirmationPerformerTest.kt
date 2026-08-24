@@ -89,7 +89,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isNull()
-            assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+            assertThat(args.paymentMethodMetadata)
+                .isEqualTo(stateHolder.state?.expressCheckoutPaymentMethodMetadata)
         }
     }
 
@@ -198,7 +199,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = ExpressButton.Link.create(
-                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethodMetadata = state.expressCheckoutPaymentMethodMetadata,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
             ),
         ) {
@@ -206,7 +207,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
-            assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+            assertThat(args.paymentMethodMetadata)
+                .isEqualTo(stateHolder.state?.expressCheckoutPaymentMethodMetadata)
         }
     }
 

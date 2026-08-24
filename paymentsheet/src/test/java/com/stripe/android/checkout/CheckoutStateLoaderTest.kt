@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -23,6 +24,7 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -70,6 +72,55 @@ internal class CheckoutStateLoaderTest {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `loadInitial creates express checkout metadata from express checkout configuration`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
+                    PaymentElement.Configuration.BillingDetailsCollectionConfiguration()
+                        .address(
+                            PaymentElement.Configuration.BillingDetailsCollectionConfiguration
+                                .AddressCollectionMode.Automatic
+                        )
+                )
+            )
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration()
+                    .googlePayConfiguration(
+                        ExpressCheckoutElement.Configuration.GooglePayConfiguration().label("Express total")
+                    )
+                    .linkConfiguration(
+                        ExpressCheckoutElement.Configuration.LinkConfiguration().display(
+                            ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never
+                        )
+                    )
+                    .billingDetailsCollectionConfiguration(
+                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
+                            .address(
+                                ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
+                                    .AddressCollectionMode.Full
+                            )
+                    )
+            )
+            .build()
+
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+        val commonConfiguration = paymentElementLoader.lastAdditionalIntegrationConfiguration
+            ?.commonConfiguration
+        assertThat(commonConfiguration?.googlePay?.label).isEqualTo("Express total")
+        assertThat(commonConfiguration?.link?.display)
+            .isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+        assertThat(
+            stateHolder.state?.paymentMethodMetadata?.billingDetailsCollectionConfiguration?.address,
+        ).isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+        assertThat(
+            stateHolder.state?.expressCheckoutPaymentMethodMetadata
+                ?.billingDetailsCollectionConfiguration?.address,
+        )
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }
 
     @Test
@@ -374,6 +425,7 @@ internal class CheckoutStateLoaderTest {
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,

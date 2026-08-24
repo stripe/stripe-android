@@ -85,7 +85,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
     @Test
     fun `onEceWalletTapped fires expected event for Link`() = runScenario {
         val linkButton = ExpressButton.Link.create(
-            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             linkAccountInfo = LinkAccountUpdate.Value(null)
         )
 
@@ -146,7 +146,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             configuration = CheckoutController.Configuration()
                 .expressCheckoutElement(expressCheckoutElementConfiguration)
                 .build(),
-            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            expressCheckoutPaymentMethodMetadata = paymentMethodMetadata,
         )
         val reporter = DefaultExpressCheckoutElementEventReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,

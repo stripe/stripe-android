@@ -73,7 +73,7 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
         )
 
-        val loaderState = paymentElementLoader.load(
+        val loadResult = paymentElementLoader.loadWithAdditionalPaymentMethodMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = response.id,
                 checkoutSessionResponse = response,
@@ -83,14 +83,20 @@ internal class CheckoutStateLoader @Inject constructor(
                 configuration = embeddedConfig,
                 paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
             ),
+            additionalIntegrationConfiguration = PaymentElementLoader.Configuration.Checkout(
+                commonConfiguration = commonConfigurationFactory.createForExpressCheckoutElement(
+                    configuration = configuration,
+                    checkoutSessionResponse = response,
+                    collectedDetails = collectedDetails,
+                ),
+                paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
+            ),
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = false,
                 initializedViaCompose = false,
             ),
         ).getOrThrow()
-
-        // TODO-codex: in parallel with paymentElementLoader.load create a separate paymentMethodMetadata for
-        // ECE which uses ECE's gpay, link, and bdcc configs.
+        val loaderState = loadResult.state
 
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
@@ -110,7 +116,7 @@ internal class CheckoutStateLoader @Inject constructor(
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
-            // TODO-codex: set the ECE payment method metadata here
+            expressCheckoutPaymentMethodMetadata = loadResult.additionalPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
