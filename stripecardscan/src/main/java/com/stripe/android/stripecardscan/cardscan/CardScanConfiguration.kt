@@ -8,6 +8,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class CardScanConfiguration(
     val elementsSessionId: String?,
+    val publishableKey: String,
     val enableMlKitTextRecognition: Boolean = false,
     val disableSsdOcr: Boolean = false,
 ) : Parcelable
