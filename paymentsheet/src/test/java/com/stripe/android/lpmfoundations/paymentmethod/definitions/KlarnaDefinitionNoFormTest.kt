@@ -93,7 +93,7 @@ class KlarnaDefinitionNoFormTest {
     }
 
     @Test
-    fun `createFormElements uses setup intent country before default billing country`() {
+    fun `createFormElements uses default billing country before setup intent country`() {
         val formElements = KlarnaDefinition.formElements(
             PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFactory.create(
@@ -102,6 +102,23 @@ class KlarnaDefinitionNoFormTest {
                 ),
                 defaultBillingDetails = PaymentSheet.BillingDetails(
                     address = PaymentSheet.Address(country = "CA"),
+                ),
+            )
+        )
+
+        assertThat(formElements).hasSize(3)
+        assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[address][country]_section")
+        val countryElement = (formElements[1] as SectionElement).fields.single() as CountryElement
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
+    }
+
+    @Test
+    fun `createFormElements uses setup intent country when default billing country is absent`() {
+        val formElements = KlarnaDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFactory.create(
+                    paymentMethodTypes = listOf("card", "klarna"),
+                    countryCode = "US",
                 ),
             )
         )

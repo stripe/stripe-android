@@ -126,7 +126,8 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
                 )
                 .requireCountry(
                     allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                    initialValue = metadata.stripeIntent.countryCode,
+                    initialValue = arguments.initialValues[IdentifierSpec.Country]
+                        ?: metadata.stripeIntent.countryCode,
                 )
         }
 
