@@ -44,7 +44,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val context: Context,
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptionsProvider: () -> ApiRequest.Options,
     private val userFacingLogger: UserFacingLogger,
 ) : IntentConfirmationInterceptor {
     init {
@@ -67,7 +67,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         null -> null
     }
 
-    private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
+    private val confirmActionHelper: ConfirmActionHelper =
+        ConfirmActionHelper(requestOptionsProvider().apiKeyIsLiveMode)
 
     override suspend fun intercept(
         intent: StripeIntent,
@@ -80,7 +81,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 shippingValues,
                 clientAttributionMetadata,
             ),
-            options = requestOptions,
+            options = requestOptionsProvider(),
         ).fold(
             onSuccess = { confirmationToken ->
                 handleDeferredOnConfirmationTokenCreated(
@@ -116,13 +117,13 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 clientAttributionMetadata,
             ),
             options = if (paymentMethod.customerId != null) {
-                requestOptions.copy(
+                requestOptionsProvider().copy(
                     apiKey = ephemeralKeySecret ?: "".also {
                         userFacingLogger.logWarningWithoutPii(ERROR_MISSING_EPHEMERAL_KEY_SECRET)
                     }
                 )
             } else {
-                requestOptions
+                requestOptionsProvider()
             },
         ).fold(
             onSuccess = { confirmationToken ->
@@ -195,7 +196,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
-            options = requestOptions,
+            options = requestOptionsProvider(),
         ).mapCatching { intent ->
             if (intent.isConfirmed) {
                 ConfirmationDefinition.Action.Complete(
@@ -273,7 +274,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 null
             },
             clientContext =
-            if (requestOptions.apiKeyIsLiveMode) {
+            if (requestOptionsProvider().apiKeyIsLiveMode) {
                 null
             } else {
                 prepareConfirmationTokenClientContextParams(

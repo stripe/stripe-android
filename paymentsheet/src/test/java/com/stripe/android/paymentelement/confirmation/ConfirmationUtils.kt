@@ -106,7 +106,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     createIntentCallback = createIntentCallback,
                     stripeRepository = stripeRepository,
                     allowsManualConfirmation = false,
-                    requestOptions = requestOptions,
+                    requestOptionsProvider = { requestOptions },
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
@@ -124,7 +124,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     customerMetadata = customerMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
-                    requestOptions = requestOptions,
+                    requestOptionsProvider = { requestOptions },
                     userFacingLogger = FakeUserFacingLogger(),
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
@@ -140,7 +140,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     handler = handler,
                     stripeRepository = stripeRepository,
                     errorReporter = errorReporter,
-                    requestOptions = requestOptions,
+                    requestOptionsProvider = { requestOptions },
                 )
             }
         },
@@ -174,9 +174,9 @@ internal suspend fun createIntentConfirmationInterceptor(
                     clientAttributionMetadata = clientAttributionMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
+                    requestOptionsProvider = { requestOptions },
                     checkoutSessionRepository = checkoutSessionRepository,
                     checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
-                    requestOptions = requestOptions,
                 )
             }
         },

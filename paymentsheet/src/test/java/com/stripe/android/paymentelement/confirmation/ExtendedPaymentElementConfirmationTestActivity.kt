@@ -19,8 +19,6 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
@@ -220,22 +218,17 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
         )
 
         @Provides
-        fun providesApiConfigurationProvider(
-            paymentConfiguration: PaymentConfiguration,
-        ): () -> ApiConfiguration.State = {
-            ApiConfiguration.State(
-                publishableKey = paymentConfiguration.publishableKey,
-                stripeAccountId = paymentConfiguration.stripeAccountId,
+        fun providesApiConfigurationState(config: PaymentConfiguration): ApiConfiguration.State {
+            return ApiConfiguration.State(
+                publishableKey = config.publishableKey,
+                stripeAccountId = config.stripeAccountId,
             )
         }
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providesPublishableKey(config: PaymentConfiguration): () -> String = { config.publishableKey }
-
-        @Provides
-        @Named(STRIPE_ACCOUNT_ID)
-        fun providesStripeAccountId(config: PaymentConfiguration): () -> String? = { config.stripeAccountId }
+        fun providesApiConfigurationStateProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiConfiguration.State = { state }
 
         @Provides
         @Singleton
@@ -253,6 +246,21 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
         fun providesLinkEventsReporter(): LinkEventsReporter = FakeLinkEventsReporterForConfirmation(
             FakeLinkEventsReporter()
         )
+
+        @Provides
+        fun providesApiConfigurationStateProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiConfiguration.State = { state }
+
+        @Provides
+        fun providesApiRequestOptionsProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiRequest.Options = {
+            ApiRequest.Options(
+                apiKey = state.publishableKey,
+                stripeAccount = state.stripeAccountId,
+            )
+        }
 
         @Provides
         fun providesApiRequestOptions(config: PaymentConfiguration): ApiRequest.Options {

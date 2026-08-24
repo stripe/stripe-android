@@ -112,12 +112,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             transactionId = intent.id,
             label = config.customLabel,
             isElements = true,
-            apiConfiguration = PaymentConfiguration.getInstance(context).let {
-                ApiConfiguration.State(
-                    publishableKey = it.publishableKey,
-                    stripeAccountId = it.stripeAccountId,
-                )
-            },
+            apiConfiguration = confirmationArgs.paymentMethodMetadata.apiConfiguration,
             displayItems = GooglePayDisplayItemsFactory.create(confirmationArgs.paymentMethodMetadata, context),
             billingEmailOverride = config.billingEmailOverride,
             shippingAddressParameters = config.shippingAddressParameters,
