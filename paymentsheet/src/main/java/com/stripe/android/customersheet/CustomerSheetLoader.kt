@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
@@ -47,6 +48,7 @@ internal class DefaultCustomerSheetLoader(
     private val eventReporter: CustomerSheetEventReporter,
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext,
+    private val apiConfigurationResolver: ApiConfigurationResolver,
 ) : CustomerSheetLoader {
 
     @Inject
@@ -57,6 +59,7 @@ internal class DefaultCustomerSheetLoader(
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
+        apiConfigurationResolver: ApiConfigurationResolver,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
@@ -66,6 +69,7 @@ internal class DefaultCustomerSheetLoader(
         eventReporter = eventReporter,
         errorReporter = errorReporter,
         workContext = workContext,
+        apiConfigurationResolver = apiConfigurationResolver,
     )
 
     override suspend fun load(
@@ -178,6 +182,7 @@ internal class DefaultCustomerSheetLoader(
                     IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach
                 }
             ),
+            apiConfiguration = apiConfigurationResolver.resolve(null),
         )
     }
 

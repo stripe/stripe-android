@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
@@ -191,7 +192,7 @@ class CustomerAdapterTest {
     fun `retrievePaymentMethods filters with paymentMethodTypes`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
-        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any()))
+        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any(), any()))
             .thenReturn(Result.success(emptyList()))
 
         val adapter = createAdapter(
@@ -208,6 +209,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = any(),
+            stripeAccountId = any()
         )
     }
 
@@ -259,6 +261,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = eq(false),
+            stripeAccountId = any()
         )
     }
 
@@ -777,7 +780,10 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            apiConfigProvider = {
+                ApiConfiguration.State("pk_123", "acc_123")
+            },
         )
     }
 }
