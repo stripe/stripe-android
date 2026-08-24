@@ -10,8 +10,8 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
-    # Run PaymentSheet E2E tests in parallel on one machine so Bitrise bills a single job.
-    - PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT: 6
+    # Limit concurrent managed devices so each emulator has reliable network connectivity.
+    - PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT: 3
 
 pipelines:
   main-trigger-pipeline:
