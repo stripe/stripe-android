@@ -25,10 +25,30 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           matches=$(git diff \
-            --unified=0 \
+            --unified=10 \
             "$BASE_SHA"..."$HEAD_SHA" \
             -- paymentsheet-example/src/androidTest \
-            | grep -E '^\+[[:space:]]*@Ignore([[:space:](]|$)' \
+            | awk '
+              /^\+\+\+ b\// {
+                file = substr($0, 7)
+              }
+              /^\+[[:space:]]*@Ignore([[:space:](]|$)/ {
+                ignored = 1
+                next
+              }
+              ignored && /^[+ ][[:space:]]*fun[[:space:]]+/ {
+                test_name = substr($0, 2)
+                sub(/^[[:space:]]*fun[[:space:]]+/, "", test_name)
+                sub(/[[:space:](].*$/, "", test_name)
+                print file ": " test_name
+                ignored = 0
+              }
+              /^diff --git / || /^@@ / {
+                if (ignored) {
+                  ignored = 0
+                }
+              }
+            ' \
             || true)
 
           if [[ -n "$matches" ]]; then
