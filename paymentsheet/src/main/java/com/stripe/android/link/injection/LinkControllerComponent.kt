@@ -6,6 +6,7 @@ import com.stripe.android.link.LinkController
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsOnlyModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -14,6 +15,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         LinkControllerModule::class,
+        ApiRequestOptionsOnlyModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )
