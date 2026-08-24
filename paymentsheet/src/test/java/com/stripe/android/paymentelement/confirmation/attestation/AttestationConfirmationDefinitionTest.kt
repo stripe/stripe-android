@@ -5,6 +5,7 @@ import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
@@ -639,7 +640,12 @@ internal class AttestationConfirmationDefinitionTest {
             integrityRequestManager = integrityRequestManager,
             coroutineScope = coroutineScope,
             workContext = workContext,
-            publishableKeyProvider = { publishableKey },
+            apiConfigProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = null,
+                )
+            },
             productUsage = productUsage,
             attestationAnalyticsEventsReporter = eventsReporter,
             isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,

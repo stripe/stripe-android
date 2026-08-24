@@ -29,7 +29,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
     @Assisted private val handler: PreparePaymentMethodHandler,
     private val errorReporter: ErrorReporter,
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptionsProvider: () -> ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
     override suspend fun intercept(
@@ -39,7 +39,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.createPaymentMethod(
             confirmationOption.createParams.updatedWithProductUsage(intentConfiguration),
-            requestOptions
+            requestOptionsProvider()
         ).fold(
             onSuccess = { paymentMethod ->
                 intercept(
@@ -78,7 +78,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
         runCatching {
             stripeRepository.createSavedPaymentMethodRadarSession(
                 paymentMethodId = paymentMethod.id,
-                requestOptions = requestOptions,
+                requestOptions = requestOptionsProvider(),
             ).getOrThrow()
         }.onFailure {
             errorReporter.report(

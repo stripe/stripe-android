@@ -6,7 +6,6 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
@@ -48,6 +47,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -95,6 +95,8 @@ class USBankAccountFormViewModelTest {
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        publishableKey = "pk_test_123",
+        stripeAccountId = null,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -105,6 +107,11 @@ class USBankAccountFormViewModelTest {
 
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @Before
+    fun setup() {
+        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), "pk_test_123")
+    }
 
     @Test
     fun `when email and name is valid then required fields are filled`() =
@@ -158,7 +165,7 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel()
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.handlePrimaryButtonClick()
-            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), anyOrNull(), any(), any())
         }
 
     @Test
@@ -268,7 +275,7 @@ class USBankAccountFormViewModelTest {
 
             viewModel.handlePrimaryButtonClick()
 
-            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), anyOrNull(), any(), any())
         }
 
     @Test
@@ -883,7 +890,7 @@ class USBankAccountFormViewModelTest {
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredPayment(
             publishableKey = any(),
-            stripeAccountId = any(),
+            stripeAccountId = anyOrNull(),
             configuration = eq(
                 CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Jenny Rose",
@@ -933,7 +940,7 @@ class USBankAccountFormViewModelTest {
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredSetup(
             publishableKey = any(),
-            stripeAccountId = any(),
+            stripeAccountId = anyOrNull(),
             configuration = eq(
                 CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Jenny Rose",
@@ -2124,14 +2131,9 @@ class USBankAccountFormViewModelTest {
         args: USBankAccountFormViewModel.Args = defaultArgs,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): USBankAccountFormViewModel {
-        val paymentConfiguration = PaymentConfiguration(
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            STRIPE_ACCOUNT_ID
-        )
         return USBankAccountFormViewModel(
             args = args,
             application = ApplicationProvider.getApplicationContext(),
-            lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         ).also { viewModelStoreRule.track(it) }
@@ -2194,7 +2196,6 @@ class USBankAccountFormViewModelTest {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
-        const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         const val CUSTOMER_COUNTRY = "US"
         const val CUSTOMER_PHONE = "+13105551234"
         val CUSTOMER_ADDRESS = PaymentSheet.Address(
