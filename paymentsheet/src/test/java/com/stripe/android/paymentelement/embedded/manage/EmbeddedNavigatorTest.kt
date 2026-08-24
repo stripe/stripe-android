@@ -814,7 +814,6 @@ internal class EmbeddedNavigatorTest {
         )
         return EmbeddedNavigator.Screen.Form.Factory(
             interactorFactory = interactorFactory,
-            eventReporter = FakeEventReporter(),
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
@@ -852,7 +851,6 @@ internal class EmbeddedNavigatorTest {
     ): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = interactor,
-            eventReporter = FakeEventReporter(),
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
@@ -873,7 +871,6 @@ internal class EmbeddedNavigatorTest {
         val formInteractor = TestFormInteractor(isLiveMode = isLiveMode)
         val screen = EmbeddedNavigator.Screen.Form(
             formInteractor = formInteractor,
-            eventReporter = FakeEventReporter(),
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
@@ -902,7 +899,6 @@ internal class EmbeddedNavigatorTest {
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = interactor,
             isLiveMode = isLiveMode,
-            eventReporter = FakeEventReporter(),
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = confirmationHelper,
             embeddedSelectionHolder = selectionHolder,

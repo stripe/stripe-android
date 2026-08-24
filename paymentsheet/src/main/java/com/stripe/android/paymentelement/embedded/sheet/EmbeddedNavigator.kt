@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
-import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.utils.addPaymentMethodTitle
 import com.stripe.android.paymentsheet.utils.isOnlyOneNonCardPaymentMethod
@@ -210,7 +209,6 @@ internal class EmbeddedNavigator private constructor(
 
         class Form(
             val formInteractor: VerticalModeFormInteractor,
-            private val eventReporter: EventReporter,
             private val sheetActivityStateHolder: SheetActivityStateHolder,
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
@@ -235,7 +233,6 @@ internal class EmbeddedNavigator private constructor(
                 val state by sheetActivityStateHolder.state.collectAsState()
                 FormScreenContent(
                     interactor = formInteractor,
-                    eventReporter = eventReporter,
                     onClick = {
                         confirmationHelper.confirm()
                     },
@@ -259,7 +256,6 @@ internal class EmbeddedNavigator private constructor(
 
             class Factory @Inject constructor(
                 private val interactorFactory: EmbeddedFormInteractorFactory,
-                private val eventReporter: EventReporter,
                 private val sheetActivityStateHolder: SheetActivityStateHolder,
                 private val confirmationHelper: SheetActivityConfirmationHelper,
                 private val embeddedSelectionHolder: EmbeddedSelectionHolder,
@@ -274,7 +270,6 @@ internal class EmbeddedNavigator private constructor(
                             paymentMethodCode = launchMode.selectedPaymentMethodCode,
                             hasSavedPaymentMethods = hasSavedPaymentMethods,
                         ),
-                        eventReporter = eventReporter,
                         sheetActivityStateHolder = sheetActivityStateHolder,
                         confirmationHelper = confirmationHelper,
                         embeddedSelectionHolder = embeddedSelectionHolder,
@@ -288,7 +283,6 @@ internal class EmbeddedNavigator private constructor(
         class SavedPaymentMethodConfirm(
             private val interactor: SavedPaymentMethodConfirmInteractor,
             private val isLiveMode: Boolean,
-            private val eventReporter: EventReporter,
             private val sheetActivityStateHolder: SheetActivityStateHolder,
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
@@ -309,28 +303,26 @@ internal class EmbeddedNavigator private constructor(
                 val state by sheetActivityStateHolder.state.collectAsState()
                 DismissKeyboardOnProcessing(state.isProcessing)
 
-                EventReporterProvider(eventReporter) {
-                    Column {
-                        SavedPaymentMethodConfirmUI(interactor)
-                        USBankAccountMandate(state)
-                        FormActivityError(state)
-                        Spacer(Modifier.height(40.dp))
-                        FormActivityPrimaryButton(
-                            state = state,
-                            onProcessingCompleted = {
-                                sheetActivityStateHolder.setResult(
-                                    successfulConfirmationResult(
-                                        embeddedSelectionHolder = embeddedSelectionHolder,
-                                        customerStateHolder = customerStateHolder,
-                                        launchMode = launchMode,
-                                    )
+                Column {
+                    SavedPaymentMethodConfirmUI(interactor)
+                    USBankAccountMandate(state)
+                    FormActivityError(state)
+                    Spacer(Modifier.height(40.dp))
+                    FormActivityPrimaryButton(
+                        state = state,
+                        onProcessingCompleted = {
+                            sheetActivityStateHolder.setResult(
+                                successfulConfirmationResult(
+                                    embeddedSelectionHolder = embeddedSelectionHolder,
+                                    customerStateHolder = customerStateHolder,
+                                    launchMode = launchMode,
                                 )
-                            },
-                            onClick = confirmationHelper::confirm,
-                            onDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
-                        )
-                        PaymentSheetContentPadding()
-                    }
+                            )
+                        },
+                        onClick = confirmationHelper::confirm,
+                        onDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+                    )
+                    PaymentSheetContentPadding()
                 }
             }
 
@@ -383,7 +375,6 @@ internal class EmbeddedNavigator private constructor(
 
         class HorizontalPaymentOptions(
             private val interactor: AddPaymentMethodInteractor,
-            private val eventReporter: EventReporter,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
             private val onContinueClick: () -> Unit,
             private val onPrimaryButtonDisabledClick: () -> Unit,
@@ -409,19 +400,17 @@ internal class EmbeddedNavigator private constructor(
 
             @Composable
             override fun Content() {
-                EventReporterProvider(eventReporter) {
-                    AddPaymentMethod(interactor = interactor)
-                    val state by sheetActivityState.collectAsState()
-                    USBankAccountMandate(state)
-                    FormActivityError(state)
-                    Spacer(Modifier.height(40.dp))
-                    FormActivityPrimaryButton(
-                        state = state,
-                        onClick = onContinueClick,
-                        onDisabledClick = onPrimaryButtonDisabledClick,
-                    )
-                    PaymentSheetContentPadding()
-                }
+                AddPaymentMethod(interactor = interactor)
+                val state by sheetActivityState.collectAsState()
+                USBankAccountMandate(state)
+                FormActivityError(state)
+                Spacer(Modifier.height(40.dp))
+                FormActivityPrimaryButton(
+                    state = state,
+                    onClick = onContinueClick,
+                    onDisabledClick = onPrimaryButtonDisabledClick,
+                )
+                PaymentSheetContentPadding()
             }
 
             override fun close() {

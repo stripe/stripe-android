@@ -89,7 +89,6 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private fun createHorizontalScreen(): EmbeddedNavigator.Screen {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = addPaymentMethodInteractorFactory.create(),
-            eventReporter = eventReporter,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,

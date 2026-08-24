@@ -659,7 +659,6 @@ internal class DefaultSheetActivityStateHolderTest {
         screenFactory = SavedPaymentMethodConfirmScreenFactory(
             interactorFactory = savedPaymentMethodConfirmInteractorFactory,
             paymentMethodMetadata = paymentMethodMetadata,
-            eventReporter = FakeEventReporter(),
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
@@ -721,7 +720,6 @@ internal class DefaultSheetActivityStateHolderTest {
     ): EmbeddedNavigator.Screen.Form {
         return EmbeddedNavigator.Screen.Form(
             formInteractor = interactor,
-            eventReporter = FakeEventReporter(),
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
@@ -753,7 +751,6 @@ internal class DefaultSheetActivityStateHolderTest {
     private fun createHorizontalPaymentOptionsScreen(): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = FakeAddPaymentMethodInteractor(FakeAddPaymentMethodInteractor.createState()),
-            eventReporter = FakeEventReporter(),
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "Continue".resolvableString,

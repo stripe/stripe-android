@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -142,7 +143,6 @@ internal class SavedPaymentMethodConfirmScreenTest {
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = interactor,
             isLiveMode = true,
-            eventReporter = eventReporter,
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = confirmationHelper,
             embeddedSelectionHolder = selectionHolder,
@@ -154,8 +154,10 @@ internal class SavedPaymentMethodConfirmScreenTest {
             CompositionLocalProvider(
                 LocalSoftwareKeyboardController provides keyboardController,
             ) {
-                StripeTheme {
-                    screen.Content()
+                EventReporterProvider(eventReporter) {
+                    StripeTheme {
+                        screen.Content()
+                    }
                 }
             }
         }

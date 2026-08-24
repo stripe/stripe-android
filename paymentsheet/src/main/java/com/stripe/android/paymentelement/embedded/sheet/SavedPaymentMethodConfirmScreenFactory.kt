@@ -4,7 +4,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import javax.inject.Inject
@@ -12,7 +11,6 @@ import javax.inject.Inject
 internal class SavedPaymentMethodConfirmScreenFactory @Inject constructor(
     private val interactorFactory: SavedPaymentMethodConfirmInteractor.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val eventReporter: EventReporter,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
     private val confirmationHelper: SheetActivityConfirmationHelper,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
@@ -22,7 +20,6 @@ internal class SavedPaymentMethodConfirmScreenFactory @Inject constructor(
     fun create(selection: PaymentSelection.Saved) = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
         interactor = interactorFactory.create(selection, embeddedSelectionHolder::setSelection),
         isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-        eventReporter = eventReporter,
         sheetActivityStateHolder = sheetActivityStateHolder,
         confirmationHelper = confirmationHelper,
         embeddedSelectionHolder = embeddedSelectionHolder,

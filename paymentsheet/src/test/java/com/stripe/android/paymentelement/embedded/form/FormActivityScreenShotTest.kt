@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -151,7 +152,6 @@ internal class FormActivityScreenShotTest {
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = FakeSavedPaymentMethodConfirmInteractor(formEnabled = false),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-            eventReporter = FakeEventReporter(),
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
@@ -161,7 +161,9 @@ internal class FormActivityScreenShotTest {
 
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
-                screen.Content()
+                EventReporterProvider(FakeEventReporter()) {
+                    screen.Content()
+                }
             }
         }
     }
@@ -255,15 +257,16 @@ internal class FormActivityScreenShotTest {
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {
-            Column {
-                FormScreenContent(
-                    interactor = interactor,
-                    eventReporter = eventReporter,
-                    onClick = {},
-                    onProcessingCompleted = {},
-                    state = state.copy(isEnabled = enabled),
-                    onPrimaryButtonDisabledClick = {},
-                )
+            EventReporterProvider(eventReporter) {
+                Column {
+                    FormScreenContent(
+                        interactor = interactor,
+                        onClick = {},
+                        onProcessingCompleted = {},
+                        state = state.copy(isEnabled = enabled),
+                        onPrimaryButtonDisabledClick = {},
+                    )
+                }
             }
         }
     }
