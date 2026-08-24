@@ -2,9 +2,11 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import com.google.android.instantapps.InstantApps
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -25,6 +27,18 @@ import kotlin.coroutines.CoroutineContext
 )
 internal class PaymentLauncherModule {
     @Provides
+    @Named(PUBLISHABLE_KEY)
+    fun providePublishableKey(
+        apiConfigurationProvider: () -> ApiConfiguration.State,
+    ): () -> String = { apiConfigurationProvider().publishableKey }
+
+    @Provides
+    @Named(STRIPE_ACCOUNT_ID)
+    fun provideStripeAccountId(
+        apiConfigurationProvider: () -> ApiConfiguration.State,
+    ): () -> String? = { apiConfigurationProvider().stripeAccountId }
+
+    @Provides
     @Singleton
     fun provideThreeDs1IntentReturnUrlMap() = mutableMapOf<String, String>()
 
@@ -40,7 +54,7 @@ internal class PaymentLauncherModule {
         @IOContext workContext: CoroutineContext,
         @UIContext uiContext: CoroutineContext,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        apiConfigurationProvider: () -> ApiConfiguration.State,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         @Named(IS_INSTANT_APP) isInstantApp: Boolean,
         @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextHandlers: Boolean,
@@ -50,7 +64,7 @@ internal class PaymentLauncherModule {
         enableLogging = enableLogging,
         workContext = workContext,
         uiContext = uiContext,
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = { apiConfigurationProvider().publishableKey },
         productUsage = productUsage,
         isInstantApp = isInstantApp,
         includePaymentSheetNextActionHandlers = includePaymentSheetNextHandlers,
