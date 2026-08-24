@@ -49,7 +49,7 @@ internal class GooglePayLauncherTest {
                 },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
             )
@@ -79,7 +79,7 @@ internal class GooglePayLauncherTest {
                 },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
             )
@@ -94,7 +94,7 @@ internal class GooglePayLauncherTest {
                 },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
             )

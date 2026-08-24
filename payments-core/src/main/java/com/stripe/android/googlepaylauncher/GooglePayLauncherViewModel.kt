@@ -286,9 +286,9 @@ internal class GooglePayLauncherViewModel(
             val productUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE)
 
             val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                application,
-                publishableKey,
-                productUsageTokens
+                context = application,
+                publishableKeyProvider = { publishableKey },
+                defaultProductUsageTokens = productUsageTokens
             )
 
             val stripeRepository = StripeApiRepository(
@@ -303,7 +303,8 @@ internal class GooglePayLauncherViewModel(
 
             val errorReporter = ErrorReporter.createFallbackInstance(
                 context = application,
-                productUsage = productUsageTokens
+                publishableKeyProvider = { publishableKey },
+                productUsage = productUsageTokens,
             )
 
             val googlePayRepository = DefaultGooglePayRepository(

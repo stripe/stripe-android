@@ -71,7 +71,11 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                 ),
                 store,
                 DefaultAnalyticsRequestExecutor(),
-                PaymentAnalyticsRequestFactory(appContext, publishableKey, productUsageTokens)
+                PaymentAnalyticsRequestFactory(
+                    context = appContext,
+                    publishableKeyProvider = { publishableKey },
+                    defaultProductUsageTokens = productUsageTokens
+                )
             ),
             staticSource = StaticCardAccountRangeSource(),
             store = store
@@ -108,7 +112,11 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                     ),
                     store,
                     DefaultAnalyticsRequestExecutor(),
-                    PaymentAnalyticsRequestFactory(appContext, publishableKey, productUsageTokens)
+                    PaymentAnalyticsRequestFactory(
+                        context = appContext,
+                        publishableKeyProvider = { publishableKey },
+                        defaultProductUsageTokens = productUsageTokens
+                    )
                 )
             },
             onFailure = {
@@ -123,9 +131,9 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     ) {
         analyticsRequestExecutor.executeAsync(
             PaymentAnalyticsRequestFactory(
-                appContext,
-                publishableKey,
-                productUsageTokens,
+                context = appContext,
+                publishableKeyProvider = { publishableKey },
+                defaultProductUsageTokens = productUsageTokens,
             ).createRequest(event)
         )
     }
