@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.17.0 - 2026-08-24
 
 ### PaymentSheet
 * [DEPRECATED] Deprecated the `googlePlacesApiKey` builder methods and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key. Address autocomplete is now available to all merchants without providing a Google Places API key. Existing integrations can remove the key without losing autocomplete, and integrations that did not provide one receive autocomplete automatically.
