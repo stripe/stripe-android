@@ -203,8 +203,14 @@
   <string name="stripe_select">選擇</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">已完成自拍照拍攝</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_captures">自拍照拍攝</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">太好了！正在檢查您的影像…</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">經您的許可後，Stripe 可能會使用您的影像來改進欺詐偵測。若您拒絕，也不會影響您的驗證。</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">使用自拍照進行驗證</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">拍攝了一張自拍照</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

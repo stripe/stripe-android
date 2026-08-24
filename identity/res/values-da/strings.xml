@@ -234,8 +234,14 @@
   <string name="stripe_select">Vælg</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Optagelse af selfier er fuldført</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_captures">Selfie-optagelser</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Fantastisk! Kontrollerer dine billeder ...</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Med din tilladelse kan Stripe bruge dine billeder til at forbedre registrering af svindel. Det påvirker ikke din verifikation, hvis du afviser.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Verificer med en selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">én selfie optaget</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

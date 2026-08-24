@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.mapOfDurationInSeconds
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.linkContext
@@ -99,10 +100,10 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
         const val FIELD_LINK_VISIBILITY = "link_visibility"
         const val FIELD_GOOGLE_PAY_VISIBILITY = "google_pay_visibility"
 
-        fun ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.toAnalyticsValue(): String {
+        fun CheckoutGooglePayConfiguration.Display.toAnalyticsValue(): String {
             return when (this) {
-                ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic -> "automatic"
-                ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never -> "never"
+                CheckoutGooglePayConfiguration.Display.Automatic -> "automatic"
+                CheckoutGooglePayConfiguration.Display.Never -> "never"
             }
         }
 

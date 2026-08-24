@@ -234,8 +234,14 @@
   <string name="stripe_select">Seleziona</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">L\'acquisizione dei selfie è completa</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_captures">Acquisizioni di selfie</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Ottimo. Controllo delle immagini in corso…</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Con la tua autorizzazione, Stripe può utilizzare le tue immagini per migliorare il rilevamento delle frodi. Se non acconsenti, la verifica non subirà alcuna conseguenza.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Verifica con un selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">un selfie acquisito</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

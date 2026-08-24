@@ -4,7 +4,7 @@ package com.stripe.android.elements.ece
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkout.asGooglePayButtonType
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.link.LinkAccountUpdate
@@ -17,6 +17,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 
 internal sealed interface ExpressButton {
 
@@ -79,13 +80,13 @@ internal sealed interface ExpressButton {
         companion object {
             fun create(
                 paymentMethodMetadata: PaymentMethodMetadata,
-                googlePayConfiguration: ExpressCheckoutElement.Configuration.GooglePayConfiguration.State,
+                googlePayConfiguration: CheckoutGooglePayConfiguration,
                 shippingAddressRequired: Boolean,
                 buttonTheme: ButtonTheme,
             ): GooglePay {
                 return GooglePay(
                     allowCreditCards = paymentMethodMetadata.cardFundingFilter.isAccepted(CardFunding.Credit),
-                    googlePayButtonType = googlePayConfiguration.buttonType.asGooglePayButtonType(),
+                    googlePayButtonType = googlePayConfiguration.buttonType.asGooglePayButtonType,
                     cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
                     cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
                     billingAddressParameters = paymentMethodMetadata.billingDetailsCollectionConfiguration
