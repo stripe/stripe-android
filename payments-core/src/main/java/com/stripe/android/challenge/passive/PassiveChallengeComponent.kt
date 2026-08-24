@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.hcaptcha.HCaptchaModule
 import com.stripe.android.model.PassiveCaptchaParams
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -17,7 +16,6 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        ApiRequestOptionsModule::class,
         HCaptchaModule::class,
         PassiveChallengeModule::class,
         StripeRepositoryModule::class,

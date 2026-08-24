@@ -57,7 +57,6 @@ import kotlin.coroutines.CoroutineContext
         PaymentElementRequestSurfaceModule::class,
         PaymentConfigurationModule::class,
         ApiConfigurationModule::class,
-        ApiRequestOptionsOnlyModule::class,
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
         NfcScanningAvailabilityModule::class,
