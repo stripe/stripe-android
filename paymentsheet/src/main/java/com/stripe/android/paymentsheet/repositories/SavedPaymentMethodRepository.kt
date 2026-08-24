@@ -104,6 +104,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 paymentMethodId = paymentMethodId,
                 stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
                 params = params,
+                stripeAccountId = apiConfigProvider().stripeAccountId,
             )
         }
     }

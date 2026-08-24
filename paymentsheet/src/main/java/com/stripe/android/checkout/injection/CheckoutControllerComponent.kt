@@ -50,6 +50,7 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -119,6 +120,7 @@ import javax.inject.Singleton
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
         ApiConfigurationResolverModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
     ],
 )
 internal interface CheckoutControllerComponent {

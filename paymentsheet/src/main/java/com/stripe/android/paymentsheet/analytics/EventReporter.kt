@@ -14,6 +14,11 @@ import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 
 internal interface LoadingEventReporter {
     /**
+     * PaymentSheet or FlowController have been initialized.
+     */
+    fun onInit(publishableKey: String)
+
+    /**
      * PaymentSheet or FlowController have started loading.
      */
     fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String)

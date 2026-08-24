@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsOnlyModule
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import dagger.BindsInstance
@@ -19,6 +20,8 @@ import javax.inject.Singleton
     modules = [
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
+        ApiConfigurationModule::class,
+        ApiRequestOptionsOnlyModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentOptionsViewModelModule::class,
         PaymentSheetAutocompleteModule::class,
