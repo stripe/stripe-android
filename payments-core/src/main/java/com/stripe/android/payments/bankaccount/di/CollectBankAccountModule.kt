@@ -3,6 +3,7 @@ package com.stripe.android.payments.bankaccount.di
 import android.app.Application
 import android.content.Context
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
@@ -16,6 +17,16 @@ internal object CollectBankAccountModule {
 
     @Provides
     fun providesAppContext(application: Application): Context = application
+
+    @Provides
+    fun provideApiConfigurationProvider(
+        args: CollectBankAccountContract.Args
+    ): () -> ApiConfiguration.State = {
+        ApiConfiguration.State(
+            publishableKey = args.publishableKey,
+            stripeAccountId = args.stripeAccountId,
+        )
+    }
 
     @Provides
     @Named(PUBLISHABLE_KEY)
