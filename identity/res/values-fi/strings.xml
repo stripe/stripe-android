@@ -234,8 +234,14 @@
   <string name="stripe_select">Valitse</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Selfien ottaminen suortitettu</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_captures">Selfiet</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Hienoa! Tarkistetaan kuviasi....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Luvallasi Stripe voi käyttää kuviasi petosten tunnistamisen parantamiseen. Kieltäytyminen ei vaikuta todentamiseesi.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Todenna selfiellä</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">yksi selfie otettu</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

@@ -112,6 +112,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_internal_error_message">S\'ha produït un error. Proveu-ho amb una altra targeta.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">No s\'admet la targeta. Proveu-ho amb una altra targeta.</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">Torneu-ho a provar.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">o introduir manualment</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->

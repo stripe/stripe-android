@@ -114,6 +114,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_internal_error_message">문제가 발생했습니다. 다른 카드를 사용해 보세요.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">지원되지 않는 카드입니다. 다른 카드를 사용해 주십시오.</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">다시 시도해 주십시오.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">또는 수동으로 입력</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
