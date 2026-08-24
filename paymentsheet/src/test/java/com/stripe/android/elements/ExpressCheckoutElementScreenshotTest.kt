@@ -4,6 +4,7 @@ package com.stripe.android.elements
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,7 +38,7 @@ internal class ExpressCheckoutElementScreenshotTest {
         paparazziRule.snapshot {
             ExpressCheckoutElementContent(
                 interactor = FakeExpressCheckoutElementInteractor(),
-                googlePayButton = { _, _ -> FakeGooglePayButton() },
+                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -55,7 +56,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                         )
                     ),
                 ),
-                googlePayButton = { _, _ -> FakeGooglePayButton() },
+                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -81,8 +82,42 @@ internal class ExpressCheckoutElementScreenshotTest {
                         )
                     ),
                 ),
-                googlePayButton = { _, _ -> FakeGooglePayButton() },
+                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
             )
+        }
+    }
+
+    @Test
+    fun rendersLinkButtonThemes() {
+        val linkButton = ExpressCheckoutElementInteractorStateFactory.create().expressButtons
+            .filterIsInstance<ExpressButton.Link>()
+            .single()
+
+        paparazziRule.snapshot {
+            Column {
+                ExpressCheckoutElementContent(
+                    interactor = FakeExpressCheckoutElementInteractor(
+                        state = stateFlowOf(
+                            ExpressCheckoutElementInteractorStateFactory.create(
+                                expressButtons = listOf(linkButton),
+                                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
+                            )
+                        ),
+                    ),
+                    googlePayButton = { _, _, _ -> FakeGooglePayButton() },
+                )
+                ExpressCheckoutElementContent(
+                    interactor = FakeExpressCheckoutElementInteractor(
+                        state = stateFlowOf(
+                            ExpressCheckoutElementInteractorStateFactory.create(
+                                expressButtons = listOf(linkButton),
+                                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Dark,
+                            )
+                        ),
+                    ),
+                    googlePayButton = { _, _, _ -> FakeGooglePayButton() },
+                )
+            }
         }
     }
 

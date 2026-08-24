@@ -41,6 +41,9 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.paymentMethodOrder).isEmpty()
         assertThat(state.appearance.buttonLayout.maxColumns).isNull()
         assertThat(state.appearance.buttonLayout.maxRows).isNull()
+        assertThat(state.appearance.buttonTheme).isEqualTo(
+            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic
+        )
     }
 
     @Test
@@ -142,11 +145,15 @@ internal class ExpressCheckoutElementTest {
                             .maxColumns(2)
                             .maxRows(1)
                     )
+                    .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
             )
             .build()
 
         assertThat(state.appearance.buttonLayout.maxColumns).isEqualTo(2)
         assertThat(state.appearance.buttonLayout.maxRows).isEqualTo(1)
+        assertThat(state.appearance.buttonTheme).isEqualTo(
+            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light
+        )
     }
 
     @Test

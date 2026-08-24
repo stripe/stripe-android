@@ -26,10 +26,12 @@ internal object ExpressCheckoutElementInteractorStateFactory {
             ),
         ),
         buttonLayout: Appearance.ButtonLayout.State = Appearance.ButtonLayout().build(),
+        buttonTheme: Appearance.ButtonTheme = Appearance.ButtonTheme.Automatic,
     ): ExpressCheckoutElementInteractor.State {
         return ExpressCheckoutElementInteractor.State(
             expressButtons = expressButtons,
             buttonLayout = buttonLayout,
+            buttonTheme = buttonTheme,
         )
     }
 }

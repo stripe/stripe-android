@@ -20,6 +20,7 @@ internal interface ExpressCheckoutElementInteractor {
     data class State(
         val expressButtons: List<ExpressButton>,
         val buttonLayout: ExpressCheckoutElement.Configuration.Appearance.ButtonLayout.State,
+        val buttonTheme: ExpressCheckoutElement.Configuration.Appearance.ButtonTheme,
     )
 
     sealed class ViewAction {
@@ -54,6 +55,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
                 expressButtons = emptyList(),
                 buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
             )
         }
 
@@ -73,6 +75,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                 }
             },
             buttonLayout = state.configuration.expressCheckoutElementConfiguration.appearance.buttonLayout,
+            buttonTheme = state.configuration.expressCheckoutElementConfiguration.appearance.buttonTheme,
         )
     }
 

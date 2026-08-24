@@ -87,6 +87,19 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
+    fun `state contains configured button theme`() = runScenario(
+        configuration = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
+            ),
+    ) {
+        assertThat(interactor.state.value.buttonTheme).isEqualTo(
+            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light
+        )
+    }
+
+    @Test
     fun `state updates when link account info changes`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.Link),
@@ -118,6 +131,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                         ),
                     ),
                     buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
 
@@ -132,6 +146,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                         ),
                     ),
                     buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
 
