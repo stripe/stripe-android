@@ -1,7 +1,5 @@
 package com.stripe.android.paymentelement
 
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasContentDescription
@@ -119,19 +117,6 @@ internal class EmbeddedFormPage(
             .performTouchInput { click() }
 
         composeTestRule.waitForIdle()
-    }
-
-    fun assertCardNumberError(errorMessage: String) {
-        composeTestRule.waitUntil(
-            conditionDescription = "card number field to show error '$errorMessage'",
-            timeoutMillis = 5.seconds.inWholeMilliseconds,
-        ) {
-            composeTestRule.onAllNodes(
-                hasText("Card number").and(
-                    SemanticsMatcher.expectValue(SemanticsProperties.Error, errorMessage)
-                )
-            ).fetchSemanticsNodes().isNotEmpty()
-        }
     }
 
     fun assertMandateIsShown() {

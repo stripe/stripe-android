@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isNotEnabled
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.times
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
@@ -15,13 +13,7 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.utils.ProductIntegrationType
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
-import com.stripe.android.paymentsheet.utils.expectNoResult
-import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,65 +28,50 @@ internal class FormValidationTest {
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
 
-    private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
-
     @Test
     fun testCard(
-        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-        integrationType: ProductIntegrationType,
-    ) = runProductIntegrationTest(
+        @TestParameter(valuesProvider = FormValidationIntegrationType.Provider::class)
+        integrationType: FormValidationIntegrationType,
+    ) = runFormValidationIntegrationTest(
         networkRule = networkRule,
+        composeTestRule = composeTestRule,
         integrationType = integrationType,
-        resultCallback = ::expectNoResult
-    ) { testContext ->
+    ) {
         enqueueElementsSession()
 
-        testContext.launch(configuration())
+        launch()
 
         navigateToFormFor(paymentMethodCode = "card")
 
-        clickPrimaryButton()
+        clickDisabledPrimaryButton()
 
         assertFieldErrorsAreShown()
 
-        testContext.markTestSucceeded()
+        markTestSucceeded()
     }
 
     @Test
     fun testUsBankAccount(
-        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-        integrationType: ProductIntegrationType,
-    ) = runProductIntegrationTest(
+        @TestParameter(valuesProvider = FormValidationIntegrationType.Provider::class)
+        integrationType: FormValidationIntegrationType,
+    ) = runFormValidationIntegrationTest(
         networkRule = networkRule,
+        composeTestRule = composeTestRule,
         integrationType = integrationType,
-        resultCallback = ::expectNoResult
-    ) { testContext ->
+    ) {
         enqueueElementsSession()
 
-        testContext.launch(configuration())
+        launch()
 
         navigateToFormFor(paymentMethodCode = "us_bank_account")
 
-        clickPrimaryButton()
+        clickDisabledPrimaryButton()
 
         assertDoesNotLaunchBankAccountFlow()
         assertFieldErrorsAreShown()
 
-        testContext.markTestSucceeded()
+        markTestSucceeded()
     }
-
-    private fun configuration() = PaymentSheet.Configuration.Builder("Example, Inc.")
-        .billingDetailsCollectionConfiguration(
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-            )
-        )
-        .allowsDelayedPaymentMethods(true)
-        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-        .build()
 
     private fun enqueueElementsSession() {
         networkRule.elementsSession { response ->
@@ -114,10 +91,6 @@ internal class FormValidationTest {
         }
     }
 
-    private fun navigateToFormFor(
-        paymentMethodCode: String
-    ) = page.clickOnLpm(paymentMethodCode, forVerticalMode = true)
-
     private fun assertDoesNotLaunchBankAccountFlow() {
         intended(
             hasComponent(
@@ -127,32 +100,20 @@ internal class FormValidationTest {
         )
     }
 
-    private fun clickPrimaryButton() {
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
-            .performScrollTo()
-            .performClick()
-
-        composeTestRule.waitForIdle()
-    }
-
     private fun assertFieldErrorsAreShown() {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
-                .onAllNodes(hasText("This field cannot be blank."))
+                .onAllNodes(
+                    hasText(BLANK_FIELD_ERROR).or(
+                        SemanticsMatcher.expectValue(SemanticsProperties.Error, BLANK_FIELD_ERROR)
+                    )
+                )
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
+    }
+
+    private companion object {
+        const val BLANK_FIELD_ERROR = "This field cannot be blank."
     }
 }
