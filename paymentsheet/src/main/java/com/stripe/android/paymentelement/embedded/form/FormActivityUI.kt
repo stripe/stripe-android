@@ -13,14 +13,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
-import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
-import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.Mandate
@@ -36,27 +33,13 @@ internal fun FormScreenContent(
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
     state: SheetActivityStateHolder.State,
-    updateSelection: (PaymentSelection.Saved) -> Unit,
-    savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
 ) {
     val interactorState by interactor.state.collectAsState()
 
     DismissKeyboardOnProcessing(interactorState.isProcessing)
 
     EventReporterProvider(eventReporter) {
-        if (state.savedPaymentSelectionToConfirm == null) {
-            VerticalModeFormUI(
-                interactor = interactor,
-                showsWalletHeader = false
-            )
-        } else {
-            SavedPaymentMethodConfirmUI(
-                savedPaymentMethodConfirmInteractor = savedPaymentMethodConfirmInteractorFactory.create(
-                    initialSelection = state.savedPaymentSelectionToConfirm,
-                    updateSelection = updateSelection,
-                ),
-            )
-        }
+        VerticalModeFormUI(interactor = interactor, showsWalletHeader = false)
         USBankAccountMandate(state)
         FormActivityError(state)
         Spacer(Modifier.height(40.dp))
