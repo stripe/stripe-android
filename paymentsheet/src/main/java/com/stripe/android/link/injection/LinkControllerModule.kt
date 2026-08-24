@@ -82,6 +82,19 @@ internal interface LinkControllerModule {
             return interactor.paymentMethodMetadata
         }
 
+        @Provides
+        fun provideApiConfigurationStateProvider(
+            interactor: Provider<LinkControllerInteractor>
+        ): () -> ApiConfiguration.State {
+            return {
+                val config = requireNotNull(interactor.get().configuration)
+                ApiConfiguration.State(
+                    publishableKey = config.publishableKey,
+                    stripeAccountId = config.stripeAccountId,
+                )
+            }
+        }
+
         // TODO
         @Provides
         @Singleton
