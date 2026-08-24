@@ -3,18 +3,16 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
-import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.FormHelper
-import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -32,8 +30,6 @@ internal fun interface EmbeddedSelectionChooser {
 internal class DefaultEmbeddedSelectionChooser @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val formHelperFactory: EmbeddedFormHelperFactory,
-    private val eventReporter: EventReporter,
-    @ViewModelScope private val coroutineScope: CoroutineScope,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) : EmbeddedSelectionChooser {
     private var previousConfiguration: CommonConfiguration?
@@ -151,35 +147,34 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection.New,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): Boolean {
-        val newFormHelper = formHelperFactory.create(
-            coroutineScope = coroutineScope,
+        val newFormDefinitionFactory = formHelperFactory.createFormDefinitionFactory(
             paymentMethodMetadata = paymentMethodMetadata,
-            eventReporter = eventReporter,
             // Card scan auto-launch is only relevant in the form, not when selecting the default.
             automaticallyLaunchedCardScanFormDataHelper = null,
             tapToAddHelper = null,
             // Not important for determining formType so use default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             paymentMethodMessagePromotionsHelper = null,
-        ) {}
-        val newFormType = newFormHelper.formTypeForCode(previousSelection.paymentMethodType)
+            linkInlineHandler = LinkInlineHandler.create(),
+        )
+        val newFormType = newFormDefinitionFactory.formTypeForCode(previousSelection.paymentMethodType)
         if (newFormType != FormHelper.FormType.UserInteractionRequired) {
             return true
         }
         return previousPaymentMethodMetadata?.let { previousPaymentMethodMetadata ->
-            val previousFormHelper = formHelperFactory.create(
-                coroutineScope = coroutineScope,
+            val previousFormDefinitionFactory = formHelperFactory.createFormDefinitionFactory(
                 paymentMethodMetadata = previousPaymentMethodMetadata,
-                eventReporter = eventReporter,
                 // Card scan auto-launch is only relevant in the form, not when selecting the default.
                 automaticallyLaunchedCardScanFormDataHelper = null,
                 tapToAddHelper = null,
                 // Not important for determining formType so use default value
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
-                paymentMethodMessagePromotionsHelper = null
-            ) {}
-            val previousFormElements = previousFormHelper.formElementsForCode(previousSelection.paymentMethodType)
-            val newFormElements = newFormHelper.formElementsForCode(previousSelection.paymentMethodType)
+                paymentMethodMessagePromotionsHelper = null,
+                linkInlineHandler = LinkInlineHandler.create(),
+            )
+            val previousFormElements =
+                previousFormDefinitionFactory.formElementsForCode(previousSelection.paymentMethodType)
+            val newFormElements = newFormDefinitionFactory.formElementsForCode(previousSelection.paymentMethodType)
             previousFormElements.size >= newFormElements.size
         } == true
     }

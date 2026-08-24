@@ -813,11 +813,12 @@ internal class PaymentSheetViewModelTest {
             )
 
             val linkInlineHandler = LinkInlineHandler.create()
-            val formHelper = DefaultFormHelper.create(
-                viewModel = viewModel,
+            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
                 coroutineScope = viewModel.viewModelScope,
                 paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                 linkInlineHandler = linkInlineHandler,
+                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+                paymentMethodMessagePromotionsHelper = null,
             )
 
             formHelper.onFormFieldValuesChanged(
@@ -1610,10 +1611,12 @@ internal class PaymentSheetViewModelTest {
             stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
         )
 
-        val observedArgs = DefaultFormHelper.create(
-            viewModel = viewModel,
+        val observedArgs = BaseSheetFormHelperFactory(viewModel).create(
             coroutineScope = viewModel.viewModelScope,
             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+            linkInlineHandler = LinkInlineHandler.create(),
+            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+            paymentMethodMessagePromotionsHelper = null,
         ).createFormArguments(
             paymentMethodCode = LpmRepositoryTestHelpers.card.code,
         )
@@ -2790,11 +2793,12 @@ internal class PaymentSheetViewModelTest {
                 assertThat(awaitItem()?.enabled).isFalse()
 
                 val linkInlineHandler = LinkInlineHandler.create()
-                val formHelper = DefaultFormHelper.create(
-                    viewModel = viewModel,
+                val formHelper = BaseSheetFormHelperFactory(viewModel).create(
                     coroutineScope = viewModel.viewModelScope,
                     paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                     linkInlineHandler = linkInlineHandler,
+                    shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+                    paymentMethodMessagePromotionsHelper = null,
                 )
 
                 formHelper.onFormFieldValuesChanged(
