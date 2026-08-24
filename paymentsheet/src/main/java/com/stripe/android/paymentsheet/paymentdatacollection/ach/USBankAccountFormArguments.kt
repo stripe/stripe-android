@@ -70,6 +70,8 @@ internal class USBankAccountFormArguments(
     val sellerBusinessName: String?,
     val forceSetupFutureUseBehavior: Boolean,
     val clientAttributionMetadata: ClientAttributionMetadata,
+    val publishableKey: String,
+    val stripeAccountId: String?,
 ) {
     companion object {
         fun create(
@@ -121,6 +123,8 @@ internal class USBankAccountFormArguments(
                 sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
                 forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+                publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
+                stripeAccountId = paymentMethodMetadata.apiConfiguration.stripeAccountId,
             )
         }
 
@@ -183,6 +187,8 @@ internal class USBankAccountFormArguments(
                 sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
                 forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+                publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
+                stripeAccountId = paymentMethodMetadata.apiConfiguration.stripeAccountId,
             )
         }
     }
