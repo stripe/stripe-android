@@ -71,6 +71,22 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
+    fun `state contains configured button layout`() = runScenario(
+        configuration = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .buttonLayout(
+                        ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                            .maxColumns(2)
+                            .maxRows(1)
+                    )
+            ),
+    ) {
+        assertThat(interactor.state.value.buttonLayout.maxColumns).isEqualTo(2)
+        assertThat(interactor.state.value.buttonLayout.maxRows).isEqualTo(1)
+    }
+
+    @Test
     fun `state updates when link account info changes`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.Link),
@@ -101,6 +117,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                         ),
                     ),
+                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
                 ),
             )
 
@@ -114,6 +131,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                             linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
                         ),
                     ),
+                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
                 ),
             )
 
