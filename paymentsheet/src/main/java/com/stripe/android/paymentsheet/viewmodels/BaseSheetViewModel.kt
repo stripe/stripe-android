@@ -102,6 +102,7 @@ internal abstract class BaseSheetViewModel(
             _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
         },
         eventReporter = addressLauncherEventReporter,
+        publishableKeyProvider = { _paymentMethodMetadata.value?.apiConfiguration?.publishableKey ?: "" }
     )
 
     val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory =

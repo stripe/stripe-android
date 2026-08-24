@@ -31,7 +31,7 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.ApiConfigurationToNamedModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -50,7 +50,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -89,7 +88,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
                 val component = DaggerLpmNetworkTestViewModelComponent.factory()
                     .create(
                         application = extras.requireApplication(),
-                        apiConfiguration = ApiConfiguration.State(
+                        apiConfigurationState = ApiConfiguration.State(
                             publishableKey = args.publishableKey,
                             stripeAccountId = null,
                         ),
@@ -140,7 +139,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LpmNetworkTestModule::class,
-        ApiConfigurationToNamedModule::class,
+        ApiRequestOptionsModule::class,
     ]
 )
 @Singleton
@@ -153,7 +152,7 @@ internal interface LpmNetworkTestViewModelComponent {
             @BindsInstance
             application: Application,
             @BindsInstance
-            apiConfiguration: ApiConfiguration.State,
+            apiConfigurationState: ApiConfiguration.State,
             @BindsInstance
             @Named(ALLOWS_MANUAL_CONFIRMATION)
             allowsManualConfirmation: Boolean,
@@ -192,9 +191,8 @@ internal interface LpmNetworkTestModule {
 
         @Provides
         fun providesPaymentConfiguration(
-            apiConfigurationProvider: Provider<ApiConfiguration.State>,
+            apiConfigurationState: ApiConfiguration.State,
         ): PaymentConfiguration {
-            val apiConfigurationState = apiConfigurationProvider.get()
             return PaymentConfiguration(
                 publishableKey = apiConfigurationState.publishableKey,
                 stripeAccountId = apiConfigurationState.stripeAccountId,
@@ -202,8 +200,23 @@ internal interface LpmNetworkTestModule {
         }
 
         @Provides
+        fun providesApiConfigurationProvider(
+            paymentConfiguration: PaymentConfiguration,
+        ): () -> ApiConfiguration.State = {
+            ApiConfiguration.State(
+                publishableKey = paymentConfiguration.publishableKey,
+                stripeAccountId = paymentConfiguration.stripeAccountId,
+            )
+        }
+
+        @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = ENABLE_LOGGING_VALUE
+
+        @Provides
+        fun providesApiConfigurationStateProvider(
+            state: ApiConfiguration.State
+        ): () -> ApiConfiguration.State = { state }
 
         @Provides
         @Singleton

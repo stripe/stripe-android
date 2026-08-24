@@ -8,13 +8,10 @@ import com.stripe.android.core.networking.executeRequestWithResultParser
 internal class DefaultStripeAutocompleteRepository(
     private val stripeNetworkClient: StripeNetworkClient,
     private val apiRequestFactory: ApiRequest.Factory,
-    private val publishableKeyProvider: () -> String,
+    private val requestOptionsProvider: () -> ApiRequest.Options,
 ) : StripeAutocompleteRepository {
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
-
-    private val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(apiKey = publishableKeyProvider())
 
     override suspend fun findAutocompletePredictions(
         query: String,
@@ -36,7 +33,7 @@ internal class DefaultStripeAutocompleteRepository(
             stripeErrorJsonParser = stripeErrorJsonParser,
             request = apiRequestFactory.createPost(
                 url = AUTOCOMPLETE_URL,
-                options = requestOptions,
+                options = requestOptionsProvider(),
                 params = params,
             ),
             responseJsonParser = AutocompletePredictionsResponseJsonParser,
@@ -62,7 +59,7 @@ internal class DefaultStripeAutocompleteRepository(
             stripeErrorJsonParser = stripeErrorJsonParser,
             request = apiRequestFactory.createPost(
                 url = DETAILS_URL,
-                options = requestOptions,
+                options = requestOptionsProvider(),
                 params = params,
             ),
             responseJsonParser = PlaceDetailsResponseJsonParser,
