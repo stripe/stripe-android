@@ -158,11 +158,20 @@ internal class CheckoutControllerExampleViewModel(
         private const val TAG = "CheckoutControllerExample"
         private const val SCENARIO_KEY = "checkout_controller_example_scenario"
 
-        val factory = viewModelFactory {
+        val factory = createFactory(CheckoutControllerExampleBackendRepository.SessionScenario.CheckoutController)
+        val shippingAddressElementFactory =
+            createFactory(CheckoutControllerExampleBackendRepository.SessionScenario.ShippingAddressElement)
+
+        private fun createFactory(
+            sessionScenario: CheckoutControllerExampleBackendRepository.SessionScenario,
+        ) = viewModelFactory {
             initializer {
                 val application = this[APPLICATION_KEY] as Application
                 CheckoutControllerExampleViewModel(
-                    repository = CheckoutControllerExampleBackendRepository(application),
+                    repository = CheckoutControllerExampleBackendRepository(
+                        applicationContext = application,
+                        sessionScenario = sessionScenario,
+                    ),
                     savedStateHandle = createSavedStateHandle(),
                     application = application,
                 )

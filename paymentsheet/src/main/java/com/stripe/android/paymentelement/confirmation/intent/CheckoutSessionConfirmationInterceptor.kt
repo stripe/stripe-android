@@ -74,7 +74,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     intent = intent,
                     paymentMethod = paymentMethod,
                     savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
-                    shippingInformation = null,
+                    shipping = shippingValues.toCheckoutSessionShipping(),
                 )
                 confirmCheckoutSession(params)
             },
@@ -108,7 +108,8 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
             savePaymentMethod = null,
-            shippingInformation = confirmationOption.shippingInformation,
+            shipping = confirmationOption.shippingInformation.toCheckoutSessionShipping()
+                ?: shippingValues.toCheckoutSessionShipping(),
         )
         return confirmCheckoutSession(params)
     }
@@ -145,7 +146,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
-        shippingInformation: ShippingInformation?,
+        shipping: ConfirmCheckoutSessionParams.Shipping?,
     ): ConfirmCheckoutSessionParams = when (intent) {
         is PaymentIntent -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
@@ -153,13 +154,13 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             returnUrl = returnUrl,
             expectedAmount = intent.amount,
             savePaymentMethod = savePaymentMethod,
-            shipping = shippingInformation.toCheckoutSessionShipping(),
+            shipping = shipping,
         )
         else -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
-            shipping = shippingInformation.toCheckoutSessionShipping(),
+            shipping = shipping,
         )
     }
 
@@ -254,6 +255,15 @@ private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSes
         ConfirmCheckoutSessionParams.Shipping(
             name = it.name,
             address = it.address,
+        )
+    }
+}
+
+private fun ConfirmPaymentIntentParams.Shipping?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
+    return this?.let {
+        ConfirmCheckoutSessionParams.Shipping(
+            name = it.getName(),
+            address = it.getAddress(),
         )
     }
 }

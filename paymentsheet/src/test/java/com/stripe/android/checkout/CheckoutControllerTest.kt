@@ -764,7 +764,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `updateShippingAddress stores address without a network call when automatic tax is disabled`() =
+    fun `updateShippingAddress reaches confirmation metadata without a network call when automatic tax is disabled`() =
         runMutationScenario {
             // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
             // and the payment element is reloaded from the existing response, firing no request.
@@ -774,6 +774,10 @@ internal class CheckoutControllerTest {
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
+            val shippingDetails = requireNotNull(state.paymentMethodMetadata.shippingDetails)
+            assertThat(shippingDetails.name).isEqualTo("John")
+            assertThat(shippingDetails.address?.line1).isEqualTo("123 Main St")
+            assertThat(shippingDetails.address?.country).isEqualTo("US")
         }
 
     @Test

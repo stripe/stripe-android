@@ -28,7 +28,7 @@ import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 internal class CheckoutShippingAddressElementPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel: CheckoutControllerExampleViewModel by viewModels {
-        CheckoutControllerExampleViewModel.factory
+        CheckoutControllerExampleViewModel.shippingAddressElementFactory
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +65,7 @@ private fun CheckoutShippingAddressElementPlayground(
     val session = configured?.session
     val hasShippingAddress = session?.shippingAddress != null
     val hasPaymentMethod = session?.paymentOptionDisplayData != null
+    val isTaxReady = session?.tax?.status == Session.Tax.Status.Ready
     val isComplete = confirmationResult is CheckoutControllerExampleViewModel.ConfirmationResult.Completed
 
     PlaygroundTheme(
@@ -78,7 +79,7 @@ private fun CheckoutShippingAddressElementPlayground(
         bottomBarContent = {
             GuidedActions(
                 canEdit = configured != null && !isUpdating && !isComplete,
-                canConfirm = hasShippingAddress && hasPaymentMethod && !isUpdating && !isComplete,
+                canConfirm = hasShippingAddress && hasPaymentMethod && isTaxReady && !isUpdating && !isComplete,
                 onAddShippingAddress = onAddShippingAddress,
                 onSelectPaymentMethod = onSelectPaymentMethod,
                 onConfirm = onConfirm,
@@ -98,12 +99,17 @@ private fun GuidedContent(
         style = MaterialTheme.typography.h5,
     )
     Spacer(modifier = Modifier.height(8.dp))
-    Text("Complete each action in order, then verify the refreshed Checkout Session.")
+    Text("Complete each action in order, then verify persistence in Admin.")
     Spacer(modifier = Modifier.height(16.dp))
     ActionStatus(
         step = "1. Add shipping address",
         detail = if (session?.shippingAddress != null) "Ready" else "Required",
         isReady = session?.shippingAddress != null,
+    )
+    ActionStatus(
+        step = "Automatic tax",
+        detail = session?.tax?.status.displayName(),
+        isReady = session?.tax?.status == Session.Tax.Status.Ready,
     )
     ActionStatus(
         step = "2. Select payment method",
@@ -215,13 +221,23 @@ private fun InlineResult(message: String) {
 private fun CompletionVerification(session: Session?) {
     val shippingAddress = session?.shippingAddress
     Spacer(modifier = Modifier.height(24.dp))
-    Text("Refreshed Session Verification", style = MaterialTheme.typography.h6)
+    Text("Completed Controller State", style = MaterialTheme.typography.h6)
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(
+        "Controller state can carry shipping locally. Verify collected_information.shipping_details " +
+            "on this Checkout Session in Admin to prove backend persistence."
+    )
     Spacer(modifier = Modifier.height(8.dp))
     VerificationRow("Session ID", session?.id, !session?.id.isNullOrBlank())
     VerificationRow(
         label = "Status",
         value = session?.status.displayName(),
         passes = session?.status is Session.Status.Complete,
+    )
+    VerificationRow(
+        label = "Automatic tax",
+        value = session?.tax?.status.displayName(),
+        passes = session?.tax?.status == Session.Tax.Status.Ready,
     )
     VerificationRow("Name", shippingAddress?.name, !shippingAddress?.name.isNullOrBlank())
     VerificationRow(
@@ -286,6 +302,16 @@ private fun Session.Status?.displayName(): String {
         is Session.Status.Open -> "Open"
         is Session.Status.Complete -> "Complete"
         is Session.Status.Expired -> "Expired"
+        null -> "Missing"
+    }
+}
+
+private fun Session.Tax.Status?.displayName(): String {
+    return when (this) {
+        Session.Tax.Status.Ready -> "Ready"
+        Session.Tax.Status.RequiresShippingAddress -> "Requires shipping address"
+        Session.Tax.Status.RequiresBillingAddress -> "Requires billing address"
+        Session.Tax.Status.Unknown -> "Unknown"
         null -> "Missing"
     }
 }
