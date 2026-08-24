@@ -64,7 +64,7 @@ class LogLinkGlobalHoldbackExposureTest {
         customerRepository = FakeCustomerRepository()
         retrieveCustomerEmail = DefaultRetrieveCustomerEmail(
             customerRepository,
-            FakeDurationProvider(),
+            FakeDurationProvider()
         )
         linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
