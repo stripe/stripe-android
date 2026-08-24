@@ -13,18 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun DefaultFraudDetectionDataRepository(
-    context: Context,
-    workContext: CoroutineContext,
-): DefaultFraudDetectionDataRepository {
-    return DefaultFraudDetectionDataRepository(
-        context = context,
-        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
-        workContext = workContext,
-    )
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @JvmOverloads
 fun DefaultFraudDetectionDataRepository(
     context: Context,

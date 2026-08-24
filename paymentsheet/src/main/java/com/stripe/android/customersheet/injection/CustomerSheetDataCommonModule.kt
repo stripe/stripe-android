@@ -6,7 +6,6 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -16,7 +15,7 @@ import dagger.Provides
 import java.util.Calendar
 import javax.inject.Named
 
-@Module(includes = [ApiRequestOptionsModule::class])
+@Module
 internal interface CustomerSheetDataCommonModule {
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository

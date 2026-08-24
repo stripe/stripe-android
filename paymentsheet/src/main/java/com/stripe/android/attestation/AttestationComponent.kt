@@ -1,9 +1,9 @@
 package com.stripe.android.attestation
 
 import android.app.Application
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.ApiConfigurationFromPublishableKeyModule
@@ -33,8 +33,7 @@ internal interface AttestationComponent {
         fun build(
             @BindsInstance application: Application,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
+            apiConfigurationProvider: () -> ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
