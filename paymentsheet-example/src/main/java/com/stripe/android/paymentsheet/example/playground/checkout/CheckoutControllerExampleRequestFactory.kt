@@ -28,10 +28,7 @@ internal object CheckoutControllerExampleRequestFactory {
                 put("currency", "usd")
                 put("automatic_tax", scenario != CheckoutControllerExampleScenario.NoTax)
                 put("shipping_address_collection", scenario == CheckoutControllerExampleScenario.ShippingTax)
-                put(
-                    "billing_address_collection",
-                    if (scenario == CheckoutControllerExampleScenario.BillingTax) "required" else "auto",
-                )
+                put("billing_address_collection", scenario == CheckoutControllerExampleScenario.BillingTax)
             },
         )
     }

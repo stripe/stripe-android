@@ -21,7 +21,7 @@ class CheckoutControllerExampleRequestFactoryTest {
                 put("currency", "usd")
                 put("automatic_tax", false)
                 put("shipping_address_collection", false)
-                put("billing_address_collection", "auto")
+                put("billing_address_collection", false)
             }
         )
     }
@@ -41,7 +41,7 @@ class CheckoutControllerExampleRequestFactoryTest {
                 put("currency", "usd")
                 put("automatic_tax", true)
                 put("shipping_address_collection", true)
-                put("billing_address_collection", "auto")
+                put("billing_address_collection", false)
             }
         )
     }
@@ -61,7 +61,7 @@ class CheckoutControllerExampleRequestFactoryTest {
                 put("currency", "usd")
                 put("automatic_tax", true)
                 put("shipping_address_collection", false)
-                put("billing_address_collection", "required")
+                put("billing_address_collection", true)
             }
         )
     }
