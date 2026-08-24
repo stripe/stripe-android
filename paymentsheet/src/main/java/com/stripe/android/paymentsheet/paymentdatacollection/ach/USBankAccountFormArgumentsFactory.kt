@@ -75,6 +75,8 @@ internal object USBankAccountFormArgumentsFactory {
             sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
             forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
             clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+            publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
+            stripeAccountId = paymentMethodMetadata.apiConfiguration.stripeAccountId,
         )
     }
 }

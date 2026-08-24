@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.DaggerAddressElementViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
@@ -22,10 +23,17 @@ internal class AddressElementViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            val args = starterArgsSupplier()
             return DaggerAddressElementViewModelFactoryComponent.factory()
                 .create(
                     context = applicationSupplier(),
-                    starterArgs = starterArgsSupplier(),
+                    starterArgs = args,
+                    apiConfigurationProvider = {
+                        ApiConfiguration.State(
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = null,
+                        )
+                    },
                 )
                 .addressElementViewModel as T
         }

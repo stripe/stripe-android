@@ -74,6 +74,7 @@ class AutocompleteContractTest {
         val args = AutocompleteContract.Args(
             id = "123",
             googlePlacesApiKey = "gp_123",
+            publishableKey = "pk_test_123",
             country = "US",
             appearanceContext = appearanceContext,
         )
