@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 internal class CardScanStripeLauncher(
     context: Context,
     private val eventsReporter: CardScanEventsReporter,
+    private val publishableKey: String,
     private val enableMlKitCardScan: Boolean,
     private val elementsSessionId: String?,
     private val disableSsdOcrCardScan: Boolean,
@@ -53,6 +54,7 @@ internal class CardScanStripeLauncher(
             CardScanSheetParams(
                 CardScanConfiguration(
                     elementsSessionId = elementsSessionId,
+                    publishableKey = publishableKey,
                     enableMlKitTextRecognition = enableMlKitCardScan,
                     disableSsdOcr = disableSsdOcrCardScan,
                 )
@@ -113,6 +115,7 @@ internal class CardScanStripeLauncher(
         @Composable
         internal fun rememberCardScanStripeLauncher(
             eventsReporter: CardScanEventsReporter,
+            publishableKey: String,
             enableMlKitCardScan: Boolean = false,
             elementsSessionId: String? = null,
             disableSsdOcrCardScan: Boolean = false,
@@ -121,11 +124,12 @@ internal class CardScanStripeLauncher(
             val context = LocalContext.current.applicationContext
             val isLaunchingState = rememberSaveable { mutableStateOf(false) }
             val launcher = remember(
-                eventsReporter, context, enableMlKitCardScan, elementsSessionId, disableSsdOcrCardScan,
+                eventsReporter, context, publishableKey, enableMlKitCardScan, elementsSessionId, disableSsdOcrCardScan,
             ) {
                 CardScanStripeLauncher(
                     context = context,
                     eventsReporter = eventsReporter,
+                    publishableKey = publishableKey,
                     enableMlKitCardScan = enableMlKitCardScan,
                     elementsSessionId = elementsSessionId,
                     disableSsdOcrCardScan = disableSsdOcrCardScan,
