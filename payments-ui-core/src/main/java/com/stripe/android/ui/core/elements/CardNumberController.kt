@@ -17,7 +17,6 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
-import com.stripe.android.cards.CardAccountRangeService.AccountRangesState
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeService
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
@@ -42,19 +41,12 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
@@ -80,16 +72,6 @@ internal class DefaultCardNumberController(
     cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
-    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext + SupervisorJob()),
-    private val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
-        cardAccountRangeRepository,
-        uiContext,
-        workContext,
-        staticCardAccountRanges,
-        cardBrandFilter = cardBrandFilter,
-        cardFundingFilter = cardFundingFilter,
-        coroutineScope = coroutineScope
-    ),
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
@@ -102,6 +84,7 @@ internal class DefaultCardNumberController(
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
 
     private val latestBinBasedPanLength = MutableStateFlow<Int?>(null)
+    private val latestSuccessfulAccountRanges = MutableStateFlow<List<AccountRange>>(emptyList())
 
     override val visualTransformation = combineAsStateFlow(
         fieldValue,
@@ -126,6 +109,27 @@ internal class DefaultCardNumberController(
 
     private val isEligibleForCardBrandChoice = cardBrandChoiceConfig is CardBrandChoiceConfig.Eligible
     private val brandChoices = MutableStateFlow<List<CardBrand>>(listOf())
+
+    private val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
+        cardAccountRangeRepository = cardAccountRangeRepository,
+        uiContext = uiContext,
+        workContext = workContext,
+        staticCardAccountRanges = staticCardAccountRanges,
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
+        accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
+            override fun onAccountRangesResult(
+                accountRanges: List<AccountRange>,
+                unfilteredAccountRanges: List<AccountRange>
+            ) {
+                latestSuccessfulAccountRanges.value = accountRanges
+                accountRanges.firstOrNull()?.panLength?.let { panLength ->
+                    latestBinBasedPanLength.value = panLength
+                }
+                brandChoices.value = unfilteredAccountRanges.map { it.brand }.distinct()
+            }
+        }
+    )
 
     private val preferredBrands = when (cardBrandChoiceConfig) {
         is CardBrandChoiceConfig.Eligible -> cardBrandChoiceConfig.preferredBrands
@@ -160,20 +164,15 @@ internal class DefaultCardNumberController(
      * option  of not determining the card brand unless the user selects one. We use an implied
      * card brand (VISA, Mastercard) internally to pass state validation.
      */
-    private val impliedCardBrand = combine(
-        flow = _fieldValue,
-        flow2 = accountRangeService.accountRangesStateFlow
-            .map { it.ranges }
+    private val impliedCardBrand = combineAsStateFlow(
+        _fieldValue,
+        accountRangeService.accountRangesStateFlow
     ) { fieldValue, accountRanges ->
         impliedBrandValue(
-            accountRange = accountRanges.firstOrNull(),
+            accountRange = accountRanges.ranges.firstOrNull(),
             number = fieldValue
         )
-    }.stateIn(
-        scope = coroutineScope,
-        initialValue = impliedBrandValue(),
-        started = SharingStarted.Eagerly
-    )
+    }
 
     override val cardBrandFlow = if (isEligibleForCardBrandChoice) {
         combineAsStateFlow(
@@ -186,11 +185,11 @@ internal class DefaultCardNumberController(
         impliedCardBrand
     }
 
-    override val trailingIcon: StateFlow<TextFieldIcon?> = combine(
-        flow = _fieldValue,
-        flow2 = brandChoices,
-        flow3 = selectedCardBrandFlow,
-        flow4 = accountRangeService.accountRangesStateFlow
+    override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
+        _fieldValue,
+        brandChoices,
+        selectedCardBrandFlow,
+        accountRangeService.accountRangesStateFlow
     ) { number, brands, chosen, accountRangeState ->
         trailingIconValue(
             number = number,
@@ -198,27 +197,19 @@ internal class DefaultCardNumberController(
             chosen = chosen,
             accountRange = accountRangeState.ranges.firstOrNull()
         )
-    }.stateIn(
-        scope = coroutineScope,
-        initialValue = trailingIconValue(),
-        started = SharingStarted.Eagerly
-    )
+    }
 
-    private val _fieldState = combine(
-        flow = impliedCardBrand,
-        flow2 = _fieldValue,
-        flow3 = accountRangeService.accountRangesStateFlow.filterIsInstance<AccountRangesState.Success>()
+    private val _fieldState = combineAsStateFlow(
+        impliedCardBrand,
+        _fieldValue,
+        latestSuccessfulAccountRanges
     ) { brand, fieldValue, accountRanges ->
         textFieldState(
             brand = brand,
-            accountRanges = accountRanges.ranges,
+            accountRanges = accountRanges,
             number = fieldValue
         )
-    }.stateIn(
-        scope = coroutineScope,
-        initialValue = textFieldState(),
-        started = SharingStarted.Eagerly
-    )
+    }
 
     override val fieldState: StateFlow<TextFieldState> = _fieldState
 
@@ -236,8 +227,10 @@ internal class DefaultCardNumberController(
      * An error must be emitted if it is visible or not visible.
      **/
     override val validationMessage: StateFlow<FieldValidationMessage?> =
-        combineAsStateFlow(visibleValidationMessage, _fieldState) { visibleError, fieldState ->
-            fieldState.getValidationMessage()?.takeIf { visibleError }
+        combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
+            fieldState.getValidationMessage()?.takeIf {
+                fieldState.shouldShowValidationMessage(hasFocus, isValidating)
+            }
         }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow { it.isValid() }
@@ -249,19 +242,6 @@ internal class DefaultCardNumberController(
 
     init {
         onRawValueChange(initialValue ?: "")
-
-        coroutineScope.launch(uiContext) {
-            accountRangeService.accountRangeResultFlow
-                .collect { result ->
-                    val newAccountRange = result.accountRanges.firstOrNull()
-                    newAccountRange?.panLength?.let { panLength ->
-                        latestBinBasedPanLength.value = panLength
-                    }
-
-                    val newBrandChoices = result.unfilteredAccountRanges.map { it.brand }.distinct()
-                    brandChoices.value = newBrandChoices
-                }
-        }
     }
 
     /**
@@ -399,7 +379,7 @@ internal class DefaultCardNumberController(
             brand,
             accountRanges,
             number,
-            numberAllowedDigits = accountRangeService.accountRange?.panLength
+            numberAllowedDigits = latestSuccessfulAccountRanges.value.firstOrNull()?.panLength
                 ?: brand.getMaxLengthForCardNumber(number)
         )
     }

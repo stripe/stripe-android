@@ -20,7 +20,9 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
+import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -38,6 +40,7 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -102,6 +105,30 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem().value)
                 .isEqualTo("4242424242424242")
         }
+    }
+
+    @Test
+    fun `validation uses last successful ranges while account range query is in flight`() = runTest {
+        val repository = ControllableCardAccountRangeRepository()
+        val firstResult = repository.enqueueResult()
+        val cardNumberController = createController(
+            cardAccountRangeRepository = repository,
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = emptyList(),
+                initialBrand = null,
+            ),
+        )
+
+        cardNumberController.onValueChange("4242424242424242")
+        firstResult.complete(listOf(accountRange("424242", panLength = 19, AccountRange.BrandInfo.Visa)))
+        assertThat(cardNumberController.isComplete.value).isFalse()
+
+        val secondResult = repository.enqueueResult()
+        cardNumberController.onValueChange("5555555555554444")
+        assertThat(cardNumberController.isComplete.value).isFalse()
+
+        secondResult.complete(listOf(accountRange("555555", panLength = 16, AccountRange.BrandInfo.Mastercard)))
+        assertThat(cardNumberController.isComplete.value).isTrue()
     }
 
     @Test
@@ -896,14 +923,15 @@ internal class CardNumberControllerTest {
     private fun createController(
         initialValue: String? = null,
         cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        cardAccountRangeRepository: CardAccountRangeRepository = FakeCardAccountRangeRepository(),
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
             cardTextFieldConfig = CardNumberConfig(
                 isCardBrandChoiceEligible = false,
                 cardBrandFilter = cardBrandFilter
             ),
-            cardAccountRangeRepository = FakeCardAccountRangeRepository(),
+            cardAccountRangeRepository = cardAccountRangeRepository,
             uiContext = testDispatcher,
             workContext = testDispatcher,
             initialValue = initialValue,
@@ -933,6 +961,36 @@ internal class CardNumberControllerTest {
 
         override val loading: StateFlow<Boolean> = stateFlowOf(false)
     }
+
+    private class ControllableCardAccountRangeRepository : CardAccountRangeRepository {
+        private val results = ArrayDeque<CompletableDeferred<List<AccountRange>?>>()
+
+        fun enqueueResult() = CompletableDeferred<List<AccountRange>?>().also(results::addLast)
+
+        override suspend fun getAccountRange(cardNumber: CardNumber.Unvalidated): AccountRange? {
+            return getAccountRanges(cardNumber)?.firstOrNull()
+        }
+
+        override suspend fun getAccountRanges(cardNumber: CardNumber.Unvalidated): List<AccountRange>? {
+            return results.removeFirst().await()
+        }
+
+        override val loading: StateFlow<Boolean> = stateFlowOf(false)
+    }
+
+    private fun accountRange(
+        bin: String,
+        panLength: Int,
+        brandInfo: AccountRange.BrandInfo,
+    ) = AccountRange(
+        binRange = BinRange(
+            low = bin + "0".repeat(panLength - bin.length),
+            high = bin + "9".repeat(panLength - bin.length),
+        ),
+        panLength = panLength,
+        brandInfo = brandInfo,
+        funding = CardFunding.Unknown,
+    )
 
     private companion object {
         const val TEST_TAG = "CardNumberElement"
