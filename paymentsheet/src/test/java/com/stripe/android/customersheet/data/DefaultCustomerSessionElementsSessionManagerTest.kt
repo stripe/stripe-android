@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
 import com.stripe.android.isInstanceOf
@@ -511,6 +512,9 @@ class DefaultCustomerSessionElementsSessionManagerTest {
                 onIntentConfiguration = onIntentConfiguration,
                 onProvidesCustomerSessionClientSecret = onCustomerSessionClientSecret,
             ),
+            apiConfigurationProvider = {
+                ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            },
             timeProvider = timeProvider,
             workContext = coroutineContext,
         )
