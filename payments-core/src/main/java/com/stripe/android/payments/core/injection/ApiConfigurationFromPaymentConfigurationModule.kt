@@ -8,8 +8,8 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import dagger.Module
 import dagger.Provides
-import javax.inject.Provider
 import javax.inject.Named
+import javax.inject.Provider
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module(includes = [PaymentConfigurationModule::class])
