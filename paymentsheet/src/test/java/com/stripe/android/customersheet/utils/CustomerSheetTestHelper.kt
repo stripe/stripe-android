@@ -133,10 +133,13 @@ internal interface CustomerSheetTestHelper {
             configuration = configuration,
             integrationType = integrationType,
             statusBarColor = null,
-            paymentConfiguration = PaymentConfiguration(
-                publishableKey = if (isLiveMode) "pk_live" else apiConfiguration.publishableKey,
-                stripeAccountId = apiConfiguration.stripeAccountId,
-            ),
+            apiConfigurationProvider = {
+                if (isLiveMode) {
+                    ApiConfiguration.State(publishableKey = "pk_live", stripeAccountId = null)
+                } else {
+                    apiConfiguration
+                }
+            },
             logger = Logger.noop(),
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }
