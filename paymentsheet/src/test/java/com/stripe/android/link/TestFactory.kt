@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -306,6 +307,7 @@ internal object TestFactory {
         ),
         cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         linkBrand = LinkBrand.Link,
+        apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
     )
 
     val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(
