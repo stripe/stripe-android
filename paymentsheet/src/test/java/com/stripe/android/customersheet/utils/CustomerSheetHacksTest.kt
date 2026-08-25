@@ -5,6 +5,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.FakeCustomerAdapter
@@ -18,6 +19,7 @@ import com.stripe.android.isInstanceOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
+import org.junit.Before
 import org.junit.runner.RunWith
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -25,6 +27,11 @@ import kotlin.time.Duration.Companion.seconds
 @RunWith(AndroidJUnit4::class)
 class CustomerSheetHacksTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
+
+    @Before
+    fun setup() {
+        PaymentConfiguration.init(application, "pk_test_123")
+    }
 
     @After
     fun teardown() {
