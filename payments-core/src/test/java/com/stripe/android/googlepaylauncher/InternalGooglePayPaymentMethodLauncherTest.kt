@@ -121,7 +121,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             onPaymentDataChangedCallback = onPaymentDataChangedCallback,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = context,
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
             ),
             analyticsRequestExecutor = analyticsRequestExecutor,
         )
