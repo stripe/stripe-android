@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
+* [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
 
 ## 23.17.0 - 2026-08-24
 

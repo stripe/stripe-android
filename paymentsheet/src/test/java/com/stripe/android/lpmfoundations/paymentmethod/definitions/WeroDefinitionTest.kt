@@ -1,12 +1,15 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.luxe.countryElements
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,12 +24,14 @@ class WeroDefinitionTest {
                 stripeIntent = PaymentIntentFactory.create(
                     paymentMethodTypes = listOf("wero")
                 )
-            )
+            ),
+            initialValues = mapOf(IdentifierSpec.Country to "BE"),
         )
 
         assertThat(formElements).hasSize(1)
 
-        checkCountryField(formElements, 0)
+        val countryElement = checkCountryField(formElements, 0)
+        assertRestrictedCountryController(countryElement, initialCountry = "BE")
     }
 
     @Test
@@ -41,20 +46,20 @@ class WeroDefinitionTest {
                     phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                     email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-                )
+                ),
             )
         )
 
         assertThat(formElements).hasSize(4)
 
-        checkCountryField(formElements, 0)
-        checkNameField(formElements, 1)
-        checkEmailField(formElements, 2)
-        checkPhoneField(formElements, 3)
+        checkNameField(formElements, 0)
+        checkEmailField(formElements, 1)
+        checkPhoneField(formElements, 2)
+        checkCountryField(formElements, 3)
     }
 
     @Test
-    fun `createFormElements returns country and billing address when full address collection enabled`() {
+    fun `createFormElements returns requested contacts and one address-owned country for full collection`() {
         val formElements = WeroDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(
@@ -65,17 +70,21 @@ class WeroDefinitionTest {
                     phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                     email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                )
-            )
+                ),
+            ),
+            initialValues = mapOf(IdentifierSpec.Country to "DE"),
         )
 
-        assertThat(formElements).hasSize(5)
+        assertThat(formElements).hasSize(4)
 
-        checkCountryField(formElements, 0)
-        checkNameField(formElements, 1)
-        checkEmailField(formElements, 2)
-        checkPhoneField(formElements, 3)
-        checkBillingField(formElements, 4)
+        checkNameField(formElements, 0)
+        checkEmailField(formElements, 1)
+        checkPhoneField(formElements, 2)
+        checkBillingField(formElements, 3)
+
+        val addressElement = (formElements[3] as SectionElement).fields.single() as AddressElement
+        assertThat(formElements.countryElements()).containsExactly(addressElement.countryElement)
+        assertRestrictedCountryController(addressElement.countryElement, initialCountry = "DE")
     }
 
     @Test
@@ -97,12 +106,21 @@ class WeroDefinitionTest {
     private fun checkCountryField(
         formElements: List<FormElement>,
         position: Int,
-    ) {
-        val element = formElements[position]
-        assertThat(element).isInstanceOf(SectionElement::class.java)
-
-        val section = element as SectionElement
+    ): CountryElement {
+        val section = formElements[position] as SectionElement
         assertThat(section.fields).hasSize(1)
-        assertThat(section.fields[0]).isInstanceOf(CountryElement::class.java)
+        return section.fields.single() as CountryElement
+    }
+
+    private fun assertRestrictedCountryController(
+        countryElement: CountryElement,
+        initialCountry: String,
+    ) {
+        assertThat(countryElement.controller.displayItems).containsExactly(
+            "🇧🇪 Belgium",
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo(initialCountry)
     }
 }
