@@ -121,43 +121,7 @@ internal class AddressElementActivity : ComponentActivity() {
                     }
                 },
             ) {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = AddressElementScreen.InputAddress.route,
-                    ) {
-                        composable(AddressElementScreen.InputAddress.route) {
-                            InputAddressScreen(
-                                inputAddressViewModelSubcomponentFactoryProvider =
-                                viewModel.inputAddressViewModelSubcomponentFactoryProvider,
-                                onCloseClick = {
-                                    if (!CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey)) {
-                                        viewModel.dismiss()
-                                    }
-                                },
-                            )
-                        }
-                        composable(
-                            AddressElementScreen.Autocomplete.route,
-                            arguments = listOf(
-                                navArgument(AddressElementScreen.Autocomplete.countryArg) {
-                                    type = NavType.StringType
-                                }
-                            )
-                        ) { backStackEntry ->
-                            val country = backStackEntry
-                                .arguments
-                                ?.getString(
-                                    AddressElementScreen.Autocomplete.countryArg
-                                )
-                            AutocompleteScreen(
-                                viewModel.autoCompleteViewModelSubcomponentFactoryProvider,
-                                viewModel.navigator,
-                                country
-                            )
-                        }
-                    }
-                }
+                AddressElementNavHost(navController)
             }
 
             if (showDiscardConfirmation) {
@@ -165,6 +129,47 @@ internal class AddressElementActivity : ComponentActivity() {
                     onDiscardChanges = viewModel::discardChanges,
                     onKeepEditing = viewModel::keepEditing,
                 )
+            }
+        }
+    }
+
+    @Composable
+    private fun AddressElementNavHost(navController: NavHostController) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            NavHost(
+                navController = navController,
+                startDestination = AddressElementScreen.InputAddress.route,
+            ) {
+                composable(AddressElementScreen.InputAddress.route) {
+                    InputAddressScreen(
+                        inputAddressViewModelSubcomponentFactoryProvider =
+                        viewModel.inputAddressViewModelSubcomponentFactoryProvider,
+                        onCloseClick = {
+                            if (!CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey)) {
+                                viewModel.dismiss()
+                            }
+                        },
+                    )
+                }
+                composable(
+                    AddressElementScreen.Autocomplete.route,
+                    arguments = listOf(
+                        navArgument(AddressElementScreen.Autocomplete.countryArg) {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { backStackEntry ->
+                    val country = backStackEntry
+                        .arguments
+                        ?.getString(
+                            AddressElementScreen.Autocomplete.countryArg
+                        )
+                    AutocompleteScreen(
+                        viewModel.autoCompleteViewModelSubcomponentFactoryProvider,
+                        viewModel.navigator,
+                        country
+                    )
+                }
             }
         }
     }
