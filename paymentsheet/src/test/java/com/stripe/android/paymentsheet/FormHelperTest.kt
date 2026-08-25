@@ -245,6 +245,7 @@ internal class FormHelperTest {
                 eventReporter = FakeEventReporter(),
                 savedStateHandle = SavedStateHandle(),
                 formDefinitionFactory = DefaultFormDefinitionFactory(
+                    coroutineScope = coroutineScope,
                     linkInlineHandler = linkInlineHandler,
                     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                     paymentMethodMetadata = paymentMethodMetadata,
@@ -775,14 +776,16 @@ internal class FormHelperTest {
             { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
+        val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher()))
         return DefaultFormHelper(
-            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
+            coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
             eventReporter = eventReporter,
             savedStateHandle = SavedStateHandle(),
             formDefinitionFactory = DefaultFormDefinitionFactory(
+                coroutineScope = coroutineScope,
                 linkInlineHandler = linkInlineHandler,
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 paymentMethodMetadata = paymentMethodMetadata,

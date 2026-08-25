@@ -17,6 +17,7 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -124,6 +125,7 @@ internal class PaymentMethodScreenScreenshotTest {
             ),
         )
         val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+            coroutineScope = CoroutineScope(dispatcher),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkConfigurationCoordinator = null,
             linkInlineHandler = null,

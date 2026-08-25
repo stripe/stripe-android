@@ -42,6 +42,8 @@ import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -144,6 +146,7 @@ internal class CustomerSheetScreenshotTest {
             ).formElementsForCode(
                 code = PaymentMethod.Type.Card.code,
                 uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                     linkConfigurationCoordinator = null,
                     onLinkInlineSignupStateChanged = {},

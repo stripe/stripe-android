@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -19,6 +20,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
+import kotlinx.coroutines.CoroutineScope
 
 internal interface FormDefinitionFactory {
     fun formElementsForCode(code: PaymentMethodCode): List<FormElement>
@@ -34,6 +36,7 @@ internal interface FormDefinitionFactory {
 }
 
 internal class DefaultFormDefinitionFactory(
+    private val coroutineScope: CoroutineScope,
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
@@ -96,6 +99,7 @@ internal class DefaultFormDefinitionFactory(
         val currentSelection = newPaymentSelectionProvider(code)?.takeIf { it.getType() == code }
 
         return UiDefinitionFactory.Arguments.Factory.Default(
+            coroutineScope = coroutineScope,
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             linkInlineHandler = linkInlineHandler,
@@ -127,6 +131,7 @@ internal class DefaultFormDefinitionFactory(
             paymentMethodMetadata: PaymentMethodMetadata,
         ): FormDefinitionFactory {
             return DefaultFormDefinitionFactory(
+                coroutineScope = viewModel.viewModelScope,
                 linkInlineHandler = LinkInlineHandler.create(),
                 cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
                 paymentMethodMetadata = paymentMethodMetadata,

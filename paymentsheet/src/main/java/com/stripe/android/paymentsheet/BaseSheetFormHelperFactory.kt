@@ -25,6 +25,7 @@ internal class BaseSheetFormHelperFactory(
             eventReporter = viewModel.eventReporter,
             savedStateHandle = viewModel.savedStateHandle,
             formDefinitionFactory = createFormDefinitionFactory(
+                coroutineScope = coroutineScope,
                 paymentMethodMetadata = paymentMethodMetadata,
                 linkInlineHandler = linkInlineHandler,
                 automaticallyLaunchedCardScanFormDataHelper = createAutomaticallyLaunchedCardScanFormDataHelper(
@@ -37,12 +38,14 @@ internal class BaseSheetFormHelperFactory(
     }
 
     private fun createFormDefinitionFactory(
+        coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
         linkInlineHandler: LinkInlineHandler,
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
     ): FormDefinitionFactory {
         return DefaultFormDefinitionFactory(
+            coroutineScope = coroutineScope,
             linkInlineHandler = linkInlineHandler,
             cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,

@@ -27,6 +27,7 @@ internal class NativeLinkFormHelperFactory(
             eventReporter = parentComponent.eventReporter,
             savedStateHandle = parentComponent.viewModel.savedStateHandle,
             formDefinitionFactory = DefaultFormDefinitionFactory(
+                coroutineScope = parentComponent.viewModel.viewModelScope,
                 linkInlineHandler = linkInlineHandler,
                 cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
                 paymentMethodMetadata = paymentMethodMetadata,

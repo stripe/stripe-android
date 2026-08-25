@@ -469,6 +469,7 @@ internal class CustomerSheetViewModel(
                 formElements = paymentMethodMetadata.formElementsForCode(
                     code = paymentMethod.code,
                     uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                        coroutineScope = viewModelScope,
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                         /*
                          * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
@@ -818,6 +819,7 @@ internal class CustomerSheetViewModel(
         val formElements = paymentMethodMetadata.formElementsForCode(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                coroutineScope = viewModelScope,
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                 /*
                  * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
