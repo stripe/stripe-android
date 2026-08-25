@@ -166,13 +166,26 @@ internal class OnrampE2EPage(
 
     fun collectKycInfo(user: FreshOnrampUser) {
         val address = TestKycAddress.forCountry(user.country)
+        val residence = when (user.country.uppercase()) {
+            "US" -> null
+            "CA" -> "Canada"
+            "CO" -> "Colombia"
+            "PH" -> "Philippines"
+            else -> "European Union"
+        }
 
         clickTag(KYC_SECTION_TAG)
+        if (residence != null) {
+            clickTag(KYC_RESIDENCE_DROPDOWN_TAG)
+            clickText(residence)
+        }
         replaceTag(KYC_FIRST_NAME_TAG, TEST_KYC_FIRST_NAME)
         replaceTag(KYC_LAST_NAME_TAG, TEST_KYC_LAST_NAME)
-        replaceTag(KYC_BIRTH_COUNTRY_TAG, user.country)
-        replaceTag(KYC_BIRTH_CITY_TAG, address.city)
-        replaceTag(KYC_NATIONALITIES_TAG, user.country)
+        if (residence == "European Union") {
+            replaceTag(KYC_BIRTH_COUNTRY_TAG, user.country)
+            replaceTag(KYC_BIRTH_CITY_TAG, address.city)
+            replaceTag(KYC_NATIONALITIES_TAG, user.country)
+        }
         replaceTag(KYC_ADDRESS_LINE_1_TAG, TEST_KYC_ADDRESS_LINE_1)
         replaceTag(KYC_ADDRESS_CITY_TAG, address.city)
         replaceTag(KYC_ADDRESS_STATE_TAG, address.state)

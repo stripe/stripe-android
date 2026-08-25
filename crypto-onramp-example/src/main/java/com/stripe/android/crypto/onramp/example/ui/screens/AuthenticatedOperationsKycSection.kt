@@ -3,14 +3,18 @@ package com.stripe.android.crypto.onramp.example.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,10 +37,13 @@ import com.stripe.android.crypto.onramp.example.KYC_ADDRESS_STATE_TAG
 import com.stripe.android.crypto.onramp.example.KYC_BIRTH_CITY_TAG
 import com.stripe.android.crypto.onramp.example.KYC_BIRTH_COUNTRY_TAG
 import com.stripe.android.crypto.onramp.example.KYC_FIRST_NAME_TAG
+import com.stripe.android.crypto.onramp.example.KYC_ID_NUMBER_TAG
 import com.stripe.android.crypto.onramp.example.KYC_LAST_NAME_TAG
 import com.stripe.android.crypto.onramp.example.KYC_NATIONALITIES_TAG
+import com.stripe.android.crypto.onramp.example.KYC_RESIDENCE_DROPDOWN_TAG
 import com.stripe.android.crypto.onramp.example.KYC_SECTION_TAG
 import com.stripe.android.crypto.onramp.example.VERIFY_KYC_BUTTON_TAG
+import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -124,10 +131,13 @@ private fun KycForm(
     onAddressChange: (PaymentSheet.Address) -> Unit,
     onCollectKyc: (KycInfo) -> Unit
 ) {
-    var ssn by remember { mutableStateOf(DEFAULT_SSN) }
+    var residence by remember { mutableStateOf(KycResidence.UnitedStates) }
+    var isResidenceDropdownExpanded by remember { mutableStateOf(false) }
+    var idNumber by remember { mutableStateOf(DEFAULT_ID_NUMBER) }
     var dobDay by remember { mutableStateOf(DEFAULT_DOB_DAY) }
     var dobMonth by remember { mutableStateOf(DEFAULT_DOB_MONTH) }
     var dobYear by remember { mutableStateOf(DEFAULT_DOB_YEAR) }
+    val nationalIdConfiguration = residence.nationalIdConfiguration
 
     Column {
         Text(
@@ -135,6 +145,55 @@ private fun KycForm(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
+
+        Box {
+            OutlinedTextField(
+                value = residence.displayName,
+                onValueChange = { },
+                readOnly = true,
+                label = { Text("Residence") },
+                trailingIcon = {
+                    TextButton(
+                        onClick = { isResidenceDropdownExpanded = true },
+                        modifier = Modifier.testTag(KYC_RESIDENCE_DROPDOWN_TAG),
+                    ) {
+                        Text("▼")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
+            )
+
+            DropdownMenu(
+                expanded = isResidenceDropdownExpanded,
+                onDismissRequest = { isResidenceDropdownExpanded = false },
+            ) {
+                KycResidence.entries.forEach { selectedResidence ->
+                    DropdownMenuItem(
+                        onClick = {
+                            residence = selectedResidence
+                            idNumber = if (selectedResidence.nationalIdConfiguration == null) {
+                                ""
+                            } else {
+                                DEFAULT_ID_NUMBER
+                            }
+                            onAddressChange(
+                                address.replacing(country = selectedResidence.countryCode.orEmpty())
+                            )
+                            if (!selectedResidence.followsEuFlow) {
+                                onBirthCountryChange("")
+                                onBirthCityChange("")
+                                onNationalitiesChange("")
+                            }
+                            isResidenceDropdownExpanded = false
+                        }
+                    ) {
+                        Text(selectedResidence.displayName)
+                    }
+                }
+            }
+        }
 
         KycTextField(
             value = firstName,
@@ -152,12 +211,17 @@ private fun KycForm(
                 .testTag(KYC_LAST_NAME_TAG),
             onChange = onLastNameChange
         )
-        KycTextField(
-            value = ssn,
-            label = "SSN",
-            keyboardType = KeyboardType.Number,
-            onChange = { ssn = it }
-        )
+        if (nationalIdConfiguration != null) {
+            KycTextField(
+                value = idNumber,
+                label = nationalIdConfiguration.label,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(KYC_ID_NUMBER_TAG),
+                keyboardType = KeyboardType.Ascii,
+                onChange = { idNumber = it }
+            )
+        }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             KycTextField(
@@ -183,36 +247,38 @@ private fun KycForm(
             )
         }
 
-        Text(
-            text = "Birth Details",
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
-        )
+        if (residence.followsEuFlow) {
+            Text(
+                text = "Birth Details",
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+            )
 
-        KycTextField(
-            value = birthCountry,
-            label = "Birth Country (ISO)",
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(KYC_BIRTH_COUNTRY_TAG),
-            onChange = onBirthCountryChange
-        )
-        KycTextField(
-            value = birthCity,
-            label = "Birth City",
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(KYC_BIRTH_CITY_TAG),
-            onChange = onBirthCityChange
-        )
-        KycTextField(
-            value = nationalities,
-            label = "Nationalities (ISO, comma-separated)",
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(KYC_NATIONALITIES_TAG),
-            onChange = onNationalitiesChange
-        )
+            KycTextField(
+                value = birthCountry,
+                label = "Birth Country (ISO)",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(KYC_BIRTH_COUNTRY_TAG),
+                onChange = onBirthCountryChange
+            )
+            KycTextField(
+                value = birthCity,
+                label = "Birth City",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(KYC_BIRTH_CITY_TAG),
+                onChange = onBirthCityChange
+            )
+            KycTextField(
+                value = nationalities,
+                label = "Nationalities (ISO, comma-separated)",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(KYC_NATIONALITIES_TAG),
+                onChange = onNationalitiesChange
+            )
+        }
 
         Text(
             text = "Address",
@@ -280,12 +346,27 @@ private fun KycForm(
                     KycInfo(
                         firstName = firstName,
                         lastName = lastName,
-                        idNumber = ssn,
+                        idNumber = nationalIdConfiguration?.let {
+                            idNumber.trim().takeIf(String::isNotEmpty)
+                        },
+                        idType = nationalIdConfiguration?.type ?: IdType.SocialSecurityNumber,
                         dateOfBirth = dateOfBirth,
                         address = address,
-                        birthCountry = birthCountry.toCountryCodeOrNull(),
-                        birthCity = birthCity.trim().takeIf { it.isNotEmpty() },
-                        nationalities = nationalities.toCountryCodesOrNull()
+                        birthCountry = if (residence.followsEuFlow) {
+                            birthCountry.toCountryCodeOrNull()
+                        } else {
+                            null
+                        },
+                        birthCity = if (residence.followsEuFlow) {
+                            birthCity.trim().takeIf(String::isNotEmpty)
+                        } else {
+                            null
+                        },
+                        nationalities = if (residence.followsEuFlow) {
+                            nationalities.toCountryCodesOrNull()
+                        } else {
+                            null
+                        }
                     )
                 )
             },
@@ -350,7 +431,7 @@ private fun PaymentSheet.Address.replacing(
     )
 }
 
-private const val DEFAULT_SSN = "000000000"
+private const val DEFAULT_ID_NUMBER = "000000000"
 private const val DEFAULT_DOB_DAY = "1"
 private const val DEFAULT_DOB_MONTH = "1"
 private const val DEFAULT_DOB_YEAR = "1990"
