@@ -131,6 +131,27 @@ class CryptoApiRepositoryAdditionalKycTest {
         assertThat(requireNotNull(result.getOrThrow().documents).single().documentSubtype).isNull()
     }
 
+    @Test
+    fun `minimal submission response is parsed`() = runScenario(
+        responseBody = minimalSubmissionResponse,
+    ) {
+        val result = repository.fulfillAdditionalKycRequirement(
+            liquidityProvider = "swapped",
+            submissionType = "document",
+            documents = null,
+            questionnaire = null,
+            consumerSessionClientSecret = "secret_123",
+        )
+
+        val response = result.getOrThrow()
+        assertThat(response.id).isEqualTo("submission_123")
+        assertThat(response.objectType).isEqualTo("crypto_onramp_kyc_submission")
+        assertThat(response.status).isEqualTo("pending_verification")
+        assertThat(response.liquidityProvider).isNull()
+        assertThat(response.submissionType).isNull()
+        assertThat(response.submittedAt).isNull()
+    }
+
     private fun assertDocumentAndQuestionnaireRequest(request: ApiRequest) {
         assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
         assertThat(request.baseUrl).isEqualTo(
@@ -279,6 +300,15 @@ class CryptoApiRepositoryAdditionalKycTest {
                     }
                   ],
                   "submitted_at": 1723264802
+                }
+            """.trimIndent()
+
+        val minimalSubmissionResponse =
+            """
+                {
+                  "id": "submission_123",
+                  "object": "crypto_onramp_kyc_submission",
+                  "status": "pending_verification"
                 }
             """.trimIndent()
     }

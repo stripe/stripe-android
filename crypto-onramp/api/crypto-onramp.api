@@ -30,6 +30,7 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter 
 	public static final field $stable I
 	public final fun authorize (Ljava/lang/String;)V
 	public final fun collectPaymentMethod (Lcom/stripe/android/crypto/onramp/model/PaymentMethodSelection;)V
+	public final fun fulfillAdditionalKycRequirement ()V
 	public final fun performCheckout (Ljava/lang/String;)V
 	public final fun presentUserAttestation ()V
 	public final fun verifyIdentity ()V

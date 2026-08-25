@@ -14,6 +14,7 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
+import com.stripe.android.crypto.onramp.model.OnrampAdditionalKycResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
@@ -28,6 +29,10 @@ import com.stripe.android.crypto.onramp.samsungpay.SamsungPayPresentation
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
+import com.stripe.android.crypto.onramp.ui.AdditionalKycActivityArgs
+import com.stripe.android.crypto.onramp.ui.AdditionalKycActivityContract
+import com.stripe.android.crypto.onramp.ui.AdditionalKycActivityResult
+import com.stripe.android.crypto.onramp.ui.AdditionalKycScreenAction
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityArgs
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityContract
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
@@ -113,7 +118,19 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             callback = ::handleUserAttestationResult
         )
 
+    private val additionalKycResultLauncher: ActivityResultLauncher<AdditionalKycActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_AdditionalKycResultLauncher($onrampCallbackIdentifier)",
+            contract = AdditionalKycActivityContract(),
+            callback = ::handleAdditionalKycResult,
+        )
+
     init {
+        AdditionalKycSubmissionHandlerRegistry[onrampCallbackIdentifier] =
+            AdditionalKycSubmissionHandler { submission ->
+                interactor.fulfillAdditionalKycRequirement(submission).map { }
+            }
+
         // Observe Link controller state
         lifecycleOwner.lifecycleScope.launch {
             linkControllerState.collect { state ->
@@ -140,8 +157,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     samsungPayLauncher?.destroy()
                     verifyKycResultLauncher.unregister()
                     userAttestationResultLauncher.unregister()
+                    additionalKycResultLauncher.unregister()
 
                     if (activity.isFinishing) {
+                        AdditionalKycSubmissionHandlerRegistry.remove(onrampCallbackIdentifier)
                         OnrampCallbackReferences.remove(onrampCallbackIdentifier)
                     }
                 }
@@ -204,6 +223,27 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    fun fulfillAdditionalKycRequirement() {
+        coroutineScope.launch {
+            interactor.retrieveAdditionalKycRequirements().fold(
+                onSuccess = { requirements ->
+                    additionalKycResultLauncher.launch(
+                        AdditionalKycActivityArgs(
+                            requirements = requirements,
+                            linkAppearance = interactor.state.value.configurationState?.appearance,
+                            submissionHandlerKey = onrampCallbackIdentifier,
+                        )
+                    )
+                },
+                onFailure = { error ->
+                    onrampCallbacksState.additionalKycCallback?.onResult(
+                        OnrampAdditionalKycResult.Failed(error)
+                    )
+                },
+            )
         }
     }
 
@@ -377,6 +417,19 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
             onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
         }
+    }
+
+    private fun handleAdditionalKycResult(result: AdditionalKycActivityResult) {
+        val additionalKycResult = when (result.action) {
+            is AdditionalKycScreenAction.Cancelled -> {
+                OnrampAdditionalKycResult.Cancelled()
+            }
+            is AdditionalKycScreenAction.Submitted -> {
+                OnrampAdditionalKycResult.Submitted()
+            }
+        }
+
+        onrampCallbacksState.additionalKycCallback?.onResult(additionalKycResult)
     }
 
     private fun googlePayConfig(): GooglePayPaymentMethodLauncher.Config? =

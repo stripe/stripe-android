@@ -56,6 +56,90 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Cancel</string>
   <!-- Title of the screen responsible for accepting CRS CARF declarations -->
   <string name="stripe_link_onramp_carf_declaration_screen_title">Declarations</string>
+  <!-- Placeholder for a free-text answer in the additional KYC flow -->
+  <string name="stripe_link_onramp_additional_kyc_answer_placeholder">Enter your answer</string>
+  <!-- Label shown before the list of file extensions accepted by a KYC partner -->
+  <string name="stripe_link_onramp_additional_kyc_accepted_formats">Accepted formats: %s</string>
+  <!-- Button text shown while a selected KYC file is being copied -->
+  <string name="stripe_link_onramp_additional_kyc_adding_file">Adding file…</string>
+  <!-- Text displayed on a cancel button in the additional KYC flow -->
+  <string name="stripe_link_onramp_additional_kyc_cancel">Cancel</string>
+  <!-- Text displayed on the button that opens a KYC document picker -->
+  <string name="stripe_link_onramp_additional_kyc_choose_file">Choose file</string>
+  <!-- Text displayed on a button that closes an informational additional KYC status screen -->
+  <string name="stripe_link_onramp_additional_kyc_close">Close</string>
+  <!-- Text displayed on the button that advances to the next additional KYC requirement -->
+  <string name="stripe_link_onramp_additional_kyc_continue">Continue</string>
+  <!-- Heading for the document collection section of the additional KYC flow -->
+  <string name="stripe_link_onramp_additional_kyc_documents_title">Upload documents</string>
+  <!-- Label for an indexed document in the additional KYC flow -->
+  <string name="stripe_link_onramp_additional_kyc_document_number">Document %d</string>
+  <!-- Validation message shown when two KYC documents use the same subtype -->
+  <string name="stripe_link_onramp_additional_kyc_duplicate_document_type">Choose a different document type for each document.</string>
+  <!-- Description explaining why the additional KYC flow is shown -->
+  <string name="stripe_link_onramp_additional_kyc_explanation">We need some more information to verify your account before you can continue.</string>
+  <!-- Text displayed on the button that closes a completed additional KYC flow -->
+  <string name="stripe_link_onramp_additional_kyc_done">Done</string>
+  <!-- Validation message shown when a selected KYC file cannot be opened -->
+  <string name="stripe_link_onramp_additional_kyc_file_unavailable">We couldn’t add that file. Choose another file and try again.</string>
+  <!-- Validation message shown when a selected KYC file is too large and no size limit is available -->
+  <string name="stripe_link_onramp_additional_kyc_file_too_large">This file is too large. Choose a smaller file.</string>
+  <!-- Validation message shown when a selected KYC file exceeds the specified size limit -->
+  <string name="stripe_link_onramp_additional_kyc_file_too_large_with_limit">Choose a file that’s %1$d MB or smaller.</string>
+  <!-- Maximum size of each file accepted by an additional KYC document picker -->
+  <string name="stripe_link_onramp_additional_kyc_maximum_file_size">Maximum file size: %1$d MB</string>
+  <!-- Validation message shown when required KYC questionnaire answers are empty -->
+  <string name="stripe_link_onramp_additional_kyc_missing_answers">Answer all required questions.</string>
+  <!-- Validation message shown when a KYC document subtype is not selected -->
+  <string name="stripe_link_onramp_additional_kyc_missing_document_type">Select a document type for each document.</string>
+  <!-- Validation message shown when too few KYC documents were selected -->
+  <string name="stripe_link_onramp_additional_kyc_missing_documents">Choose all required documents.</string>
+  <!-- Description shown when all additional KYC requirements are awaiting Stripe or partner action -->
+  <string name="stripe_link_onramp_additional_kyc_pending_explanation">There’s nothing else you need to do right now.</string>
+  <!-- Title shown when all additional KYC requirements are awaiting Stripe or partner action -->
+  <string name="stripe_link_onramp_additional_kyc_pending_title">Verification in progress</string>
+  <!-- Message shown for an additional KYC requirement awaiting Stripe action -->
+  <string name="stripe_link_onramp_additional_kyc_processing_message">Your information is still being processed.</string>
+  <!-- Status shown for an additional KYC requirement awaiting Stripe action -->
+  <string name="stripe_link_onramp_additional_kyc_processing_title">Processing</string>
+  <!-- Heading for the questionnaire section of the additional KYC flow -->
+  <string name="stripe_link_onramp_additional_kyc_questions_title">Answer a few questions</string>
+  <!-- Title of the proof-of-address collection screen -->
+  <string name="stripe_link_onramp_additional_kyc_proof_of_address_title">Proof of address</string>
+  <!-- Text template that marks a KYC question as required -->
+  <string name="stripe_link_onramp_additional_kyc_required_question">%s *</string>
+  <!-- Text displayed on the button that removes a selected KYC file -->
+  <string name="stripe_link_onramp_additional_kyc_remove_file">Remove</string>
+  <!-- Text displayed on the button that replaces a selected KYC file -->
+  <string name="stripe_link_onramp_additional_kyc_replace_file">Replace file</string>
+  <!-- Text displayed on the button that retries a failed additional KYC submission -->
+  <string name="stripe_link_onramp_additional_kyc_retry">Retry</string>
+  <!-- Placeholder shown before a KYC document subtype is selected -->
+  <string name="stripe_link_onramp_additional_kyc_select_document_type">Select document type</string>
+  <!-- Title of the source-of-funds collection screen -->
+  <string name="stripe_link_onramp_additional_kyc_source_of_funds_title">Source of funds</string>
+  <!-- Text displayed on the submit button in the additional KYC flow -->
+  <string name="stripe_link_onramp_additional_kyc_submit">Submit</string>
+  <!-- Progress text shown when the additional KYC flow contains multiple requirements -->
+  <string name="stripe_link_onramp_additional_kyc_step">Step %1$d of %2$d</string>
+  <!-- Error shown when uploading or fulfilling an additional KYC requirement fails -->
+  <string name="stripe_link_onramp_additional_kyc_submission_failed">We couldn’t submit your information. Check your connection and try again.</string>
+  <!-- Confirmation text shown when more additional KYC requirements remain -->
+  <string name="stripe_link_onramp_additional_kyc_submitted_next">Your information was submitted. Continue to the next requirement.</string>
+  <!-- Confirmation text shown after the last additional KYC requirement was submitted -->
+  <string name="stripe_link_onramp_additional_kyc_submitted_done">Your information was submitted and is now being reviewed.</string>
+  <!-- Title shown after an additional KYC requirement was submitted -->
+  <string name="stripe_link_onramp_additional_kyc_submitted_title">Submitted for review</string>
+  <!-- Generic title for a future or unrecognized additional KYC requirement -->
+  <string name="stripe_link_onramp_additional_kyc_title">Additional verification</string>
+  <!-- Message shown when an additional KYC requirement cannot be rendered -->
+  <string name="stripe_link_onramp_additional_kyc_unavailable">We can’t collect this information right now. Try again later.</string>
+  <!-- Validation message shown when a selected KYC file extension is not accepted -->
+  <string name="stripe_link_onramp_additional_kyc_unsupported_file_type">This file type isn’t supported. Choose a file in one of the accepted formats.</string>
+  <!-- Message shown for an additional KYC requirement awaiting partner action -->
+  <string name="stripe_link_onramp_additional_kyc_waiting_for_review_message">Your information was submitted and is waiting for review.</string>
+  <!-- Status shown for an additional KYC requirement awaiting partner action -->
+  <string name="stripe_link_onramp_additional_kyc_waiting_for_review_title">Waiting for review</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Address</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->

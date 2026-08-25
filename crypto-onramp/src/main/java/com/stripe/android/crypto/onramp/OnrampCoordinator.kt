@@ -281,6 +281,14 @@ class OnrampCoordinator @Inject internal constructor(
         fun presentUserAttestation() {
             coordinator.presentUserAttestation()
         }
+
+        /**
+         * Presents UI to collect and submit outstanding additional KYC requirements.
+         * The result will be delivered through the additional KYC callback provided in [OnrampCallbacks].
+         */
+        fun fulfillAdditionalKycRequirement() {
+            coordinator.fulfillAdditionalKycRequirement()
+        }
     }
 
     /**

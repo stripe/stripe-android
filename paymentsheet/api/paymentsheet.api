@@ -380,6 +380,13 @@ public final class com/stripe/android/link/LinkController$Presenter {
 public abstract interface annotation class com/stripe/android/link/LinkControllerPreview : java/lang/annotation/Annotation {
 }
 
+public final class com/stripe/android/link/onramp/ui/ComposableSingletons$AdditionalKycScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/link/onramp/ui/ComposableSingletons$AdditionalKycScreenKt;
+	public fun <init> ()V
+	public final fun getLambda$-260027412$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$313333905$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/link/onramp/ui/ComposableSingletons$OnrampKYCRefreshScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/onramp/ui/ComposableSingletons$OnrampKYCRefreshScreenKt;
 	public fun <init> ()V

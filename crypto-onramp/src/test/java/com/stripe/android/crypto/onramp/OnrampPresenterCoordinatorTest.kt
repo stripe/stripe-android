@@ -1,10 +1,21 @@
 package com.stripe.android.crypto.onramp
 
+import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.CheckoutState.Status
+import com.stripe.android.crypto.onramp.model.AdditionalKycQuestion
+import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
+import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
+import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmission
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
+import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
+import com.stripe.android.crypto.onramp.model.AdditionalKycSubmissionResponse
+import com.stripe.android.crypto.onramp.model.OnrampAdditionalKycCallback
+import com.stripe.android.crypto.onramp.model.OnrampAdditionalKycResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutCallback
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
@@ -18,6 +29,8 @@ import com.stripe.android.crypto.onramp.samsungpay.FakeSamsungPayLauncher
 import com.stripe.android.crypto.onramp.samsungpay.FakeSamsungPayLauncherFactory
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
+import com.stripe.android.crypto.onramp.ui.AdditionalKycActivity
+import com.stripe.android.crypto.onramp.ui.AdditionalKycScreenAction
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,10 +42,12 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 class OnrampPresenterCoordinatorTest {
@@ -122,6 +137,109 @@ class OnrampPresenterCoordinatorTest {
             .isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         assertThat((callbackCaptor.firstValue as OnrampCheckoutResult.Failed).error)
             .isSameInstanceAs(error)
+    }
+
+    @Test
+    fun `additional KYC retrieves requirements and launches activity`() = runTest {
+        val requirements = additionalKycRequirements()
+        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
+        val coordinator = createCoordinator(
+            onrampStateFlow = MutableStateFlow(
+                OnrampState(configurationState = createConfiguration()),
+            ),
+        )
+
+        coordinator.fulfillAdditionalKycRequirement()
+        testScope.testScheduler.advanceUntilIdle()
+
+        val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
+        assertThat(startedIntent.component?.className).isEqualTo(AdditionalKycActivity::class.java.name)
+        assertThat(AdditionalKycActivity.argsFrom(startedIntent)?.requirements).isEqualTo(requirements)
+        assertThat(AdditionalKycActivity.argsFrom(startedIntent)?.submissionHandlerKey)
+            .isEqualTo(DEFAULT_ONRAMP_INSTANCE_KEY)
+    }
+
+    @Test
+    fun `additional KYC retrieval failure calls failed callback`() = runTest {
+        val error = IllegalStateException("Could not retrieve requirements")
+        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.failure(error))
+        var callbackResult: OnrampAdditionalKycResult? = null
+        val coordinator = createCoordinator(
+            additionalKycCallback = { callbackResult = it },
+        )
+
+        coordinator.fulfillAdditionalKycRequirement()
+        testScope.testScheduler.advanceUntilIdle()
+
+        assertThat(callbackResult).isInstanceOf(OnrampAdditionalKycResult.Failed::class.java)
+        assertThat((callbackResult as OnrampAdditionalKycResult.Failed).error).isSameInstanceAs(error)
+        assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+    }
+
+    @Test
+    fun `additional KYC submission handler fulfills requirement`() = runTest {
+        val requirements = additionalKycRequirements()
+        val submission = additionalKycSubmission()
+        var callbackResult: OnrampAdditionalKycResult? = null
+        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
+        whenever(interactor.fulfillAdditionalKycRequirement(submission)).thenReturn(
+            Result.success(AdditionalKycSubmissionResponse(id = "kyc_submission_123"))
+        )
+        val coordinator = createCoordinator(
+            additionalKycCallback = { callbackResult = it },
+        )
+
+        coordinator.fulfillAdditionalKycRequirement()
+        testScope.testScheduler.advanceUntilIdle()
+        val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
+        val handlerKey = requireNotNull(AdditionalKycActivity.argsFrom(startedIntent)).submissionHandlerKey
+        val result = requireNotNull(AdditionalKycSubmissionHandlerRegistry[handlerKey]).submit(submission)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(callbackResult).isNull()
+        verify(interactor).fulfillAdditionalKycRequirement(submission)
+    }
+
+    @Test
+    fun `additional KYC submitted action calls submitted callback`() = runTest {
+        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(
+            Result.success(additionalKycRequirements())
+        )
+        var callbackResult: OnrampAdditionalKycResult? = null
+        val coordinator = createCoordinator(
+            additionalKycCallback = { callbackResult = it },
+        )
+
+        coordinator.fulfillAdditionalKycRequirement()
+        testScope.testScheduler.advanceUntilIdle()
+        val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
+        shadowOf(activity).receiveResult(
+            startedIntent,
+            Activity.RESULT_OK,
+            AdditionalKycActivity.createResultIntent(AdditionalKycScreenAction.Submitted),
+        )
+
+        assertThat(callbackResult).isInstanceOf(OnrampAdditionalKycResult.Submitted::class.java)
+    }
+
+    @Test
+    fun `additional KYC cancelled action calls cancelled callback`() = runTest {
+        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(
+            Result.success(additionalKycRequirements())
+        )
+        var callbackResult: OnrampAdditionalKycResult? = null
+        val coordinator = createCoordinator(
+            additionalKycCallback = { callbackResult = it },
+        )
+
+        coordinator.fulfillAdditionalKycRequirement()
+        testScope.testScheduler.advanceUntilIdle()
+        val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
+        shadowOf(activity).receiveResult(startedIntent, Activity.RESULT_CANCELED, null)
+        testScope.testScheduler.advanceUntilIdle()
+
+        assertThat(callbackResult).isInstanceOf(OnrampAdditionalKycResult.Cancelled::class.java)
+        verify(interactor, never()).fulfillAdditionalKycRequirement(any())
     }
 
     @Test
@@ -322,6 +440,7 @@ class OnrampPresenterCoordinatorTest {
         linkStateFlow: MutableStateFlow<LinkController.State> = MutableStateFlow(createFakeLinkState()),
         samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null,
         collectPaymentCallback: OnrampCollectPaymentMethodCallback = OnrampCollectPaymentMethodCallback {},
+        additionalKycCallback: OnrampAdditionalKycCallback? = null,
     ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 
@@ -350,6 +469,7 @@ class OnrampPresenterCoordinatorTest {
             .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
 
         samsungPayIsReadyCallback?.let(callbacks::samsungPayIsReadyCallback)
+        additionalKycCallback?.let(callbacks::additionalKycCallback)
 
         OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY] = callbacks.build()
 
@@ -375,6 +495,58 @@ class OnrampPresenterCoordinatorTest {
                 ),
             )
             .build()
+    }
+
+    private fun createConfiguration(): OnrampConfiguration.State {
+        return OnrampConfiguration()
+            .merchantDisplayName("Stripe merchant")
+            .publishableKey("pk_test_123")
+            .build()
+    }
+
+    private fun additionalKycRequirements(): AdditionalKycRequirements {
+        return AdditionalKycRequirements(
+            userActionRequired = listOf(
+                AdditionalKycRequirement(
+                    description = "screening_questions",
+                    requestedBy = "swapped",
+                    awaitingActionFrom = "user",
+                    requestedReasons = emptyList(),
+                    errors = emptyList(),
+                    submissionType = "questionnaire",
+                    document = null,
+                    questionnaire = AdditionalKycQuestionnaire(
+                        questions = listOf(
+                            AdditionalKycQuestion(
+                                id = "purchase_purpose",
+                                prompt = "Why are you purchasing cryptocurrency?",
+                                answerType = "free_text",
+                                required = true,
+                            )
+                        )
+                    ),
+                )
+            ),
+            pendingPartnerAction = emptyList(),
+            pendingStripeAction = emptyList(),
+            unrecognizedActionOwner = emptyList(),
+        )
+    }
+
+    private fun additionalKycSubmission(): AdditionalKycSubmission {
+        return AdditionalKycSubmission(
+            liquidityProvider = "swapped",
+            submissionType = "questionnaire",
+            documents = null,
+            questionnaire = AdditionalKycQuestionnaireSubmission(
+                answers = listOf(
+                    AdditionalKycQuestionnaireAnswer(
+                        questionId = "purchase_purpose",
+                        value = "Long-term investment",
+                    )
+                )
+            ),
+        )
     }
 
     private fun createFakeLinkState(
