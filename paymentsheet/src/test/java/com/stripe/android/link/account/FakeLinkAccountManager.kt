@@ -108,6 +108,10 @@ internal open class FakeLinkAccountManager(
     var createPaymentMethodResult: Result<com.stripe.android.model.PaymentMethod> = Result.success(
         value = PaymentMethodFixtures.CARD_PAYMENT_METHOD
     )
+    var createPaymentMethodResultProvider: suspend () -> Result<com.stripe.android.model.PaymentMethod> = {
+        createPaymentMethodResult
+    }
+    val createPaymentMethodCalls = Turbine<LinkPaymentMethod>()
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePhoneNumberResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -261,7 +265,8 @@ internal open class FakeLinkAccountManager(
     override suspend fun createPaymentMethod(
         linkPaymentMethod: LinkPaymentMethod
     ): Result<com.stripe.android.model.PaymentMethod> {
-        return createPaymentMethodResult
+        createPaymentMethodCalls.add(linkPaymentMethod)
+        return createPaymentMethodResultProvider()
     }
 
     override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {

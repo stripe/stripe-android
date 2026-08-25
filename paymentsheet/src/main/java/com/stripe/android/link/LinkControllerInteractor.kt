@@ -53,6 +53,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Provider
@@ -113,11 +115,11 @@ internal class LinkControllerInteractor @Inject constructor(
         MutableSharedFlow<LinkController.PresentResult>(extraBufferCapacity = 1)
     val presentResultFlow = _presentResultFlow.asSharedFlow()
 
-    private val _presentSelectionSucceededFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val createPaymentMethodMutex = Mutex()
 
-    init {
+    private fun createPaymentMethodForPresentResult() {
         coroutineScope.launch {
-            _presentSelectionSucceededFlow.collect {
+            createPaymentMethodMutex.withLock {
                 val pmResult = performCreatePaymentMethod(apiKey = null)
                 updateState { it.copy(createdPaymentMethod = pmResult.getOrNull()) }
                 val presentResult = pmResult.fold(
@@ -435,7 +437,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 is LinkActivityResult.Completed -> {
                     logger.debug("$tag: present PM selected, creating payment method")
                     updateState { it.copy(selectedPaymentMethod = result.selectedPayment) }
-                    _presentSelectionSucceededFlow.tryEmit(Unit)
+                    createPaymentMethodForPresentResult()
                 }
                 is LinkActivityResult.Failed -> {
                     logger.debug("$tag: present failed")

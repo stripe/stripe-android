@@ -27,11 +27,14 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakeLinkComponent
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Rule
@@ -67,8 +70,7 @@ class LinkControllerInteractorTest {
     private val linkComponentFactoryProvider: Provider<LinkComponent.Factory> =
         Provider { FakeLinkComponent.Factory(linkComponent) }
 
-    // Each created interactor owns a scope with a perpetual collector in its init; track and cancel
-    // them so the scopes don't outlive the test.
+    // Track injected scopes so any finite work still running after a failed test is canceled.
     @get:Rule
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
@@ -81,6 +83,16 @@ class LinkControllerInteractorTest {
                 LinkController.State()
             )
         }
+    }
+
+    @Test
+    fun `constructing interactor does not start child coroutine`() = runTest {
+        val parentJob = Job()
+        val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher + parentJob))
+
+        createInteractor(coroutineScope)
+
+        assertThat(parentJob.children.toList()).isEmpty()
     }
 
     @Test
@@ -1075,8 +1087,9 @@ class LinkControllerInteractorTest {
         }
     }
 
-    private fun createInteractor(): LinkControllerInteractor {
-        val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher))
+    private fun createInteractor(
+        coroutineScope: CoroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher)),
+    ): LinkControllerInteractor {
         return LinkControllerInteractor(
             application = application,
             logger = logger,
@@ -1404,6 +1417,73 @@ class LinkControllerInteractorTest {
             assertThat(result).isInstanceOf(LinkController.PresentResult.Completed::class.java)
             assertThat((result as LinkController.PresentResult.Completed).paymentMethod)
                 .isEqualTo(expectedPaymentMethod)
+        }
+    }
+
+    @Test
+    fun `completed present work leaves no child coroutine`() = runTest {
+        val parentJob = Job()
+        val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher + parentJob))
+        val interactor = createInteractor(coroutineScope)
+        configure(interactor)
+        interactor.presentFull(FakeActivityResultLauncher())
+
+        interactor.presentResultFlow.test {
+            interactor.onLinkActivityResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                    selectedPayment = createTestPaymentMethod(),
+                    shippingAddress = null,
+                )
+            )
+            assertThat(awaitItem()).isInstanceOf(LinkController.PresentResult.Completed::class.java)
+        }
+        advanceUntilIdle()
+
+        assertThat(parentJob.children.toList()).isEmpty()
+    }
+
+    @Test
+    fun `rapid completed present results create payment methods serially`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        val firstResult = CompletableDeferred<Result<com.stripe.android.model.PaymentMethod>>()
+        val secondResult = CompletableDeferred<Result<com.stripe.android.model.PaymentMethod>>()
+        val results = ArrayDeque(listOf(firstResult, secondResult))
+        linkAccountManager.createPaymentMethodResultProvider = { results.removeFirst().await() }
+        val firstPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val secondPaymentMethod = firstPaymentMethod.copy(id = "pm_second")
+
+        interactor.presentResultFlow.test {
+            interactor.presentFull(FakeActivityResultLauncher())
+            interactor.onLinkActivityResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                    selectedPayment = createTestPaymentMethod(cvc = "111"),
+                    shippingAddress = null,
+                )
+            )
+            assertThat(linkAccountManager.createPaymentMethodCalls.awaitItem().collectedCvc).isEqualTo("111")
+
+            interactor.presentFull(FakeActivityResultLauncher())
+            interactor.onLinkActivityResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                    selectedPayment = createTestPaymentMethod(cvc = "222"),
+                    shippingAddress = null,
+                )
+            )
+            linkAccountManager.createPaymentMethodCalls.expectNoEvents()
+            expectNoEvents()
+
+            firstResult.complete(Result.success(firstPaymentMethod))
+            assertThat((awaitItem() as LinkController.PresentResult.Completed).paymentMethod)
+                .isEqualTo(firstPaymentMethod)
+            assertThat(linkAccountManager.createPaymentMethodCalls.awaitItem().collectedCvc).isEqualTo("222")
+
+            secondResult.complete(Result.success(secondPaymentMethod))
+            assertThat((awaitItem() as LinkController.PresentResult.Completed).paymentMethod)
+                .isEqualTo(secondPaymentMethod)
         }
     }
 
