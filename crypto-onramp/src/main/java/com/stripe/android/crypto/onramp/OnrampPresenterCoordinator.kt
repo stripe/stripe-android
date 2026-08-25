@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
@@ -230,7 +231,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                                 clientAttributionMetadata = null,
                                 transactionId = selection.transactionId,
                                 label = selection.label,
-                                publishableKey = it
+                                apiConfiguration = ApiConfiguration.State(
+                                    publishableKey = it,
+                                    stripeAccountId = null,
+                                )
                             )
                         },
                         onFailure = { error ->

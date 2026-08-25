@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
@@ -91,7 +92,7 @@ class GooglePayConfirmationFlowTest {
                     transactionId = "pi_12345",
                     label = null,
                     isElements = true,
-                    publishableKey = null,
+                    apiConfiguration = ApiConfiguration.State("pk_test_123", null),
                     displayItems = emptyList(),
                     billingEmailOverride = null,
                     shippingAddressParameters = null,
