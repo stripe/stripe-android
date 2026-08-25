@@ -3,8 +3,6 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
