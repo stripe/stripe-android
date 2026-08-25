@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.DaggerAddressElementViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
@@ -21,7 +22,9 @@ internal class AddressElementViewModel @Inject internal constructor(
         dismissalCoordinator.showDiscardConfirmation
 
     fun dismiss() {
-        if (dismissalCoordinator.requestDismiss()) {
+        if (!FeatureFlags.enableAddressElementUnsavedChanges.isEnabled ||
+            dismissalCoordinator.requestDismiss()
+        ) {
             navigator.dismiss()
         }
     }

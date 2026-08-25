@@ -2,14 +2,23 @@ package com.stripe.android.paymentsheet.addresselement
 
 import androidx.navigation.NavHostController
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
+import com.stripe.android.testing.FeatureFlagTestRule
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
 internal class AddressElementViewModelTest {
+    @get:Rule
+    val unsavedChangesFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableAddressElementUnsavedChanges,
+        isEnabled = true,
+    )
+
     @Test
     fun `clean dismissal exits immediately`() {
         var result: AddressLauncherResult? = null
@@ -31,6 +40,20 @@ internal class AddressElementViewModelTest {
 
         assertThat(viewModel.showDiscardConfirmation.value).isTrue()
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun `dirty dismissal exits immediately when feature flag is disabled`() {
+        unsavedChangesFeatureFlagTestRule.setEnabled(false)
+        var result: AddressLauncherResult? = null
+        val coordinator = AddressElementDismissalCoordinator()
+        val viewModel = createViewModel(coordinator) { result = it }
+        coordinator.setDirty(true)
+
+        viewModel.dismiss()
+
+        assertThat(result).isEqualTo(AddressLauncherResult.Canceled())
+        assertThat(viewModel.showDiscardConfirmation.value).isFalse()
     }
 
     @Test
