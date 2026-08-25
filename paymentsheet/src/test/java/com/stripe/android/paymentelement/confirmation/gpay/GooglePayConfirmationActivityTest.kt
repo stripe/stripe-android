@@ -14,7 +14,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
@@ -38,7 +37,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,11 +46,6 @@ import com.stripe.android.R as PaymentsCoreR
 @RunWith(RobolectricTestRunner::class)
 internal class GooglePayConfirmationActivityTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
-
-    @Before
-    fun setUp() {
-        PaymentConfiguration.init(application, "pk_test_123")
-    }
 
     @get:Rule
     val intentsRule = IntentsRule()
