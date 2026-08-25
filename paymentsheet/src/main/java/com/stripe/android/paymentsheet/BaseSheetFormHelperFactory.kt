@@ -20,19 +20,38 @@ internal class BaseSheetFormHelperFactory(
         return DefaultFormHelper(
             coroutineScope = coroutineScope,
             linkInlineHandler = linkInlineHandler,
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionUpdater = viewModel::updateSelection,
+            eventReporter = viewModel.eventReporter,
+            savedStateHandle = viewModel.savedStateHandle,
+            formDefinitionFactory = createFormDefinitionFactory(
+                paymentMethodMetadata = paymentMethodMetadata,
+                linkInlineHandler = linkInlineHandler,
+                automaticallyLaunchedCardScanFormDataHelper = createAutomaticallyLaunchedCardScanFormDataHelper(
+                    shouldCreate = shouldCreateAutomaticallyLaunchedCardScanFormDataHelper,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                ),
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            ),
+        )
+    }
+
+    private fun createFormDefinitionFactory(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        linkInlineHandler: LinkInlineHandler,
+        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
+        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+    ): FormDefinitionFactory {
+        return DefaultFormDefinitionFactory(
+            linkInlineHandler = linkInlineHandler,
             cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = { viewModel.newPaymentSelection },
-            selectionUpdater = viewModel::updateSelection,
             linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
             setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
-            eventReporter = viewModel.eventReporter,
-            savedStateHandle = viewModel.savedStateHandle,
             autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-            automaticallyLaunchedCardScanFormDataHelper = createAutomaticallyLaunchedCardScanFormDataHelper(
-                shouldCreate = shouldCreateAutomaticallyLaunchedCardScanFormDataHelper,
-                paymentMethodMetadata = paymentMethodMetadata,
-            ),
+            isLinkUI = false,
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = viewModel.tapToAddHelper,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             isNfcScanningAvailable = viewModel.isNfcScanningAvailable,

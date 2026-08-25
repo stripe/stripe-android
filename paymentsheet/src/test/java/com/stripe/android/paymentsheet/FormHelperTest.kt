@@ -234,23 +234,30 @@ internal class FormHelperTest {
             val cardBrand = "visa"
             val name = "Joe"
             val receivedSelection = CompletableDeferred<PaymentSelection?>()
+            val linkInlineHandler = LinkInlineHandler.create()
+            val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
             val formHelper = DefaultFormHelper(
                 coroutineScope = coroutineScope,
-                linkInlineHandler = LinkInlineHandler.create(),
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                newPaymentSelectionProvider = { null },
-                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                linkInlineHandler = linkInlineHandler,
+                paymentMethodMetadata = paymentMethodMetadata,
                 selectionUpdater = { selection -> receivedSelection.complete(selection) },
-                setAsDefaultMatchesSaveForFutureUse = false,
                 eventReporter = FakeEventReporter(),
                 savedStateHandle = SavedStateHandle(),
-                autocompleteAddressInteractorFactory = null,
-                automaticallyLaunchedCardScanFormDataHelper = null,
-                tapToAddHelper = null,
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-                isNfcScanningAvailable = null,
+                formDefinitionFactory = DefaultFormDefinitionFactory(
+                    linkInlineHandler = linkInlineHandler,
+                    cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    newPaymentSelectionProvider = { null },
+                    linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                    setAsDefaultMatchesSaveForFutureUse = false,
+                    autocompleteAddressInteractorFactory = null,
+                    isLinkUI = false,
+                    automaticallyLaunchedCardScanFormDataHelper = null,
+                    tapToAddHelper = null,
+                    paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                    isNfcScanningAvailable = null,
+                ),
             )
 
             val formFieldValues = FormFieldValues(
@@ -770,20 +777,25 @@ internal class FormHelperTest {
     ): FormHelper {
         return DefaultFormHelper(
             coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
-            newPaymentSelectionProvider = newPaymentSelectionProvider,
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
-            setAsDefaultMatchesSaveForFutureUse = false,
             eventReporter = eventReporter,
             savedStateHandle = SavedStateHandle(),
-            autocompleteAddressInteractorFactory = null,
-            automaticallyLaunchedCardScanFormDataHelper = null,
-            tapToAddHelper = tapToAddHelper,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
-            isNfcScanningAvailable = null,
+            formDefinitionFactory = DefaultFormDefinitionFactory(
+                linkInlineHandler = linkInlineHandler,
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                paymentMethodMetadata = paymentMethodMetadata,
+                newPaymentSelectionProvider = newPaymentSelectionProvider,
+                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                setAsDefaultMatchesSaveForFutureUse = false,
+                autocompleteAddressInteractorFactory = null,
+                isLinkUI = false,
+                automaticallyLaunchedCardScanFormDataHelper = null,
+                tapToAddHelper = tapToAddHelper,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                isNfcScanningAvailable = null,
+            ),
         )
     }
 
