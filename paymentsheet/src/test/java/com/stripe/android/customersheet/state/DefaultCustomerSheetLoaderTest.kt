@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.ApiConfiguration
@@ -41,6 +42,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.CoroutineTestRule
@@ -64,6 +66,7 @@ import org.junit.Test
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -453,6 +456,9 @@ internal class DefaultCustomerSheetLoaderTest {
                 workContext = coroutineContext,
                 customerAdapter = FakeCustomerAdapter(),
                 errorReporter = FakeErrorReporter(),
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+                },
             )
         )
 
@@ -866,7 +872,8 @@ internal class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
-            workContext = workContext
+            workContext = workContext,
+            apiConfigurationResolver = ApiConfigurationResolver(Provider { PaymentConfiguration("pk_test_123") })
         )
     }
 
