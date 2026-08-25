@@ -8,6 +8,8 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -17,8 +19,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsSectionControllerTest {
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    private val coroutineScope = CoroutineScope(testDispatcher)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -72,6 +78,7 @@ class CardDetailsSectionControllerTest {
     private fun createController() = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
         initialValues = emptyMap(),
+        coroutineScope = coroutineScope,
         collectName = false,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         cardBrandFilter = DefaultCardBrandFilter,

@@ -10,6 +10,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -110,5 +112,6 @@ internal class TapToAddCardDetailsActionTest {
     private fun fakeController() = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
         initialValues = emptyMap(),
+        coroutineScope = CoroutineScope(Dispatchers.Unconfined),
     )
 }

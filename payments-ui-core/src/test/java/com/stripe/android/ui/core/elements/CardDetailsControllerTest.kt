@@ -35,6 +35,8 @@ import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.isInstanceOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -44,8 +46,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsControllerTest {
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    private val coroutineScope = CoroutineScope(testDispatcher)
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -484,6 +490,7 @@ class CardDetailsControllerTest {
                             identifier = IdentifierSpec.Generic("card_details"),
                             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
                             initialValues = mapOf(),
+                            coroutineScope = coroutineScope,
                         ),
                         modifier = Modifier,
                         hiddenIdentifiers = emptySet(),
@@ -511,6 +518,7 @@ class CardDetailsControllerTest {
             cardBrandFilter = cardBrandFilter,
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = initialValues,
+            coroutineScope = coroutineScope,
             cbcEligibility = cbcEligibility,
             cardDetailsTextFieldConfig = cardDetailsTextFieldConfig,
             cvcTextFieldConfig = cvcTextFieldConfig,

@@ -28,6 +28,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +37,7 @@ import kotlin.coroutines.CoroutineContext
 internal class CardDetailsController(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
+    coroutineScope: CoroutineScope,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     uiContext: CoroutineContext = Dispatchers.Main,
@@ -86,6 +88,7 @@ internal class CardDetailsController(
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
         DefaultCardNumberController(
+            coroutineScope = coroutineScope,
             cardTextFieldConfig = cardDetailsTextFieldConfig,
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,

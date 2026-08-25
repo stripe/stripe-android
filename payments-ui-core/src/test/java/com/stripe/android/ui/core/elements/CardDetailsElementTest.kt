@@ -13,6 +13,7 @@ import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -27,6 +28,8 @@ class CardDetailsElementTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private val coroutineScope = CoroutineScope(testDispatcher)
+
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @get:Rule
@@ -36,6 +39,7 @@ class CardDetailsElementTest {
     fun `test form field values returned and expiration date parsing`() = runTest {
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             uiContext = testDispatcher,
             workContext = testDispatcher,
@@ -43,6 +47,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             controller = cardController
         )
@@ -71,6 +76,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.CardBrand to CardBrand.Visa.code
@@ -99,6 +105,7 @@ class CardDetailsElementTest {
     fun `test form field values returned when collecting name`() = runTest {
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             collectName = true,
             uiContext = testDispatcher,
@@ -107,6 +114,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -138,6 +146,7 @@ class CardDetailsElementTest {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList())
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility,
@@ -148,6 +157,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -181,6 +191,7 @@ class CardDetailsElementTest {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility,
@@ -191,6 +202,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -231,6 +243,7 @@ class CardDetailsElementTest {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf(CardBrand.CartesBancaires))
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility,
@@ -241,6 +254,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -273,6 +287,7 @@ class CardDetailsElementTest {
     fun `test card scan result should fill in card number and expiration date`() = runTest {
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             uiContext = testDispatcher,
             workContext = testDispatcher,
@@ -280,6 +295,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             controller = cardController
         )
@@ -311,6 +327,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.CardValidatedScan to "true",
@@ -338,6 +355,7 @@ class CardDetailsElementTest {
         val repositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = repositoryFactory,
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             uiContext = testDispatcher,
             workContext = testDispatcher,
@@ -346,6 +364,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = repositoryFactory,
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             controller = cardController,
         )
@@ -383,6 +402,7 @@ class CardDetailsElementTest {
         val repositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = repositoryFactory,
+            coroutineScope = coroutineScope,
             initialValues = initialValues,
             uiContext = testDispatcher,
             workContext = testDispatcher,
@@ -390,6 +410,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = repositoryFactory,
+            coroutineScope = coroutineScope,
             initialValues = initialValues,
             controller = cardController,
         )
@@ -410,10 +431,12 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            coroutineScope = coroutineScope,
             initialValues = emptyMap(),
             collectName = true,
             controller = CardDetailsController(
                 cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+                coroutineScope = coroutineScope,
                 initialValues = emptyMap(),
                 collectName = true,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
