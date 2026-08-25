@@ -156,6 +156,9 @@ dependencies {
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.leakCanary
 
+    testImplementation testLibs.junit
+    testImplementation testLibs.truth
+
     androidTestImplementation project(':payments-ui-core')
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation libs.playServicesWallet

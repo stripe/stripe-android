@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.checkout.CheckoutPresenter
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
@@ -58,46 +60,29 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 
         setContent {
             val status by viewModel.status.collectAsState()
+            val confirmationResult by viewModel.confirmationResult.collectAsState()
 
             PlaygroundTheme(
                 content = {
-                    when (val currentStatus = status) {
-                        is CheckoutControllerExampleViewModel.Status.Loading -> {
-                            LoadingContent()
-                        }
-                        is CheckoutControllerExampleViewModel.Status.Error -> {
-                            ErrorContent(currentStatus.message)
-                        }
-                        is CheckoutControllerExampleViewModel.Status.Configured -> {
-                            val session = currentStatus.session
-                            if (session != null) {
-                                LineItemsSection(session)
-                                TotalSummarySection(session)
-                                if (session.availableExpressCheckoutPaymentMethods.isNotEmpty()) {
-                                    presenter.expressCheckoutElement().Content()
-                                }
-                                paymentElement.Content()
-                            }
-                        }
-                    }
+                    CheckoutContent(
+                        status = status,
+                        presenter = presenter,
+                        paymentElement = paymentElement,
+                        onScenarioSelected = viewModel::start,
+                    )
                 },
                 bottomBarContent = {
                     val configured = status as? CheckoutControllerExampleViewModel.Status.Configured
-                    PaymentOptionRow(configured?.session?.paymentOptionDisplayData)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { paymentElement.present() },
-                        enabled = configured != null,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Select Payment Method")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { presenter.confirm() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Confirm")
+                    if (configured != null) {
+                        ConfirmationControls(
+                            paymentOption = configured.session?.paymentOptionDisplayData,
+                            confirmationResult = confirmationResult,
+                            onSelectPaymentMethod = paymentElement::present,
+                            onConfirm = {
+                                viewModel.clearConfirmationResult()
+                                presenter.confirm()
+                            },
+                        )
                     }
                 },
             )
@@ -106,22 +91,84 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun LoadingContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator()
+private fun CheckoutContent(
+    status: CheckoutControllerExampleViewModel.Status,
+    presenter: CheckoutPresenter,
+    paymentElement: PaymentElement,
+    onScenarioSelected: (CheckoutControllerExampleScenario) -> Unit,
+) {
+    when (status) {
+        is CheckoutControllerExampleViewModel.Status.ChooseScenario -> {
+            ScenarioChooser(onScenarioSelected)
+        }
+        is CheckoutControllerExampleViewModel.Status.Loading -> {
+            LoadingContent(status.scenario)
+        }
+        is CheckoutControllerExampleViewModel.Status.Error -> {
+            ErrorContent(status.scenario, status.message)
+        }
+        is CheckoutControllerExampleViewModel.Status.Configured -> {
+            status.session?.let { session ->
+                ScenarioSummary(status.scenario, session.tax.status)
+                LineItemsSection(session)
+                TotalSummarySection(session)
+                if (session.availableExpressCheckoutPaymentMethods.isNotEmpty()) {
+                    presenter.expressCheckoutElement().Content()
+                }
+                paymentElement.Content()
+            }
+        }
     }
 }
 
 @Composable
-private fun ErrorContent(message: String) {
+private fun ScenarioChooser(
+    onScenarioSelected: (CheckoutControllerExampleScenario) -> Unit,
+) {
+    Text(text = "Choose a session scenario", style = MaterialTheme.typography.h6)
+    Spacer(modifier = Modifier.height(16.dp))
+    CheckoutControllerExampleScenario.entries.forEach { scenario ->
+        Button(
+            onClick = { onScenarioSelected(scenario) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(scenario.displayName)
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+    Text(
+        text = "Relaunch this activity to choose another scenario.",
+        style = MaterialTheme.typography.body2,
+        color = Color.Gray,
+    )
+}
+
+@Composable
+private fun LoadingContent(scenario: CheckoutControllerExampleScenario) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "Scenario: ${scenario.displayName}")
+            Spacer(modifier = Modifier.height(12.dp))
+            CircularProgressIndicator()
+        }
+    }
+}
+
+@Composable
+private fun ErrorContent(
+    scenario: CheckoutControllerExampleScenario,
+    message: String,
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Text(text = "Scenario: ${scenario.displayName}")
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Error",
             style = MaterialTheme.typography.h6,
@@ -129,6 +176,50 @@ private fun ErrorContent(message: String) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = message)
+    }
+}
+
+@Composable
+private fun ScenarioSummary(
+    scenario: CheckoutControllerExampleScenario,
+    taxStatus: Session.Tax.Status,
+) {
+    Text(text = "Scenario: ${scenario.displayName}", style = MaterialTheme.typography.h6)
+    Text(text = "Tax status: $taxStatus", style = MaterialTheme.typography.body1)
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+private fun ConfirmationControls(
+    paymentOption: PaymentOptionDisplayData?,
+    confirmationResult: CheckoutControllerExampleViewModel.ConfirmationResult?,
+    onSelectPaymentMethod: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    PaymentOptionRow(paymentOption)
+    confirmationResult?.let { result ->
+        Spacer(modifier = Modifier.height(8.dp))
+        val message = when (result) {
+            CheckoutControllerExampleViewModel.ConfirmationResult.Canceled -> "Confirmation canceled"
+            is CheckoutControllerExampleViewModel.ConfirmationResult.Failed -> {
+                "Confirmation failed: ${result.message}"
+            }
+        }
+        Text(text = message, color = Color.Red)
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+    Button(
+        onClick = onSelectPaymentMethod,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text("Select Payment Method")
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+    Button(
+        onClick = onConfirm,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text("Confirm")
     }
 }
 
