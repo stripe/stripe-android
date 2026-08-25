@@ -12,8 +12,8 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherViewModel
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.ApiConfigurationFromNamedModule
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
