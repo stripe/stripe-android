@@ -27,9 +27,12 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.paymentelementtestpages.ManagePage
+import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -40,6 +43,8 @@ import org.robolectric.RobolectricTestRunner
 internal class PaymentOptionsEmbeddedSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
+    private val managePage = ManagePage(composeTestRule)
+    private val verticalModePage = VerticalModePage(composeTestRule)
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -138,6 +143,31 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
+    fun `selecting saved payment method from manage returns to payment options`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+
+        launch(
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = paymentMethods,
+            ),
+        ) { scenario ->
+            verticalModePage.clickViewMore()
+            managePage.waitUntilVisible()
+
+            managePage.selectPaymentMethod(paymentMethods.first().id)
+            composeTestRule.waitForIdle()
+
+            managePage.assertNotVisible()
+            verticalModePage.waitUntilVisible()
+            scenario.onActivity { activity ->
+                assertThat(activity.embeddedNavigator.canGoBack).isFalse()
+                assertThat(activity.embeddedNavigator.screen.value)
+                    .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+            }
+        }
+    }
+
+    @Test
     fun `configuration change keeps saved payment method confirmation screen`() = launch { scenario ->
         val interactor = FakeSavedPaymentMethodConfirmInteractor()
         lateinit var originalScreen: EmbeddedNavigator.Screen.SavedPaymentMethodConfirm
@@ -215,6 +245,28 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         selection: PaymentSelection? = null,
         previousNewSelections: Bundle = Bundle(),
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
+    ) = launch(
+        selection = selection,
+        previousNewSelections = previousNewSelections,
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+        block = block,
+    )
+
+    private fun launch(
+        customerState: CustomerState,
+        block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
+    ) = launch(
+        selection = null,
+        previousNewSelections = Bundle(),
+        customerState = customerState,
+        block = block,
+    )
+
+    private fun launch(
+        selection: PaymentSelection?,
+        previousNewSelections: Bundle,
+        customerState: CustomerState,
+        block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(
@@ -228,7 +280,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
                     selection = selection,
                     previousNewSelections = previousNewSelections,
-                    customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+                    customerState = customerState,
                     promotion = null,
                     launchMode = EmbeddedLaunchMode.PaymentOptions,
                 ),
