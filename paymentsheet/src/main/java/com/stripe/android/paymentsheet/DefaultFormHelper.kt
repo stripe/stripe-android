@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
-import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
@@ -93,35 +92,6 @@ internal class DefaultFormHelper(
                 tapToAddHelper = viewModel.tapToAddHelper,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
-            )
-        }
-
-        fun create(
-            coroutineScope: CoroutineScope,
-            cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-            autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            eventReporter: EventReporter,
-            savedStateHandle: SavedStateHandle,
-            isLinkUI: Boolean = false,
-        ): FormHelper {
-            return DefaultFormHelper(
-                coroutineScope = coroutineScope,
-                linkInlineHandler = LinkInlineHandler.create(),
-                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-                paymentMethodMetadata = paymentMethodMetadata,
-                newPaymentSelectionProvider = { null },
-                linkConfigurationCoordinator = null,
-                selectionUpdater = {},
-                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
-                eventReporter = eventReporter,
-                savedStateHandle = savedStateHandle,
-                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-                isLinkUI = isLinkUI,
-                automaticallyLaunchedCardScanFormDataHelper = null,
-                tapToAddHelper = null,
-                paymentMethodMessagePromotionsHelper = null,
-                isNfcScanningAvailable = null,
             )
         }
     }
