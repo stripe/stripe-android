@@ -1375,11 +1375,11 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = createLinkViewModel()
 
         val linkInlineHandler = LinkInlineHandler.create()
-        val formHelper = DefaultFormHelper.create(
-            viewModel = viewModel,
+        val formHelper = BaseSheetFormHelperFactory(viewModel).create(
             coroutineScope = viewModel.viewModelScope,
             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
             linkInlineHandler = linkInlineHandler,
+            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
             paymentMethodMessagePromotionsHelper = null
         )
 
