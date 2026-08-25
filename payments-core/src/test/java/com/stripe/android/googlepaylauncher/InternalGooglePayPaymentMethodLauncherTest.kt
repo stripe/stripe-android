@@ -9,6 +9,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.FakeActivityResultLauncher
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import org.junit.Test
@@ -76,7 +77,10 @@ class InternalGooglePayPaymentMethodLauncherTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            ),
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -93,7 +97,8 @@ class InternalGooglePayPaymentMethodLauncherTest {
                 cardFundingFilter = DefaultCardFundingFilter,
                 clientAttributionMetadata = null,
                 isElements = true,
-                publishableKey = null,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
                 displayItems = emptyList(),
                 billingEmailOverride = null,
                 shippingAddressParameters = null,
