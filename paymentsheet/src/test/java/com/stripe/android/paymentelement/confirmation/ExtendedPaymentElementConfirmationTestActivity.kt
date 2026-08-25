@@ -19,7 +19,6 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
@@ -225,10 +224,6 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
             publishableKey = config.publishableKey,
             stripeAccountId = config.stripeAccountId,
         )
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providesPublishableKey(config: PaymentConfiguration): () -> String = { config.publishableKey }
 
         @Provides
         @Singleton
