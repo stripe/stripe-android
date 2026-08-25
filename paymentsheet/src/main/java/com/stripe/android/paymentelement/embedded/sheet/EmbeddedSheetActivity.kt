@@ -241,6 +241,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 previousNewSelections = selectionHolder.previousNewSelections,
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
+                checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
                 launchMode = args?.launchMode ?: EmbeddedLaunchMode.Manage,
             )

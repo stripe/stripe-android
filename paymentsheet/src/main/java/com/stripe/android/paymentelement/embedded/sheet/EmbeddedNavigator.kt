@@ -439,6 +439,7 @@ private fun successfulConfirmationResult(
     previousNewSelections = embeddedSelectionHolder.previousNewSelections,
     hasBeenConfirmed = true,
     customerState = customerStateHolder.customer.value,
+    checkoutSessionResponse = null,
     shouldInvokeSelectionCallback = false,
     launchMode = launchMode,
 )
