@@ -38,7 +38,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationMetadata: IntegrationMetadata,
         elementsSession: ElementsSession,
-        isGooglePaySupported: Boolean,
+        isGooglePayReady: Boolean,
         configuration: PaymentElementLoader.Configuration,
         customerMetadata: CustomerMetadata?,
         linkStateResult: LinkStateResult?,
@@ -69,7 +69,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
             )
         )
 
-        put("google_pay_enabled", SimpleBoolean(isGooglePaySupported))
+        put("google_pay_enabled", SimpleBoolean(isGooglePayReady))
 
         put("tap_to_add_available", SimpleBoolean(isTapToAddAvailable))
 

@@ -36,7 +36,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
@@ -264,7 +263,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val lpmRepository: LpmRepository,
     private val logger: Logger,
     private val eventReporter: LoadingEventReporter,
-    private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     private val createLinkState: CreateLinkState,
     private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
@@ -292,7 +290,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode: PaymentElementLoader.InitializationMode,
             integrationMetadata: IntegrationMetadata,
             elementsSession: ElementsSession,
-            isGooglePaySupported: Boolean,
+            isGooglePayReady: Boolean,
             configuration: PaymentElementLoader.Configuration,
             customerMetadata: CustomerMetadata?,
             linkStateResult: LinkStateResult?,
@@ -319,13 +317,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionStarter.start(configuration)
 
-        val isGooglePaySupportedOnDevice = async {
-            durationProvider.measureDuration(
-                DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported
-            ) {
-                isGooglePaySupportedOnDevice()
-            }
-        }
         val isGooglePaySupportedByConfiguration = async {
             durationProvider.measureDuration(
                 DurationProvider.Key.PaymentSheetLoadIsGooglePayReady
@@ -392,9 +383,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val paymentMethodMetadata = async {
             val linkStateResult = linkState.await()
-            val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
-            } ?: false
 
             durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
                 createPaymentMethodMetadata(
@@ -403,7 +391,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     configuration = configuration,
                     linkStateResult = linkStateResult,
                     isGooglePayReady = isGooglePayReady,
-                    isGooglePaySupported = isGooglePaySupported,
                     initializationMode = initializationMode,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
@@ -551,7 +538,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
-        isGooglePaySupported: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
@@ -586,7 +572,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             integrationMetadata = integrationMetadata,
             elementsSession = elementsSession,
-            isGooglePaySupported = isGooglePaySupported,
+            isGooglePayReady = isGooglePayReady,
             configuration = integrationConfiguration,
             customerMetadata = customerMetadata,
             linkStateResult = linkStateResult,
@@ -712,10 +698,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 }
             )
         } ?: false
-    }
-
-    private suspend fun isGooglePaySupportedOnDevice(): Boolean {
-        return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production)
     }
 
     @Suppress("CyclomaticComplexMethod")

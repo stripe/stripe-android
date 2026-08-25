@@ -791,7 +791,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             initializationMode = initializationMode,
             integrationMetadata = integrationMetadata,
             elementsSession = elementsSession,
-            isGooglePaySupported = isGooglePaySupported,
+            isGooglePayReady = isGooglePaySupported,
             configuration = configuration,
             customerMetadata = customerMetadata,
             linkStateResult = linkStateResult,

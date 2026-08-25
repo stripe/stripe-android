@@ -44,7 +44,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
@@ -5035,7 +5034,6 @@ internal class DefaultPaymentElementLoaderTest {
             lpmRepository = LpmRepository(),
             logger = Logger.noop(),
             eventReporter = eventReporter,
-            errorReporter = errorReporter,
             workContext = testDispatcher,
             createLinkState = createLinkState,
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
