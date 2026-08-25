@@ -34,6 +34,23 @@ class NetworkDispatcherTest {
     }
 
     @Test
+    fun `validate succeeds when optional mock remains unconsumed`() = runScenario {
+        enqueueOptional(RequestMatchers.path("/v1/optional"))
+
+        dispatcher.validate()
+    }
+
+    @Test
+    fun `dispatch matches and consumes optional response`() = runScenario {
+        enqueueOptional(RequestMatchers.path("/v1/optional"))
+
+        val response = dispatch(path = "/v1/optional")
+
+        assertThat(response.status).isEqualTo("HTTP/1.1 200 OK")
+        dispatcher.validate()
+    }
+
+    @Test
     fun `validate fails when extra requests were made`() = runScenario {
         enqueue(
             RequestMatchers.path("/v1/confirm"),
@@ -83,6 +100,10 @@ class NetworkDispatcherTest {
 
         fun enqueue(vararg matchers: RequestMatcher) {
             dispatcher.enqueue(*matchers) { it.setBody("{}") }
+        }
+
+        fun enqueueOptional(vararg matchers: RequestMatcher) {
+            dispatcher.enqueueOptional(*matchers) { it.setBody("{}") }
         }
 
         fun dispatch(

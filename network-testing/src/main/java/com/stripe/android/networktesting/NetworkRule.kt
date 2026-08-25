@@ -67,6 +67,21 @@ class NetworkRule private constructor(
         }
     }
 
+    fun enqueueOptional(
+        vararg requestMatcher: RequestMatcher,
+        applyDefaultAuthorization: Boolean = true,
+        ensureResponseIsValidJson: Boolean = true,
+        responseFactory: (MockResponse) -> Unit
+    ) {
+        val matchers = withDefaultAuthorization(requestMatcher, applyDefaultAuthorization)
+        mockWebServer.dispatcher.enqueueOptional(*matchers) { response ->
+            responseFactory(response)
+            if (ensureResponseIsValidJson) {
+                assertResponseBodyIsValidJson(response)
+            }
+        }
+    }
+
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
         applyDefaultAuthorization: Boolean = true,

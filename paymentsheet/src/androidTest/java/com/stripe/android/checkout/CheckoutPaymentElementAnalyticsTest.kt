@@ -13,6 +13,7 @@ import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
+import com.stripe.android.paymentsheet.allowAnalyticsRequest
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -93,6 +94,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
             }
         },
         setup = { controller ->
+            networkRule.allowAnalyticsRequest(
+                eventName = "google_pay.skipped_during_load",
+                productUsage = setOf("Checkout"),
+            )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
                 productUsage = setOf("Checkout"),

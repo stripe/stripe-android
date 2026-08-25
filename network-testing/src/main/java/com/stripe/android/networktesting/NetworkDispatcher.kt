@@ -15,9 +15,21 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
     private val unmatchedRequests: MutableList<UnmatchedRequest> = Collections.synchronizedList(mutableListOf())
 
     fun enqueue(vararg requestMatcher: RequestMatcher, responseFactory: (MockResponse) -> Unit) {
+        enqueue(required = true, requestMatcher = requestMatcher, responseFactory = responseFactory)
+    }
+
+    fun enqueueOptional(vararg requestMatcher: RequestMatcher, responseFactory: (MockResponse) -> Unit) {
+        enqueue(required = false, requestMatcher = requestMatcher, responseFactory = responseFactory)
+    }
+
+    private fun enqueue(
+        required: Boolean,
+        requestMatcher: Array<out RequestMatcher>,
+        responseFactory: (MockResponse) -> Unit,
+    ) {
         validateEnqueueState()
         enqueuedResponses.add(
-            Entry(RequestMatchers.composite(*requestMatcher)) {
+            Entry(RequestMatchers.composite(*requestMatcher), required = required) {
                 val response = MockResponse()
                 response.setResponseCode(200)
                 responseFactory(response)
@@ -58,9 +70,10 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
     fun validate() {
         val exceptionMessage = StringBuilder()
         if (hasResponsesInQueue()) {
+            val requiredResponses = enqueuedResponses.filter(Entry::required)
             exceptionMessage.append(
-                "Mock responses is not empty. Remaining: ${enqueuedResponses.size}.\nRemaining Matchers: " +
-                    remainingMatchersDescription()
+                "Mock responses is not empty. Remaining: ${requiredResponses.size}.\nRemaining Matchers: " +
+                    requiredResponses.joinToString { it.requestMatcher.toString() }
             )
         }
         addExtraRequestsToExceptionMessage(exceptionMessage)
@@ -83,20 +96,16 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
 
     private fun hasResponsesInQueue(): Boolean {
         if (validationTimeout == null) {
-            return enqueuedResponses.size != 0
+            return enqueuedResponses.any(Entry::required)
         }
 
         var timeWaited = 0.milliseconds
         val sleepDuration = 100.milliseconds
-        while (enqueuedResponses.size != 0 && timeWaited < validationTimeout) {
+        while (enqueuedResponses.any(Entry::required) && timeWaited < validationTimeout) {
             Thread.sleep(sleepDuration.inWholeMilliseconds)
             timeWaited = timeWaited.plus(sleepDuration)
         }
-        return enqueuedResponses.size != 0
-    }
-
-    private fun remainingMatchersDescription(): String {
-        return enqueuedResponses.joinToString { it.requestMatcher.toString() }
+        return enqueuedResponses.any(Entry::required)
     }
 
     private fun extraRequestDescriptions(): String {
@@ -162,6 +171,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
 
 private class Entry(
     val requestMatcher: RequestMatcher,
+    val required: Boolean = true,
     val responseFactory: (TestRecordedRequest) -> MockResponse
 )
 

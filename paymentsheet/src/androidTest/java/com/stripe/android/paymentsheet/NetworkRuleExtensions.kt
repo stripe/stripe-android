@@ -21,3 +21,17 @@ internal fun NetworkRule.validateAnalyticsRequest(
         response.status = "HTTP/1.1 200 OK"
     }
 }
+
+internal fun NetworkRule.allowAnalyticsRequest(
+    eventName: String,
+    productUsage: Set<String>,
+) {
+    enqueueOptional(
+        host("q.stripe.com"),
+        method("GET"),
+        analyticsPayloadField("event", eventName),
+        analyticsPayloadField("product_usage", productUsage.joinToString(",")),
+    ) { response ->
+        response.status = "HTTP/1.1 200 OK"
+    }
+}
