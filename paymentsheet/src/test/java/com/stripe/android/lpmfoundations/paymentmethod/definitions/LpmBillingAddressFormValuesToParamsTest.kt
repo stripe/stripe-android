@@ -3,7 +3,9 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -43,6 +45,21 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     @Test
     fun `has unique configs`() {
         assertThat(lpmBillingAddressTestConfigurations).containsNoDuplicates()
+    }
+
+    @Test
+    fun `specialized flow definitions remain registered`() {
+        assertThat(PaymentMethodRegistry.all).containsAtLeastElementsIn(specializedFlowDefinitions)
+    }
+
+    @Test
+    fun `covers every registered LPM without a specialized billing flow`() {
+        val expected = PaymentMethodRegistry.all - specializedFlowDefinitions
+        val covered = lpmBillingAddressTestConfigurations
+            .map { it.paymentMethodType }
+            .distinct()
+
+        assertThat(covered).containsExactlyElementsIn(expected.map { it.type })
     }
 
     @Test
@@ -121,6 +138,13 @@ internal class LpmBillingAddressFormValuesToParamsTest {
         )
     }
 }
+
+// These definitions render or collect billing details through specialized flows outside the shared LPM form harness.
+private val specializedFlowDefinitions: Set<PaymentMethodDefinition> = setOf(
+    CardDefinition,
+    InstantDebitsDefinition,
+    UsBankAccountDefinition,
+)
 
 internal data class LpmBillingAddressFormValuesToParamsTestCase(
     val name: String,
