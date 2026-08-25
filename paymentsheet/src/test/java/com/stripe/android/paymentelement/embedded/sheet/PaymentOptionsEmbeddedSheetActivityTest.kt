@@ -36,9 +36,9 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
