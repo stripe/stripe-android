@@ -1,7 +1,7 @@
 package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -267,8 +267,10 @@ class CustomerSessionPaymentMethodDataSourceTest {
             elementsSessionManager = elementsSessionManager,
             customerRepository = customerRepository,
             errorReporter = errorReporter,
-            paymentConfiguration = { PaymentConfiguration("pk_test") },
             workContext = coroutineContext,
+            apiConfigProvider = {
+                ApiConfiguration.State("pk_123", null)
+            }
         )
     }
 }

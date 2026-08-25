@@ -30,7 +30,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -209,7 +208,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = any(),
-            stripeAccountId = isNull(),
+            stripeAccountId = any()
         )
     }
 
@@ -261,7 +260,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = eq(false),
-            stripeAccountId = isNull(),
+            stripeAccountId = any()
         )
     }
 
@@ -780,8 +779,7 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
-            paymentConfiguration = { PaymentConfiguration("pk_test") },
-            workContext = testDispatcher
+            workContext = testDispatcher,
         )
     }
 }
