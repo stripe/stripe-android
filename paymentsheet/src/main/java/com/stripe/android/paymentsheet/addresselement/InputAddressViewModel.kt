@@ -13,6 +13,7 @@ import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +28,7 @@ internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
     private val eventReporter: AddressLauncherEventReporter,
+    private val dismissalCoordinator: AddressElementDismissalCoordinator,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
 ) : ViewModel(), AutocompleteAddressInteractor {
@@ -43,6 +45,12 @@ internal class InputAddressViewModel @Inject constructor(
     private val initialShippingAddress = unparsedInitialShippingAddress?.let {
         addressFormatParser.parse(it)
     }
+
+    private val initialAddress = unparsedInitialShippingAddress ?: unparsedInitialBillingAddress
+    private val normalizedInitialFormValues = addressFormatParser
+        .parse(initialAddress ?: AddressDetails())
+        .mapValues { it.value.orEmpty() }
+    private val initialCheckboxChecked = unparsedInitialShippingAddress?.isCheckboxSelected ?: false
 
     private val initialInputsAreTheSame = initialBillingAddress == initialShippingAddress
 
@@ -113,6 +121,8 @@ internal class InputAddressViewModel @Inject constructor(
         config = args.config,
     )
 
+    val isDirty: StateFlow<Boolean> = dismissalCoordinator.isDirty
+
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
 
@@ -154,8 +164,10 @@ internal class InputAddressViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch {
+        // Register before returning so dirty tracking is active before the UI can accept input.
+        viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
             addressFormController.uncompletedFormValues.collectLatest { formValues ->
+                updateDirtyState(formValues)
                 val currentBillingSameAsShippingState = _shippingSameAsBillingState.value
 
                 if (currentBillingSameAsShippingState is ShippingSameAsBillingState.Show) {
@@ -180,6 +192,8 @@ internal class InputAddressViewModel @Inject constructor(
         unparsedInitialShippingAddress?.isCheckboxSelected?.let {
             _checkboxChecked.value = it
         }
+
+        updateDirtyState(addressFormController.uncompletedFormValues.value)
     }
 
     override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
@@ -238,6 +252,7 @@ internal class InputAddressViewModel @Inject constructor(
                 editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
+        dismissalCoordinator.markSaved()
         navigator.dismiss(
             AddressLauncherResult.Succeeded(addressDetails)
         )
@@ -263,6 +278,15 @@ internal class InputAddressViewModel @Inject constructor(
 
     fun clickCheckbox(newValue: Boolean) {
         _checkboxChecked.value = newValue
+        updateDirtyState(addressFormController.uncompletedFormValues.value)
+    }
+
+    private fun updateDirtyState(formValues: Map<IdentifierSpec, FormFieldEntry>) {
+        val currentValues = formValues.mapValues { it.value.value.orEmpty() }
+        dismissalCoordinator.setDirty(
+            currentValues != normalizedInitialFormValues ||
+                _checkboxChecked.value != initialCheckboxChecked
+        )
     }
 
     fun onEnterManually() {

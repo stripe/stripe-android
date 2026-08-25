@@ -29,8 +29,9 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
         dismissCalls.add(Call.Dismiss(result))
     }
 
-    override fun onBack() {
+    override fun onBack(): Boolean {
         onBackCalls.add(Call.OnBack)
+        return true
     }
 
     sealed interface Call {

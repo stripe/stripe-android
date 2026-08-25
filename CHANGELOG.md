@@ -6,6 +6,9 @@ NEXT_VERSION_BUMP: PATCH
 ### PaymentSheet
 * [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
 
+### AddressElement
+* [CHANGED] Address Element now asks customers to confirm before discarding unsaved address changes.
+
 ## 23.17.0 - 2026-08-24
 
 ### PaymentSheet
