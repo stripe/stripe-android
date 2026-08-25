@@ -22,7 +22,7 @@ internal class TapToAddConnectionStarterTest {
             coroutineContext = testDispatcher,
         )
 
-        assertThat(starter.isSupported("pk_test_123", false)).isTrue()
+        assertThat(starter.isSupported).isTrue()
     }
 
     @Test
@@ -34,7 +34,7 @@ internal class TapToAddConnectionStarterTest {
             coroutineContext = testDispatcher,
         )
 
-        assertThat(starter.isSupported("pk_test_123", false)).isFalse()
+        assertThat(starter.isSupported).isFalse()
     }
 
     @Test
@@ -50,15 +50,13 @@ internal class TapToAddConnectionStarterTest {
             merchantDisplayName = "Books & Things",
         )
 
-        starter.start(commonConfiguration, "pk_test_123", false)
+        starter.start(commonConfiguration)
         advanceUntilIdle()
 
         assertThat(manager.connectCalls.awaitItem()).isEqualTo(
             FakeTapToAddConnectionManager.ConnectCall(
                 config = TapToAddConnectionManager.ConnectionConfig(
                     merchantDisplayName = "Books & Things",
-                    publishableKey = "pk_test_123",
-                    isLiveMode = false,
                 ),
             )
         )
