@@ -200,16 +200,6 @@ internal interface LpmNetworkTestModule {
         }
 
         @Provides
-        fun providesApiConfigurationProvider(
-            paymentConfiguration: PaymentConfiguration,
-        ): () -> ApiConfiguration.State = {
-            ApiConfiguration.State(
-                publishableKey = paymentConfiguration.publishableKey,
-                stripeAccountId = paymentConfiguration.stripeAccountId,
-            )
-        }
-
-        @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = ENABLE_LOGGING_VALUE
 
