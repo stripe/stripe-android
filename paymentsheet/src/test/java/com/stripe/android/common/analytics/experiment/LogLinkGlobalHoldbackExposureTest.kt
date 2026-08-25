@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.CommonConfigurationFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SESSION
 import com.stripe.android.link.TestFactory.PUBLISHABLE_KEY
@@ -76,6 +77,7 @@ class LogLinkGlobalHoldbackExposureTest {
             retrieveCustomerEmail = retrieveCustomerEmail,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             mode = EventReporter.Mode.Complete,
+            apiConfigProvider = { ApiConfiguration.State(PUBLISHABLE_KEY, null) },
         )
     }
 
