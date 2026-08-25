@@ -308,9 +308,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
-    ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
+    ): Result<PaymentElementLoader.State> {
         val configuration = integrationConfiguration.commonConfiguration
         val apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration)
+
+        return workContext.runCatching(
+            onFailure = { error -> reportFailedLoad(error, apiConfiguration.publishableKey) }
+        ) {
         eventReporter.onInit(apiConfiguration.publishableKey)
         // Validate configuration before loading
         initializationMode.validate()
@@ -483,7 +487,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = state.paymentMethodMetadata,
         )
 
-        return@runCatching state
+            return@runCatching state
+        }
     }
 
     private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
@@ -876,11 +881,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun reportFailedLoad(
         error: Throwable,
+        publishableKey: String,
     ) {
         logger.error("Failure loading PaymentSheetState", error)
-        val publishableKey = runCatching {
-            apiConfigurationResolver.resolve(null).publishableKey
-        }.getOrDefault("")
         eventReporter.onLoadFailed(error, publishableKey)
     }
 
