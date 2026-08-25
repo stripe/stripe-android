@@ -29,8 +29,6 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
-                publishableKey = "pk_test_123",
-                isLiveMode = false,
             )
         ).isTrue()
     }
@@ -49,8 +47,6 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
-                publishableKey = "pk_test_123",
-                isLiveMode = false,
             )
         ).isFalse()
     }
@@ -69,8 +65,6 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
-                publishableKey = "pk_test_123",
-                isLiveMode = false,
             )
         ).isFalse()
     }
@@ -89,8 +83,6 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = null,
-                publishableKey = "pk_test_123",
-                isLiveMode = false,
             )
         ).isFalse()
     }

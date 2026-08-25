@@ -4,6 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -818,6 +819,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
                 linkBrand = LinkBrand.Link,
+                apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             ),
             userInput = userInput,
         )

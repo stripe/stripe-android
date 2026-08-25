@@ -159,10 +159,14 @@ internal suspend fun createIntentConfirmationInterceptor(
                     analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                         context = ApplicationProvider.getApplicationContext(),
-                        publishableKey = "pk",
+                        publishableKeyProvider = { "pk" },
                     ),
-                    publishableKeyProvider = { "pk" },
-                    stripeAccountIdProvider = { null },
+                    apiConfigurationProvider = {
+                        ApiConfiguration.State(
+                            publishableKey = "pk",
+                            stripeAccountId = null,
+                        )
+                    },
                 )
                 return CheckoutSessionConfirmationInterceptor(
                     integrationMetadata = integrationMetadata,
