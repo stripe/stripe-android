@@ -11,6 +11,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.countryElements
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_INTEGRATION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
@@ -44,7 +45,6 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
@@ -627,7 +627,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
+    fun `formElementsForCode creates one country field in the Klarna address`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -645,15 +645,7 @@ internal class PaymentMethodMetadataTest {
             uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
         )!!
 
-        val countrySection = formElement[4] as SectionElement
-        val countryElement = countrySection.fields[0] as CountryElement
-        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
-
-        val addressSection = formElement[5] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-        val addressIdentifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element doesn't contain country.
-        assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
+        assertThat(formElement.countryElements()).hasSize(1)
     }
 
     @Test

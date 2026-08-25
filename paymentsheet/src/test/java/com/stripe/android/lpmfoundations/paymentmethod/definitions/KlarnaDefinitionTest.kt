@@ -191,12 +191,11 @@ class KlarnaDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(4)
+        assertThat(formElements).hasSize(3)
 
         checkKlarnaHeaderText(formElements, 0)
         checkEmailField(formElements, 1)
-        checkCountryField(formElements, 2)
-        checkBillingField(formElements, 3)
+        checkBillingField(formElements, 2)
     }
 
     @Test
@@ -215,15 +214,14 @@ class KlarnaDefinitionTest {
 
         val formElements = KlarnaDefinition.formElements(metadata = metadata)
 
-        assertThat(formElements).hasSize(7)
+        assertThat(formElements).hasSize(6)
 
         checkKlarnaHeaderText(formElements, 0)
         checkNameField(formElements, 1)
         checkEmailField(formElements, 2)
         checkPhoneField(formElements, 3)
-        checkCountryField(formElements, 4)
-        checkBillingField(formElements, 5)
-        checkMandateField(formElements, metadata, 6)
+        checkBillingField(formElements, 4)
+        checkMandateField(formElements, metadata, 5)
     }
 
     @Test

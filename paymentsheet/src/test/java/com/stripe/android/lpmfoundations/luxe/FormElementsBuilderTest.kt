@@ -185,25 +185,31 @@ class FormElementsBuilderTest {
     }
 
     @Test
-    fun `full address collection adds country requirement and address fields with country hidden`() {
+    fun `full address collection uses country requirement in address fields`() {
         val formElements = FormElementsBuilder(
             arguments(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    allowedCountries = setOf("US", "CA"),
-                )
+                    allowedCountries = setOf("US"),
+                ),
+                initialValues = mapOf(IdentifierSpec.Country to "US"),
             )
         )
             .requireCountry(
-                allowedCountryCodes = setOf("US", "CA"),
-                initialValue = "US",
+                allowedCountryCodes = setOf("BS", "CA"),
+                initialValue = "BS",
             )
             .build()
 
-        assertThat(formElements).hasSize(2)
-        formElements.countryElement()
-        val addressElement = (formElements[1] as SectionElement).fields.single() as AddressElement
-        assertThat(addressElement.fields.value).doesNotContain(addressElement.countryElement)
+        assertThat(formElements).hasSize(1)
+        val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "🇧🇸 Bahamas",
+            "🇨🇦 Canada",
+        )
+        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("BS")
+        assertThat(addressElement.fields.value).contains(addressElement.countryElement)
+        assertThat(formElements.countryElements()).hasSize(1)
     }
 
     @Test
@@ -475,5 +481,17 @@ class FormElementsBuilderTest {
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             linkInlineHandler = null,
         )
+    }
+}
+
+internal fun List<FormElement>.countryElements(): List<CountryElement> {
+    return filterIsInstance<SectionElement>().flatMap { section ->
+        section.fields.mapNotNull { field ->
+            when (field) {
+                is CountryElement -> field
+                is AddressElement -> field.countryElement
+                else -> null
+            }
+        }
     }
 }

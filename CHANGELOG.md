@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
+
 ## 23.17.0 - 2026-08-24
 
 ### PaymentSheet
