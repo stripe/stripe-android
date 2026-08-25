@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -217,6 +218,16 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
             publishableKey = "pk_123",
             stripeAccountId = null,
         )
+
+        @Provides
+        fun providesApiConfigurationProvider(
+            paymentConfiguration: PaymentConfiguration,
+        ): () -> ApiConfiguration.State = {
+            ApiConfiguration.State(
+                publishableKey = paymentConfiguration.publishableKey,
+                stripeAccountId = paymentConfiguration.stripeAccountId,
+            )
+        }
 
         @Provides
         @Named(PUBLISHABLE_KEY)
