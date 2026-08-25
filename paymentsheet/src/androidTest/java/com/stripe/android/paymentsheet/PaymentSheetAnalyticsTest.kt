@@ -29,6 +29,7 @@ import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,6 +67,14 @@ internal class PaymentSheetAnalyticsTest {
         merchantDisplayName = "Example, Inc.",
         paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     )
+
+    @Before
+    fun before() {
+        networkRule.allowAnalyticsRequest(
+            eventName = "google_pay.skipped_during_load",
+            productUsage = setOf("PaymentSheet"),
+        )
+    }
 
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(

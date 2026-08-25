@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,6 +40,14 @@ class CustomPaymentMethodsAnalyticsTest {
     }
 
     private val page = PaymentSheetPage(testRules.compose)
+
+    @Before
+    fun before() {
+        networkRule.allowAnalyticsRequest(
+            eventName = "google_pay.skipped_during_load",
+            productUsage = setOf("PaymentSheet"),
+        )
+    }
 
     @Test
     fun testSuccessful() = runPaymentSheetTest(

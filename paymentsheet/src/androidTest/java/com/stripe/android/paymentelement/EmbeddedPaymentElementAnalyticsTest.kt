@@ -20,6 +20,7 @@ import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.allowAnalyticsRequest
 import com.stripe.android.paymentsheet.clientAttributionMetadataParamsForDeferredIntent
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -59,6 +60,10 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
     @Before
     fun before() {
+        networkRule.allowAnalyticsRequest(
+            eventName = "google_pay.skipped_during_load",
+            productUsage = setOf("EmbeddedPaymentElement"),
+        )
         validateAnalyticsRequest(eventName = "mc_embedded_init")
     }
 

@@ -71,6 +71,10 @@ internal class FlowControllerAnalyticsTest {
 
     @Before
     fun before() {
+        networkRule.allowAnalyticsRequest(
+            eventName = "google_pay.skipped_during_load",
+            productUsage = setOf("PaymentSheet.FlowController"),
+        )
         validateAnalyticsRequest(eventName = "mc_custom_init")
     }
 
