@@ -11,6 +11,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -33,6 +34,7 @@ class CustomerSheetTest {
     @Before
     fun setup() {
         val appContext = ApplicationProvider.getApplicationContext<Application>()
+        PaymentConfiguration.init(appContext, "pk_test_123")
 
         val activityInfo = ActivityInfo().apply {
             name = TestActivity::class.java.name

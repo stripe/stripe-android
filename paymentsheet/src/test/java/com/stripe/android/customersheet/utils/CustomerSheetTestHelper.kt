@@ -83,6 +83,10 @@ internal interface CustomerSheetTestHelper {
             publishableKey = "pk_test_123",
             stripeAccountId = null,
         ),
+        apiConfiguration: ApiConfiguration.State = ApiConfiguration.State(
+            publishableKey = paymentConfiguration.publishableKey,
+            stripeAccountId = paymentConfiguration.stripeAccountId,
+        ),
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
             merchantDisplayName = "Example",
             googlePayEnabled = isGooglePayAvailable,
@@ -128,7 +132,10 @@ internal interface CustomerSheetTestHelper {
             configuration = configuration,
             integrationType = integrationType,
             statusBarColor = null,
-            paymentConfiguration = PaymentConfiguration(if (isLiveMode) "pk_live" else "pk_test"),
+            paymentConfiguration = PaymentConfiguration(
+                publishableKey = if (isLiveMode) "pk_live" else apiConfiguration.publishableKey,
+                stripeAccountId = apiConfiguration.stripeAccountId,
+            ),
             logger = Logger.noop(),
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }
