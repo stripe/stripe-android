@@ -136,7 +136,7 @@ internal class OnrampInteractor @Inject constructor(
         }
 
         PaymentConfiguration.init(
-            context = application,
+            context = application.applicationContext,
             publishableKey = configurationState.publishableKey,
         )
         val linkResult = linkController.configure(

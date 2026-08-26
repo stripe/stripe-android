@@ -797,6 +797,7 @@ class OnrampInteractorTest {
     @Test
     fun uncategorizedExceptionFallsBackToSafeUserMessage() = runTest {
         val application = mock<Application> {
+            on { applicationContext } doReturn RuntimeEnvironment.getApplication()
             on { packageName } doReturn "com.example.app"
             on { getString(any()) } doReturn "Something went wrong. Please try again later."
         }
@@ -847,6 +848,7 @@ class OnrampInteractorTest {
     @Test
     fun appAttestationExceptionUsesSingleLocalizedFallbackUserMessage() = runTest {
         val application = mock<Application> {
+            on { applicationContext } doReturn RuntimeEnvironment.getApplication()
             on { packageName } doReturn "com.example.app"
             on { getString(any()) } doReturn
                 "This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists."
@@ -1974,6 +1976,7 @@ class OnrampInteractorTest {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 
         return mock {
+            on { applicationContext } doReturn runtimeApplication
             on { packageName } doReturn runtimeApplication.packageName
             on { getString(R.string.stripe_onramp_default_api_error_user_message) } doReturn
                 defaultApiErrorUserMessage
