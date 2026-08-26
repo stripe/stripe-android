@@ -55,12 +55,13 @@ internal class DefaultPaymentOptionFactory @Inject constructor(
     }
 }
 
-internal fun shouldUseDarkThemeIcon(context: Context): Boolean {
+private fun useDarkThemeIcon(context: Context): Boolean {
     return context.isSystemDarkTheme() ||
         StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }
 
-internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(context: Context): Boolean {
+internal fun PaymentSheet.Appearance?.shouldUseDarkThemeIcon(context: Context): Boolean {
+    if (this == null) return useDarkThemeIcon(context)
     return shouldUseDarkThemeIcon(context.isSystemDarkTheme())
 }
 
