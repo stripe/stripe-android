@@ -23,6 +23,7 @@ import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
+import com.stripe.android.link.theme.isDarkTheme
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.link.ui.wallet.makeFallbackCardName
@@ -147,15 +148,20 @@ internal class LinkControllerInteractor @Inject constructor(
 
     val selectedPaymentMethodPreview: StateFlow<LinkController.PaymentMethodPreview?> =
         _state.mapAsStateFlow { state ->
+            val isDarkTheme = state.linkConfiguration?.linkAppearance?.style.isDarkTheme(
+                isSystemDarkTheme = application.isSystemDarkTheme()
+            )
             state.selectedPaymentMethod?.details?.toPreview(
                 context = application,
                 iconLoader = cachedIconLoader,
                 reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
+                isDarkTheme = isDarkTheme
             )
         }
 
     fun state(context: Context): StateFlow<LinkController.State> {
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
+            val isDarkTheme = state.linkConfiguration?.linkAppearance?.style.isDarkTheme(context.isSystemDarkTheme())
             LinkController.State(
                 elementsSessionId = state.linkConfiguration?.elementsSessionId,
                 internalLinkAccount = account,
@@ -165,6 +171,7 @@ internal class LinkControllerInteractor @Inject constructor(
                         context = context,
                         iconLoader = cachedIconLoader,
                         reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
+                        isDarkTheme = isDarkTheme
                     ),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
@@ -878,6 +885,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     context: Context,
     iconLoader: PaymentSelection.IconLoader,
     reduceLinkBranding: Boolean,
+    isDarkTheme: Boolean,
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = buildString {
@@ -913,7 +921,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
                 drawableResourceIdNight = null,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
-                useDarkThemeIcon = null,
+                useDarkThemeIcon = isDarkTheme,
             )
         },
         label = label,

@@ -47,9 +47,7 @@ internal class PaymentOptionFactory @Inject constructor(
 }
 
 internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(context: Context): Boolean {
-    val isDark = themeMode.isDarkTheme(context.isSystemDarkTheme())
-    val componentColor = Color(getColors(isDark).component)
-    return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
+    return themeMode.isDarkTheme(context.isSystemDarkTheme())
 }
 
 internal val PaymentSelection.shippingDetails: AddressDetails?

@@ -131,7 +131,8 @@ internal class PaymentSelectionIconLoaderTest {
         darkIconUrl = null,
         iconRes = iconRes,
         iconResNight = null,
-        useDarkThemeIcon = null,
+        // Should we add tests fpr this?
+        useDarkThemeIcon = false,
         block = block,
     )
 
@@ -156,7 +157,7 @@ internal class PaymentSelectionIconLoaderTest {
         darkIconUrl: String?,
         iconRes: Int?,
         iconResNight: Int?,
-        useDarkThemeIcon: Boolean?,
+        useDarkThemeIcon: Boolean,
         block: Scenario.() -> Unit,
     ) = runTest(testDispatcher) {
         val imageLoader = FakeStripeImageLoader(

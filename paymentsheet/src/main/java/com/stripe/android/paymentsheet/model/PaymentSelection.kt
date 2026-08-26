@@ -1,15 +1,13 @@
 package com.stripe.android.paymentsheet.model
 
-import android.content.res.Configuration
 import android.content.res.Resources
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.graphics.luminance
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toDrawable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
@@ -33,13 +31,11 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
-import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLinkIconArrow
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -281,34 +277,21 @@ internal sealed class PaymentSelection : Parcelable {
         private val resources: Resources,
         private val imageLoader: StripeImageLoader,
     ) {
-        private fun isDarkTheme(): Boolean {
-            return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
-                Configuration.UI_MODE_NIGHT_YES ||
-                isCustomDarkTheme()
-        }
-
-        /**
-         * Some users implement a custom dark mode and will pass dark colors into colors light.
-         */
-        private fun isCustomDarkTheme(): Boolean {
-            return StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
-        }
 
         suspend fun load(
             @DrawableRes drawableResourceId: Int,
             @DrawableRes drawableResourceIdNight: Int?,
             lightThemeIconUrl: String?,
             darkThemeIconUrl: String?,
-            useDarkThemeIcon: Boolean?,
+            useDarkThemeIcon: Boolean,
         ): Drawable {
-            val shouldUseDarkThemeIcon = useDarkThemeIcon ?: isDarkTheme()
 
             fun loadResource(): Drawable {
                 @Suppress("DEPRECATION")
                 return runCatching {
                     ResourcesCompat.getDrawable(
                         resources,
-                        if (shouldUseDarkThemeIcon) {
+                        if (useDarkThemeIcon) {
                             drawableResourceIdNight ?: drawableResourceId
                         } else {
                             drawableResourceId
@@ -319,14 +302,12 @@ internal sealed class PaymentSelection : Parcelable {
             }
 
             suspend fun loadIcon(url: String): Drawable {
-                return imageLoader.load(url).getOrNull()?.let {
-                    BitmapDrawable(resources, it)
-                } ?: loadResource()
+                return imageLoader.load(url).getOrNull()?.toDrawable(resources) ?: loadResource()
             }
 
             // If the payment option has an icon URL, we prefer it.
             // Some payment options don't have an icon URL, and are loaded locally via resource.
-            return if (shouldUseDarkThemeIcon && darkThemeIconUrl != null) {
+            return if (useDarkThemeIcon && darkThemeIconUrl != null) {
                 loadIcon(darkThemeIconUrl)
             } else if (lightThemeIconUrl != null) {
                 loadIcon(lightThemeIconUrl)
