@@ -15,12 +15,14 @@ internal object FinancialConnectionsSheetConfigurationModule {
 
     @Provides
     @ActivityRetainedScope
-    fun providesApiConfigurationState(
+    fun providesApiConfigurationStateProvider(
         configuration: FinancialConnectionsSheetConfiguration
-    ): ApiConfiguration.State = ApiConfiguration.State(
-        publishableKey = configuration.publishableKey,
-        stripeAccountId = configuration.stripeAccountId,
-    )
+    ): () -> ApiConfiguration.State = {
+        ApiConfiguration.State(
+            publishableKey = configuration.publishableKey,
+            stripeAccountId = configuration.stripeAccountId,
+        )
+    }
 
     @Provides
     @Named(ENABLE_LOGGING)
