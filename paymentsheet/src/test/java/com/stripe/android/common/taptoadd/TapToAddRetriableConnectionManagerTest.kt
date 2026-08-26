@@ -11,16 +11,20 @@ import kotlin.time.Duration
 
 internal class TapToAddRetriableConnectionManagerTest {
     private val testConnectionConfig =
-        TapToAddConnectionManager.ConnectionConfig(merchantDisplayName = "Test Merchant")
+        TapToAddConnectionManager.ConnectionConfig(
+            merchantDisplayName = "Test Merchant",
+            publishableKey = "pk_test_123",
+            isLiveMode = false,
+        )
 
     @Test
     fun `isSupported is true when inner manager's isSupported is true`() = runScenario(isSupported = true) {
-        assertThat(retryConnectionManager.isSupported).isTrue()
+        assertThat(retryConnectionManager.isSupported("pk_test_123", false)).isTrue()
     }
 
     @Test
     fun `isSupported is false when inner manager's isSupported is false`() = runScenario(isSupported = false) {
-        assertThat(retryConnectionManager.isSupported).isFalse()
+        assertThat(retryConnectionManager.isSupported("pk_test_123", false)).isFalse()
     }
 
     @Test

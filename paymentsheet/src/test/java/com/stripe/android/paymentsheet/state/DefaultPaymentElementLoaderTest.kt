@@ -705,7 +705,10 @@ internal class DefaultPaymentElementLoaderTest {
                 ).getOrThrow()
 
                 assertThat(startCalls.awaitItem()).isEqualTo(
-                    FakeTapToAddConnectionStarter.StartCall(config = config.asCommonConfiguration())
+                    FakeTapToAddConnectionStarter.StartCall(
+                        config = config.asCommonConfiguration(),
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    )
                 )
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isTrue()
@@ -752,7 +755,10 @@ internal class DefaultPaymentElementLoaderTest {
                 ).getOrThrow()
 
                 assertThat(startCalls.awaitItem()).isEqualTo(
-                    FakeTapToAddConnectionStarter.StartCall(config = config.asCommonConfiguration())
+                    FakeTapToAddConnectionStarter.StartCall(
+                        config = config.asCommonConfiguration(),
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    )
                 )
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isFalse()
