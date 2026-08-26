@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -22,6 +23,7 @@ import com.stripe.android.testing.FakeStripeImageLoader
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.Test
 
 @OptIn(CheckoutSessionPreview::class)
@@ -150,6 +152,32 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     }
 
     @Test
+    @Config(qualifiers = "notnight")
+    fun `imageLoader uses light icon on light system`() = runScenario {
+        val option = factory.create(
+            selection = customPaymentMethod,
+            paymentMethodMetadata = metadata,
+        )
+
+        option?.imageLoader?.invoke()
+
+        assertThat(imageLoader.awaitLoadCall().url).isEqualTo(LIGHT_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `imageLoader uses dark icon on dark system`() = runScenario {
+        val option = factory.create(
+            selection = customPaymentMethod,
+            paymentMethodMetadata = metadata,
+        )
+
+        option?.imageLoader?.invoke()
+
+        assertThat(imageLoader.awaitLoadCall().url).isEqualTo(DARK_ICON_URL)
+    }
+
+    @Test
     fun `create uses link account brand for saved Link passthrough card label`() = runScenario(
         linkAccount = LinkAccount(
             TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
@@ -174,11 +202,12 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
+        val imageLoader = FakeStripeImageLoader()
         Scenario(
             factory = DefaultCheckoutPaymentOptionDisplayDataFactory(
                 iconLoader = PaymentSelection.IconLoader(
                     resources = context.resources,
-                    imageLoader = FakeStripeImageLoader(),
+                    imageLoader = imageLoader,
                 ),
                 cardArtDrawableLoader = { cardArt },
                 context = context,
@@ -188,12 +217,28 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
             ),
             metadata = metadata,
             cardArt = cardArt,
-        ).block()
+            imageLoader = imageLoader,
+        ).apply { block() }
+        imageLoader.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val factory: DefaultCheckoutPaymentOptionDisplayDataFactory,
         val metadata: PaymentMethodMetadata,
         val cardArt: Drawable?,
+        val imageLoader: FakeStripeImageLoader,
     )
+
+    private companion object {
+        const val LIGHT_ICON_URL = "light_icon_url"
+        const val DARK_ICON_URL = "dark_icon_url"
+
+        val customPaymentMethod = PaymentSelection.CustomPaymentMethod(
+            id = "cpm_123",
+            billingDetails = null,
+            label = "Custom".resolvableString,
+            lightThemeIconUrl = LIGHT_ICON_URL,
+            darkThemeIconUrl = DARK_ICON_URL,
+        )
+    }
 }
