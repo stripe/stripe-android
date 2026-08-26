@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.model.label
 import com.stripe.android.paymentsheet.model.lightThemeIconUrl
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.model.shouldUseDarkThemeIcon
 import javax.inject.Inject
 
 @OptIn(CheckoutSessionPreview::class)
@@ -64,7 +65,7 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
-                    useDarkThemeIcon = null,
+                    useDarkThemeIcon = shouldUseDarkThemeIcon(context),
                 )
             },
             label = selection.label(
