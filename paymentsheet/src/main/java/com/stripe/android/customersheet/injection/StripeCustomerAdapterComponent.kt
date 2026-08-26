@@ -51,11 +51,6 @@ internal interface StripeCustomerAdapterComponent {
 internal interface StripeCustomerAdapterModule {
     companion object {
         @Provides
-        fun provideApiConfigurationState(
-            apiConfigurationProvider: () -> ApiConfiguration.State
-        ): ApiConfiguration.State = apiConfigurationProvider()
-
-        @Provides
         fun providePrefsRepositoryFactory(
             appContext: Context,
             @IOContext workContext: CoroutineContext
