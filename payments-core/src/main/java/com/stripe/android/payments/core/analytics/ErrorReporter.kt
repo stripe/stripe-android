@@ -496,16 +496,13 @@ internal interface DefaultErrorReporterModule {
         }
 
         @Provides
-        fun provideApiConfigurationState(publishableKeyProvider: () -> String): ApiConfiguration.State {
-            return ApiConfiguration.State(
+        fun provideApiConfigurationProvider(
+            publishableKeyProvider: () -> String
+        ): () -> ApiConfiguration.State = {
+            ApiConfiguration.State(
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = null,
             )
         }
-
-        @Provides
-        fun provideApiConfigurationStateProvider(
-            state: ApiConfiguration.State
-        ): () -> ApiConfiguration.State = { state }
     }
 }
