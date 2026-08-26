@@ -67,6 +67,40 @@ private val cashAppPayFullExpectedParams = LpmBillingAddressFormParams(
     extraParams = null,
 )
 
+private val cashAppPayAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.CashAppPay.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line1 = "510 Townsend St",
+                line2 = null,
+                city = "San Francisco",
+                state = "CA",
+                country = "US",
+                postalCode = "94103",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.CashAppPay.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "line1" to "510 Townsend St",
+                    "city" to "San Francisco",
+                    "state" to "CA",
+                    "country" to "US",
+                    "postal_code" to "94103",
+                ),
+            ),
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
 private val cashAppPayTypeOnlyWithMandateExpectedParams = LpmBillingAddressFormParams(
     createParams = PaymentMethodCreateParams.createWithOverride(
         code = PaymentMethod.Type.CashAppPay.code,
@@ -140,6 +174,17 @@ internal val cashAppPayTestCases = listOf(
         ),
         rawValues = cashAppPayRawValues,
         expectedParams = cashAppPayTypeOnlyExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Cash App Pay AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.CashAppPay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = cashAppPayRawValues,
+        expectedParams = cashAppPayAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Cash App Pay Full PaymentIntent automatic terms",

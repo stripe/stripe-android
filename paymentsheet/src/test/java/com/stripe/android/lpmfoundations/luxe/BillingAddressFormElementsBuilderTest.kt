@@ -12,12 +12,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +29,100 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class BillingAddressFormElementsBuilderTest {
+    @Test
+    fun `full address takes precedence over automatic tax`() {
+        val formElements = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+                requiresBillingAddressForAutomaticTax = true,
+            ),
+            requireBillingAddressCollection = true,
+        ).build()
+
+        val addressField = formElements.addressElement()
+        assertThat(addressField).isNotInstanceOf(BillingAddressElement::class.java)
+    }
+
+    @Test
+    fun `method-required address takes precedence over automatic tax`() {
+        val formElements = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(),
+                requiresBillingAddressForAutomaticTax = true,
+            ),
+            requireBillingAddressCollection = true,
+        ).build()
+
+        val addressField = formElements.addressElement()
+        assertThat(addressField).isNotInstanceOf(BillingAddressElement::class.java)
+    }
+
+    @Test
+    fun `automatic tax collects billing address`() {
+        val billingAddressElement = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(
+                    allowedCountries = setOf("US"),
+                ),
+                requiresBillingAddressForAutomaticTax = true,
+                initialValues = mapOf(IdentifierSpec.Country to "US"),
+            ),
+        ).build().billingAddressElement()
+
+        assertThat(billingAddressElement.hiddenIdentifiers.value).contains(IdentifierSpec.Line2)
+        assertThat(billingAddressElement.hiddenIdentifiers.value).containsNoneOf(
+            IdentifierSpec.Line1,
+            IdentifierSpec.City,
+            IdentifierSpec.State,
+            IdentifierSpec.PostalCode,
+        )
+    }
+
+    @Test
+    fun `unsupported automatic tax returns empty output`() {
+        val formElements = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(),
+                requiresBillingAddressForAutomaticTax = true,
+            ),
+            supportsAutomaticTaxBillingAddress = false,
+        ).build()
+
+        assertThat(formElements).isEmpty()
+    }
+
+    @Test
+    fun `tax-disabled automatic collection preserves standalone country`() {
+        val formElements = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(),
+                requiresBillingAddressForAutomaticTax = false,
+            ),
+            countryRequirement = CountryRequirement(
+                allowedCountryCodes = setOf("US"),
+                initialValue = "US",
+            ),
+        ).build()
+
+        assertThat(formElements.countryElement().controller.rawFieldValue.value).isEqualTo("US")
+    }
+
+    @Test
+    fun `never collection returns empty output`() {
+        val formElements = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                ),
+                requiresBillingAddressForAutomaticTax = true,
+            ),
+        ).build()
+
+        assertThat(formElements).isEmpty()
+    }
+
     @Test
     fun `country requirement creates standalone country`() {
         val countryElement = billingAddressFormElementsBuilder(
@@ -87,6 +183,29 @@ class BillingAddressFormElementsBuilderTest {
     }
 
     @Test
+    fun `country requirement overrides automatic tax countries and initial country`() {
+        val countryElement = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(
+                    allowedCountries = setOf("US"),
+                ),
+                requiresBillingAddressForAutomaticTax = true,
+                initialValues = mapOf(IdentifierSpec.Country to "US"),
+            ),
+            countryRequirement = CountryRequirement(
+                allowedCountryCodes = setOf("DE", "FR"),
+                initialValue = "FR",
+            ),
+        ).build().billingAddressElement().countryElement
+
+        assertThat(countryElement.controller.displayItems).containsExactly(
+            "🇫🇷 France",
+            "🇩🇪 Germany",
+        ).inOrder()
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("FR")
+    }
+
+    @Test
     fun `full address falls back to fallback country codes`() {
         val addressElement = billingAddressFormElementsBuilder(
             arguments = arguments(
@@ -115,6 +234,55 @@ class BillingAddressFormElementsBuilderTest {
     }
 
     @Test
+    fun `automatic tax falls back to merchant countries`() {
+        val countryElement = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(
+                    allowedCountries = setOf("US", "CA"),
+                ),
+                requiresBillingAddressForAutomaticTax = true,
+                initialValues = mapOf(IdentifierSpec.Country to "CA"),
+            ),
+            fallbackCountryCodes = setOf("BS"),
+        ).build().billingAddressElement().countryElement
+
+        assertThat(countryElement.controller.displayItems).containsExactly(
+            "🇺🇸 United States",
+            "🇨🇦 Canada",
+        )
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
+    }
+
+    @Test
+    fun `automatic tax preserves same as shipping`() {
+        val formElements = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(),
+                requiresBillingAddressForAutomaticTax = true,
+                shippingValues = mapOf(IdentifierSpec.SameAsShipping to "true"),
+            ),
+        ).build()
+
+        val sameAsShippingElement = formElements.last() as SameAsShippingElement
+        assertThat(sameAsShippingElement.controller.value.value).isTrue()
+    }
+
+    @Test
+    fun `automatic tax does not use autocomplete`() {
+        val billingAddressElement = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(),
+                requiresBillingAddressForAutomaticTax = true,
+                autocompleteAddressInteractorFactory = {
+                    TestAutocompleteAddressInteractor.noOp()
+                },
+            ),
+        ).build().billingAddressElement()
+
+        assertThat(billingAddressElement.addressElement).isInstanceOf<AddressElement>()
+    }
+
+    @Test
     fun `full address uses autocomplete`() {
         val formElements = billingAddressFormElementsBuilder(
             arguments = arguments(
@@ -131,6 +299,7 @@ class BillingAddressFormElementsBuilderTest {
 
     private fun billingAddressFormElementsBuilder(
         arguments: UiDefinitionFactory.Arguments,
+        supportsAutomaticTaxBillingAddress: Boolean = true,
         requireBillingAddressCollection: Boolean = false,
         fallbackCountryCodes: Set<String> =
             arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
@@ -138,6 +307,7 @@ class BillingAddressFormElementsBuilderTest {
     ): BillingAddressFormElementsBuilder {
         return BillingAddressFormElementsBuilder(
             arguments = arguments,
+            supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
             requireBillingAddressCollection = requireBillingAddressCollection,
             fallbackCountryCodes = fallbackCountryCodes,
             countryRequirement = countryRequirement,
@@ -146,6 +316,13 @@ class BillingAddressFormElementsBuilderTest {
 
     private fun List<FormElement>.addressElement(): AddressElement {
         return (single() as SectionElement).fields.single() as AddressElement
+    }
+
+    private fun List<FormElement>.billingAddressElement(): BillingAddressElement {
+        return filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<BillingAddressElement>()
+            .single()
     }
 
     private fun List<FormElement>.countryElement(): CountryElement {
@@ -158,6 +335,7 @@ class BillingAddressFormElementsBuilderTest {
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
         initialValues: Map<IdentifierSpec, String?> = emptyMap(),
         shippingValues: Map<IdentifierSpec, String?>? = emptyMap(),
+        requiresBillingAddressForAutomaticTax: Boolean = false,
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
@@ -170,7 +348,7 @@ class BillingAddressFormElementsBuilderTest {
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            requiresBillingAddressForAutomaticTax = false,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             requiresMandate = false,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
@@ -179,6 +357,15 @@ class BillingAddressFormElementsBuilderTest {
             setAsDefaultMatchesSaveForFutureUse = false,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             linkInlineHandler = null,
+        )
+    }
+
+    private fun automaticAddressConfiguration(
+        allowedCountries: Set<String> = emptySet(),
+    ): PaymentSheet.BillingDetailsCollectionConfiguration {
+        return PaymentSheet.BillingDetailsCollectionConfiguration(
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            allowedCountries = allowedCountries,
         )
     }
 }

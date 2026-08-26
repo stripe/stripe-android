@@ -88,6 +88,26 @@ class FormElementsBuilderTest {
     }
 
     @Test
+    fun `automatic tax adds billing address after ordinary elements and before footers`() {
+        val formElements = formElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(),
+                requiresBillingAddressForAutomaticTax = true,
+            ),
+        )
+            .element(EmptyFormElement(identifier = IdentifierSpec.Generic("element")))
+            .footer(EmptyFormElement(identifier = IdentifierSpec.Generic("footer")))
+            .build()
+
+        assertThat(formElements.map { it.identifier.v1 }).containsExactly(
+            "element",
+            "billing_details[address]_section",
+            "footer",
+        ).inOrder()
+        formElements.billingAddressElement()
+    }
+
+    @Test
     fun `build returns no billing fields if specified as never`() {
         val arguments = arguments(
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -219,6 +239,13 @@ class FormElementsBuilderTest {
         assertThat(fields[0]).isInstanceOf<T>()
     }
 
+    private fun List<FormElement>.billingAddressElement(): BillingAddressElement {
+        return filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<BillingAddressElement>()
+            .single()
+    }
+
     private fun getSection(
         formElements: List<FormElement>,
         identifierName: String,
@@ -261,8 +288,23 @@ class FormElementsBuilderTest {
         )
     }
 
-    private fun formElementsBuilder(arguments: UiDefinitionFactory.Arguments): FormElementsBuilder {
-        return FormElementsBuilder(arguments = arguments)
+    private fun formElementsBuilder(
+        arguments: UiDefinitionFactory.Arguments,
+        supportsAutomaticTaxBillingAddress: Boolean = true,
+    ): FormElementsBuilder {
+        return FormElementsBuilder(
+            arguments = arguments,
+            supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
+        )
+    }
+
+    private fun automaticAddressConfiguration(
+        allowedCountries: Set<String> = emptySet(),
+    ): PaymentSheet.BillingDetailsCollectionConfiguration {
+        return PaymentSheet.BillingDetailsCollectionConfiguration(
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            allowedCountries = allowedCountries,
+        )
     }
 }
 

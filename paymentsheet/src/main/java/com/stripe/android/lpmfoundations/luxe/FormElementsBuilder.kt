@@ -6,6 +6,7 @@ import com.stripe.android.uicore.elements.FormElement
 
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
+    private val supportsAutomaticTaxBillingAddress: Boolean,
 ) {
     private val headerFormElements: MutableList<FormElement> = mutableListOf()
     private val uiFormElements: MutableList<FormElement> = mutableListOf()
@@ -107,6 +108,7 @@ internal class FormElementsBuilder(
             addAll(
                 BillingAddressFormElementsBuilder(
                     arguments = arguments,
+                    supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
                     requireBillingAddressCollection = requireBillingAddressCollection,
                     fallbackCountryCodes = availableCountries,
                     countryRequirement = countryRequirement,
