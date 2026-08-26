@@ -59,7 +59,7 @@ internal interface TapToAddConnectionManager {
             applicationContext: Context,
             logger: Logger,
             workContext: CoroutineContext,
-            callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
+            hasCreateCardPresentSetupIntentCallback: () -> Boolean,
             isSimulatedProvider: TapToAddIsSimulatedProvider,
         ): TapToAddConnectionManager {
             return if (isStripeTerminalSdkAvailable()) {
@@ -70,7 +70,7 @@ internal interface TapToAddConnectionManager {
                         errorReporter = errorReporter,
                         terminalWrapper = terminalWrapper,
                         logger = logger,
-                        callbackRetriever = callbackRetriever,
+                        hasCreateCardPresentSetupIntentCallback = hasCreateCardPresentSetupIntentCallback,
                         isSimulatedProvider = isSimulatedProvider,
                     ),
                     fatalErrorChecker = DefaultTapToAddFatalErrorChecker(),
@@ -90,7 +90,7 @@ internal class DefaultTapToAddConnectionManager(
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
     private val logger: Logger,
-    private val callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
+    private val hasCreateCardPresentSetupIntentCallback: () -> Boolean,
     private val isSimulatedProvider: TapToAddIsSimulatedProvider,
 ) : TapToAddConnectionManager, TerminalListener, TapToPayReaderListener {
     private var connectionTask: CompletableDeferred<Unit>? = null
@@ -102,7 +102,7 @@ internal class DefaultTapToAddConnectionManager(
     }
 
     override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean {
-        if (!callbackRetriever.hasCallback()) {
+        if (!hasCreateCardPresentSetupIntentCallback()) {
             return false
         }
 
