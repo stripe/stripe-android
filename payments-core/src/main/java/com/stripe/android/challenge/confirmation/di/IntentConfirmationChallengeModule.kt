@@ -10,6 +10,7 @@ import com.stripe.android.challenge.confirmation.DefaultConfirmationChallengeBri
 import com.stripe.android.challenge.confirmation.IntentConfirmationChallengeArgs
 import com.stripe.android.challenge.confirmation.analytics.DefaultIntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -61,6 +62,16 @@ internal interface IntentConfirmationChallengeModule {
     ): AnalyticsRequestFactory
 
     companion object {
+        @Provides
+        fun provideApiConfigurationProvider(
+            args: IntentConfirmationChallengeArgs
+        ): () -> ApiConfiguration.State = {
+            ApiConfiguration.State(
+                publishableKey = args.publishableKey,
+                stripeAccountId = null,
+            )
+        }
+
         @Provides
         @Named(ENABLE_LOGGING)
         fun provideEnableLogging(): Boolean = BuildConfig.DEBUG
