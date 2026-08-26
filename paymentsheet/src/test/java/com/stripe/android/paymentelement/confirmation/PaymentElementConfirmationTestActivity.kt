@@ -215,17 +215,14 @@ internal interface PaymentElementConfirmationTestModule {
         )
 
         @Provides
-        fun providesApiConfigurationState(config: PaymentConfiguration): ApiConfiguration.State {
-            return ApiConfiguration.State(
+        fun providesApiConfigurationStateProvider(
+            config: PaymentConfiguration
+        ): () -> ApiConfiguration.State = {
+            ApiConfiguration.State(
                 publishableKey = config.publishableKey,
                 stripeAccountId = config.stripeAccountId,
             )
         }
-
-        @Provides
-        fun providesApiConfigurationStateProvider(
-            state: ApiConfiguration.State
-        ): () -> ApiConfiguration.State = { state }
 
         @Provides
         @Singleton
