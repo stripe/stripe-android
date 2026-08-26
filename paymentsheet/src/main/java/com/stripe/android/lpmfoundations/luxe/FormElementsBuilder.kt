@@ -2,13 +2,7 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.uicore.elements.CountryConfig
-import com.stripe.android.uicore.elements.CountryElement
-import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionElement
 
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
@@ -110,49 +104,16 @@ internal class FormElementsBuilder(
 
             addAll(uiFormElements)
 
-            if (requireBillingAddressCollection) {
-                addAll(createAddressElements())
-            } else {
-                countryRequirement?.let { requirement ->
-                    add(createCountryElement(requirement))
-                }
-            }
+            addAll(
+                BillingAddressFormElementsBuilder(
+                    arguments = arguments,
+                    requireBillingAddressCollection = requireBillingAddressCollection,
+                    fallbackCountryCodes = availableCountries,
+                    countryRequirement = countryRequirement,
+                ).build()
+            )
 
             addAll(footerFormElements) // Order footers last.
         }
     }
-
-    private fun createCountryElement(requirement: CountryRequirement): FormElement {
-        return SectionElement.wrap(
-            CountryElement(
-                identifier = IdentifierSpec.Country,
-                controller = DropdownFieldController(
-                    config = CountryConfig(requirement.allowedCountryCodes),
-                    initialValue = requirement.initialValue,
-                )
-            )
-        )
-    }
-
-    private fun createAddressElements(): List<FormElement> {
-        return AddressSpec(
-            allowedCountryCodes = countryRequirement?.allowedCountryCodes ?: availableCountries,
-        ).transform(
-            initialValues = countryRequirement?.overrideInitialCountry(arguments.initialValues)
-                ?: arguments.initialValues,
-            shippingValues = arguments.shippingValues,
-            autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
-        )
-    }
-
-    private fun CountryRequirement.overrideInitialCountry(
-        initialValues: Map<IdentifierSpec, String?>,
-    ): Map<IdentifierSpec, String?> {
-        return initialValues + (IdentifierSpec.Country to initialValue)
-    }
-
-    private data class CountryRequirement(
-        val allowedCountryCodes: Set<String>,
-        val initialValue: String?,
-    )
 }

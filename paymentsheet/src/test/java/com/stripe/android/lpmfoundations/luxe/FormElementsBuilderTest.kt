@@ -6,15 +6,13 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailElement
@@ -24,7 +22,6 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SimpleTextElement
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -33,7 +30,7 @@ import org.robolectric.RobolectricTestRunner
 class FormElementsBuilderTest {
     @Test
     fun `build returns an emptyList`() {
-        assertThat(FormElementsBuilder(arguments()).build()).isEmpty()
+        assertThat(formElementsBuilder(arguments()).build()).isEmpty()
     }
 
     @Test
@@ -46,7 +43,7 @@ class FormElementsBuilderTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
-        val formElements = FormElementsBuilder(arguments).build()
+        val formElements = formElementsBuilder(arguments).build()
         assertThat(formElements).hasSize(4)
         assertThat(formElements[0].identifier.v1).isEqualTo("billing_details[name]_section")
         assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[phone]_section")
@@ -56,7 +53,7 @@ class FormElementsBuilderTest {
 
     @Test
     fun `build orders fields correctly`() {
-        val formElements = FormElementsBuilder(arguments())
+        val formElements = formElementsBuilder(arguments())
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
             .header(EmptyFormElement(identifier = IdentifierSpec(v1 = "header")))
             .footer(EmptyFormElement(identifier = IdentifierSpec(v1 = "footer")))
@@ -73,7 +70,7 @@ class FormElementsBuilderTest {
 
     @Test
     fun `build orders country requirement after ordinary elements and before footers`() {
-        val formElements = FormElementsBuilder(arguments())
+        val formElements = formElementsBuilder(arguments())
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
             .footer(EmptyFormElement(identifier = IdentifierSpec(v1 = "footer")))
             .requireCountry(
@@ -89,145 +86,6 @@ class FormElementsBuilderTest {
     }
 
     @Test
-    fun `standalone country requirement uses explicit countries instead of merchant countries`() {
-        val countryElement = FormElementsBuilder(
-            arguments(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    allowedCountries = setOf("US"),
-                )
-            )
-        )
-            .requireCountry(
-                allowedCountryCodes = setOf("CA"),
-                initialValue = null,
-            )
-            .build()
-            .countryElement()
-
-        assertThat(countryElement.controller.displayItems).containsExactly(
-            "\uD83C\uDDE8\uD83C\uDDE6 Canada",
-        )
-    }
-
-    @Test
-    fun `country requirement uses declared initial value`() {
-        val countryElement = FormElementsBuilder(arguments())
-            .requireCountry(
-                allowedCountryCodes = setOf("US", "CA"),
-                initialValue = "CA",
-            )
-            .build()
-            .countryElement()
-
-        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
-    }
-
-    @Test
-    fun `billing address requirement inherits merchant countries and initial country`() {
-        val formElements = FormElementsBuilder(
-            arguments(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-                    allowedCountries = setOf("US", "CA"),
-                ),
-                initialValues = mapOf(IdentifierSpec.Country to "CA"),
-            )
-        )
-            .requireBillingAddressIfAllowed()
-            .build()
-
-        val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
-        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
-            "\uD83C\uDDFA\uD83C\uDDF8 United States",
-            "\uD83C\uDDE8\uD83C\uDDE6 Canada",
-        )
-        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("CA")
-    }
-
-    @Test
-    fun `billing address requirement uses explicit countries and initial country`() {
-        val formElements = FormElementsBuilder(
-            arguments(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-                    allowedCountries = setOf("US"),
-                ),
-                initialValues = mapOf(IdentifierSpec.Country to "CA"),
-            )
-        )
-            .requireBillingAddressIfAllowed(availableCountries = setOf("CA"))
-            .build()
-
-        val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
-        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
-            "\uD83C\uDDE8\uD83C\uDDE6 Canada",
-        )
-        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("CA")
-    }
-
-    @Test
-    fun `country requirement returns country-only output without full address collection`() {
-        val formElements = FormElementsBuilder(
-            arguments(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-                )
-            )
-        )
-            .requireCountry(
-                allowedCountryCodes = setOf("US", "CA"),
-                initialValue = "US",
-            )
-            .build()
-
-        assertThat(formElements).hasSize(1)
-        formElements.countryElement()
-    }
-
-    @Test
-    fun `full address collection uses country requirement in address fields`() {
-        val formElements = FormElementsBuilder(
-            arguments(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    allowedCountries = setOf("US"),
-                ),
-                initialValues = mapOf(IdentifierSpec.Country to "US"),
-            )
-        )
-            .requireCountry(
-                allowedCountryCodes = setOf("BS", "CA"),
-                initialValue = "BS",
-            )
-            .build()
-
-        assertThat(formElements).hasSize(1)
-        val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
-        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
-            "🇧🇸 Bahamas",
-            "🇨🇦 Canada",
-        )
-        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("BS")
-        assertThat(addressElement.fields.value).contains(addressElement.countryElement)
-        assertThat(formElements.countryElements()).hasSize(1)
-    }
-
-    @Test
-    fun `full address collection without country requirement keeps country in address fields`() {
-        val formElements = FormElementsBuilder(
-            arguments(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                )
-            )
-        ).build()
-
-        assertThat(formElements).hasSize(1)
-        val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
-        assertThat(addressElement.fields.value).contains(addressElement.countryElement)
-    }
-
-    @Test
     fun `build returns no billing fields if specified as never`() {
         val arguments = arguments(
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -237,7 +95,7 @@ class FormElementsBuilderTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .requireBillingAddressIfAllowed()
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Phone)
@@ -248,7 +106,7 @@ class FormElementsBuilderTest {
 
     @Test
     fun `build returns fields in the order they were added`() {
-        val formElements = FormElementsBuilder(arguments())
+        val formElements = formElementsBuilder(arguments())
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element1")))
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element2")))
             .footer(EmptyFormElement(identifier = IdentifierSpec(v1 = "footer1")))
@@ -272,7 +130,7 @@ class FormElementsBuilderTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
             .ignoreBillingAddressRequirements()
             .build()
@@ -289,92 +147,12 @@ class FormElementsBuilderTest {
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
             .ignoreContactInformationRequirements()
             .build()
         assertThat(formElements).hasSize(1)
         assertThat(formElements[0].identifier.v1).isEqualTo("element")
-    }
-
-    @Test
-    fun `build should return AutocompleteAddressElement if factory is provided`() = runTest {
-        val arguments = arguments(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            ),
-            autocompleteAddressInteractorFactory = {
-                TestAutocompleteAddressInteractor.noOp()
-            }
-        )
-
-        val formElements = FormElementsBuilder(arguments).build()
-
-        assertThat(formElements).hasSize(1)
-        assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
-
-        val sectionElement = formElements.first() as SectionElement
-
-        assertThat(sectionElement.fields.size).isEqualTo(1)
-        assertThat(sectionElement.fields.firstOrNull()).isInstanceOf<AutocompleteAddressElement>()
-    }
-
-    @Test
-    fun `build contains all supported billing countries when allowed countries is empty`() {
-        val arguments = arguments(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                allowedCountries = emptySet()
-            )
-        )
-        val formElements = FormElementsBuilder(arguments).build()
-
-        assertThat(formElements).hasSize(1)
-        assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
-
-        val sectionElement = formElements.first() as SectionElement
-        val sectionFields = sectionElement.fields
-
-        assertThat(sectionFields.size).isEqualTo(1)
-        assertThat(sectionFields.firstOrNull()).isInstanceOf<AddressElement>()
-
-        val addressElement = sectionFields.first() as AddressElement
-
-        assertThat(addressElement.countryElement.controller.displayItems)
-            .hasSize(CountryUtils.supportedBillingCountries.size)
-    }
-
-    @Test
-    fun `build contains only countries provided through billing configuration`() {
-        val arguments = arguments(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                allowedCountries = setOf("US", "CA")
-            )
-        )
-        val formElements = FormElementsBuilder(arguments).build()
-
-        assertThat(formElements).hasSize(1)
-        assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
-
-        val sectionElement = formElements.first() as SectionElement
-        val sectionFields = sectionElement.fields
-
-        assertThat(sectionFields.size).isEqualTo(1)
-        assertThat(sectionFields.firstOrNull()).isInstanceOf<AddressElement>()
-
-        val addressElement = sectionFields.first() as AddressElement
-
-        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
-            "\uD83C\uDDFA\uD83C\uDDF8 United States",
-            "\uD83C\uDDE8\uD83C\uDDE6 Canada"
-        )
     }
 
     @Test
@@ -388,7 +166,7 @@ class FormElementsBuilderTest {
                 allowedCountries = setOf("US", "CA")
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
@@ -417,7 +195,7 @@ class FormElementsBuilderTest {
                 allowedCountries = setOf("US", "CA")
             )
         )
-        val formElements = FormElementsBuilder(arguments)
+        val formElements = formElementsBuilder(arguments)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .build()
@@ -439,11 +217,6 @@ class FormElementsBuilderTest {
         assertThat(fields[0]).isInstanceOf<T>()
     }
 
-    private fun List<FormElement>.countryElement(): CountryElement {
-        val section = single { it.identifier.v1 == "billing_details[address][country]_section" } as SectionElement
-        return section.fields.single() as CountryElement
-    }
-
     private fun getSection(
         formElements: List<FormElement>,
         identifierName: String,
@@ -460,18 +233,20 @@ class FormElementsBuilderTest {
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
         initialValues: Map<IdentifierSpec, String?> = emptyMap(),
+        shippingValues: Map<IdentifierSpec, String?>? = emptyMap(),
+        requiresBillingAddressForAutomaticTax: Boolean = false,
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
             initialValues = initialValues,
             initialLinkUserInput = null,
-            shippingValues = emptyMap(),
+            shippingValues = shippingValues,
             saveForFutureUseInitialValue = false,
             merchantName = "Example Inc.",
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            requiresBillingAddressForAutomaticTax = false,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             requiresMandate = false,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
@@ -482,6 +257,10 @@ class FormElementsBuilderTest {
             linkInlineHandler = null,
         )
     }
+
+    private fun formElementsBuilder(arguments: UiDefinitionFactory.Arguments): FormElementsBuilder {
+        return FormElementsBuilder(arguments = arguments)
+    }
 }
 
 internal fun List<FormElement>.countryElements(): List<CountryElement> {
@@ -489,6 +268,7 @@ internal fun List<FormElement>.countryElements(): List<CountryElement> {
         section.fields.mapNotNull { field ->
             when (field) {
                 is CountryElement -> field
+                is BillingAddressElement -> field.countryElement
                 is AddressElement -> field.countryElement
                 else -> null
             }
