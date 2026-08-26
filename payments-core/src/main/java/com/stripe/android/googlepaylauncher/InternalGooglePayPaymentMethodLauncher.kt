@@ -1,6 +1,5 @@
 package com.stripe.android.googlepaylauncher
 
-import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -8,10 +7,8 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -32,13 +29,8 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
     @Assisted private val lifecycleOwner: LifecycleOwner,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     @Assisted private val onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
-    context: Context,
-    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context = context,
-        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
-        defaultProductUsageTokens = setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
-    ),
-    analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    analyticsRequestExecutor: AnalyticsRequestExecutor,
 ) {
     init {
         if (!GooglePayPaymentMethodLauncher.HAS_SENT_INIT_ANALYTIC_EVENT) {
