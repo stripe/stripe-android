@@ -1,13 +1,10 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
 import com.stripe.android.paymentsheet.ui.isDarkTheme
 import com.stripe.android.uicore.isSystemDarkTheme
 import javax.inject.Inject
@@ -39,15 +36,16 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
-                    useDarkThemeIcon = appearance?.shouldUseDarkThemeIcon(context),
+                    useDarkThemeIcon = appearance.shouldUseDarkThemeIcon(context),
                 )
             },
         )
     }
 }
 
-internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(context: Context): Boolean {
-    return themeMode.isDarkTheme(context.isSystemDarkTheme())
+internal fun PaymentSheet.Appearance?.shouldUseDarkThemeIcon(context: Context): Boolean {
+    val isSystemDarkTheme = context.isSystemDarkTheme()
+    return this?.themeMode?.isDarkTheme(isSystemDarkTheme) ?: isSystemDarkTheme
 }
 
 internal val PaymentSelection.shippingDetails: AddressDetails?

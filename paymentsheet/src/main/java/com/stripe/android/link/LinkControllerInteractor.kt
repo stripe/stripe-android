@@ -835,7 +835,8 @@ internal fun PaymentMethodPreviewDetails.toPreview(
     iconLoader: PaymentSelection.IconLoader
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
-    val drawableResourceId = getIconDrawableRes(this, context.isSystemDarkTheme())
+    val isDarkTheme = context.isSystemDarkTheme()
+    val drawableResourceId = getIconDrawableRes(this, isDarkTheme)
     val sublabel = buildString {
         val name: ResolvableString
         val last4: String
@@ -872,7 +873,7 @@ internal fun PaymentMethodPreviewDetails.toPreview(
                 drawableResourceIdNight = null,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
-                useDarkThemeIcon = null,
+                useDarkThemeIcon = isDarkTheme,
             )
         },
         label = label,
@@ -897,7 +898,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
         append(last4)
     }
     val drawableResourceId = if (reduceLinkBranding) {
-        getIconDrawableRes(context.isSystemDarkTheme())
+        getIconDrawableRes(isDarkTheme)
     } else {
         getLinkIconArrow()
     }

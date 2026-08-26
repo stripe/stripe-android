@@ -131,7 +131,6 @@ internal class PaymentSelectionIconLoaderTest {
         darkIconUrl = null,
         iconRes = iconRes,
         iconResNight = null,
-        // Should we add tests fpr this?
         useDarkThemeIcon = false,
         block = block,
     )
@@ -180,7 +179,7 @@ internal class PaymentSelectionIconLoaderTest {
         )
         advanceUntilIdle()
 
-        val expectedUrl = if (useDarkThemeIcon == true && darkIconUrl != null) darkIconUrl else iconUrl
+        val expectedUrl = if (useDarkThemeIcon && darkIconUrl != null) darkIconUrl else iconUrl
         val loadedUrl = expectedUrl?.let { imageLoader.awaitLoadCall().url }
         Scenario(drawable = drawable, loadedUrl = loadedUrl).apply { block() }
         imageLoader.ensureAllEventsConsumed()

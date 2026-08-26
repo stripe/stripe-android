@@ -285,7 +285,6 @@ internal sealed class PaymentSelection : Parcelable {
             darkThemeIconUrl: String?,
             useDarkThemeIcon: Boolean,
         ): Drawable {
-
             fun loadResource(): Drawable {
                 @Suppress("DEPRECATION")
                 return runCatching {
