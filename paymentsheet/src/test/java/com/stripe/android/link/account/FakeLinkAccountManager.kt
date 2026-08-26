@@ -139,7 +139,7 @@ internal open class FakeLinkAccountManager(
 
     val confirmVerificationTurbine = Turbine<String>()
 
-    private val logoutCall = Turbine<Unit>()
+    private val logoutCall = Turbine<LinkAccount?>()
 
     fun setConsumerPaymentDetails(consumerPaymentDetails: ConsumerPaymentDetails?) {
         _consumerState.value = consumerPaymentDetails?.toLinkPaymentMethod()?.let {
@@ -209,7 +209,12 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun logOut(): Result<ConsumerSession> {
-        logoutCall.add(Unit)
+        logoutCall.add(linkAccountHolder.linkAccountInfo.value.account)
+        return logOutResult
+    }
+
+    override suspend fun logOut(linkAccount: LinkAccount): Result<ConsumerSession> {
+        logoutCall.add(linkAccount)
         return logOutResult
     }
 
@@ -323,6 +328,10 @@ internal open class FakeLinkAccountManager(
     }
 
     suspend fun awaitLogoutCall() {
+        logoutCall.awaitItem()
+    }
+
+    suspend fun awaitLogoutCallAccount(): LinkAccount? {
         return logoutCall.awaitItem()
     }
 

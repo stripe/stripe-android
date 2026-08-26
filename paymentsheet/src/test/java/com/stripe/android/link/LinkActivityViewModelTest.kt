@@ -52,10 +52,14 @@ import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -864,6 +868,30 @@ internal class LinkActivityViewModelTest {
         assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(
             LinkAccountUpdate.Value(null, LoggedOut)
         )
+    }
+
+    @Test
+    fun `change email logs out captured account after clearing linkAccountHolder`() = runTest {
+        val queuedDispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(queuedDispatcher)
+
+        try {
+            val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            val linkAccountManager = FakeLinkAccountManager(linkAccountHolder = linkAccountHolder)
+            linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+            val viewModel = createViewModel(
+                linkAccountHolder = linkAccountHolder,
+                linkAccountManager = linkAccountManager,
+            )
+
+            viewModel.changeEmail()
+            assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+
+            runCurrent()
+            assertThat(linkAccountManager.awaitLogoutCallAccount()).isEqualTo(TestFactory.LINK_ACCOUNT)
+        } finally {
+            Dispatchers.setMain(dispatcher)
+        }
     }
 
     @Test

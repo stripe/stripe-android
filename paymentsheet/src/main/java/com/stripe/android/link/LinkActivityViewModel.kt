@@ -278,8 +278,10 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun changeEmail() {
         savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
-        viewModelScope.launch {
-            linkAccountManager.logOut()
+        linkAccount?.let { linkAccount ->
+            viewModelScope.launch {
+                linkAccountManager.logOut(linkAccount)
+            }
         }
         if (linkScreenState.value is ScreenState.VerificationDialog) {
             clearAccountAfterChangeEmail(loggedOut = false)
