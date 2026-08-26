@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -18,6 +19,9 @@ internal class AddressElementViewModelTest {
         featureFlag = FeatureFlags.enableAddressElementUnsavedChanges,
         isEnabled = true,
     )
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `clean dismissal exits immediately`() {
@@ -126,6 +130,6 @@ internal class AddressElementViewModelTest {
             autoCompleteViewModelSubcomponentFactoryProvider =
             mock<Provider<AutocompleteViewModelSubcomponent.Factory>>(),
             dismissalCoordinator = coordinator,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }
