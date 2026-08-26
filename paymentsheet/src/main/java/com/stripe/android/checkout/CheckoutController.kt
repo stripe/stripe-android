@@ -108,7 +108,7 @@ class CheckoutController @Inject internal constructor(
 
             checkoutSessionRepository.init(
                 sessionId = sessionId,
-                adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+                adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
                 val defaultBillingAddress = configurationState.defaults.billingDetails?.address
                 if (defaultBillingAddress != null) {
@@ -220,7 +220,7 @@ class CheckoutController @Inject internal constructor(
             onSuccess = {
                 checkoutSessionRepository.init(
                     sessionId = sessionId,
-                    adaptivePricingAllowed = configuration.adaptivePricingAllowed,
+                    adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                 )
             },
             onFailure = { kotlin.Result.failure(it) },
@@ -821,25 +821,13 @@ class CheckoutController @Inject internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
-        private var adaptivePricing: AdaptivePricing = AdaptivePricing()
         private var merchantDisplayName: String? = null
         private var defaults: Defaults = Defaults()
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
-        private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
-            CurrencySelectorElement.Configuration()
-        private var shippingAddressElementConfiguration: ShippingAddressElement.Configuration =
-            ShippingAddressElement.Configuration()
+        private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration? = null
+        private var shippingAddressElementConfiguration: ShippingAddressElement.Configuration? = null
         private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration =
             ExpressCheckoutElement.Configuration()
-
-        /**
-         * Sets the adaptive pricing configuration for this checkout session.
-         */
-        fun adaptivePricing(
-            adaptivePricing: AdaptivePricing,
-        ): Configuration = apply {
-            this.adaptivePricing = adaptivePricing
-        }
 
         /**
          * Sets the merchant display name shown to the customer during checkout.
@@ -901,49 +889,23 @@ class CheckoutController @Inject internal constructor(
 
         @Parcelize
         internal data class State(
-            val adaptivePricingAllowed: Boolean,
             val merchantDisplayName: String?,
             val defaults: Defaults.State,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
-            val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
-            val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
+            val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State?,
+            val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State?,
             val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
         ) : Parcelable
 
         internal fun build(): State {
             val defaultsState = defaults.build()
             return State(
-                adaptivePricingAllowed = adaptivePricing.build().allowed,
                 merchantDisplayName = merchantDisplayName,
                 paymentElementConfiguration = paymentElementConfiguration.build(),
-                currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
-                shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
+                currencySelectorElementConfiguration = currencySelectorElementConfiguration?.build(),
+                shippingAddressElementConfiguration = shippingAddressElementConfiguration?.build(),
                 expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
                 defaults = defaultsState,
-            )
-        }
-
-        /**
-         * Configuration for adaptive pricing.
-         */
-        @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class AdaptivePricing {
-            private var allowed: Boolean = false
-
-            /**
-             * Sets whether adaptive pricing is allowed for this checkout session.
-             */
-            fun allowed(allowed: Boolean): AdaptivePricing = apply {
-                this.allowed = allowed
-            }
-
-            internal fun build(): State = State(
-                allowed = allowed,
-            )
-
-            internal data class State(
-                val allowed: Boolean,
             )
         }
 
