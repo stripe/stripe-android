@@ -219,17 +219,14 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
         )
 
         @Provides
-        fun providesApiConfigurationState(config: PaymentConfiguration): ApiConfiguration.State {
-            return ApiConfiguration.State(
+        fun providesApiConfigurationStateProvider(
+            config: PaymentConfiguration
+        ): () -> ApiConfiguration.State = {
+            ApiConfiguration.State(
                 publishableKey = config.publishableKey,
                 stripeAccountId = config.stripeAccountId,
             )
         }
-
-        @Provides
-        fun providesApiConfigurationStateProvider(
-            state: ApiConfiguration.State
-        ): () -> ApiConfiguration.State = { state }
 
         @Provides
         @Named(PUBLISHABLE_KEY)
@@ -254,8 +251,9 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
 
         @Provides
         fun providesApiRequestOptionsProvider(
-            state: ApiConfiguration.State
+            apiConfigurationProvider: () -> ApiConfiguration.State
         ): () -> ApiRequest.Options = {
+            val state = apiConfigurationProvider()
             ApiRequest.Options(
                 apiKey = state.publishableKey,
                 stripeAccount = state.stripeAccountId,

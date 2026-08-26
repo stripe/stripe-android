@@ -88,10 +88,12 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
                 val component = DaggerLpmNetworkTestViewModelComponent.factory()
                     .create(
                         application = extras.requireApplication(),
-                        apiConfigurationState = ApiConfiguration.State(
-                            publishableKey = args.publishableKey,
-                            stripeAccountId = null,
-                        ),
+                        apiConfigurationProvider = {
+                            ApiConfiguration.State(
+                                publishableKey = args.publishableKey,
+                                stripeAccountId = null,
+                            )
+                        },
                         allowsManualConfirmation = args.allowsManualConfirmation,
                         paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                         savedStateHandle = extras.createSavedStateHandle(),
@@ -152,7 +154,7 @@ internal interface LpmNetworkTestViewModelComponent {
             @BindsInstance
             application: Application,
             @BindsInstance
-            apiConfigurationState: ApiConfiguration.State,
+            apiConfigurationProvider: () -> ApiConfiguration.State,
             @BindsInstance
             @Named(ALLOWS_MANUAL_CONFIRMATION)
             allowsManualConfirmation: Boolean,
@@ -191,8 +193,9 @@ internal interface LpmNetworkTestModule {
 
         @Provides
         fun providesPaymentConfiguration(
-            apiConfigurationState: ApiConfiguration.State,
+            apiConfigurationProvider: () -> ApiConfiguration.State,
         ): PaymentConfiguration {
+            val apiConfigurationState = apiConfigurationProvider()
             return PaymentConfiguration(
                 publishableKey = apiConfigurationState.publishableKey,
                 stripeAccountId = apiConfigurationState.stripeAccountId,
@@ -202,11 +205,6 @@ internal interface LpmNetworkTestModule {
         @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = ENABLE_LOGGING_VALUE
-
-        @Provides
-        fun providesApiConfigurationStateProvider(
-            state: ApiConfiguration.State
-        ): () -> ApiConfiguration.State = { state }
 
         @Provides
         @Singleton
