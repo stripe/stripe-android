@@ -12,9 +12,9 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConnectionStarter {
-    val isSupported: Boolean
+    fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean
 
-    fun start(config: CommonConfiguration)
+    fun start(config: CommonConfiguration, publishableKey: String, isLiveMode: Boolean)
 }
 
 internal class DefaultTapToAddConnectionStarter @Inject constructor(
@@ -22,15 +22,18 @@ internal class DefaultTapToAddConnectionStarter @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val coroutineContext: CoroutineContext,
 ) : TapToAddConnectionStarter {
-    override val isSupported: Boolean
-        get() = tapToAddConnectionManager.isSupported
+    override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean {
+        return tapToAddConnectionManager.isSupported(publishableKey, isLiveMode)
+    }
 
-    override fun start(config: CommonConfiguration) {
+    override fun start(config: CommonConfiguration, publishableKey: String, isLiveMode: Boolean) {
         viewModelScope.launch(coroutineContext) {
             runCatching {
                 tapToAddConnectionManager.connect(
                     config = TapToAddConnectionManager.ConnectionConfig(
                         merchantDisplayName = config.merchantDisplayName,
+                        publishableKey = publishableKey,
+                        isLiveMode = isLiveMode,
                     )
                 )
             }
@@ -39,10 +42,9 @@ internal class DefaultTapToAddConnectionStarter @Inject constructor(
 }
 
 internal class NoOpTapToAddConnectionStarter @Inject constructor() : TapToAddConnectionStarter {
-    override val isSupported: Boolean = false
+    override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean = false
 
-    @Suppress("UNUSED_PARAMETER")
-    override fun start(config: CommonConfiguration) {
+    override fun start(config: CommonConfiguration, publishableKey: String, isLiveMode: Boolean) {
         // No-op
     }
 }
