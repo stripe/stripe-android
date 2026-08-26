@@ -119,11 +119,14 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         internal fun providesApiOptions(
-            apiConfiguration: ApiConfiguration.State
-        ): ApiRequest.Options = ApiRequest.Options(
-            apiKey = apiConfiguration.publishableKey,
-            stripeAccount = apiConfiguration.stripeAccountId
-        )
+            apiConfigurationProvider: () -> ApiConfiguration.State
+        ): ApiRequest.Options {
+            val apiConfiguration = apiConfigurationProvider()
+            return ApiRequest.Options(
+                apiKey = apiConfiguration.publishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId
+            )
+        }
 
         @Provides
         @ActivityRetainedScope
@@ -180,14 +183,16 @@ internal interface FinancialConnectionsSheetSharedModule {
         @ActivityRetainedScope
         internal fun provideAnalyticsRequestFactory(
             application: Application,
-            apiConfiguration: ApiConfiguration.State
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = application.packageManager,
-            packageName = application.packageName.orEmpty(),
-            packageInfo = application.packageInfo,
-            publishableKeyProvider = { apiConfiguration.publishableKey },
-            networkTypeProvider = NetworkTypeDetector(application)::invoke,
-        )
+            apiConfigurationProvider: () -> ApiConfiguration.State
+        ): AnalyticsRequestFactory {
+            return AnalyticsRequestFactory(
+                packageManager = application.packageManager,
+                packageName = application.packageName.orEmpty(),
+                packageInfo = application.packageInfo,
+                publishableKeyProvider = { apiConfigurationProvider().publishableKey },
+                networkTypeProvider = NetworkTypeDetector(application)::invoke,
+            )
+        }
 
         @Provides
         @ActivityRetainedScope
