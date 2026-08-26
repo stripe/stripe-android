@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.isSystemDarkTheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -58,6 +59,7 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
                                     imageLoader = DefaultStripeImageLoader(context),
                                 ),
                                 reduceLinkBranding = true,
+                                isDarkTheme = context.isSystemDarkTheme(),
                             )
                         )
                     }
