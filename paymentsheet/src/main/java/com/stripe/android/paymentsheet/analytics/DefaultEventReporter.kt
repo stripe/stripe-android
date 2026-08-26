@@ -639,8 +639,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         publishableKey: String? = null,
     ) {
         CoroutineScope(workContext).launch {
+            val resolvedPublishableKey = publishableKey
+                ?: paymentMethodMetadata?.apiConfiguration?.publishableKey
             val additionalParams = defaultParams(paymentMethodMetadata) + event.params +
-                (publishableKey?.let { mapOf(AnalyticsFields.PUBLISHABLE_KEY to it) } ?: emptyMap())
+                (resolvedPublishableKey?.let { mapOf(AnalyticsFields.PUBLISHABLE_KEY to it) } ?: emptyMap())
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
