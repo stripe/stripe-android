@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.ApiRequest.Options.Companion.UNDEFINED_PUBLISHABLE_KEY
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
@@ -389,10 +390,23 @@ internal class PaymentSheetAnalyticsTest {
         eventName: String,
         vararg requestMatchers: RequestMatcher,
     ) {
+        val publishableKey = if (eventName in EVENTS_REPORTED_BEFORE_API_CONFIGURATION_IS_AVAILABLE) {
+            UNDEFINED_PUBLISHABLE_KEY
+        } else {
+            TestApiKeys.PUBLISHABLE
+        }
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
             productUsage = setOf("PaymentSheet"),
-            *requestMatchers
+            requestMatchers = requestMatchers,
+            publishableKey = publishableKey,
+        )
+    }
+
+    private companion object {
+        val EVENTS_REPORTED_BEFORE_API_CONFIGURATION_IS_AVAILABLE = setOf(
+            "stripe_android.retrieve_payment_methods",
+            "elements.customer_repository.get_saved_payment_methods_success",
         )
     }
 }
