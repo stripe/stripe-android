@@ -104,10 +104,15 @@ internal fun DefaultLinkTheme(
 
 @Composable
 internal fun isLinkDarkTheme(appearance: LinkAppearance.State?): Boolean {
-    return when (appearance?.style) {
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    return appearance?.style.isDarkTheme(isSystemInDarkTheme)
+}
+
+internal fun LinkAppearance.Style?.isDarkTheme(isSystemDarkTheme: Boolean): Boolean {
+    return when (this) {
+        LinkAppearance.Style.AUTOMATIC, null -> isSystemDarkTheme
         LinkAppearance.Style.ALWAYS_LIGHT -> false
         LinkAppearance.Style.ALWAYS_DARK -> true
-        LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
     }
 }
 

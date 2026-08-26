@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -39,6 +40,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 import java.util.Optional
 import javax.inject.Provider
 import kotlin.jvm.optionals.getOrNull
@@ -706,6 +709,36 @@ class LinkControllerInteractorTest {
     }
 
     @Test
+    @Config(qualifiers = "notnight")
+    fun `selectedPaymentMethodPreview uses always dark Link appearance on light system`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        setLinkAppearance(LinkAppearance.Style.ALWAYS_DARK)
+        selectBankPaymentMethod(interactor)
+
+        val preview = interactor.selectedPaymentMethodPreview.first()
+        val drawable = requireNotNull(preview).imageLoader()
+
+        assertThat(shadowOf(drawable).createdFromResId)
+            .isEqualTo(R.drawable.stripe_link_bank_with_bg_night)
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `state preview uses always light Link appearance on dark system`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        setLinkAppearance(LinkAppearance.Style.ALWAYS_LIGHT)
+        selectBankPaymentMethod(interactor)
+
+        val preview = interactor.state(application).first().selectedPaymentMethodPreview
+        val drawable = requireNotNull(preview).imageLoader()
+
+        assertThat(shadowOf(drawable).createdFromResId)
+            .isEqualTo(R.drawable.stripe_link_bank_with_bg_day)
+    }
+
+    @Test
     fun `onLinkActivityResult() with Failed result`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
@@ -1132,6 +1165,30 @@ class LinkControllerInteractorTest {
             collectedCvc = cvc,
             billingPhone = billingPhone
         )
+    }
+
+    private fun setLinkAppearance(style: LinkAppearance.Style) {
+        linkComponent.configuration = linkComponent.configuration.copy(
+            linkAppearance = LinkAppearance()
+                .style(style)
+                .reduceLinkBranding(true)
+                .build(),
+        )
+    }
+
+    private fun selectBankPaymentMethod(interactor: LinkControllerInteractor) {
+        interactor.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(
+                        bankAccountName = null,
+                        bankIconCode = null,
+                    ),
+                    collectedCvc = null,
+                    billingPhone = null,
+                )
+            )
+        }
     }
 
     private suspend fun configureWithAttestation(
