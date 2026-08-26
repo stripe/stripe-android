@@ -67,9 +67,9 @@ class GooglePayPaymentMethodLauncher internal constructor(
 ) {
     private val apiConfigurationProvider = {
         ApiConfiguration.State(
-        publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
-        stripeAccountId = PaymentConfiguration.getInstance(context).stripeAccountId,
-    )
+            publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
+            stripeAccountId = PaymentConfiguration.getInstance(context).stripeAccountId,
+        )
     }
     private var isReady = false
     private val internalLauncher = InternalGooglePayPaymentMethodLauncher(
