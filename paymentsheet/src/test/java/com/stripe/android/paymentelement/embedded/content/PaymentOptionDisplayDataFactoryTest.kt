@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import android.content.Context
+import android.graphics.drawable.ColorDrawable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -34,7 +35,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -187,49 +187,66 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     @Test
-    @Config(qualifiers = "notnight")
     fun `always dark with dark component uses dark icon on light system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysDark,
         lightComponent = Color.White,
         darkComponent = Color.Black,
+        isSystemDarkTheme = false,
     ) {
         assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
     }
 
     @Test
-    @Config(qualifiers = "night")
     fun `always light with light component uses light icon on dark system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysLight,
         lightComponent = Color.White,
         darkComponent = Color.Black,
+        isSystemDarkTheme = true,
     ) {
         assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
     }
 
     @Test
-    @Config(qualifiers = "notnight")
     fun `automatic with light component uses light icon on light system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.Automatic,
         lightComponent = Color.White,
         darkComponent = Color.Black,
+        isSystemDarkTheme = false,
     ) {
         assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
     }
 
     @Test
-    @Config(qualifiers = "night")
     fun `automatic with dark component uses dark icon on dark system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.Automatic,
         lightComponent = Color.White,
         darkComponent = Color.Black,
+        isSystemDarkTheme = true,
     ) {
         assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
+    }
+
+    @Test
+    fun `paymentOptionResource returns card art when available`() = runTest {
+        val cardArt = ColorDrawable()
+        val option = createFactory(
+            cardArtDrawableLoader = { cardArt },
+        ).create(
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            paymentMethodMetadata = paymentMethodMetadata,
+            appearance = appearance,
+        )
+
+        val drawable = requireNotNull(option).paymentOptionResource.load(isSystemDarkTheme = false)
+
+        assertThat(drawable).isSameInstanceAs(cardArt)
     }
 
     private fun runIconScenario(
         themeMode: PaymentSheet.ThemeMode,
         lightComponent: Color,
         darkComponent: Color,
+        isSystemDarkTheme: Boolean,
         block: IconScenario.() -> Unit,
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -259,7 +276,9 @@ internal class PaymentOptionDisplayDataFactoryTest {
                 paymentMethodMetadata = paymentMethodMetadata,
                 appearance = appearance,
             )
-        ).imageLoader()
+        ).paymentOptionResource.load(
+            isSystemDarkTheme = isSystemDarkTheme,
+        )
 
         IconScenario(loadedUrl = imageLoader.awaitLoadCall().url).apply(block)
         imageLoader.ensureAllEventsConsumed()
