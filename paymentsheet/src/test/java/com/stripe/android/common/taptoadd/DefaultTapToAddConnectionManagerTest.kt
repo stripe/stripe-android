@@ -711,7 +711,7 @@ class DefaultTapToAddConnectionManagerTest {
                         isSimulatedProvider = object : TapToAddIsSimulatedProvider {
                             override fun get(isLiveMode: Boolean): Boolean = isSimulated
                         },
-                        callbackRetriever = callbackRetriever,
+                        hasCreateCardPresentSetupIntentCallback = callbackRetriever::hasCallback,
                     ),
                     terminalInstance = terminalInstance,
                     errorReporter = errorReporter,
