@@ -5,12 +5,14 @@ import app.cash.turbine.Turbine
 import com.stripe.android.common.model.CommonConfiguration
 
 internal class FakeTapToAddConnectionStarter private constructor(
-    override val isSupported: Boolean = false,
+    private val isSupportedValue: Boolean = false,
 ) : TapToAddConnectionStarter {
     private val startCalls: Turbine<StartCall> = Turbine()
 
-    override fun start(config: CommonConfiguration) {
-        startCalls.add(StartCall(config))
+    override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean = isSupportedValue
+
+    override fun start(config: CommonConfiguration, publishableKey: String, isLiveMode: Boolean) {
+        startCalls.add(StartCall(config, publishableKey))
     }
 
     fun ensureAllEventsConsumed() {
@@ -18,7 +20,8 @@ internal class FakeTapToAddConnectionStarter private constructor(
     }
 
     data class StartCall(
-        val config: CommonConfiguration
+        val config: CommonConfiguration,
+        val publishableKey: String,
     )
 
     class Scenario(
@@ -45,6 +48,6 @@ internal class FakeTapToAddConnectionStarter private constructor(
 
         fun create(
             isSupported: Boolean = false,
-        ): FakeTapToAddConnectionStarter = FakeTapToAddConnectionStarter(isSupported = isSupported)
+        ): FakeTapToAddConnectionStarter = FakeTapToAddConnectionStarter(isSupportedValue = isSupported)
     }
 }
