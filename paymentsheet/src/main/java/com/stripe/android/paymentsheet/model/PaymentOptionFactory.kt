@@ -40,20 +40,20 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
-                    useDarkThemeIcon = appearance?.shouldUseDarkThemeIcon(context)
-                        ?: shouldUseDarkThemeIcon(context),
+                    useDarkThemeIcon = appearance.shouldUseDarkThemeIcon(context),
                 )
             },
         )
     }
 }
 
-internal fun shouldUseDarkThemeIcon(context: Context): Boolean {
+private fun useDarkThemeIcon(context: Context): Boolean {
     return context.isSystemDarkTheme() ||
         StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }
 
-internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(context: Context): Boolean {
+internal fun PaymentSheet.Appearance?.shouldUseDarkThemeIcon(context: Context): Boolean {
+    if (this == null) return useDarkThemeIcon(context)
     val isDark = themeMode.isDarkTheme(context.isSystemDarkTheme())
     val componentColor = Color(getColors(isDark).component)
     return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON

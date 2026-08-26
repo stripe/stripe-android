@@ -65,7 +65,7 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
-                    useDarkThemeIcon = shouldUseDarkThemeIcon(context),
+                    useDarkThemeIcon = paymentMethodMetadata.appearance.shouldUseDarkThemeIcon(context),
                 )
             },
             label = selection.label(
