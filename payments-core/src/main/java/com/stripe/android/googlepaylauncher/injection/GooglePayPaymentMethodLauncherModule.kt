@@ -50,6 +50,5 @@ internal abstract class GooglePayPaymentMethodLauncherModule {
             googlePayConfig: GooglePayPaymentMethodLauncher.Config,
             paymentsClientFactory: PaymentsClientFactory
         ) = paymentsClientFactory.create(googlePayConfig.environment)
-
     }
 }
