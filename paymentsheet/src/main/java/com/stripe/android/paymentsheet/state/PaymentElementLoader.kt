@@ -54,6 +54,7 @@ import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -319,7 +320,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionStarter.start(configuration)
 
-        val isGooglePaySupportedOnDevice = async {
+        // Give immediately available results a chance to complete before later load work checks isCompleted.
+        val isGooglePaySupportedOnDevice = async(start = CoroutineStart.UNDISPATCHED) {
             durationProvider.measureDuration(
                 DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported
             ) {
