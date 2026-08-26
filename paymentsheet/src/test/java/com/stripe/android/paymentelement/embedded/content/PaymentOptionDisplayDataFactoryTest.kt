@@ -1,10 +1,15 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
@@ -23,14 +28,19 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -39,6 +49,14 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(AppearanceAPIAdditionsPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionDisplayDataFactoryTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     private val displayDataFactory = createFactory()
     private val appearance = PaymentSheet.Appearance()
@@ -227,19 +245,32 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     @Test
-    fun `paymentOptionResource returns card art when available`() = runTest {
+    fun `iconPainter uses card art when available`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
         val cardArt = ColorDrawable()
+        val cardArtLoadCalls = Turbine<PaymentSelection>()
+        val imageLoader = FakeStripeImageLoader()
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val option = createFactory(
-            cardArtDrawableLoader = { cardArt },
+            iconLoader = PaymentSelection.IconLoader(
+                resources = context.resources,
+                imageLoader = imageLoader,
+            ),
+            cardArtDrawableLoader = { requestedSelection ->
+                cardArtLoadCalls.add(requestedSelection)
+                cardArt
+            },
         ).create(
-            selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            selection = selection,
             paymentMethodMetadata = paymentMethodMetadata,
             appearance = appearance,
         )
 
-        val drawable = requireNotNull(option).paymentOptionResource.load(isSystemDarkTheme = false)
+        renderIcon(requireNotNull(option), isSystemDarkTheme = false)
 
-        assertThat(drawable).isSameInstanceAs(cardArt)
+        assertThat(cardArtLoadCalls.awaitItem()).isEqualTo(selection)
+        cardArtLoadCalls.ensureAllEventsConsumed()
+        imageLoader.ensureAllEventsConsumed()
     }
 
     private fun runIconScenario(
@@ -270,18 +301,37 @@ internal class PaymentOptionDisplayDataFactoryTest {
             darkThemeIconUrl = DARK_ICON_URL,
         )
 
-        requireNotNull(
+        val option = requireNotNull(
             factory.create(
                 selection = selection,
                 paymentMethodMetadata = paymentMethodMetadata,
                 appearance = appearance,
             )
-        ).paymentOptionResource.load(
-            isSystemDarkTheme = isSystemDarkTheme,
         )
+        renderIcon(option, isSystemDarkTheme)
 
         IconScenario(loadedUrl = imageLoader.awaitLoadCall().url).apply(block)
         imageLoader.ensureAllEventsConsumed()
+    }
+
+    private fun renderIcon(
+        option: EmbeddedPaymentElement.PaymentOptionDisplayData,
+        isSystemDarkTheme: Boolean,
+    ) {
+        composeRule.setContent {
+            val configuration = Configuration(LocalConfiguration.current).apply {
+                val nightMode = if (isSystemDarkTheme) {
+                    Configuration.UI_MODE_NIGHT_YES
+                } else {
+                    Configuration.UI_MODE_NIGHT_NO
+                }
+                uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
+            }
+            CompositionLocalProvider(LocalConfiguration provides configuration) {
+                option.iconPainter
+            }
+        }
+        composeRule.waitForIdle()
     }
 
     companion object {
