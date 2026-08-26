@@ -638,7 +638,7 @@ class CheckoutController @Inject internal constructor(
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class PaymentOptionDisplayData internal constructor(
-            internal val paymentOptionResource: PaymentOptionResource,
+            private val paymentOptionResource: PaymentOptionResource,
             /**
              * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
              */
