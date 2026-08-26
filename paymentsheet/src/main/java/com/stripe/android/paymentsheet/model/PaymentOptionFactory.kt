@@ -54,7 +54,11 @@ private fun useDarkThemeIcon(context: Context): Boolean {
 
 internal fun PaymentSheet.Appearance?.shouldUseDarkThemeIcon(context: Context): Boolean {
     if (this == null) return useDarkThemeIcon(context)
-    val isDark = themeMode.isDarkTheme(context.isSystemDarkTheme())
+    return shouldUseDarkThemeIcon(context.isSystemDarkTheme())
+}
+
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(isSystemDarkTheme: Boolean): Boolean {
+    val isDark = themeMode.isDarkTheme(isSystemDarkTheme)
     val componentColor = Color(getColors(isDark).component)
     return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }

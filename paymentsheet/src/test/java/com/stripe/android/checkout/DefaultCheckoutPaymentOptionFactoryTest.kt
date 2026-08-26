@@ -23,7 +23,6 @@ import com.stripe.android.testing.FakeStripeImageLoader
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import kotlin.test.Test
 
 @OptIn(CheckoutSessionPreview::class)
@@ -129,7 +128,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     }
 
     @Test
-    fun `imageLoader returns the card art when the card art loader provides one`() = runScenario(
+    fun `paymentOptionResource returns the card art when the card art loader provides one`() = runScenario(
         cardArt = ColorDrawable(),
     ) {
         // Card art is only ever loaded for saved payment methods.
@@ -138,41 +137,39 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
             paymentMethodMetadata = metadata,
         )
 
-        assertThat(option?.imageLoader?.invoke()).isSameInstanceAs(cardArt)
+        assertThat(option?.paymentOptionResource?.load(isSystemDarkTheme = false)).isSameInstanceAs(cardArt)
     }
 
     @Test
-    fun `imageLoader falls back to the icon loader when there is no card art`() = runScenario {
+    fun `paymentOptionResource falls back to the icon loader when there is no card art`() = runScenario {
         val option = factory.create(
             selection = PaymentSelection.GooglePay,
             paymentMethodMetadata = metadata,
         )
 
-        assertThat(option?.imageLoader?.invoke()).isNotNull()
+        assertThat(option?.paymentOptionResource?.load(isSystemDarkTheme = false)).isNotNull()
     }
 
     @Test
-    @Config(qualifiers = "notnight")
-    fun `imageLoader uses light icon on light system`() = runScenario {
+    fun `paymentOptionResource uses light icon on light system`() = runScenario {
         val option = factory.create(
             selection = customPaymentMethod,
             paymentMethodMetadata = metadata,
         )
 
-        option?.imageLoader?.invoke()
+        option?.paymentOptionResource?.load(isSystemDarkTheme = false)
 
         assertThat(imageLoader.awaitLoadCall().url).isEqualTo(LIGHT_ICON_URL)
     }
 
     @Test
-    @Config(qualifiers = "night")
-    fun `imageLoader uses dark icon on dark system`() = runScenario {
+    fun `paymentOptionResource uses dark icon on dark system`() = runScenario {
         val option = factory.create(
             selection = customPaymentMethod,
             paymentMethodMetadata = metadata,
         )
 
-        option?.imageLoader?.invoke()
+        option?.paymentOptionResource?.load(isSystemDarkTheme = true)
 
         assertThat(imageLoader.awaitLoadCall().url).isEqualTo(DARK_ICON_URL)
     }

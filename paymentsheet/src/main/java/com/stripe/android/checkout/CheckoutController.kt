@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
@@ -12,7 +11,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
-import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
@@ -638,11 +636,7 @@ class CheckoutController @Inject internal constructor(
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class PaymentOptionDisplayData internal constructor(
-            /**
-             * Loads the payment method image. Prefer [iconPainter] to render it in Compose.
-             */
-            @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            val imageLoader: suspend () -> Drawable,
+            internal val paymentOptionResource: PaymentOptionResource,
             /**
              * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
              */
@@ -721,16 +715,12 @@ class CheckoutController @Inject internal constructor(
                 )
             }
 
-            private val iconDrawable: Drawable by lazy {
-                DelegateDrawable(imageLoader)
-            }
-
             /**
              * An image representing a payment method; e.g. the Google Pay logo or a VISA logo.
              */
             val iconPainter: Painter
                 @Composable
-                get() = rememberDrawablePainter(iconDrawable)
+                get() = rememberDrawablePainter(rememberPaymentOptionResource(paymentOptionResource))
         }
     }
 
