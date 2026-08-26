@@ -10,6 +10,8 @@ internal interface TapToAddAvailabilityFactory {
     fun isAvailable(
         elementsSession: ElementsSession,
         customerMetadata: CustomerMetadata?,
+        publishableKey: String,
+        isLiveMode: Boolean,
     ): Boolean
 }
 
@@ -20,8 +22,12 @@ internal class DefaultTapToAddAvailabilityFactory @Inject constructor(
     override fun isAvailable(
         elementsSession: ElementsSession,
         customerMetadata: CustomerMetadata?,
+        publishableKey: String,
+        isLiveMode: Boolean,
     ): Boolean {
-        return connectionManager.isSupported && elementsSession.isTapToAddEnabled && customerMetadata != null
+        return connectionManager.isSupported(publishableKey, isLiveMode) &&
+            elementsSession.isTapToAddEnabled &&
+            customerMetadata != null
     }
 }
 
@@ -29,5 +35,7 @@ internal class TapToAddAvailabilityFactoryForCustomerSheet @Inject constructor()
     override fun isAvailable(
         elementsSession: ElementsSession,
         customerMetadata: CustomerMetadata?,
+        publishableKey: String,
+        isLiveMode: Boolean,
     ) = false
 }
