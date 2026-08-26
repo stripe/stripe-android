@@ -6,6 +6,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -77,8 +78,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
             bounds = defaultBounds,
         )
 
-        // Update twice to achieve stability
-        tracker.updateVisibility("card", coordinates1)
         tracker.updateVisibility("card", coordinates1)
 
         advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
@@ -98,8 +97,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
             bounds = Rect(0f, 0f, 0f, 0f) // Hidden
         )
 
-        // Update twice to achieve stability
-        tracker.updateVisibility("card", coordinates1)
         tracker.updateVisibility("card", coordinates1)
 
         // Should not dispatch because no items are visible
@@ -119,8 +116,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
             bounds = Rect(0f, 0f, 100f, 49f) // 98% visible
         )
 
-        // Update twice to achieve stability
-        tracker.updateVisibility("card", coordinates1)
         tracker.updateVisibility("card", coordinates1)
 
         // Should dispatch because item meets visibility threshold
@@ -140,8 +135,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
             bounds = Rect(0f, 0f, 100f, 25f) // 50% visible
         )
 
-        // Update twice to achieve stability
-        tracker.updateVisibility("card", coordinates1)
         tracker.updateVisibility("card", coordinates1)
 
         // Should not dispatch because item doesn't meet visibility threshold
@@ -150,7 +143,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
     }
 
     @Test
-    fun `coordinate stability - changing coordinates does not invoke callback`() = runTest {
+    fun `coordinate stability - changing coordinates resets debounce timer`() = runTest {
         val tracker = getTracker(
             expectedItems = listOf("card"),
         )
@@ -161,14 +154,18 @@ class PaymentMethodInitialVisibilityTrackerTest {
         )
         val coordinates2 = FakeLayoutCoordinates.create(
             size = defaultCoordinateSize,
-            bounds = Rect(10f, 10f, 110f, 60f) // Different position
+            bounds = Rect(1f, 1f, 101f, 51f) // Different position, still above the visibility threshold
         )
 
         tracker.updateVisibility("card", coordinates1)
-        tracker.updateVisibility("card", coordinates2) // Changes position
+        advanceTimeBy(TIME_ADVANCE_LESSER_THAN_DEBOUNCE_DELAY)
+        tracker.updateVisibility("card", coordinates2)
 
-        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
+        advanceTimeBy(TIME_ADVANCE_LESSER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
+
+        advanceUntilIdle()
+        verify(callback).invoke(listOf("card"), emptyList())
     }
 
     @Test
@@ -179,8 +176,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
 
         val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
-        // Update twice to achieve stability
-        tracker.updateVisibility("card", coordinates)
         tracker.updateVisibility("card", coordinates)
 
         // Should not dispatch immediately
@@ -199,8 +194,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
 
         val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
-        // Update twice to achieve stability
-        tracker.updateVisibility("card", coordinates)
         tracker.updateVisibility("card", coordinates)
 
         // Should not dispatch immediately
@@ -227,8 +220,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
 
         val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
-        // Update multiple times to achieve stability
-        tracker.updateVisibility("card", coordinates)
         tracker.updateVisibility("card", coordinates)
 
         advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
@@ -249,9 +240,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
 
         // Update only two of three items
         tracker.updateVisibility("card", coordinates)
-        tracker.updateVisibility("card", coordinates) // Make stable
         tracker.updateVisibility("klarna", coordinates)
-        tracker.updateVisibility("klarna", coordinates) // Make stable
 
         // Should not dispatch yet (missing paypal)
         advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
@@ -259,7 +248,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
 
         // Add the third item
         tracker.updateVisibility("paypal", coordinates)
-        tracker.updateVisibility("paypal", coordinates) // Make stable
 
         // Now should dispatch
         advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
@@ -275,7 +263,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
         val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
         // Set up for dispatch but dispose before it happens
-        tracker.updateVisibility("card", coordinates)
         tracker.updateVisibility("card", coordinates)
 
         advanceTimeBy(TIME_ADVANCE_LESSER_THAN_DEBOUNCE_DELAY)
@@ -294,10 +281,8 @@ class PaymentMethodInitialVisibilityTrackerTest {
         val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
         tracker.updateVisibility("card", coordinates)
-        tracker.updateVisibility("card", coordinates)
         tracker.reset()
 
-        tracker.updateVisibility("card", coordinates)
         tracker.updateVisibility("card", coordinates)
         advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
 
@@ -314,10 +299,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
 
         val hiddenCoordinates = FakeLayoutCoordinatesFixtures.FULLY_HIDDEN_COORDINATES
 
-        // Make card visible and klarna hidden, both stable
         tracker.updateVisibility("card", visibleCoordinates)
-        tracker.updateVisibility("card", visibleCoordinates)
-        tracker.updateVisibility("klarna", hiddenCoordinates)
         tracker.updateVisibility("klarna", hiddenCoordinates)
 
         advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
@@ -335,10 +317,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
 
         val hiddenCoordinates = FakeLayoutCoordinatesFixtures.FULLY_HIDDEN_COORDINATES
 
-        // Make card visible and klarna hidden, both stable
         tracker.updateVisibility("card", visibleCoordinates)
-        tracker.updateVisibility("card", visibleCoordinates)
-        tracker.updateVisibility("klarna", hiddenCoordinates)
         tracker.updateVisibility("klarna", hiddenCoordinates)
 
         advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
@@ -368,13 +347,6 @@ class PaymentMethodInitialVisibilityTrackerTest {
         verifyNoCallback(callback)
 
         val fullyVisibleCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
-
-        tracker.updateVisibility("card", fullyVisibleCoordinates)
-        tracker.updateVisibility("klarna", partiallyHiddenCoordinates)
-        tracker.updateVisibility("paypal", fullyHiddenCoordinates)
-
-        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
-        verifyNoCallback(callback)
 
         tracker.updateVisibility("card", fullyVisibleCoordinates)
         tracker.updateVisibility("klarna", partiallyHiddenCoordinates)
