@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.paymentsheet.model
 
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -7,7 +7,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.shouldUseDarkThemeIcon
 
 @Stable
 internal class PaymentOptionResource(

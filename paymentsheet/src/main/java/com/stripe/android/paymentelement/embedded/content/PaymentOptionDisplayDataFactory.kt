@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
@@ -17,7 +18,6 @@ import com.stripe.android.paymentsheet.model.lightThemeIconUrl
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.model.shippingDetails
-import com.stripe.android.paymentsheet.model.shouldUseDarkThemeIcon
 import com.stripe.android.paymentsheet.model.toPaymentSheetBillingDetails
 import javax.inject.Inject
 
@@ -56,13 +56,15 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
                     linkAccountHolder.linkAccountInfo.value.account
                 )
             ).resolve(context),
-            imageLoader = {
+            paymentOptionResource = PaymentOptionResource(
+                appearance = appearance,
+            ) { useDarkThemeIcon ->
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
-                    useDarkThemeIcon = appearance.shouldUseDarkThemeIcon(context),
+                    useDarkThemeIcon = useDarkThemeIcon,
                 )
             },
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),

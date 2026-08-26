@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.paymentsheet.model
 
 import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
