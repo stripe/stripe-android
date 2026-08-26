@@ -65,7 +65,7 @@ internal interface AutocompleteViewModelModule {
                 context = context,
                 publishableKeyProvider = { args.publishableKey }
             ),
-                )
+        )
 
         @Provides
         @Singleton
