@@ -15,6 +15,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
@@ -85,6 +86,7 @@ class GooglePayLauncher internal constructor(
                 billingAddressParameters = config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                 allowCreditCards = config.allowCreditCards,
+                apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
@@ -130,6 +132,7 @@ class GooglePayLauncher internal constructor(
                 billingAddressParameters = config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                 allowCreditCards = config.allowCreditCards,
+                apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
@@ -179,6 +182,7 @@ class GooglePayLauncher internal constructor(
                 billingAddressParameters = config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                 allowCreditCards = config.allowCreditCards,
+                apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
@@ -419,6 +423,7 @@ fun rememberGooglePayLauncher(
                     billingAddressParameters = config.billingAddressConfig.convert(),
                     existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                     allowCreditCards = config.allowCreditCards,
+                    apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
                         publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
@@ -436,4 +441,11 @@ fun rememberGooglePayLauncher(
             DefaultAnalyticsRequestExecutor()
         )
     }
+}
+
+private fun PaymentConfiguration.toApiConfiguration(): ApiConfiguration.State {
+    return ApiConfiguration.State(
+        publishableKey = publishableKey,
+        stripeAccountId = stripeAccountId,
+    )
 }

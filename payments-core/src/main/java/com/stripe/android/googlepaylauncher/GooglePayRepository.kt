@@ -52,13 +52,13 @@ internal class DefaultGooglePayRepository(
     private val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
     private val existingPaymentMethodRequired: Boolean,
     private val allowCreditCards: Boolean,
+    private val apiConfiguration: ApiConfiguration.State,
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter,
     private val additionalEnabledNetworks: List<String> = emptyList(),
-    private val apiConfiguration: ApiConfiguration.State? = null
 ) : GooglePayRepository {
 
     @Inject
@@ -68,13 +68,15 @@ internal class DefaultGooglePayRepository(
         logger: Logger,
         errorReporter: ErrorReporter,
         cardBrandFilter: CardBrandFilter,
-        cardFundingFilter: CardFundingFilter
+        cardFundingFilter: CardFundingFilter,
+        apiConfigurationProvider: () -> ApiConfiguration.State,
     ) : this(
         context.applicationContext,
         googlePayConfig.environment,
         googlePayConfig.billingAddressConfig.convert(),
         googlePayConfig.existingPaymentMethodRequired,
         googlePayConfig.allowCreditCards,
+        apiConfigurationProvider(),
         DefaultPaymentsClientFactory(context),
         errorReporter,
         logger,
@@ -84,9 +86,7 @@ internal class DefaultGooglePayRepository(
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(
-        apiConfiguration?.let {
-            GooglePayConfig(it.publishableKey, it.stripeAccountId)
-        } ?: GooglePayConfig(context),
+        GooglePayConfig(apiConfiguration.publishableKey, apiConfiguration.stripeAccountId),
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         additionalEnabledNetworks = additionalEnabledNetworks

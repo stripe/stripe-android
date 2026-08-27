@@ -186,7 +186,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                 environment: GooglePayEnvironment,
                 cardFundingFilter: CardFundingFilter,
                 cardBrandFilter: CardBrandFilter,
-                apiConfiguration: ApiConfiguration.State?
+                apiConfiguration: ApiConfiguration.State
             ): GooglePayRepository {
                 return DefaultGooglePayRepository(
                     context = context,
@@ -194,6 +194,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     billingAddressParameters = config.billingAddressConfig.convert(),
                     existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                     allowCreditCards = config.allowCreditCards,
+                    apiConfiguration = apiConfiguration,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
                         publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
@@ -214,7 +215,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
                 val repository = googlePayRepositoryFactory(
                     environment = config.environment,
                     cardFundingFilter = cardFundingFilter,
-                    cardBrandFilter = cardBrandFilter
+                    cardBrandFilter = cardBrandFilter,
+                    apiConfiguration = apiConfigurationProvider(),
                 )
                 readyCallback.onReady(
                     repository.isReady().first().also {

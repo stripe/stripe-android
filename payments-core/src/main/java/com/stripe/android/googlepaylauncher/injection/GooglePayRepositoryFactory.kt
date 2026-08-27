@@ -20,7 +20,7 @@ interface GooglePayRepositoryFactory {
         environment: GooglePayEnvironment,
         cardFundingFilter: CardFundingFilter,
         cardBrandFilter: CardBrandFilter,
-        apiConfiguration: ApiConfiguration.State? = null
+        apiConfiguration: ApiConfiguration.State,
     ): GooglePayRepository
 }
 
@@ -34,7 +34,7 @@ class DefaultGooglePayRepositoryFactory @Inject constructor(
         environment: GooglePayEnvironment,
         cardFundingFilter: CardFundingFilter,
         cardBrandFilter: CardBrandFilter,
-        apiConfiguration: ApiConfiguration.State?
+        apiConfiguration: ApiConfiguration.State
     ): GooglePayRepository {
         return DefaultGooglePayRepository(
             appContext,
