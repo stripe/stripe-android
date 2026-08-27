@@ -26,6 +26,10 @@ internal class CheckoutPaymentElementTestRunnerContext(
     private val presenter: CheckoutPresenter,
     private val countDownLatch: CountDownLatch,
 ) {
+    fun presentPaymentOptions() {
+        presenter.paymentElement().present()
+    }
+
     fun confirm() {
         presenter.confirm()
     }
@@ -97,6 +101,8 @@ internal fun runCheckoutPaymentElementTest(
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
-        controller.destroy()
+        scenario.onActivity {
+            controller.destroy()
+        }
     }
 }

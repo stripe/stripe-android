@@ -1,15 +1,14 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
-import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -235,18 +234,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             clientAttributionMetadata: ClientAttributionMetadata,
         ): CheckoutSessionConfirmationInterceptor
     }
-}
-
-@OptIn(CheckoutSessionPreview::class)
-private fun Address.toCheckoutAddress(): CheckoutController.Address.State? {
-    return CheckoutController.Address.State(
-        city = city,
-        country = country ?: return null,
-        line1 = line1,
-        line2 = line2,
-        postalCode = postalCode,
-        state = state,
-    )
 }
 
 private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {

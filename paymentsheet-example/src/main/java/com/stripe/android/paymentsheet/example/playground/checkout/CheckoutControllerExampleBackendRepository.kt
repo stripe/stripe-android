@@ -7,7 +7,6 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.example.Settings
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import kotlinx.coroutines.Dispatchers
@@ -20,20 +19,14 @@ internal class CheckoutControllerExampleBackendRepository(
     private val json = Json { ignoreUnknownKeys = true }
     private val backendUrl = Settings(applicationContext).playgroundBackendUrl
 
-    suspend fun fetchCheckoutSessionClientSecret(): kotlin.Result<String> {
-        val requestBody = CheckoutRequest.Builder()
-            .initialization("checkout_session")
-            .useCheckoutSession(true)
-            .mode("payment")
-            .customerEmail("email@example.com")
-            .currency("usd")
-            .amount(5000)
-            .customer("new")
-            .build()
+    suspend fun fetchCheckoutSessionClientSecret(
+        scenario: CheckoutControllerExampleScenario,
+    ): kotlin.Result<String> {
+        val request = CheckoutControllerExampleRequestFactory.create(scenario)
 
         val apiResponse = withContext(Dispatchers.IO) {
-            Fuel.post(backendUrl + "checkout")
-                .jsonBody(json.encodeToString(CheckoutRequest.serializer(), requestBody))
+            Fuel.post(backendUrl + request.endpoint)
+                .jsonBody(request.body.toString())
                 .suspendable()
                 .awaitModel(CheckoutResponse.serializer(), json)
         }

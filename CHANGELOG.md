@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: MINOR
 
 ### PaymentSheet
 * [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
+* [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
 
 ### CryptoOnramp
 * [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.

@@ -111,6 +111,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         previousNewSelections = selectionHolder.previousNewSelections,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = launchMode,
                     )
@@ -119,6 +120,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         previousNewSelections = selectionHolder.previousNewSelections,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
+                        checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = launchMode,
                     )
@@ -129,6 +131,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
+                            checkoutSessionResponse = null,
                             shouldInvokeSelectionCallback = false,
                             launchMode = launchMode,
                         )

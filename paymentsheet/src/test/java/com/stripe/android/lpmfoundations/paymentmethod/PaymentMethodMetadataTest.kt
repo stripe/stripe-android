@@ -649,6 +649,28 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `formElementsForCode creates one country field in the Wero address`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "wero")
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
+        )
+        val formElement = metadata.formElementsForCode(
+            code = "wero",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        assertThat(formElement.countryElements()).hasSize(1)
+    }
+
+    @Test
     fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val headerInformation = metadata.formHeaderInformationForCode(
