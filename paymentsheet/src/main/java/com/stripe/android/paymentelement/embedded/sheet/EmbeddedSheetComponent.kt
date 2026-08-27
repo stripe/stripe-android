@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
+import com.stripe.android.paymentsheet.injection.PaymentSheetAutocompleteModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -33,6 +34,7 @@ import javax.inject.Singleton
         GooglePayLauncherModule::class,
         EmbeddedLinkExtrasModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
+        PaymentSheetAutocompleteModule::class,
     ],
 )
 @Singleton

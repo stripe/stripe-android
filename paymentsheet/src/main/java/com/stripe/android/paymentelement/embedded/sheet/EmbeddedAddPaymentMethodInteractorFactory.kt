@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +34,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val customerStateHolder: CustomerStateHolder,
+    private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
 ) {
     @Suppress("LongMethod")
     fun create(): AddPaymentMethodInteractor {
@@ -55,6 +57,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
 
         return DefaultAddPaymentMethodInteractor(
@@ -102,6 +105,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             setSelection = embeddedSelectionHolder::setSelection,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->
                 sheetActivityStateHolder.updateMandate(mandateText)

@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInt
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
@@ -187,6 +188,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val testScope = TestScope(UnconfinedTestDispatcher())
         val sheetActivityStateHolder = FakeSheetActivityStateHolder()
         val continueCoordinator = FakeSheetActivityContinueCoordinator()
+        val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
@@ -209,6 +211,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
                     tapToAddHelper = FakeTapToAddHelper.noOp(),
                     eventReporter = FakeEventReporter(),
                     paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                    autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 ),
                 sheetActivityStateHolder = sheetActivityStateHolder,
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
@@ -243,6 +246,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             customerStateHolder = customerStateHolder,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
 
         val factory = InitialPaymentOptionsScreenFactory(

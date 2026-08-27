@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -38,6 +39,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
         tapToAddHelper: TapToAddHelper?,
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         val linkInlineHandler = LinkInlineHandler.create()
@@ -55,6 +57,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
                 tapToAddHelper = tapToAddHelper,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 linkInlineHandler = linkInlineHandler,
             ),
         )
@@ -67,6 +70,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
         tapToAddHelper: TapToAddHelper?,
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         linkInlineHandler: LinkInlineHandler,
     ): FormDefinitionFactory {
         return DefaultFormDefinitionFactory(
@@ -77,7 +81,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             newPaymentSelectionProvider = ::newPaymentSelection,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
-            autocompleteAddressInteractorFactory = null,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             isLinkUI = false,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = tapToAddHelper,
@@ -120,6 +124,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             selectionUpdater = selectionUpdater,
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            autocompleteAddressInteractorFactory = null,
         )
     }
 

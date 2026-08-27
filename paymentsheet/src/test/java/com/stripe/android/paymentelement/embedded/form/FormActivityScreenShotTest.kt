@@ -27,6 +27,7 @@ import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
@@ -247,7 +248,8 @@ internal class FormActivityScreenShotTest {
             sheetActivityStateHolder = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
         ).create(
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,
