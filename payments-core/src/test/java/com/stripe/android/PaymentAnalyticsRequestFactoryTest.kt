@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -271,7 +272,12 @@ class PaymentAnalyticsRequestFactoryTest {
             packageManager = packageManager,
             packageInfo = packageInfo,
             packageName = packageName,
-            publishableKeyProvider = { API_KEY },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = API_KEY,
+                    stripeAccountId = null,
+                )
+            },
             networkTypeProvider = { "5G" },
         )
         val params = factory.createTokenCreation(
