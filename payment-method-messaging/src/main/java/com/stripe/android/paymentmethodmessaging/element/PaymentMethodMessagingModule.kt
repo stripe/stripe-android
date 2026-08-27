@@ -13,8 +13,8 @@ import com.stripe.android.paymentmethodmessaging.element.analytics.DefaultPaymen
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
-import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
@@ -26,7 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 
-@Module(includes = [ApiConfigurationFromPaymentConfigurationModule::class])
+@Module(includes = [PaymentConfigurationModule::class])
 internal interface PaymentMethodMessagingModule {
 
     @Binds
