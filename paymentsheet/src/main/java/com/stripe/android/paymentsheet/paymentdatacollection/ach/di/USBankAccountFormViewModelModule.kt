@@ -5,15 +5,15 @@ import android.content.Context
 import android.content.res.Resources
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
 @Module(
     subcomponents = [USBankAccountFormViewModelSubcomponent::class],
-    includes = [ApiConfigurationFromPaymentConfigurationModule::class],
+    includes = [PaymentConfigurationModule::class],
 )
 internal class USBankAccountFormViewModelModule {
     @Provides
