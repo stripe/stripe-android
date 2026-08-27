@@ -1,6 +1,6 @@
 ---
 name: create-fake
-description: Use when creating a fake test implementation in stripe-android — covers FakeClassName pattern, Turbine call tracking, ViewActionRecorder, and ensureAllEventsConsumed validation
+description: Use when creating or changing a fake test implementation in stripe-android — mandates Turbine for all interaction tracking and covers FakeClassName, ViewActionRecorder, and ensureAllEventsConsumed validation
 ---
 
 # Creating Fakes for Testing
@@ -10,9 +10,56 @@ This skill describes how to create fake implementations for testing in the Strip
 ## Core Principles
 
 1. **Prefer fakes over mocks** - Create `FakeClassName` implementations that provide controllable, inspectable behavior
-2. **Use Turbine for call tracking** - Track method invocations with Turbine channels for verification
+2. **Use Turbine for every recorded interaction** - Track calls, callbacks, and lifecycle events with Turbine channels
 3. **Provide default parameters** - Make fakes easy to instantiate with sensible defaults
-4. **Enable validation** - Implement `ensureAllEventsConsumed()` validation method when using Turbines
+4. **Require validation** - Implement `ensureAllEventsConsumed()` and call it after every test scenario
+
+## Interaction Tracking Is Always Turbine
+
+Use `Turbine<Call>()` for all history that a test observes. This includes method calls with parameters, parameterless lifecycle calls such as `unregister()`, and callback registration.
+
+Never use these to record interactions:
+
+- `MutableList`, `mutableListOf`, or `list += call`
+- `callCount` integer properties
+- `wasCalled` or `invoked` boolean properties
+- A callback field that bypasses recording the registration call
+
+Mutable properties are appropriate only for configuring fake behavior, such as the value a method returns or an error it should throw. They are not appropriate for recording what the system under test did.
+
+```kotlin
+internal class FakeLauncher(
+    var launchResult: Boolean = false, // Configuration is mutable.
+) : Launcher {
+    val registerCalls = Turbine<RegisterCall>()
+    val launchCalls = Turbine<LaunchCall>()
+    val unregisterCalls = Turbine<Unit>()
+
+    override fun register(callback: () -> Unit) {
+        registerCalls.add(RegisterCall(callback))
+    }
+
+    override fun launch(id: String): Boolean {
+        launchCalls.add(LaunchCall(id))
+        return launchResult
+    }
+
+    override fun unregister() {
+        unregisterCalls.add(Unit)
+    }
+
+    fun ensureAllEventsConsumed() {
+        registerCalls.ensureAllEventsConsumed()
+        launchCalls.ensureAllEventsConsumed()
+        unregisterCalls.ensureAllEventsConsumed()
+    }
+
+    data class RegisterCall(val callback: () -> Unit)
+    data class LaunchCall(val id: String)
+}
+```
+
+Retrieve registered callbacks from the recorded call with `registerCalls.awaitItem()` and invoke that callback in the test. Do not add a separate callback shortcut that hides whether registration occurred.
 
 ## Basic Fake Structure
 
@@ -93,7 +140,7 @@ data class DetachRequest(val paymentMethodId: String, val customerId: String)
 
 ### Validation with ensureAllEventsConsumed
 
-Implement a **validation method** that ensures all turbine events were consumed:
+Implement a **validation method** that includes every Turbine and ensures all events were consumed:
 
 ```kotlin
 fun ensureAllEventsConsumed() {
@@ -105,7 +152,7 @@ fun ensureAllEventsConsumed() {
 }
 ```
 
-Tests should call this method after verification:
+Every scenario should call this method after verification, including scenarios where no calls are expected:
 
 ```kotlin
 @Test
@@ -183,7 +230,10 @@ Reference these fakes from the codebase as gold standards:
 ## Quick Reference
 
 - **Need to track method calls?** → Use Turbine with data classes
+- **Need to track a parameterless call?** → Use `Turbine<Unit>`
+- **Need to invoke a registered callback?** → Capture it in a Turbine call and retrieve it with `awaitItem()`
 - **Tracking view actions?** → Use ViewActionRecorder
 - **Need to verify all events consumed?** → Implement `ensureAllEventsConsumed()` that calls it on all Turbines
+- **Mutable list, counter, or invoked flag?** → Replace it with a Turbine; mutable fields are only for fake configuration
 - **Complex initialization?** → Add companion object `create()` factory method
 - **Always** → Provide default parameters for easy instantiation
