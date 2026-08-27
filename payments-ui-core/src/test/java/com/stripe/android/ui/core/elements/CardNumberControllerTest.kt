@@ -38,6 +38,7 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -906,6 +907,7 @@ internal class CardNumberControllerTest {
             cardAccountRangeRepository = FakeCardAccountRangeRepository(),
             uiContext = testDispatcher,
             workContext = testDispatcher,
+            coroutineScope = CoroutineScope(testDispatcher),
             initialValue = initialValue,
             cardBrandChoiceConfig = cardBrandChoiceConfig,
             cardBrandFilter = cardBrandFilter
