@@ -31,14 +31,21 @@ import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.link.ui.paymentmenthod.PAYMENT_METHOD_ERROR_TAG
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.formElements
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.NoOpCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -59,6 +66,9 @@ internal class PaymentMethodScreenTest {
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()
 
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @Test
     fun `form fields are displayed correctly`() = runScenario {
         onCardNumber().assertExists()
@@ -74,7 +84,6 @@ internal class PaymentMethodScreenTest {
     @Test
     fun `no error message on successful payment`() = runScenario {
         fillCardDetails()
-        assertThat(formHelper.formFieldValuesChangedCall.awaitItem()).isNotNull()
 
         onPayButton()
             .scrollToAndAssertDisplayed()
@@ -123,11 +132,13 @@ internal class PaymentMethodScreenTest {
             .assert(hasText("oops"))
     }
 
-    private fun fillCardDetails() {
+    private suspend fun Scenario.fillCardDetails() {
         onCardNumber().performTextReplacement("4242424242424242")
         onCvc().performTextReplacement("123")
         onExpiryDate().performTextReplacement("12/34")
         onZipCode().performTextReplacement("12345")
+        assertThat(formHelper.formFieldValuesChangedCall.awaitItem())
+            .isEqualTo(PaymentMethod.Type.Card.code)
     }
 
     private fun screen(viewModel: PaymentMethodViewModel) {
@@ -149,7 +160,11 @@ internal class PaymentMethodScreenTest {
     private fun runScenario(
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         linkConfirmationHandler: FakeLinkConfirmationHandler = FakeLinkConfirmationHandler(),
-        formHelper: PaymentMethodFormHelper = PaymentMethodFormHelper(),
+        formHelper: PaymentMethodFormHelper = PaymentMethodFormHelper(
+            formElements = CardDefinition.formElements(
+                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
+            ),
+        ),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         block: suspend Scenario.() -> Unit
     ) {

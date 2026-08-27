@@ -6,13 +6,16 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -21,10 +24,15 @@ class CardDetailsSectionControllerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+    private val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
-    private val coroutineScope = CoroutineScope(testDispatcher)
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.outerRule(coroutineTestRule)
+        .around(coroutineScopeCleanupRule)
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(testDispatcher))
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 

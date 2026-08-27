@@ -20,9 +20,46 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 
 internal object TestUiDefinitionFactoryArgumentsFactory {
+    private val cancelledCoroutineScope = CoroutineScope(Dispatchers.Unconfined).apply {
+        cancel()
+    }
+
     fun create(
+        paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+        initialValues: Map<IdentifierSpec, String?>? = null,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
+        linkInlineHandler: LinkInlineHandler? = null,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+        initialLinkUserInput: UserInput? = null,
+        setAsDefaultMatchesSaveForFutureUse: Boolean = false,
+        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+        tapToAddHelper: TapToAddHelper? = null,
+        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
+        isNfcScanningAvailable: IsNfcScanningAvailable? = null,
+    ): UiDefinitionFactory.Arguments.Factory = create(
+        coroutineScope = cancelledCoroutineScope,
+        paymentMethodCreateParams = paymentMethodCreateParams,
+        paymentMethodExtraParams = paymentMethodExtraParams,
+        paymentMethodOptionsParams = paymentMethodOptionsParams,
+        initialValues = initialValues,
+        linkConfigurationCoordinator = linkConfigurationCoordinator,
+        linkInlineHandler = linkInlineHandler,
+        autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        initialLinkUserInput = initialLinkUserInput,
+        setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+        tapToAddHelper = tapToAddHelper,
+        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+        isNfcScanningAvailable = isNfcScanningAvailable,
+    )
+
+    fun create(
+        coroutineScope: CoroutineScope,
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
@@ -43,7 +80,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             null
         }
         val delegate = UiDefinitionFactory.Arguments.Factory.Default(
-            coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+            coroutineScope = coroutineScope,
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory(context),
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodOptionsParams = paymentMethodOptionsParams,
