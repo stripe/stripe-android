@@ -43,6 +43,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private val sessionRefresher: CheckoutSessionRefresher,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val logger: Logger,
+    private val checkoutSheetLinkHelper: CheckoutSheetLinkHelper,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
@@ -51,10 +52,16 @@ internal class CheckoutSheetLauncher @Inject constructor(
 ) : EmbeddedSheetLauncher {
 
     init {
+        checkoutSheetLinkHelper.register(
+            activityResultCaller = activityResultCaller,
+            launchPaymentOptions = ::launchPaymentOptionsSheet,
+        )
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     activityLauncher.unregister()
+                    checkoutSheetLinkHelper.unregister()
                     super.onDestroy(owner)
                 }
             }
@@ -226,6 +233,25 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
+
+        if (checkoutSheetLinkHelper.launchLinkIfEligible(paymentMethodMetadata, selection)) {
+            return
+        }
+
+        launchPaymentOptionsSheet(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerState = customerState,
+            selection = selection,
+            configuration = configuration,
+        )
+    }
+
+    private fun launchPaymentOptionsSheet(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration,
+    ) {
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
