@@ -17,6 +17,7 @@ import javax.inject.Singleton
     modules = [
         PaymentLauncherModule::class,
         ApiRequestOptionsModule::class,
+        ApiConfigurationToNamedModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
