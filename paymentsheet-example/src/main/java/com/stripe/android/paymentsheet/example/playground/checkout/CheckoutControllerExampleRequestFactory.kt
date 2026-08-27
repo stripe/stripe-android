@@ -11,7 +11,7 @@ internal enum class CheckoutControllerExampleScenario(
 ) {
     NoTax("No tax"),
     ShippingTax("Shipping tax"),
-    BillingTax("Billing tax"),
+    BillingTax("Billing tax w/ auto collection"),
 }
 
 internal data class CheckoutControllerExampleRequest(
@@ -45,7 +45,9 @@ internal object CheckoutControllerExampleRequestFactory {
                 )
                 put("automatic_tax", scenario != CheckoutControllerExampleScenario.NoTax)
                 put("shipping_address_collection", scenario == CheckoutControllerExampleScenario.ShippingTax)
-                put("billing_address_collection", scenario == CheckoutControllerExampleScenario.BillingTax)
+                if (scenario != CheckoutControllerExampleScenario.BillingTax) {
+                    put("billing_address_collection", false)
+                }
             },
         )
     }
