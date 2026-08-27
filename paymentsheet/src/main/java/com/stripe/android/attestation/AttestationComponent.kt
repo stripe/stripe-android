@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.link.injection.PaymentsIntegrityModule
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPublishableKeyModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -21,6 +22,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         PaymentsIntegrityModule::class,
         StripeRepositoryModule::class,
+        ApiConfigurationFromPublishableKeyModule::class,
     ]
 )
 internal interface AttestationComponent {
