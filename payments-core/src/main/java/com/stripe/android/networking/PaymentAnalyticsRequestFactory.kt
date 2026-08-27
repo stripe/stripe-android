@@ -30,14 +30,14 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     packageManager: PackageManager?,
     packageInfo: PackageInfo?,
     packageName: String,
-    apiConfigurationProvider: () -> ApiConfiguration.State,
+    publishableKeyProvider: Provider<String>,
     networkTypeProvider: Provider<String?>,
     internal val defaultProductUsageTokens: Set<String> = emptySet(),
 ) : AnalyticsRequestFactory(
     packageManager,
     packageInfo,
     packageName,
-    Provider { apiConfigurationProvider().publishableKey },
+    publishableKeyProvider,
     networkTypeProvider,
 ) {
     private val appInfo get() = Stripe.appInfo
@@ -51,12 +51,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        apiConfigurationProvider = {
-            ApiConfiguration.State(
-                publishableKey = publishableKeyProvider(),
-                stripeAccountId = null,
-            )
-        },
+        publishableKeyProvider = publishableKeyProvider,
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
     )
 
@@ -78,7 +73,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        apiConfigurationProvider = apiConfigurationProvider,
+        publishableKeyProvider = Provider { apiConfigurationProvider().publishableKey },
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
