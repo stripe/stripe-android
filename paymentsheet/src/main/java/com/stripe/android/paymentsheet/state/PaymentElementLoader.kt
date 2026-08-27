@@ -32,6 +32,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -95,12 +96,6 @@ internal interface PaymentElementLoader {
             val isRowSelectionImmediateAction: Boolean,
             val configuration: EmbeddedPaymentElement.Configuration,
             val paymentMethodLayout: PaymentMethodLayout,
-        ) : Configuration {
-            override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
-        }
-
-        data class CryptoOnramp(
-            val configuration: LinkController.Configuration.State
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
@@ -193,21 +188,9 @@ internal interface PaymentElementLoader {
         }
 
         @Parcelize
-        data class CryptoOnramp(
-            val paymentMethodTypes: List<String>? = null,
-        ) : InitializationMode() {
-            override fun validate() {
-                // Nothing to validate.
-            }
-
-            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
-                return IntegrationMetadata.CryptoOnramp
-            }
-        }
-
-        @Parcelize
         data class StandaloneLink(
             val paymentMethodTypes: List<String>? = null,
+            val requestSurface: RequestSurface = RequestSurface.StandaloneLink,
         ) : InitializationMode() {
             override fun validate() {
                 // Nothing to validate.
@@ -624,7 +607,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
     ): PaymentMethodLayout {
         return when (integrationConfiguration) {
-            is PaymentElementLoader.Configuration.CryptoOnramp,
             is PaymentElementLoader.Configuration.StandaloneLink -> PaymentMethodLayout.Vertical
             is PaymentElementLoader.Configuration.Embedded ->
                 if (

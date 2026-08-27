@@ -1972,12 +1972,12 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `integrationMetadata returns cryptoOnramp`() = runScenario {
-        val initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp()
+    fun `integrationMetadata returns StandaloneLink`() = runScenario {
+        val initializationMode = PaymentElementLoader.InitializationMode.StandaloneLink()
         assertThat(initializationMode.integrationMetadata(null))
-            .isEqualTo(IntegrationMetadata.CryptoOnramp)
+            .isEqualTo(IntegrationMetadata.StandaloneLink)
         assertThat(initializationMode.integrationMetadata(PaymentElementCallbacks.Builder().build()))
-            .isEqualTo(IntegrationMetadata.CryptoOnramp)
+            .isEqualTo(IntegrationMetadata.StandaloneLink)
     }
 
     @Test
@@ -4542,11 +4542,11 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Loads successfully for cryptoOnramp`() = runScenario {
+    fun `Loads successfully for Standalone Link`() = runScenario {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
-        val initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp()
+        val initializationMode = PaymentElementLoader.InitializationMode.StandaloneLink()
 
         val result = loader.load(
             initializationMode = initializationMode,
@@ -4556,7 +4556,8 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         ).getOrThrow()
 
-        assertThat(result.paymentMethodMetadata.integrationMetadata).isEqualTo(IntegrationMetadata.CryptoOnramp)
+        assertThat(result.paymentMethodMetadata.integrationMetadata)
+            .isEqualTo(IntegrationMetadata.StandaloneLink)
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem().initializedViaCompose).isTrue()
         eventReporter.loadSucceededTurbine.awaitItem()

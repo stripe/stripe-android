@@ -43,9 +43,6 @@ internal sealed class IntegrationMetadata : Parcelable {
     }
 
     @Parcelize
-    object CryptoOnramp : IntegrationMetadata()
-
-    @Parcelize
     object StandaloneLink : IntegrationMetadata()
 
     @Parcelize
