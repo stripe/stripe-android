@@ -1,16 +1,21 @@
 package com.stripe.android.paymentsheet.injection
 
+import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import javax.inject.Inject
-import javax.inject.Provider
 
-internal class ApiConfigurationResolver @Inject constructor(
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+internal class ApiConfigurationResolver(
+    private val paymentConfigurationProvider: () -> PaymentConfiguration,
 ) {
+    @Inject
+    constructor(context: Context) : this(
+        paymentConfigurationProvider = { PaymentConfiguration.getInstance(context) }
+    )
+
     fun resolve(apiConfiguration: ApiConfiguration.State?): ApiConfiguration.State {
         if (apiConfiguration != null) return apiConfiguration
-        val config = paymentConfiguration.get()
+        val config = paymentConfigurationProvider()
         return ApiConfiguration.State(
             publishableKey = config.publishableKey,
             stripeAccountId = config.stripeAccountId,

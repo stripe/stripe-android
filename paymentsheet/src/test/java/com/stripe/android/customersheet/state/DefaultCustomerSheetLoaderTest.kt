@@ -66,7 +66,6 @@ import org.junit.Test
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -873,7 +872,7 @@ internal class DefaultCustomerSheetLoaderTest {
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = workContext,
-            apiConfigurationResolver = ApiConfigurationResolver(Provider { PaymentConfiguration("pk_test_123") })
+            apiConfigurationResolver = ApiConfigurationResolver { PaymentConfiguration("pk_test_123") }
         )
     }
 
