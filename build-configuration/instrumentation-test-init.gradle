@@ -1,4 +1,11 @@
-apply from: new File(gradle.startParameter.currentDir, "build-configuration/quarantined-tests-json.gradle")
+def instrumentationInitScript = gradle.startParameter.allInitScripts.find {
+    it.name == "instrumentation-test-init.gradle"
+}
+if (instrumentationInitScript == null) {
+    throw new GradleException("Could not locate instrumentation-test-init.gradle")
+}
+
+apply from: new File(instrumentationInitScript.parentFile, "quarantined-tests-json.gradle")
 
 def load = gradle.ext.quarantinedTestsLoad
 

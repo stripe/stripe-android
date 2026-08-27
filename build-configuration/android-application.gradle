@@ -5,6 +5,7 @@
  */
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
+apply plugin: "com.google.firebase.testlab"
 
 apply from: rootProject.file('build-configuration/version.gradle')
 
@@ -50,21 +51,6 @@ android {
         // Make sure animations are off when we run espresso tests
         animationsDisabled = true
 
-        managedDevices {
-            localDevices {
-                register("pixel2api33") {
-                    device = "Pixel 2"
-                    apiLevel = 33
-                    systemImageSource = "aosp-atd"
-                }
-                // google_apis ships a browser; used by the paymentsheet-example E2E suite.
-                register("pixel2api33chrome") {
-                    device = "Pixel 2"
-                    apiLevel = 33
-                    systemImageSource = "google_apis"
-                }
-            }
-        }
     }
 
     lintOptions {
@@ -91,6 +77,34 @@ android {
     packagingOptions {
         resources {
             excludes += ['LICENSE.txt']
+        }
+    }
+}
+
+firebaseTestLab {
+    def credentials = System.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+    if (credentials) {
+        serviceAccountCredentials = file(credentials)
+    }
+
+    managedDevices {
+        mediumPhoneApi33 {
+            device = "MediumPhone.arm"
+            apiLevel = 33
+        }
+    }
+
+    testOptions {
+        execution {
+            timeoutMinutes = 45
+            maxTestReruns = 2
+            failFast = false
+            targetedShardDurationMinutes = 9
+        }
+        results {
+            cloudStorageBucket = "stripe-payments-sdk-prod-test-lab-results"
+            recordVideo = false
         }
     }
 }

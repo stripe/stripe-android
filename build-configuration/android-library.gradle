@@ -6,6 +6,7 @@
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "org.gradle.test-retry"
+apply plugin: "com.google.firebase.testlab"
 if (project.hasProperty("enable_dokka") && project.enable_dokka) {
     apply plugin: "org.jetbrains.dokka"
 }
@@ -48,18 +49,6 @@ android {
         testInstrumentationRunnerArguments clearPackageData: 'true'
     }
 
-    testOptions {
-        managedDevices {
-            localDevices {
-                register("pixel2api33") {
-                    device = "Pixel 2"
-                    apiLevel = 33
-                    systemImageSource = "aosp-atd"
-                }
-            }
-        }
-    }
-
     sourceSets {
         main {
             res.srcDirs = ['res']
@@ -92,6 +81,34 @@ android {
 
         compilerOptions {
             jvmTarget.set("JVM_11")
+        }
+    }
+}
+
+firebaseTestLab {
+    def credentials = System.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+    if (credentials) {
+        serviceAccountCredentials = file(credentials)
+    }
+
+    managedDevices {
+        mediumPhoneApi33 {
+            device = "MediumPhone.arm"
+            apiLevel = 33
+        }
+    }
+
+    testOptions {
+        execution {
+            timeoutMinutes = 45
+            maxTestReruns = 2
+            failFast = false
+            targetedShardDurationMinutes = 9
+        }
+        results {
+            cloudStorageBucket = "stripe-payments-sdk-prod-test-lab-results"
+            recordVideo = false
         }
     }
 }

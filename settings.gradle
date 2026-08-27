@@ -1,3 +1,13 @@
+pluginManagement {
+    includeBuild("build-logic/firebase-testlab-plugin")
+
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 include ':camera-core'
 include ':checkout-testing'
 include ':example'
