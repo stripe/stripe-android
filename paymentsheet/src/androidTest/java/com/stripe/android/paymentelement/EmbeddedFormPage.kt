@@ -18,10 +18,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
-import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
-import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import kotlin.time.Duration.Companion.seconds
 
 internal class EmbeddedFormPage(
@@ -86,7 +87,7 @@ internal class EmbeddedFormPage(
         clickPrimaryButtonWithoutWaitingForDismissal()
 
         composeTestRule.waitUntil(5.seconds.inWholeMilliseconds) {
-            composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+            composeTestRule.onAllNodesWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
@@ -102,11 +103,11 @@ internal class EmbeddedFormPage(
             timeoutMillis = 5.seconds.inWholeMilliseconds,
         ) {
             composeTestRule.onAllNodes(
-                hasTestTag(PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled())
+                hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled())
             ).fetchSemanticsNodes().isNotEmpty()
         }
 
-        composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+        composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
             .performScrollTo()
             .performTouchInput { click() }
 
@@ -142,11 +143,11 @@ internal class EmbeddedFormPage(
 
     fun assertErrorIsShown(message: String) {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule.onAllNodes(hasText(message))
+            composeTestRule.onAllNodes(hasTestTag(SHEET_ERROR_TEST_TAG).and(hasText(message)))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
-        composeTestRule.onNode(hasText(message))
+        composeTestRule.onNode(hasTestTag(SHEET_ERROR_TEST_TAG).and(hasText(message)))
             .performScrollTo()
             .assertIsDisplayed()
     }
@@ -154,26 +155,26 @@ internal class EmbeddedFormPage(
     fun assertMandateIsShown() {
         waitUntilVisible()
 
-        composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
+        composeTestRule.onNodeWithTag(SHEET_MANDATE_TEST_TAG)
             .assertExists()
     }
 
     fun assertMandateIsMissing() {
         waitUntilVisible()
 
-        composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
+        composeTestRule.onNodeWithTag(SHEET_MANDATE_TEST_TAG)
             .assertDoesNotExist()
     }
 
     private fun waitUntilPrimaryButtonIsEnabled() {
         composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(isEnabled()))
+            composeTestRule.onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
 
     private fun primaryButton(): SemanticsNodeInteraction {
-        return composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+        return composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
     }
 }

@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.FormPage
@@ -60,7 +61,7 @@ internal class EmbeddedSheetActivityTest {
     private val billingDetailsPage = BillingDetailsPage(composeTestRule)
     private val primaryButton = composeTestRule.onNode(
         hasTestTag(PRIMARY_BUTTON_TEST_TAG)
-            .and(hasParent(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)))
+            .and(hasParent(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG)))
     )
 
     @get:Rule
