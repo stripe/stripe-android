@@ -42,7 +42,21 @@ class ApiConfigurationFromNamedModule {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
-class ApiConfigurationToNamedModule {
+class ApiConfigurationFromPublishableKeyModule {
+    @Provides
+    fun provideApiConfiguration(
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+    ): ApiConfiguration.State {
+        return ApiConfiguration.State(
+            publishableKey = publishableKeyProvider(),
+            stripeAccountId = null,
+        )
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Module
+class ApiRequestOptionsModule {
     @Provides
     @Named(PUBLISHABLE_KEY)
     fun providePublishableKeyProvider(
@@ -54,11 +68,7 @@ class ApiConfigurationToNamedModule {
     fun provideStripeAccountIdProvider(
         apiConfigurationProvider: Provider<ApiConfiguration.State>
     ): () -> String? = { apiConfigurationProvider.get().stripeAccountId }
-}
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module
-class ApiRequestOptionsModule {
     @Provides
     fun provideApiRequestOptions(
         apiConfigurationProvider: Provider<ApiConfiguration.State>
