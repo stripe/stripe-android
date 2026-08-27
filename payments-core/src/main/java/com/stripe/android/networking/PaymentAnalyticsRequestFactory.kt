@@ -53,8 +53,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    constructor(
+    internal constructor(
         context: Context,
         publishableKeyProvider: () -> String,
         defaultProductUsageTokens: Set<String> = emptySet()
