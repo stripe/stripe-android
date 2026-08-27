@@ -18,13 +18,12 @@ class CheckoutControllerExampleRequestFactoryTest {
         assertThat(request.body).isEqualTo(
             buildJsonObject {
                 put("mode", "payment")
-                put("customer", "new")
+                put("customer", "guest")
                 put("customer_email", "email@example.com")
                 put("currency", "usd")
                 put("payment_method_types", commonPaymentMethodTypes)
                 put("automatic_tax", false)
                 put("shipping_address_collection", false)
-                put("billing_address_collection", false)
             }
         )
     }
@@ -39,13 +38,12 @@ class CheckoutControllerExampleRequestFactoryTest {
         assertThat(request.body).isEqualTo(
             buildJsonObject {
                 put("mode", "payment")
-                put("customer", "new")
+                put("customer", "guest")
                 put("customer_email", "email@example.com")
                 put("currency", "usd")
                 put("payment_method_types", commonPaymentMethodTypes)
                 put("automatic_tax", true)
                 put("shipping_address_collection", true)
-                put("billing_address_collection", false)
             }
         )
     }

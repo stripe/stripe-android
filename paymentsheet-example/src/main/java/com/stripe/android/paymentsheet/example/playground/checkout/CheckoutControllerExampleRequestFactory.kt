@@ -25,10 +25,7 @@ internal object CheckoutControllerExampleRequestFactory {
             endpoint = "checkout_session",
             body = buildJsonObject {
                 put("mode", "payment")
-                put(
-                    "customer",
-                    if (scenario == CheckoutControllerExampleScenario.BillingTax) "guest" else "new"
-                )
+                put("customer", "guest")
                 put("customer_email", "email@example.com")
                 put("currency", "usd")
                 put(
@@ -45,9 +42,6 @@ internal object CheckoutControllerExampleRequestFactory {
                 )
                 put("automatic_tax", scenario != CheckoutControllerExampleScenario.NoTax)
                 put("shipping_address_collection", scenario == CheckoutControllerExampleScenario.ShippingTax)
-                if (scenario != CheckoutControllerExampleScenario.BillingTax) {
-                    put("billing_address_collection", false)
-                }
             },
         )
     }
