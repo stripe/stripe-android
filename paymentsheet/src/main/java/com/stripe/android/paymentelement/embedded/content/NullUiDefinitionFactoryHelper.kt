@@ -6,10 +6,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 
 internal object NullUiDefinitionFactoryHelper {
     val nullEmbeddedUiDefinitionFactory = UiDefinitionFactory.Arguments.Factory.Default(
+        // This factory only creates form elements for synchronous metadata inspection.
+        coroutineScope = CoroutineScope(Job().apply { cancel() }),
         cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
         linkConfigurationCoordinator = null,
         linkInlineHandler = null,

@@ -49,6 +49,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             formDefinitionFactory = createFormDefinitionFactory(
+                coroutineScope = coroutineScope,
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                 paymentMethodMetadata = paymentMethodMetadata,
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
@@ -60,6 +61,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     }
 
     fun createFormDefinitionFactory(
+        coroutineScope: CoroutineScope,
         setAsDefaultMatchesSaveForFutureUse: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
@@ -68,6 +70,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         linkInlineHandler: LinkInlineHandler,
     ): FormDefinitionFactory {
         return DefaultFormDefinitionFactory(
+            coroutineScope = coroutineScope,
             linkInlineHandler = linkInlineHandler,
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,

@@ -18,6 +18,8 @@ import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormData
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 internal object TestUiDefinitionFactoryArgumentsFactory {
     fun create(
@@ -41,6 +43,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             null
         }
         val delegate = UiDefinitionFactory.Arguments.Factory.Default(
+            coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory(context),
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodOptionsParams = paymentMethodOptionsParams,

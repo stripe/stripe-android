@@ -13,6 +13,8 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -32,6 +34,9 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
     private val formHelperFactory: EmbeddedFormHelperFactory,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) : EmbeddedSelectionChooser {
+    // Compatibility checks only inspect synchronously constructed form metadata.
+    private val coroutineScope = CoroutineScope(Job().apply { cancel() })
+
     private var previousConfiguration: CommonConfiguration?
         get() = savedStateHandle[PREVIOUS_CONFIGURATION_KEY]
         set(value) = savedStateHandle.set(PREVIOUS_CONFIGURATION_KEY, value)
@@ -148,6 +153,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
     ): Boolean {
         val newFormDefinitionFactory = formHelperFactory.createFormDefinitionFactory(
+            coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             // Card scan auto-launch is only relevant in the form, not when selecting the default.
             automaticallyLaunchedCardScanFormDataHelper = null,
@@ -163,6 +169,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         }
         return previousPaymentMethodMetadata?.let { previousPaymentMethodMetadata ->
             val previousFormDefinitionFactory = formHelperFactory.createFormDefinitionFactory(
+                coroutineScope = coroutineScope,
                 paymentMethodMetadata = previousPaymentMethodMetadata,
                 // Card scan auto-launch is only relevant in the form, not when selecting the default.
                 automaticallyLaunchedCardScanFormDataHelper = null,

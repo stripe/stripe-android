@@ -19,6 +19,8 @@ import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -159,6 +161,7 @@ class BillingAddressFormElementsBuilderTest {
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
+            coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             initialValues = initialValues,
             initialLinkUserInput = null,
             shippingValues = shippingValues,

@@ -22,6 +22,8 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SimpleTextElement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -238,6 +240,7 @@ class FormElementsBuilderTest {
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
+            coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             initialValues = initialValues,
             initialLinkUserInput = null,
             shippingValues = shippingValues,
