@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -22,6 +23,7 @@ import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsE
 import com.stripe.android.paymentsheet.injection.PaymentSheetAutocompleteModule
 import dagger.BindsInstance
 import dagger.Component
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -40,7 +42,6 @@ import javax.inject.Singleton
 )
 @Singleton
 internal interface EmbeddedSheetComponent {
-    val viewModel: EmbeddedSheetViewModel
     val selectionHolder: EmbeddedSelectionHolder
     val customerStateHolder: CustomerStateHolder
 
@@ -64,6 +65,9 @@ internal interface EmbeddedSheetComponent {
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance promotion: PaymentMethodMessagePromotion?,
             @BindsInstance launchMode: EmbeddedLaunchMode,
+            @BindsInstance
+            @ViewModelScope
+            viewModelScope: CoroutineScope,
         ): EmbeddedSheetComponent
     }
 }
