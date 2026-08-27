@@ -10,8 +10,6 @@ enum class IdType(internal val value: String) {
     /** A United States Social Security Number. */
     SocialSecurityNumber("social_security_number"),
 
-    // These API values are provisional and must be confirmed before stabilization.
-
     /** A Canadian Social Insurance Number. */
     CanadianSocialInsuranceNumber("ca_sin"),
 

@@ -43,6 +43,7 @@ import com.stripe.android.crypto.onramp.example.KYC_NATIONALITIES_TAG
 import com.stripe.android.crypto.onramp.example.KYC_RESIDENCE_DROPDOWN_TAG
 import com.stripe.android.crypto.onramp.example.KYC_SECTION_TAG
 import com.stripe.android.crypto.onramp.example.VERIFY_KYC_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.model.KycResidence
 import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.model.DateOfBirth
@@ -62,6 +63,8 @@ internal fun KycSection(
     onBirthCityChange: (String) -> Unit,
     nationalities: String,
     onNationalitiesChange: (String) -> Unit,
+    residence: KycResidence,
+    onResidenceChange: (KycResidence) -> Unit,
     address: PaymentSheet.Address,
     onAddressChange: (PaymentSheet.Address) -> Unit,
     onCollectKyc: (KycInfo) -> Unit,
@@ -96,6 +99,8 @@ internal fun KycSection(
                 onBirthCityChange = onBirthCityChange,
                 nationalities = nationalities,
                 onNationalitiesChange = onNationalitiesChange,
+                residence = residence,
+                onResidenceChange = onResidenceChange,
                 address = address,
                 onAddressChange = onAddressChange,
                 onCollectKyc = onCollectKyc
@@ -127,13 +132,16 @@ private fun KycForm(
     onBirthCityChange: (String) -> Unit,
     nationalities: String,
     onNationalitiesChange: (String) -> Unit,
+    residence: KycResidence,
+    onResidenceChange: (KycResidence) -> Unit,
     address: PaymentSheet.Address,
     onAddressChange: (PaymentSheet.Address) -> Unit,
     onCollectKyc: (KycInfo) -> Unit
 ) {
-    var residence by remember { mutableStateOf(KycResidence.UnitedStates) }
     var isResidenceDropdownExpanded by remember { mutableStateOf(false) }
-    var idNumber by remember { mutableStateOf(DEFAULT_ID_NUMBER) }
+    var idNumber by remember {
+        mutableStateOf(residence.nationalIdConfiguration?.defaultValue.orEmpty())
+    }
     var dobDay by remember { mutableStateOf(DEFAULT_DOB_DAY) }
     var dobMonth by remember { mutableStateOf(DEFAULT_DOB_MONTH) }
     var dobYear by remember { mutableStateOf(DEFAULT_DOB_YEAR) }
@@ -172,20 +180,8 @@ private fun KycForm(
                 KycResidence.entries.forEach { selectedResidence ->
                     DropdownMenuItem(
                         onClick = {
-                            residence = selectedResidence
-                            idNumber = if (selectedResidence.nationalIdConfiguration == null) {
-                                ""
-                            } else {
-                                DEFAULT_ID_NUMBER
-                            }
-                            onAddressChange(
-                                address.replacing(country = selectedResidence.countryCode.orEmpty())
-                            )
-                            if (!selectedResidence.followsEuFlow) {
-                                onBirthCountryChange("")
-                                onBirthCityChange("")
-                                onNationalitiesChange("")
-                            }
+                            onResidenceChange(selectedResidence)
+                            idNumber = selectedResidence.nationalIdConfiguration?.defaultValue.orEmpty()
                             isResidenceDropdownExpanded = false
                         }
                     ) {
@@ -309,7 +305,7 @@ private fun KycForm(
         )
         KycTextField(
             value = address.state.orEmpty(),
-            label = "State",
+            label = if (residence.requiresState) "State/Province *" else "State/Province",
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag(KYC_ADDRESS_STATE_TAG),
@@ -431,7 +427,6 @@ private fun PaymentSheet.Address.replacing(
     )
 }
 
-private const val DEFAULT_ID_NUMBER = "000000000"
 private const val DEFAULT_DOB_DAY = "1"
 private const val DEFAULT_DOB_MONTH = "1"
 private const val DEFAULT_DOB_YEAR = "1990"
