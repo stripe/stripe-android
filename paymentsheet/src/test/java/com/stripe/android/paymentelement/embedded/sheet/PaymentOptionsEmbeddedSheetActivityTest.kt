@@ -333,6 +333,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 input = EmbeddedActivityArgs(
                     paymentMethodMetadata = paymentMethodMetadata,
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+                    productUsage = setOf("EmbeddedPaymentElement"),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
                     selection = selection,

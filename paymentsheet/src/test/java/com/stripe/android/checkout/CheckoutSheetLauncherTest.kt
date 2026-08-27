@@ -71,6 +71,7 @@ internal class CheckoutSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("Checkout"),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             statusBarColor = null,
             selection = null,
@@ -363,6 +364,7 @@ internal class CheckoutSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("Checkout"),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             statusBarColor = null,
             selection = PaymentSelection.GooglePay,
@@ -490,6 +492,7 @@ internal class CheckoutSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("Checkout"),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             statusBarColor = null,
             selection = selection,
@@ -749,6 +752,7 @@ internal class CheckoutSheetLauncherTest {
                 operationCoordinator = operationCoordinator,
                 logger = logger,
                 coroutineScope = testScope,
+                productUsage = setOf("Checkout"),
                 statusBarColor = null,
                 paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
                 rowSelectionImmediateActionHandler = { immediateActionInvoked = true },

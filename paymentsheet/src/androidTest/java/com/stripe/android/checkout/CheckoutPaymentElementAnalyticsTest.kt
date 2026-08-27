@@ -13,6 +13,7 @@ import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
+import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -35,6 +36,52 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     private val contentPage = EmbeddedContentPage(testRules.compose)
+    private val formPage = EmbeddedFormPage(testRules.compose)
+
+    @Test
+    fun testSheetAnalyticsUsesCheckoutProductUsage() = runCheckoutPaymentElementTest(
+        networkRule = networkRule,
+        setup = { controller ->
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_started",
+                productUsage = setOf("Checkout"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_succeeded",
+                productUsage = setOf("Checkout"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_initial_displayed_payment_methods",
+                productUsage = setOf("Checkout"),
+            )
+            controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        },
+    ) { context ->
+        networkRule.validateAnalyticsRequest(
+            eventName = "mc_carousel_payment_method_tapped",
+            productUsage = setOf("Checkout"),
+        )
+        networkRule.validateAnalyticsRequest(
+            eventName = "stripe_android.card_metadata_pk_available",
+            productUsage = setOf("Checkout"),
+        )
+        networkRule.validateAnalyticsRequest(
+            eventName = "mc_form_shown",
+            productUsage = setOf("Checkout"),
+        )
+        networkRule.validateAnalyticsRequest(
+            eventName = "stripe_android.card_metadata_pk_available",
+            productUsage = setOf("Checkout"),
+        )
+        networkRule.validateAnalyticsRequest(
+            eventName = "mc_cardscan_api_check_failed",
+            productUsage = setOf("Checkout"),
+        )
+
+        contentPage.clickOnLpm("card")
+        formPage.waitUntilVisible()
+        context.markTestSucceeded()
+    }
 
     @Test
     fun testTotalChangeFailureSendsAnalyticsErrorCode() = runCheckoutPaymentElementTest(

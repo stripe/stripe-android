@@ -266,6 +266,7 @@ internal class EmbeddedSheetActivityTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                         .build(),
+                    productUsage = setOf("EmbeddedPaymentElement"),
                     paymentElementCallbackIdentifier = "EmbeddedSheetActivityTestCallbackIdentifier",
                     statusBarColor = null,
                     selection = selection,

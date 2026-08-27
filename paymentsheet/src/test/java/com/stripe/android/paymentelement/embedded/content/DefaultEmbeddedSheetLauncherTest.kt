@@ -74,6 +74,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = null,
@@ -399,6 +400,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = PaymentSelection.GooglePay,
@@ -578,6 +580,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = selection,
@@ -809,6 +812,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 customerStateHolder = customerStateHolder,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
+                productUsage = setOf("EmbeddedPaymentElement"),
                 statusBarColor = null,
                 paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                 embeddedResultCallbackHelper = callbackHelper,
