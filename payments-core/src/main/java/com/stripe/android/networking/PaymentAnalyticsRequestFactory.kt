@@ -7,7 +7,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
-import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -30,14 +30,14 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     packageManager: PackageManager?,
     packageInfo: PackageInfo?,
     packageName: String,
-    apiConfigurationProvider: () -> ApiConfiguration.State,
+    publishableKeyProvider: Provider<String>,
     networkTypeProvider: Provider<String?>,
     internal val defaultProductUsageTokens: Set<String> = emptySet(),
 ) : AnalyticsRequestFactory(
     packageManager,
     packageInfo,
     packageName,
-    Provider { apiConfigurationProvider().publishableKey },
+    publishableKeyProvider,
     networkTypeProvider,
 ) {
     private val appInfo get() = Stripe.appInfo
@@ -62,12 +62,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        apiConfigurationProvider = {
-            ApiConfiguration.State(
-                publishableKey = publishableKeyProvider(),
-                stripeAccountId = null,
-            )
-        },
+        publishableKeyProvider = publishableKeyProvider,
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
@@ -75,13 +70,13 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @Inject
     internal constructor(
         context: Context,
-        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
-        apiConfigurationProvider: () -> ApiConfiguration.State,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: Provider<() -> String>,
+        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        apiConfigurationProvider = apiConfigurationProvider,
+        publishableKeyProvider = Provider { publishableKeyProvider.get()() },
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
