@@ -1,6 +1,6 @@
 ---
 name: write-unit-tests
-description: Use when writing or structuring unit tests in stripe-android — covers runScenario pattern, fakes, Turbine Flow testing, and Truth assertions
+description: Use when writing or structuring unit tests in stripe-android — covers runScenario, mandatory Turbine fake-call tracking, Flow testing, and Truth assertions
 ---
 # Setting Up Tests
 
@@ -8,12 +8,20 @@ This skill describes how to structure tests in the Stripe Android SDK using fake
 
 ## Core Principles
 
-1. **Use fakes over mocks** - Leverage fake implementations for dependencies (see `create-fake` skill)
+1. **Use fakes over mocks** - Invoke and follow the [`create-fake`](../create-fake/SKILL.md) skill for every new or changed fake
 2. **Create test scenarios** - Use Scenario classes with `runScenario` functions to organize test setup
 3. **Verify all events consumed** - Call `ensureAllEventsConsumed()` on fakes after test block
 4. **Use Truth assertions** - Always use `assertThat(actual).isEqualTo(expected)` from Google Truth 
 5. **One case per test** - Each `@Test` should cover a single scenario or configuration
 6. **Use Turbine for Flow testing** - Test Flow emissions with Turbine's `.test { }` syntax
+
+## Fake Interaction Tracking
+
+All fake interaction history must use Turbine. This applies to calls with arguments, parameterless lifecycle calls, and callback registrations.
+
+Do not record calls with mutable lists, call-count integers, or invoked booleans. Mutable fake properties may configure return values or failures, but must not represent observed call history. Consume expected calls with `awaitItem()`, assert absence with `expectNoEvents()`, and invoke registered callbacks from the call object returned by `awaitItem()`.
+
+Every fake that owns Turbines must expose `ensureAllEventsConsumed()`, and every `runScenario` must call it after the test block. See [`create-fake`](../create-fake/SKILL.md) for the required implementation pattern.
 
 ## Basic Test Structure
 
@@ -183,6 +191,8 @@ fun `state updates when data changes`() = runScenario {
 | Assertions | `assertThat(actual).isEqualTo(expected)` |
 | Flow testing | `flow.test { assertThat(awaitItem()).isEqualTo(x) }` |
 | Fake call tracking | `assertThat(fake.calls.awaitItem()).isEqualTo(call)` |
+| Parameterless fake call | `fake.unregisterCalls.awaitItem()` using `Turbine<Unit>` |
+| Prohibited fake tracking | Mutable lists, call counters, and invoked booleans |
 | Fake validation | `ensureAllEventsConsumed()` — automatic in runScenario |
 | Test granularity | One scenario or configuration per `@Test` |
 | Parameterized cases | Invoke the [`parameterized-tests`](../parameterized-tests/SKILL.md) skill |
