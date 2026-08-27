@@ -45,6 +45,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationFromNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
@@ -133,6 +134,7 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
         GooglePayLauncherModule::class,
         PaymentOptionCardArtModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
+        ApiConfigurationFromNamedModule::class,
     ]
 )
 @Singleton

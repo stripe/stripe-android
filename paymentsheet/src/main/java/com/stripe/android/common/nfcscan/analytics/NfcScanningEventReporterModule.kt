@@ -1,10 +1,7 @@
 package com.stripe.android.common.nfcscan.analytics
 
-import android.content.Context
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -13,6 +10,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.BuildConfig
 import dagger.Binds
@@ -20,7 +18,7 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
-@Module
+@Module(includes = [ApiConfigurationFromPaymentConfigurationModule::class])
 internal interface NfcScanningEventReporterModule {
     @Binds
     fun bindsNfcScanningEventReporter(
@@ -45,12 +43,6 @@ internal interface NfcScanningEventReporterModule {
                 is IntegrationMetadata.CustomerSheet -> "cs_"
                 else -> "mc_"
             }
-        }
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(context: Context): () -> String = {
-            PaymentConfiguration.getInstance(context).publishableKey
         }
 
         @Provides
