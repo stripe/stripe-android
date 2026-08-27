@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.ApiConfiguration
@@ -851,7 +852,7 @@ internal class DefaultCustomerSheetLoaderTest {
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
                     cardBrandFilter: CardBrandFilter,
-                    apiConfiguration: ApiConfiguration.State?,
+                    apiConfiguration: ApiConfiguration.State,
                 ): GooglePayRepository {
                     return if (isGooglePayReady) {
                         readyGooglePayRepository
@@ -866,7 +867,12 @@ internal class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
-            workContext = workContext
+            workContext = workContext,
+            paymentConfiguration = {
+                PaymentConfiguration(
+                    publishableKey = "pk_test_123",
+                )
+            },
         )
     }
 
