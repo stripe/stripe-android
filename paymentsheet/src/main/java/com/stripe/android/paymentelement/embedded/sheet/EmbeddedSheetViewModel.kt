@@ -29,6 +29,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
                 paymentMethodMetadata = args.paymentMethodMetadata,
                 statusBarColor = args.statusBarColor,
                 configuration = args.configuration,
+                productUsage = args.productUsage,
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 application = extras.requireApplication(),
                 savedStateHandle = extras.createSavedStateHandle(),

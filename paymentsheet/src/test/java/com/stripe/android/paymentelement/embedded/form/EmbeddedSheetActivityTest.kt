@@ -261,6 +261,7 @@ internal class EmbeddedSheetActivityTest {
                 input = EmbeddedActivityArgs(
                     paymentMethodMetadata = paymentMethodMetadata,
                     configuration = configuration,
+                    productUsage = setOf("EmbeddedPaymentElement"),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                     selection = null,
