@@ -5029,7 +5029,7 @@ internal class DefaultPaymentElementLoaderTest {
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
                     cardBrandFilter: CardBrandFilter,
-                    apiConfiguration: ApiConfiguration.State?,
+                    apiConfiguration: ApiConfiguration.State,
                 ): GooglePayRepository {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }
