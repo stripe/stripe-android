@@ -6,7 +6,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
 
 internal class PaymentElementAutocompleteAddressInteractor(
-    private val launcher: AutocompleteLauncher,
+    private val launcher: AutocompleteLauncher?,
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
 ) : AutocompleteAddressInteractor, AutocompleteLauncherResultHandler {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
@@ -17,7 +17,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
 
     override fun onAutocomplete(country: String) {
         autocompleteConfig.googlePlacesApiKey?.let { googlePlacesApiKey ->
-            launcher.launch(
+            launcher?.launch(
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
                 resultHandler = this,
@@ -43,7 +43,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
     }
 
     class Factory(
-        private val launcher: AutocompleteLauncher,
+        private val launcher: AutocompleteLauncher?,
         private val autocompleteConfig: AutocompleteAddressInteractor.Config,
         private val placesClient: PlacesClientProxy?,
         private val stripeAutocompleteRepository: StripeAutocompleteRepository?,
