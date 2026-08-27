@@ -813,12 +813,15 @@ internal class PaymentSheetViewModelTest {
             )
 
             val linkInlineHandler = LinkInlineHandler.create()
-            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
+            val metadata = requireNotNull(viewModel.paymentMethodMetadata.value)
+            val formHelper = viewModel.paymentMethodFormFactory.createFormHelper(
                 coroutineScope = viewModel.viewModelScope,
-                paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                 linkInlineHandler = linkInlineHandler,
-                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+                paymentMethodMetadata = metadata,
+                dependencies = viewModel.paymentMethodFormFactoryDependencies(metadata),
                 paymentMethodMessagePromotionsHelper = null,
+                selectedPaymentMethodCode = PaymentMethod.Type.Card.code,
+                createAutomaticallyLaunchedCardScanFormDataHelper = false,
             )
 
             formHelper.onFormFieldValuesChanged(
@@ -1611,12 +1614,15 @@ internal class PaymentSheetViewModelTest {
             stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
         )
 
-        val observedArgs = BaseSheetFormHelperFactory(viewModel).create(
+        val metadata = requireNotNull(viewModel.paymentMethodMetadata.value)
+        val observedArgs = viewModel.paymentMethodFormFactory.createFormHelper(
             coroutineScope = viewModel.viewModelScope,
-            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
             linkInlineHandler = LinkInlineHandler.create(),
-            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+            paymentMethodMetadata = metadata,
+            dependencies = viewModel.paymentMethodFormFactoryDependencies(metadata),
             paymentMethodMessagePromotionsHelper = null,
+            selectedPaymentMethodCode = PaymentMethod.Type.Card.code,
+            createAutomaticallyLaunchedCardScanFormDataHelper = false,
         ).createFormArguments(
             paymentMethodCode = LpmRepositoryTestHelpers.card.code,
         )
@@ -2793,12 +2799,15 @@ internal class PaymentSheetViewModelTest {
                 assertThat(awaitItem()?.enabled).isFalse()
 
                 val linkInlineHandler = LinkInlineHandler.create()
-                val formHelper = BaseSheetFormHelperFactory(viewModel).create(
+                val metadata = requireNotNull(viewModel.paymentMethodMetadata.value)
+                val formHelper = viewModel.paymentMethodFormFactory.createFormHelper(
                     coroutineScope = viewModel.viewModelScope,
-                    paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                     linkInlineHandler = linkInlineHandler,
-                    shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+                    paymentMethodMetadata = metadata,
+                    dependencies = viewModel.paymentMethodFormFactoryDependencies(metadata),
                     paymentMethodMessagePromotionsHelper = null,
+                    selectedPaymentMethodCode = PaymentMethod.Type.Card.code,
+                    createAutomaticallyLaunchedCardScanFormDataHelper = false,
                 )
 
                 formHelper.onFormFieldValuesChanged(

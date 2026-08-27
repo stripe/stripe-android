@@ -11,10 +11,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_CONFIGURATION_KEY
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_PAYMENT_METHOD_METADATA_KEY
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CoroutineTestRule
@@ -475,9 +475,9 @@ internal class DefaultEmbeddedSelectionChooserTest {
         block: Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
-        val formHelperFactory = EmbeddedFormHelperFactory(
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        val formFactory = PaymentMethodFormFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
@@ -485,7 +485,8 @@ internal class DefaultEmbeddedSelectionChooserTest {
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(
                 savedStateHandle = savedStateHandle,
-                formHelperFactory = formHelperFactory,
+                formFactory = formFactory,
+                selectionHolder = selectionHolder,
                 internalRowSelectionCallback = { internalRowSelectionCallback }
             ),
             savedStateHandle = savedStateHandle,

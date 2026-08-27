@@ -9,8 +9,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -29,7 +29,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import kotlin.test.Test
 
-internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
+internal class EmbeddedPaymentMethodFormFactoryTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -95,9 +95,8 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
             setSelection(initialSelection)
         }
-        val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
+        val paymentMethodFormFactory = PaymentMethodFormFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
@@ -109,19 +108,32 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             selection = selectionHolder.selection,
         )
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
-        val factory = EmbeddedAddPaymentMethodInteractorFactory(
-            paymentMethodMetadata = paymentMethodMetadata,
-            embeddedSelectionHolder = selectionHolder,
-            embeddedFormHelperFactory = embeddedFormHelperFactory,
+        val eventReporter = FakeEventReporter()
+        val sheetActivityStateHolder = FakeSheetActivityStateHolder()
+        val tapToAddHelper = FakeTapToAddHelper.noOp()
+        val paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+        val dependencies = EmbeddedPaymentMethodFormDependencies(
             viewModelScope = viewModelScope,
-            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
-            tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = FakeEventReporter(),
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-            customerStateHolder = customerStateHolder,
+            selectionHolder = selectionHolder,
+            sheetActivityStateHolder = sheetActivityStateHolder,
+            tapToAddHelper = tapToAddHelper,
+            eventReporter = eventReporter,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        ).create(
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty(),
         )
-        val interactor = factory.create()
+        val initialCode = (selectionHolder.selection.value as? PaymentSelection.New)
+            ?.paymentMethodCreateParams
+            ?.typeCode
+            ?: paymentMethodMetadata.supportedPaymentMethodTypes().first()
+        val interactor = paymentMethodFormFactory.createAddPaymentMethodInteractor(
+            initiallySelectedPaymentMethodType = initialCode,
+            paymentMethodMetadata = paymentMethodMetadata,
+            dependencies = dependencies,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { _, _ -> },
+        )
 
         Scenario(
             interactor = interactor,

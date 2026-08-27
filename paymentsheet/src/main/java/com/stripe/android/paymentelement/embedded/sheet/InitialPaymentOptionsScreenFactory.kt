@@ -7,7 +7,6 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
@@ -15,6 +14,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
@@ -44,7 +45,8 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
-    private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
+    private val paymentMethodFormFactory: PaymentMethodFormFactory,
+    private val paymentMethodFormDependencies: EmbeddedPaymentMethodFormDependencies,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val manageInteractorFactory: EmbeddedManageScreenInteractorFactory,
     private val updateScreenInteractorFactory: EmbeddedUpdateScreenInteractorFactory,
@@ -52,7 +54,6 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val sheetActivityStateHolder: SheetActivityStateHolder,
     private val formScreenFactory: EmbeddedFormScreenFactory,
     private val linkAccountHolder: LinkAccountHolder,
-    private val addPaymentMethodInteractorFactory: EmbeddedAddPaymentMethodInteractorFactory,
     private val continueCoordinator: SheetActivityContinueCoordinator,
 ) {
     fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
@@ -87,8 +88,28 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     private fun createHorizontalScreen(): EmbeddedNavigator.Screen {
+        val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
+        val dependencies = paymentMethodFormDependencies.create(
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
+        )
+        val initialCode = (selectionHolder.selection.value as? PaymentSelection.New)?.paymentMethodType
+            ?: paymentMethodMetadata.supportedPaymentMethodTypes().first()
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
-            interactor = addPaymentMethodInteractorFactory.create(),
+            interactor = paymentMethodFormFactory.createAddPaymentMethodInteractor(
+                initiallySelectedPaymentMethodType = initialCode,
+                paymentMethodMetadata = paymentMethodMetadata,
+                dependencies = dependencies,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
+                    eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+                        visiblePaymentMethods = visiblePaymentMethods,
+                        hiddenPaymentMethods = hiddenPaymentMethods,
+                        walletsState = null,
+                        isVerticalLayout = false,
+                    )
+                },
+            ),
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
@@ -101,12 +122,25 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     private fun createFormHelper(coroutineScope: CoroutineScope): FormHelper {
-        return embeddedFormHelperFactory.createForVerticalLayout(
-            coroutineScope = coroutineScope,
+        val dependencies = paymentMethodFormDependencies.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            eventReporter = eventReporter,
-            selectionUpdater = { selectionHolder.setSelection(it) },
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty(),
+        )
+        return paymentMethodFormFactory.createFormHelper(
+            PaymentMethodFormFactory.FormHelperArguments(
+                coroutineScope = coroutineScope,
+                linkInlineHandler = com.stripe.android.paymentsheet.LinkInlineHandler.create(),
+                paymentMethodMetadata = paymentMethodMetadata,
+                newPaymentSelectionProvider = dependencies.newPaymentSelectionProvider,
+                selectionUpdater = dependencies.selectionUpdater,
+                eventReporter = eventReporter,
+                setAsDefaultMatchesSaveForFutureUse =
+                    FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+                automaticallyLaunchedCardScanFormDataHelper = null,
+                tapToAddHelper = null,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                autocompleteAddressInteractorFactory = null,
+            )
         )
     }
 

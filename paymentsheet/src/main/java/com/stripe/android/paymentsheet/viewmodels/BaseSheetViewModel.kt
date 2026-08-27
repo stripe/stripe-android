@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.MandateHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
@@ -31,9 +32,11 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
@@ -50,6 +53,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -140,6 +144,67 @@ internal abstract class BaseSheetViewModel(
     abstract val tapToAddHelper: TapToAddHelper
 
     abstract val isNfcScanningAvailable: IsNfcScanningAvailable
+
+    internal val paymentMethodFormFactory: PaymentMethodFormFactory by lazy {
+        PaymentMethodFormFactory(
+            linkConfigurationCoordinator = linkHandler.linkConfigurationCoordinator,
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            savedStateHandle = savedStateHandle,
+            isNfcScanningAvailable = isNfcScanningAvailable,
+        )
+    }
+
+    internal fun paymentMethodFormFactoryDependencies(
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ): PaymentMethodFormFactory.Dependencies {
+        return PaymentMethodFormFactory.Dependencies(
+            coroutineScope = viewModelScope,
+            selection = selection,
+            processing = processing,
+            validationRequested = validationRequested,
+            newPaymentSelectionProvider = { newPaymentSelection },
+            selectionUpdater = ::updateSelection,
+            clearErrorMessages = ::clearErrorMessages,
+            reportFieldInteraction = analyticsListener::reportFieldInteraction,
+            eventReporter = eventReporter,
+            tapToAddHelper = tapToAddHelper,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            setAsDefaultMatchesSaveForFutureUse = customerStateHolder.paymentMethods.value.isEmpty(),
+            isCompleteFlow = isCompleteFlow,
+            shippingDetails = config.shippingDetails,
+            draftPaymentSelectionProvider = { newPaymentSelection?.paymentSelection },
+            onMandateTextChanged = mandateHandler::updateMandateText,
+            onUpdatePrimaryButtonUIState = { customPrimaryButtonUiState.update(it) },
+            onUpdatePrimaryButtonState = ::updatePrimaryButtonState,
+            onError = ::onError,
+            termsDisplayProvider = paymentMethodMetadata::termsDisplayForCode,
+            hasAutomaticallyLaunchedCardScanProvider = {
+                newPaymentSelection?.paymentSelection is PaymentSelection.New.Card &&
+                    newPaymentSelection?.getPaymentMethodCreateParams() != null
+            },
+        )
+    }
+
+    internal fun createAddPaymentMethodInteractor(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+    ): AddPaymentMethodInteractor {
+        return paymentMethodFormFactory.createAddPaymentMethodInteractor(
+            initiallySelectedPaymentMethodType = initiallySelectedPaymentMethodType,
+            paymentMethodMetadata = paymentMethodMetadata,
+            dependencies = paymentMethodFormFactoryDependencies(paymentMethodMetadata),
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
+                eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+                    visiblePaymentMethods = visiblePaymentMethods,
+                    hiddenPaymentMethods = hiddenPaymentMethods,
+                    // Flow Controller does not show wallet header in AddPaymentMethod.
+                    walletsState = walletsState.value?.takeIf { isCompleteFlow },
+                    isVerticalLayout = false,
+                )
+            },
+        )
+    }
 
     val analyticsListener: PaymentSheetAnalyticsListener = PaymentSheetAnalyticsListener(
         savedStateHandle = savedStateHandle,

@@ -152,12 +152,14 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         ),
         block: (List<FormElement>) -> Unit,
     ) {
-        val defaultFormHelper = BaseSheetFormHelperFactory(viewModel).create(
+        val defaultFormHelper = viewModel.paymentMethodFormFactory.createFormHelper(
             coroutineScope = viewModel.viewModelScope,
-            paymentMethodMetadata = paymentMethodMetadata,
             linkInlineHandler = LinkInlineHandler.create(),
-            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
+            paymentMethodMetadata = paymentMethodMetadata,
+            dependencies = viewModel.paymentMethodFormFactoryDependencies(paymentMethodMetadata),
             paymentMethodMessagePromotionsHelper = null,
+            selectedPaymentMethodCode = PaymentMethod.Type.Card.code,
+            createAutomaticallyLaunchedCardScanFormDataHelper = true,
         )
 
         val formElements = defaultFormHelper.formElementsForCode(PaymentMethod.Type.Card.code)

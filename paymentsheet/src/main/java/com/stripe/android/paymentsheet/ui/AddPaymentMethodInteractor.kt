@@ -1,24 +1,14 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.paymentsheet.BaseSheetFormHelperFactory
-import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
-import com.stripe.android.paymentsheet.utils.childScope
-import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -87,64 +77,6 @@ internal class DefaultAddPaymentMethodInteractor(
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
     override val isLiveMode: Boolean,
 ) : AddPaymentMethodInteractor {
-
-    companion object {
-        fun create(
-            viewModel: BaseSheetViewModel,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
-        ): AddPaymentMethodInteractor {
-            val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Main)
-            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
-                coroutineScope = coroutineScope,
-                paymentMethodMetadata = paymentMethodMetadata,
-                linkInlineHandler = LinkInlineHandler.create(),
-                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
-            )
-            val bankFormInteractor = BankFormInteractor.create(viewModel)
-
-            return DefaultAddPaymentMethodInteractor(
-                initiallySelectedPaymentMethodType = viewModel.initiallySelectedPaymentMethodType,
-                selection = viewModel.selection,
-                processing = viewModel.processing,
-                incentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
-                supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
-                createFormArguments = formHelper::createFormArguments,
-                formElementsForCode = formHelper::formElementsForCode,
-                clearErrorMessages = viewModel::clearErrorMessages,
-                reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
-                onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
-                reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
-                reportPromotionDisplayed = { code ->
-                    paymentMethodMessagePromotionsHelper?.reportPromotionDisplayed(code, paymentMethodMetadata)
-                },
-                createUSBankAccountFormArguments = {
-                    USBankAccountFormArguments.create(
-                        viewModel = viewModel,
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
-                        selectedPaymentMethodCode = it,
-                        bankFormInteractor = bankFormInteractor,
-                    )
-                },
-                coroutineScope = coroutineScope,
-                validationRequested = viewModel.validationRequested,
-                uiContext = Dispatchers.Main,
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
-                    viewModel.eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
-                        visiblePaymentMethods = visiblePaymentMethods,
-                        hiddenPaymentMethods = hiddenPaymentMethods,
-                        // Flow Controller does not show wallet header in AddPaymentMethod
-                        walletsState = viewModel.walletsState.value?.takeIf { viewModel.isCompleteFlow },
-                        isVerticalLayout = false,
-                    )
-                }
-            )
-        }
-    }
-
     private val _selectedPaymentMethodCode: MutableStateFlow<String> =
         MutableStateFlow(initiallySelectedPaymentMethodType)
     private val selectedPaymentMethodCode: StateFlow<String> = _selectedPaymentMethodCode

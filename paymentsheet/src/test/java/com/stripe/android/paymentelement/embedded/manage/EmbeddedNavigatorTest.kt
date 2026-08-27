@@ -14,14 +14,14 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
-import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedPaymentMethodFormDependencies
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
@@ -797,29 +797,34 @@ internal class EmbeddedNavigatorTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ): EmbeddedNavigator.Screen.Form.Factory {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        val interactorFactory = EmbeddedFormInteractorFactory(
-            paymentMethodMetadata = paymentMethodMetadata,
-            embeddedSelectionHolder = selectionHolder,
-            embeddedFormHelperFactory = EmbeddedFormHelperFactory(
-                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                embeddedSelectionHolder = selectionHolder,
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+        val paymentMethodFormFactory = PaymentMethodFormFactory(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
-        ),
-            viewModelScope = TestScope(UnconfinedTestDispatcher()),
-            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+        )
+        val viewModelScope = TestScope(UnconfinedTestDispatcher())
+        val sheetActivityStateHolder = FakeSheetActivityStateHolder()
+        val customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods)
+        val eventReporter = FakeEventReporter()
+        val paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+        val paymentMethodFormDependencies = EmbeddedPaymentMethodFormDependencies(
+            viewModelScope = viewModelScope,
+            sheetActivityStateHolder = sheetActivityStateHolder,
+            selectionHolder = selectionHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = FakeEventReporter(),
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            eventReporter = eventReporter,
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
         )
         return EmbeddedNavigator.Screen.Form.Factory(
-            interactorFactory = interactorFactory,
-            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethodFormFactory = paymentMethodFormFactory,
+            paymentMethodFormDependencies = paymentMethodFormDependencies,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            sheetActivityStateHolder = sheetActivityStateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
-            customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
+            customerStateHolder = customerStateHolder,
         )
     }
 

@@ -11,24 +11,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.FormActivityError
 import com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentelement.embedded.form.USBankAccountMandate
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.utils.addPaymentMethodTitle
@@ -255,7 +258,10 @@ internal class EmbeddedNavigator private constructor(
             }
 
             class Factory @Inject constructor(
-                private val interactorFactory: EmbeddedFormInteractorFactory,
+                private val paymentMethodMetadata: PaymentMethodMetadata,
+                private val paymentMethodFormFactory: PaymentMethodFormFactory,
+                private val paymentMethodFormDependencies: EmbeddedPaymentMethodFormDependencies,
+                private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
                 private val sheetActivityStateHolder: SheetActivityStateHolder,
                 private val confirmationHelper: SheetActivityConfirmationHelper,
                 private val embeddedSelectionHolder: EmbeddedSelectionHolder,
@@ -265,10 +271,34 @@ internal class EmbeddedNavigator private constructor(
                     val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
                         it.type?.code == launchMode.selectedPaymentMethodCode
                     }
+                    val dependencies = paymentMethodFormDependencies.create(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        hasSavedPaymentMethods = hasSavedPaymentMethods,
+                    )
+                    val bankFormInteractor = paymentMethodFormFactory.createBankFormInteractor(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        selectionUpdater = dependencies.selectionUpdater,
+                    )
                     return Form(
-                        formInteractor = interactorFactory.create(
-                            paymentMethodCode = launchMode.selectedPaymentMethodCode,
-                            hasSavedPaymentMethods = hasSavedPaymentMethods,
+                        formInteractor = paymentMethodFormFactory.createVerticalModeFormInteractor(
+                            selectedPaymentMethodCode = launchMode.selectedPaymentMethodCode,
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            customerHasSavedPaymentMethods = hasSavedPaymentMethods,
+                            dependencies = dependencies,
+                            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                            bankFormInteractor = bankFormInteractor,
+                            onMandateOnlyFormReady = { formArguments ->
+                                embeddedSelectionHolder.setSelection(
+                                    formArguments.noUserInteractionFormFieldValues().transformToPaymentSelection(
+                                        paymentMethod = requireNotNull(
+                                            paymentMethodMetadata.supportedPaymentMethodForCode(
+                                                code = launchMode.selectedPaymentMethodCode
+                                            )
+                                        ),
+                                        paymentMethodMetadata = paymentMethodMetadata,
+                                    )
+                                )
+                            },
                         ),
                         sheetActivityStateHolder = sheetActivityStateHolder,
                         confirmationHelper = confirmationHelper,

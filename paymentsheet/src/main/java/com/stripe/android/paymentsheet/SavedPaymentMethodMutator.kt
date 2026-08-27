@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
-import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -343,8 +342,7 @@ internal class SavedPaymentMethodMutator(
                     if (viewModel.customerStateHolder.paymentMethods.value.size == 1) {
                         // If we're removing the last payment method in horizontal mode, we want to transition
                         // immediately to the AddFirstPaymentMethod screen.
-                        val interactor = DefaultAddPaymentMethodInteractor.create(
-                            viewModel = viewModel,
+                        val interactor = viewModel.createAddPaymentMethodInteractor(
                             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                             paymentMethodMessagePromotionsHelper = null
                         )

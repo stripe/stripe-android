@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -16,7 +15,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
@@ -128,28 +126,5 @@ internal class DefaultFormDefinitionFactory(
             paymentMethodMessagingPromotionsHelper = paymentMethodMessagePromotionsHelper,
             isNfcScanningAvailable = isNfcScanningAvailable,
         )
-    }
-
-    companion object {
-        fun create(
-            viewModel: BaseSheetViewModel,
-            paymentMethodMetadata: PaymentMethodMetadata,
-        ): FormDefinitionFactory {
-            return DefaultFormDefinitionFactory(
-                coroutineScope = viewModel.viewModelScope,
-                linkInlineHandler = LinkInlineHandler.create(),
-                cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
-                paymentMethodMetadata = paymentMethodMetadata,
-                newPaymentSelectionProvider = { viewModel.newPaymentSelection },
-                linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
-                setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
-                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                isLinkUI = false,
-                automaticallyLaunchedCardScanFormDataHelper = null,
-                tapToAddHelper = viewModel.tapToAddHelper,
-                paymentMethodMessagePromotionsHelper = null,
-                isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
-            )
-        }
     }
 }

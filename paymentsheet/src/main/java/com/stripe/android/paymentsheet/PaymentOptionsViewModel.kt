@@ -48,7 +48,6 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -443,8 +442,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             )
             SelectSavedPaymentMethods(interactor = interactor)
         } else {
-            val interactor = DefaultAddPaymentMethodInteractor.create(
-                viewModel = this,
+            val interactor = createAddPaymentMethodInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
@@ -458,8 +456,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // The user has previously selected a new payment method. Instead of sending them
                 // to the payment methods screen, we directly launch them into the payment method
                 // form again.
-                val interactor = DefaultAddPaymentMethodInteractor.create(
-                    viewModel = this@PaymentOptionsViewModel,
+                val interactor = createAddPaymentMethodInteractor(
                     paymentMethodMetadata = paymentMethodMetadata,
                     paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                 )

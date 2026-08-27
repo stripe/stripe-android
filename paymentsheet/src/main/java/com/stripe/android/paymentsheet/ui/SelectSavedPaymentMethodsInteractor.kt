@@ -256,8 +256,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 currentSelection = viewModel.selection,
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 onAddCardPressed = {
-                    val interactor = DefaultAddPaymentMethodInteractor.create(
-                        viewModel = viewModel,
+                    val interactor = viewModel.createAddPaymentMethodInteractor(
                         paymentMethodMetadata = paymentMethodMetadata,
                         paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                     )

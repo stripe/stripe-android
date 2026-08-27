@@ -64,7 +64,6 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.paymentsheet.utils.toConfirmationError
@@ -749,8 +748,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 cvcRecollectionState = getCvcRecollectionState()
             )
         } else {
-            val interactor = DefaultAddPaymentMethodInteractor.create(
-                viewModel = this,
+            val interactor = createAddPaymentMethodInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )

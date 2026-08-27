@@ -18,11 +18,11 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -242,15 +242,16 @@ internal class CheckoutStateLoaderTest {
         loaderSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
         isGooglePayAvailable = true,
         selectionChooser = { savedStateHandle ->
+            val selectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
             DefaultEmbeddedSelectionChooser(
                 savedStateHandle = savedStateHandle,
-                formHelperFactory = EmbeddedFormHelperFactory(
+                formFactory = PaymentMethodFormFactory(
                     linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                    embeddedSelectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
                     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                     savedStateHandle = savedStateHandle,
                     isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 ),
+                selectionHolder = selectionHolder,
                 internalRowSelectionCallback = { null },
             )
         },

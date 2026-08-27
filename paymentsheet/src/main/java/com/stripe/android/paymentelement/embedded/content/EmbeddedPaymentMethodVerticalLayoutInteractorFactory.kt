@@ -5,18 +5,22 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.NewPaymentOptionSelection
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +40,7 @@ internal fun interface EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
 
 internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
-    private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
+    private val paymentMethodFormFactory: PaymentMethodFormFactory,
     private val confirmationHandler: ConfirmationHandler,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
@@ -61,15 +65,24 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
         )
-        val formHelper = embeddedFormHelperFactory.createForVerticalLayout(
-            coroutineScope = formHelperScope,
-            paymentMethodMetadata = paymentMethodMetadata,
-            eventReporter = eventReporter,
-            selectionUpdater = {
-                selectionHolder.setSelection(it)
-                rowSelectionImmediateActionHandler.invoke()
-            },
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+        val formHelper = paymentMethodFormFactory.createFormHelper(
+            PaymentMethodFormFactory.FormHelperArguments(
+                coroutineScope = formHelperScope,
+                linkInlineHandler = com.stripe.android.paymentsheet.LinkInlineHandler.create(),
+                paymentMethodMetadata = paymentMethodMetadata,
+                newPaymentSelectionProvider = ::newPaymentSelection,
+                selectionUpdater = {
+                    selectionHolder.setSelection(it)
+                    rowSelectionImmediateActionHandler.invoke()
+                },
+                eventReporter = eventReporter,
+                setAsDefaultMatchesSaveForFutureUse =
+                    FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+                automaticallyLaunchedCardScanFormDataHelper = null,
+                tapToAddHelper = null,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                autocompleteAddressInteractorFactory = null,
+            )
         )
         val savedPaymentMethodMutator = savedPaymentMethodMutatorFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -146,5 +159,18 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             coroutineScope = interactorScope,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
+    }
+
+    private fun newPaymentSelection(code: String): NewPaymentOptionSelection? {
+        return when (
+            val currentSelection = selectionHolder.selection.value
+                ?.takeIf { it.paymentMethodType == code }
+                ?: selectionHolder.getPreviousNewSelection(code)
+        ) {
+            is PaymentSelection.ExternalPaymentMethod -> NewPaymentOptionSelection.External(currentSelection)
+            is PaymentSelection.CustomPaymentMethod -> NewPaymentOptionSelection.Custom(currentSelection)
+            is PaymentSelection.New -> NewPaymentOptionSelection.New(currentSelection)
+            else -> null
+        }
     }
 }

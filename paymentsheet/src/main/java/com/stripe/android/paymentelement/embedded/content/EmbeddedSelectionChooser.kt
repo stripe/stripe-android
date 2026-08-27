@@ -6,10 +6,12 @@ import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
+import com.stripe.android.paymentsheet.NewPaymentOptionSelection
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
@@ -31,7 +33,8 @@ internal fun interface EmbeddedSelectionChooser {
 
 internal class DefaultEmbeddedSelectionChooser @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val formHelperFactory: EmbeddedFormHelperFactory,
+    private val formFactory: PaymentMethodFormFactory,
+    private val selectionHolder: EmbeddedSelectionHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) : EmbeddedSelectionChooser {
     // Compatibility checks only inspect synchronously constructed form metadata.
@@ -152,16 +155,8 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection.New,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): Boolean {
-        val newFormDefinitionFactory = formHelperFactory.createFormDefinitionFactory(
-            coroutineScope = coroutineScope,
-            paymentMethodMetadata = paymentMethodMetadata,
-            // Card scan auto-launch is only relevant in the form, not when selecting the default.
-            automaticallyLaunchedCardScanFormDataHelper = null,
-            tapToAddHelper = null,
-            // Not important for determining formType so use default value
-            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
-            paymentMethodMessagePromotionsHelper = null,
-            autocompleteAddressInteractorFactory = null,
+        val newFormDefinitionFactory = formFactory.createFormDefinitionFactory(
+            arguments = formDefinitionArguments(paymentMethodMetadata),
             linkInlineHandler = LinkInlineHandler.create(),
         )
         val newFormType = newFormDefinitionFactory.formTypeForCode(previousSelection.paymentMethodType)
@@ -169,16 +164,8 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             return true
         }
         return previousPaymentMethodMetadata?.let { previousPaymentMethodMetadata ->
-            val previousFormDefinitionFactory = formHelperFactory.createFormDefinitionFactory(
-                coroutineScope = coroutineScope,
-                paymentMethodMetadata = previousPaymentMethodMetadata,
-                // Card scan auto-launch is only relevant in the form, not when selecting the default.
-                automaticallyLaunchedCardScanFormDataHelper = null,
-                tapToAddHelper = null,
-                // Not important for determining formType so use default value
-                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
-                paymentMethodMessagePromotionsHelper = null,
-                autocompleteAddressInteractorFactory = null,
+            val previousFormDefinitionFactory = formFactory.createFormDefinitionFactory(
+                arguments = formDefinitionArguments(previousPaymentMethodMetadata),
                 linkInlineHandler = LinkInlineHandler.create(),
             )
             val previousFormElements =
@@ -186,6 +173,37 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             val newFormElements = newFormDefinitionFactory.formElementsForCode(previousSelection.paymentMethodType)
             previousFormElements.size >= newFormElements.size
         } == true
+    }
+
+    private fun formDefinitionArguments(
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ): PaymentMethodFormFactory.FormDefinitionArguments {
+        return PaymentMethodFormFactory.FormDefinitionArguments(
+            coroutineScope = coroutineScope,
+            paymentMethodMetadata = paymentMethodMetadata,
+            newPaymentSelectionProvider = ::newPaymentSelection,
+            // Not important for determining form type, so use the default value.
+            setAsDefaultMatchesSaveForFutureUse =
+                FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+            // These features only apply to a displayed form, not compatibility checks.
+            automaticallyLaunchedCardScanFormDataHelper = null,
+            tapToAddHelper = null,
+            paymentMethodMessagePromotionsHelper = null,
+            autocompleteAddressInteractorFactory = null,
+        )
+    }
+
+    private fun newPaymentSelection(code: String): NewPaymentOptionSelection? {
+        return when (
+            val currentSelection = selectionHolder.selection.value
+                ?.takeIf { it.paymentMethodType == code }
+                ?: selectionHolder.getPreviousNewSelection(code)
+        ) {
+            is PaymentSelection.ExternalPaymentMethod -> NewPaymentOptionSelection.External(currentSelection)
+            is PaymentSelection.CustomPaymentMethod -> NewPaymentOptionSelection.Custom(currentSelection)
+            is PaymentSelection.New -> NewPaymentOptionSelection.New(currentSelection)
+            else -> null
+        }
     }
 
     companion object {

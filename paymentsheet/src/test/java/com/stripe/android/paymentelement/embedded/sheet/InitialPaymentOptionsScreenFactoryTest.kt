@@ -10,13 +10,12 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -189,12 +188,21 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val sheetActivityStateHolder = FakeSheetActivityStateHolder()
         val continueCoordinator = FakeSheetActivityContinueCoordinator()
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
-        val formHelperFactory = EmbeddedFormHelperFactory(
+        val paymentMethodFormFactory = PaymentMethodFormFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+        )
+        val tapToAddHelper = FakeTapToAddHelper.noOp()
+        val paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+        val paymentMethodFormDependencies = EmbeddedPaymentMethodFormDependencies(
+            viewModelScope = testScope,
+            selectionHolder = selectionHolder,
+            sheetActivityStateHolder = sheetActivityStateHolder,
+            tapToAddHelper = tapToAddHelper,
+            eventReporter = eventReporter,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
         val updateScreenInteractorFactory = FakeEmbeddedUpdateScreenInteractorFactory()
         val manageInteractorFactory = EmbeddedManageScreenInteractorFactory {
@@ -202,17 +210,10 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         }
         val formScreenFactory = DefaultEmbeddedFormScreenFactory(
             formFactory = EmbeddedNavigator.Screen.Form.Factory(
-                interactorFactory = EmbeddedFormInteractorFactory(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    embeddedSelectionHolder = selectionHolder,
-                    embeddedFormHelperFactory = formHelperFactory,
-                    viewModelScope = testScope,
-                    sheetActivityStateHolder = sheetActivityStateHolder,
-                    tapToAddHelper = FakeTapToAddHelper.noOp(),
-                    eventReporter = FakeEventReporter(),
-                    paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-                    autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-                ),
+                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethodFormFactory = paymentMethodFormFactory,
+                paymentMethodFormDependencies = paymentMethodFormDependencies,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 sheetActivityStateHolder = sheetActivityStateHolder,
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = selectionHolder,
@@ -236,34 +237,21 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
 
-        val addPaymentMethodInteractorFactory = EmbeddedAddPaymentMethodInteractorFactory(
-            paymentMethodMetadata = paymentMethodMetadata,
-            embeddedSelectionHolder = selectionHolder,
-            embeddedFormHelperFactory = formHelperFactory,
-            viewModelScope = testScope,
-            sheetActivityStateHolder = sheetActivityStateHolder,
-            tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = FakeEventReporter(),
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-            customerStateHolder = customerStateHolder,
-            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-        )
-
         val factory = InitialPaymentOptionsScreenFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
             eventReporter = eventReporter,
             embeddedNavigatorProvider = Provider { navigator },
-            embeddedFormHelperFactory = formHelperFactory,
+            paymentMethodFormFactory = paymentMethodFormFactory,
+            paymentMethodFormDependencies = paymentMethodFormDependencies,
             viewModelScope = testScope,
             manageInteractorFactory = manageInteractorFactory,
             updateScreenInteractorFactory = updateScreenInteractorFactory,
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             sheetActivityStateHolder = sheetActivityStateHolder,
             formScreenFactory = formScreenFactory,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-            addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
         )
 

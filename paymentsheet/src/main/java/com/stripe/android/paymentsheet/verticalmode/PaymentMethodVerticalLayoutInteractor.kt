@@ -11,11 +11,9 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.BaseSheetFormHelperFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
-import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -137,12 +135,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         ): PaymentMethodVerticalLayoutInteractor {
             val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Default)
             val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
-            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
+            val formFactory = viewModel.paymentMethodFormFactory
+            val formFactoryDependencies = viewModel.paymentMethodFormFactoryDependencies(paymentMethodMetadata)
+            val formHelper = formFactory.createFormHelper(
                 coroutineScope = formHelperScope,
+                linkInlineHandler = com.stripe.android.paymentsheet.LinkInlineHandler.create(),
                 paymentMethodMetadata = paymentMethodMetadata,
-                linkInlineHandler = LinkInlineHandler.create(),
-                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                dependencies = formFactoryDependencies,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                selectedPaymentMethodCode = paymentMethodMetadata.supportedPaymentMethodTypes().first(),
+                createAutomaticallyLaunchedCardScanFormDataHelper = false,
             )
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                 it is PaymentSheetScreen.VerticalMode
@@ -168,13 +170,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     viewModel.navigationHandler.transitionToWithDelay(screen)
                 },
                 transitionToFormScreen = { selectedPaymentMethodCode ->
-                    val interactor = DefaultVerticalModeFormInteractor.create(
+                    val interactor = formFactory.createVerticalModeFormInteractor(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
-                        viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
-                        customerStateHolder = customerStateHolder,
+                        customerHasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
+                            it.type?.code == selectedPaymentMethodCode
+                        },
+                        dependencies = formFactoryDependencies,
                         bankFormInteractor = bankFormInteractor,
-                        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                        onMandateOnlyFormReady = null,
                     )
                     val screen = PaymentSheetScreen.VerticalModeForm(interactor = interactor)
                     viewModel.navigationHandler.transitionToWithDelay(screen)

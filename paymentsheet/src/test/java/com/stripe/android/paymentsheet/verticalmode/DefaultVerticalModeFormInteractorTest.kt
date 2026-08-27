@@ -15,17 +15,18 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
-import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedPaymentMethodFormDependencies
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -259,6 +260,36 @@ internal class DefaultVerticalModeFormInteractorTest {
         assertThat(parentScope.isActive).isTrue()
     }
 
+    @Test
+    fun `linked bank account removes embedded form incentive`() = runTest {
+        val incentive = PaymentMethodIncentive(
+            identifier = "link_instant_debits",
+            displayText = "$5",
+        )
+        val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(incentive)
+        val bankFormInteractor = BankFormInteractor(
+            updateSelection = {},
+            paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
+        )
+        val interactor = closeInteractorRule.track(
+            createEmbeddedFormInteractor(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    paymentMethodIncentive = incentive,
+                ),
+                paymentMethodCode = "link",
+                bankFormInteractor = bankFormInteractor,
+            )
+        )
+
+        assertThat(paymentMethodIncentiveInteractor.displayedIncentive.value).isEqualTo(incentive)
+
+        interactor.state.value.usBankAccountFormArguments.onLinkedBankAccountChanged(
+            PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+        )
+
+        assertThat(paymentMethodIncentiveInteractor.displayedIncentive.value).isNull()
+    }
+
     private fun testSetAsDefaultElements(
         hasSavedPaymentMethods: Boolean,
         block: (SaveForFutureUseElement?, SetAsDefaultPaymentMethodElement?) -> Unit
@@ -312,9 +343,11 @@ internal class DefaultVerticalModeFormInteractorTest {
         paymentSelection: PaymentSelection? = null,
         paymentMethodCode: String = "card",
         hasSavedPaymentMethods: Boolean = false,
+        bankFormInteractor: BankFormInteractor? = null,
     ): DefaultVerticalModeFormInteractor {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         selectionHolder.setSelection(paymentSelection)
+        val customerStateHolder = FakeCustomerStateHolder()
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
@@ -324,34 +357,45 @@ internal class DefaultVerticalModeFormInteractorTest {
             eventReporter = FakeEventReporter(),
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            customerStateHolder = FakeCustomerStateHolder(),
+            customerStateHolder = customerStateHolder,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = paymentMethodCode,
             ),
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
-        val formHelperFactory = EmbeddedFormHelperFactory(
+        val formFactory = PaymentMethodFormFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
-        return EmbeddedFormInteractorFactory(
-            paymentMethodMetadata = paymentMethodMetadata,
-            embeddedSelectionHolder = selectionHolder,
-            embeddedFormHelperFactory = formHelperFactory,
+        val eventReporter = FakeEventReporter()
+        val tapToAddHelper = FakeTapToAddHelper.noOp()
+        val dependencies = EmbeddedPaymentMethodFormDependencies(
             viewModelScope = viewModelScope,
             sheetActivityStateHolder = stateHolder,
-            tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = FakeEventReporter(),
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            selectionHolder = selectionHolder,
+            tapToAddHelper = tapToAddHelper,
+            eventReporter = eventReporter,
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
         ).create(
-            paymentMethodCode = paymentMethodCode,
+            paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
         )
+        val resolvedBankFormInteractor = bankFormInteractor ?: formFactory.createBankFormInteractor(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionUpdater = dependencies.selectionUpdater,
+        )
+        return formFactory.createVerticalModeFormInteractor(
+            selectedPaymentMethodCode = paymentMethodCode,
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerHasSavedPaymentMethods = hasSavedPaymentMethods,
+            dependencies = dependencies,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            bankFormInteractor = resolvedBankFormInteractor,
+            onMandateOnlyFormReady = null,
+        ) as DefaultVerticalModeFormInteractor
     }
 
     private fun runScenario(

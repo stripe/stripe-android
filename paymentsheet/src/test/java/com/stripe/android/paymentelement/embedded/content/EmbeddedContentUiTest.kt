@@ -12,9 +12,9 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
@@ -134,10 +134,9 @@ internal class EmbeddedContentUiTest {
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
-        val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
+        val paymentMethodFormFactory = PaymentMethodFormFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
@@ -175,7 +174,7 @@ internal class EmbeddedContentUiTest {
         )
         val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
             eventReporter = eventReporter,
-            embeddedFormHelperFactory = embeddedFormHelperFactory,
+            paymentMethodFormFactory = paymentMethodFormFactory,
             confirmationHandler = confirmationHandler,
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
