@@ -1,290 +1,160 @@
 ---
 name: write-unit-tests
-description: Use when writing or structuring unit tests in stripe-android — covers runScenario, mandatory Turbine fake-call tracking, Flow testing, and Truth assertions
+description: Use when writing or structuring unit tests or fake test implementations in stripe-android — covers scenarios, Turbine interaction tracking and Flow testing, and Truth assertions
 ---
-# Setting Up Tests
 
-This skill describes how to structure tests in the Stripe Android SDK using fakes, scenarios, and proper verification patterns.
+# Writing Unit Tests
+
+Use fakes, scenario helpers, and behavior-focused assertions to keep tests reliable and readable.
 
 ## Core Principles
 
-1. **Use fakes over mocks** - Invoke and follow the [`create-fake`](../create-fake/SKILL.md) skill for every new or changed fake
-2. **Create test scenarios** - Use Scenario classes with `runScenario` functions to organize test setup
-3. **Verify all events consumed** - Call `ensureAllEventsConsumed()` on fakes after test block
-4. **Use Truth assertions** - Always use `assertThat(actual).isEqualTo(expected)` from Google Truth 
-5. **One case per test** - Each `@Test` should cover a single scenario or configuration
-6. **Use Turbine for Flow testing** - Test Flow emissions with Turbine's `.test { }` syntax
+1. Prefer fakes over mocks. Name them `FakeClassName`, keep them `internal`, and place them in the test source set.
+2. Track every observed fake interaction with Turbine. Mutable properties are only for configuring behavior.
+3. Put shared setup in a `runScenario` helper and validate every fake after the test block.
+4. Use Google Truth assertions and prefer field-level assertions when exact object equality is not the contract.
+5. Cover one scenario or configuration per `@Test`.
+6. Test Flow emissions with Turbine's `.test { }` API.
 
-## Fake Interaction Tracking
+## Creating Fakes
 
-All fake interaction history must use Turbine. This applies to calls with arguments, parameterless lifecycle calls, and callback registrations.
+Give fake constructors sensible defaults so tests only specify behavior relevant to the case. Use a companion `create()` factory when initialization is complex.
 
-Do not record calls with mutable lists, call-count integers, or invoked booleans. Mutable fake properties may configure return values or failures, but must not represent observed call history. Consume expected calls with `awaitItem()`, assert absence with `expectNoEvents()`, and invoke registered callbacks from the call object returned by `awaitItem()`.
-
-Every fake that owns Turbines must expose `ensureAllEventsConsumed()`, and every `runScenario` must call it after the test block. See [`create-fake`](../create-fake/SKILL.md) for the required implementation pattern.
-
-## Basic Test Structure
-
-Every test should follow this pattern:
+All interaction history—including calls, callbacks, and parameterless lifecycle events—must use Turbine. Do not use mutable lists, counters, `wasCalled` flags, or callback shortcuts. Retrieve a registered callback from its recorded call so the test also proves registration occurred.
 
 ```kotlin
-@Test
-fun `test description`() = runScenario(
-    // Test-specific parameters
-    config = testConfig
-) {
-    // 1. Configure: Set up fake behaviors (optional)
-    fakeService.result = expectedResult
+internal class FakeLauncher(
+    var launchResult: Boolean = false,
+) : Launcher {
+    val registerCalls = Turbine<RegisterCall>()
+    val launchCalls = Turbine<LaunchCall>()
+    val unregisterCalls = Turbine<Unit>()
 
-    // 2. Execute: Call the code under test
-    val result = systemUnderTest.doSomething()
+    override fun register(callback: () -> Unit) {
+        registerCalls.add(RegisterCall(callback))
+    }
 
-    // 3. Verify: Assert results and check fake calls
-    assertThat(result.status).isEqualTo(expectedStatus)
-    assertThat(result.id).isEqualTo(expectedId)
-    assertThat(fakeService.calls.awaitItem()).isEqualTo(expectedCall)
+    override fun launch(id: String): Boolean {
+        launchCalls.add(LaunchCall(id))
+        return launchResult
+    }
+
+    override fun unregister() {
+        unregisterCalls.add(Unit)
+    }
+
+    fun ensureAllEventsConsumed() {
+        registerCalls.ensureAllEventsConsumed()
+        launchCalls.ensureAllEventsConsumed()
+        unregisterCalls.ensureAllEventsConsumed()
+    }
+
+    data class RegisterCall(val callback: () -> Unit)
+    data class LaunchCall(val id: String)
 }
-// 4. Validation: ensureAllEventsConsumed called automatically by runScenario
 ```
 
-## Scenario Pattern with runScenario
+Use data classes for calls with parameters and `Turbine<Unit>` for parameterless calls. Consume expected calls with `awaitItem()`, use `expectNoEvents()` when no call is expected, and include every owned Turbine in `ensureAllEventsConsumed()`.
 
-### Basic Structure
+For view actions, use `ViewActionRecorder<ViewAction>` instead of another recording mechanism. Accept it as a constructor or factory parameter with a default when useful:
 
-Create a `runScenario` function and a `Scenario` class at the bottom of your test file:
+```kotlin
+internal class FakeInteractor(
+    private val viewActionRecorder: ViewActionRecorder<ViewAction> = ViewActionRecorder(),
+) : Interactor {
+    override fun handleViewAction(viewAction: ViewAction) {
+        viewActionRecorder.record(viewAction)
+    }
+}
+```
+
+Good codebase references are:
+
+- `paymentsheet/src/test/java/com/stripe/android/paymentsheet/analytics/FakeEventReporter.kt`
+- `paymentsheet/src/test/java/com/stripe/android/utils/FakeCustomerRepository.kt`
+- `paymentsheet/src/test/java/com/stripe/android/paymentsheet/verticalmode/FakePaymentMethodVerticalLayoutInteractor.kt`
+
+## Scenario Pattern
+
+Create `runScenario` and `Scenario` at the bottom of the test file. Give setup parameters defaults, expose the system under test and fakes through `Scenario`, and call each fake's `ensureAllEventsConsumed()` after the block.
 
 ```kotlin
 class MyFeatureTest {
     @Test
-    fun `test case`() = runScenario {
-        // Test code using scenario fields
-        assertThat(systemUnderTest.getValue()).isEqualTo(expectedValue)
+    fun `fetching data returns success`() = runScenario {
+        fakeRepository.result = Result.success(testData)
+
+        val result = systemUnderTest.fetchData()
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(fakeRepository.fetchCalls.awaitItem()).isEqualTo(
+            FetchCall(userId = "123")
+        )
     }
 
     private fun runScenario(
         config: Config = defaultConfig,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        // Setup fakes
         val fakeRepository = FakeRepository()
-        val fakeAnalytics = FakeAnalytics()
-
-        // Create system under test
         val systemUnderTest = MyFeature(
             repository = fakeRepository,
-            analytics = fakeAnalytics,
             config = config,
         )
 
-        // Run test block with scenario context
         Scenario(
             systemUnderTest = systemUnderTest,
             fakeRepository = fakeRepository,
-            fakeAnalytics = fakeAnalytics,
         ).apply { block() }
 
-        // Validate all fakes
         fakeRepository.ensureAllEventsConsumed()
-        fakeAnalytics.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
         val systemUnderTest: MyFeature,
         val fakeRepository: FakeRepository,
-        val fakeAnalytics: FakeAnalytics,
     )
 }
 ```
 
-**Key Features:**
-- `runScenario` replaces `runTest` as the test entry point
-- Default parameters for all configuration make tests concise
-- Trailing lambda provides DSL-like syntax with scenario fields
-- `ensureAllEventsConsumed()` called automatically after test block
-- Scenario class holds system under test and all fakes
+Use `runTest` directly when shared scenario setup would not help. In that case, validate fakes explicitly.
 
-### Using runScenario in Tests
+## Assertions and Test Scope
 
-```kotlin
-@Test
-fun `fetching data returns success when repository succeeds`() = runScenario {
-    // Configure fake behavior
-    fakeRepository.dataResult = Result.success(testData)
+Use `assertThat(actual).isEqualTo(expected)` from Google Truth. Prefer assertions on meaningful fields because their failures are easier to diagnose; use whole-object equality when exact equality is the behavior under test.
 
-    // Execute
-    val result = systemUnderTest.fetchData()
+Keep each test focused on one case. Split related configurations into separate tests so one failure does not hide another. Test observable behavior rather than implementation details, and include relevant null, empty, error, and boundary cases. Avoid vacuous assertions by establishing the precondition before testing its removal.
 
-    // Verify
-    assertThat(result.isSuccess).isTrue()
-    assertThat(fakeRepository.fetchCalls.awaitItem()).isEqualTo(FetchCall(userId = "123"))
-}
-// ensureAllEventsConsumed called automatically
-```
+## Testing Flows
 
-## Assertion Style
-
-When the code under test returns an object, prefer asserting on the specific fields you care about instead of asserting that the whole object is equal to an expected object:
+Use Turbine's `.test { }` API for Flow and StateFlow emissions:
 
 ```kotlin
-assertThat(result.status).isEqualTo(Status.Complete)
-assertThat(result.paymentMethodId).isEqualTo("pm_123")
-```
+systemUnderTest.state.test {
+    assertThat(awaitItem()).isEqualTo(State.Loading)
 
-Use whole-object equality only when exact object equality is the behavior under test.
+    fakeRepository.emit(newData)
 
-Field-level assertions usually produce better failure messages because the failing property is obvious.
-
-## One Case Per Test
-
-Keep each unit test focused on a single case. If you need to verify several related configurations, write one test per configuration instead of combining them into one test.
-
-```kotlin
-@Test
-fun `analytics event for saved card`() = runScenario(
-    paymentSelection = PaymentSelection.Saved(paymentMethod),
-) {
-    assertThat(fakeAnalytics.calls.awaitItem().event).isEqualTo("saved_card")
-}
-
-@Test
-fun `analytics event for new card`() = runScenario(
-    paymentSelection = PaymentSelection.New.Card(cardParams),
-) {
-    assertThat(fakeAnalytics.calls.awaitItem().event).isEqualTo("new_card")
+    assertThat(awaitItem()).isEqualTo(State.Loaded(newData))
+    ensureAllEventsConsumed()
 }
 ```
 
-This keeps failures isolated. When multiple scenarios are combined into one test, execution stops at the first failing assertion and hides the rest of the failures from that run.
+Common operations are `awaitItem()`, `expectNoEvents()`, `skipItems(n)`, and `ensureAllEventsConsumed()`.
 
-## Turbine Flow Testing
+## Concurrency with Real I/O
 
-Use Turbine's `.test { }` to assert Flow emissions:
+For coroutine tests involving real NetworkRule or OkHttp I/O:
 
-```kotlin
-@Test
-fun `state updates when data changes`() = runScenario {
-    systemUnderTest.state.test {
-        // Initial state
-        assertThat(awaitItem()).isEqualTo(State.Loading)
+- Use `runTest`, `async`, and `await()` so failures propagate.
+- Use `testScheduler.advanceUntilIdle()` to advance to a suspension point; never use `Thread.sleep`.
+- After releasing a latch, use `await()` because OkHttp resumes asynchronously.
+- Give every `CountDownLatch.await()` in a mock handler a timeout.
+- Use Turbine for StateFlow emission sequences and latches for request ordering.
+- Assert both that a queued request did not arrive while held and that it arrived after release.
 
-        // Trigger change
-        fakeRepository.emit(newData)
-        assertThat(awaitItem()).isEqualTo(State.Loaded(newData))
+## Related Skills
 
-        // No more events expected
-        ensureAllEventsConsumed()
-    }
-}
-```
-
-**Common Turbine operations:**
-- `awaitItem()` — wait for next emission
-- `expectNoEvents()` — assert no emissions occurred
-- `ensureAllEventsConsumed()` — verify no unconsumed events remain
-- `skipItems(n)` — skip past emissions you don't care about
-
-## Quick Reference
-
-| What | Pattern |
-|------|---------|
-| Test entry point | `fun \`test name\`() = runScenario { }` |
-| Assertions | `assertThat(actual).isEqualTo(expected)` |
-| Flow testing | `flow.test { assertThat(awaitItem()).isEqualTo(x) }` |
-| Fake call tracking | `assertThat(fake.calls.awaitItem()).isEqualTo(call)` |
-| Parameterless fake call | `fake.unregisterCalls.awaitItem()` using `Turbine<Unit>` |
-| Prohibited fake tracking | Mutable lists, call counters, and invoked booleans |
-| Fake validation | `ensureAllEventsConsumed()` — automatic in runScenario |
-| Test granularity | One scenario or configuration per `@Test` |
-| Parameterized cases | Invoke the [`parameterized-tests`](../parameterized-tests/SKILL.md) skill |
-| Compose UI tests | Invoke `compose-tests` skill |
-| Creating fakes | Invoke `create-fake` skill |
-| NetworkRule integration tests | Invoke `network-tests` skill |
-
-## Concurrency Testing with Real I/O
-
-When testing coroutines that involve real network I/O (NetworkRule/OkHttp), use `runTest` + `testScheduler.advanceUntilIdle()` + `async`/`await()`.
-
-### Asserting StateFlow emission sequences (use Turbine)
-
-When you need to verify a StateFlow's transitions during an async operation, use Turbine's `.test { }` to assert the full sequence:
-
-```kotlin
-@Test
-fun `loading state transitions during mutation`() = runTest {
-    val holdResponse = CountDownLatch(1)
-    networkRule.enqueue(host("api.stripe.com"), method("POST"), path("/v1/...")) { response ->
-        holdResponse.await(10, TimeUnit.SECONDS)
-        response.setBody("{}")
-    }
-
-    systemUnderTest.isLoading.test {
-        assertThat(awaitItem()).isFalse()
-
-        val job = async { systemUnderTest.mutate() }
-        testScheduler.advanceUntilIdle()
-
-        assertThat(awaitItem()).isTrue()
-
-        holdResponse.countDown()
-        job.await()
-
-        assertThat(awaitItem()).isFalse()
-    }
-}
-```
-
-### Asserting operations are queued (use CountDownLatch)
-
-When you need to verify that concurrent operations are serialized by a mutex, use CountDownLatch to observe request ordering:
-
-```kotlin
-@Test
-fun `concurrent operations are serialized by mutex`() = runTest {
-    val holdFirstResponse = CountDownLatch(1)
-    val secondRequestArrived = CountDownLatch(1)
-
-    networkRule.enqueue(host("api.stripe.com"), method("POST"), path("/v1/...")) { response ->
-        holdFirstResponse.await(10, TimeUnit.SECONDS)
-        response.setBody("{}")
-    }
-    networkRule.enqueue(host("api.stripe.com"), method("POST"), path("/v1/...")) { response ->
-        secondRequestArrived.countDown()
-        response.setBody("{}")
-    }
-
-    val jobB = async { systemUnderTest.operationB() }
-    testScheduler.advanceUntilIdle()
-
-    val jobA = async { systemUnderTest.operationA() }
-    testScheduler.advanceUntilIdle()
-
-    assertThat(secondRequestArrived.count).isEqualTo(1) // A hasn't fired
-
-    holdFirstResponse.countDown()
-    jobB.await()
-    jobA.await()
-
-    assertThat(secondRequestArrived.count).isEqualTo(0) // A did fire
-}
-```
-
-### Rules
-
-- `async` + `await()` over `launch` + `join()` — `await()` propagates exceptions
-- `testScheduler.advanceUntilIdle()` over `Thread.sleep` — deterministic, advances to suspension point
-- After releasing a latch, use `await()` (not `advanceUntilIdle()` alone) — OkHttp delivers continuations asynchronously
-- Always pass a timeout to `CountDownLatch.await()` inside mock handlers — prevents hangs
-- Assert both negative (didn't happen during hold) AND positive (did happen after release)
-- Turbine `.test { }` for StateFlow emission sequences; `CountDownLatch` for request ordering
-
-## Common Mistakes
-
-- **Using mocks instead of fakes** — always create `FakeClassName` implementations
-- **Forgetting `ensureAllEventsConsumed()`** — runScenario handles this, but if using `runTest` directly, call it manually
-- **Testing implementation details** — test behavior (inputs → outputs), not internal method calls
-- **Missing edge cases** — null values, empty lists, blank strings, error paths
-- **Using `Thread.sleep` in tests** — use `testScheduler.advanceUntilIdle()` instead
-- **Testing stdlib behavior** — don't test that `HashMap.clear()` works
-- **Vacuous assertions** — assert the pre-condition exists before testing its removal
-- **Asserting on full objects by default** — prefer field-level assertions unless exact object equality is the contract being tested
-- **Combining multiple scenarios in one test** — split related configurations into separate `@Test`s so failures stay isolated
+- Invoke [`parameterized-tests`](../parameterized-tests/SKILL.md) for parameterized cases.
+- Invoke [`compose-tests`](../compose-tests/SKILL.md) for Compose UI tests.
+- Invoke [`network-tests`](../network-tests/SKILL.md) for NetworkRule integration tests.
