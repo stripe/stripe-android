@@ -19,6 +19,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.R
@@ -36,10 +37,12 @@ import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.isInstanceOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -48,16 +51,22 @@ class CardDetailsControllerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+    private val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
-    private val coroutineScope = CoroutineScope(testDispatcher)
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(testDispatcher))
+
+    private val composeTestRule = createComposeRule()
+
+    private val composeCleanupRule = createComposeCleanupRule()
 
     @get:Rule
-    val composeTestRule = createComposeRule()
-
-    @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(composeTestRule)
+        .around(composeCleanupRule)
+        .around(coroutineTestRule)
+        .around(coroutineScopeCleanupRule)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 

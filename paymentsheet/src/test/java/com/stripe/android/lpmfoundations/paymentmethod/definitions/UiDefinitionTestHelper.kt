@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.isInstanceOf
@@ -25,6 +26,7 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
+import kotlinx.coroutines.Dispatchers
 
 @Composable
 internal fun PaymentMethodDefinition.CreateFormUi(
@@ -37,7 +39,9 @@ internal fun PaymentMethodDefinition.CreateFormUi(
     tapToAddHelper: TapToAddHelper? = null,
     isValidating: Boolean = false,
 ) {
+    val coroutineScope = rememberCoroutineScope { Dispatchers.Unconfined }
     val formElements = formElements(
+        coroutineScope = coroutineScope,
         metadata = metadata,
         paymentMethodCreateParams = paymentMethodCreateParams,
         paymentMethodExtraParams = paymentMethodExtraParams,

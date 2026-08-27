@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARG
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
@@ -36,11 +37,15 @@ import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.core.R as CoreR
@@ -51,8 +56,15 @@ import com.stripe.android.uicore.R as UiCoreR
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
 
+    private val viewModelStoreRule = ViewModelStoreTestRule()
+
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
-    val viewModelStoreRule = ViewModelStoreTestRule()
+    val ruleChain: RuleChain = RuleChain.outerRule(viewModelStoreRule)
+        .around(coroutineScopeCleanupRule)
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
 
     @Test
     fun `Verify completeFormValues is not null when no elements exist`() = runTest {
@@ -562,7 +574,9 @@ internal class FormViewModelTest {
 
             val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
                 code = "card",
-                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(
+                    coroutineScope = coroutineScope,
+                ),
             )!!
 
             val formViewModel = createViewModel(
