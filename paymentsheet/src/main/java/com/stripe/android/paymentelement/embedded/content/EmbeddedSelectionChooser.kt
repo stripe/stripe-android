@@ -161,6 +161,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             // Not important for determining formType so use default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             paymentMethodMessagePromotionsHelper = null,
+            autocompleteAddressInteractorFactory = null,
             linkInlineHandler = LinkInlineHandler.create(),
         )
         val newFormType = newFormDefinitionFactory.formTypeForCode(previousSelection.paymentMethodType)
@@ -177,6 +178,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
                 // Not important for determining formType so use default value
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
                 paymentMethodMessagePromotionsHelper = null,
+                autocompleteAddressInteractorFactory = null,
                 linkInlineHandler = LinkInlineHandler.create(),
             )
             val previousFormElements =

@@ -47,11 +47,17 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
+import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -125,6 +131,11 @@ internal interface EmbeddedActivityModule {
     fun bindsContinueCoordinator(
         continueCoordinator: DefaultSheetActivityContinueCoordinator
     ): SheetActivityContinueCoordinator
+
+    @Binds
+    fun bindsAddressLauncherEventReporter(
+        eventReporter: DefaultAddressLauncherEventReporter
+    ): AddressLauncherEventReporter
 
     @Suppress("TooManyFunctions")
     companion object {
@@ -212,6 +223,33 @@ internal interface EmbeddedActivityModule {
         @Provides
         @Singleton
         fun provideOnClickOverrideDelegate(): OnClickOverrideDelegate = OnClickDelegateOverrideImpl()
+
+        @Provides
+        @Singleton
+        fun provideAutocompleteAddressInteractorFactory(
+            stripeAutocompleteRepository: StripeAutocompleteRepository,
+            @ViewModelScope coroutineScope: CoroutineScope,
+            paymentMethodMetadata: PaymentMethodMetadata,
+            eventReporter: AddressLauncherEventReporter,
+        ): AutocompleteAddressInteractor.Factory {
+            return PaymentElementAutocompleteAddressInteractor.Factory(
+                // Embedded supports Stripe-hosted inline autocomplete, which does not launch an activity.
+                launcher = null,
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+                    isPlacesAvailable = false,
+                    isInlineAutocompleteEnabled = true,
+                ),
+                placesClient = null,
+                stripeAutocompleteRepository = stripeAutocompleteRepository,
+                coroutineScope = coroutineScope,
+                shouldUseAutocompleteProxyEndpointsProvider = {
+                    paymentMethodMetadata.shouldUseAutocompleteProxyEndpoints
+                },
+                eventReporter = eventReporter,
+            )
+        }
 
         @Provides
         @Singleton
