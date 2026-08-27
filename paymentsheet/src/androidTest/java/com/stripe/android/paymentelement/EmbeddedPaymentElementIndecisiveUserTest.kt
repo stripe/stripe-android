@@ -87,6 +87,29 @@ internal class EmbeddedPaymentElementIndecisiveUserTest {
     }
 
     @Test
+    fun testRepeatedDirectEditNavigationAllowsLaterCompletion() = runScenario(
+        cards = listOf(card1),
+    ) {
+        repeat(3) {
+            embeddedContentPage.clickEdit()
+            editPage.waitUntilVisible()
+
+            Espresso.pressBack()
+            editPage.waitUntilMissing()
+
+            resultCalls.expectNoEvents()
+        }
+
+        embeddedContentPage.assertHasSelectedSavedPaymentMethod(card1.id)
+
+        enqueueSavedPaymentMethodConfirmationRequests()
+        testContext.confirm()
+
+        resultCalls.assertCompleted()
+        assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
+    }
+
+    @Test
     fun testFormCancellationPreservesChangingSelections() = runScenario {
         embeddedContentPage.clickOnLpm("cashapp")
         testContext.consumePaymentOptionEvent("cashapp", "Cash App Pay")
@@ -156,6 +179,7 @@ internal class EmbeddedPaymentElementIndecisiveUserTest {
     }
 
     private fun runScenario(
+        cards: List<CardPaymentMethodDetails> = listOf(card1, card2),
         block: suspend Scenario.() -> Unit,
     ) {
         val resultCalls = Turbine<EmbeddedPaymentElement.Result>()
@@ -170,7 +194,7 @@ internal class EmbeddedPaymentElementIndecisiveUserTest {
             networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
             }
-            networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(*cards.toTypedArray())
             networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
             networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 

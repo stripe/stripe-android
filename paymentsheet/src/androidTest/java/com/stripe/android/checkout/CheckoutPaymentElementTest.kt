@@ -183,6 +183,13 @@ internal class CheckoutPaymentElementTest {
             formPage.clickPrimaryButton()
             contentPage.assertHasSelectedLpm("card")
 
+            repeat(3) {
+                context.presentPaymentOptions()
+                preparePaymentOptionsScreen(paymentMethodLayout)
+                Espresso.pressBack()
+                waitForPaymentOptionsMissing()
+            }
+
             enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
 
             context.presentPaymentOptions()
@@ -303,15 +310,29 @@ internal class CheckoutPaymentElementTest {
     private fun waitForPaymentOptionsLayout(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
     ) {
-        val layoutTag = when (paymentMethodLayout) {
-            PaymentElement.Configuration.PaymentMethodLayout.Vertical -> TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
-            PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> TEST_TAG_LIST
-            PaymentElement.Configuration.PaymentMethodLayout.Automatic -> error("Expected an explicit layout.")
-        }
+        val layoutTag = paymentOptionsLayoutTag(paymentMethodLayout)
         testRules.compose.waitUntil(timeoutMillis = 5_000) {
             testRules.compose.onAllNodes(hasTestTag(layoutTag))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
+        }
+    }
+
+    private fun waitForPaymentOptionsMissing() {
+        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+            testRules.compose.onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+    }
+
+    private fun paymentOptionsLayoutTag(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ): String {
+        return when (paymentMethodLayout) {
+            PaymentElement.Configuration.PaymentMethodLayout.Vertical -> TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+            PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> TEST_TAG_LIST
+            PaymentElement.Configuration.PaymentMethodLayout.Automatic -> error("Expected an explicit layout.")
         }
     }
 

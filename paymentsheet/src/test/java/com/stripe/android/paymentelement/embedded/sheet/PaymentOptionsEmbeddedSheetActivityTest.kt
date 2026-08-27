@@ -18,6 +18,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -27,6 +28,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -43,6 +45,8 @@ import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.paymentelementtestpages.EditPage
+import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
@@ -55,6 +59,8 @@ import org.robolectric.RobolectricTestRunner
 internal class PaymentOptionsEmbeddedSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
+    private val editPage = EditPage(composeTestRule)
+    private val formPage = FormPage(composeTestRule)
     private val managePage = ManagePage(composeTestRule)
     private val verticalModePage = VerticalModePage(composeTestRule)
     private val networkRule = NetworkRule()
@@ -137,7 +143,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `new selection requiring a form opens on the form and back returns to the list`() = launch(
+    fun `can repeatedly navigate between a new payment method form and payment options`() = launch(
         selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) { scenario ->
         scenario.onActivity { activity ->
@@ -155,6 +161,20 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             assertThat(activity.embeddedNavigator.screen.value)
                 .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         }
+
+        repeat(3) {
+            verticalModePage.clickNewPaymentMethodButton("card")
+            formPage.waitUntilVisible()
+
+            Espresso.pressBack()
+            verticalModePage.waitUntilVisible()
+
+            scenario.onActivity { activity ->
+                assertThat(activity.embeddedNavigator.canGoBack).isFalse()
+                assertThat(activity.embeddedNavigator.screen.value)
+                    .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+            }
+        }
     }
 
     @Test
@@ -166,9 +186,22 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 paymentMethods = paymentMethods,
             ),
         ) { scenario ->
+            repeat(3) {
+                verticalModePage.clickViewMore()
+                managePage.waitUntilVisible()
+
+                Espresso.pressBack()
+                verticalModePage.waitUntilVisible()
+
+                scenario.onActivity { activity ->
+                    assertThat(activity.embeddedNavigator.canGoBack).isFalse()
+                    assertThat(activity.embeddedNavigator.screen.value)
+                        .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+                }
+            }
+
             verticalModePage.clickViewMore()
             managePage.waitUntilVisible()
-
             managePage.selectPaymentMethod(paymentMethods.first().id)
             composeTestRule.waitForIdle()
 
@@ -178,6 +211,36 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 assertThat(activity.embeddedNavigator.canGoBack).isFalse()
                 assertThat(activity.embeddedNavigator.screen.value)
                     .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+            }
+        }
+    }
+
+    @Test
+    fun `can repeatedly navigate between direct saved payment method edit and payment options`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        launch(
+            selection = PaymentSelection.Saved(paymentMethod),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
+                canRemoveLastPaymentMethod = true,
+                customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
+        ) { scenario ->
+            repeat(3) {
+                verticalModePage.clickEdit()
+                editPage.waitUntilVisible()
+
+                Espresso.pressBack()
+                verticalModePage.waitUntilVisible()
+
+                scenario.onActivity { activity ->
+                    assertThat(activity.embeddedNavigator.canGoBack).isFalse()
+                    assertThat(activity.embeddedNavigator.screen.value)
+                        .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+                }
             }
         }
     }

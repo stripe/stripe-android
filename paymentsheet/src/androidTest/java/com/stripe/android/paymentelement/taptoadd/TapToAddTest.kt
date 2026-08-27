@@ -178,7 +178,7 @@ internal class TapToAddTest {
     }
 
     @Test
-    fun successAfterCancelAfterCardCollectedWithCompleteMode(
+    fun successAfterRepeatedCancelAfterCardCollectedWithCompleteMode(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Complete.Provider::class)
         integrationType: TapToAddIntegrationType.Complete,
     ) = runTapToAddIntegrationTest(
@@ -199,16 +199,18 @@ internal class TapToAddTest {
             response.defaultElementsSessions()
         }
 
-        cardCollectionTestHelper.enqueueSuccessfulTapToCollectFlow()
-
         launchFlow()
-        openCardForm()
 
-        tapToAddCardFormPage.clickOnTapToAdd()
+        repeat(3) {
+            cardCollectionTestHelper.enqueueSuccessfulTapToCollectFlow()
+            openCardForm()
 
-        confirmationPage.assertPrimaryButton()
-        confirmationPage.clickCloseButton()
-        confirmationPage.waitUntilMissing()
+            tapToAddCardFormPage.clickOnTapToAdd()
+
+            confirmationPage.assertPrimaryButton()
+            confirmationPage.clickCloseButton()
+            confirmationPage.waitUntilMissing()
+        }
 
         enqueueConfirmRequests()
 
