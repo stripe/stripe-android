@@ -339,7 +339,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     selection = selection,
                     previousNewSelections = previousNewSelections,
                     customerState = customerState,
-                    promotion = null,
+                    promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.PaymentOptions,
                 ),
             )

@@ -62,7 +62,7 @@ internal interface EmbeddedSheetComponent {
             paymentElementCallbackIdentifier: String,
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
-            @BindsInstance promotion: PaymentMethodMessagePromotion?,
+            @BindsInstance promotions: List<PaymentMethodMessagePromotion>,
             @BindsInstance launchMode: EmbeddedLaunchMode,
         ): EmbeddedSheetComponent
     }

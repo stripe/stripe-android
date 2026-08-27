@@ -33,7 +33,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 application = extras.requireApplication(),
                 savedStateHandle = extras.createSavedStateHandle(),
-                promotion = args.promotion,
+                promotions = args.promotions,
                 launchMode = args.launchMode,
             )
 

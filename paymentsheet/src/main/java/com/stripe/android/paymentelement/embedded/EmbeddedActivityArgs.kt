@@ -21,7 +21,7 @@ internal data class EmbeddedActivityArgs(
     val selection: PaymentSelection?,
     val previousNewSelections: Bundle,
     val customerState: CustomerState?,
-    val promotion: PaymentMethodMessagePromotion?,
+    val promotions: List<PaymentMethodMessagePromotion>,
     val launchMode: EmbeddedLaunchMode,
 ) : Parcelable {
     companion object {
