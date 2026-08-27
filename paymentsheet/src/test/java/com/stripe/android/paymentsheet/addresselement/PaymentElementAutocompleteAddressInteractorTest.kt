@@ -295,7 +295,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory creates inline interactor when proxy flag is on with repository`() = test { scenario ->
+    fun `Factory creates inline interactor without launcher when proxy flag is on with repository`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
@@ -304,7 +304,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
+            launcher = null,
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
