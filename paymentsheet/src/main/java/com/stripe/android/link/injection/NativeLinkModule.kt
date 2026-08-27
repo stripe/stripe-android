@@ -47,6 +47,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationDefinition
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationFromNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -74,7 +75,8 @@ import kotlin.coroutines.CoroutineContext
 @Module(
     includes = [
         StripeRepositoryModule::class,
-        PaymentsIntegrityModule::class
+        PaymentsIntegrityModule::class,
+        ApiConfigurationFromNamedModule::class,
     ],
     subcomponents = [
         OAuthConsentViewModelComponent::class,
