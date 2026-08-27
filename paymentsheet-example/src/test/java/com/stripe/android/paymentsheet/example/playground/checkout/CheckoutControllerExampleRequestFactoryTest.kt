@@ -66,6 +66,7 @@ class CheckoutControllerExampleRequestFactoryTest {
                 put("payment_method_types", commonPaymentMethodTypes)
                 put("automatic_tax", true)
                 put("shipping_address_collection", false)
+                put("billing_address_collection", true)
             }
         )
     }
