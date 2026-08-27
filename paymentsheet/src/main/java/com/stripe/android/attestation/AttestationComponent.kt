@@ -4,8 +4,9 @@ import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.injection.PaymentsIntegrityModule
-import com.stripe.android.payments.core.injection.ApiConfigurationFromPublishableKeyModule
+import com.stripe.android.payments.core.injection.ApiConfigurationFromNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -22,7 +23,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         PaymentsIntegrityModule::class,
         StripeRepositoryModule::class,
-        ApiConfigurationFromPublishableKeyModule::class,
+        ApiConfigurationFromNamedModule::class,
     ]
 )
 internal interface AttestationComponent {
@@ -35,6 +36,9 @@ internal interface AttestationComponent {
             @BindsInstance
             @Named(PUBLISHABLE_KEY)
             publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(STRIPE_ACCOUNT_ID)
+            stripeAccountIdProvider: () -> String?,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
