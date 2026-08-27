@@ -63,7 +63,6 @@ internal class AttestationViewModel @Inject constructor(
                     .build(
                         application = app,
                         publishableKeyProvider = { args.publishableKey },
-                        stripeAccountIdProvider = { null },
                         productUsage = args.productUsage.toSet()
                     )
                     .attestationViewModel

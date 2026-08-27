@@ -9,8 +9,8 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.addresselement.AutocompleteViewModel
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -23,7 +23,7 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module(includes = [ApiConfigurationFromPaymentConfigurationModule::class])
+@Module(includes = [PaymentConfigurationModule::class])
 internal interface AutocompleteViewModelModule {
     @Binds
     fun bindsAnalyticsRequestFactory(

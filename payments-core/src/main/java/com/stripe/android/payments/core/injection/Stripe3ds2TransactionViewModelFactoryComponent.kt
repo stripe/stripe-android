@@ -22,7 +22,6 @@ import javax.inject.Singleton
         CoreCommonModule::class,
         RetryDelayModule::class,
         ApiRequestOptionsModule::class,
-        ApiConfigurationToNamedModule::class,
     ]
 )
 internal interface Stripe3ds2TransactionViewModelFactoryComponent {
