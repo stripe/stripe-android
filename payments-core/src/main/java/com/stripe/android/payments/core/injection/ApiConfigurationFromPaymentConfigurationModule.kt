@@ -1,22 +1,22 @@
 package com.stripe.android.payments.core.injection
 
+import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import dagger.Module
 import dagger.Provides
-import javax.inject.Provider
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module(includes = [PaymentConfigurationModule::class])
+@Module
 class ApiConfigurationFromPaymentConfigurationModule {
     @Provides
     fun provideApiConfigurationStateProvider(
-        paymentConfiguration: Provider<PaymentConfiguration>
+        context: Context
     ): () -> ApiConfiguration.State {
         return {
-            val config = paymentConfiguration.get()
+            val config = PaymentConfiguration.getInstance(context)
             ApiConfiguration.State(
                 publishableKey = config.publishableKey,
                 stripeAccountId = config.stripeAccountId,
