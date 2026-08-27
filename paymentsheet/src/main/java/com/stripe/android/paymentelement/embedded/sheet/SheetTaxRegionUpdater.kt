@@ -14,10 +14,12 @@ internal typealias SheetTaxRegionUpdate = suspend () -> Result<CheckoutSessionRe
 
 @OptIn(CheckoutSessionPreview::class)
 internal class SheetTaxRegionUpdater @Inject constructor(
-    private val paymentMethodMetadata: PaymentMethodMetadata,
     private val taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
 ) {
-    fun prepareUpdate(selection: PaymentSelection?): SheetTaxRegionUpdate? {
+    fun prepareUpdate(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        selection: PaymentSelection?,
+    ): SheetTaxRegionUpdate? {
         val checkoutSessionResponse =
             (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
                 ?.checkoutSessionResponse

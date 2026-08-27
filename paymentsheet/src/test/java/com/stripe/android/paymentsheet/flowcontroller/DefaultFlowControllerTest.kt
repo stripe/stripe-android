@@ -26,6 +26,7 @@ import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.LinkPaymentMethodSelectionCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SESSION
 import com.stripe.android.link.TestFactory.VERIFICATION_STARTED_SESSION
@@ -2517,10 +2518,13 @@ internal class DefaultFlowControllerTest {
             linkHandler = linkHandler ?: mock(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             linkAccountHolder = linkAccountHolder,
+            linkPaymentMethodSelectionCoordinator = LinkPaymentMethodSelectionCoordinator(
+                linkAccountHolder = linkAccountHolder,
+                linkGateFactory = FakeLinkGate.Factory(linkGate),
+            ),
             flowControllerLinkLauncher = flowControllerLinkPaymentLauncher,
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
-            linkGateFactory = FakeLinkGate.Factory(linkGate),
             confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
                 listOf(KLARNA_PROMOTION)

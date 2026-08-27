@@ -45,7 +45,7 @@ internal class SheetTaxRegionUpdaterTest {
             )
         )
     ) {
-        val update = updater.prepareUpdate(selectionWithAddress(ADDRESS))
+        val update = updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
 
         assertThat(update).isNull()
     }
@@ -54,7 +54,7 @@ internal class SheetTaxRegionUpdaterTest {
     fun `prepareUpdate returns null for non-checkout session integration`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) {
-        val update = updater.prepareUpdate(selectionWithAddress(ADDRESS))
+        val update = updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
 
         assertThat(update).isNull()
     }
@@ -68,7 +68,7 @@ internal class SheetTaxRegionUpdaterTest {
             )
         )
     ) {
-        val update = updater.prepareUpdate(selectionWithAddress(ADDRESS))
+        val update = updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
 
         assertThat(update).isNull()
     }
@@ -86,14 +86,16 @@ internal class SheetTaxRegionUpdaterTest {
             response.testBodyFromFile("checkout-session-init.json")
         }
 
-        val result = requireNotNull(updater.prepareUpdate(selectionWithAddress(ADDRESS))).invoke()
+        val result = requireNotNull(
+            updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
+        ).invoke()
 
         assertThat(result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
 
     @Test
     fun `prepareUpdate returns null when selection is null`() = runScenario {
-        val update = updater.prepareUpdate(selection = null)
+        val update = updater.prepareUpdate(paymentMethodMetadata, selection = null)
 
         assertThat(update).isNull()
     }
@@ -106,14 +108,17 @@ internal class SheetTaxRegionUpdaterTest {
             ),
         )
 
-        val update = updater.prepareUpdate(selection)
+        val update = updater.prepareUpdate(paymentMethodMetadata, selection)
 
         assertThat(update).isNull()
     }
 
     @Test
     fun `prepareUpdate returns null when billing address has no country`() = runScenario {
-        val update = updater.prepareUpdate(selectionWithAddress(ADDRESS.copy(country = null)))
+        val update = updater.prepareUpdate(
+            paymentMethodMetadata,
+            selectionWithAddress(ADDRESS.copy(country = null)),
+        )
 
         assertThat(update).isNull()
     }
@@ -125,7 +130,9 @@ internal class SheetTaxRegionUpdaterTest {
             response.setBody("""{"error":{"message":"Invalid tax region"}}""")
         }
 
-        val result = requireNotNull(updater.prepareUpdate(selectionWithAddress(ADDRESS))).invoke()
+        val result = requireNotNull(
+            updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
+        ).invoke()
 
         assertThat(result.exceptionOrNull()?.message).contains("Invalid tax region")
     }
@@ -147,11 +154,13 @@ internal class SheetTaxRegionUpdaterTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val updater = SheetTaxRegionUpdater(
-            paymentMethodMetadata = paymentMethodMetadata,
             taxRegionUpdater = checkoutSessionTaxRegionUpdater(),
         )
 
-        Scenario(updater = updater).block()
+        Scenario(
+            updater = updater,
+            paymentMethodMetadata = paymentMethodMetadata,
+        ).block()
     }
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
@@ -193,6 +202,7 @@ internal class SheetTaxRegionUpdaterTest {
 
     private data class Scenario(
         val updater: SheetTaxRegionUpdater,
+        val paymentMethodMetadata: PaymentMethodMetadata,
     )
 
     private companion object {
