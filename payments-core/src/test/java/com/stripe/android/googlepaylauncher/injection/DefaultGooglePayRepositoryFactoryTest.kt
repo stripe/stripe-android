@@ -9,7 +9,7 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
@@ -38,7 +38,6 @@ internal class DefaultGooglePayRepositoryFactoryTest {
 
     @Before
     fun setup() {
-        PaymentConfiguration.init(context, "pk_123")
         GooglePayRepository.googlePayAvailabilityClientFactory =
             object : GooglePayAvailabilityClient.Factory {
                 override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
@@ -85,6 +84,10 @@ internal class DefaultGooglePayRepositoryFactoryTest {
             environment = GooglePayEnvironment.Test,
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_123",
+                stripeAccountId = null,
+            ),
         )
 
         Scenario(
