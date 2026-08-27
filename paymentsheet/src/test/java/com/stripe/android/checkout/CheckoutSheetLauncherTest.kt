@@ -508,10 +508,48 @@ internal class CheckoutSheetLauncherTest {
             selection = selection,
             configuration = EmbeddedConfigurationFactory.create(),
         )
+        checkoutSheetLinkHelper.launchLinkIfEligibleCalls.awaitItem()
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `launchPaymentOptions does not launch sheet when Link helper launches`() = testScenario {
+        checkoutSheetLinkHelper.launchLinkIfEligibleResult = true
+
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = null,
+            selection = null,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
+
+        val call = checkoutSheetLinkHelper.launchLinkIfEligibleCalls.awaitItem()
+        assertThat(call.selection).isNull()
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `Link helper callback launches payment options with supplied state`() = testScenario {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val customerState = createCustomerState()
+        val selection = PaymentSelection.GooglePay
+        val configuration = EmbeddedConfigurationFactory.create()
+
+        linkLaunchPaymentOptions.launch(
+            paymentMethodMetadata = metadata,
+            customerState = customerState,
+            selection = selection,
+            configuration = configuration,
+        )
+
+        val args = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(args.paymentMethodMetadata).isEqualTo(metadata)
+        assertThat(args.customerState).isEqualTo(customerState)
+        assertThat(args.selection).isEqualTo(selection)
+        assertThat(args.configuration).isEqualTo(configuration)
     }
 
     @Test
@@ -525,6 +563,7 @@ internal class CheckoutSheetLauncherTest {
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             configuration = EmbeddedConfigurationFactory.create(),
         )
+        checkoutSheetLinkHelper.launchLinkIfEligibleCalls.awaitItem()
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
 
         assertThat(launchCall.previousNewSelections.previousNewSelection("card"))
@@ -706,6 +745,7 @@ internal class CheckoutSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         val unregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+        checkoutSheetLinkHelper.unregisterCalls.awaitItem()
 
         assertThat(unregisteredLauncher).isEqualTo(launcher)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
@@ -713,7 +753,7 @@ internal class CheckoutSheetLauncherTest {
 
     @Suppress("LongMethod")
     private fun testScenario(
-        block: suspend Scenario.() -> Unit
+        block: suspend Scenario.() -> Unit,
     ) = runTest {
         var immediateActionInvoked = false
         val testScope = this
@@ -721,6 +761,7 @@ internal class CheckoutSheetLauncherTest {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val errorReporter = FakeErrorReporter()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = selectionHolder.selection,
@@ -728,9 +769,9 @@ internal class CheckoutSheetLauncherTest {
             paymentMethodMetadataFlow = stateFlowOf(null),
         )
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
-        val errorReporter = FakeErrorReporter()
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val logger = FakeLogger()
+        val checkoutSheetLinkHelper = FakeCheckoutSheetLinkHelper()
         val confirmationHandler = FakeConfirmationHandler()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
@@ -739,7 +780,6 @@ internal class CheckoutSheetLauncherTest {
             logger = logger,
             resultCallback = CheckoutController.ResultCallback {},
         )
-
         DummyActivityResultCaller.test {
             val sheetLauncher = CheckoutSheetLauncher(
                 activityResultCaller = activityResultCaller,
@@ -751,6 +791,7 @@ internal class CheckoutSheetLauncherTest {
                 sessionRefresher = sessionRefresher,
                 operationCoordinator = operationCoordinator,
                 logger = logger,
+                checkoutSheetLinkHelper = checkoutSheetLinkHelper,
                 coroutineScope = testScope,
                 productUsage = setOf("Checkout"),
                 statusBarColor = null,
@@ -759,6 +800,7 @@ internal class CheckoutSheetLauncherTest {
             )
             val registerCall = awaitRegisterCall()
             val launcher = awaitNextRegisteredLauncher()
+            val linkRegisterCall = checkoutSheetLinkHelper.registerCalls.awaitItem()
 
             assertThat(registerCall).isNotNull()
             assertThat(registerCall.contract).isInstanceOf<EmbeddedSheetContract>()
@@ -777,12 +819,15 @@ internal class CheckoutSheetLauncherTest {
                 sessionRefresher = sessionRefresher,
                 logger = logger,
                 operationCoordinator = operationCoordinator,
+                checkoutSheetLinkHelper = checkoutSheetLinkHelper,
+                linkLaunchPaymentOptions = linkRegisterCall.launchPaymentOptions,
                 runCurrent = testScheduler::runCurrent,
             ).block()
         }
 
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
+        checkoutSheetLinkHelper.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -799,6 +844,8 @@ internal class CheckoutSheetLauncherTest {
         val sessionRefresher: FakeCheckoutSessionRefresher,
         val logger: FakeLogger,
         val operationCoordinator: CheckoutOperationCoordinator,
+        val checkoutSheetLinkHelper: FakeCheckoutSheetLinkHelper,
+        val linkLaunchPaymentOptions: CheckoutSheetLinkHelper.LaunchPaymentOptions,
         private val runCurrent: () -> Unit,
     ) {
         fun runCurrent() {
