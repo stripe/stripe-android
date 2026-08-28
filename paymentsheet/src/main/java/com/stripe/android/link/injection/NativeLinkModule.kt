@@ -152,6 +152,7 @@ internal interface NativeLinkModule {
     @SuppressWarnings("TooManyFunctions")
     companion object {
         @Provides
+        @NativeLinkScope
         fun providePaymentConfiguration(context: Context): PaymentConfiguration {
             return PaymentConfiguration.getInstance(context)
         }
