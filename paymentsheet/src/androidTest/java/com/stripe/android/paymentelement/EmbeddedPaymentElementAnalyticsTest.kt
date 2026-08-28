@@ -5,7 +5,6 @@ import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.ApiRequest.Options.Companion.UNDEFINED_PUBLISHABLE_KEY
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
@@ -488,23 +487,11 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         vararg requestMatchers: RequestMatcher,
         additionalProductUsage: Set<String> = emptySet(),
     ) {
-        val publishableKey = if (eventName in EVENTS_REPORTED_BEFORE_API_CONFIGURATION_IS_AVAILABLE) {
-            UNDEFINED_PUBLISHABLE_KEY
-        } else {
-            TestApiKeys.PUBLISHABLE
-        }
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
             productUsage = setOf("EmbeddedPaymentElement").plus(additionalProductUsage),
             requestMatchers = requestMatchers,
-            publishableKey = publishableKey,
-        )
-    }
-
-    private companion object {
-        val EVENTS_REPORTED_BEFORE_API_CONFIGURATION_IS_AVAILABLE = setOf(
-            "stripe_android.retrieve_payment_methods",
-            "elements.customer_repository.get_saved_payment_methods_success",
+            publishableKey = TestApiKeys.PUBLISHABLE,
         )
     }
 }
