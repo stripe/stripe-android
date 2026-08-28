@@ -52,6 +52,7 @@ class PaymentMethodOptionsParamsTest {
             PaymentMethodOptionsParams.Klarna.Builder()
                 .setInteroperabilityToken("interoperability_token")
                 .setPartnerConfirmationToken("partner_confirmation_token")
+                .setSetupFutureUsage(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
                 .build()
                 .toParamMap()
         ).isEqualTo(
@@ -59,6 +60,39 @@ class PaymentMethodOptionsParamsTest {
                 "klarna" to mapOf(
                     "interoperability_token" to "interoperability_token",
                     "partner_confirmation_token" to "partner_confirmation_token",
+                    "setup_future_usage" to "off_session",
+                )
+            )
+        )
+    }
+
+    @Test
+    fun klarnaSetupFutureUsage_returnsConfiguredValue() {
+        val params = PaymentMethodOptionsParams.Klarna.Builder()
+            .setSetupFutureUsage(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+            .build()
+
+        assertThat(params.setupFutureUsage())
+            .isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+    }
+
+    @Test
+    fun klarnaUpdateSetupFutureUsageWithPmoSfu_preservesTokens() {
+        val params = PaymentMethodOptionsParams.Klarna.Builder()
+            .setInteroperabilityToken("interoperability_token")
+            .setPartnerConfirmationToken("partner_confirmation_token")
+            .build()
+
+        val updatedParams = params.updateSetupFutureUsageWithPmoSfu(
+            pmoSfu = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+        )
+
+        assertThat(updatedParams?.toParamMap()).isEqualTo(
+            mapOf(
+                "klarna" to mapOf(
+                    "interoperability_token" to "interoperability_token",
+                    "partner_confirmation_token" to "partner_confirmation_token",
+                    "setup_future_usage" to "on_session",
                 )
             )
         )
