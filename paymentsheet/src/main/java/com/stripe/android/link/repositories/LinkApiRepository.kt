@@ -373,6 +373,8 @@ internal class LinkApiRepository @Inject constructor(
             allowRedisplayParams +
             clientAttributionMetadataParams
 
+        // Allow using a custom API key so that payment methods can be created under the
+        // merchant-of-record if necessary.
         val effectiveOptions = buildRequestOptions(requestOptions, apiKey)
 
         consumersApiService.sharePaymentDetails(
