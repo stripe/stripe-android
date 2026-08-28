@@ -228,9 +228,6 @@ internal class VerificationViewModel @Inject constructor(
     fun onChangeEmailButtonClicked() {
         clearError()
         onChangeEmailRequested()
-        viewModelScope.launch {
-            linkAccountManager.logOut()
-        }
     }
 
     fun onFocusRequested() {
