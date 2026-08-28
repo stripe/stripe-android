@@ -455,7 +455,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
-                publishableKey = "pk_test_123",
+                publishableKeyProvider = { "pk_test_123" },
             ),
             apiConfigurationProvider = {
                 ApiConfiguration.State(

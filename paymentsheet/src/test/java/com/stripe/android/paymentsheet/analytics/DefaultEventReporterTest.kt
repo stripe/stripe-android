@@ -1522,7 +1522,7 @@ class DefaultEventReporterTest {
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
-            publishableKey = "pk_test_123",
+            publishableKeyProvider = { "pk_test_123" },
             defaultProductUsageTokens = setOf(""),
         )
 

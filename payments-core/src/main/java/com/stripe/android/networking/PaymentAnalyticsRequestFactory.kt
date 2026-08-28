@@ -53,6 +53,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         packageName = context.applicationContext.packageName.orEmpty(),
         publishableKeyProvider = publishableKeyProvider,
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
     internal constructor(
