@@ -159,7 +159,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                         context = ApplicationProvider.getApplicationContext(),
-                        publishableKeyProvider = { "pk" },
+                        publishableKey = "pk",
                     ),
                     apiConfigurationProvider = {
                         ApiConfiguration.State(
