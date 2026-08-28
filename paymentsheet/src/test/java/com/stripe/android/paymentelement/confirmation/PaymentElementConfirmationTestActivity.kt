@@ -43,6 +43,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationToNamedModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -127,6 +128,7 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
         PaymentElementConfirmationModule::class,
         PaymentElementConfirmationTestModule::class,
         GooglePayLauncherModule::class,
+        ApiConfigurationToNamedModule::class,
         ApiRequestOptionsModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
     ]
