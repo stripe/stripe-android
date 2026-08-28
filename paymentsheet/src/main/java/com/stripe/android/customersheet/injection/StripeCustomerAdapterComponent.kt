@@ -10,7 +10,6 @@ import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
 import com.stripe.android.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.customersheet.StripeCustomerAdapter
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -26,7 +25,6 @@ import kotlin.coroutines.CoroutineContext
     modules = [
         StripeCustomerAdapterModule::class,
         CustomerSheetDataCommonModule::class,
-        ApiConfigurationFromPaymentConfigurationModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
