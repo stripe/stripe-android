@@ -51,7 +51,6 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val mode: EventReporter.Mode,
     private val logger: Logger,
-    private val apiConfigProvider: () -> ApiConfiguration.State
 ) : LogLinkHoldbackExperiment {
 
     override operator fun invoke(
@@ -96,7 +95,11 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             }
             else -> {
                 // Link is disabled — perform the lookup for experiment logging.
-                isReturningUser(email = customerEmail, sessionId = elementsSession.elementsSessionId)
+                isReturningUser(
+                    email = customerEmail,
+                    sessionId = elementsSession.elementsSessionId,
+                    apiConfiguration = state.paymentMethodMetadata.apiConfiguration,
+                )
             }
         }
 
@@ -152,11 +155,11 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun isReturningUser(
         email: String,
         sessionId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Boolean {
-        val config = apiConfigProvider()
         val requestOptions = ApiRequest.Options(
-            apiKey = config.publishableKey,
-            stripeAccount = config.stripeAccountId,
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
         )
         return linkDisabledApiRepository
             .lookupConsumerWithoutBackendLoggingForExposure(
