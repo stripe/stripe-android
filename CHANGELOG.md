@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+Dependencies updated:
+- Bumped Compose from 1.10.6 to 1.11.4.
+
 ### PaymentSheet
 * [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
 * [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
