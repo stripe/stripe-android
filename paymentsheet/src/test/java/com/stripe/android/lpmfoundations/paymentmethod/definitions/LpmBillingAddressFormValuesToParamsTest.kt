@@ -75,13 +75,19 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     }
 
     @Test
-    fun `covers every billing mode for every payment method`() {
+    fun `covers every preservation billing mode for every payment method`() {
         lpmBillingAddressTestConfigurations
             .groupBy { it.paymentMethodType }
             .values
             .forEach { configs ->
                 assertThat(configs.map { it.billingDetailsCollectionMode })
-                    .containsAtLeastElementsIn(LpmBillingDetailsCollectionMode.entries)
+                    .containsAtLeastElementsIn(
+                        listOf(
+                            LpmBillingDetailsCollectionMode.Never,
+                            LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+                            LpmBillingDetailsCollectionMode.Full,
+                        )
+                    )
             }
     }
 

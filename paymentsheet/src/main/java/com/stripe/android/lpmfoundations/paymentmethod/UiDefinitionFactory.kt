@@ -172,6 +172,8 @@ internal sealed interface UiDefinitionFactory {
     }
 
     abstract class Simple : UiDefinitionFactory {
+        protected open val supportsAutomaticTaxBillingAddress: Boolean = true
+
         abstract fun createSupportedPaymentMethod(
             metadata: PaymentMethodMetadata,
         ): SupportedPaymentMethod
@@ -185,7 +187,10 @@ internal sealed interface UiDefinitionFactory {
         }
 
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement> {
-            val builder = FormElementsBuilder(arguments)
+            val builder = FormElementsBuilder(
+                arguments = arguments,
+                supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
+            )
 
             buildFormElements(metadata, arguments, builder)
 
