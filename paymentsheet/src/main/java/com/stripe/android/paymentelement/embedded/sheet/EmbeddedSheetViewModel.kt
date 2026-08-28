@@ -35,7 +35,7 @@ internal class EmbeddedSheetViewModel(
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 application = extras.requireApplication(),
                 savedStateHandle = extras.createSavedStateHandle(),
-                promotion = args.promotion,
+                promotions = args.promotions,
                 launchMode = args.launchMode,
                 viewModelScope = customViewModelScope,
             )

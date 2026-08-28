@@ -175,7 +175,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             selection = currentSelection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = promotion,
+            promotions = listOfNotNull(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -206,7 +206,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
         )
         activityLauncher.launch(args)
@@ -235,7 +235,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         activityLauncher.launch(args)
