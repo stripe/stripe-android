@@ -4,7 +4,6 @@
  * Don't add any configuration here that is not common to *every* android library.
  */
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
 apply plugin: "org.gradle.test-retry"
 if (project.hasProperty("enable_dokka") && project.enable_dokka) {
     apply plugin: "org.jetbrains.dokka"
@@ -22,6 +21,7 @@ configurations {
 }
 
 def jitpackEnabled = System.getenv("JITPACK")
+def consumerProguardFile = file("consumer-rules.txt")
 
 if (jitpackEnabled != null && jitpackEnabled.toBoolean()) {
     group='com.github.stripe.stripe-android'
@@ -36,7 +36,9 @@ android {
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion rootProject.ext.compileSdkVersion
-        consumerProguardFiles "consumer-rules.txt"
+        if (consumerProguardFile.exists()) {
+            consumerProguardFiles consumerProguardFile
+        }
 
         vectorDrawables.useSupportLibrary = true
 

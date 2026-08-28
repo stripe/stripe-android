@@ -4,7 +4,6 @@
  * Don't add any configuration here that is not common to *every* android example application.
  */
 apply plugin: "com.android.application"
-apply plugin: "kotlin-android"
 
 apply from: rootProject.file('build-configuration/version.gradle')
 
@@ -13,6 +12,8 @@ apply from: rootProject.file('build-configuration/detekt.gradle')
 apply from: rootProject.file('build-configuration/configurations.gradle')
 
 apply from: rootProject.file('build-configuration/instrumentation-test-report-splitter.gradle')
+
+def proguardRulesFile = file('proguard-rules.pro')
 
 android {
     namespace STRIPE_ANDROID_NAMESPACE
@@ -38,7 +39,10 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+            if (proguardRulesFile.exists()) {
+                proguardFiles proguardRulesFile
+            }
             signingConfig signingConfigs.config
         }
         debug {

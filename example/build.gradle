@@ -19,6 +19,8 @@ def getAccountId() {
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
+    implementation project(':payments-ui-core')
+    implementation project(':stripe-ui-core')
 
     implementation libs.accompanist.materialThemeAdapter
     implementation libs.alipay

@@ -34,44 +34,54 @@ android {
     }
 }
 
-// Generate the HTML class for hCaptcha
-def hcaptchaPackageName = "com.stripe.hcaptcha"
-def hcaptchaPackagePath = hcaptchaPackageName.replaceAll('\\.', '/')
-def hcaptchaGenBaseDir = project.layout.buildDirectory.dir("generated/source/hcaptcha/main")
-def hcaptchaGenDir = project.layout.buildDirectory.dir("generated/source/hcaptcha/main/${hcaptchaPackagePath}")
-def templateFile = project.layout.projectDirectory.file("src/main/html/HCaptchaHtml.java.tml")
-def htmlFile = project.layout.projectDirectory.file("src/main/html/hcaptcha.html")
+abstract class GenerateHtmlClass extends DefaultTask {
+    @InputFile
+    abstract RegularFileProperty getTemplateFile()
 
-def generateHtmlClass = tasks.register("generateJavaClassFromStaticHtml") {
-    group 'Generate'
-    description "Generate HTML java class"
+    @InputFile
+    abstract RegularFileProperty getHtmlFile()
 
-    inputs.file(templateFile)
-    inputs.file(htmlFile)
-    outputs.dir(hcaptchaGenDir)
+    @Input
+    abstract Property<String> getPackageName()
 
-    doFirst {
-        def html = htmlFile.getAsFile().readLines()
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDirectory()
+
+    @TaskAction
+    void generate() {
+        def html = htmlFile.get().asFile.readLines()
                 .stream()
                 .collect(Collectors.joining("\n"))
 
         def engine = new SimpleTemplateEngine()
-        def src = engine.createTemplate(templateFile.getAsFile().text).make([
+        def src = engine.createTemplate(templateFile.get().asFile.text).make([
                 "htmlContent": html,
-                "packageName": hcaptchaPackageName
+                "packageName": packageName.get()
         ])
 
-        def outDir = hcaptchaGenDir.get().asFile
+        def packagePath = packageName.get().replaceAll('\\.', '/')
+        def outDir = outputDirectory.dir(packagePath).get().asFile
         outDir.mkdirs()
         new File(outDir, "HCaptchaHtml.kt").write(src.toString())
     }
 }
 
-android.sourceSets.main.kotlin.srcDirs += hcaptchaGenBaseDir
+// Generate the HTML class for hCaptcha
+def generateHtmlClass = tasks.register("generateJavaClassFromStaticHtml", GenerateHtmlClass) {
+    group 'Generate'
+    description "Generate HTML java class"
 
-tasks.configureEach {
-    if (name.startsWith("compile") && name.contains("Kotlin")) {
-        dependsOn(generateHtmlClass)
+    templateFile = project.layout.projectDirectory.file("src/main/html/HCaptchaHtml.java.tml")
+    htmlFile = project.layout.projectDirectory.file("src/main/html/hcaptcha.html")
+    packageName = "com.stripe.hcaptcha"
+    outputDirectory = project.layout.buildDirectory.dir("generated/source/hcaptcha/main")
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.sources.kotlin.addGeneratedSourceDirectory(generateHtmlClass) {
+            it.outputDirectory
+        }
     }
 }
 

@@ -86,6 +86,11 @@ android {
         viewBinding true
         compose true
     }
+
+    lint {
+        // Lifecycle 2.10.0's detector crashes on IdentityViewModel with AGP 9 lint.
+        disable 'NullSafeMutableLiveData'
+    }
 }
 
 ext {

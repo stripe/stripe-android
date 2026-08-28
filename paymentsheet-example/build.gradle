@@ -121,6 +121,8 @@ android {
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
+    implementation project(':payments-ui-core')
+    implementation project(':stripe-ui-core')
     cardScanImplementation project(':stripecardscan')
 
     implementation libs.androidx.activity
@@ -149,6 +151,7 @@ dependencies {
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.zxing
 
+    compileOnly libs.terminal.core
     tapToAddImplementation libs.terminal.core
     tapToAddImplementation libs.terminal.tapToPay
 

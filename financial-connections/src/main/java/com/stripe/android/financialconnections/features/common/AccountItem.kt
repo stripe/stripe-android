@@ -21,15 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.os.ConfigurationCompat.getLocales
 import com.stripe.android.financialconnections.features.common.AccountSelectionState.Disabled
 import com.stripe.android.financialconnections.features.common.AccountSelectionState.Enabled
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -44,7 +43,6 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
-import java.util.Locale
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 /**
@@ -189,7 +187,7 @@ private fun getSubtitle(
 
 @Composable
 private fun PartnerAccount.getFormattedBalance(): String? {
-    val locale = getLocales(LocalConfiguration.current).get(0) ?: Locale.getDefault()
+    val locale = LocalLocale.current.platformLocale
     val debugMode = LocalInspectionMode.current
     if (balanceAmount == null || currency == null) return null
     return when {

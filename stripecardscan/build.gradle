@@ -69,10 +69,12 @@ android {
         }
     }
 
-    kotlinOptions {
-        freeCompilerArgs += [
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll(
                 "-Xconsistent-data-class-copy-visibility",
-        ]
+            )
+        }
     }
 }
 
