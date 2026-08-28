@@ -1313,7 +1313,7 @@ internal class PlaygroundTestDriver(
                 }
 
                 if (authorizeAction != null) {
-                    if (authorizeAction.exists()) {
+                    if (testParameters.authorizationAction is AuthorizeAction.Bacs || authorizeAction.exists()) {
                         authorizeAction.click()
                     } else if (!authorizeAction.exists()) {
                         // Buttons aren't showing the same way each time in the web page.
@@ -1462,21 +1462,20 @@ internal class PlaygroundTestDriver(
                         }
                     }
                     is AuthorizeAction.ShowQrCodeThenPoll -> {
-                        val simulateScanText = UiAutomatorText(
-                            "Simulate scan",
-                            labelMatchesExactly = true,
-                            device = device
-                        )
-                        simulateScanText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-                        simulateScanText.click()
+                        val qrCodeWebView = onWebView()
+                            .withElementByCssSelector(
+                                selector = QR_CODE_SIMULATE_SCAN_SELECTOR,
+                                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+                            )
+                        qrCodeWebView.openPopupsInCurrentWebView()
+                        qrCodeWebView.perform(webClick())
 
-                        val authorizeTestPaymentText = UiAutomatorText(
-                            "AUTHORIZE TEST PAYMENT",
-                            labelMatchesExactly = true,
-                            device = device
-                        )
-                        authorizeTestPaymentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-                        authorizeTestPaymentText.click()
+                        onWebView()
+                            .withElementByCssSelector(
+                                selector = AUTHORIZE_TEST_PAYMENT_SELECTOR,
+                                timeout = WEBVIEW_ELEMENT_TIMEOUT,
+                            )
+                            .perform(webClick())
 
                         waitForPollingToFinish()
                     }
@@ -1826,6 +1825,10 @@ internal class PlaygroundTestDriver(
             "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
         const val FINANCIAL_CONNECTIONS_LITE_ACTIVITY =
             "com.stripe.android.financialconnections.lite.FinancialConnectionsSheetLiteActivity"
+        const val QR_CODE_SIMULATE_SCAN_SELECTOR = ".QRCode-simulatorButton"
+        const val AUTHORIZE_TEST_PAYMENT_SELECTOR =
+            "[data-testid='authorize-test-payment-button'], " +
+                "a[name='success'], button[name='success'], #authorize-test-payment"
     }
 }
 

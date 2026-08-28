@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -53,19 +53,22 @@ class PaymentMethodFormTest {
 
         // Changing the payment method from card to PayPal.
         paymentMethodCodeFlow.value = PaymentMethod.Type.PayPal.code
+        composeTestRule.waitForIdle()
 
         // PayPalValues should only be associated with the PayPal payment method code, not card.
         val payPalValues = FormFieldValues(
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
         completeFormValuesFlow.value = payPalValues
+        composeTestRule.waitForIdle()
 
-        assertThat(emissions).containsExactly(null, payPalValues)
+        assertThat(emissions).containsExactly(null, null, payPalValues)
 
         paymentMethodCodeFlow.value = PaymentMethod.Type.Card.code
         completeFormValuesFlow.value = null
+        composeTestRule.waitForIdle()
 
-        assertThat(emissions).containsExactly(null, payPalValues, null)
+        assertThat(emissions).containsExactly(null, null, payPalValues, null, null)
     }
 
     @Test
@@ -97,6 +100,7 @@ class PaymentMethodFormTest {
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
         completeFormValuesFlow.value = completeValues
+        composeTestRule.waitForIdle()
 
         assertThat(emissions).containsExactly(null, completeValues)
     }

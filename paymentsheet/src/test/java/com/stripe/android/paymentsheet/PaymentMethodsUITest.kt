@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.graphics.Bitmap
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.NewPaymentMethodTabLayoutUI

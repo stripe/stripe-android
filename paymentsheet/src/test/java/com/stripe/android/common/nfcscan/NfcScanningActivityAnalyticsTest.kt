@@ -2,7 +2,7 @@ package com.stripe.android.common.nfcscan
 
 import android.content.Context
 import android.os.Build
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider

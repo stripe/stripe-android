@@ -2,7 +2,7 @@ package com.stripe.android.common.taptoadd
 
 import android.app.Activity.RESULT_OK
 import android.app.Application
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra

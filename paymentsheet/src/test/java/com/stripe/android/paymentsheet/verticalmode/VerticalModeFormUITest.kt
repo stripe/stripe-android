@@ -4,7 +4,7 @@ import android.os.Build
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -68,6 +68,7 @@ internal class VerticalModeFormUITest {
         formPage.cardNumber.performTextReplacement("4242424242424242")
         assertThat(viewActionRecorder.viewActions).isEmpty()
         formPage.fillOutCardDetails(fillOutCardNumber = false)
+        composeRule.waitForIdle()
         assertThat(viewActionRecorder.viewActions).hasSize(1)
         val viewAction = viewActionRecorder.viewActions[0]
             as VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged

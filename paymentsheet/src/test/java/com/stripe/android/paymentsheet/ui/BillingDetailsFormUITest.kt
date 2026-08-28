@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.performTextReplacement
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
@@ -64,6 +64,7 @@ internal class BillingDetailsFormUITest {
             page.city.performTextReplacement("San Diego")
             page.line1.performTextReplacement("1 Fake St")
             page.line2.performTextReplacement("Suite 100")
+            composeRule.waitForIdle()
 
             assertThat(billingDetailsFormState?.postalCode?.value).isEqualTo("94100")
             assertThat(billingDetailsFormState?.city?.value).isEqualTo("San Diego")

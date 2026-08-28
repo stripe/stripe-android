@@ -3,7 +3,7 @@ package com.stripe.android.customersheet
 import android.content.Context
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -217,6 +217,7 @@ internal class CustomerSheetActivityTest : CustomerSheetTestHelper {
         ) {
             page.waitForText("Card number")
             page.inputText("Card number", "4242424242424242")
+            composeTestRule.waitForIdle()
 
             verify(eventReporter).onCardNumberCompleted()
         }

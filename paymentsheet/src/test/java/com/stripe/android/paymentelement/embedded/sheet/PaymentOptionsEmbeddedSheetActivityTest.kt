@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -70,6 +70,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         Espresso.pressBack()
 
         onIdle()
+        composeTestRule.waitForIdle()
 
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
@@ -97,6 +98,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         }
 
         onIdle()
+        composeTestRule.waitForIdle()
 
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
@@ -109,11 +111,15 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
 
     @Test
     fun `navigator back emits cancelled result`() = launch { scenario ->
-        scenario.onActivity { activity ->
+        lateinit var activity: EmbeddedSheetActivity
+        scenario.onActivity {
+            activity = it
+        }
+        composeTestRule.runOnIdle {
             activity.embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
         }
 
-        onIdle()
+        composeTestRule.waitForIdle()
 
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
@@ -216,6 +222,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         Espresso.pressBack()
 
         onIdle()
+        composeTestRule.waitForIdle()
 
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         val cancelled = result as EmbeddedActivityResult.Cancelled

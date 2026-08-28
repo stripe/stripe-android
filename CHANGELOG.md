@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+Dependencies updated:
+- Bumped Compose from 1.10.6 to 1.11.4.
+
 ### PaymentSheet
 * [ADDED] Added support for SeQura.
 * [ADDED] Added support for PAYCO.

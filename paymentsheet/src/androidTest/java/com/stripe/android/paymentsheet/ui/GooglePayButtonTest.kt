@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -11,13 +11,18 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 
 class GooglePayButtonTest {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val composeTestRule = createAndroidComposeRule<MainActivity>(
+        effectContext = UnconfinedTestDispatcher(),
+    )
 
     @Test
     fun handlesPressWhenEnabled() {

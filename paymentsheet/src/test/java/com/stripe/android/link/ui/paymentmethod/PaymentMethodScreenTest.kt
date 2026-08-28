@@ -9,7 +9,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -137,6 +137,7 @@ internal class PaymentMethodScreenTest {
         onCvc().performTextReplacement("123")
         onExpiryDate().performTextReplacement("12/34")
         onZipCode().performTextReplacement("12345")
+        composeTestRule.waitForIdle()
         assertThat(formHelper.formFieldValuesChangedCall.awaitItem())
             .isEqualTo(PaymentMethod.Type.Card.code)
     }

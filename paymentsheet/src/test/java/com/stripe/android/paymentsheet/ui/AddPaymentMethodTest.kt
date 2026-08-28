@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
 import android.os.Build
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
@@ -305,6 +305,12 @@ internal class AddPaymentMethodTest {
                 it is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility &&
                     it.initialVisibilityTrackerData.paymentMethodCodes == listOf("card", "klarna")
             }
+            viewActionRecorder.consume(
+                AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
+                    formValues = null,
+                    selectedPaymentMethodCode = "card",
+                )
+            )
 
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
@@ -325,6 +331,12 @@ internal class AddPaymentMethodTest {
                 it is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility &&
                     it.initialVisibilityTrackerData.paymentMethodCodes == listOf("card", "klarna")
             }
+            viewActionRecorder.consume(
+                AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
+                    formValues = null,
+                    selectedPaymentMethodCode = "card",
+                )
+            )
 
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
@@ -697,13 +709,7 @@ internal class AddPaymentMethodTest {
                 interactor = addPaymentMethodInteractor,
             )
         }
-
-        viewActionRecorder.consume(
-            AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
-                formValues = null,
-                selectedPaymentMethodCode = initiallySelectedPaymentMethodType
-            )
-        )
+        composeRule.waitForIdle()
 
         Scenario(viewActionRecorder).apply(block)
     }

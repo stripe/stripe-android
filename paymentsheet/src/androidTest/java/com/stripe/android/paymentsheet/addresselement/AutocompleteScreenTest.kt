@@ -4,7 +4,7 @@ import android.app.Application
 import android.text.SpannableString
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -17,6 +17,8 @@ import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.DefaultStripeTheme
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import java.util.Locale
 import org.junit.Rule
 import org.junit.Test
@@ -26,7 +28,10 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AutocompleteScreenTest {
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>(
+        effectContext = UnconfinedTestDispatcher(),
+    )
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val eventReporter = NoOpAddressLauncherEventReporter

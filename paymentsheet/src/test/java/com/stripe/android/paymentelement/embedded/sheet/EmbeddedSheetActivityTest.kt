@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.Lifecycle
@@ -105,6 +105,7 @@ internal class EmbeddedSheetActivityTest {
         managePage.waitUntilGone(PaymentMethodFixtures.CARD_ID)
         managePage.clickDone()
         Espresso.pressBack() // Close sheet.
+        composeTestRule.waitForIdle()
         assertThat(completedResultPaymentMethods()).hasSize(defaultPaymentMethods().size - 1)
     }
 
@@ -155,6 +156,7 @@ internal class EmbeddedSheetActivityTest {
         managePage.clickDone()
         managePage.assertCardIsVisible(cbcCardId, "visa")
         Espresso.pressBack()
+        composeTestRule.waitForIdle()
         val updatedCbcCard = completedResultPaymentMethods().first { it.id == cbcCardId }
         assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
     }

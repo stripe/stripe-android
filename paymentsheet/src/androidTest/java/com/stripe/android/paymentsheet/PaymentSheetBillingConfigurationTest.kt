@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -22,6 +22,8 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +32,10 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetBillingConfigurationTest {
-    private val composeTestRule = createAndroidComposeRule<MainActivity>()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val composeTestRule = createAndroidComposeRule<MainActivity>(
+        effectContext = UnconfinedTestDispatcher(),
+    )
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule

@@ -35,6 +35,54 @@ internal fun WebInteraction<Void>.withElementByTestId(
 ).interaction
 
 /**
+ * Finds an element using a stable selector supplied by a Stripe-hosted surface.
+ */
+internal fun WebInteraction<Void>.withElementByCssSelector(
+    selector: String,
+    timeout: Duration,
+): WebInteraction<Void> {
+    var lastProbe: String? = null
+    var lastFailure: Throwable? = null
+    return retryUntil(
+        timeout = timeout,
+        pollInterval = 1.seconds,
+        failureMessage = {
+            "No WebView element found for CSS selector '$selector' within $timeout; " +
+                "last probe: ${lastProbe ?: "none"}"
+        },
+        failureCause = { lastFailure },
+    ) {
+        runCatching {
+            val probe = probePage(selector).also { lastProbe = it }
+            if (probe == RENDERED_SELECTOR) {
+                withElement(findElement(Locator.CSS_SELECTOR, selector))
+            } else {
+                null
+            }
+        }.onFailure { lastFailure = it }.getOrNull()
+    }
+}
+
+/**
+ * Keeps links opened with `window.open` in the WebView so Espresso-Web can continue the flow.
+ */
+internal fun WebInteraction<Void>.openPopupsInCurrentWebView() {
+    perform(
+        script(
+            """
+                function() {
+                  window.open = function(url) {
+                    window.location.assign(url);
+                    return window;
+                  };
+                  return true;
+                }
+            """.trimIndent()
+        )
+    ).get()
+}
+
+/**
  * Finds the first available element from [testIds] without spending the full timeout on a selector for a
  * different server-controlled flow variant.
  */
@@ -92,6 +140,24 @@ private fun WebInteraction<Void>.probePage(testIds: List<String>): String {
         """if (document.querySelector("${cssSelector(testId)}") !== null) { """ +
             """return "$RENDERED_TEST_ID_PREFIX$testId"; }"""
     }
+
+    return perform(script(probeScript)).get().value?.toString() ?: "no probe result"
+}
+
+private const val RENDERED_SELECTOR = "selector=rendered"
+
+private fun WebInteraction<Void>.probePage(selector: String): String {
+    val escapedSelector = selector
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+    val probeScript = """
+        function() {
+          if (document.querySelector("$escapedSelector") !== null) {
+            return "$RENDERED_SELECTOR";
+          }
+          return 'url=' + document.location.href + ' readyState=' + document.readyState;
+        }
+    """.trimIndent()
 
     return perform(script(probeScript)).get().value?.toString() ?: "no probe result"
 }

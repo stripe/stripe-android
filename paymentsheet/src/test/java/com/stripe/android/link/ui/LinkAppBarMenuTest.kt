@@ -1,7 +1,7 @@
 package com.stripe.android.link.ui
 
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.LinkBrand

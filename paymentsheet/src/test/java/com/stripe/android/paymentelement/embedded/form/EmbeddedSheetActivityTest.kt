@@ -10,7 +10,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -215,6 +215,7 @@ internal class EmbeddedSheetActivityTest {
         selectedPaymentMethodCode = "card",
     ) { scenario ->
         pressBack()
+        composeTestRule.waitForIdle()
 
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
@@ -237,6 +238,7 @@ internal class EmbeddedSheetActivityTest {
         ),
     ) { scenario ->
         pressBack()
+        composeTestRule.waitForIdle()
 
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
