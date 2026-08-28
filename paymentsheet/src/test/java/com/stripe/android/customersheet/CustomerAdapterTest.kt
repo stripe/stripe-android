@@ -770,6 +770,12 @@ class CustomerAdapterTest {
             FakePrefsRepository()
         },
         paymentMethodTypes: List<String>? = null,
+        apiConfigurationProvider: () -> ApiConfiguration.State = {
+            ApiConfiguration.State(
+                publishableKey = "pk_123",
+                stripeAccountId = "acct_123",
+            )
+        },
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
             context = application,
