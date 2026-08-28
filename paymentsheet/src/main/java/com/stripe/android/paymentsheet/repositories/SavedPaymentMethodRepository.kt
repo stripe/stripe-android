@@ -54,12 +54,14 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             }
         }
         is CustomerMetadata.CustomerSession -> {
+            val apiConfiguration = apiConfigProvider()
             customerRepository.detachPaymentMethodAndDuplicates(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
                 paymentMethodId = paymentMethodId,
-                stripeAccountId = apiConfigProvider().stripeAccountId,
+                publishableKey = apiConfiguration.publishableKey,
+                stripeAccountId = apiConfiguration.stripeAccountId,
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {

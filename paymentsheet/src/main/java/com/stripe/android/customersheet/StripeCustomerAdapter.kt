@@ -67,13 +67,15 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             paymentMethodTypes.mapNotNull { PaymentMethod.Type.fromCode(it) }
         }
 
+        val apiConfiguration = apiConfigurationProvider()
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.getPaymentMethods(
                 customerId = customerEphemeralKey.customerId,
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 types = requestedTypes,
                 silentlyFail = false,
-                stripeAccountId = apiConfigurationProvider().stripeAccountId,
+                publishableKey = apiConfiguration.publishableKey,
+                stripeAccountId = apiConfiguration.stripeAccountId,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
