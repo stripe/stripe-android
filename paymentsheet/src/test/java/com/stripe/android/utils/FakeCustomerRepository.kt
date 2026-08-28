@@ -77,6 +77,7 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
+        publishableKey: String,
         stripeAccountId: String?,
     ): Result<List<PaymentMethod>> {
         _getPaymentMethodsRequests.add(
@@ -113,6 +114,7 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
+        publishableKey: String,
         stripeAccountId: String?,
     ): Result<PaymentMethod> {
         _detachRequests.add(

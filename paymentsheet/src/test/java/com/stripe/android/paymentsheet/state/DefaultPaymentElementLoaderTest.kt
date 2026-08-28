@@ -1090,6 +1090,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret: String,
                     types: List<PaymentMethod.Type>,
                     silentlyFail: Boolean,
+                    publishableKey: String,
                     stripeAccountId: String?
                 ): Result<List<PaymentMethod>> {
                     requestPaymentMethodTypes = types
