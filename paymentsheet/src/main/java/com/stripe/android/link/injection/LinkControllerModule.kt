@@ -2,9 +2,7 @@ package com.stripe.android.link.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
@@ -31,7 +29,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -60,18 +57,6 @@ internal interface LinkControllerModule {
     fun bindLinkConfigurationLoader(impl: DefaultLinkConfigurationLoader): LinkConfigurationLoader
 
     companion object {
-        @Provides
-        @Singleton
-        fun provideApiConfigurationProvider(
-            paymentConfiguration: Provider<PaymentConfiguration>,
-        ): () -> ApiConfiguration.State = {
-            val configuration = paymentConfiguration.get()
-            ApiConfiguration.State(
-                publishableKey = configuration.publishableKey,
-                stripeAccountId = configuration.stripeAccountId,
-            )
-        }
-
         @Provides
         @Singleton
         fun provideAppContext(application: Application): Context = application.applicationContext
