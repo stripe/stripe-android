@@ -218,7 +218,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         return !requiresFormScreen
     }
 
-    private fun walletsState(): WalletsState? {
+    internal fun walletsState(): WalletsState? {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         return WalletsState.create(
             isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton,
