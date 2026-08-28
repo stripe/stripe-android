@@ -174,7 +174,7 @@ internal class SheetTaxRegionUpdaterTest {
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
-                publishableKeyProvider = { "pk_test_123" },
+                publishableKey = "pk_test_123",
             ),
             apiConfigurationProvider = {
                 ApiConfiguration.State(
