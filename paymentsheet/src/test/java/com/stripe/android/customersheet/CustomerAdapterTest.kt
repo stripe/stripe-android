@@ -31,6 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -198,6 +199,12 @@ class CustomerAdapterTest {
         val adapter = createAdapter(
             customerRepository = customerRepository,
             paymentMethodTypes = listOf("card"),
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = "pk_123",
+                    stripeAccountId = "acct_123",
+                )
+            },
         )
         adapter.retrievePaymentMethods()
         verify(customerRepository).getPaymentMethods(
@@ -261,7 +268,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = eq(false),
-            stripeAccountId = eq("acct_123"),
+            stripeAccountId = isNull(),
         )
     }
 
@@ -771,6 +778,12 @@ class CustomerAdapterTest {
             FakePrefsRepository()
         },
         paymentMethodTypes: List<String>? = null,
+        apiConfigurationProvider: () -> ApiConfiguration.State = {
+            ApiConfiguration.State(
+                publishableKey = "pk_123",
+                stripeAccountId = null,
+            )
+        },
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
             context = application,
@@ -780,8 +793,8 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
-            apiConfigurationProvider = { ApiConfiguration.State("pk_test_123", "acct_123") },
-            workContext = testDispatcher
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = testDispatcher,
         )
     }
 }
