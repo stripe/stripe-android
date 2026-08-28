@@ -43,6 +43,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
         networkRule = networkRule,
         setup = { controller ->
             networkRule.validateAnalyticsRequest(
+                eventName = "mc_embedded_init",
+                productUsage = setOf("Checkout"),
+            )
+            networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
                 productUsage = setOf("Checkout"),
             )
