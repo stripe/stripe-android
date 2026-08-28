@@ -83,18 +83,3 @@ class ApiRequestOptionsModule {
         )
     }
 }
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module
-class ApiRequestOptionsOnlyModule {
-    @Provides
-    fun provideApiRequestOptionsProvider(
-        apiConfigurationProvider: () -> ApiConfiguration.State
-    ): () -> ApiRequest.Options = {
-        val state = apiConfigurationProvider()
-        ApiRequest.Options(
-            apiKey = state.publishableKey,
-            stripeAccount = state.stripeAccountId,
-        )
-    }
-}

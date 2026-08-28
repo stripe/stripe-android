@@ -22,7 +22,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
-import com.stripe.android.payments.core.injection.ApiRequestOptionsOnlyModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
@@ -56,7 +56,7 @@ import kotlin.coroutines.CoroutineContext
         PaymentElementRequestSurfaceModule::class,
         PaymentConfigurationModule::class,
         ApiConfigurationModule::class,
-        ApiRequestOptionsOnlyModule::class,
+        ApiRequestOptionsModule::class,
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
         NfcScanningAvailabilityModule::class,
