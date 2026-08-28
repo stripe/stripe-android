@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -53,6 +54,7 @@ internal class CustomerApiRepository @Inject constructor(
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
+        publishableKey: String,
         stripeAccountId: String?,
     ): Result<List<PaymentMethod>> = withContext(workContext) {
         val requests = types.filter { paymentMethodType ->
@@ -70,6 +72,7 @@ internal class CustomerApiRepository @Inject constructor(
                         paymentMethodType = paymentMethodType,
                     ),
                     productUsageTokens = productUsageTokens,
+                    publishableKey = publishableKey,
                     requestOptions = ApiRequest.Options(
                         apiKey = ephemeralKeySecret,
                         stripeAccount = stripeAccountId,
@@ -81,7 +84,10 @@ internal class CustomerApiRepository @Inject constructor(
                         StripeException.create(it)
                     )
                 }.onSuccess {
-                    errorReporter.report(ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS)
+                    errorReporter.report(
+                        errorEvent = ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS,
+                        additionalNonPiiParams = mapOf(AnalyticsFields.PUBLISHABLE_KEY to publishableKey),
+                    )
                 }
             }
         }
@@ -133,6 +139,7 @@ internal class CustomerApiRepository @Inject constructor(
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
+        publishableKey: String,
         stripeAccountId: String?,
     ): Result<PaymentMethod> = with(CoroutineScope(workContext)) {
         val requestOptions = ApiRequest.Options(
@@ -155,6 +162,7 @@ internal class CustomerApiRepository @Inject constructor(
             // We only support removing duplicate cards.
             types = listOf(PaymentMethod.Type.Card),
             silentlyFail = false,
+            publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
         ).getOrElse {
             return Result.failure(it)

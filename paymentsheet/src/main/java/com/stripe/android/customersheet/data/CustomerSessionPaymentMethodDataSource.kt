@@ -64,12 +64,14 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
+                val apiConfiguration = apiConfigProvider()
                 customerRepository.detachPaymentMethodAndDuplicates(
                     customerId = ephemeralKey.customerId,
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     paymentMethodId = paymentMethodId,
-                    stripeAccountId = apiConfigProvider().stripeAccountId,
+                    publishableKey = apiConfiguration.publishableKey,
+                    stripeAccountId = apiConfiguration.stripeAccountId,
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }

@@ -248,6 +248,20 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         )
     }
 
+    internal fun createRequest(
+        event: PaymentAnalyticsEvent,
+        productUsageTokens: Set<String>,
+        publishableKey: String,
+    ): AnalyticsRequest {
+        return createRequest(
+            event = event,
+            additionalParams = additionalParams(
+                productUsageTokens = productUsageTokens,
+                errorMessage = null,
+            ) + (AnalyticsFields.PUBLISHABLE_KEY to publishableKey),
+        )
+    }
+
     private fun additionalParams(
         productUsageTokens: Set<String> = emptySet(),
         @Source.SourceType sourceType: String? = null,

@@ -27,6 +27,7 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
+        publishableKey: String,
         stripeAccountId: String?,
     ): Result<List<PaymentMethod>>
 
@@ -51,6 +52,7 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
+        publishableKey: String,
         stripeAccountId: String?,
     ): Result<PaymentMethod>
 
