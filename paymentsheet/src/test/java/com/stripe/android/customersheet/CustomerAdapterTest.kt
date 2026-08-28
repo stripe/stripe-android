@@ -780,7 +780,7 @@ class CustomerAdapterTest {
         apiConfigurationProvider: () -> ApiConfiguration.State = {
             ApiConfiguration.State(
                 publishableKey = "pk_123",
-                stripeAccountId = null,
+                stripeAccountId = "acct_123",
             )
         },
     ): StripeCustomerAdapter {
