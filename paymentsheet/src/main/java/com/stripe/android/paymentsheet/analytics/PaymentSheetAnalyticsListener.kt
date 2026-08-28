@@ -17,12 +17,6 @@ internal class PaymentSheetAnalyticsListener(
     coroutineScope: CoroutineScope,
     private val currentPaymentMethodTypeProvider: () -> String
 ) {
-    private var previouslySentDeepLinkEvent: Boolean
-        get() = savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] ?: false
-        set(value) {
-            savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] = value
-        }
-
     private var previouslyPresentedSheet: Boolean
         get() = savedStateHandle[PREVIOUSLY_PRESENTED_SHEET] ?: false
         set(value) {
@@ -50,10 +44,10 @@ internal class PaymentSheetAnalyticsListener(
     }
 
     fun cannotProperlyReturnFromLinkAndOtherLPMs() {
-        if (!previouslySentDeepLinkEvent) {
+        if (!savedStateHandle.previouslySentDeepLinkEvent) {
             eventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
 
-            previouslySentDeepLinkEvent = true
+            savedStateHandle.previouslySentDeepLinkEvent = true
         }
     }
 
@@ -135,7 +129,6 @@ internal class PaymentSheetAnalyticsListener(
     companion object {
         internal const val PREVIOUSLY_SHOWN_PAYMENT_FORM = "previously_shown_payment_form"
         internal const val PREVIOUSLY_INTERACTION_PAYMENT_FORM = "previously_interacted_payment_form"
-        internal const val PREVIOUSLY_SENT_DEEP_LINK_EVENT = "previously_sent_deep_link_event"
         internal const val PREVIOUSLY_PRESENTED_SHEET = "previously_presented_sheet"
     }
 }
