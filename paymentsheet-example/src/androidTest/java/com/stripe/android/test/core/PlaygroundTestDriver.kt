@@ -39,7 +39,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -58,7 +57,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.MerchantSetti
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -800,7 +800,7 @@ internal class PlaygroundTestDriver(
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG).and(hasText(FawryActivity.FAILED_DISPLAY_MESSAGE)))
+                .onAllNodes(hasTestTag(SHEET_ERROR_TEST_TAG).and(hasText(FawryActivity.FAILED_DISPLAY_MESSAGE)))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
@@ -855,7 +855,7 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodes(
-                    hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG)
+                    hasTestTag(SHEET_ERROR_TEST_TAG)
                         .and(hasText(CustomPaymentMethodActivity.FAILED_DISPLAY_MESSAGE))
                 )
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -1139,7 +1139,7 @@ internal class PlaygroundTestDriver(
 
     private fun waitUntilPrimaryButtonIsCompleted() {
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+            composeTestRule.onAllNodesWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }

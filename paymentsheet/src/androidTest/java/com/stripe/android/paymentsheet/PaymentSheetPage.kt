@@ -30,9 +30,9 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
@@ -226,11 +226,11 @@ internal class PaymentSheetPage(
     fun clickPrimaryButton() {
         composeTestRule.waitUntil(5_000) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
+                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+        composeTestRule.onNode(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
             .performClick()
 
@@ -255,12 +255,12 @@ internal class PaymentSheetPage(
     fun assertErrorMessageShown() {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
-                .onAllNodesWithTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG)
+                .onAllNodesWithTag(SHEET_ERROR_TEST_TAG)
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
 
-        composeTestRule.onNodeWithTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(SHEET_ERROR_TEST_TAG).assertIsDisplayed()
     }
 
     fun fillCvcRecollection(cvc: String) {
@@ -428,7 +428,7 @@ internal class PaymentSheetPage(
     fun waitUntilVisible() {
         composeTestRule.waitUntil(5000) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
@@ -437,7 +437,7 @@ internal class PaymentSheetPage(
     fun waitUntilMissing() {
         composeTestRule.waitUntil(5000) {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
@@ -536,7 +536,7 @@ internal class PaymentSheetPage(
         composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
             .assertDoesNotExist()
 
-        composeTestRule.onNodeWithTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG)
+        composeTestRule.onNodeWithTag(SHEET_MANDATE_TEST_TAG)
             .assertDoesNotExist()
     }
 

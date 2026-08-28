@@ -23,7 +23,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -318,10 +318,10 @@ internal class CheckoutPaymentElementTest {
     private fun clickPaymentOptionsPrimaryButton() {
         testRules.compose.waitUntil(timeoutMillis = 5_000) {
             testRules.compose.onAllNodes(
-                hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(isEnabled())
+                hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
             ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
-        testRules.compose.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+        testRules.compose.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
             .performScrollTo()
             .performClick()
     }
