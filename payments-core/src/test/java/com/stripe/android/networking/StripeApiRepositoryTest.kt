@@ -15,6 +15,7 @@ import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
+import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -1240,6 +1241,7 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             ).getOrThrow()
         assertThat(paymentMethods)
@@ -1255,6 +1257,8 @@ internal class StripeApiRepositoryTest {
             PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
             null
         )
+        assertThat(analyticsRequestArgumentCaptor.firstValue.params[AnalyticsFields.PUBLISHABLE_KEY])
+            .isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
     }
 
     @Test
@@ -1297,6 +1301,7 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             ).getOrThrow()
         assertThat(paymentMethods)

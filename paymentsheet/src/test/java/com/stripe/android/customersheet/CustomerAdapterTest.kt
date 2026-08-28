@@ -215,7 +215,7 @@ class CustomerAdapterTest {
     fun `retrievePaymentMethods filters with paymentMethodTypes`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
-        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any(), any()))
+        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any(), any(), any()))
             .thenReturn(Result.success(emptyList()))
 
         val adapter = createAdapter(
@@ -238,6 +238,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = any(),
+            publishableKey = eq("pk_123"),
             stripeAccountId = eq("acct_123")
         )
     }
@@ -290,6 +291,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = eq(false),
+            publishableKey = any(),
             stripeAccountId = any()
         )
     }

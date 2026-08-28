@@ -61,6 +61,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
                 paymentMethodId = paymentMethodId,
+                publishableKey = apiConfiguration.publishableKey,
                 stripeAccountId = apiConfiguration.stripeAccountId,
             )
         }

@@ -71,6 +71,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     paymentMethodId = paymentMethodId,
+                    publishableKey = apiConfiguration.publishableKey,
                     stripeAccountId = apiConfiguration.stripeAccountId,
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
