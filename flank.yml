@@ -1,0 +1,35 @@
+gcloud:
+  app: paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk
+  test: paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk
+  auto-google-login: true
+  use-orchestrator: true
+  num-flaky-test-attempts: 2
+  timeout: 45m
+  test-targets:
+    - notClass com.stripe.android.latency.TestLatency
+  results-bucket: "stripe-payments-sdk-prod-test-lab-results"
+  device:
+    # The suite includes CardScan tests that load Play-delivered TFLite modules and
+    # PaymentSheet E2E tests that need Chrome. The Arm image provides neither.
+    - model: MediumPhone.arm
+      version: 33
+      locale: en_US
+      orientation: portrait
+
+flank:
+  max-test-shards: 20
+  smart-flank-gcs-path: gs://stripe-payments-sdk-prod-test-lab-results/flank/smart_results.xml
+  disable-sharding: false
+  full-junit-result: true
+  local-result-dir: results
+  additional-app-test-apks:
+    - app: connect-example/build/outputs/apk/debug/connect-example-debug.apk
+      test: connect-example/build/outputs/apk/androidTest/debug/connect-example-debug-androidTest.apk
+    - app: crypto-onramp-example/build/outputs/apk/debug/crypto-onramp-example-debug.apk
+      test: crypto-onramp-example/build/outputs/apk/androidTest/debug/crypto-onramp-example-debug-androidTest.apk
+    - test: camera-core/build/outputs/apk/androidTest/debug/camera-core-debug-androidTest.apk
+    - test: connect/build/outputs/apk/androidTest/debug/connect-debug-androidTest.apk
+    - test: payment-method-messaging/build/outputs/apk/androidTest/debug/payment-method-messaging-debug-androidTest.apk
+    - test: payments-core/build/outputs/apk/androidTest/debug/payments-core-debug-androidTest.apk
+    - test: paymentsheet/build/outputs/apk/androidTest/debug/paymentsheet-debug-androidTest.apk
+    - test: stripecardscan/build/outputs/apk/androidTest/debug/stripecardscan-debug-androidTest.apk
