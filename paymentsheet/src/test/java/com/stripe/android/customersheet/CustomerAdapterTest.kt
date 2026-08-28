@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
@@ -197,6 +198,12 @@ class CustomerAdapterTest {
         val adapter = createAdapter(
             customerRepository = customerRepository,
             paymentMethodTypes = listOf("card"),
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = "pk_123",
+                    stripeAccountId = "acct_123",
+                )
+            },
         )
         adapter.retrievePaymentMethods()
         verify(customerRepository).getPaymentMethods(
@@ -208,7 +215,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = any(),
-            stripeAccountId = isNull()
+            stripeAccountId = eq("acct_123")
         )
     }
 
@@ -773,7 +780,7 @@ class CustomerAdapterTest {
         apiConfigurationProvider: () -> ApiConfiguration.State = {
             ApiConfiguration.State(
                 publishableKey = "pk_123",
-                stripeAccountId = "acct_123",
+                stripeAccountId = null,
             )
         },
     ): StripeCustomerAdapter {
@@ -785,6 +792,7 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
+            apiConfigurationProvider = apiConfigurationProvider,
             workContext = testDispatcher,
         )
     }
