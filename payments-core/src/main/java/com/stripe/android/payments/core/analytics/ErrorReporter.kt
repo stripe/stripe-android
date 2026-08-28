@@ -438,7 +438,6 @@ internal interface DefaultErrorReporterComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
             publishableKeyProvider: () -> String,
             @BindsInstance
             @Named(PRODUCT_USAGE)
@@ -478,7 +477,7 @@ internal interface DefaultErrorReporterModule {
 
         @Provides
         fun provideApiConfigurationProvider(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
+            publishableKeyProvider: () -> String
         ): () -> ApiConfiguration.State = {
             ApiConfiguration.State(
                 publishableKey = publishableKeyProvider(),
