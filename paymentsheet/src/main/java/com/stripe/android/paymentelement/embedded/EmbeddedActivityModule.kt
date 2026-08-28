@@ -226,6 +226,7 @@ internal interface EmbeddedActivityModule {
             return PaymentElementAutocompleteAddressInteractor.Factory(
                 // Embedded supports Stripe-hosted inline autocomplete, which does not launch an activity.
                 launcher = null,
+                publishableKeyProvider = { paymentMethodMetadata.apiConfiguration.publishableKey },
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
                     googlePlacesApiKey = null,
                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
