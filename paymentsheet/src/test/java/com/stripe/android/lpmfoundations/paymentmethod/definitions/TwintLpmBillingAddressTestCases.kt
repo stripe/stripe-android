@@ -30,6 +30,32 @@ private val twintTypeOnlyExpectedParams = LpmBillingAddressFormParams(
     extraParams = null,
 )
 
+private val twintAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.Twint.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line2 = null,
+                country = "CH",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.Twint.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "country" to "CH",
+                ),
+            ),
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
 private val twintFullExpectedParams = LpmBillingAddressFormParams(
     createParams = PaymentMethodCreateParams.createWithOverride(
         code = PaymentMethod.Type.Twint.code,
@@ -134,6 +160,17 @@ internal val twintTestCases = listOf(
         ),
         rawValues = twintRawValues,
         expectedParams = twintTypeOnlyExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Twint AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Twint,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = twintRawValues,
+        expectedParams = twintAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Twint Full PaymentIntent automatic terms",
