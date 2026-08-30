@@ -17,7 +17,7 @@ gcloud:
       orientation: portrait
 
 flank:
-  max-test-shards: 20
+  max-test-shards: 8
   smart-flank-gcs-path: gs://stripe-payments-sdk-prod-test-lab-results/flank/smart_results.xml
   disable-sharding: false
   full-junit-result: true
