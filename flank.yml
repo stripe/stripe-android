@@ -17,7 +17,11 @@ gcloud:
       orientation: portrait
 
 flank:
-  max-test-shards: 8
+  max-test-shards: 20
+  shard-time: 400
+  use-average-test-time-for-new-tests: true
+  default-test-time: 7
+  default-class-test-time: 35
   smart-flank-gcs-path: gs://stripe-payments-sdk-prod-test-lab-results/flank/smart_results.xml
   disable-sharding: false
   full-junit-result: true
