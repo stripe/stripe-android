@@ -114,7 +114,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticsPayloadField("payment_method_layout", "vertical")
         )
 
-        validateCardMetadataAnalyticsRequests()
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_form_interacted")
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
@@ -214,7 +215,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
 
-        validateCardMetadataAnalyticsRequests()
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_form_interacted")
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
@@ -505,23 +507,5 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             requestMatchers = requestMatchers,
             publishableKey = TestApiKeys.PUBLISHABLE,
         )
-    }
-
-    private fun validateCardMetadataAnalyticsRequests() {
-        val paymentConfigurationPublishableKey = apiConfigurationTestType.paymentConfigurationPublishableKey
-        val eventName = if (paymentConfigurationPublishableKey == null) {
-            "stripe_android.card_metadata_pk_unavailable"
-        } else {
-            "stripe_android.card_metadata_pk_available"
-        }
-        val publishableKey = paymentConfigurationPublishableKey ?: ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY
-
-        repeat(2) {
-            networkRule.validateAnalyticsRequest(
-                eventName = eventName,
-                productUsage = setOf("EmbeddedPaymentElement"),
-                publishableKey = publishableKey,
-            )
-        }
     }
 }
