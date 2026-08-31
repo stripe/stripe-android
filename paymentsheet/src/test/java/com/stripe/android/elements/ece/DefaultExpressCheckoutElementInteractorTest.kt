@@ -90,6 +90,13 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
+    fun `state has no buttons when ECE configuration is absent`() = runScenario(
+        configuration = null,
+    ) {
+        assertThat(interactor.state.value.expressButtons).isEmpty()
+    }
+
+    @Test
     fun `state contains configured button theme`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
@@ -238,7 +245,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+        configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
         googlePayConfiguration: CheckoutGooglePayConfiguration = createGooglePayConfiguration(),
         availableExpressButtonTypes: List<ExpressButtonType> = paymentMethodMetadata.availableWallets.map {
             when (it) {
@@ -288,7 +295,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         paymentMethodMetadata: PaymentMethodMetadata,
         availableExpressButtonTypes: List<ExpressButtonType>,
         savedStateHandle: SavedStateHandle,
-        configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+        configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
     ): CheckoutControllerStateHolder {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
@@ -298,11 +305,13 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 availableExpressButtonTypes = availableExpressButtonTypes,
             ),
         )
+        val configurationBuilder = CheckoutController.Configuration()
+        if (configuration != null) {
+            configurationBuilder.expressCheckoutElement(configuration)
+        }
         stateHolder.state = CheckoutControllerStateFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = CheckoutController.Configuration()
-                .expressCheckoutElement(configuration)
-                .build(),
+            configuration = configurationBuilder.build(),
         )
 
         return stateHolder

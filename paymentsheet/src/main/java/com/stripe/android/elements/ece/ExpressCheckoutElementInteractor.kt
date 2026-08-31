@@ -50,14 +50,13 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         stateHolder.stateFlow,
         stateHolder.session,
     ) { linkAccountInfo, state, session, ->
-        if (state == null || session == null) {
+        val configuration = state?.configuration?.expressCheckoutElementConfiguration
+        if (configuration == null || session == null) {
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
                 expressButtons = emptyList(),
                 buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
             )
         }
-
-        val configuration = state.configuration.expressCheckoutElementConfiguration
 
         ExpressCheckoutElementInteractor.State(
             expressButtons = session.availableExpressButtonTypes.map { expressButtonType ->

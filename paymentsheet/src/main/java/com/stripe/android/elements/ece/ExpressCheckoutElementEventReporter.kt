@@ -58,6 +58,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     private fun defaultParams(): Map<String, Any> {
         val state = stateHolder.state ?: return emptyMap()
         val expressCheckoutElementConfiguration = state.configuration.expressCheckoutElementConfiguration
+            ?: return emptyMap()
         val orderedLpms = stateHolder.session.value?.availableExpressButtonTypes.orEmpty().map {
             when (it) {
                 is ExpressButtonType.GooglePay -> "google_pay"
