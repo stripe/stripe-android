@@ -3,7 +3,6 @@ package com.stripe.android.link.injection
 import android.app.Application
 import android.content.Context
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
@@ -30,7 +29,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -67,19 +65,6 @@ internal interface LinkControllerModule {
         @Singleton
         fun providePaymentMethodMetadata(interactor: LinkControllerInteractor): PaymentMethodMetadata? {
             return interactor.paymentMethodMetadata
-        }
-
-        @Provides
-        fun provideApiConfigurationStateProvider(
-            interactor: Provider<LinkControllerInteractor>
-        ): () -> ApiConfiguration.State {
-            return {
-                val config = requireNotNull(interactor.get().configuration)
-                ApiConfiguration.State(
-                    publishableKey = config.publishableKey,
-                    stripeAccountId = config.stripeAccountId,
-                )
-            }
         }
 
         // TODO
