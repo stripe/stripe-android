@@ -104,6 +104,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+            isCompleteFlow = false,
+            draftPaymentSelection = null,
             setSelection = embeddedSelectionHolder::setSelection,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
