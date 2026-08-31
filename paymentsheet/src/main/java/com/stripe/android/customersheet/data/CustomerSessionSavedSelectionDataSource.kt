@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.data
 
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSelection
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
@@ -11,11 +12,13 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     private val elementsSessionManager: CustomerSessionElementsSessionManager,
     private val customerRepository: CustomerRepository,
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetSavedSelectionDataSource {
@@ -101,6 +104,7 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
             customerId = ephemeralKey.customerId,
             ephemeralKeySecret = ephemeralKey.ephemeralKey,
             paymentMethodId = paymentMethodId,
+            stripeAccountId = paymentConfiguration.get().stripeAccountId,
         ).getOrThrow()
     }
 

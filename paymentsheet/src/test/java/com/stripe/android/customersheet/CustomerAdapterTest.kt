@@ -30,6 +30,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -191,7 +192,7 @@ class CustomerAdapterTest {
     fun `retrievePaymentMethods filters with paymentMethodTypes`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
-        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any()))
+        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any(), any()))
             .thenReturn(Result.success(emptyList()))
 
         val adapter = createAdapter(
@@ -208,6 +209,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = any(),
+            stripeAccountId = isNull(),
         )
     }
 
@@ -259,6 +261,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = eq(false),
+            stripeAccountId = isNull(),
         )
     }
 
@@ -777,6 +780,7 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
+            paymentConfiguration = { PaymentConfiguration("pk_test") },
             workContext = testDispatcher
         )
     }

@@ -2,6 +2,7 @@ package com.stripe.android.common.analytics.experiment
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.link.TestFactory
@@ -64,6 +65,7 @@ class LogLinkGlobalHoldbackExposureTest {
         retrieveCustomerEmail = DefaultRetrieveCustomerEmail(
             customerRepository,
             FakeDurationProvider(),
+            { PaymentConfiguration("pk_test") },
         )
         linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
