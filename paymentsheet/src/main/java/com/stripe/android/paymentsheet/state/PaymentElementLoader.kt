@@ -314,7 +314,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         val configuration = integrationConfiguration.commonConfiguration
         // Validate configuration before loading
-        initializationMode.validate()
         configuration.validate(
             initializationMode = initializationMode,
             isLiveMode = paymentConfiguration.get().isLiveMode(),
@@ -341,14 +340,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
         }
 
-        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration)
-
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-        val elementsSession = loadSession(
-            initializationMode = initializationMode,
-            configuration = configuration,
-            savedPaymentMethodSelection = savedPaymentMethodSelection,
-        )
+        val elementsSession = initializationMode.checkoutSessionResponse.elementsSession ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
@@ -427,7 +420,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     elementsSession = elementsSession,
                     metadata = paymentMethodMetadata,
                     savedSelection = savedSelection,
-                    prefetchedPaymentMethods = prefetchedPaymentMethods,
+                    prefetchedPaymentMethods = null,
                 )
             }
         }
