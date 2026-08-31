@@ -24,3 +24,7 @@
 # Stripe Connect SDK
 /connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 /connect-example/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+
+# Crypto Onramp SDK
+/crypto-onramp/ @stripe/android-crypto-onramp-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/crypto-onramp-example/ @stripe/android-crypto-onramp-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
