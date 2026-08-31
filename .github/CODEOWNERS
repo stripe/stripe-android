@@ -1,26 +1,100 @@
-# Require approvals from the android-sdk-reviewers team for all changes not in directories listed below.
+# Allow the general Android reviewer teams to approve files that do not belong to a category below.
 * @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 
+# Core infrastructure
+/.agents/ @stripe/android-payments-reviewers
+/.bitrise/ @stripe/android-payments-reviewers
+/.claude/ @stripe/android-payments-reviewers
+/.github/ @stripe/android-payments-reviewers
+/.githooks/ @stripe/android-payments-reviewers
+/.idea/ @stripe/android-payments-reviewers
+/.editorconfig @stripe/android-payments-reviewers
+/.gitignore @stripe/android-payments-reviewers
+/.nexus.yaml @stripe/android-payments-reviewers
+/.phraseapp.yml @stripe/android-payments-reviewers
+/.ruby-version @stripe/android-payments-reviewers
+/AGENTS.md @stripe/android-payments-reviewers
+/CLAUDE.md @stripe/android-payments-reviewers
+/Gemfile @stripe/android-payments-reviewers
+/Gemfile.lock @stripe/android-payments-reviewers
+/VERSION @stripe/android-payments-reviewers
+/bitrise.yml @stripe/android-payments-reviewers
+/build-configuration/ @stripe/android-payments-reviewers
+/config/ @stripe/android-payments-reviewers
+/deploy/ @stripe/android-payments-reviewers
+/dokka-stripe/ @stripe/android-payments-reviewers
+/gradle/ @stripe/android-payments-reviewers
+/gradlew @stripe/android-payments-reviewers
+/gradlew.bat @stripe/android-payments-reviewers
+/jitpack.yml @stripe/android-payments-reviewers
+/lint/ @stripe/android-payments-reviewers
+/scripts/ @stripe/android-payments-reviewers
+/settings/ @stripe/android-payments-reviewers
+/stripe-example.keystore @stripe/android-payments-reviewers
+*.gradle @stripe/android-payments-reviewers
+*.properties @stripe/android-payments-reviewers
+
 # Payments SDK
-/payment-method-messaging/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments-core/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments-core-testing/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments-model/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments-ui-core/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/paymentsheet/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/paymentsheet-example/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/stripecardscan/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/stripecardscan-example/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/3ds2playground/ @stripe/android-payments-reviewers
+/3ds2sdk/ @stripe/android-payments-reviewers
+/assets/ @stripe/android-payments-reviewers
+/camera-core/ @stripe/android-payments-reviewers
+/CHANGELOG.md @stripe/android-payments-reviewers
+/checkout-testing/ @stripe/android-payments-reviewers
+/docs/ @stripe/android-payments-reviewers
+/example/ @stripe/android-payments-reviewers
+/hcaptcha/ @stripe/android-payments-reviewers
+/LICENSE @stripe/android-payments-reviewers
+/maestro/ @stripe/android-payments-reviewers
+/MIGRATING.md @stripe/android-payments-reviewers
+/ml-core/ @stripe/android-payments-reviewers
+/ml-core:base/ @stripe/android-payments-reviewers
+/ml-core:default/ @stripe/android-payments-reviewers
+/ml-core:googleplay/ @stripe/android-payments-reviewers
+/network-testing/ @stripe/android-payments-reviewers
+/payment-element-test-pages/ @stripe/android-payments-reviewers
+/payment-method-messaging/ @stripe/android-payments-reviewers
+/payment-method-messaging-example/ @stripe/android-payments-reviewers
+/payments/ @stripe/android-payments-reviewers
+/payments-core/ @stripe/android-payments-reviewers
+/payments-core-testing/ @stripe/android-payments-reviewers
+/payments-model/ @stripe/android-payments-reviewers
+/payments-ui-core/ @stripe/android-payments-reviewers
+/paymentsheet/ @stripe/android-payments-reviewers @stripe/android-link-reviewers
+/paymentsheet-example/ @stripe/android-payments-reviewers @stripe/android-link-reviewers
+/docs/paymentsheet/ @stripe/android-payments-reviewers @stripe/android-link-reviewers
+/README.md @stripe/android-payments-reviewers
+/samplestore/ @stripe/android-payments-reviewers
+/screenshot-testing/ @stripe/android-payments-reviewers
+/stripe-attestation/ @stripe/android-payments-reviewers
+/stripe-core/ @stripe/android-payments-reviewers
+/stripe-test-e2e/ @stripe/android-payments-reviewers
+/stripe-ui-core/ @stripe/android-payments-reviewers
+/stripecardscan/ @stripe/android-payments-reviewers
+/stripecardscan-example/ @stripe/android-payments-reviewers
+/tap-to-add-testing/ @stripe/android-payments-reviewers
+/wechatpay/ @stripe/android-payments-reviewers
+
+# Crypto Onramp SDK
+/crypto-onramp/ @stripe/android-crypto-reviewers
+/crypto-onramp-example/ @stripe/android-crypto-reviewers
 
 # Identity SDK
-/identity/ @stripe/android-identity-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/identity-example/ @stripe/android-identity-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/docs/identity/ @stripe/android-identity-reviewers
+/identity/ @stripe/android-identity-reviewers
+/identity-example/ @stripe/android-identity-reviewers
 
 # Financial Connections SDK
-/financial-connections/ @stripe/android-link-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/financial-connections-example/ @stripe/android-link-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/docs/financial-connections/ @stripe/android-link-reviewers
+/docs/financial-connections-core/ @stripe/android-link-reviewers
+/financial-connections/ @stripe/android-link-reviewers
+/financial-connections-core/ @stripe/android-link-reviewers
+/financial-connections-example/ @stripe/android-link-reviewers
+/financial-connections-lite/ @stripe/android-link-reviewers
+/maestro/financial-connections/ @stripe/android-link-reviewers
 
 # Stripe Connect SDK
-/connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/connect-example/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers
+/connect-example/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers
+/docs/connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers
+/maestro/connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers
