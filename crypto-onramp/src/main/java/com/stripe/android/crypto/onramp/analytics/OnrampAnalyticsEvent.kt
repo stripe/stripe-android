@@ -94,6 +94,14 @@ internal sealed class OnrampAnalyticsEvent(
         name = "user_attestation_completed"
     )
 
+    data object TermsAndConditionsStarted : OnrampAnalyticsEvent(
+        name = "terms_and_conditions_started"
+    )
+
+    data object TermsAndConditionsCompleted : OnrampAnalyticsEvent(
+        name = "terms_and_conditions_completed"
+    )
+
     class WalletRegistered(
         network: CryptoNetwork
     ) : OnrampAnalyticsEvent(
@@ -251,7 +259,8 @@ internal sealed class OnrampAnalyticsEvent(
             VerifyKyc("verify_kyc_info"),
             RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
             SubmitIdentifiers("submit_identifiers"),
-            PresentUserAttestation("present_user_attestation")
+            PresentUserAttestation("present_user_attestation"),
+            PresentTermsAndConditionsIfNeeded("present_terms_and_conditions_if_needed")
         }
     }
 

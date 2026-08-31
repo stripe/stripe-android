@@ -7,6 +7,9 @@ NEXT_VERSION_BUMP: PATCH
 * [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
 * [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
 
+### CryptoOnramp
+* [ADDED] Added `presentTermsAndConditionsIfNeeded()` to present and record terms acceptance only when required.
+
 ## 23.17.0 - 2026-08-24
 
 ### PaymentSheet

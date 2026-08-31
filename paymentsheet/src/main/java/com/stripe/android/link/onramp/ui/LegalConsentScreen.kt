@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -32,17 +31,19 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.text.Html
 
 @Composable
 @Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun UserAttestationScreen(
+fun LegalConsentScreen(
     appearance: LinkAppearance.State?,
-    attestationText: String,
+    title: String,
+    consentText: String,
+    acceptButtonText: String,
+    cancelButtonText: String,
     onClose: () -> Unit,
-    onConfirm: () -> Unit
+    onAccept: () -> Unit,
 ) {
     BackHandler(onBack = onClose)
 
@@ -71,16 +72,16 @@ fun UserAttestationScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.stripe_link_onramp_carf_declaration_screen_title),
+                            text = title,
                             style = LinkTheme.typography.title,
                             color = LinkTheme.colors.textPrimary
                         )
                         TextButton(
                             onClick = onClose,
-                            modifier = Modifier.testTag(USER_ATTESTATION_CANCEL_BUTTON_TAG),
+                            modifier = Modifier.testTag(LEGAL_CONSENT_CANCEL_BUTTON_TAG),
                         ) {
                             Text(
-                                text = stringResource(R.string.stripe_link_onramp_carf_declaration_cancel_button_text),
+                                text = cancelButtonText,
                                 style = LinkTheme.typography.detailEmphasized,
                                 color = LinkTheme.colors.textSecondary
                             )
@@ -90,7 +91,7 @@ fun UserAttestationScreen(
                     Spacer(Modifier.height(16.dp))
 
                     Html(
-                        html = attestationText,
+                        html = consentText,
                         style = LinkTheme.typography.body,
                         color = LinkTheme.colors.textPrimary,
                         urlSpanStyle = SpanStyle(
@@ -106,9 +107,9 @@ fun UserAttestationScreen(
                     Spacer(Modifier.height(24.dp))
 
                     PrimaryButton(
-                        label = stringResource(R.string.stripe_link_onramp_carf_declaration_accept_button_text),
+                        label = acceptButtonText,
                         state = PrimaryButtonState.Enabled,
-                        onButtonClick = onConfirm,
+                        onButtonClick = onAccept,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -117,4 +118,4 @@ fun UserAttestationScreen(
     }
 }
 
-internal const val USER_ATTESTATION_CANCEL_BUTTON_TAG = "UserAttestationCancelButtonTag"
+internal const val LEGAL_CONSENT_CANCEL_BUTTON_TAG = "LegalConsentCancelButtonTag"

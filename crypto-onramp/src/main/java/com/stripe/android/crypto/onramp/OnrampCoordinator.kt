@@ -281,6 +281,15 @@ class OnrampCoordinator @Inject internal constructor(
         fun presentUserAttestation() {
             coordinator.presentUserAttestation()
         }
+
+        /**
+         * Presents the terms and conditions when the current version has not already been accepted.
+         * The result will be delivered through the terms and conditions callback provided in
+         * [OnrampCallbacks].
+         */
+        fun presentTermsAndConditionsIfNeeded() {
+            coordinator.presentTermsAndConditionsIfNeeded()
+        }
     }
 
     /**

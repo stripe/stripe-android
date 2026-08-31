@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.StringRes
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -17,6 +18,7 @@ import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
@@ -28,15 +30,16 @@ import com.stripe.android.crypto.onramp.samsungpay.SamsungPayPresentation
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
-import com.stripe.android.crypto.onramp.ui.UserAttestationActivityArgs
-import com.stripe.android.crypto.onramp.ui.UserAttestationActivityContract
-import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
+import com.stripe.android.crypto.onramp.ui.LegalConsentActivityArgs
+import com.stripe.android.crypto.onramp.ui.LegalConsentActivityContract
+import com.stripe.android.crypto.onramp.ui.LegalConsentActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
@@ -46,6 +49,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
@@ -106,11 +110,18 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             callback = ::handleVerifyKycResult
         )
 
-    private val userAttestationResultLauncher: ActivityResultLauncher<UserAttestationActivityArgs> =
+    private val userAttestationResultLauncher: ActivityResultLauncher<LegalConsentActivityArgs> =
         activity.activityResultRegistry.register(
             key = "OnrampPresenterCoordinator_UserAttestationResultLauncher($onrampCallbackIdentifier)",
-            contract = UserAttestationActivityContract(),
+            contract = LegalConsentActivityContract(),
             callback = ::handleUserAttestationResult
+        )
+
+    private val termsAndConditionsResultLauncher: ActivityResultLauncher<LegalConsentActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_TermsAndConditionsResultLauncher($onrampCallbackIdentifier)",
+            contract = LegalConsentActivityContract(),
+            callback = ::handleTermsAndConditionsResult,
         )
 
     init {
@@ -140,6 +151,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     samsungPayLauncher?.destroy()
                     verifyKycResultLauncher.unregister()
                     userAttestationResultLauncher.unregister()
+                    termsAndConditionsResultLauncher.unregister()
 
                     if (activity.isFinishing) {
                         OnrampCallbackReferences.remove(onrampCallbackIdentifier)
@@ -194,8 +206,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         coroutineScope.launch {
             when (val result = interactor.startUserAttestation()) {
                 is OnrampStartUserAttestationResult.Completed -> {
-                    userAttestationResultLauncher.launch(
-                        UserAttestationActivityArgs(result.attestation, result.appearance)
+                    presentLegalConsent(
+                        resultLauncher = userAttestationResultLauncher,
+                        consentText = result.attestation.text,
+                        version = result.attestation.version,
+                        appearance = result.appearance,
+                        titleResId =
+                            PaymentSheetR.string.stripe_link_onramp_carf_declaration_screen_title,
                     )
                 }
                 is OnrampStartUserAttestationResult.Failed -> {
@@ -205,6 +222,54 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 }
             }
         }
+    }
+
+    fun presentTermsAndConditionsIfNeeded() {
+        coroutineScope.launch {
+            when (val result = interactor.startTermsAndConditions()) {
+                is OnrampStartTermsAndConditionsResult.PresentationRequired -> {
+                    presentLegalConsent(
+                        resultLauncher = termsAndConditionsResultLauncher,
+                        consentText = result.terms.text,
+                        version = result.terms.version,
+                        appearance = result.appearance,
+                        titleResId =
+                            PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
+                    )
+                }
+                OnrampStartTermsAndConditionsResult.NotRequired -> {
+                    onrampCallbacksState.termsAndConditionsCallback?.onResult(
+                        OnrampTermsAndConditionsResult.AlreadyAccepted()
+                    )
+                }
+                is OnrampStartTermsAndConditionsResult.Failed -> {
+                    onrampCallbacksState.termsAndConditionsCallback?.onResult(
+                        OnrampTermsAndConditionsResult.Failed(result.error)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun presentLegalConsent(
+        resultLauncher: ActivityResultLauncher<LegalConsentActivityArgs>,
+        consentText: String,
+        version: String,
+        appearance: LinkAppearance?,
+        @StringRes titleResId: Int,
+    ) {
+        resultLauncher.launch(
+            LegalConsentActivityArgs(
+                consentText = consentText,
+                version = version,
+                linkAppearance = appearance,
+                titleResId = titleResId,
+                acceptButtonResId =
+                    PaymentSheetR.string.stripe_link_onramp_carf_declaration_accept_button_text,
+                cancelButtonResId =
+                    PaymentSheetR.string.stripe_link_onramp_carf_declaration_cancel_button_text,
+            )
+        )
     }
 
     fun collectPaymentMethod(selection: PaymentMethodSelection) {
@@ -371,11 +436,19 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun handleUserAttestationResult(result: UserAttestationActivityResult) {
+    private fun handleUserAttestationResult(result: LegalConsentActivityResult) {
         coroutineScope.launch {
             val attestationResult = interactor.handleUserAttestationResult(result)
 
             onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
+        }
+    }
+
+    private fun handleTermsAndConditionsResult(result: LegalConsentActivityResult) {
+        coroutineScope.launch {
+            val termsAndConditionsResult = interactor.handleTermsAndConditionsResult(result)
+
+            onrampCallbacksState.termsAndConditionsCallback?.onResult(termsAndConditionsResult)
         }
     }
 

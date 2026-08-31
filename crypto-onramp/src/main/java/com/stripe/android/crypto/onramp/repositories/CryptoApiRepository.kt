@@ -15,6 +15,7 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.ConfirmPartnerTermsRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoConsumerWallet
@@ -30,6 +31,8 @@ import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRefreshRequest
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
+import com.stripe.android.crypto.onramp.model.PartnerTerms
+import com.stripe.android.crypto.onramp.model.PartnerTermsResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.SamsungPayTokenParams
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
@@ -193,6 +196,37 @@ internal class CryptoApiRepository @Inject constructor(
             userAttestationUrl,
             credentialsParams(consumerSessionClientSecret),
             Unit.serializer()
+        )
+    }
+
+    suspend fun retrievePartnerTerms(
+        consumerSessionClientSecret: String
+    ): Result<PartnerTerms> {
+        val request = apiRequestFactory.createGet(
+            url = partnerTermsUrl,
+            options = buildRequestOptions(),
+            params = credentialsParams(consumerSessionClientSecret).toMap(),
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = PartnerTermsResponse.serializer(),
+        ).mapCatching { it.toPartnerTerms() }
+    }
+
+    suspend fun confirmPartnerTerms(
+        consumerSessionClientSecret: String,
+        version: String,
+    ): Result<Unit> {
+        val request = ConfirmPartnerTermsRequest(
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
+            version = version,
+        )
+
+        return executePost(
+            url = confirmPartnerTermsUrl,
+            paramsJson = Json.encodeToJsonElement(request).jsonObject,
+            responseSerializer = Unit.serializer(),
         )
     }
 
@@ -612,6 +646,12 @@ internal class CryptoApiRepository @Inject constructor(
          */
         internal val userAttestationUrl: String
             get() = getApiUrl("crypto/internal/crs_carf_declaration")
+
+        internal val partnerTermsUrl: String
+            get() = getApiUrl("crypto/internal/partner_terms")
+
+        internal val confirmPartnerTermsUrl: String
+            get() = getApiUrl("crypto/internal/confirm_partner_terms")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/wallet`

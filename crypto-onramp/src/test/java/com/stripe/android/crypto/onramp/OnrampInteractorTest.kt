@@ -55,11 +55,13 @@ import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
+import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
@@ -78,8 +80,7 @@ import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
-import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
-import com.stripe.android.crypto.onramp.ui.UserAttestationScreenAction
+import com.stripe.android.crypto.onramp.ui.LegalConsentActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
@@ -100,6 +101,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -1018,6 +1020,38 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun testStartTermsAndConditionsRequiresPresentation() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        val termsAndConditions = PartnerTerms.Required(
+            partner = "example",
+            text = "Please accept these terms.",
+            version = "2026-08-27",
+        )
+        whenever(cryptoApiRepository.retrievePartnerTerms(any()))
+            .thenReturn(Result.success(termsAndConditions))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.startTermsAndConditions()
+
+        assertThat(result).isInstanceOf(OnrampStartTermsAndConditionsResult.PresentationRequired::class.java)
+        val presentationRequired = result as OnrampStartTermsAndConditionsResult.PresentationRequired
+        assertThat(presentationRequired.terms).isEqualTo(termsAndConditions)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsAndConditionsStarted)
+    }
+
+    @Test
+    fun testStartTermsAndConditionsReturnsNotRequired() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(cryptoApiRepository.retrievePartnerTerms(any()))
+            .thenReturn(Result.success(PartnerTerms.NotRequired))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.startTermsAndConditions()
+
+        assertThat(result).isEqualTo(OnrampStartTermsAndConditionsResult.NotRequired)
+    }
+
+    @Test
     fun testStartIdentityVerificationIsSuccessful() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val response = StartIdentityVerificationResponse(
@@ -1845,9 +1879,7 @@ class OnrampInteractorTest {
             .thenReturn(Result.success(Unit))
 
         val result = interactor.handleUserAttestationResult(
-            UserAttestationActivityResult(
-                UserAttestationScreenAction.Confirm
-            )
+            LegalConsentActivityResult.Accepted(version = "2026-04-23")
         )
 
         assertThat(result).isInstanceOf(OnrampUserAttestationResult.Confirmed::class.java)
@@ -1857,12 +1889,35 @@ class OnrampInteractorTest {
     @Test
     fun testHandleUserAttestationResultCancelled() = runTest {
         val result = interactor.handleUserAttestationResult(
-            UserAttestationActivityResult(
-                UserAttestationScreenAction.Cancelled
-            )
+            LegalConsentActivityResult.Cancelled
         )
 
         assertThat(result).isInstanceOf(OnrampUserAttestationResult.Cancelled::class.java)
+    }
+
+    @Test
+    fun testHandleTermsAndConditionsResultAcceptedSuccess() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(cryptoApiRepository.confirmPartnerTerms(any(), any()))
+            .thenReturn(Result.success(Unit))
+
+        val result = interactor.handleTermsAndConditionsResult(
+            LegalConsentActivityResult.Accepted(version = "2026-08-27")
+        )
+
+        assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Accepted::class.java)
+        verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("2026-08-27"))
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsAndConditionsCompleted)
+    }
+
+    @Test
+    fun testHandleTermsAndConditionsResultCancelled() = runTest {
+        val result = interactor.handleTermsAndConditionsResult(
+            LegalConsentActivityResult.Cancelled
+        )
+
+        assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Cancelled::class.java)
+        verify(cryptoApiRepository, never()).confirmPartnerTerms(any(), any())
     }
 
     @Test

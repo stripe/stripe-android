@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -11,6 +12,8 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodCallback
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsCallback
+import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
@@ -317,11 +320,30 @@ class OnrampPresenterCoordinatorTest {
         samsungPayLauncher.destroyCalls.awaitItem()
     }
 
+    @Test
+    fun `terms already accepted invokes callback without presenting`() = runTest {
+        whenever(interactor.startTermsAndConditions()).thenReturn(
+            OnrampStartTermsAndConditionsResult.NotRequired
+        )
+        val results = Turbine<OnrampTermsAndConditionsResult>()
+        val coordinator = createCoordinator(
+            termsAndConditionsCallback = OnrampTermsAndConditionsCallback(results::add),
+        )
+
+        coordinator.presentTermsAndConditionsIfNeeded()
+        testScope.testScheduler.advanceUntilIdle()
+
+        assertThat(results.awaitItem())
+            .isInstanceOf(OnrampTermsAndConditionsResult.AlreadyAccepted::class.java)
+        results.ensureAllEventsConsumed()
+    }
+
     private fun createCoordinator(
         onrampStateFlow: MutableStateFlow<OnrampState> = MutableStateFlow(OnrampState()),
         linkStateFlow: MutableStateFlow<LinkController.State> = MutableStateFlow(createFakeLinkState()),
         samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null,
         collectPaymentCallback: OnrampCollectPaymentMethodCallback = OnrampCollectPaymentMethodCallback {},
+        termsAndConditionsCallback: OnrampTermsAndConditionsCallback? = null,
     ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 
@@ -350,6 +372,7 @@ class OnrampPresenterCoordinatorTest {
             .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
 
         samsungPayIsReadyCallback?.let(callbacks::samsungPayIsReadyCallback)
+        termsAndConditionsCallback?.let(callbacks::termsAndConditionsCallback)
 
         OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY] = callbacks.build()
 
