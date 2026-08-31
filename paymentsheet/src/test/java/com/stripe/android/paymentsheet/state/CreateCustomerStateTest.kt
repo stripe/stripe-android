@@ -3,10 +3,13 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Address
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -78,6 +81,92 @@ internal class CreateCustomerStateTest {
         assertThat(result!!.paymentMethods).isEmpty()
         assertThat(result.defaultPaymentMethodId).isNull()
     }
+
+    @Test
+    fun `Checkout session only includes payment methods with sufficient automatic tax billing details`() = runScenario {
+        val insufficientPaymentMethod = paymentMethodWithBillingAddress(
+            id = "pm_insufficient",
+            address = Address(country = "US"),
+        )
+        val sufficientUnitedStatesPaymentMethod = paymentMethodWithBillingAddress(
+            id = "pm_sufficient_us",
+            address = Address(
+                country = "US",
+                line1 = "510 Townsend St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+            ),
+        )
+        val sufficientGermanyPaymentMethod = paymentMethodWithBillingAddress(
+            id = "pm_sufficient_de",
+            address = Address(country = "DE"),
+        )
+        val checkoutSessionResponse = createAutomaticTaxCheckoutSession(
+            paymentMethods = listOf(
+                insufficientPaymentMethod,
+                sufficientUnitedStatesPaymentMethod,
+                sufficientGermanyPaymentMethod,
+            ),
+        )
+
+        val result = createCustomerState(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "instances_key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            metadata = createAutomaticTaxCheckoutMetadata(checkoutSessionResponse),
+            paymentMethodFilter = DefaultPaymentMethodFilter(),
+        )
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.paymentMethods).containsExactly(
+            sufficientUnitedStatesPaymentMethod,
+            sufficientGermanyPaymentMethod,
+        ).inOrder()
+    }
+
+    private fun paymentMethodWithBillingAddress(
+        id: String,
+        address: Address,
+    ): PaymentMethod {
+        return PaymentMethodFactory.card(
+            id = id,
+            last4 = "4242",
+            billingDetails = PaymentMethod.BillingDetails(address = address),
+        )
+    }
+
+    private fun createAutomaticTaxCheckoutSession(
+        paymentMethods: List<PaymentMethod>,
+    ): CheckoutSessionResponse {
+        return CheckoutSessionResponseFactory.create(
+            customer = CheckoutSessionResponse.Customer(
+                id = "cus_checkout_automatic_tax",
+                paymentMethods = paymentMethods,
+                canDetachPaymentMethod = false,
+            ),
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+    }
+
+    private fun createAutomaticTaxCheckoutMetadata(
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ) = PaymentMethodMetadataFactory.create(
+        integrationMetadata = IntegrationMetadata.CheckoutSession(
+            id = checkoutSessionResponse.id,
+            instancesKey = "instances_key",
+            checkoutSessionResponse = checkoutSessionResponse,
+        ),
+    ).copy(
+        customerMetadata = CustomerMetadata.CheckoutSession(
+            sessionId = checkoutSessionResponse.id,
+            customerId = "cus_checkout_automatic_tax",
+            removePaymentMethod = PaymentMethodRemovePermission.None,
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+        ),
+    )
 
     @Test
     fun `Customer session extracts payment methods and default payment method`() = runScenario {

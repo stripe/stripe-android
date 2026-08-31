@@ -21,6 +21,7 @@ internal interface PaymentMethodFilter {
 
     class FilterParams(
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        val requiresBillingAddressForAutomaticTax: Boolean,
         val customerMetadata: CustomerMetadata?,
         val remoteDefaultPaymentMethodId: String?,
         val cardBrandFilter: CardBrandFilter,
@@ -45,7 +46,11 @@ internal class DefaultPaymentMethodFilter @Inject constructor() : PaymentMethodF
             } ?: true
             params.cardBrandFilter.isAccepted(paymentMethod) &&
                 fundingAccepted &&
-                paymentMethod.isSupportedWithBillingConfig(params.billingDetailsCollectionConfiguration)
+                paymentMethod.isSupportedWithBillingConfig(params.billingDetailsCollectionConfiguration) &&
+                (
+                    !params.requiresBillingAddressForAutomaticTax ||
+                        paymentMethod.hasSufficientBillingDetailsForAutomaticTax()
+                    )
         }
     }
 }
