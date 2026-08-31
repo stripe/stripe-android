@@ -59,9 +59,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     @Test
     fun `confirm reports unexpected error when confirmation args are null`() = runScenario(
         state = CheckoutControllerStateFactory.create(
-            configuration = CheckoutController.Configuration()
-                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-                .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
         ),
         expressButton = createGooglePayExpressButton(),
@@ -190,9 +187,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     @Test
     fun `confirm starts confirmation with a Link option`() {
         val state = CheckoutControllerStateFactory.create(
-            configuration = CheckoutController.Configuration()
-                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-                .build(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
                     configuration = LinkTestUtils.createLinkConfiguration(),

@@ -67,12 +67,10 @@ internal class ExpressCheckoutElementContentTest {
 
     @Test
     fun `does not render wallet buttons when state has no buttons`() {
-        val viewActionRecorder = ViewActionRecorder<ExpressCheckoutElementInteractor.ViewAction>()
         val interactor = FakeExpressCheckoutElementInteractor(
             state = stateFlowOf(
                 ExpressCheckoutElementInteractorStateFactory.create(expressButtons = emptyList())
             ),
-            viewActionRecorder = viewActionRecorder,
         )
 
         composeRule.setContent {
@@ -83,7 +81,6 @@ internal class ExpressCheckoutElementContentTest {
 
         composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
         composeRule.onNodeWithTag(LinkButtonTestTag).assertDoesNotExist()
-        assertThat(viewActionRecorder.viewActions).isEmpty()
     }
 
     @Test

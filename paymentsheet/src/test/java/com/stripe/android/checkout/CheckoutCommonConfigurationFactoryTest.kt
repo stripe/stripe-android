@@ -108,9 +108,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `maps googlePay using the checkout session country`() {
         val result = factory().create(
-            configuration = controllerConfiguration(
-                googlePayConfiguration = GooglePayConfiguration(),
-            ),
+            configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "GB",
                 liveMode = true,
@@ -178,8 +176,19 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.link.display)
+        assertThat(result?.link?.display)
             .isEqualTo(PaymentSheet.LinkConfiguration.Display.WalletButtonHidden)
+    }
+
+    @Test
+    fun `createForExpressCheckoutElement returns null when express checkout configuration is absent`() {
+        val result = factory().createForExpressCheckoutElement(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result).isNull()
     }
 
     @Test
@@ -215,11 +224,11 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.billingDetailsCollectionConfiguration.name)
+        assertThat(result?.billingDetailsCollectionConfiguration?.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
-        assertThat(result.billingDetailsCollectionConfiguration.email)
+        assertThat(result?.billingDetailsCollectionConfiguration?.email)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
-        assertThat(result.billingDetailsCollectionConfiguration.address)
+        assertThat(result?.billingDetailsCollectionConfiguration?.address)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }
 
@@ -447,11 +456,11 @@ internal class CheckoutCommonConfigurationFactoryTest {
                         BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
                     )
             )
+        val expressCheckoutElementConfiguration = ExpressCheckoutElement.Configuration()
         if (googlePayConfiguration != null) {
-            builder.expressCheckoutElement(
-                ExpressCheckoutElement.Configuration().googlePayConfiguration(googlePayConfiguration)
-            )
+            expressCheckoutElementConfiguration.googlePayConfiguration(googlePayConfiguration)
         }
+        builder.expressCheckoutElement(expressCheckoutElementConfiguration)
         return builder.build()
     }
 

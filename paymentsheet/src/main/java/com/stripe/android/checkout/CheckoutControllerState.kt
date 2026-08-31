@@ -36,12 +36,10 @@ internal data class CheckoutControllerState(
                 selection = paymentSelection,
                 paymentMethodMetadata = paymentMethodMetadata,
             ),
-            availableExpressButtonTypes = configuration.expressCheckoutElementConfiguration?.let {
-                availableExpressButtonTypesFactory.create(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    expressCheckoutElementConfiguration = it,
-                )
-            }.orEmpty()
+            availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
+                paymentMethodMetadata = paymentMethodMetadata,
+                expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
+            )
         )
     }
 }

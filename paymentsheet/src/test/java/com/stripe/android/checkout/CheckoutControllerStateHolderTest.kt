@@ -54,13 +54,6 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `session has no express checkout payment methods when ECE configuration is absent`() = testScenario {
-        stateHolder.state = committedState()
-
-        assertThat(stateHolder.session.value?.availableExpressCheckoutPaymentMethods).isEmpty()
-    }
-
-    @Test
     fun `setSelection updates paymentSelection on the state and emits`() = testScenario {
         stateHolder.state = committedState()
 

@@ -860,8 +860,6 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the express checkout element.
-         *
-         * If not set, the express checkout element has no content.
          */
         fun expressCheckoutElement(
             configuration: ExpressCheckoutElement.Configuration

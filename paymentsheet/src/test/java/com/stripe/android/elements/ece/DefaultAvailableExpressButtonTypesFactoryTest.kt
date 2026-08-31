@@ -11,6 +11,16 @@ import org.junit.Test
 
 class DefaultAvailableExpressButtonTypesFactoryTest {
     @Test
+    fun `create returns no express button types when ECE configuration is absent`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+            configuration = null,
+        )
+
+        assertThat(availableExpressButtonTypes).isEmpty()
+    }
+
+    @Test
     fun `create keeps only express button types returned by metadata`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay),
@@ -151,13 +161,13 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
 
     private fun create(
         availableWallets: List<WalletType>,
-        configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+        configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
     ): List<ExpressButtonType> {
         return DefaultAvailableExpressButtonTypesFactory().create(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 availableWallets = availableWallets,
             ),
-            expressCheckoutElementConfiguration = configuration.build(),
+            expressCheckoutElementConfiguration = configuration?.build(),
         )
     }
 

@@ -57,18 +57,16 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
 
     private fun defaultParams(): Map<String, Any> {
         val state = stateHolder.state ?: return emptyMap()
+        val expressCheckoutElementConfiguration = state.configuration.expressCheckoutElementConfiguration
+            ?: return emptyMap()
         val orderedLpms = stateHolder.session.value?.availableExpressButtonTypes.orEmpty().map {
             when (it) {
                 is ExpressButtonType.GooglePay -> "google_pay"
                 ExpressButtonType.Link -> "link"
             }
         }
-        val defaultParams = state.paymentMethodMetadata.analyticsMetadata.paramsMap + mapOf(
+        return state.paymentMethodMetadata.analyticsMetadata.paramsMap + mapOf(
             FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
-        )
-        val expressCheckoutElementConfiguration = state.configuration.expressCheckoutElementConfiguration
-            ?: return defaultParams
-        return defaultParams + mapOf(
             FIELD_ECE_CONFIG to mapOf(
                 FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkConfiguration.display
                     .toAnalyticsValue(),

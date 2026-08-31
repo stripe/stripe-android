@@ -33,10 +33,8 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): CommonConfiguration {
-        val expressCheckoutElementConfiguration = requireNotNull(
-            configuration.expressCheckoutElementConfiguration
-        )
+    ): CommonConfiguration? {
+        val expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration ?: return null
         return createCommonConfiguration(
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
