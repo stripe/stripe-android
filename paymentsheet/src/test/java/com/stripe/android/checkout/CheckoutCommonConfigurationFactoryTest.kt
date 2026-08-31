@@ -108,7 +108,9 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `maps googlePay using the checkout session country`() {
         val result = factory().create(
-            configuration = controllerConfiguration(),
+            configuration = controllerConfiguration(
+                googlePayConfiguration = GooglePayConfiguration(),
+            ),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "GB",
                 liveMode = true,

@@ -58,6 +58,10 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         }
 
         val configuration = state.configuration.expressCheckoutElementConfiguration
+            ?: return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
+                expressButtons = emptyList(),
+                buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+            )
 
         ExpressCheckoutElementInteractor.State(
             expressButtons = session.availableExpressButtonTypes.map { expressButtonType ->

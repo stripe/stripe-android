@@ -817,8 +817,7 @@ class CheckoutController @Inject internal constructor(
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration? = null
         private var shippingAddressElementConfiguration: ShippingAddressElement.Configuration? = null
-        private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration =
-            ExpressCheckoutElement.Configuration()
+        private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration? = null
 
         /**
          * Sets the merchant display name shown to the customer during checkout.
@@ -861,6 +860,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the express checkout element.
+         *
+         * If not set, the express checkout element has no content.
          */
         fun expressCheckoutElement(
             configuration: ExpressCheckoutElement.Configuration
@@ -885,7 +886,7 @@ class CheckoutController @Inject internal constructor(
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State?,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State?,
-            val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
+            val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
         ) : Parcelable
 
         internal fun build(): State {
@@ -895,7 +896,7 @@ class CheckoutController @Inject internal constructor(
                 paymentElementConfiguration = paymentElementConfiguration.build(),
                 currencySelectorElementConfiguration = currencySelectorElementConfiguration?.build(),
                 shippingAddressElementConfiguration = shippingAddressElementConfiguration?.build(),
-                expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
+                expressCheckoutElementConfiguration = expressCheckoutElementConfiguration?.build(),
                 defaults = defaultsState,
             )
         }

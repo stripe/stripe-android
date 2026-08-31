@@ -59,6 +59,10 @@ internal fun ExpressCheckoutElementContent(
 ) {
     val state by interactor.state.collectAsState()
 
+    if (state.expressButtons.isEmpty()) {
+        return
+    }
+
     LaunchedEffect(Unit) {
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
     }
