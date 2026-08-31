@@ -5,6 +5,8 @@ import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -29,7 +31,10 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
-internal class PaymentSheetBillingConfigurationTest {
+internal class PaymentSheetBillingConfigurationTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val composeTestRule = createAndroidComposeRule<MainActivity>()
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -60,7 +65,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             paymentSheet.presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
                     defaultBillingDetails = PaymentSheet.BillingDetails(
                         name = "Jenny Rosen",
@@ -79,7 +84,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         attachDefaultsToPaymentMethod = true,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                ),
+                )),
             )
         }
 
@@ -134,7 +139,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             paymentSheet.presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
                     defaultBillingDetails = PaymentSheet.BillingDetails(
                         name = "Jenny Rosen",
@@ -150,7 +155,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         attachDefaultsToPaymentMethod = false,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                ),
+                )),
             )
         }
 
@@ -175,6 +180,7 @@ internal class PaymentSheetBillingConfigurationTest {
 
     @Test
     fun testAddressInputNotReset() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = IntegrationType.Compose,
         resultCallback = ::assertCompleted,
@@ -186,7 +192,7 @@ internal class PaymentSheetBillingConfigurationTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
                     defaultBillingDetails = PaymentSheet.BillingDetails(
                         name = "Jenny Rosen",
@@ -206,7 +212,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         attachDefaultsToPaymentMethod = false,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                ),
+                )),
             )
         }
 
@@ -227,6 +233,7 @@ internal class PaymentSheetBillingConfigurationTest {
         @TestParameter(valuesProvider = PaymentSheetLayoutTypeProvider::class)
         layoutType: PaymentSheetLayoutType,
     ) = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,

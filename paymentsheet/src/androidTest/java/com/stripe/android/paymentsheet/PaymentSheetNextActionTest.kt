@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
@@ -11,6 +13,8 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -29,8 +33,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
-@RunWith(AndroidJUnit4::class)
-internal class PaymentSheetNextActionTest {
+@RunWith(TestParameterInjector::class)
+internal class PaymentSheetNextActionTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     // The retrieve happens after the sheet has already handed back its result, so give
     // validate() a moment to see it.
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
@@ -66,6 +73,7 @@ internal class PaymentSheetNextActionTest {
         resultCallback: PaymentSheetResultCallback,
         afterConfirm: (PaymentSheetTestRunnerContext) -> Unit = {},
     ) = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         successTimeoutSeconds = 10L,
         resultCallback = resultCallback,
@@ -77,10 +85,10 @@ internal class PaymentSheetNextActionTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration(
                     merchantDisplayName = "Example, Inc.",
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                ),
+                )),
             )
         }
 

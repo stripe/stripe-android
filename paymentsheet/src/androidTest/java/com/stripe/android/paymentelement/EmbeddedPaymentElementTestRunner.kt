@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement
 
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -13,17 +12,14 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.ApiConfigurationPreview
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -34,7 +30,7 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     val rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
     val paymentOptionTurbine: ReceiveTurbine<EmbeddedPaymentElement.PaymentOptionDisplayData?>,
     private val countDownLatch: CountDownLatch,
-    private val apiConfigurationTestType: EmbeddedPaymentElementApiConfigurationTestType,
+    private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
@@ -76,36 +72,13 @@ internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     createIntentCallback: CreateIntentCallback,
     resultCallback: EmbeddedPaymentElement.ResultCallback,
+    apiConfigurationTestType: ApiConfigurationTestType,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
-    runEmbeddedPaymentElementTestWithConfigurationType(
-        networkRule = networkRule,
-        builderInstance = EmbeddedPaymentElement.Builder(
-            createIntentCallback = createIntentCallback,
-            resultCallback = resultCallback,
-        ),
-        builder = builder,
-        successTimeoutSeconds = successTimeoutSeconds,
-        rowSelectionCalls = rowSelectionCalls,
-        apiConfigurationTestType = EmbeddedPaymentElementApiConfigurationTestType.PaymentConfigurationOnly,
-        block = block,
-    )
-}
-
-internal fun runEmbeddedPaymentElementTest(
-    networkRule: NetworkRule,
-    createIntentCallback: CreateIntentCallback,
-    resultCallback: EmbeddedPaymentElement.ResultCallback,
-    apiConfigurationTestType: EmbeddedPaymentElementApiConfigurationTestType,
-    builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
-    successTimeoutSeconds: Long = 5L,
-    rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
-    block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
-) {
-    runEmbeddedPaymentElementTestWithConfigurationType(
+    runEmbeddedPaymentElementTest(
         networkRule = networkRule,
         builderInstance = EmbeddedPaymentElement.Builder(
             createIntentCallback = createIntentCallback,
@@ -120,54 +93,13 @@ internal fun runEmbeddedPaymentElementTest(
 }
 
 @OptIn(WalletButtonsPreview::class, SharedPaymentTokenSessionPreview::class)
-private fun runEmbeddedPaymentElementTestWithConfigurationType(
-    networkRule: NetworkRule,
-    builderInstance: EmbeddedPaymentElement.Builder,
-    builder: EmbeddedPaymentElement.Builder.() -> Unit,
-    successTimeoutSeconds: Long,
-    rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
-    apiConfigurationTestType: EmbeddedPaymentElementApiConfigurationTestType,
-    block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
-) {
-    runEmbeddedPaymentElementTest(
-        networkRule = networkRule,
-        builderInstance = builderInstance,
-        builder = builder,
-        successTimeoutSeconds = successTimeoutSeconds,
-        rowSelectionCalls = rowSelectionCalls,
-        apiConfigurationTestType = apiConfigurationTestType,
-        block = block,
-    )
-}
-
-@OptIn(WalletButtonsPreview::class, SharedPaymentTokenSessionPreview::class)
 internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     builderInstance: EmbeddedPaymentElement.Builder,
+    apiConfigurationTestType: ApiConfigurationTestType,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
-    block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
-) {
-    runEmbeddedPaymentElementTest(
-        networkRule = networkRule,
-        builderInstance = builderInstance,
-        builder = builder,
-        successTimeoutSeconds = successTimeoutSeconds,
-        rowSelectionCalls = rowSelectionCalls,
-        apiConfigurationTestType = EmbeddedPaymentElementApiConfigurationTestType.PaymentConfigurationOnly,
-        block = block,
-    )
-}
-
-@OptIn(WalletButtonsPreview::class, SharedPaymentTokenSessionPreview::class)
-private fun runEmbeddedPaymentElementTest(
-    networkRule: NetworkRule,
-    builderInstance: EmbeddedPaymentElement.Builder,
-    builder: EmbeddedPaymentElement.Builder.() -> Unit,
-    successTimeoutSeconds: Long,
-    rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
-    apiConfigurationTestType: EmbeddedPaymentElementApiConfigurationTestType,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -234,20 +166,13 @@ private fun runEmbeddedPaymentElementTestInternal(
     countDownLatchTimeoutSeconds: Long,
     makeEmbeddedPaymentElement: (ComponentActivity) -> EmbeddedPaymentElement,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
-    apiConfigurationTestType: EmbeddedPaymentElementApiConfigurationTestType,
+    apiConfigurationTestType: ApiConfigurationTestType,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.clearInstance()
-            it.getSharedPreferences(
-                PaymentConfiguration::class.java.canonicalName,
-                Context.MODE_PRIVATE,
-            ).edit().clear().commit()
-            apiConfigurationTestType.paymentConfigurationPublishableKey?.let { publishableKey ->
-                PaymentConfiguration.init(it, publishableKey)
-            }
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             DefaultLinkStore(it.applicationContext).clear()
         }
 
@@ -292,33 +217,3 @@ data class RowSelectionCall(
     val paymentMethodType: String?,
     val paymentOptionLabel: String?,
 )
-
-internal sealed class EmbeddedPaymentElementApiConfigurationTestType(
-    val paymentConfigurationPublishableKey: String?,
-    val apiConfiguration: ApiConfiguration?,
-) {
-    data object PaymentConfigurationOnly : EmbeddedPaymentElementApiConfigurationTestType(
-        paymentConfigurationPublishableKey = TestApiKeys.PUBLISHABLE,
-        apiConfiguration = null,
-    )
-
-    data object ApiConfigurationOnly : EmbeddedPaymentElementApiConfigurationTestType(
-        paymentConfigurationPublishableKey = null,
-        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE),
-    )
-
-    data object ApiConfigurationOverridesPaymentConfiguration : EmbeddedPaymentElementApiConfigurationTestType(
-        paymentConfigurationPublishableKey = "pk_test_should_not_be_used",
-        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE),
-    )
-}
-
-internal object EmbeddedPaymentElementApiConfigurationTestTypeProvider : TestParameterValuesProvider() {
-    override fun provideValues(
-        context: Context?,
-    ): List<EmbeddedPaymentElementApiConfigurationTestType> = listOf(
-        EmbeddedPaymentElementApiConfigurationTestType.PaymentConfigurationOnly,
-        EmbeddedPaymentElementApiConfigurationTestType.ApiConfigurationOnly,
-        EmbeddedPaymentElementApiConfigurationTestType.ApiConfigurationOverridesPaymentConfiguration,
-    )
-}
