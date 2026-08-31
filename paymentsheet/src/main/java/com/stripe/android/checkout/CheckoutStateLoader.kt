@@ -73,7 +73,7 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
         )
 
-        val loaderState = paymentElementLoader.load(
+        val loaderState = paymentElementLoader.loadForCheckoutSession(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = response.id,
                 checkoutSessionResponse = response,
