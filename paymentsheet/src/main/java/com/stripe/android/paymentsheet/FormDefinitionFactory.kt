@@ -35,6 +35,27 @@ internal interface FormDefinitionFactory {
     fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType
 }
 
+internal fun formTypeForCode(
+    paymentMethodCode: PaymentMethodCode,
+    formElements: List<FormElement>,
+): FormHelper.FormType {
+    val userInteractionAllowed = formElements.any { it.allowsUserInteraction }
+    val requiresFormScreen = userInteractionAllowed ||
+        paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
+        paymentMethodCode == PaymentMethod.Type.Link.code
+
+    return if (requiresFormScreen) {
+        FormHelper.FormType.UserInteractionRequired
+    } else {
+        val mandate = formElements.firstNotNullOfOrNull { it.mandateText }
+        if (mandate == null) {
+            FormHelper.FormType.Empty
+        } else {
+            FormHelper.FormType.MandateOnly(mandate)
+        }
+    }
+}
+
 internal class DefaultFormDefinitionFactory(
     private val coroutineScope: CoroutineScope,
     private val linkInlineHandler: LinkInlineHandler,
@@ -76,23 +97,7 @@ internal class DefaultFormDefinitionFactory(
 
     override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
         val formElements = formElementsForCode(paymentMethodCode)
-        return if (requiresFormScreen(paymentMethodCode, formElements)) {
-            FormHelper.FormType.UserInteractionRequired
-        } else {
-            val mandate = formElements.firstNotNullOfOrNull { it.mandateText }
-            if (mandate == null) {
-                FormHelper.FormType.Empty
-            } else {
-                FormHelper.FormType.MandateOnly(mandate)
-            }
-        }
-    }
-
-    private fun requiresFormScreen(paymentMethodCode: String, formElements: List<FormElement>): Boolean {
-        val userInteractionAllowed = formElements.any { it.allowsUserInteraction }
-        return userInteractionAllowed ||
-            paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
-            paymentMethodCode == PaymentMethod.Type.Link.code
+        return formTypeForCode(paymentMethodCode, formElements)
     }
 
     private fun createArgumentsFactory(code: PaymentMethodCode): UiDefinitionFactory.Arguments.Factory {
