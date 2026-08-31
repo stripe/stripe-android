@@ -48,6 +48,40 @@ private val affirmAutomaticWithoutTaxExpectedParams = LpmBillingAddressFormParam
     extraParams = null,
 )
 
+private val affirmAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.Affirm.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line1 = "510 Townsend St",
+                line2 = null,
+                city = "San Francisco",
+                state = "CA",
+                country = "US",
+                postalCode = "94103",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.Affirm.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "line1" to "510 Townsend St",
+                    "city" to "San Francisco",
+                    "state" to "CA",
+                    "country" to "US",
+                    "postal_code" to "94103",
+                ),
+            ),
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
 private val affirmFullExpectedParams = LpmBillingAddressFormParams(
     createParams = PaymentMethodCreateParams.createWithOverride(
         code = PaymentMethod.Type.Affirm.code,
@@ -105,6 +139,17 @@ internal val affirmTestCases = listOf(
         ),
         rawValues = affirmRawValues,
         expectedParams = affirmAutomaticWithoutTaxExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Affirm AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Affirm,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = affirmRawValues,
+        expectedParams = affirmAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Affirm Full",

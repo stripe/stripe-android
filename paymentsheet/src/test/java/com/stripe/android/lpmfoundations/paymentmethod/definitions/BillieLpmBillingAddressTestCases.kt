@@ -47,6 +47,32 @@ private val billieAutomaticWithoutTaxExpectedParams = LpmBillingAddressFormParam
     extraParams = null,
 )
 
+private val billieAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.Billie.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line2 = null,
+                country = "DE",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.Billie.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "country" to "DE",
+                ),
+            ),
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
 private val billieFullExpectedParams = LpmBillingAddressFormParams(
     createParams = PaymentMethodCreateParams.createWithOverride(
         code = PaymentMethod.Type.Billie.code,
@@ -102,6 +128,17 @@ internal val billieTestCases = listOf(
         ),
         rawValues = billieRawValues,
         expectedParams = billieAutomaticWithoutTaxExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Billie AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Billie,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = billieRawValues,
+        expectedParams = billieAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Billie Full",
