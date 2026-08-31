@@ -97,6 +97,7 @@ internal object MerchantSettingsDefinition :
                 Merchant.JP -> Currency.JPY
                 Merchant.CN -> Currency.CNY
                 Merchant.DE -> Currency.EUR
+                Merchant.ES -> Currency.EUR
                 Merchant.IT -> Currency.EUR
                 Merchant.TH -> Currency.THB
                 Merchant.StripeShop -> Currency.USD
@@ -119,6 +120,7 @@ enum class Merchant(override val value: String) : ValueEnum {
     JP("JP"),
     CN("CN"),
     DE("DE"),
+    ES("ES"),
     IT("IT"),
     TH("TH"),
     StripeShop("stripe_shop_test"),
@@ -141,6 +143,7 @@ val Merchant.countryCode: String
             Merchant.JP -> value
             Merchant.CN -> value
             Merchant.DE -> value
+            Merchant.ES -> value
             Merchant.IT -> value
             Merchant.TH -> value
             Merchant.StripeShop -> "US"
