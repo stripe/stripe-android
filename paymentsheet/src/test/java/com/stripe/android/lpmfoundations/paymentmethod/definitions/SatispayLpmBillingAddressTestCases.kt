@@ -32,6 +32,40 @@ private val satispayTypeOnlyExpectedParams = LpmBillingAddressFormParams(
     extraParams = null,
 )
 
+private val satispayAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.Satispay.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line1 = "510 Townsend St",
+                line2 = null,
+                city = "San Francisco",
+                state = "CA",
+                country = "US",
+                postalCode = "94103",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.Satispay.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "line1" to "510 Townsend St",
+                    "city" to "San Francisco",
+                    "state" to "CA",
+                    "country" to "US",
+                    "postal_code" to "94103",
+                ),
+            ),
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
 private val satispayFullExpectedParams = LpmBillingAddressFormParams(
     createParams = PaymentMethodCreateParams.createWithOverride(
         code = PaymentMethod.Type.Satispay.code,
@@ -140,6 +174,17 @@ internal val satispayTestCases = listOf(
         ),
         rawValues = satispayRawValues,
         expectedParams = satispayTypeOnlyExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Satispay AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = satispayRawValues,
+        expectedParams = satispayAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Satispay Full PaymentIntent automatic terms",
