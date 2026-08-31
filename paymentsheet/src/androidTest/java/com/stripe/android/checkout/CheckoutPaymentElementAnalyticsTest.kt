@@ -121,8 +121,11 @@ internal class CheckoutPaymentElementAnalyticsTest {
                                 "type": "card",
                                 "billing_details": {
                                     "address": {
+                                        "line1": "510 Townsend St",
+                                        "city": "San Francisco",
+                                        "state": "CA",
                                         "country": "US",
-                                        "postal_code": "12345"
+                                        "postal_code": "94103"
                                     }
                                 },
                                 "card": {
