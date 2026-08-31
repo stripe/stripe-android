@@ -528,10 +528,6 @@ public final class com/stripe/android/crypto/onramp/model/OnrampTermsAndConditio
 	public static final field $stable I
 }
 
-public final class com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult$AlreadyAccepted : com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult {
-	public static final field $stable I
-}
-
 public final class com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult {
 	public static final field $stable I
 }
@@ -539,6 +535,10 @@ public final class com/stripe/android/crypto/onramp/model/OnrampTermsAndConditio
 public final class com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult$Failed : com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult {
 	public static final field $stable I
 	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult$NotRequired : com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult {
+	public static final field $stable I
 }
 
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampTokenAuthenticationResult {

@@ -321,7 +321,7 @@ class OnrampPresenterCoordinatorTest {
     }
 
     @Test
-    fun `terms already accepted invokes callback without presenting`() = runTest {
+    fun `terms not required invokes callback without presenting`() = runTest {
         whenever(interactor.startTermsAndConditions()).thenReturn(
             OnrampStartTermsAndConditionsResult.NotRequired
         )
@@ -334,7 +334,7 @@ class OnrampPresenterCoordinatorTest {
         testScope.testScheduler.advanceUntilIdle()
 
         assertThat(results.awaitItem())
-            .isInstanceOf(OnrampTermsAndConditionsResult.AlreadyAccepted::class.java)
+            .isInstanceOf(OnrampTermsAndConditionsResult.NotRequired::class.java)
         results.ensureAllEventsConsumed()
     }
 

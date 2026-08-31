@@ -283,7 +283,8 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Presents the terms and conditions when the current version has not already been accepted.
+         * Presents the current terms and conditions when acceptance is required.
+         * Requires an authenticated Link user.
          * The result will be delivered through the terms and conditions callback provided in
          * [OnrampCallbacks].
          */

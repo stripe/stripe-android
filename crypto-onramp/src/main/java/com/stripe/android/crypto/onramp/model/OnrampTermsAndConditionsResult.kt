@@ -22,10 +22,11 @@ sealed interface OnrampTermsAndConditionsResult {
     class Accepted internal constructor() : OnrampTermsAndConditionsResult
 
     /**
-     * The current terms and conditions had already been accepted, so no UI was presented.
+     * The current terms and conditions had already been accepted or did not require acceptance,
+     * so no UI was presented.
      */
     @ExperimentalCryptoOnramp
-    class AlreadyAccepted internal constructor() : OnrampTermsAndConditionsResult
+    class NotRequired internal constructor() : OnrampTermsAndConditionsResult
 
     /**
      * The terms and conditions presentation was cancelled.

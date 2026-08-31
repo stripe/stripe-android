@@ -30,9 +30,11 @@ import com.stripe.android.crypto.onramp.samsungpay.SamsungPayPresentation
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
-import com.stripe.android.crypto.onramp.ui.LegalConsentActivityArgs
-import com.stripe.android.crypto.onramp.ui.LegalConsentActivityContract
-import com.stripe.android.crypto.onramp.ui.LegalConsentActivityResult
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityArgs
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityContract
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityResult
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationCallbackReferences
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
@@ -48,6 +50,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
@@ -74,6 +77,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     )
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
+    private val htmlConfirmationIds = mutableSetOf<String>()
 
     private val paymentLauncherFactory: PaymentLauncherFactory = PaymentLauncherFactory(
         activityResultRegistryOwner = activity,
@@ -110,17 +114,17 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             callback = ::handleVerifyKycResult
         )
 
-    private val userAttestationResultLauncher: ActivityResultLauncher<LegalConsentActivityArgs> =
+    private val userAttestationResultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs> =
         activity.activityResultRegistry.register(
             key = "OnrampPresenterCoordinator_UserAttestationResultLauncher($onrampCallbackIdentifier)",
-            contract = LegalConsentActivityContract(),
+            contract = HTMLConfirmationActivityContract(),
             callback = ::handleUserAttestationResult
         )
 
-    private val termsAndConditionsResultLauncher: ActivityResultLauncher<LegalConsentActivityArgs> =
+    private val termsAndConditionsResultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs> =
         activity.activityResultRegistry.register(
             key = "OnrampPresenterCoordinator_TermsAndConditionsResultLauncher($onrampCallbackIdentifier)",
-            contract = LegalConsentActivityContract(),
+            contract = HTMLConfirmationActivityContract(),
             callback = ::handleTermsAndConditionsResult,
         )
 
@@ -152,6 +156,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     verifyKycResultLauncher.unregister()
                     userAttestationResultLauncher.unregister()
                     termsAndConditionsResultLauncher.unregister()
+                    htmlConfirmationIds.forEach(HTMLConfirmationCallbackReferences::remove)
+                    htmlConfirmationIds.clear()
 
                     if (activity.isFinishing) {
                         OnrampCallbackReferences.remove(onrampCallbackIdentifier)
@@ -206,13 +212,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         coroutineScope.launch {
             when (val result = interactor.startUserAttestation()) {
                 is OnrampStartUserAttestationResult.Completed -> {
-                    presentLegalConsent(
+                    presentHTMLConfirmation(
                         resultLauncher = userAttestationResultLauncher,
-                        consentText = result.attestation.text,
+                        html = result.attestation.text,
                         version = result.attestation.version,
                         appearance = result.appearance,
-                        titleResId =
+                        headingResId =
                             PaymentSheetR.string.stripe_link_onramp_carf_declaration_screen_title,
+                        onConfirm = ::confirmUserAttestation,
                     )
                 }
                 is OnrampStartUserAttestationResult.Failed -> {
@@ -228,18 +235,19 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         coroutineScope.launch {
             when (val result = interactor.startTermsAndConditions()) {
                 is OnrampStartTermsAndConditionsResult.PresentationRequired -> {
-                    presentLegalConsent(
+                    presentHTMLConfirmation(
                         resultLauncher = termsAndConditionsResultLauncher,
-                        consentText = result.terms.text,
+                        html = result.terms.text,
                         version = result.terms.version,
                         appearance = result.appearance,
-                        titleResId =
+                        headingResId =
                             PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
+                        onConfirm = ::confirmTermsAndConditions,
                     )
                 }
                 OnrampStartTermsAndConditionsResult.NotRequired -> {
                     onrampCallbacksState.termsAndConditionsCallback?.onResult(
-                        OnrampTermsAndConditionsResult.AlreadyAccepted()
+                        OnrampTermsAndConditionsResult.NotRequired()
                     )
                 }
                 is OnrampStartTermsAndConditionsResult.Failed -> {
@@ -251,23 +259,35 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun presentLegalConsent(
-        resultLauncher: ActivityResultLauncher<LegalConsentActivityArgs>,
-        consentText: String,
+    private fun presentHTMLConfirmation(
+        resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
+        html: String,
         version: String,
         appearance: LinkAppearance?,
-        @StringRes titleResId: Int,
+        @StringRes headingResId: Int,
+        onConfirm: suspend (HTMLConfirmationResult.Confirmed) -> Unit,
     ) {
+        val confirmationId = UUID.randomUUID().toString()
+        htmlConfirmationIds += confirmationId
+        HTMLConfirmationCallbackReferences[confirmationId] = { result ->
+            try {
+                onConfirm(result)
+            } finally {
+                HTMLConfirmationCallbackReferences.remove(confirmationId)
+                htmlConfirmationIds -= confirmationId
+            }
+        }
         resultLauncher.launch(
-            LegalConsentActivityArgs(
-                consentText = consentText,
+            HTMLConfirmationActivityArgs(
+                html = html,
                 version = version,
                 linkAppearance = appearance,
-                titleResId = titleResId,
-                acceptButtonResId =
+                headingResId = headingResId,
+                confirmationButtonResId =
                     PaymentSheetR.string.stripe_link_onramp_carf_declaration_accept_button_text,
                 cancelButtonResId =
                     PaymentSheetR.string.stripe_link_onramp_carf_declaration_cancel_button_text,
+                confirmationId = confirmationId,
             )
         )
     }
@@ -436,19 +456,40 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun handleUserAttestationResult(result: LegalConsentActivityResult) {
+    private fun handleUserAttestationResult(result: HTMLConfirmationActivityResult) {
+        clearHTMLConfirmationCallback(result)
+        if (result.confirmationHandled) {
+            return
+        }
         coroutineScope.launch {
-            val attestationResult = interactor.handleUserAttestationResult(result)
-
-            onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
+            confirmUserAttestation(result.result)
         }
     }
 
-    private fun handleTermsAndConditionsResult(result: LegalConsentActivityResult) {
+    private fun handleTermsAndConditionsResult(result: HTMLConfirmationActivityResult) {
+        clearHTMLConfirmationCallback(result)
+        if (result.confirmationHandled) {
+            return
+        }
         coroutineScope.launch {
-            val termsAndConditionsResult = interactor.handleTermsAndConditionsResult(result)
+            confirmTermsAndConditions(result.result)
+        }
+    }
 
-            onrampCallbacksState.termsAndConditionsCallback?.onResult(termsAndConditionsResult)
+    private suspend fun confirmUserAttestation(result: HTMLConfirmationResult) {
+        val attestationResult = interactor.handleUserAttestationResult(result)
+        onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
+    }
+
+    private suspend fun confirmTermsAndConditions(result: HTMLConfirmationResult) {
+        val termsAndConditionsResult = interactor.handleTermsAndConditionsResult(result)
+        onrampCallbacksState.termsAndConditionsCallback?.onResult(termsAndConditionsResult)
+    }
+
+    private fun clearHTMLConfirmationCallback(result: HTMLConfirmationActivityResult) {
+        result.confirmationId?.let {
+            HTMLConfirmationCallbackReferences.remove(it)
+            htmlConfirmationIds -= it
         }
     }
 

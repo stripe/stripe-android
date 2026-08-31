@@ -36,16 +36,21 @@ import com.stripe.android.uicore.text.Html
 @Composable
 @Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun LegalConsentScreen(
+fun HTMLConfirmationScreen(
     appearance: LinkAppearance.State?,
-    title: String,
-    consentText: String,
-    acceptButtonText: String,
+    heading: String,
+    html: String,
+    confirmationButtonText: String,
     cancelButtonText: String,
+    isProcessing: Boolean,
     onClose: () -> Unit,
-    onAccept: () -> Unit,
+    onConfirm: () -> Unit,
 ) {
-    BackHandler(onBack = onClose)
+    BackHandler {
+        if (!isProcessing) {
+            onClose()
+        }
+    }
 
     DefaultLinkTheme(appearance = appearance) {
         Box(
@@ -72,13 +77,14 @@ fun LegalConsentScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = title,
+                            text = heading,
                             style = LinkTheme.typography.title,
                             color = LinkTheme.colors.textPrimary
                         )
                         TextButton(
                             onClick = onClose,
-                            modifier = Modifier.testTag(LEGAL_CONSENT_CANCEL_BUTTON_TAG),
+                            enabled = !isProcessing,
+                            modifier = Modifier.testTag(HTML_CONFIRMATION_CANCEL_BUTTON_TAG),
                         ) {
                             Text(
                                 text = cancelButtonText,
@@ -91,7 +97,7 @@ fun LegalConsentScreen(
                     Spacer(Modifier.height(16.dp))
 
                     Html(
-                        html = consentText,
+                        html = html,
                         style = LinkTheme.typography.body,
                         color = LinkTheme.colors.textPrimary,
                         urlSpanStyle = SpanStyle(
@@ -107,9 +113,13 @@ fun LegalConsentScreen(
                     Spacer(Modifier.height(24.dp))
 
                     PrimaryButton(
-                        label = acceptButtonText,
-                        state = PrimaryButtonState.Enabled,
-                        onButtonClick = onAccept,
+                        label = confirmationButtonText,
+                        state = if (isProcessing) {
+                            PrimaryButtonState.Processing
+                        } else {
+                            PrimaryButtonState.Enabled
+                        },
+                        onButtonClick = onConfirm,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -118,4 +128,4 @@ fun LegalConsentScreen(
     }
 }
 
-internal const val LEGAL_CONSENT_CANCEL_BUTTON_TAG = "LegalConsentCancelButtonTag"
+internal const val HTML_CONFIRMATION_CANCEL_BUTTON_TAG = "HTMLConfirmationCancelButtonTag"

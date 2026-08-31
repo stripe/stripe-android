@@ -11,7 +11,7 @@
             android:exported="false" />
 
         <activity
-            android:name="com.stripe.android.crypto.onramp.ui.LegalConsentActivity"
+            android:name="com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivity"
             android:theme="@style/StripeOnrampTheme"
             android:exported="false" />
 

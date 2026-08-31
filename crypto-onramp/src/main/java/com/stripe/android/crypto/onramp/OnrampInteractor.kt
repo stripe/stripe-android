@@ -11,6 +11,7 @@ import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent.ErrorOccurred.Operation
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.exception.LinkAccountNotVerifiedException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
@@ -60,8 +61,8 @@ import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
-import com.stripe.android.crypto.onramp.ui.LegalConsentActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
@@ -470,11 +471,11 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun startUserAttestation(): OnrampStartUserAttestationResult {
-        val secret = consumerSessionClientSecret()
+        val secret = authenticatedConsumerSessionClientSecret()
         if (secret == null) {
             val error = mapError(
                 operation = Operation.PresentUserAttestation,
-                error = MissingConsumerSecretException(),
+                error = authenticatedLinkSessionError(),
             )
             trackError(Operation.PresentUserAttestation, error)
             return OnrampStartUserAttestationResult.Failed(error)
@@ -500,11 +501,11 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun startTermsAndConditions(): OnrampStartTermsAndConditionsResult {
         analyticsService?.track(OnrampAnalyticsEvent.TermsAndConditionsStarted)
 
-        val secret = consumerSessionClientSecret()
+        val secret = authenticatedConsumerSessionClientSecret()
         if (secret == null) {
             val error = mapError(
                 operation = Operation.PresentTermsAndConditionsIfNeeded,
-                error = MissingConsumerSecretException(),
+                error = authenticatedLinkSessionError(),
             )
             trackError(Operation.PresentTermsAndConditionsIfNeeded, error)
             return OnrampStartTermsAndConditionsResult.Failed(error)
@@ -1031,15 +1032,15 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun handleUserAttestationResult(
-        result: LegalConsentActivityResult,
+        result: HTMLConfirmationResult,
     ): OnrampUserAttestationResult = when (result) {
-        LegalConsentActivityResult.Cancelled -> OnrampUserAttestationResult.Cancelled()
-        is LegalConsentActivityResult.Accepted -> {
-            val secret = consumerSessionClientSecret()
+        HTMLConfirmationResult.Cancelled -> OnrampUserAttestationResult.Cancelled()
+        is HTMLConfirmationResult.Confirmed -> {
+            val secret = authenticatedConsumerSessionClientSecret()
             if (secret == null) {
                 val error = mapError(
                     operation = Operation.PresentUserAttestation,
-                    error = MissingConsumerSecretException(),
+                    error = authenticatedLinkSessionError(),
                 )
                 trackError(Operation.PresentUserAttestation, error)
                 OnrampUserAttestationResult.Failed(error)
@@ -1060,20 +1061,23 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun handleTermsAndConditionsResult(
-        result: LegalConsentActivityResult,
+        result: HTMLConfirmationResult,
     ): OnrampTermsAndConditionsResult = when (result) {
-        LegalConsentActivityResult.Cancelled -> OnrampTermsAndConditionsResult.Cancelled()
-        is LegalConsentActivityResult.Accepted -> {
-            val secret = consumerSessionClientSecret()
+        HTMLConfirmationResult.Cancelled -> OnrampTermsAndConditionsResult.Cancelled()
+        is HTMLConfirmationResult.Confirmed -> {
+            val secret = authenticatedConsumerSessionClientSecret()
             if (secret == null) {
                 val error = mapError(
                     operation = Operation.PresentTermsAndConditionsIfNeeded,
-                    error = MissingConsumerSecretException(),
+                    error = authenticatedLinkSessionError(),
                 )
                 trackError(Operation.PresentTermsAndConditionsIfNeeded, error)
                 OnrampTermsAndConditionsResult.Failed(error)
             } else {
-                cryptoApiRepository.confirmPartnerTerms(secret, result.version).fold(
+                cryptoApiRepository.confirmPartnerTerms(
+                    secret,
+                    result.version,
+                ).fold(
                     onSuccess = {
                         analyticsService?.track(OnrampAnalyticsEvent.TermsAndConditionsCompleted)
                         OnrampTermsAndConditionsResult.Accepted()
@@ -1091,6 +1095,24 @@ internal class OnrampInteractor @Inject constructor(
     private fun consumerSessionClientSecret(): String? =
         _state.value.linkControllerState?.internalLinkAccount?.consumerSessionClientSecret
             ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
+
+    private fun authenticatedConsumerSessionClientSecret(): String? {
+        val linkState = _state.value.linkControllerState ?: linkController.state(application).value
+        return if (linkState.isConsumerVerified == true) {
+            linkState.internalLinkAccount?.consumerSessionClientSecret
+        } else {
+            null
+        }
+    }
+
+    private fun authenticatedLinkSessionError(): Throwable {
+        val linkState = _state.value.linkControllerState ?: linkController.state(application).value
+        return if (linkState.isConsumerVerified == false) {
+            LinkAccountNotVerifiedException()
+        } else {
+            MissingConsumerSecretException()
+        }
+    }
 
     fun onLinkControllerState(linkState: LinkController.State) {
         if (analyticsService?.elementsSessionId != linkState.elementsSessionId) {
@@ -1472,7 +1494,7 @@ internal sealed interface OnrampStartUserAttestationResult {
      */
     class Completed internal constructor(
         val attestation: UserAttestation,
-        val appearance: LinkAppearance?
+        val appearance: LinkAppearance?,
     ) : OnrampStartUserAttestationResult
 
     /**

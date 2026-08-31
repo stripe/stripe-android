@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.exception.AppAttestationUnavailableExcep
 import com.stripe.android.crypto.onramp.exception.CryptoOnrampApiException
 import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipChallengeException
 import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipSignatureException
+import com.stripe.android.crypto.onramp.exception.LinkAccountNotVerifiedException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
@@ -79,8 +80,8 @@ import com.stripe.android.crypto.onramp.model.compliance.SubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
-import com.stripe.android.crypto.onramp.ui.LegalConsentActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
@@ -1040,6 +1041,23 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun testStartTermsAndConditionsFailsForUnverifiedLinkAccount() = runTest {
+        val unverifiedAccount = mockLinkAccount(
+            sessionState = LinkController.SessionState.NeedsVerification,
+        )
+        val linkState = mockLinkStateWithAccount(unverifiedAccount)
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(linkState))
+        interactor.onLinkControllerState(linkState)
+
+        val result = interactor.startTermsAndConditions()
+
+        assertThat(result).isInstanceOf(OnrampStartTermsAndConditionsResult.Failed::class.java)
+        val failed = result as OnrampStartTermsAndConditionsResult.Failed
+        assertThat(failed.error).isInstanceOf(LinkAccountNotVerifiedException::class.java)
+        verify(cryptoApiRepository, never()).retrievePartnerTerms(any())
+    }
+
+    @Test
     fun testStartTermsAndConditionsReturnsNotRequired() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         whenever(cryptoApiRepository.retrievePartnerTerms(any()))
@@ -1879,7 +1897,9 @@ class OnrampInteractorTest {
             .thenReturn(Result.success(Unit))
 
         val result = interactor.handleUserAttestationResult(
-            LegalConsentActivityResult.Accepted(version = "2026-04-23")
+            HTMLConfirmationResult.Confirmed(
+                version = "2026-04-23",
+            )
         )
 
         assertThat(result).isInstanceOf(OnrampUserAttestationResult.Confirmed::class.java)
@@ -1889,7 +1909,7 @@ class OnrampInteractorTest {
     @Test
     fun testHandleUserAttestationResultCancelled() = runTest {
         val result = interactor.handleUserAttestationResult(
-            LegalConsentActivityResult.Cancelled
+            HTMLConfirmationResult.Cancelled
         )
 
         assertThat(result).isInstanceOf(OnrampUserAttestationResult.Cancelled::class.java)
@@ -1902,7 +1922,9 @@ class OnrampInteractorTest {
             .thenReturn(Result.success(Unit))
 
         val result = interactor.handleTermsAndConditionsResult(
-            LegalConsentActivityResult.Accepted(version = "2026-08-27")
+            HTMLConfirmationResult.Confirmed(
+                version = "2026-08-27",
+            )
         )
 
         assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Accepted::class.java)
@@ -1911,9 +1933,28 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun testHandleTermsAndConditionsResultFailsForUnverifiedLinkAccount() = runTest {
+        val unverifiedAccount = mockLinkAccount(
+            sessionState = LinkController.SessionState.NeedsVerification,
+        )
+        interactor.onLinkControllerState(mockLinkStateWithAccount(unverifiedAccount))
+
+        val result = interactor.handleTermsAndConditionsResult(
+            HTMLConfirmationResult.Confirmed(
+                version = "2026-08-27",
+            )
+        )
+
+        assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Failed::class.java)
+        val failed = result as OnrampTermsAndConditionsResult.Failed
+        assertThat(failed.error).isInstanceOf(LinkAccountNotVerifiedException::class.java)
+        verify(cryptoApiRepository, never()).confirmPartnerTerms(any(), any())
+    }
+
+    @Test
     fun testHandleTermsAndConditionsResultCancelled() = runTest {
         val result = interactor.handleTermsAndConditionsResult(
-            LegalConsentActivityResult.Cancelled
+            HTMLConfirmationResult.Cancelled
         )
 
         assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Cancelled::class.java)
@@ -1964,11 +2005,14 @@ class OnrampInteractorTest {
             type = LinkController.PaymentMethodType.Card
         )
 
-    private fun mockLinkAccount(): LinkController.LinkAccount = LinkController.LinkAccount(
+    private fun mockLinkAccount(
+        consumerSessionClientSecret: String? = "secret_123",
+        sessionState: LinkController.SessionState = LinkController.SessionState.LoggedIn,
+    ): LinkController.LinkAccount = LinkController.LinkAccount(
         email = "test@email.com",
         redactedPhoneNumber = "***-***-1234",
-        sessionState = LinkController.SessionState.LoggedIn,
-        consumerSessionClientSecret = "secret_123"
+        sessionState = sessionState,
+        consumerSessionClientSecret = consumerSessionClientSecret,
     )
 
     private fun mockLinkAccountWithoutSecret(): LinkController.LinkAccount = LinkController.LinkAccount(
