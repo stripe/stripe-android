@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED] Added support for SeQura.
+
 ## 23.17.1 - 2026-08-31
 
 ### PaymentSheet

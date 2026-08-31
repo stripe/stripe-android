@@ -33,6 +33,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.PromptPayDefi
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.SequraDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
@@ -76,6 +77,7 @@ internal object PaymentMethodRegistry {
         PromptPayDefinition,
         RevolutPayDefinition,
         SatispayDefinition,
+        SequraDefinition,
         SepaDebitDefinition,
         SunbitDefinition,
         SwishDefinition,

@@ -517,6 +517,14 @@ constructor(
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
         ),
+        Sequra(
+            "sequra",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
         PayByBank(
             "pay_by_bank",
             isReusable = false,
