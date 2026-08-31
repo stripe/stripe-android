@@ -8,6 +8,7 @@ import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementError
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
+import com.stripe.android.link.onramp.ui.AdditionalKycCollectionPage
 import com.stripe.android.link.onramp.ui.AdditionalKycPendingRequirementStatus
 import com.stripe.android.link.onramp.ui.AdditionalKycRequirementType
 import com.stripe.android.link.onramp.ui.AdditionalKycSubmissionState
@@ -16,6 +17,57 @@ import org.junit.Test
 import java.io.File
 
 internal class AdditionalKycStateHolderTest {
+    @Test
+    fun `proof of address advances from context to document editor`() {
+        val stateHolder = AdditionalKycStateHolder(
+            requirements(
+                userActionRequired = listOf(documentRequirement(minDocuments = 1)),
+                pendingPartnerAction = emptyList(),
+                pendingStripeAction = emptyList(),
+            )
+        )
+
+        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Context)
+
+        assertThat(stateHolder.onContinue()).isTrue()
+
+        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.DocumentEditor)
+        assertThat(stateHolder.state.document?.editingSlotIndex).isEqualTo(0)
+    }
+
+    @Test
+    fun `source of funds advances through questionnaire overview and editor`() {
+        val stateHolder = AdditionalKycStateHolder(
+            requirements(
+                userActionRequired = listOf(
+                    documentRequirement(minDocuments = 1).copy(
+                        description = "source_of_funds",
+                        questionnaire = AdditionalKycQuestionnaire(
+                            questions = listOf(
+                                question(id = "purchase_purpose"),
+                                question(id = "third_party_advised"),
+                                question(id = "funding_sources"),
+                            )
+                        ),
+                    )
+                ),
+                pendingPartnerAction = emptyList(),
+                pendingStripeAction = emptyList(),
+            )
+        )
+
+        stateHolder.onContinue()
+        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Questionnaire)
+
+        stateHolder.onQuestionAnswerChanged("purchase_purpose", "For investment")
+        stateHolder.onQuestionAnswerChanged("third_party_advised", "No")
+        assertThat(stateHolder.onContinue()).isTrue()
+        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.DocumentOverview)
+
+        stateHolder.onAddDocuments()
+        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.DocumentEditor)
+    }
+
     @Test
     fun `initial state uses first requirement awaiting user action`() {
         val stateHolder = AdditionalKycStateHolder(
@@ -29,7 +81,8 @@ internal class AdditionalKycStateHolderTest {
         assertThat(stateHolder.state.requirementType)
             .isEqualTo(AdditionalKycRequirementType.ProofOfAddress)
         assertThat(stateHolder.state.document?.slots).hasSize(1)
-        assertThat(stateHolder.state.document?.maxFileSizeMegabytes).isEqualTo(50)
+        assertThat(stateHolder.state.document?.maxFileSizeMegabytes).isEqualTo(5)
+        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Context)
         assertThat(stateHolder.state.errorMessages).containsExactly("The previous document was too old")
         assertThat(stateHolder.state.canSubmit).isFalse()
         assertThat(stateHolder.state.pendingRequirements).isEmpty()
@@ -63,7 +116,7 @@ internal class AdditionalKycStateHolderTest {
     }
 
     @Test
-    fun `document submission collects required unique subtypes files and questionnaire`() {
+    fun `document submission groups files by source and populates funding source answer`() {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
                 userActionRequired = listOf(
@@ -86,20 +139,6 @@ internal class AdditionalKycStateHolderTest {
             )
         )
 
-        stateHolder.onDocumentSubtypeSelected(slotIndex = 0, subtypeId = "bank_statement")
-
-        val bankStatementInSecondSlot = stateHolder.state.document
-            ?.slots
-            ?.get(1)
-            ?.subtypes
-            ?.single { subtype -> subtype.id == "bank_statement" }
-        assertThat(bankStatementInSecondSlot?.isEnabled).isFalse()
-
-        stateHolder.onDocumentSubtypeSelected(slotIndex = 1, subtypeId = "bank_statement")
-        assertThat(stateHolder.state.validationError)
-            .isEqualTo(AdditionalKycValidationError.DuplicateDocumentType)
-
-        stateHolder.onDocumentSubtypeSelected(slotIndex = 1, subtypeId = "payslip")
         stateHolder.onFileSelected(
             slotIndex = 0,
             file = File("/tmp/bank.pdf"),
@@ -111,21 +150,19 @@ internal class AdditionalKycStateHolderTest {
             file = File("/tmp/income.jpg"),
             displayName = "income.jpg",
         )
-        stateHolder.onQuestionAnswerChanged("funding_sources", "Salary and savings")
 
         val submission = stateHolder.createSubmission()
 
         assertThat(submission?.submissionType).isEqualTo("document")
         assertThat(submission?.documents?.map { document -> document.documentType })
-            .containsExactly("source_of_funds", "source_of_funds")
+            .containsExactly("source_of_funds")
         assertThat(submission?.documents?.map { document -> document.documentSubtype })
-            .containsExactly("bank_statement", "payslip")
-            .inOrder()
+            .containsExactly("bank_statement")
         assertThat(submission?.documents?.flatMap { document -> document.files })
             .containsExactly(File("/tmp/bank.pdf"), File("/tmp/income.jpg"))
             .inOrder()
         assertThat(submission?.questionnaire?.answers?.single()?.value)
-            .isEqualTo("Salary and savings")
+            .isEqualTo("Bank statement")
     }
 
     @Test
@@ -148,6 +185,24 @@ internal class AdditionalKycStateHolderTest {
         assertThat(stateHolder.state.selectingFileSlot).isNull()
         assertThat(stateHolder.state.validationError)
             .isEqualTo(AdditionalKycValidationError.UnsupportedFileType)
+        assertThat(stateHolder.state.validationFileName).isEqualTo("malware.exe")
+    }
+
+    @Test
+    fun `uploading state retains selected file name`() {
+        val stateHolder = AdditionalKycStateHolder(
+            requirements(
+                userActionRequired = listOf(documentRequirement(minDocuments = 1)),
+                pendingPartnerAction = emptyList(),
+                pendingStripeAction = emptyList(),
+            )
+        )
+        stateHolder.onFileSelectionStarted(slotIndex = 0)
+
+        stateHolder.onFileUploadStarted(slotIndex = 0, displayName = "electricity-bill.pdf")
+
+        assertThat(stateHolder.state.selectingFileSlot).isEqualTo(0)
+        assertThat(stateHolder.state.selectingFileName).isEqualTo("electricity-bill.pdf")
     }
 
     @Test
@@ -161,7 +216,7 @@ internal class AdditionalKycStateHolderTest {
         )
         stateHolder.onFileSelectionStarted(slotIndex = 0)
 
-        val accepted = stateHolder.isAcceptedFileSize(fileSizeBytes = 50_000_000L)
+        val accepted = stateHolder.isAcceptedFileSize(fileSizeBytes = 5_000_000L)
 
         assertThat(accepted).isTrue()
         assertThat(stateHolder.state.validationError).isNull()
@@ -178,7 +233,7 @@ internal class AdditionalKycStateHolderTest {
         )
         stateHolder.onFileSelectionStarted(slotIndex = 0)
 
-        val accepted = stateHolder.isAcceptedFileSize(fileSizeBytes = 50_000_001L)
+        val accepted = stateHolder.isAcceptedFileSize(fileSizeBytes = 5_000_001L)
 
         assertThat(accepted).isFalse()
         assertThat(stateHolder.state.selectingFileSlot).isNull()
@@ -300,6 +355,7 @@ internal class AdditionalKycStateHolderTest {
 
         assertThat(stateHolder.state.isCollectionAvailable).isFalse()
         assertThat(stateHolder.state.pendingRequirements).isEmpty()
+        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Unavailable)
         assertThat(stateHolder.createSubmission()).isNull()
     }
 
@@ -367,6 +423,15 @@ internal class AdditionalKycStateHolderTest {
     }
 
     private companion object {
+        fun question(id: String): AdditionalKycQuestion {
+            return AdditionalKycQuestion(
+                id = id,
+                prompt = "Question $id",
+                answerType = "free_text",
+                required = true,
+            )
+        }
+
         fun requirements(
             userActionRequired: List<AdditionalKycRequirement>,
             pendingPartnerAction: List<AdditionalKycRequirement>,

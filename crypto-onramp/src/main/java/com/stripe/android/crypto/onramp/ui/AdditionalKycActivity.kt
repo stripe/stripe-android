@@ -25,6 +25,7 @@ import com.stripe.android.crypto.onramp.AdditionalKycSubmissionHandlerRegistry
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.onramp.ui.AdditionalKycScreen
+import com.stripe.android.link.onramp.ui.AdditionalKycSubmissionState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -68,12 +69,19 @@ internal class AdditionalKycActivity : ComponentActivity() {
             appearance = args.appearance,
             state = stateHolder.state,
             onClose = { cancel(stateHolder) },
+            onBack = {
+                if (!stateHolder.onBack()) {
+                    cancel(stateHolder)
+                }
+            },
             onQuestionAnswerChanged = stateHolder::onQuestionAnswerChanged,
             onDocumentSubtypeSelected = stateHolder::onDocumentSubtypeSelected,
             onChooseFile = chooseFile,
             onRemoveFile = { slotIndex ->
                 stateHolder.onFileRemoved(slotIndex)?.delete()
             },
+            onAddDocuments = stateHolder::onAddDocuments,
+            onEditDocuments = stateHolder::onEditDocuments,
             onSubmit = {
                 scope.launch {
                     submit(
@@ -83,8 +91,12 @@ internal class AdditionalKycActivity : ComponentActivity() {
                 }
             },
             onContinue = {
-                if (!stateHolder.advanceToNextRequirement()) {
-                    finishSubmitted()
+                if (stateHolder.state.submissionState == AdditionalKycSubmissionState.Submitted) {
+                    if (!stateHolder.advanceToNextRequirement()) {
+                        finishSubmitted()
+                    }
+                } else {
+                    stateHolder.onContinue()
                 }
             },
         )
@@ -125,9 +137,17 @@ internal class AdditionalKycActivity : ComponentActivity() {
         slotIndex: Int,
         stateHolder: AdditionalKycStateHolder,
     ) {
+        val displayName = withContext(Dispatchers.IO) {
+            runCatching { selectedFileName(uri) }
+        }.getOrElse {
+            stateHolder.onFileSelectionFailed()
+            return
+        }
+        stateHolder.onFileUploadStarted(slotIndex, displayName)
         val selectedFile = withContext(Dispatchers.IO) {
             readSelectedFile(
                 uri = uri,
+                displayName = displayName,
                 maximumFileSizeBytes = stateHolder.maximumFileSizeBytes,
             )
         }
@@ -209,9 +229,9 @@ internal class AdditionalKycActivity : ComponentActivity() {
 
     private fun readSelectedFile(
         uri: Uri,
+        displayName: String,
         maximumFileSizeBytes: Long?,
     ): Result<SelectedFile> = runCatching {
-        val displayName = selectedFileName(uri)
         val mimeTypeExtension = contentResolver.getType(uri)
             ?.let(MimeTypeMap.getSingleton()::getExtensionFromMimeType)
         val suffix = displayName

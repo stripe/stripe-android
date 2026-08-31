@@ -58,6 +58,98 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_carf_declaration_screen_title">Declarations</string>
   <!-- Placeholder for a free-text answer in the additional KYC flow -->
   <string name="stripe_link_onramp_additional_kyc_answer_placeholder">Enter your answer</string>
+  <!-- Floating label for an answer field in the source of funds questionnaire -->
+  <string name="stripe_link_onramp_additional_kyc_answer">Answer</string>
+  <!-- Accessibility label for the back button in additional KYC collection -->
+  <string name="stripe_link_onramp_additional_kyc_back">Back</string>
+  <!-- Title on the source of funds action that opens document collection -->
+  <string name="stripe_link_onramp_additional_kyc_add_documents">Add documents</string>
+  <!-- Button text after one document has been uploaded for a source of funds -->
+  <string name="stripe_link_onramp_additional_kyc_add_one_document">Add %1$d document</string>
+  <!-- Button text after several documents have been uploaded for a source of funds -->
+  <string name="stripe_link_onramp_additional_kyc_add_multiple_documents">Add %1$d documents</string>
+  <!-- Heading for source of funds document acceptance requirements -->
+  <string name="stripe_link_onramp_additional_kyc_acceptance_criteria">Acceptance criteria</string>
+  <!-- Description of an accepted bank proof of address -->
+  <string name="stripe_link_onramp_additional_kyc_bank_document_description">Bank statement, bank letter</string>
+  <!-- One accepted source of funds document for company profits -->
+  <string name="stripe_link_onramp_additional_kyc_company_profits_document">A dividend distribution certificate</string>
+  <!-- Date requirement for a company profits document -->
+  <string name="stripe_link_onramp_additional_kyc_company_profits_criteria_date">Dated within the last 1 year</string>
+  <!-- Common financial-value requirement for source of funds documents -->
+  <string name="stripe_link_onramp_additional_kyc_criteria_value">Contains a balance or financial value</string>
+  <!-- Common name requirement for source of funds documents -->
+  <string name="stripe_link_onramp_additional_kyc_criteria_name">Document must include your name</string>
+  <!-- Button text on the generic additional KYC error screen -->
+  <string name="stripe_link_onramp_additional_kyc_contact_support">Contact support</string>
+  <!-- Label above the proof of address document subtype control and subtype selector -->
+  <string name="stripe_link_onramp_additional_kyc_document_type">Document type</string>
+  <!-- Heading above accepted source of funds documents -->
+  <string name="stripe_link_onramp_additional_kyc_document_section_title">Document(s)</string>
+  <!-- File-format and size guidance shown below an upload action -->
+  <string name="stripe_link_onramp_additional_kyc_file_requirements">PDF, JPEG, or PNG up to 5MB</string>
+  <!-- Inline validation message for a file that exceeds the document-collection size limit -->
+  <string name="stripe_link_onramp_additional_kyc_file_too_large_design">This file is larger than %1$d MB. Choose a file that is %1$d MB or smaller.</string>
+  <!-- Prompt on the source of funds document overview -->
+  <string name="stripe_link_onramp_additional_kyc_funding_sources_prompt">How are you funding your transactions on Swapped? Please list all of your sources. For example, salary, savings, investment earnings, etc.</string>
+  <!-- Label above the source of funds subtype control -->
+  <string name="stripe_link_onramp_additional_kyc_funds_source">Funds source</string>
+  <!-- Description of an accepted government proof of address -->
+  <string name="stripe_link_onramp_additional_kyc_government_document_description">Statement, voter registration, tax bill</string>
+  <!-- Description of an accepted identity proof of address -->
+  <string name="stripe_link_onramp_additional_kyc_id_document_description">ID cards, passport, residence permit, driver’s license</string>
+  <!-- Description of an accepted lease proof of address -->
+  <string name="stripe_link_onramp_additional_kyc_lease_agreement_description">Rental or tenancy agreement</string>
+  <!-- Proof of address intro-screen title -->
+  <string name="stripe_link_onramp_additional_kyc_proof_of_address_context_title">Upload your proof of address</string>
+  <!-- Proof of address intro-screen explanation -->
+  <string name="stripe_link_onramp_additional_kyc_proof_of_address_context_message">We’re required to confirm your address to enable spending over €1,000.</string>
+  <!-- Proof of address collection title -->
+  <string name="stripe_link_onramp_additional_kyc_proof_of_address_upload_title">Upload your proof of address</string>
+  <!-- Proof of address collection subtitle -->
+  <string name="stripe_link_onramp_additional_kyc_proof_of_address_upload_message">Make sure your document meets following requirements.</string>
+  <!-- Proof of address document-content requirement -->
+  <string name="stripe_link_onramp_additional_kyc_proof_instruction_name_address">Documents must have the customer’s full name and address on it</string>
+  <!-- Proof of address ID validity requirement -->
+  <string name="stripe_link_onramp_additional_kyc_proof_instruction_id_valid">ID documents must be valid and in-date</string>
+  <!-- Proof of address recency requirement -->
+  <string name="stripe_link_onramp_additional_kyc_proof_instruction_recent">Other documents must have been issued in the last 12 months</string>
+  <!-- Proof of address photo-framing requirement -->
+  <string name="stripe_link_onramp_additional_kyc_proof_instruction_corners">For physical documents, all 4 corners must be visible</string>
+  <!-- Proof of address digital-document requirement -->
+  <string name="stripe_link_onramp_additional_kyc_proof_instruction_digital">For digital documents, we can only accept PDF files - we don’t accept screenshots</string>
+  <!-- Date requirement for salary source documents -->
+  <string name="stripe_link_onramp_additional_kyc_salary_criteria_date">Dated within the last 3 months</string>
+  <!-- Payslip issuer/content requirement for salary source documents -->
+  <string name="stripe_link_onramp_additional_kyc_salary_criteria_payslip">Payslip (optional) must be issued by your employer and clearly show your salary and your name</string>
+  <!-- Accepted payslip option for salary source documents -->
+  <string name="stripe_link_onramp_additional_kyc_salary_document_payslips">3 recent payslips from your employer or</string>
+  <!-- Accepted bank statement option for salary source documents -->
+  <string name="stripe_link_onramp_additional_kyc_salary_document_statements">One or more bank statements demonstrating three salary payments from your employer</string>
+  <!-- Fallback filename shown with a file validation error -->
+  <string name="stripe_link_onramp_additional_kyc_selected_document">Selected document</string>
+  <!-- Source of funds intro-screen title -->
+  <string name="stripe_link_onramp_additional_kyc_source_of_funds_context_title">Tell us about your source of funds</string>
+  <!-- Source of funds intro-screen explanation -->
+  <string name="stripe_link_onramp_additional_kyc_source_of_funds_context_message">We’re required to understand where your funds come from to enable spending over €1,000.</string>
+  <!-- Title on the generic additional KYC error screen -->
+  <string name="stripe_link_onramp_additional_kyc_something_went_wrong">Something went wrong</string>
+  <!-- Submitted-for-review explanation -->
+  <string name="stripe_link_onramp_additional_kyc_submitted_review_message">We’re reviewing your documents. We’ll let you know when verification is complete.</string>
+  <!-- Description on the generic additional KYC error screen -->
+  <string name="stripe_link_onramp_additional_kyc_try_again_later">Please try again later.</string>
+  <!-- Description of an accepted utility-bill proof of address -->
+  <string name="stripe_link_onramp_additional_kyc_utility_bill_description">Electricity, water, gas, internet, phone bill</string>
+  <!-- Primary action for selecting a local document -->
+  <string name="stripe_link_onramp_additional_kyc_upload_document">Upload document</string>
+  <!-- Status below a file while it is being uploaded -->
+  <string name="stripe_link_onramp_additional_kyc_uploading">Uploading…</string>
+  <!-- Status below a successfully uploaded file -->
+  <string name="stripe_link_onramp_additional_kyc_uploaded">Uploaded</string>
+  <!-- Inline error after an upload attempt fails -->
+  <string name="stripe_link_onramp_additional_kyc_upload_failed">We couldn’t upload this file. Please try again.</string>
+  <!-- Inline validation message for an unsupported document format -->
+  <string name="stripe_link_onramp_additional_kyc_unsupported_file_type_design">This file type isn’t supported. Upload a PDF, JPEG, or PNG file.</string>
   <!-- Label shown before the list of file extensions accepted by a KYC partner -->
   <string name="stripe_link_onramp_additional_kyc_accepted_formats">Accepted formats: %s</string>
   <!-- Button text shown while a selected KYC file is being copied -->
