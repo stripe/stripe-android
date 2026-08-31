@@ -1,6 +1,8 @@
 package com.stripe.android.paymentelement
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -24,7 +26,9 @@ import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(TestParameterInjector::class)
 internal class EmbeddedPaymentElementTest {
     private val networkRule = NetworkRule()
 
@@ -35,6 +39,9 @@ internal class EmbeddedPaymentElementTest {
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
+
+    @TestParameter(valuesProvider = EmbeddedPaymentElementApiConfigurationTestTypeProvider::class)
+    lateinit var apiConfigurationTestType: EmbeddedPaymentElementApiConfigurationTestType
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
@@ -55,6 +62,7 @@ internal class EmbeddedPaymentElementTest {
     @Test
     fun testSuccessfulCardPayment_withFormSheetActionConfirm() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -81,6 +89,7 @@ internal class EmbeddedPaymentElementTest {
     @Test
     fun testSuccessfulCardPayment_withFormSheetActionContinue() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -115,6 +124,7 @@ internal class EmbeddedPaymentElementTest {
     @Test
     fun testCardFormValidation() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -142,6 +152,7 @@ internal class EmbeddedPaymentElementTest {
     @Test
     fun testRemoveCard() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -180,6 +191,7 @@ internal class EmbeddedPaymentElementTest {
     @Test
     fun testRemoveCardPreservesPreviousSelection() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -221,6 +233,7 @@ internal class EmbeddedPaymentElementTest {
         // Instance 1
         runEmbeddedPaymentElementTest(
             networkRule = networkRule,
+            apiConfigurationTestType = apiConfigurationTestType,
             createIntentCallback = { _, shouldSavePaymentMethod ->
                 assertThat(shouldSavePaymentMethod).isFalse()
                 CreateIntentResult.Success("pi_example_secret_12345")
@@ -249,6 +262,7 @@ internal class EmbeddedPaymentElementTest {
         // Instance 2 - no network requests, no configure call -- just a state set.
         runEmbeddedPaymentElementTest(
             networkRule = networkRule,
+            apiConfigurationTestType = apiConfigurationTestType,
             createIntentCallback = { _, shouldSavePaymentMethod ->
                 assertThat(shouldSavePaymentMethod).isFalse()
                 CreateIntentResult.Success("pi_example_secret_12345")
@@ -269,6 +283,7 @@ internal class EmbeddedPaymentElementTest {
     @Test
     fun testEmbeddedPaymentElementDisplaysMandate() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -289,6 +304,7 @@ internal class EmbeddedPaymentElementTest {
     @Test
     fun testEmbeddedPaymentElementWithTermsDisplayNeverDoesNotDisplayMandate() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -315,6 +331,7 @@ internal class EmbeddedPaymentElementTest {
     @Test
     fun testOBO_PassedToElementsSessionCall() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
