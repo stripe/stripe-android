@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardFundingFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
@@ -177,7 +176,6 @@ internal class DefaultCreateLinkStateTest {
         retrieveCustomerEmail: RetrieveCustomerEmail = DefaultRetrieveCustomerEmail(
             FakeCustomerRepository(),
             FakeDurationProvider(),
-            { PaymentConfiguration("pk_test") },
         ),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
