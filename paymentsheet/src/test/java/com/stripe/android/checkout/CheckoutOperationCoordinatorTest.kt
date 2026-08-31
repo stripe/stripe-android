@@ -359,7 +359,7 @@ internal class CheckoutOperationCoordinatorTest {
 
             resultTurbine.expectNoEvents()
             assertThat(coordinator.isUpdating.value).isFalse()
-            assertThat(coordinator.runSynchronousMutation { Result.success(Unit) }.isSuccess).isTrue()
+            assertThat(coordinator.runMutation { Result.success(Unit) }.isSuccess).isTrue()
         }
 
     @Test
@@ -377,7 +377,7 @@ internal class CheckoutOperationCoordinatorTest {
 
         resultTurbine.expectNoEvents()
         assertThat(coordinator.isUpdating.value).isFalse()
-        assertThat(coordinator.runSynchronousMutation { Result.success(Unit) }.isSuccess).isTrue()
+        assertThat(coordinator.runMutation { Result.success(Unit) }.isSuccess).isTrue()
     }
 
     @Test
@@ -731,61 +731,6 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
             assertThat(awaitItem()).isFalse()
         }
-    }
-
-    @Test
-    fun `synchronous mutation fails while confirmation is in flight`() = runScenario {
-        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
-
-        val result = coordinator.runSynchronousMutation {
-            Result.success(Unit)
-        }
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat()
-            .isEqualTo("Cannot mutate checkout session while confirmation is in progress.")
-    }
-
-    @Test
-    fun `synchronous mutation fails while asynchronous mutation is in flight`() = runScenario {
-        val mutationStarted = CompletableDeferred<Unit>()
-        val finishMutation = CompletableDeferred<Unit>()
-        val mutation = async {
-            coordinator.runMutation {
-                mutationStarted.complete(Unit)
-                finishMutation.await()
-                Result.success(Unit)
-            }
-        }
-        mutationStarted.await()
-        var synchronousMutationInvoked = false
-
-        val result = coordinator.runSynchronousMutation {
-            synchronousMutationInvoked = true
-            Result.success(Unit)
-        }
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat()
-            .isEqualTo("Cannot mutate checkout session while another mutation is in progress.")
-        assertThat(synchronousMutationInvoked).isFalse()
-
-        finishMutation.complete(Unit)
-        mutation.await()
-    }
-
-    @Test
-    fun `synchronous mutation executes and returns success when confirmation is not in flight`() = runScenario {
-        var invocationCount = 0
-
-        val result = coordinator.runSynchronousMutation {
-            invocationCount += 1
-            Result.success("updated")
-        }
-
-        assertThat(result.getOrThrow()).isEqualTo("updated")
-        assertThat(invocationCount).isEqualTo(1)
-        assertThat(coordinator.isUpdating.value).isFalse()
     }
 
     private fun runScenario(

@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.graphics.drawable.Drawable
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
@@ -283,18 +284,6 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    private fun requireMutableState(): kotlin.Result<Unit> {
-        stateHolder.state
-            ?: return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session before it is configured.")
-            )
-        return if (sheetStateHolder.sheetIsOpen) {
-            integrationLaunchedFailure()
-        } else {
-            kotlin.Result.success(Unit)
-        }
-    }
-
     private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
         IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
     )
@@ -338,18 +327,20 @@ class CheckoutController @Inject internal constructor(
      * Clears the customer's selected payment option, resetting it to `null`.
      *
      * Returns [kotlin.Result.failure] if the session hasn't been configured yet, a payment flow is
-     * currently presented, or another mutation or confirmation is in progress.
+     * currently presented.
      */
-    fun clearPaymentOption(): kotlin.Result<Unit> {
-        return requireMutableState().fold(
-            onSuccess = {
-                operationCoordinator.runSynchronousMutation {
-                    stateHolder.clearSelection()
-                    kotlin.Result.success(Unit)
-                }
+    suspend fun clearPaymentOption(): kotlin.Result<Unit> {
+        return withCheckoutState(
+            additionalStateMutations = {
+                copy(
+                    paymentSelection = null,
+                    temporarySelection = null,
+                    previousNewSelections = Bundle(),
+                )
             },
-            onFailure = { kotlin.Result.failure(it) },
-        )
+        ) {
+            kotlin.Result.success(checkoutSessionResponse)
+        }
     }
 
     /**
