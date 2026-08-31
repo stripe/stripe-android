@@ -16,6 +16,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
@@ -356,6 +357,44 @@ internal class EmbeddedPaymentElementTest {
         )
 
         testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testCardMetadataQueryExecutedOncePerCardSessionForBin() {
+        repeat(2) {
+            runEmbeddedPaymentElementTest(
+                networkRule = networkRule,
+                apiConfigurationTestType = apiConfigurationTestType,
+                createIntentCallback = { _, shouldSavePaymentMethod ->
+                    assertThat(shouldSavePaymentMethod).isFalse()
+                    CreateIntentResult.Success("pi_example_secret_12345")
+                },
+                resultCallback = ::assertCompleted
+            ) { testContext ->
+                networkRule.elementsSession { response ->
+                    response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+                }
+
+                testContext.configure{
+                    formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+                }
+
+                networkRule.enqueue(
+                    method("GET"),
+                    path("edge-internal/card-metadata")
+                ) { response ->
+                    response.testBodyFromFile("card-metadata-get.json")
+                }
+
+                embeddedContentPage.clickOnLpm("card")
+                formPage.fillOutCardDetails()
+
+                enqueueDeferredIntentConfirmationRequests()
+
+                formPage.clickPrimaryButton()
+                formPage.waitUntilMissing()
+            }
+        }
     }
 
     private fun enqueueDeferredIntentConfirmationRequests() {
