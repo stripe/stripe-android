@@ -9,6 +9,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
@@ -102,6 +103,7 @@ internal interface WalletButtonsInteractor {
         @Immutable
         @Stable
         data class GooglePay private constructor(
+            val apiConfiguration: ApiConfiguration.State,
             val googlePayButtonType: GooglePayButtonType,
             val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
             val allowCreditCards: Boolean,
@@ -113,12 +115,14 @@ internal interface WalletButtonsInteractor {
 
             constructor(
                 buttonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
+                apiConfiguration: ApiConfiguration.State,
                 billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
                 allowCreditCards: Boolean,
                 cardBrandFilter: CardBrandFilter,
                 cardFundingFilter: CardFundingFilter,
                 additionalEnabledNetworks: List<String>
             ) : this(
+                apiConfiguration = apiConfiguration,
                 googlePayButtonType = buttonType.asGooglePayButtonType,
                 billingAddressParameters = billingDetailsCollectionConfiguration.toBillingAddressParameters(),
                 allowCreditCards = allowCreditCards,
@@ -178,6 +182,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             arguments.paymentMethodMetadata.availableWallets.mapNotNull { wallet ->
                 when (wallet) {
                     WalletType.GooglePay -> WalletButton.GooglePay(
+                        apiConfiguration = paymentMethodMetadata.apiConfiguration,
                         allowCreditCards = true,
                         buttonType = configuration.googlePay?.buttonType,
                         cardBrandFilter = PaymentSheetCardBrandFilter(
