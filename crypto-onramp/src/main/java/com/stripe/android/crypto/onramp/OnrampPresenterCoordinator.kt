@@ -208,7 +208,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     presentHTMLConfirmation(
                         resultLauncher = userAttestationResultLauncher,
                         html = result.attestation.text,
-                        version = null,
+                        declarationId = null,
                         appearance = result.appearance,
                         headingResId =
                             PaymentSheetR.string.stripe_link_onramp_carf_declaration_screen_title,
@@ -230,7 +230,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     presentHTMLConfirmation(
                         resultLauncher = termsAndConditionsResultLauncher,
                         html = result.terms.text,
-                        version = result.terms.version,
+                        declarationId = result.terms.declarationId,
                         appearance = result.appearance,
                         headingResId =
                             PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
@@ -253,14 +253,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun presentHTMLConfirmation(
         resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
         html: String,
-        version: String?,
+        declarationId: String?,
         appearance: LinkAppearance?,
         @StringRes headingResId: Int,
     ) {
         resultLauncher.launch(
             HTMLConfirmationActivityArgs(
                 html = html,
-                version = version,
+                declarationId = declarationId,
                 linkAppearance = appearance,
                 headingResId = headingResId,
                 confirmationButtonResId =
@@ -446,7 +446,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         coroutineScope.launch {
             val termsAndConditionsResult = interactor.handleTermsAndConditionsResult(
                 result = result.result,
-                version = result.version,
+                declarationId = result.declarationId,
             )
             onrampCallbacksState.termsAndConditionsCallback?.onResult(termsAndConditionsResult)
         }

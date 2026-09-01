@@ -216,11 +216,11 @@ internal class CryptoApiRepository @Inject constructor(
 
     suspend fun confirmPartnerTerms(
         consumerSessionClientSecret: String,
-        version: String,
+        declarationId: String,
     ): Result<Unit> {
         val request = ConfirmPartnerTermsRequest(
             credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
-            version = version,
+            declarationId = declarationId,
         )
 
         return executePost(

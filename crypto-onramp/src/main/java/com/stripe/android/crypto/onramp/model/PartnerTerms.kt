@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 internal sealed interface PartnerTerms {
     data class Required(
         val partner: String,
-        val version: String,
+        val declarationId: String,
         val text: String,
     ) : PartnerTerms
 
@@ -17,7 +17,8 @@ internal sealed interface PartnerTerms {
 internal data class PartnerTermsResponse(
     val required: Boolean,
     val partner: String? = null,
-    val version: String? = null,
+    @SerialName("declaration_id")
+    val declarationId: String? = null,
     @SerialName("text")
     val text: String? = null,
 ) {
@@ -28,7 +29,7 @@ internal data class PartnerTermsResponse(
 
         return PartnerTerms.Required(
             partner = requireNotNull(partner),
-            version = requireNotNull(version),
+            declarationId = requireNotNull(declarationId),
             text = requireNotNull(text),
         )
     }
@@ -37,5 +38,6 @@ internal data class PartnerTermsResponse(
 @Serializable
 internal data class ConfirmPartnerTermsRequest(
     val credentials: CryptoCustomerRequestParams.Credentials,
-    val version: String,
+    @SerialName("declaration_id")
+    val declarationId: String,
 )

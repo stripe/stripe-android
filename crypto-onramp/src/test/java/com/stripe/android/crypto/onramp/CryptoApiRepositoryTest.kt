@@ -461,7 +461,7 @@ class CryptoApiRepositoryTest {
                     "required": true,
                     "partner": "example",
                     "text": "Please accept these terms.",
-                    "version": "2026-08-27"
+                    "declaration_id": "declaration_123"
                 }
             """,
             emptyMap()
@@ -482,7 +482,7 @@ class CryptoApiRepositoryTest {
         val terms = result.getOrThrow() as PartnerTerms.Required
         assertThat(terms.partner).isEqualTo("example")
         assertThat(terms.text).isEqualTo("Please accept these terms.")
-        assertThat(terms.version).isEqualTo("2026-08-27")
+        assertThat(terms.declarationId).isEqualTo("declaration_123")
     }
 
     @Test
@@ -518,7 +518,7 @@ class CryptoApiRepositoryTest {
 
         val result = cryptoApiRepository.confirmPartnerTerms(
             consumerSessionClientSecret = "test-secret",
-            version = "2026-08-27",
+            declarationId = "declaration_123",
         )
 
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -528,7 +528,7 @@ class CryptoApiRepositoryTest {
         assertThat(apiRequest.params).isEqualTo(
             mapOf(
                 "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
-                "version" to "2026-08-27",
+                "declaration_id" to "declaration_123",
             )
         )
         assertThat(result.isSuccess).isTrue()

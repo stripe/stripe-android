@@ -1026,7 +1026,7 @@ class OnrampInteractorTest {
         val termsAndConditions = PartnerTerms.Required(
             partner = "example",
             text = "Please accept these terms.",
-            version = "2026-08-27",
+            declarationId = "declaration_123",
         )
         whenever(cryptoApiRepository.retrievePartnerTerms(any()))
             .thenReturn(Result.success(termsAndConditions))
@@ -1921,11 +1921,11 @@ class OnrampInteractorTest {
 
         val result = interactor.handleTermsAndConditionsResult(
             result = HTMLConfirmationResult.Confirmed,
-            version = "2026-08-27",
+            declarationId = "declaration_123",
         )
 
         assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Accepted::class.java)
-        verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("2026-08-27"))
+        verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("declaration_123"))
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsAndConditionsCompleted)
     }
 
@@ -1938,7 +1938,7 @@ class OnrampInteractorTest {
 
         val result = interactor.handleTermsAndConditionsResult(
             result = HTMLConfirmationResult.Confirmed,
-            version = "2026-08-27",
+            declarationId = "declaration_123",
         )
 
         assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Failed::class.java)
@@ -1951,7 +1951,7 @@ class OnrampInteractorTest {
     fun testHandleTermsAndConditionsResultCancelled() = runTest {
         val result = interactor.handleTermsAndConditionsResult(
             result = HTMLConfirmationResult.Cancelled,
-            version = null,
+            declarationId = null,
         )
 
         assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Cancelled::class.java)

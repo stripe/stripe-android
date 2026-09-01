@@ -32,8 +32,8 @@ internal class HTMLConfirmationActivity : ComponentActivity() {
                 confirmationButtonText = stringResource(args.confirmationButtonResId),
                 cancelButtonText = stringResource(args.cancelButtonResId),
                 appearance = args.appearance,
-                onClose = { finishWithResult(HTMLConfirmationResult.Cancelled, args.version) },
-                onConfirm = { finishWithResult(HTMLConfirmationResult.Confirmed, args.version) },
+                onClose = { finishWithResult(HTMLConfirmationResult.Cancelled, args.declarationId) },
+                onConfirm = { finishWithResult(HTMLConfirmationResult.Confirmed, args.declarationId) },
             )
         }
     }
@@ -45,14 +45,14 @@ internal class HTMLConfirmationActivity : ComponentActivity() {
 
     private fun finishWithResult(
         result: HTMLConfirmationResult,
-        version: String?,
+        declarationId: String?,
     ) {
         setResult(
             if (result == HTMLConfirmationResult.Confirmed) RESULT_OK else RESULT_CANCELED,
             createResultIntent(
                 HTMLConfirmationActivityResult(
                     result = result,
-                    version = version,
+                    declarationId = declarationId,
                 )
             )
         )
@@ -79,7 +79,7 @@ internal class HTMLConfirmationActivity : ComponentActivity() {
 
 internal data class HTMLConfirmationActivityArgs(
     val html: String,
-    val version: String?,
+    val declarationId: String?,
     val linkAppearance: LinkAppearance?,
     val headingResId: Int,
     val confirmationButtonResId: Int,
@@ -97,7 +97,7 @@ internal sealed interface HTMLConfirmationResult : Parcelable {
 @Parcelize
 internal data class HTMLConfirmationActivityResult(
     val result: HTMLConfirmationResult,
-    val version: String?,
+    val declarationId: String?,
 ) : Parcelable
 
 internal class HTMLConfirmationActivityContract : ActivityResultContract<
@@ -109,7 +109,7 @@ internal class HTMLConfirmationActivityContract : ActivityResultContract<
             context = context,
             args = HTMLConfirmationArgs(
                 html = input.html,
-                version = input.version,
+                declarationId = input.declarationId,
                 appearance = input.linkAppearance?.build(),
                 headingResId = input.headingResId,
                 confirmationButtonResId = input.confirmationButtonResId,
@@ -127,7 +127,7 @@ internal class HTMLConfirmationActivityContract : ActivityResultContract<
             )
         } ?: HTMLConfirmationActivityResult(
             result = HTMLConfirmationResult.Cancelled,
-            version = null,
+            declarationId = null,
         )
     }
 }
@@ -135,7 +135,7 @@ internal class HTMLConfirmationActivityContract : ActivityResultContract<
 @Parcelize
 internal data class HTMLConfirmationArgs(
     val html: String,
-    val version: String?,
+    val declarationId: String?,
     val appearance: LinkAppearance.State?,
     val headingResId: Int,
     val confirmationButtonResId: Int,
