@@ -17,6 +17,9 @@ import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
+import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampStartTermsAndConditionsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult

@@ -24,7 +24,6 @@ import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
-import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
@@ -41,6 +40,9 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
+import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampStartTermsAndConditionsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
@@ -54,7 +56,6 @@ import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
-import com.stripe.android.crypto.onramp.model.UserAttestation
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.googlePayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
@@ -66,7 +67,6 @@ import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
-import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -1470,54 +1470,6 @@ internal sealed interface SelectedPaymentSource {
     ) : SelectedPaymentSource {
         override val analyticsValue: String = "samsung_pay"
     }
-}
-
-internal sealed interface OnrampStartKycVerificationResult {
-    /**
-     * Starting KYC verification completed successfully.
-     */
-    class Completed internal constructor(
-        val response: KycRetrieveResponse,
-        val appearance: LinkAppearance?
-    ) : OnrampStartKycVerificationResult
-
-    /**
-     * Starting KYC verification failed due to an error.
-     * @param error The error that caused the failure.
-     */
-    class Failed internal constructor(
-        val error: Throwable
-    ) : OnrampStartKycVerificationResult
-}
-
-internal sealed interface OnrampStartUserAttestationResult {
-    /**
-     * Starting user attestation presentation completed successfully.
-     */
-    class Completed internal constructor(
-        val attestation: UserAttestation,
-        val appearance: LinkAppearance?,
-    ) : OnrampStartUserAttestationResult
-
-    /**
-     * Starting user attestation presentation failed.
-     */
-    class Failed internal constructor(
-        val error: Throwable
-    ) : OnrampStartUserAttestationResult
-}
-
-internal sealed interface OnrampStartTermsAndConditionsResult {
-    class PresentationRequired internal constructor(
-        val terms: PartnerTerms.Required,
-        val appearance: LinkAppearance?,
-    ) : OnrampStartTermsAndConditionsResult
-
-    data object NotRequired : OnrampStartTermsAndConditionsResult
-
-    class Failed internal constructor(
-        val error: Throwable
-    ) : OnrampStartTermsAndConditionsResult
 }
 
 internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisplayData.Type {

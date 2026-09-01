@@ -12,6 +12,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodCallback
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampStartTermsAndConditionsResult
 import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsCallback
 import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
