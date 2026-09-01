@@ -18,7 +18,7 @@ internal enum class KycResidence(
         countryCode = "US",
         nationalIdConfiguration = NationalIdConfiguration(
             type = IdType.SocialSecurityNumber,
-            label = "Social Security Number",
+            label = "Social Security Number (SSN)",
             defaultValue = "000000000",
         ),
     ),
