@@ -5,16 +5,19 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
-import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec.PlaceholderField
-import com.stripe.android.ui.core.elements.SepaMandateTextSpec
+import com.stripe.android.uicore.elements.AddressFieldsElement
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.PhoneNumberElement
+import com.stripe.android.uicore.elements.SectionElement
+import kotlinx.coroutines.flow.filterNotNull
 
 internal object PlaceholderHelper {
     /**
@@ -23,7 +26,6 @@ internal object PlaceholderHelper {
     internal fun specsForConfiguration(
         specs: List<FormItemSpec>,
         placeholderOverrideList: List<IdentifierSpec>,
-        requiresMandate: Boolean,
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
         termsDisplay: PaymentSheet.TermsDisplay,
     ): List<FormItemSpec> {
@@ -56,14 +58,9 @@ internal object PlaceholderHelper {
                 is PlaceholderSpec -> specForPlaceholderField(
                     field = it.field,
                     placeholderOverrideList = placeholderOverrideList,
-                    requiresMandate = requiresMandate,
                     configuration = configuration,
                     termsDisplay = termsDisplay,
                 )
-
-                is SepaMandateTextSpec -> it.takeUnless {
-                    termsDisplay == PaymentSheet.TermsDisplay.NEVER
-                }
 
                 else -> it
             }
@@ -73,22 +70,13 @@ internal object PlaceholderHelper {
                 specForPlaceholderField(
                     field = it,
                     placeholderOverrideList = placeholderOverrideList,
-                    requiresMandate = requiresMandate,
                     configuration = configuration,
                     termsDisplay = termsDisplay,
                 )
             }
         )
 
-        return modifiedSpecs.sortedWith { o1, o2 ->
-            if (o1 is MandateTextSpec || o1 is CashAppPayMandateTextSpec) {
-                1
-            } else if (o2 is MandateTextSpec || o2 is CashAppPayMandateTextSpec) {
-                -1
-            } else {
-                0
-            }
-        }
+        return modifiedSpecs
     }
 
     @VisibleForTesting
@@ -103,13 +91,7 @@ internal object PlaceholderHelper {
             is AddressSpec ->
                 placeholderFields.remove(PlaceholderField.BillingAddress)
 
-            is SepaMandateTextSpec -> placeholderFields.remove(PlaceholderField.SepaMandate)
-            is PlaceholderSpec -> when (spec.field) {
-                PlaceholderField.BillingAddressWithoutCountry ->
-                    placeholderFields.remove(PlaceholderField.BillingAddress)
-
-                else -> placeholderFields.remove(spec.field)
-            }
+            is PlaceholderSpec -> placeholderFields.remove(spec.field)
 
             else -> Unit
         }
@@ -119,9 +101,8 @@ internal object PlaceholderHelper {
     internal fun specForPlaceholderField(
         field: PlaceholderField,
         placeholderOverrideList: List<IdentifierSpec>,
-        requiresMandate: Boolean,
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
-        termsDisplay: PaymentSheet.TermsDisplay,
+        @Suppress("UNUSED_PARAMETER") termsDisplay: PaymentSheet.TermsDisplay,
     ) = when (field) {
         PlaceholderField.Name -> NameSpec().takeIf {
             configuration.name == CollectionMode.Always ||
@@ -157,19 +138,39 @@ internal object PlaceholderHelper {
                     )
         }
 
-        PlaceholderField.BillingAddressWithoutCountry ->
-            AddressSpec(allowedCountryCodes = configuration.allowedBillingCountries, hideCountry = true).takeIf {
-                configuration.address == AddressCollectionMode.Full ||
-                    (
-                        placeholderOverrideList.contains(it.apiPath) &&
-                            configuration.address != AddressCollectionMode.Never
-                        )
-            }
+        else -> null
+    }
 
-        PlaceholderField.SepaMandate -> SepaMandateTextSpec().takeIf {
-            requiresMandate && termsDisplay != PaymentSheet.TermsDisplay.NEVER
+    internal suspend fun connectBillingDetailsFields(elements: List<FormElement>) {
+        val phoneNumberElement: PhoneNumberElement? = elements
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<PhoneNumberElement>()
+            .firstOrNull()
+
+        // Look for a standalone CountryElement.
+        // Note that this should be done first, because AddressElement always has a
+        // CountryElement, but it might be hidden.
+        var countryElement = elements
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<CountryElement>()
+            .firstOrNull()
+
+        // If not found, look for one inside an AddressElement.
+        if (countryElement == null) {
+            countryElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<AddressFieldsElement>()
+                .firstOrNull()
+                ?.countryElement
         }
 
-        else -> null
+        countryElement?.controller?.rawFieldValue?.filterNotNull()?.collect {
+            if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
+                phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
+            }
+        }
     }
 }

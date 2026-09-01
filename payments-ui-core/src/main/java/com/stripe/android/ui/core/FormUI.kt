@@ -20,7 +20,6 @@ import com.stripe.android.ui.core.elements.BsbElement
 import com.stripe.android.ui.core.elements.BsbElementUI
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElementUI
-import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.MandateTextUI
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
@@ -87,7 +86,7 @@ fun FormUI(
         } ?: Arrangement.Top,
     ) {
         val visibleElements = elements.filter { element ->
-            !hiddenIdentifiers.contains(element.identifier) && element !is EmptyFormElement
+            !hiddenIdentifiers.contains(element.identifier)
         }
 
         visibleElements.forEachIndexed { index, element ->

@@ -15,6 +15,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.createOtpElement
 import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -23,7 +24,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.LinkBrand
-import com.stripe.android.ui.core.elements.OTPSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -71,7 +71,7 @@ internal class VerificationViewModel @Inject constructor(
     )
     val viewState: StateFlow<VerificationViewState> = _viewState
 
-    val otpElement = OTPSpec.transform()
+    val otpElement = createOtpElement()
 
     private val otpCode: StateFlow<String?> =
         otpElement.otpCompleteFlow.stateIn(viewModelScope, SharingStarted.Lazily, null)

@@ -38,21 +38,9 @@ object FormItemSpecSerializer :
     JsonContentPolymorphicSerializer<FormItemSpec>(FormItemSpec::class) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<FormItemSpec> {
         return when (element.jsonObject["type"]?.jsonPrimitive?.content) {
-            "billing_address" -> AddressSpec.serializer()
-            "affirm_header" -> AffirmTextSpec.serializer()
-            "afterpay_header" -> AfterpayClearpayTextSpec.serializer()
-            "country" -> CountrySpec.serializer()
             "email" -> EmailSpec.serializer()
-            "iban" -> IbanSpec.serializer()
-            "klarna_country" -> CountrySpec.serializer()
-            "klarna_header" -> KlarnaHeaderStaticTextSpec.serializer()
-            "static_text" -> StaticTextSpec.serializer()
             "name" -> NameSpec.serializer()
-            "mandate" -> MandateTextSpec.serializer()
-            "sepa_mandate" -> SepaMandateTextSpec.serializer()
-            "text" -> SimpleTextSpec.serializer()
-            "placeholder" -> PlaceholderSpec.serializer()
-            else -> EmptyFormSpec.serializer()
+            else -> PlaceholderSpec.serializer()
         }
     }
 }

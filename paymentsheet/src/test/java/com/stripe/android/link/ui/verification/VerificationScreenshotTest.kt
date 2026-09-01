@@ -1,11 +1,11 @@
 package com.stripe.android.link.ui.verification
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.createOtpElement
 import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
 import org.junit.Rule
 import org.junit.Test
@@ -265,7 +265,7 @@ internal class VerificationScreenshotTest(
         }
 
         private fun otpSpecWithContent(content: String = "555555"): OTPElement {
-            val spec = OTPSpec.transform()
+            val spec = createOtpElement()
             spec.controller.onAutofillDigit(content)
             return spec
         }

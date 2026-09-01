@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.forms
 import androidx.annotation.StringRes
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
@@ -16,16 +17,16 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
-import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IbanSpec
-import com.stripe.android.ui.core.elements.MandateTextSpec
+import com.stripe.android.ui.core.elements.IbanConfig
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
+import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
@@ -34,6 +35,7 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
+import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -90,7 +92,7 @@ internal class FormViewModelTest {
         val formViewModel = createViewModel(
             args,
             listOf(
-                CountrySpec().transform(emptyMap())
+                createCountryElement(CountryUtils.supportedBillingCountries)
             )
         )
 
@@ -113,7 +115,7 @@ internal class FormViewModelTest {
                 listOf(
                     NameSpec().transform(emptyMap()),
                     EmailSpec().transform(emptyMap()),
-                    CountrySpec().transform(emptyMap()),
+                    createCountryElement(CountryUtils.supportedBillingCountries),
                 )
             )
 
@@ -136,7 +138,7 @@ internal class FormViewModelTest {
             args,
             listOf(
                 EmailSpec().transform(emptyMap()),
-                CountrySpec().transform(emptyMap()),
+                createCountryElement(CountryUtils.supportedBillingCountries),
             )
         )
 
@@ -170,7 +172,7 @@ internal class FormViewModelTest {
                 args,
                 listOf(
                     EmailSpec().transform(emptyMap()),
-                    CountrySpec().transform(emptyMap()),
+                    createCountryElement(CountryUtils.supportedBillingCountries),
                     SaveForFutureUseElement(true, ""),
                 )
             )
@@ -212,7 +214,7 @@ internal class FormViewModelTest {
             listOf(
                 NameSpec().transform(emptyMap()),
                 EmailSpec().transform(emptyMap()),
-                CountrySpec(
+                createCountryElement(
                     allowedCountryCodes = setOf(
                         "AT",
                         "BE",
@@ -221,7 +223,7 @@ internal class FormViewModelTest {
                         "IT",
                         "NL"
                     )
-                ).transform(emptyMap()),
+                ),
                 SaveForFutureUseElement(true, ""),
             )
         )
@@ -271,12 +273,9 @@ internal class FormViewModelTest {
             listOfNotNull(
                 NameSpec().transform(emptyMap()),
                 EmailSpec().transform(emptyMap()),
-                IbanSpec().transform(emptyMap()),
+                createIbanElement(),
                 *addressElements,
-                MandateTextSpec(
-                    IdentifierSpec.Generic("mandate"),
-                    R.string.stripe_sepa_mandate
-                ).transform(""),
+                createMandateElement(),
             )
         )
 
@@ -367,12 +366,9 @@ internal class FormViewModelTest {
             listOfNotNull(
                 NameSpec().transform(emptyMap()),
                 EmailSpec().transform(emptyMap()),
-                IbanSpec().transform(emptyMap()),
+                createIbanElement(),
                 *addressElements,
-                MandateTextSpec(
-                    IdentifierSpec.Generic("mandate"),
-                    R.string.stripe_sepa_mandate
-                ).transform("")
+                createMandateElement()
             )
         )
 
@@ -638,7 +634,7 @@ internal class FormViewModelTest {
                     NameSpec().transform(emptyMap()),
                     EmailSpec().transform(emptyMap()),
                     PhoneSpec().transform(emptyMap()),
-                    CountrySpec().transform(emptyMap()),
+                    createCountryElement(CountryUtils.supportedBillingCountries),
                     *addressElements,
                 ),
             )
@@ -859,17 +855,52 @@ internal class FormViewModelTest {
         )
         val originalElements = listOf(
             EmailSpec().transform(emptyMap()),
-            CountrySpec().transform(emptyMap()),
+            createCountryElement(CountryUtils.supportedBillingCountries),
         )
         val formViewModel = createViewModel(args, originalElements)
 
         val newElementsWithSameIdentifiers = listOf(
             EmailSpec().transform(emptyMap()),
-            CountrySpec().transform(emptyMap()),
+            createCountryElement(CountryUtils.supportedBillingCountries),
         )
         formViewModel.updateFormElements(newElementsWithSameIdentifiers)
 
         assertThat(formViewModel.elements).isSameInstanceAs(originalElements)
+    }
+
+    private fun createCountryElement(
+        allowedCountryCodes: Set<String>,
+    ): FormElement {
+        return SectionElement.wrap(
+            CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = DropdownFieldController(
+                    config = CountryConfig(allowedCountryCodes),
+                    initialValue = null,
+                ),
+            )
+        )
+    }
+
+    private fun createIbanElement(): FormElement {
+        val identifier = IdentifierSpec.Generic("sepa_debit[iban]")
+        return SectionElement.wrap(
+            SimpleTextElement(
+                identifier = identifier,
+                controller = SimpleTextFieldController(
+                    textFieldConfig = IbanConfig(),
+                    initialValue = null,
+                ),
+            )
+        )
+    }
+
+    private fun createMandateElement(): FormElement {
+        return MandateTextElement(
+            identifier = IdentifierSpec.Generic("mandate"),
+            stringResId = R.string.stripe_sepa_mandate,
+            args = listOf(""),
+        )
     }
 
     private fun createViewModel(

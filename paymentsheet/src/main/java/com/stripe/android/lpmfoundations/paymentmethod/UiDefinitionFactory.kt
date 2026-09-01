@@ -164,7 +164,6 @@ internal sealed interface UiDefinitionFactory {
             transformSpecToElements: TransformSpecToElements,
         ): List<FormElement> {
             return transformSpecToElements.transform(
-                metadata = metadata,
                 specs = sharedDataSpec.fields,
                 termsDisplay = metadata.termsDisplayForCode(sharedDataSpec.type),
             )

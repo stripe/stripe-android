@@ -1,12 +1,16 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.IdentifierSpec
-import kotlinx.parcelize.IgnoredOnParcel
+import com.stripe.android.uicore.elements.SimpleTextElement
+import com.stripe.android.uicore.elements.SimpleTextFieldConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
@@ -17,16 +21,18 @@ data class NameSpec(
     @SerialName("translation_id")
     val labelTranslationId: TranslationId = TranslationId.AddressName
 ) : FormItemSpec() {
-    @IgnoredOnParcel
-    @Transient
-    private val simpleTextSpec =
-        SimpleTextSpec(
-            apiPath,
-            labelTranslationId.resourceId,
-            Capitalization.Words,
-            KeyboardType.Text
+    fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
+        SimpleTextElement(
+            identifier = apiPath,
+            controller = SimpleTextFieldController(
+                textFieldConfig = SimpleTextFieldConfig(
+                    label = resolvableString(labelTranslationId.resourceId),
+                    capitalization = KeyboardCapitalization.Words,
+                    keyboard = KeyboardType.Text,
+                    optional = false,
+                ),
+                initialValue = initialValues[apiPath],
+            )
         )
-
-    fun transform(initialValues: Map<IdentifierSpec, String?>) =
-        simpleTextSpec.transform(initialValues)
+    )
 }
