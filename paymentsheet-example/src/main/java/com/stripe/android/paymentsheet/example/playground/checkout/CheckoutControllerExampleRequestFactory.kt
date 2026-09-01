@@ -1,18 +1,12 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.session
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-
-internal enum class CheckoutControllerExampleScenario(
-    val displayName: String,
-) {
-    NoTax("No tax"),
-    ShippingTax("Shipping tax"),
-    BillingTax("Billing tax w/ auto collection"),
-}
 
 internal data class CheckoutControllerExampleRequest(
     val endpoint: String,
@@ -20,29 +14,36 @@ internal data class CheckoutControllerExampleRequest(
 )
 
 internal object CheckoutControllerExampleRequestFactory {
-    fun create(scenario: CheckoutControllerExampleScenario): CheckoutControllerExampleRequest {
+    fun create(
+        settings: CheckoutPlaygroundSettings.Snapshot,
+        returningCustomerId: String?,
+    ): CheckoutControllerExampleRequest {
         return CheckoutControllerExampleRequest(
             endpoint = "checkout_session",
             body = buildJsonObject {
-                put("mode", "payment")
-                put("customer", "guest")
-                put("customer_email", "email@example.com")
-                put("currency", "usd")
+                val customer = settings[session.customer]
                 put(
-                    "payment_method_types",
-                    JsonArray(
-                        listOf(
-                            JsonPrimitive("card"),
-                            JsonPrimitive("us_bank_account"),
-                            JsonPrimitive("link"),
-                            JsonPrimitive("cashapp"),
-                            JsonPrimitive("klarna"),
+                    "customer",
+                    if (customer == RETURNING_CUSTOMER) returningCustomerId ?: customer else customer,
+                )
+                put("customer_email", settings[session.customerEmail])
+                put("currency", settings[session.currency].value)
+                if (settings[session.automaticPaymentMethods]) {
+                    put("automatic_payment_methods", true)
+                } else {
+                    put(
+                        "payment_method_types",
+                        JsonArray(
+                            settings[session.paymentMethodTypes].map(::JsonPrimitive)
                         )
                     )
-                )
-                put("automatic_tax", scenario != CheckoutControllerExampleScenario.NoTax)
-                put("shipping_address_collection", scenario == CheckoutControllerExampleScenario.ShippingTax)
+                }
+                put("automatic_tax", settings[session.automaticTax])
+                put("shipping_address_collection", settings[session.shippingAddressCollection])
+                put("billing_address_collection", settings[session.billingAddressCollection])
             },
         )
     }
+
+    private const val RETURNING_CUSTOMER = "returning"
 }
