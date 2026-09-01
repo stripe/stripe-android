@@ -14,6 +14,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleSettings.Snapshot
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,15 +27,26 @@ import kotlinx.coroutines.launch
 internal class CheckoutControllerExampleViewModel(
     private val repository: CheckoutControllerExampleBackendRepository,
     private val savedStateHandle: SavedStateHandle,
-    application: Application,
+    private val application: Application,
 ) : ViewModel() {
 
-    private val selectedScenario = savedStateHandle.get<String>(SCENARIO_KEY)?.let(
-        CheckoutControllerExampleScenario::valueOf
+    private val customerStore = CheckoutControllerExampleCustomerStore(application)
+    private val _settings = MutableStateFlow(
+        CheckoutControllerExampleSettings.create(
+            persistedValues = savedStateHandle.get<Map<String, String>>(SETTINGS_KEY),
+            storedCustomerId = customerStore.getCustomerId(),
+        )
     )
+    val settings: StateFlow<CheckoutControllerExampleSettings> = _settings.asStateFlow()
+
+    private val restoredSessionSettings = if (savedStateHandle.get<Boolean>(SESSION_STARTED_KEY) == true) {
+        settings.value.snapshot()
+    } else {
+        null
+    }
 
     private val _status = MutableStateFlow<Status>(
-        selectedScenario?.let(Status::Loading) ?: Status.ChooseScenario
+        restoredSessionSettings?.let(Status::Loading) ?: Status.ChooseSettings
     )
     val status: StateFlow<Status> = _status.asStateFlow()
 
@@ -49,7 +62,7 @@ internal class CheckoutControllerExampleViewModel(
     ).resultCallback(::onConfirmationResult).build()
 
     init {
-        selectedScenario?.let(::fetchAndConfigure)
+        restoredSessionSettings?.let(::fetchAndConfigure)
         viewModelScope.launch {
             controller.session.collect { session ->
                 updateConfiguredState { it.copy(session = session) }
@@ -57,14 +70,23 @@ internal class CheckoutControllerExampleViewModel(
         }
     }
 
-    fun start(scenario: CheckoutControllerExampleScenario) {
-        if (savedStateHandle.get<String>(SCENARIO_KEY) != null) {
+    fun updateSetting(
+        definition: CheckoutControllerExampleSettingDefinition<Any>,
+        value: Any,
+    ) {
+        updateSettings(_settings.value.withValue(definition, value))
+    }
+
+    fun start() {
+        if (savedStateHandle.get<Boolean>(SESSION_STARTED_KEY) == true) {
             return
         }
 
-        savedStateHandle[SCENARIO_KEY] = scenario.name
-        _status.value = Status.Loading(scenario)
-        fetchAndConfigure(scenario)
+        val sessionSettings = settings.value.snapshot()
+        persistSettings(settings.value)
+        savedStateHandle[SESSION_STARTED_KEY] = true
+        _status.value = Status.Loading(sessionSettings)
+        fetchAndConfigure(sessionSettings)
     }
 
     fun clearConfirmationResult() {
@@ -92,37 +114,75 @@ internal class CheckoutControllerExampleViewModel(
         }
     }
 
-    private fun fetchAndConfigure(scenario: CheckoutControllerExampleScenario) {
+    private fun updateSettings(updatedSettings: CheckoutControllerExampleSettings) {
+        _settings.value = updatedSettings
+        persistSettings(updatedSettings)
+    }
+
+    private fun persistSettings(settings: CheckoutControllerExampleSettings) {
+        savedStateHandle[SETTINGS_KEY] = settings.encodedValues()
+    }
+
+    private fun fetchAndConfigure(settings: Snapshot) {
         viewModelScope.launch {
-            repository.fetchCheckoutSessionClientSecret(scenario).fold(
-                onSuccess = { clientSecret ->
-                    controller.configure(
-                        clientSecret = clientSecret,
-                    ).fold(
-                        onSuccess = {
-                            _status.value = Status.Configured(
-                                scenario = scenario,
-                                session = controller.session.value,
-                            )
-                        },
-                        onFailure = { error ->
-                            Log.e(TAG, "Failed to configure", error)
-                            _status.value = Status.Error(
-                                scenario = scenario,
-                                message = error.message ?: "Configure failed",
-                            )
-                        },
+            val result = runCatching {
+                repository.fetchCheckoutSession(settings)
+            }.getOrElse { error -> kotlin.Result.failure(error) }
+            val response = result.getOrNull()
+            if (response == null) {
+                val error = result.exceptionOrNull()
+                Log.e(TAG, "Failed to fetch checkout session", error)
+                _status.value = Status.Error(
+                    settings = settings,
+                    message = error?.message ?: "Unknown error",
+                )
+                return@launch
+            }
+            configure(settings, response)
+        }
+    }
+
+    private suspend fun configure(
+        settings: Snapshot,
+        response: CheckoutResponse,
+    ) {
+        if (settings[CheckoutControllerExampleSettingsDefinition.Customer] == CheckoutControllerExampleCustomer.New) {
+            val customerId = response.customerId?.takeIf(String::isNotBlank)
+            if (customerId == null) {
+                _status.value = Status.Error(
+                    settings = settings,
+                    message = "No customer ID returned for new customer",
+                )
+                return
+            }
+            customerStore.saveCustomerId(customerId)
+            updateSettings(
+                _settings.value
+                    .withStoredCustomerId(customerId)
+                    .withValue(
+                        CheckoutControllerExampleSettingsDefinition.Customer,
+                        CheckoutControllerExampleCustomer.Existing(customerId),
                     )
-                },
-                onFailure = { error ->
-                    Log.e(TAG, "Failed to fetch checkout session", error)
-                    _status.value = Status.Error(
-                        scenario = scenario,
-                        message = error.message ?: "Unknown error",
-                    )
-                },
             )
         }
+
+        controller.configure(
+            clientSecret = response.clientSecret,
+        ).fold(
+            onSuccess = {
+                _status.value = Status.Configured(
+                    settings = settings,
+                    session = controller.session.value,
+                )
+            },
+            onFailure = { error ->
+                Log.e(TAG, "Failed to configure", error)
+                _status.value = Status.Error(
+                    settings = settings,
+                    message = error.message ?: "Configure failed",
+                )
+            },
+        )
     }
 
     override fun onCleared() {
@@ -131,14 +191,14 @@ internal class CheckoutControllerExampleViewModel(
     }
 
     sealed interface Status {
-        data object ChooseScenario : Status
-        data class Loading(val scenario: CheckoutControllerExampleScenario) : Status
+        data object ChooseSettings : Status
+        data class Loading(val settings: Snapshot) : Status
         data class Configured(
-            val scenario: CheckoutControllerExampleScenario,
+            val settings: Snapshot,
             val session: Session?,
         ) : Status
         data class Error(
-            val scenario: CheckoutControllerExampleScenario,
+            val settings: Snapshot,
             val message: String,
         ) : Status
     }
@@ -150,7 +210,8 @@ internal class CheckoutControllerExampleViewModel(
 
     companion object {
         private const val TAG = "CheckoutControllerExample"
-        private const val SCENARIO_KEY = "checkout_controller_example_scenario"
+        private const val SETTINGS_KEY = "checkout_controller_example_settings"
+        private const val SESSION_STARTED_KEY = "checkout_controller_example_session_started"
 
         val factory = viewModelFactory {
             initializer {

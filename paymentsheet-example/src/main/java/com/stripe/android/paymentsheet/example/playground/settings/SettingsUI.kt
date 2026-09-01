@@ -206,7 +206,7 @@ private fun TextSetting(
 }
 
 @Composable
-private fun <T> RadioButtonSetting(
+internal fun <T> RadioButtonSetting(
     name: String,
     options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
     value: T,

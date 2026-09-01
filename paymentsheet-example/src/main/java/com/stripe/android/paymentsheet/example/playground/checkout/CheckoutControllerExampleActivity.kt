@@ -22,6 +22,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,6 +38,7 @@ import com.stripe.android.checkout.CheckoutPresenter
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
+import com.stripe.android.paymentsheet.example.playground.settings.RadioButtonSetting
 import com.stripe.android.uicore.format.CurrencyFormatter
 import kotlinx.coroutines.launch
 
@@ -51,15 +53,26 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         val presenter = viewModel.controller.createPresenter(this)
         val paymentElement = presenter.paymentElement()
 
+        observeSessionCompletion()
+        setCheckoutContent(presenter, paymentElement)
+    }
+
+    private fun observeSessionCompletion() {
         lifecycleScope.launch {
             viewModel.sessionComplete.collect {
                 Toast.makeText(this@CheckoutControllerExampleActivity, "Payment complete!", Toast.LENGTH_LONG).show()
                 finish()
             }
         }
+    }
 
+    private fun setCheckoutContent(
+        presenter: CheckoutPresenter,
+        paymentElement: PaymentElement,
+    ) {
         setContent {
             val status by viewModel.status.collectAsState()
+            val settings by viewModel.settings.collectAsState()
             val confirmationResult by viewModel.confirmationResult.collectAsState()
 
             PlaygroundTheme(
@@ -68,21 +81,33 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                         status = status,
                         presenter = presenter,
                         paymentElement = paymentElement,
-                        onScenarioSelected = viewModel::start,
+                        settings = settings,
+                        onSettingChanged = viewModel::updateSetting,
                     )
                 },
                 bottomBarContent = {
-                    val configured = status as? CheckoutControllerExampleViewModel.Status.Configured
-                    if (configured != null) {
-                        ConfirmationControls(
-                            paymentOption = configured.session?.paymentOptionDisplayData,
-                            confirmationResult = confirmationResult,
-                            onSelectPaymentMethod = paymentElement::present,
-                            onConfirm = {
-                                viewModel.clearConfirmationResult()
-                                presenter.confirm()
-                            },
-                        )
+                    when (status) {
+                        is CheckoutControllerExampleViewModel.Status.ChooseSettings -> {
+                            Button(
+                                onClick = viewModel::start,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text("Create session")
+                            }
+                        }
+                        is CheckoutControllerExampleViewModel.Status.Configured -> {
+                            val configured = status as CheckoutControllerExampleViewModel.Status.Configured
+                            ConfirmationControls(
+                                paymentOption = configured.session?.paymentOptionDisplayData,
+                                confirmationResult = confirmationResult,
+                                onSelectPaymentMethod = paymentElement::present,
+                                onConfirm = {
+                                    viewModel.clearConfirmationResult()
+                                    presenter.confirm()
+                                },
+                            )
+                        }
+                        else -> Unit
                     }
                 },
             )
@@ -95,21 +120,22 @@ private fun CheckoutContent(
     status: CheckoutControllerExampleViewModel.Status,
     presenter: CheckoutPresenter,
     paymentElement: PaymentElement,
-    onScenarioSelected: (CheckoutControllerExampleScenario) -> Unit,
+    settings: CheckoutControllerExampleSettings,
+    onSettingChanged: (CheckoutControllerExampleSettingDefinition<Any>, Any) -> Unit,
 ) {
     when (status) {
-        is CheckoutControllerExampleViewModel.Status.ChooseScenario -> {
-            ScenarioChooser(onScenarioSelected)
+        is CheckoutControllerExampleViewModel.Status.ChooseSettings -> {
+            SettingsChooser(settings, onSettingChanged)
         }
         is CheckoutControllerExampleViewModel.Status.Loading -> {
-            LoadingContent(status.scenario)
+            LoadingContent(status.settings)
         }
         is CheckoutControllerExampleViewModel.Status.Error -> {
-            ErrorContent(status.scenario, status.message)
+            ErrorContent(status.settings, status.message)
         }
         is CheckoutControllerExampleViewModel.Status.Configured -> {
             status.session?.let { session ->
-                ScenarioSummary(status.scenario, session.tax.status)
+                SettingsSummary(status.settings, session.tax.status)
                 LineItemsSection(session)
                 TotalSummarySection(session)
                 if (session.availableExpressCheckoutPaymentMethods.isNotEmpty()) {
@@ -122,35 +148,62 @@ private fun CheckoutContent(
 }
 
 @Composable
-private fun ScenarioChooser(
-    onScenarioSelected: (CheckoutControllerExampleScenario) -> Unit,
+private fun SettingsChooser(
+    settings: CheckoutControllerExampleSettings,
+    onSettingChanged: (CheckoutControllerExampleSettingDefinition<Any>, Any) -> Unit,
 ) {
-    Text(text = "Choose a session scenario", style = MaterialTheme.typography.h6)
-    Spacer(modifier = Modifier.height(16.dp))
-    CheckoutControllerExampleScenario.entries.forEach { scenario ->
-        Button(
-            onClick = { onScenarioSelected(scenario) },
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(scenario.displayName)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        settings.activeSettings().forEach { setting ->
+            CheckoutControllerSetting(
+                setting = setting,
+                settings = settings,
+                onSettingChanged = onSettingChanged,
+            )
         }
-        Spacer(modifier = Modifier.height(8.dp))
     }
-    Text(
-        text = "Relaunch this activity to choose another scenario.",
-        style = MaterialTheme.typography.body2,
-        color = Color.Gray,
-    )
 }
 
 @Composable
-private fun LoadingContent(scenario: CheckoutControllerExampleScenario) {
+private fun CheckoutControllerSetting(
+    setting: CheckoutControllerExampleSettings.ActiveSetting,
+    settings: CheckoutControllerExampleSettings,
+    onSettingChanged: (CheckoutControllerExampleSettingDefinition<Any>, Any) -> Unit,
+) {
+    @Suppress("UNCHECKED_CAST")
+    val definition = setting.definition as CheckoutControllerExampleSettingDefinition<Any>
+    val value = setting.value as Any
+
+    Column(modifier = Modifier.padding(start = (setting.indentation * 16).dp)) {
+        RadioButtonSetting(
+            name = definition.displayName,
+            options = definition.options(settings),
+            value = value,
+            onOptionChanged = { updatedValue ->
+                onSettingChanged(definition, updatedValue)
+            },
+        )
+        setting.displayDetails.forEach { detail ->
+            OutlinedTextField(
+                value = detail.value,
+                onValueChange = {},
+                label = { Text(detail.name) },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingContent(settings: CheckoutControllerExampleSettings.Snapshot) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Scenario: ${scenario.displayName}")
+            SettingsSummary(settings)
             Spacer(modifier = Modifier.height(12.dp))
             CircularProgressIndicator()
         }
@@ -159,7 +212,7 @@ private fun LoadingContent(scenario: CheckoutControllerExampleScenario) {
 
 @Composable
 private fun ErrorContent(
-    scenario: CheckoutControllerExampleScenario,
+    settings: CheckoutControllerExampleSettings.Snapshot,
     message: String,
 ) {
     Column(
@@ -167,7 +220,7 @@ private fun ErrorContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text = "Scenario: ${scenario.displayName}")
+        SettingsSummary(settings)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Error",
@@ -180,12 +233,16 @@ private fun ErrorContent(
 }
 
 @Composable
-private fun ScenarioSummary(
-    scenario: CheckoutControllerExampleScenario,
-    taxStatus: Session.Tax.Status,
+private fun SettingsSummary(
+    settings: CheckoutControllerExampleSettings.Snapshot,
+    taxStatus: Session.Tax.Status? = null,
 ) {
-    Text(text = "Scenario: ${scenario.displayName}", style = MaterialTheme.typography.h6)
-    Text(text = "Tax status: $taxStatus", style = MaterialTheme.typography.body1)
+    settings.summaryLines().forEach { summaryLine ->
+        Text(text = summaryLine, style = MaterialTheme.typography.h6)
+    }
+    taxStatus?.let { status ->
+        Text(text = "Tax status: $status", style = MaterialTheme.typography.body1)
+    }
     Spacer(modifier = Modifier.height(16.dp))
 }
 

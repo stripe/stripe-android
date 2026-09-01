@@ -19,10 +19,10 @@ internal class CheckoutControllerExampleBackendRepository(
     private val json = Json { ignoreUnknownKeys = true }
     private val backendUrl = Settings(applicationContext).playgroundBackendUrl
 
-    suspend fun fetchCheckoutSessionClientSecret(
-        scenario: CheckoutControllerExampleScenario,
-    ): kotlin.Result<String> {
-        val request = CheckoutControllerExampleRequestFactory.create(scenario)
+    suspend fun fetchCheckoutSession(
+        settings: CheckoutControllerExampleSettings.Snapshot,
+    ): kotlin.Result<CheckoutResponse> {
+        val request = CheckoutControllerExampleRequestFactory.create(settings)
 
         val apiResponse = withContext(Dispatchers.IO) {
             Fuel.post(backendUrl + request.endpoint)
@@ -42,12 +42,13 @@ internal class CheckoutControllerExampleBackendRepository(
                     PaymentConfiguration.init(applicationContext, response.publishableKey)
                 }
 
-                val clientSecret = response.checkoutSessionClientSecret
-                    ?: return kotlin.Result.failure(
+                if (response.checkoutSessionClientSecret == null) {
+                    return kotlin.Result.failure(
                         IllegalStateException("No checkout session client secret in response")
                     )
+                }
 
-                kotlin.Result.success(clientSecret)
+                kotlin.Result.success(response)
             }
         }
     }
