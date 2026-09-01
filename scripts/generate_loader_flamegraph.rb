@@ -7,7 +7,7 @@ require 'open3'
 require_relative 'latency_test_utils'
 
 PROJECT_ROOT = LatencyTestUtils::PROJECT_ROOT
-PRIMARY_DURATION_KEY = LatencyTestUtils::DURATION_KEY
+DEFAULT_PRIMARY_DURATION_KEY = LatencyTestUtils::DURATION_KEY
 TRACE_DURATION_KEY_PREFIX = 'PaymentSheetLoad'
 MINGLE_DIAGRAM_URL = 'https://pages.stripe.me/mingle/diagrams?diagram='
 
@@ -52,7 +52,7 @@ def restore_checkout(target)
   end
 end
 
-def parse_trace_output(output)
+def parse_trace_output(output, primary_duration_key: DEFAULT_PRIMARY_DURATION_KEY)
   sessions = {}
   current_test_name = nil
   test_started_at = nil
@@ -97,11 +97,11 @@ def parse_trace_output(output)
       spans: []
     )
     session.spans << TraceSpan.new(
-      name: humanize_span_name(span_name),
+      name: humanize_span_name(span_name, primary_duration_key: primary_duration_key),
       start_offset_ms: started_at - test_started_at,
       duration_ms: ended_at - started_at,
     )
-    if span_name == PRIMARY_DURATION_KEY
+    if span_name == primary_duration_key
       session.total_duration_ms = ended_at - started_at
     end
   end
@@ -119,13 +119,38 @@ def humanize_test_name(test_name)
   test_name.split('_').map(&:capitalize).join(' ')
 end
 
-def humanize_span_name(span_name)
-  return span_name if span_name == PRIMARY_DURATION_KEY
+def humanize_span_name(span_name, primary_duration_key: DEFAULT_PRIMARY_DURATION_KEY)
+  return span_name if span_name == primary_duration_key
 
   span_name
     .sub(/^#{TRACE_DURATION_KEY_PREFIX}/, '')
     .gsub(/([a-z])([A-Z])/, '\1 \2')
     .strip
+end
+
+def add_manual_session_markers(output, primary_duration_key:, session_name:)
+  return output if output.include?('LATENCY_TEST_CASE_STARTED:')
+
+  marked_output = +''
+  session_number = 0
+  current_session_name = nil
+
+  output.each_line do |line|
+    if line =~ /DURATION_STARTED:\s*#{Regexp.escape(primary_duration_key)}:\s*\d+/
+      session_number += 1
+      current_session_name = session_number == 1 ? session_name : "#{session_name}_#{session_number}"
+      marked_output << "LATENCY_TEST_CASE_STARTED: #{current_session_name}\n"
+    end
+
+    marked_output << line
+
+    if current_session_name && line =~ /DURATION_ENDED:\s*#{Regexp.escape(primary_duration_key)}:\s*\d+/
+      marked_output << "LATENCY_TEST_CASE_FINISHED: #{current_session_name}\n"
+      current_session_name = nil
+    end
+  end
+
+  marked_output
 end
 
 def gantt_value(value)
@@ -136,11 +161,11 @@ def gantt_end(start_offset_ms, duration_ms)
   [gantt_value(start_offset_ms + duration_ms), gantt_value(start_offset_ms) + 1].max
 end
 
-def build_mermaid_diagram(trace_target, sessions)
+def build_mermaid_diagram(trace_target, sessions, title: 'PaymentSheet Duration Trace')
   diagram_lines = []
   diagram_lines << "%%{init: {'gantt': {'titleTopMargin': 50, 'topPadding': 100, 'leftPadding': 200}}}%%"
   diagram_lines << 'gantt'
-  diagram_lines << "    title PaymentSheet Duration Trace - #{format_trace_target(trace_target)}"
+  diagram_lines << "    title #{title} - #{format_trace_target(trace_target)}"
   diagram_lines << '    dateFormat x'
 
   task_index = 0
@@ -161,8 +186,8 @@ def build_mermaid_diagram(trace_target, sessions)
   diagram_lines.join("\n")
 end
 
-def build_diagram_url(trace_target, sessions)
-  encoded_diagram = Base64.strict_encode64(build_mermaid_diagram(trace_target, sessions))
+def build_diagram_url(trace_target, sessions, title: 'PaymentSheet Duration Trace')
+  encoded_diagram = Base64.strict_encode64(build_mermaid_diagram(trace_target, sessions, title: title))
   "#{MINGLE_DIAGRAM_URL}#{encoded_diagram}"
 end
 
@@ -181,20 +206,53 @@ def format_trace_target(trace_target)
   trace_target.match?(/\A[0-9a-f]{10,40}\z/i) ? trace_target[0, 10] : trace_target
 end
 
-options = {}
+options = {
+  primary_duration_key: DEFAULT_PRIMARY_DURATION_KEY,
+  title: 'PaymentSheet Duration Trace',
+}
 
 OptionParser.new do |opts|
   opts.banner = <<~BANNER
     Usage: generate_loader_flamegraph.rb [--commit COMMIT]
+           generate_loader_flamegraph.rb --input FILE [options]
+           generate_loader_flamegraph.rb --stdin [options]
 
     Runs TestLatency once and prints a Mingle diagram URL with the Mermaid
     gantt chart encoded into the link. When --commit is provided, the script
     checks out that commit before running and restores the original checkout
     afterward.
+
+    --input and --stdin parse previously captured StripeSdk logcat output. Each
+    primary-duration span is treated as a separate trace session. Duration
+    lines are emitted by debug SDK builds.
+
+    Checkout Session example:
+      adb logcat -d -s StripeSdk:D '*:S' > checkout-session.log
+      ./scripts/generate_loader_flamegraph.rb --input checkout-session.log --primary-duration CheckoutSessionConfigure
   BANNER
 
   opts.on('--commit COMMIT', 'Commit to trace (defaults to current checkout)') do |commit|
     options[:commit] = commit
+  end
+
+  opts.on('--input FILE', 'Read StripeSdk logcat output from a file') do |file|
+    options[:input] = file
+  end
+
+  opts.on('--stdin', 'Read StripeSdk logcat output from standard input') do
+    options[:stdin] = true
+  end
+
+  opts.on('--primary-duration KEY', 'Overall duration key (defaults to Loading)') do |key|
+    options[:primary_duration_key] = key
+  end
+
+  opts.on('--label LABEL', 'Label for an imported trace (defaults to the input filename)') do |label|
+    options[:label] = label
+  end
+
+  opts.on('--title TITLE', 'Diagram title') do |title|
+    options[:title] = title
   end
 
   opts.on('-h', '--help', 'Prints this help') do
@@ -202,6 +260,26 @@ OptionParser.new do |opts|
     exit
   end
 end.parse!
+
+input_option_count = [options[:input], options[:stdin]].compact.length
+if input_option_count > 1 || (input_option_count == 1 && options[:commit])
+  warn 'Error: use only one of --commit, --input, or --stdin.'
+  exit 1
+end
+
+if input_option_count == 1
+  input = options[:stdin] ? $stdin.read : File.read(options[:input])
+  default_label = options[:stdin] ? 'stdin' : File.basename(options[:input])
+  trace_target = options[:label] || default_label
+  marked_input = add_manual_session_markers(
+    input,
+    primary_duration_key: options[:primary_duration_key],
+    session_name: trace_target,
+  )
+  sessions = parse_trace_output(marked_input, primary_duration_key: options[:primary_duration_key])
+  puts build_diagram_url(trace_target, sessions, title: options[:title])
+  exit
+end
 
 original_checkout = current_checkout
 trace_target = options[:commit] || original_checkout
@@ -213,8 +291,11 @@ end
 
 begin
   checkout_commit(options[:commit]) if options[:commit]
-  sessions = parse_trace_output(collect_trace_output)
-  puts build_diagram_url(trace_target, sessions)
+  sessions = parse_trace_output(
+    collect_trace_output,
+    primary_duration_key: options[:primary_duration_key],
+  )
+  puts build_diagram_url(trace_target, sessions, title: options[:title])
 ensure
   restore_checkout(original_checkout) if options[:commit]
 end

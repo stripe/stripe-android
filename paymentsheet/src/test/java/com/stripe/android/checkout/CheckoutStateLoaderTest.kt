@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -38,6 +39,7 @@ import com.stripe.android.uicore.StripeShapes
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeTypography
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
@@ -61,6 +63,22 @@ internal class CheckoutStateLoaderTest {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `loadInitial measures checkout session preparation`() = runScenario {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.End(DurationProvider.Key.CheckoutSessionResolveFlags)
+            )
+        ).isTrue()
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.End(DurationProvider.Key.CheckoutSessionLoadPaymentElement)
+            )
+        ).isTrue()
     }
 
     @Test
@@ -424,6 +442,7 @@ internal class CheckoutStateLoaderTest {
             isGooglePayAvailable = isGooglePayAvailable,
             customer = customer,
         )
+        val durationProvider = FakeDurationProvider()
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
             commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
@@ -433,6 +452,7 @@ internal class CheckoutStateLoaderTest {
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
             internalRowSelectionCallback = { internalRowSelectionCallback },
+            durationProvider = durationProvider,
         )
 
         Scenario(
@@ -442,6 +462,7 @@ internal class CheckoutStateLoaderTest {
             paymentElementLoader = paymentElementLoader,
             chooser = recordingChooser,
             imageLoader = imageLoader,
+            durationProvider = durationProvider,
         ).block()
 
         imageLoader.ensureAllEventsConsumed()
@@ -454,6 +475,7 @@ internal class CheckoutStateLoaderTest {
         val paymentElementLoader: FakePaymentElementLoader,
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
+        val durationProvider: FakeDurationProvider,
     )
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,

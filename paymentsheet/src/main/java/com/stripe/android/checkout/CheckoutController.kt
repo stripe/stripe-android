@@ -15,6 +15,7 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -65,6 +66,7 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
+    private val durationProvider: DurationProvider,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -103,29 +105,35 @@ class CheckoutController @Inject internal constructor(
         if (sheetStateHolder.sheetIsOpen) {
             return integrationLaunchedFailure()
         }
-        return operationCoordinator.runMutation {
-            val configurationState = configuration.build()
-            val sessionId = clientSecret.substringBefore("_secret_")
+        return durationProvider.measureDuration(DurationProvider.Key.CheckoutSessionConfigure) {
+            operationCoordinator.runMutation {
+                val configurationState = configuration.build()
+                val sessionId = clientSecret.substringBefore("_secret_")
 
-            checkoutSessionRepository.init(
-                sessionId = sessionId,
-                adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
-            ).mapCatching { response ->
-                val defaultBillingAddress = configurationState.defaults.billingDetails?.address
-                if (defaultBillingAddress != null) {
-                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                durationProvider.measureDuration(DurationProvider.Key.CheckoutSessionInit) {
+                    checkoutSessionRepository.init(
+                        sessionId = sessionId,
+                        adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
+                    )
+                }.mapCatching { response ->
+                    val defaultBillingAddress = configurationState.defaults.billingDetails?.address
+                    if (defaultBillingAddress != null) {
+                        durationProvider.measureDuration(DurationProvider.Key.CheckoutSessionTaxUpdate) {
+                            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                                checkoutSessionResponse = response,
+                                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                                address = defaultBillingAddress,
+                            ).getOrThrow()
+                        }
+                    } else {
+                        response
+                    }
+                }.mapCatching { response ->
+                    checkoutStateLoader.loadInitial(
+                        configuration = configurationState,
                         checkoutSessionResponse = response,
-                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                        address = defaultBillingAddress,
-                    ).getOrThrow()
-                } else {
-                    response
+                    )
                 }
-            }.mapCatching { response ->
-                checkoutStateLoader.loadInitial(
-                    configuration = configurationState,
-                    checkoutSessionResponse = response,
-                )
             }
         }
     }

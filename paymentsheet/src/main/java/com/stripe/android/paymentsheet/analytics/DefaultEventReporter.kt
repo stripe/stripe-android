@@ -124,6 +124,12 @@ internal class DefaultEventReporter @Inject internal constructor(
                     DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection ->
                         "retrieveInitialPaymentSelection"
                     // We don't send load timings for these.
+                    DurationProvider.Key.CheckoutSessionConfigure,
+                    DurationProvider.Key.CheckoutSessionInit,
+                    DurationProvider.Key.CheckoutSessionTaxUpdate,
+                    DurationProvider.Key.CheckoutSessionResolveFlags,
+                    DurationProvider.Key.CheckoutSessionLoadPaymentElement,
+                    DurationProvider.Key.CheckoutSessionLoadExpressCheckoutElement,
                     DurationProvider.Key.Loading,
                     DurationProvider.Key.Checkout,
                     DurationProvider.Key.NfcScan,
