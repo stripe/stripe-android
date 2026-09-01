@@ -65,7 +65,8 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
                 ExpressButtonType.Link -> "link"
             }
         }
-        return state.paymentMethodMetadata.analyticsMetadata.paramsMap + mapOf(
+        val analyticsParams = state.expressCheckoutElementPaymentMethodMetadata.analyticsMetadata.paramsMap
+        return analyticsParams + mapOf(
             FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
             FIELD_ECE_CONFIG to mapOf(
                 FIELD_LINK_VISIBILITY to expressCheckoutElementConfiguration.linkConfiguration.display

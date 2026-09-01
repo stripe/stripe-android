@@ -2,12 +2,11 @@ package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
-import com.stripe.android.elements.ExpressCheckoutElement
-import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
 import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement.Configuration.TermsDisplay
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -234,7 +233,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `maps googlePay regardless of ECE display setting`() {
+    fun `maps googlePay regardless of payment element display setting`() {
         val result = factory().create(
             configuration = controllerConfiguration(
                 googlePayConfiguration = GooglePayConfiguration()
@@ -354,21 +353,18 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
         googlePayConfiguration: GooglePayConfiguration? = null,
     ): CheckoutController.Configuration.State {
-        val builder = CheckoutController.Configuration()
-            .paymentElement(
-                PaymentElement.Configuration()
-                    .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
-                    .appearance(appearance)
-                    .billingDetailsCollectionConfiguration(
-                        BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
-                    )
+        val paymentElementConfiguration = PaymentElement.Configuration()
+            .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
+            .appearance(appearance)
+            .billingDetailsCollectionConfiguration(
+                BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
             )
-        if (googlePayConfiguration != null) {
-            builder.expressCheckoutElement(
-                ExpressCheckoutElement.Configuration().googlePayConfiguration(googlePayConfiguration)
-            )
+        googlePayConfiguration?.let {
+            paymentElementConfiguration.googlePayConfiguration(it)
         }
-        return builder.build()
+        return CheckoutController.Configuration()
+            .paymentElement(paymentElementConfiguration)
+            .build()
     }
 
     private fun collectedDetails(

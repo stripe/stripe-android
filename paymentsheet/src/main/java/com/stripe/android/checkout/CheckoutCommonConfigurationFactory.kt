@@ -18,15 +18,10 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): CommonConfiguration = createCommonConfiguration(
+    ): CommonConfiguration = createForPaymentElement(
         configuration = configuration,
         checkoutSessionResponse = checkoutSessionResponse,
         collectedDetails = collectedDetails,
-        googlePayConfiguration =
-            configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse),
-        linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
-        billingDetailsCollectionConfiguration =
-            configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
     )
 
     fun createForExpressCheckoutElement(

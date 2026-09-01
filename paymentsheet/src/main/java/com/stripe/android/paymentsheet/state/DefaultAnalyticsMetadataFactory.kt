@@ -130,6 +130,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         when (this@analyticsMap) {
             is PaymentElementLoader.Configuration.PaymentSheet -> putAll(analyticsMap())
             is PaymentElementLoader.Configuration.Embedded -> putAll(analyticsMap())
+            is PaymentElementLoader.Configuration.Checkout,
             is PaymentElementLoader.Configuration.CryptoOnramp,
             is PaymentElementLoader.Configuration.StandaloneLink -> Unit
         }

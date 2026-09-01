@@ -82,6 +82,7 @@ internal class FakePaymentElementLoader(
                 is PaymentElementLoader.Configuration.CryptoOnramp,
                 is PaymentElementLoader.Configuration.StandaloneLink,
                 is PaymentElementLoader.Configuration.Embedded -> PaymentSheet.PaymentMethodLayout.Vertical
+                is PaymentElementLoader.Configuration.Checkout -> integrationConfiguration.paymentMethodLayout
                 is PaymentElementLoader.Configuration.PaymentSheet ->
                     integrationConfiguration.configuration.paymentMethodLayout
             }

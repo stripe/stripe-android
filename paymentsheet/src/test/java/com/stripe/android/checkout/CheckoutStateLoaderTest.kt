@@ -10,6 +10,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -24,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -62,7 +64,62 @@ internal class CheckoutStateLoaderTest {
     fun `loadInitial commits state with payment method metadata`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
-        assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+        assertThat(stateHolder.state?.paymentElementPaymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `loadInitial creates express checkout metadata from express checkout configuration`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
+                    PaymentElement.Configuration.BillingDetailsCollectionConfiguration()
+                        .address(
+                            PaymentElement.Configuration.BillingDetailsCollectionConfiguration
+                                .AddressCollectionMode.Automatic
+                        )
+                )
+            )
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration()
+                    .googlePayConfiguration(
+                        ExpressCheckoutElement.Configuration.GooglePayConfiguration().label("Express total")
+                    )
+                    .linkConfiguration(
+                        ExpressCheckoutElement.Configuration.LinkConfiguration().display(
+                            ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never
+                        )
+                    )
+                    .billingDetailsCollectionConfiguration(
+                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
+                            .address(
+                                ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
+                                    .AddressCollectionMode.Full
+                            )
+                    )
+            )
+            .build()
+
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+        val commonConfiguration = paymentElementLoader.lastIntegrationConfiguration?.commonConfiguration
+        assertThat(commonConfiguration?.googlePay?.label).isEqualTo("Express total")
+        assertThat(commonConfiguration?.link?.display)
+            .isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+        assertThat(
+            stateHolder.state?.paymentElementPaymentMethodMetadata
+                ?.billingDetailsCollectionConfiguration?.address,
+        ).isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+        assertThat(
+            stateHolder.state?.expressCheckoutElementPaymentMethodMetadata
+                ?.billingDetailsCollectionConfiguration?.address,
+        ).isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.End(
+                    DurationProvider.Key.CheckoutSessionLoadExpressCheckoutElement
+                )
+            )
+        ).isTrue()
     }
 
     @Test
@@ -128,7 +185,7 @@ internal class CheckoutStateLoaderTest {
             checkoutSessionResponse = response(),
         )
 
-        assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
+        assertThat(stateHolder.state?.paymentElementPaymentMethodMetadata?.paymentMethodOrder)
             .isEqualTo(listOf("klarna", "card"))
     }
 
@@ -380,7 +437,8 @@ internal class CheckoutStateLoaderTest {
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
@@ -431,8 +489,12 @@ internal class CheckoutStateLoaderTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = stateHolder.selection,
-            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata },
-            customerMetadata = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata?.customerMetadata },
+            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentElementPaymentMethodMetadata
+            },
+            customerMetadata = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentElementPaymentMethodMetadata?.customerMetadata
+            },
         )
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser

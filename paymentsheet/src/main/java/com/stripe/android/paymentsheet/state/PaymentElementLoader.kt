@@ -110,6 +110,11 @@ internal interface PaymentElementLoader {
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
+
+        data class Checkout(
+            override val commonConfiguration: CommonConfiguration,
+            val paymentMethodLayout: PaymentMethodLayout,
+        ) : Configuration
     }
 
     sealed class InitializationMode : Parcelable {
@@ -626,6 +631,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
             is PaymentElementLoader.Configuration.StandaloneLink -> PaymentMethodLayout.Vertical
+            is PaymentElementLoader.Configuration.Checkout -> integrationConfiguration.paymentMethodLayout
             is PaymentElementLoader.Configuration.Embedded ->
                 if (
                     elementsSession.forceVerticalPaymentMethodLayout &&
