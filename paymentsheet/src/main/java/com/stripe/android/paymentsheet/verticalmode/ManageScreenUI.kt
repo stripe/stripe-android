@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13,7 +12,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
-import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeFormInsets
@@ -39,6 +37,8 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                 linkBrand = state.linkBrand,
                 isEnabled = !state.isProcessing,
                 isSelected = isSelected,
+                isLoading = state.pendingPaymentMethodId == it.paymentMethod.id,
+                loadingIndicatorTestTag = TEST_TAG_MANAGE_SCREEN_PENDING,
                 onClick = {
                     rowOnClick(
                         isEditing = state.isEditing,
@@ -51,18 +51,10 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                     )
                 },
                 trailingContent = {
-                    if (state.pendingPaymentMethodId == it.paymentMethod.id) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .testTag(TEST_TAG_MANAGE_SCREEN_PENDING),
-                        )
-                    } else {
-                        TrailingContent(
-                            isEditing = state.isEditing,
-                            paymentMethod = it,
-                        )
-                    }
+                    TrailingContent(
+                        isEditing = state.isEditing,
+                        paymentMethod = it,
+                    )
                 }
             )
         }

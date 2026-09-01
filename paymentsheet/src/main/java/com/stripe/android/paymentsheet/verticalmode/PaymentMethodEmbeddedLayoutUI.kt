@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -38,7 +37,6 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.ErrorMessage
-import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -292,21 +290,15 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             linkBrand = linkBrand,
             isEnabled = isEnabled,
             isSelected = selection?.isSaved == true,
+            isLoading = pendingSavedPaymentMethodId == displayedSavedPaymentMethod.paymentMethod.id,
+            loadingIndicatorTestTag = EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
             trailingContent = {
-                if (pendingSavedPaymentMethodId == displayedSavedPaymentMethod.paymentMethod.id) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG),
-                    )
-                } else {
-                    SavedPaymentMethodTrailingContent(
-                        viewMoreShowChevron = appearance.style.viewMoreShowsChevron,
-                        savedPaymentMethodAction = savedPaymentMethodAction,
-                        onViewMorePaymentMethods = onViewMorePaymentMethods,
-                        onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
-                    )
-                }
+                SavedPaymentMethodTrailingContent(
+                    viewMoreShowChevron = appearance.style.viewMoreShowsChevron,
+                    savedPaymentMethodAction = savedPaymentMethodAction,
+                    onViewMorePaymentMethods = onViewMorePaymentMethods,
+                    onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
+                )
             },
             modifier = Modifier.onGloballyPositioned { coordinates ->
                 updatePaymentMethodVisibility("saved", coordinates)

@@ -6,7 +6,9 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescriptionExactly
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
@@ -19,6 +21,7 @@ import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentM
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
@@ -259,11 +262,23 @@ class ManageScreenUITest {
         )
     ) {
         displayableSavedPaymentMethods.forEach {
-            composeRule.onNodeWithTag(
-                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${it.paymentMethod.id}"
-            ).assertIsNotEnabled()
+            val isPending = it == displayableSavedPaymentMethods[1]
+            val row = composeRule.onNodeWithTag(
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${it.paymentMethod.id}",
+                useUnmergedTree = true,
+            )
+                .assertIsNotEnabled()
+            val hasLoadingIndicator = hasAnyDescendant(hasTestTag(TEST_TAG_MANAGE_SCREEN_PENDING))
+            val hasPaymentMethodIcon = hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES))
+
+            if (isPending) {
+                row.assert(hasLoadingIndicator).assert(hasPaymentMethodIcon.not())
+            } else {
+                row.assert(hasLoadingIndicator.not()).assert(hasPaymentMethodIcon)
+            }
         }
-        composeRule.onNodeWithTag("manage_screen_pending", useUnmergedTree = true).assertExists()
+        composeRule.onAllNodesWithTag(TEST_TAG_MANAGE_SCREEN_PENDING, useUnmergedTree = true)
+            .assertCountEquals(1)
     }
 
     private fun getChevronIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {
