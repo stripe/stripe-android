@@ -50,6 +50,18 @@ class PaymentSheetAnalyticsListenerTest {
     }
 
     @Test
+    fun `reporting form shown allows interaction to be reported again`() = runScenario {
+        analyticsListener.reportFormShown("card")
+        analyticsListener.reportFieldInteraction("card")
+        analyticsListener.reportFieldInteraction("card")
+        analyticsListener.reportFormShown("card")
+        analyticsListener.reportFieldInteraction("card")
+
+        verify(eventReporter, times(2)).onPaymentMethodFormShown("card")
+        verify(eventReporter, times(2)).onPaymentMethodFormInteraction("card")
+    }
+
+    @Test
     fun `reportPaymentSheetHidden reports for UpdatePaymentMethod`() = runScenario {
         analyticsListener.reportPaymentSheetHidden(mock<PaymentSheetScreen.UpdatePaymentMethod>())
 

@@ -86,7 +86,7 @@ internal class PaymentSheetAnalyticsListener(
                 reportPaymentOptions(false)
             }
             is AddFirstPaymentMethod, is AddAnotherPaymentMethod -> {
-                reportFormShown(currentPaymentMethodTypeProvider())
+                reportFormShownIfNecessary(currentPaymentMethodTypeProvider())
                 reportPaymentOptions(false)
             }
         }
@@ -114,15 +114,20 @@ internal class PaymentSheetAnalyticsListener(
         }
     }
 
-    private fun reportFormShown(code: String) {
+    fun reportFormShown(code: PaymentMethodCode) {
+        previouslyShownForm = code
+        previouslyInteractedForm = null
+        eventReporter.onPaymentMethodFormShown(code)
+    }
+
+    private fun reportFormShownIfNecessary(code: PaymentMethodCode) {
         /*
          * Prevents this event from being reported multiple times on the same payment form after process death. We
          * should only trigger a form shown event when initially shown in the add payment method screen or the user
          * navigates to a different form.
          */
         if (previouslyShownForm != code) {
-            eventReporter.onPaymentMethodFormShown(code)
-            previouslyShownForm = code
+            reportFormShown(code)
         }
     }
 

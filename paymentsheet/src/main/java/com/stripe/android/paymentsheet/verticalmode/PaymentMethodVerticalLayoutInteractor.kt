@@ -196,7 +196,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 canChangeCbc = viewModel.customerStateHolder.canChangeCbc,
                 isCurrentScreen = isCurrentScreen,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
-                reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
+                reportFormShown = viewModel.analyticsListener::reportFormShown,
                 shouldUpdateVerticalModeSelection = { paymentMethodCode ->
                     val requiresFormScreen = paymentMethodCode != null &&
                         formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired

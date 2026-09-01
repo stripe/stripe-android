@@ -433,6 +433,49 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onPaymentMethodFormInteraction fires event once for repeated interactions`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onPaymentMethodFormInteraction(code = "card")
+        eventReporter.onPaymentMethodFormInteraction(code = "card")
+
+        assertThat(analyticsEventTurbine.awaitItem())
+            .isEqualTo(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_form_interacted")
+    }
+
+    @Test
+    fun `onPaymentMethodFormShown allows form interaction to fire again`() = runScenario {
+        repeat(3) {
+            paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        }
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.ConfirmButtonClicked,
+                reset = true,
+            )
+        )
+
+        eventReporter.onPaymentMethodFormInteraction(code = "card")
+        eventReporter.onPaymentMethodFormShown(code = "card")
+        eventReporter.onPaymentMethodFormInteraction(code = "card")
+
+        assertThat(analyticsEventTurbine.awaitItem())
+            .isEqualTo(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        assertThat(analyticsEventTurbine.awaitItem())
+            .isEqualTo(AnalyticEvent.DisplayedPaymentMethodForm("card"))
+        assertThat(analyticsEventTurbine.awaitItem())
+            .isEqualTo(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        assertThat(analyticsRequestExecutor.requestTurbine.awaitItem().params)
+            .containsEntry("event", "mc_form_interacted")
+        assertThat(analyticsRequestExecutor.requestTurbine.awaitItem().params)
+            .containsEntry("event", "mc_form_shown")
+        assertThat(analyticsRequestExecutor.requestTurbine.awaitItem().params)
+            .containsEntry("event", "mc_form_interacted")
+    }
+
+    @Test
     fun `onPaymentMethodFormCompleted fires event`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 
