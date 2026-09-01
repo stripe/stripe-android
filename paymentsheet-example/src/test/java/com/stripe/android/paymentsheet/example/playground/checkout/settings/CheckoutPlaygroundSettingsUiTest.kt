@@ -77,6 +77,8 @@ class CheckoutPlaygroundSettingsUiTest {
         initialConfiguration = CheckoutPlaygroundDefinitions.Controller.payment.appearance.lightColors.configuration,
     ) {
         val definition = CheckoutPlaygroundDefinitions.Controller.payment.appearance.lightColors.primary
+        settings.updateSerialized(definition, "")
+        composeRule.waitForIdle()
         page.value(definition).performClick()
 
         composeRule.onNodeWithText("Pick color").assertIsDisplayed().performClick()
