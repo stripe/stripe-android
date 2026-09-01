@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.childScope
+import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -59,15 +60,19 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
+        val bankFormInteractor = BankFormInteractor(
+            updateSelection = embeddedSelectionHolder::setSelection,
+            paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
+                paymentMethodMetadata.paymentMethodIncentive
+            ),
+        )
 
         return DefaultAddPaymentMethodInteractor(
             initiallySelectedPaymentMethodType = initialCode,
             selection = embeddedSelectionHolder.selection,
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
             validationRequested = sheetActivityStateHolder.validationRequested,
-            incentive = PaymentMethodIncentiveInteractor(
-                paymentMethodMetadata.paymentMethodIncentive
-            ).displayedIncentive,
+            incentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
             supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
             createFormArguments = formHelper::createFormArguments,
             formElementsForCode = formHelper::formElementsForCode,
@@ -79,7 +84,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
                 paymentMethodMessagePromotionsHelper.reportPromotionDisplayed(code, paymentMethodMetadata)
             },
             createUSBankAccountFormArguments = { code ->
-                createUsBankAccountFormArguments(code, hasSavedPaymentMethods)
+                createUsBankAccountFormArguments(code, hasSavedPaymentMethods, bankFormInteractor)
             },
             coroutineScope = coroutineScope,
             uiContext = Dispatchers.Main,
@@ -98,6 +103,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
     private fun createUsBankAccountFormArguments(
         paymentMethodCode: PaymentMethodCode,
         hasSavedPaymentMethods: Boolean,
+        bankFormInteractor: BankFormInteractor,
     ): USBankAccountFormArguments {
         return USBankAccountFormArguments.createForEmbedded(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -105,7 +111,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             isCompleteFlow = false,
             draftPaymentSelection = null,
-            setSelection = embeddedSelectionHolder::setSelection,
+            bankFormInteractor = bankFormInteractor,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,

@@ -210,6 +210,14 @@ internal class DefaultAddPaymentMethodInteractor(
         }
 
         coroutineScope.launch {
+            incentive.collect {
+                _state.value = _state.value.copy(
+                    incentive = it
+                )
+            }
+        }
+
+        coroutineScope.launch {
             validationRequested.collect {
                 withContext(uiContext) {
                     _state.value = _state.value.copy(
