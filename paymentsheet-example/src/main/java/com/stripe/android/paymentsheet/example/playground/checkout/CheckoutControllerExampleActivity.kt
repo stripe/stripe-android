@@ -84,31 +84,15 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             configured.scenario == CheckoutControllerExampleScenario.ShippingTax
                         val isComplete =
                             confirmationResult is CheckoutControllerExampleViewModel.ConfirmationResult.Completed
-                        val canEdit = configured.session != null && !isUpdating && !isComplete
-                        val canConfirm = if (isShippingScenario) {
-                            configured.session?.let { session ->
-                                session.shippingAddress != null &&
-                                    session.paymentOptionDisplayData != null &&
-                                    session.tax.status == Session.Tax.Status.Ready &&
-                                    !isUpdating &&
-                                    !isComplete
-                            } == true
-                        } else {
-                            !isUpdating && !isComplete
-                        }
-                        if (configured.scenario == CheckoutControllerExampleScenario.ShippingTax) {
-                            ShippingAddressButton(
-                                shippingAddressElement = shippingAddressElement,
-                                enabled = canEdit,
-                            )
-                        }
+                        val controlsEnabled = configured.session != null &&
+                            !isUpdating &&
+                            !(isShippingScenario && isComplete)
                         ConfirmationControls(
-                            scenario = configured.scenario,
-                            paymentOption = configured.session?.paymentOptionDisplayData,
+                            session = configured.session,
                             confirmationResult = confirmationResult,
                             onSelectPaymentMethod = paymentElement::present,
-                            selectPaymentMethodEnabled = canEdit,
-                            confirmEnabled = canConfirm,
+                            onEditShippingAddress = shippingAddressElement::present,
+                            controlsEnabled = controlsEnabled,
                             onConfirm = {
                                 viewModel.clearConfirmationResult()
                                 presenter.confirm()
@@ -132,18 +116,17 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 
 @Composable
 private fun ShippingAddressButton(
-    shippingAddressElement: ShippingAddressElement,
+    hasShippingAddress: Boolean,
+    onClick: () -> Unit,
     enabled: Boolean,
 ) {
-    Spacer(modifier = Modifier.height(8.dp))
     Button(
-        onClick = { shippingAddressElement.present() },
+        onClick = onClick,
         enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text("1. Add Shipping Address")
+        Text(if (hasShippingAddress) "Edit Shipping Address" else "Add Shipping Address")
     }
-    Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable
@@ -260,10 +243,10 @@ private fun ShippingTaxSummary(
         style = MaterialTheme.typography.h6,
     )
     Spacer(modifier = Modifier.height(8.dp))
-    Text("Complete each action in order, then verify persistence in Admin.")
+    Text("Review the session state, then verify persistence in Admin after completion.")
     Spacer(modifier = Modifier.height(16.dp))
     ActionStatus(
-        step = "1. Add shipping address",
+        step = "Shipping address",
         detail = if (session.shippingAddress != null) "Ready" else "Required",
         isReady = session.shippingAddress != null,
     )
@@ -273,12 +256,12 @@ private fun ShippingTaxSummary(
         isReady = session.tax.status == Session.Tax.Status.Ready,
     )
     ActionStatus(
-        step = "2. Select payment method",
+        step = "Payment method",
         detail = session.paymentOptionDisplayData?.label ?: "Required",
         isReady = session.paymentOptionDisplayData != null,
     )
     ActionStatus(
-        step = "3. Confirm session",
+        step = "Confirmation",
         detail = confirmationResult.confirmationDetail(),
         isReady = confirmationResult is CheckoutControllerExampleViewModel.ConfirmationResult.Completed,
     )
@@ -380,15 +363,14 @@ private fun VerificationRow(
 
 @Composable
 private fun ConfirmationControls(
-    scenario: CheckoutControllerExampleScenario,
-    paymentOption: PaymentOptionDisplayData?,
+    session: Session?,
     confirmationResult: CheckoutControllerExampleViewModel.ConfirmationResult?,
     onSelectPaymentMethod: () -> Unit,
-    selectPaymentMethodEnabled: Boolean,
-    confirmEnabled: Boolean,
+    onEditShippingAddress: () -> Unit,
+    controlsEnabled: Boolean,
     onConfirm: () -> Unit,
 ) {
-    PaymentOptionRow(paymentOption)
+    PaymentOptionRow(session?.paymentOptionDisplayData)
     confirmationResult?.let { result ->
         val message = when (result) {
             is CheckoutControllerExampleViewModel.ConfirmationResult.Completed -> null
@@ -407,30 +389,24 @@ private fun ConfirmationControls(
     Spacer(modifier = Modifier.height(8.dp))
     Button(
         onClick = onSelectPaymentMethod,
-        enabled = selectPaymentMethodEnabled,
+        enabled = controlsEnabled,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(
-            if (scenario == CheckoutControllerExampleScenario.ShippingTax) {
-                "2. Select Payment Method"
-            } else {
-                "Select Payment Method"
-            }
-        )
+        Text("Select Payment Method")
     }
+    Spacer(modifier = Modifier.height(8.dp))
+    ShippingAddressButton(
+        hasShippingAddress = session?.shippingAddress != null,
+        onClick = onEditShippingAddress,
+        enabled = controlsEnabled,
+    )
     Spacer(modifier = Modifier.height(8.dp))
     Button(
         onClick = onConfirm,
-        enabled = confirmEnabled,
+        enabled = controlsEnabled,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(
-            if (scenario == CheckoutControllerExampleScenario.ShippingTax) {
-                "3. Confirm Session"
-            } else {
-                "Confirm"
-            }
-        )
+        Text("Confirm")
     }
 }
 
