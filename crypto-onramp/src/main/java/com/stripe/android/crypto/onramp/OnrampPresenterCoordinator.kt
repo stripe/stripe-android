@@ -33,8 +33,6 @@ import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityArgs
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityContract
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityResult
-import com.stripe.android.crypto.onramp.ui.HTMLConfirmationCallbackReferences
-import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
@@ -50,7 +48,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
@@ -77,8 +74,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     )
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
-    private val htmlConfirmationIds = mutableSetOf<String>()
-
     private val paymentLauncherFactory: PaymentLauncherFactory = PaymentLauncherFactory(
         activityResultRegistryOwner = activity,
         lifecycleOwner = lifecycleOwner,
@@ -156,8 +151,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     verifyKycResultLauncher.unregister()
                     userAttestationResultLauncher.unregister()
                     termsAndConditionsResultLauncher.unregister()
-                    htmlConfirmationIds.forEach(HTMLConfirmationCallbackReferences::remove)
-                    htmlConfirmationIds.clear()
 
                     if (activity.isFinishing) {
                         OnrampCallbackReferences.remove(onrampCallbackIdentifier)
@@ -215,11 +208,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     presentHTMLConfirmation(
                         resultLauncher = userAttestationResultLauncher,
                         html = result.attestation.text,
-                        version = result.attestation.version,
+                        version = null,
                         appearance = result.appearance,
                         headingResId =
                             PaymentSheetR.string.stripe_link_onramp_carf_declaration_screen_title,
-                        onConfirm = ::confirmUserAttestation,
                     )
                 }
                 is OnrampStartUserAttestationResult.Failed -> {
@@ -242,7 +234,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                         appearance = result.appearance,
                         headingResId =
                             PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
-                        onConfirm = ::confirmTermsAndConditions,
                     )
                 }
                 OnrampStartTermsAndConditionsResult.NotRequired -> {
@@ -262,21 +253,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun presentHTMLConfirmation(
         resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
         html: String,
-        version: String,
+        version: String?,
         appearance: LinkAppearance?,
         @StringRes headingResId: Int,
-        onConfirm: suspend (HTMLConfirmationResult.Confirmed) -> Unit,
     ) {
-        val confirmationId = UUID.randomUUID().toString()
-        htmlConfirmationIds += confirmationId
-        HTMLConfirmationCallbackReferences[confirmationId] = { result ->
-            try {
-                onConfirm(result)
-            } finally {
-                HTMLConfirmationCallbackReferences.remove(confirmationId)
-                htmlConfirmationIds -= confirmationId
-            }
-        }
         resultLauncher.launch(
             HTMLConfirmationActivityArgs(
                 html = html,
@@ -287,7 +267,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     PaymentSheetR.string.stripe_link_onramp_carf_declaration_accept_button_text,
                 cancelButtonResId =
                     PaymentSheetR.string.stripe_link_onramp_carf_declaration_cancel_button_text,
-                confirmationId = confirmationId,
             )
         )
     }
@@ -457,39 +436,19 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     private fun handleUserAttestationResult(result: HTMLConfirmationActivityResult) {
-        clearHTMLConfirmationCallback(result)
-        if (result.confirmationHandled) {
-            return
-        }
         coroutineScope.launch {
-            confirmUserAttestation(result.result)
+            val attestationResult = interactor.handleUserAttestationResult(result.result)
+            onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
         }
     }
 
     private fun handleTermsAndConditionsResult(result: HTMLConfirmationActivityResult) {
-        clearHTMLConfirmationCallback(result)
-        if (result.confirmationHandled) {
-            return
-        }
         coroutineScope.launch {
-            confirmTermsAndConditions(result.result)
-        }
-    }
-
-    private suspend fun confirmUserAttestation(result: HTMLConfirmationResult) {
-        val attestationResult = interactor.handleUserAttestationResult(result)
-        onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
-    }
-
-    private suspend fun confirmTermsAndConditions(result: HTMLConfirmationResult) {
-        val termsAndConditionsResult = interactor.handleTermsAndConditionsResult(result)
-        onrampCallbacksState.termsAndConditionsCallback?.onResult(termsAndConditionsResult)
-    }
-
-    private fun clearHTMLConfirmationCallback(result: HTMLConfirmationActivityResult) {
-        result.confirmationId?.let {
-            HTMLConfirmationCallbackReferences.remove(it)
-            htmlConfirmationIds -= it
+            val termsAndConditionsResult = interactor.handleTermsAndConditionsResult(
+                result = result.result,
+                version = result.version,
+            )
+            onrampCallbacksState.termsAndConditionsCallback?.onResult(termsAndConditionsResult)
         }
     }
 

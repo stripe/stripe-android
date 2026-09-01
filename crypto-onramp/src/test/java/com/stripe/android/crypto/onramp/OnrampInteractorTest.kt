@@ -1897,9 +1897,7 @@ class OnrampInteractorTest {
             .thenReturn(Result.success(Unit))
 
         val result = interactor.handleUserAttestationResult(
-            HTMLConfirmationResult.Confirmed(
-                version = "2026-04-23",
-            )
+            HTMLConfirmationResult.Confirmed
         )
 
         assertThat(result).isInstanceOf(OnrampUserAttestationResult.Confirmed::class.java)
@@ -1922,9 +1920,8 @@ class OnrampInteractorTest {
             .thenReturn(Result.success(Unit))
 
         val result = interactor.handleTermsAndConditionsResult(
-            HTMLConfirmationResult.Confirmed(
-                version = "2026-08-27",
-            )
+            result = HTMLConfirmationResult.Confirmed,
+            version = "2026-08-27",
         )
 
         assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Accepted::class.java)
@@ -1940,9 +1937,8 @@ class OnrampInteractorTest {
         interactor.onLinkControllerState(mockLinkStateWithAccount(unverifiedAccount))
 
         val result = interactor.handleTermsAndConditionsResult(
-            HTMLConfirmationResult.Confirmed(
-                version = "2026-08-27",
-            )
+            result = HTMLConfirmationResult.Confirmed,
+            version = "2026-08-27",
         )
 
         assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Failed::class.java)
@@ -1954,7 +1950,8 @@ class OnrampInteractorTest {
     @Test
     fun testHandleTermsAndConditionsResultCancelled() = runTest {
         val result = interactor.handleTermsAndConditionsResult(
-            HTMLConfirmationResult.Cancelled
+            result = HTMLConfirmationResult.Cancelled,
+            version = null,
         )
 
         assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Cancelled::class.java)

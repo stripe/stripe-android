@@ -1035,7 +1035,7 @@ internal class OnrampInteractor @Inject constructor(
         result: HTMLConfirmationResult,
     ): OnrampUserAttestationResult = when (result) {
         HTMLConfirmationResult.Cancelled -> OnrampUserAttestationResult.Cancelled()
-        is HTMLConfirmationResult.Confirmed -> {
+        HTMLConfirmationResult.Confirmed -> {
             val secret = authenticatedConsumerSessionClientSecret()
             if (secret == null) {
                 val error = mapError(
@@ -1062,9 +1062,11 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun handleTermsAndConditionsResult(
         result: HTMLConfirmationResult,
+        version: String?,
     ): OnrampTermsAndConditionsResult = when (result) {
         HTMLConfirmationResult.Cancelled -> OnrampTermsAndConditionsResult.Cancelled()
-        is HTMLConfirmationResult.Confirmed -> {
+        HTMLConfirmationResult.Confirmed -> {
+            requireNotNull(version) { "Missing terms and conditions version." }
             val secret = authenticatedConsumerSessionClientSecret()
             if (secret == null) {
                 val error = mapError(
@@ -1076,7 +1078,7 @@ internal class OnrampInteractor @Inject constructor(
             } else {
                 cryptoApiRepository.confirmPartnerTerms(
                     secret,
-                    result.version,
+                    version,
                 ).fold(
                     onSuccess = {
                         analyticsService?.track(OnrampAnalyticsEvent.TermsAndConditionsCompleted)

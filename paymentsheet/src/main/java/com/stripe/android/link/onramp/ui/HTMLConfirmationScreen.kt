@@ -42,15 +42,10 @@ fun HTMLConfirmationScreen(
     html: String,
     confirmationButtonText: String,
     cancelButtonText: String,
-    isProcessing: Boolean,
     onClose: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    BackHandler {
-        if (!isProcessing) {
-            onClose()
-        }
-    }
+    BackHandler(onBack = onClose)
 
     DefaultLinkTheme(appearance = appearance) {
         Box(
@@ -83,7 +78,6 @@ fun HTMLConfirmationScreen(
                         )
                         TextButton(
                             onClick = onClose,
-                            enabled = !isProcessing,
                             modifier = Modifier.testTag(HTML_CONFIRMATION_CANCEL_BUTTON_TAG),
                         ) {
                             Text(
@@ -114,11 +108,7 @@ fun HTMLConfirmationScreen(
 
                     PrimaryButton(
                         label = confirmationButtonText,
-                        state = if (isProcessing) {
-                            PrimaryButtonState.Processing
-                        } else {
-                            PrimaryButtonState.Enabled
-                        },
+                        state = PrimaryButtonState.Enabled,
                         onButtonClick = onConfirm,
                         modifier = Modifier.fillMaxWidth()
                     )
