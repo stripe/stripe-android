@@ -50,7 +50,6 @@
     <ID>MagicNumber:Menu.kt:0.8f</ID>
     <ID>MaxLineLength:AndroidMenu.kt:*</ID>
     <ID>MaxLineLength:CardNumberControllerTest.kt:CardNumberControllerTest$fun</ID>
-    <ID>TooGenericExceptionCaught:PlacesClientProxy.kt:DefaultPlacesClientProxy$e: Exception</ID>
-    <ID>UtilityClassWithPublicConstructor:FieldValuesToParamsMapConverter.kt:FieldValuesToParamsMapConverter</ID>
+<ID>UtilityClassWithPublicConstructor:FieldValuesToParamsMapConverter.kt:FieldValuesToParamsMapConverter</ID>
   </CurrentIssues>
 </SmellBaseline>

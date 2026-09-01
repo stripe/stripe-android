@@ -6,7 +6,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +37,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
@@ -78,8 +76,7 @@ internal fun AutocompleteScreen(
 internal fun AutocompleteScreenUI(
     viewModel: AutocompleteViewModel,
     navigator: AddressElementNavigator,
-    attributionDrawable: Int? =
-        PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
+    attributionDrawable: Int? = null
 ) {
     LaunchedEffect(Unit) {
         viewModel.event.collectLatest { event ->

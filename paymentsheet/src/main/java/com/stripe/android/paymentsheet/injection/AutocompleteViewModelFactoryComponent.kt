@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.addresselement.AutocompleteViewModel
@@ -15,8 +16,10 @@ import javax.inject.Singleton
     modules = [
         CoreCommonModule::class,
         CoroutineContextModule::class,
+        StripeNetworkClientModule::class,
         StripeRepositoryModule::class,
         AutocompleteViewModelModule::class,
+        PaymentSheetAutocompleteModule::class,
     ]
 )
 internal interface AutocompleteViewModelFactoryComponent {

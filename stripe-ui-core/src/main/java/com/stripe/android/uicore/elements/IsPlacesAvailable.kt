@@ -9,12 +9,5 @@ fun interface IsPlacesAvailable {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultIsPlacesAvailable : IsPlacesAvailable {
-    override fun invoke(): Boolean {
-        return try {
-            Class.forName("com.google.android.libraries.places.api.Places")
-            true
-        } catch (_: Exception) {
-            false
-        }
-    }
+    override fun invoke(): Boolean = true
 }

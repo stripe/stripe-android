@@ -8,11 +8,12 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.addresselement.AutocompleteViewModel
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -56,14 +57,14 @@ internal interface AutocompleteViewModelModule {
 
         @Provides
         @Singleton
-        internal fun provideGooglePlacesClient(
-            context: Context,
-            args: AutocompleteContract.Args
-        ): PlacesClientProxy = PlacesClientProxy.create(
-            context = context,
-            googlePlacesApiKey = args.googlePlacesApiKey,
-            errorReporter = ErrorReporter.createFallbackInstance(context),
-        )
+        internal fun providePlacesClient(
+            stripeAutocompleteRepository: StripeAutocompleteRepository,
+            eventReporter: AddressLauncherEventReporter,
+        ): PlacesClientProxy = PlacesClientProxy.override
+            ?: StripeHostedPlacesClientProxy(
+                repository = stripeAutocompleteRepository,
+                eventReporter = eventReporter,
+            )
 
         @Provides
         @Singleton

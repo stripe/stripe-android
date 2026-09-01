@@ -65,8 +65,6 @@ dependencies {
     // Other
     implementation libs.playServicesWallet
     implementation libs.material
-    compileOnly libs.places
-
     // Tooling support (Previews, etc.)
     implementation libs.compose.uiToolingPreview
     debugImplementation libs.compose.uiTooling
@@ -116,7 +114,6 @@ dependencies {
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation project(':payment-element-test-pages')
 
-    androidTestImplementation libs.places
     androidTestImplementation libs.terminal.core
     androidTestImplementation libs.terminal.tapToPay
     androidTestImplementation testLibs.androidx.composeUi

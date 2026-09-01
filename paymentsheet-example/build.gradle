@@ -12,10 +12,6 @@ def getBackendUrl() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_BACKEND_URL') ?: ""
 }
 
-def getGooglePlacesApiKey() {
-    return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
-}
-
 def getProxyIpAddress() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_PROXY_IP_ADDRESS') ?: ""
 }
@@ -80,7 +76,6 @@ android {
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),
-                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey(),
                 SENTRY_DSN: getSentryDsn(),
                 USES_CLEARTEXT_TRAFFIC: usesCleartextTraffic(),
         ]
@@ -145,7 +140,6 @@ dependencies {
     implementation libs.loggingInterceptor
     implementation libs.material
     implementation libs.okio
-    implementation libs.places
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.zxing
 
