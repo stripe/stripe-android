@@ -1,6 +1,6 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
@@ -13,6 +13,9 @@ NEXT_VERSION_BUMP: PATCH
 * [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
 * [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
 * [FIXED][13323](https://github.com/stripe/stripe-android/pull/13323) Fixed an issue where selecting "Not you?" during Link 2FA did not fully log out the previous account, preventing subsequent logins.
+
+### CryptoOnramp
+* [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
 
 ## 23.17.0 - 2026-08-24
 
