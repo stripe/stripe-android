@@ -52,7 +52,7 @@ class BsbElement(
     }
 }
 
-internal val auBecsDebitBanks: List<BecsDebitBanks.Bank> = listOf(
+private val auBecsDebitBanks: List<BecsDebitBanks.Bank> = listOf(
     BecsDebitBanks.Bank("00", "Stripe Test Bank"),
     BecsDebitBanks.Bank("10", "BankSA (division of Westpac Bank)"),
     BecsDebitBanks.Bank("11", "St George Bank (division of Westpac Bank)"),
