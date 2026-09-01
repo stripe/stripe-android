@@ -56,6 +56,32 @@ private val mobilePayWithBillingAddressExpectedPaymentMethodParams = PaymentMeth
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
+private val mobilePayAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.MobilePay.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line2 = null,
+                country = "DK",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.MobilePay.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "country" to "DK",
+                ),
+            ),
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
 internal val mobilePayTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "MobilePay Never",
@@ -86,6 +112,17 @@ internal val mobilePayTestCases = listOf(
             optionsParams = null,
             extraParams = null,
         ),
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "MobilePay AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.MobilePay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = mobilePayFullRawValues,
+        expectedParams = mobilePayAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "MobilePay Full",

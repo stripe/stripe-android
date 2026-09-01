@@ -33,17 +33,20 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): CommonConfiguration = createCommonConfiguration(
-        configuration = configuration,
-        checkoutSessionResponse = checkoutSessionResponse,
-        collectedDetails = collectedDetails,
-        googlePayConfiguration =
-            configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse),
-        linkConfiguration = configuration.expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
-        billingDetailsCollectionConfiguration = configuration.expressCheckoutElementConfiguration
-            .billingDetailsCollectionConfiguration
-            .asPaymentSheet(requiresBillingAddress = checkoutSessionResponse.requiresBillingAddress),
-    )
+    ): CommonConfiguration? {
+        val expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration ?: return null
+        return createCommonConfiguration(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
+            googlePayConfiguration =
+                configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse),
+            linkConfiguration = expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
+            billingDetailsCollectionConfiguration = expressCheckoutElementConfiguration
+                .billingDetailsCollectionConfiguration
+                .asPaymentSheet(requiresBillingAddress = checkoutSessionResponse.requiresBillingAddress),
+        )
+    }
 
     fun createForPaymentElement(
         configuration: CheckoutController.Configuration.State,

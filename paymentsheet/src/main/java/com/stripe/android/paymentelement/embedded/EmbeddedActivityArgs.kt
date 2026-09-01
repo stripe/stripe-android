@@ -15,12 +15,13 @@ import kotlinx.parcelize.Parcelize
 internal data class EmbeddedActivityArgs(
     val paymentMethodMetadata: PaymentMethodMetadata,
     val configuration: EmbeddedPaymentElement.Configuration,
+    val productUsage: Set<String>,
     val paymentElementCallbackIdentifier: String,
     val statusBarColor: Int?,
     val selection: PaymentSelection?,
     val previousNewSelections: Bundle,
     val customerState: CustomerState?,
-    val promotion: PaymentMethodMessagePromotion?,
+    val promotions: List<PaymentMethodMessagePromotion>,
     val launchMode: EmbeddedLaunchMode,
 ) : Parcelable {
     companion object {

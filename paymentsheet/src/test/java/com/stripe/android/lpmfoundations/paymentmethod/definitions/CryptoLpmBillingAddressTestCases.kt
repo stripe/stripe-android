@@ -47,6 +47,34 @@ private val cryptoAutomaticWithoutTaxExpectedParams = LpmBillingAddressFormParam
     extraParams = null,
 )
 
+private val cryptoAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.Crypto.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line2 = null,
+                country = "GB",
+                postalCode = "NW16XE",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.Crypto.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "country" to "GB",
+                    "postal_code" to "NW16XE",
+                ),
+            ),
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
 private val cryptoFullExpectedParams = LpmBillingAddressFormParams(
     createParams = PaymentMethodCreateParams.createWithOverride(
         code = PaymentMethod.Type.Crypto.code,
@@ -102,6 +130,17 @@ internal val cryptoTestCases = listOf(
         ),
         rawValues = cryptoRawValues,
         expectedParams = cryptoAutomaticWithoutTaxExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Crypto AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Crypto,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = cryptoRawValues,
+        expectedParams = cryptoAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Crypto Full",

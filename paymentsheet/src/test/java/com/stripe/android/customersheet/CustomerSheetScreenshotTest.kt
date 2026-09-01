@@ -44,6 +44,7 @@ import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -83,6 +84,8 @@ internal class CustomerSheetScreenshotTest {
 
     private val closeInteractorRule = CleanupTestRule(UpdatePaymentMethodInteractor::close)
 
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
     val ruleChain: RuleChain = RuleChain.emptyRuleChain()
         .around(closeInteractorRule)
@@ -91,6 +94,7 @@ internal class CustomerSheetScreenshotTest {
         .around(scopedThemePaparazzi)
         .around(localeRule)
         .around(coroutineRule)
+        .around(coroutineScopeCleanupRule)
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
@@ -146,7 +150,7 @@ internal class CustomerSheetScreenshotTest {
             ).formElementsForCode(
                 code = PaymentMethod.Type.Card.code,
                 uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                    coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                     linkConfigurationCoordinator = null,
                     onLinkInlineSignupStateChanged = {},

@@ -1385,6 +1385,21 @@ constructor(
 
         @JvmStatic
         @JvmOverloads
+        fun createSequra(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Sequra,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
         fun createPayByBank(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
@@ -1392,6 +1407,21 @@ constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.PayByBank,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createPayco(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Payco,
                 billingDetails = billingDetails,
                 metadata = metadata,
                 allowRedisplay = allowRedisplay,

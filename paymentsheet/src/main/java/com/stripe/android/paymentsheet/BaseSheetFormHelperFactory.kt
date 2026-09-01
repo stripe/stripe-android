@@ -10,6 +10,13 @@ import kotlinx.coroutines.CoroutineScope
 internal class BaseSheetFormHelperFactory(
     private val viewModel: BaseSheetViewModel,
 ) {
+    private val formFactory = PaymentMethodFormFactory(
+        linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
+        cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
+        savedStateHandle = viewModel.savedStateHandle,
+        isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
+    )
+
     fun create(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -17,47 +24,23 @@ internal class BaseSheetFormHelperFactory(
         shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean,
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
     ): FormHelper {
-        return DefaultFormHelper(
-            coroutineScope = coroutineScope,
-            linkInlineHandler = linkInlineHandler,
-            paymentMethodMetadata = paymentMethodMetadata,
-            selectionUpdater = viewModel::updateSelection,
-            eventReporter = viewModel.eventReporter,
-            savedStateHandle = viewModel.savedStateHandle,
-            formDefinitionFactory = createFormDefinitionFactory(
+        return formFactory.createFormHelper(
+            PaymentMethodFormFactory.FormHelperArguments(
                 coroutineScope = coroutineScope,
-                paymentMethodMetadata = paymentMethodMetadata,
                 linkInlineHandler = linkInlineHandler,
+                paymentMethodMetadata = paymentMethodMetadata,
+                newPaymentSelectionProvider = { viewModel.newPaymentSelection },
+                selectionUpdater = viewModel::updateSelection,
+                eventReporter = viewModel.eventReporter,
+                setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
                 automaticallyLaunchedCardScanFormDataHelper = createAutomaticallyLaunchedCardScanFormDataHelper(
                     shouldCreate = shouldCreateAutomaticallyLaunchedCardScanFormDataHelper,
                     paymentMethodMetadata = paymentMethodMetadata,
                 ),
+                tapToAddHelper = viewModel.tapToAddHelper,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
-            ),
-        )
-    }
-
-    private fun createFormDefinitionFactory(
-        coroutineScope: CoroutineScope,
-        paymentMethodMetadata: PaymentMethodMetadata,
-        linkInlineHandler: LinkInlineHandler,
-        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
-        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
-    ): FormDefinitionFactory {
-        return DefaultFormDefinitionFactory(
-            coroutineScope = coroutineScope,
-            linkInlineHandler = linkInlineHandler,
-            cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
-            paymentMethodMetadata = paymentMethodMetadata,
-            newPaymentSelectionProvider = { viewModel.newPaymentSelection },
-            linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
-            setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
-            autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-            isLinkUI = false,
-            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
-            tapToAddHelper = viewModel.tapToAddHelper,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
-            isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
+                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
+            )
         )
     }
 

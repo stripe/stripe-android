@@ -32,6 +32,40 @@ private val payPalTypeOnlyExpectedParams = LpmBillingAddressFormParams(
     extraParams = null,
 )
 
+private val payPalAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.PayPal.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line1 = "510 Townsend St",
+                line2 = null,
+                city = "San Francisco",
+                state = "CA",
+                country = "US",
+                postalCode = "94103",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.PayPal.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "line1" to "510 Townsend St",
+                    "city" to "San Francisco",
+                    "state" to "CA",
+                    "country" to "US",
+                    "postal_code" to "94103",
+                ),
+            ),
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
 private val payPalFullExpectedParams = LpmBillingAddressFormParams(
     createParams = PaymentMethodCreateParams.createWithOverride(
         code = PaymentMethod.Type.PayPal.code,
@@ -140,6 +174,17 @@ internal val payPalTestCases = listOf(
         ),
         rawValues = payPalRawValues,
         expectedParams = payPalTypeOnlyExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "PayPal AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.PayPal,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = payPalRawValues,
+        expectedParams = payPalAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "PayPal Full PaymentIntent automatic terms",

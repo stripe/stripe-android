@@ -136,6 +136,12 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun `createPayco() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createPayco().toParamMap())
+            .isEqualTo(mapOf("type" to "payco"))
+    }
+
+    @Test
     fun auBecsDebit_toParamMap_shouldCreateExpectedMap() {
         assertThat(PaymentMethodCreateParamsFixtures.AU_BECS_DEBIT.toParamMap())
             .isEqualTo(

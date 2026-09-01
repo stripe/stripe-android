@@ -16,18 +16,30 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 
 @RunWith(RobolectricTestParameterInjector::class)
 internal class LpmBillingAddressFormValuesToParamsTest {
+    private val viewModelStoreRule = ViewModelStoreTestRule()
+
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
-    val viewModelStoreRule = ViewModelStoreTestRule()
+    val ruleChain: RuleChain = RuleChain.outerRule(viewModelStoreRule)
+        .around(coroutineScopeCleanupRule)
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
 
     @Test
     fun `creates the expected form params`(
@@ -63,13 +75,19 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     }
 
     @Test
-    fun `covers every billing mode for every payment method`() {
+    fun `covers every preservation billing mode for every payment method`() {
         lpmBillingAddressTestConfigurations
             .groupBy { it.paymentMethodType }
             .values
             .forEach { configs ->
                 assertThat(configs.map { it.billingDetailsCollectionMode })
-                    .containsAtLeastElementsIn(LpmBillingDetailsCollectionMode.entries)
+                    .containsAtLeastElementsIn(
+                        listOf(
+                            LpmBillingDetailsCollectionMode.Never,
+                            LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+                            LpmBillingDetailsCollectionMode.Full,
+                        )
+                    )
             }
     }
 
@@ -99,6 +117,7 @@ internal class LpmBillingAddressFormValuesToParamsTest {
             metadata.formElementsForCode(
                 code = paymentMethodType.code,
                 uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(
+                    coroutineScope = coroutineScope,
                     initialValues = initialValues,
                 ),
             ),
@@ -189,11 +208,13 @@ internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(cryptoTestCases)
     addAll(grabPayTestCases)
     addAll(payByBankTestCases)
+    addAll(paycoTestCases)
     addAll(payNowTestCases)
     addAll(payPayTestCases)
     addAll(payPalTestCases)
     addAll(revolutPayTestCases)
     addAll(satispayTestCases)
+    addAll(sequraTestCases)
     addAll(sunbitTestCases)
     addAll(swishTestCases)
     addAll(twintTestCases)

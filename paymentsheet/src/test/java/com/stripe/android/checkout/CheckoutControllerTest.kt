@@ -399,25 +399,24 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `clearPaymentOption clears paymentOptionDisplayData`() = runTest {
-        val savedStateHandle = parentHandleWithState(
-            CheckoutControllerStateFactory.create(
-                paymentSelection = PaymentSelection.GooglePay,
-                temporarySelection = "card",
-                previousNewSelections = Bundle().apply {
-                    putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-                },
-            )
-        )
-
-        val controller = createController(savedStateHandle)
+    fun `clearPaymentOption clears payment option state`() = runMutationScenario(
+        paymentSelection = PaymentSelection.GooglePay,
+        temporarySelection = "card",
+        previousNewSelections = Bundle().apply {
+            putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        },
+    ) {
         controller.session.test {
             assertThat(awaitItem()?.paymentOptionDisplayData).isNotNull()
 
-            assertThat(controller.clearPaymentOption().isSuccess).isTrue()
+            controller.clearPaymentOption().getOrThrow()
 
             assertThat(requireNotNull(awaitItem()).paymentOptionDisplayData).isNull()
         }
+        val clearedState = committedState()
+        assertThat(clearedState.paymentSelection).isNull()
+        assertThat(clearedState.temporarySelection).isNull()
+        assertThat(clearedState.previousNewSelections.isEmpty).isTrue()
     }
 
     @Test
@@ -446,7 +445,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `clearPaymentOption returns failure and preserves selection while a mutation is in flight`() =
+    fun `clearPaymentOption waits for an in-flight mutation before clearing the selection`() =
         runMutationScenario(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION) {
             val holdResponse = CountDownLatch(1)
             networkRule.checkoutUpdate(
@@ -457,17 +456,15 @@ internal class CheckoutControllerTest {
             }
             val mutation = async { controller.applyPromotionCode("10OFF") }
             testScheduler.advanceUntilIdle()
+            val clearPaymentOption = async { controller.clearPaymentOption() }
+            testScheduler.advanceUntilIdle()
 
-            val result = controller.clearPaymentOption()
-
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).hasMessageThat()
-                .isEqualTo("Cannot mutate checkout session while another mutation is in progress.")
             assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
 
             holdResponse.countDown()
             assertThat(mutation.await().isSuccess).isTrue()
-            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+            assertThat(clearPaymentOption.await().isSuccess).isTrue()
+            assertThat(controller.session.value?.paymentOptionDisplayData).isNull()
         }
 
     @Test
@@ -1243,6 +1240,8 @@ internal class CheckoutControllerTest {
     private fun runMutationScenario(
         initModifier: (JSONObject) -> Unit = {},
         paymentSelection: PaymentSelection? = null,
+        temporarySelection: String? = null,
+        previousNewSelections: Bundle = Bundle(),
         sheetIsOpen: Boolean = false,
         assertLoadingConsumed: Boolean = false,
         block: suspend MutationScenario.() -> Unit,
@@ -1257,6 +1256,10 @@ internal class CheckoutControllerTest {
         val controller = setup.controller
         controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
         paymentSelection?.let(setup.stateHolder::setSelection)
+        temporarySelection?.let(setup.stateHolder::setTemporarySelection)
+        if (!previousNewSelections.isEmpty) {
+            setup.stateHolder.setPreviousNewSelections(previousNewSelections)
+        }
         setup.sheetStateHolder.sheetIsOpen = sheetIsOpen
 
         turbineScope {

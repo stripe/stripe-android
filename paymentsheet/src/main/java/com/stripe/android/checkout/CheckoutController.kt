@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.graphics.drawable.Drawable
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
@@ -283,18 +284,6 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    private fun requireMutableState(): kotlin.Result<Unit> {
-        stateHolder.state
-            ?: return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session before it is configured.")
-            )
-        return if (sheetStateHolder.sheetIsOpen) {
-            integrationLaunchedFailure()
-        } else {
-            kotlin.Result.success(Unit)
-        }
-    }
-
     private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
         IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
     )
@@ -338,18 +327,20 @@ class CheckoutController @Inject internal constructor(
      * Clears the customer's selected payment option, resetting it to `null`.
      *
      * Returns [kotlin.Result.failure] if the session hasn't been configured yet, a payment flow is
-     * currently presented, or another mutation or confirmation is in progress.
+     * currently presented.
      */
-    fun clearPaymentOption(): kotlin.Result<Unit> {
-        return requireMutableState().fold(
-            onSuccess = {
-                operationCoordinator.runSynchronousMutation {
-                    stateHolder.clearSelection()
-                    kotlin.Result.success(Unit)
-                }
+    suspend fun clearPaymentOption(): kotlin.Result<Unit> {
+        return withCheckoutState(
+            additionalStateMutations = {
+                copy(
+                    paymentSelection = null,
+                    temporarySelection = null,
+                    previousNewSelections = Bundle(),
+                )
             },
-            onFailure = { kotlin.Result.failure(it) },
-        )
+        ) {
+            kotlin.Result.success(checkoutSessionResponse)
+        }
     }
 
     /**
@@ -826,8 +817,7 @@ class CheckoutController @Inject internal constructor(
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration? = null
         private var shippingAddressElementConfiguration: ShippingAddressElement.Configuration? = null
-        private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration =
-            ExpressCheckoutElement.Configuration()
+        private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration? = null
 
         /**
          * Sets the merchant display name shown to the customer during checkout.
@@ -894,7 +884,7 @@ class CheckoutController @Inject internal constructor(
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State?,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State?,
-            val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
+            val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
         ) : Parcelable
 
         internal fun build(): State {
@@ -904,7 +894,7 @@ class CheckoutController @Inject internal constructor(
                 paymentElementConfiguration = paymentElementConfiguration.build(),
                 currencySelectorElementConfiguration = currencySelectorElementConfiguration?.build(),
                 shippingAddressElementConfiguration = shippingAddressElementConfiguration?.build(),
-                expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
+                expressCheckoutElementConfiguration = expressCheckoutElementConfiguration?.build(),
                 defaults = defaultsState,
             )
         }

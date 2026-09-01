@@ -2203,15 +2203,6 @@ public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPri
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding : androidx/viewbinding/ViewBinding {
-	public final field googlePayButtonLayout Landroid/widget/RelativeLayout;
-	public final field googlePayPaymentButton Lcom/google/android/gms/wallet/button/PayButton;
-	public final field googlePayPrimaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
-}
-
 public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public static final field $stable I
 	public fun <init> (ILjava/lang/String;)V

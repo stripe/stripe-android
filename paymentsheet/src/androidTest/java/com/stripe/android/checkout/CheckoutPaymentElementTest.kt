@@ -1,12 +1,14 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
@@ -23,7 +25,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -170,6 +172,20 @@ internal class CheckoutPaymentElementTest {
         runCashAppPaymentOptionsTaxUpdateTest(PaymentElement.Configuration.PaymentMethodLayout.Horizontal)
     }
 
+    @Test
+    fun testPrefilledCashAppTaxUpdateFromVerticalPaymentOptionsRefreshesCheckoutSession() {
+        runPrefilledCashAppPaymentOptionsTaxUpdateTest(
+            PaymentElement.Configuration.PaymentMethodLayout.Vertical
+        )
+    }
+
+    @Test
+    fun testPrefilledCashAppTaxUpdateFromHorizontalPaymentOptionsRefreshesCheckoutSession() {
+        runPrefilledCashAppPaymentOptionsTaxUpdateTest(
+            PaymentElement.Configuration.PaymentMethodLayout.Horizontal
+        )
+    }
+
     private fun runPaymentOptionsTaxUpdateTest(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
     ) {
@@ -200,6 +216,32 @@ internal class CheckoutPaymentElementTest {
     private fun runCashAppPaymentOptionsTaxUpdateTest(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
     ) {
+        runAutomaticTaxTest(
+            paymentMethodLayout = paymentMethodLayout,
+            checkoutInitResponse = automaticTaxResponseWithoutRequiredBilling(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+        ) { context, controller ->
+            context.presentPaymentOptions()
+            selectCashApp(paymentMethodLayout)
+            formPage.waitUntilVisible()
+
+            enqueueTaxUpdate(automaticTaxResponseWithoutRequiredBilling(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+            fillOutBillingDetails()
+            formPage.clickPrimaryButton()
+
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            assertThat(controller.session.value?.tax?.status)
+                .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+            contentPage.assertHasSelectedLpm("cashapp")
+            context.markTestSucceeded()
+        }
+    }
+
+    private fun runPrefilledCashAppPaymentOptionsTaxUpdateTest(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ) {
         enqueueTaxUpdate(automaticTaxResponseWithoutRequiredBilling(INITIAL_TOTAL, TAX_STATUS_COMPLETE))
         runAutomaticTaxTest(
             configuration = checkoutConfigurationWithDefaultBillingAddress(paymentMethodLayout),
@@ -208,20 +250,38 @@ internal class CheckoutPaymentElementTest {
                 TAX_STATUS_REQUIRES_LOCATION,
             ),
         ) { context, controller ->
-            contentPage.clickOnLpm("cashapp")
-            contentPage.assertHasSelectedLpm("cashapp")
-            assertThat(formPage.isVisible()).isFalse()
+            context.presentPaymentOptions()
+            selectCashApp(paymentMethodLayout)
+            formPage.waitUntilVisible()
+            assertBillingDetailsArePopulated()
 
             enqueueTaxUpdate(automaticTaxResponseWithoutRequiredBilling(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
-            context.presentPaymentOptions()
-            waitForPaymentOptionsLayout(paymentMethodLayout)
-            clickPaymentOptionsPrimaryButton()
+            formPage.clickPrimaryButton()
 
             waitForSessionTotal(controller, UPDATED_TOTAL)
             assertThat(controller.session.value?.tax?.status)
                 .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("cashapp")
             context.markTestSucceeded()
+        }
+    }
+
+    private fun selectCashApp(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ) {
+        when (paymentMethodLayout) {
+            PaymentElement.Configuration.PaymentMethodLayout.Vertical -> {
+                verticalModePage.clickNewPaymentMethodButton("cashapp")
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> {
+                val cashAppTag = TEST_TAG_LIST + "cashapp"
+                testRules.compose.onNodeWithTag(TEST_TAG_LIST, useUnmergedTree = true)
+                    .performScrollToNode(hasTestTag(cashAppTag))
+                testRules.compose.onNodeWithTag(cashAppTag).performClick()
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Automatic -> {
+                error("Expected an explicit layout.")
+            }
         }
     }
 
@@ -318,10 +378,10 @@ internal class CheckoutPaymentElementTest {
     private fun clickPaymentOptionsPrimaryButton() {
         testRules.compose.waitUntil(timeoutMillis = 5_000) {
             testRules.compose.onAllNodes(
-                hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(isEnabled())
+                hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
             ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
-        testRules.compose.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+        testRules.compose.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
             .performScrollTo()
             .performClick()
     }
@@ -340,11 +400,24 @@ internal class CheckoutPaymentElementTest {
 
     private fun fillOutCardAndBillingDetails() {
         formPage.fillOutCardDetails()
+        fillOutBillingDetails()
+    }
+
+    private fun fillOutBillingDetails() {
+        billingDetailsPage.country.assertTextContains("United States")
         billingDetailsPage.line1.performTextReplacement(BILLING_ADDRESS_LINE_ONE)
         billingDetailsPage.city.performTextReplacement(BILLING_ADDRESS_CITY)
         billingDetailsPage.state.performScrollTo().performClick()
         testRules.compose.onNodeWithText("California").performClick()
         billingDetailsPage.zipCode.performTextReplacement(BILLING_ADDRESS_ZIP)
+    }
+
+    private fun assertBillingDetailsArePopulated() {
+        billingDetailsPage.country.performScrollTo().assertTextContains("United States")
+        billingDetailsPage.line1.performScrollTo().assertTextContains(BILLING_ADDRESS_LINE_ONE)
+        billingDetailsPage.city.performScrollTo().assertTextContains(BILLING_ADDRESS_CITY)
+        billingDetailsPage.state.performScrollTo().assertTextContains("California")
+        billingDetailsPage.zipCode.performScrollTo().assertTextContains(BILLING_ADDRESS_ZIP)
     }
 
     private fun waitForSessionTotal(controller: CheckoutController, total: Long) {

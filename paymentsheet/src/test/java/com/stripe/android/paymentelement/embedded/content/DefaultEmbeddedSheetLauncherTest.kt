@@ -74,12 +74,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = null,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = promotion,
+            promotions = listOf(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -399,12 +400,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = PaymentSelection.GooglePay,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
         )
 
@@ -578,12 +580,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
 
@@ -809,6 +812,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 customerStateHolder = customerStateHolder,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
+                productUsage = setOf("EmbeddedPaymentElement"),
                 statusBarColor = null,
                 paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                 embeddedResultCallbackHelper = callbackHelper,

@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FieldValidationMessage
@@ -14,10 +15,12 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
@@ -28,12 +31,17 @@ class CardDetailsElementTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val coroutineScope = CoroutineScope(testDispatcher)
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(testDispatcher))
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
+    private val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+    val ruleChain: RuleChain = RuleChain.outerRule(coroutineTestRule)
+        .around(coroutineScopeCleanupRule)
 
     @Test
     fun `test form field values returned and expiration date parsing`() = runTest {

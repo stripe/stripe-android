@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
-import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.update
@@ -128,8 +127,11 @@ internal class USBankAccountFormArguments(
             paymentMethodMetadata: PaymentMethodMetadata,
             selectedPaymentMethodCode: String,
             hostedSurface: String,
-            setSelection: (PaymentSelection?) -> Unit,
+            isCompleteFlow: Boolean,
+            draftPaymentSelection: PaymentSelection?,
+            bankFormInteractor: BankFormInteractor,
             hasSavedPaymentMethods: Boolean,
+            autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
             onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
             onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
@@ -143,27 +145,20 @@ internal class USBankAccountFormArguments(
                 hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
-            val bankFormInteractor = BankFormInteractor(
-                updateSelection = setSelection,
-                paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
-                    paymentMethodMetadata.paymentMethodIncentive
-                )
-            )
-
             return USBankAccountFormArguments(
                 showCheckbox = isSaveForFutureUseValueChangeable && instantDebits.not(),
                 hostedSurface = hostedSurface,
                 instantDebits = instantDebits,
                 linkMode = paymentMethodMetadata.linkMode,
                 onBehalfOf = paymentMethodMetadata.onBehalfOf,
-                isCompleteFlow = false,
+                isCompleteFlow = isCompleteFlow,
                 isPaymentFlow = paymentMethodMetadata.stripeIntent is PaymentIntent,
                 stripeIntentId = paymentMethodMetadata.stripeIntent.id,
                 clientSecret = paymentMethodMetadata.stripeIntent.clientSecret,
                 shippingDetails = paymentMethodMetadata.shippingDetails,
-                draftPaymentSelection = null,
+                draftPaymentSelection = draftPaymentSelection,
                 onMandateTextChanged = onMandateTextChanged,
-                autocompleteAddressInteractorFactory = null,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 onAnalyticsEvent = onAnalyticsEvent,
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = onUpdatePrimaryButtonUIState,

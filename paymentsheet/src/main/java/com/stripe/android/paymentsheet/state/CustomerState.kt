@@ -65,6 +65,7 @@ internal class CreateCustomerState @Inject constructor(
                     paymentMethods = state.paymentMethods,
                     params = PaymentMethodFilter.FilterParams(
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
+                        requiresBillingAddressForAutomaticTax = metadata.requiresBillingAddressForAutomaticTax,
                         customerMetadata = customerMetadata,
                         cardBrandFilter = metadata.cardBrandFilter,
                         cardFundingFilter = metadata.cardFundingFilter,

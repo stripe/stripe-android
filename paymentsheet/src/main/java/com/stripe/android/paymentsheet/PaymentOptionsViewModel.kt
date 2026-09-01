@@ -29,7 +29,6 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
 import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -323,14 +322,16 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 val linkBrand =
                     linkConfiguration.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
                 _paymentOptionsActivityResult.tryEmit(
-                    PaymentOptionsActivityResult.Succeeded(
-                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                    PaymentOptionsResultFactory.createSucceeded(
                         paymentSelection = Link(
                             brand = linkBrand,
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),
-                        paymentMethods = customerStateHolder.paymentMethods.value
+                        initialPaymentSelection = args.state.paymentSelection,
+                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                        paymentMethods = customerStateHolder.paymentMethods.value,
+                        autocompleteFilledAddress = autocompleteFilledAddress,
                     )
                 )
             }
@@ -347,31 +348,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override fun onUserCancel() {
         eventReporter.onDismiss()
         _paymentOptionsActivityResult.tryEmit(
-            PaymentOptionsActivityResult.Canceled(
+            PaymentOptionsResultFactory.createCanceled(
+                initialPaymentSelection = args.state.paymentSelection,
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                mostRecentError = null,
-                paymentSelection = determinePaymentSelectionUponCancel(),
                 paymentMethods = customerStateHolder.paymentMethods.value,
             )
         )
-    }
-
-    private fun determinePaymentSelectionUponCancel(): PaymentSelection? {
-        val initialSelection = args.state.paymentSelection?.withLinkDetails()
-
-        return if (initialSelection is PaymentSelection.Saved) {
-            initialSelection.takeIfStillValid()
-        } else {
-            initialSelection
-        }
-    }
-
-    private fun PaymentSelection.Saved.takeIfStillValid(): PaymentSelection.Saved? {
-        val paymentMethods = customerStateHolder.paymentMethods.value
-        val paymentMethod = paymentMethods.firstOrNull { it.id == paymentMethod.id }
-        return paymentMethod?.let {
-            this.copy(paymentMethod = it)
-        }
     }
 
     override fun onError(error: ResolvableString?) {
@@ -401,9 +383,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 )
             } else {
                 _paymentOptionsActivityResult.tryEmit(
-                    PaymentOptionsActivityResult.Succeeded(
+                    PaymentOptionsResultFactory.createSucceeded(
+                        initialPaymentSelection = args.state.paymentSelection,
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                        paymentSelection = paymentSelection.withLinkDetails(),
+                        paymentSelection = paymentSelection,
                         paymentMethods = customerStateHolder.paymentMethods.value,
                         autocompleteFilledAddress = autocompleteFilledAddress,
                     )
@@ -416,24 +399,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         viewModelScope.launch {
             validationRequested.emit(Unit)
         }
-    }
-
-    /**
-     * - Updates the [PaymentSelection], if Link, to include the current [LinkAccount] if it exists.
-     * - Preserves the previously selected payment method, if any, in case none is selected in this launch.
-     */
-    private fun PaymentSelection.withLinkDetails(): PaymentSelection = when (this) {
-        is Link -> when (linkAccountHolder.linkAccountInfo.value.account) {
-            // If link account is null, clear account status and selected payment from payment selection
-            null -> copy(
-                selectedPayment = null
-            )
-            // If link account exists, include it in the payment selection and keep the previously selected payment.
-            else -> copy(
-                selectedPayment = (selectedPayment ?: (args.state.paymentSelection as? Link)?.selectedPayment)
-            )
-        }
-        else -> this
     }
 
     private fun shouldShowLinkVerification(

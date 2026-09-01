@@ -71,12 +71,13 @@ internal class CheckoutSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("Checkout"),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             statusBarColor = null,
             selection = null,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = promotion,
+            promotions = listOf(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -363,12 +364,13 @@ internal class CheckoutSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("Checkout"),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             statusBarColor = null,
             selection = PaymentSelection.GooglePay,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
         )
 
@@ -490,12 +492,13 @@ internal class CheckoutSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("Checkout"),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             statusBarColor = null,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
 
@@ -749,6 +752,7 @@ internal class CheckoutSheetLauncherTest {
                 operationCoordinator = operationCoordinator,
                 logger = logger,
                 coroutineScope = testScope,
+                productUsage = setOf("Checkout"),
                 statusBarColor = null,
                 paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
                 rowSelectionImmediateActionHandler = { immediateActionInvoked = true },

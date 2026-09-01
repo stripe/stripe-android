@@ -74,7 +74,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             configuration = state.configuration,
             checkoutSessionResponse = state.checkoutSessionResponse,
             collectedDetails = state.collectedDetails,
-        )
+        ) ?: return null
         val shippingAddressRequired = (expressButton as? ExpressButton.GooglePay)?.shippingAddressRequired == true
         val shippingAddressParameters = if (shippingAddressRequired) {
             GooglePayJsonFactory.ShippingAddressParameters(

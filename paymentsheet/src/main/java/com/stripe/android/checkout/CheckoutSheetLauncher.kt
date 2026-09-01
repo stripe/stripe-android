@@ -20,6 +20,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -43,6 +44,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val logger: Logger,
     @ViewModelScope private val coroutineScope: CoroutineScope,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
@@ -167,12 +169,13 @@ internal class CheckoutSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = currentSelection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = promotion,
+            promotions = listOfNotNull(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -197,12 +200,13 @@ internal class CheckoutSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
         )
         activityLauncher.launch(args)
@@ -225,12 +229,13 @@ internal class CheckoutSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         activityLauncher.launch(args)
