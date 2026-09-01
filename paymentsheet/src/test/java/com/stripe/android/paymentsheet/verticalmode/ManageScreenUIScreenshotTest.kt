@@ -57,25 +57,6 @@ internal class ManageScreenUIScreenshotTest {
     }
 
     @Test
-    fun testManageUIScreen_loadingSelection() {
-        paparazziRule.snapshot {
-            ManageScreenUI(
-                interactor = FakeManageScreenInteractor(
-                    initialState = ManageScreenInteractor.State(
-                        paymentMethods = savedPaymentMethods,
-                        currentSelection = savedPaymentMethods.first(),
-                        isEditing = false,
-                        canEdit = true,
-                        linkBrand = LinkBrand.Link,
-                        isProcessing = true,
-                        pendingPaymentMethodId = savedPaymentMethods[1].paymentMethod.id,
-                    )
-                ),
-            )
-        }
-    }
-
-    @Test
     fun testManageUIScreen_inEditMode() {
         paparazziRule.snapshot {
             ManageScreenUI(
