@@ -86,7 +86,7 @@ internal class PaymentSheetConfirmationTokenTest(
         paymentMethodType: PaymentMethodType,
     ) {
         runPaymentSheetTest(
-        apiConfigurationTestType = apiConfigurationTestType,
+            apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             isLiveMode = isLiveMode,
             builder = {
@@ -105,7 +105,7 @@ internal class PaymentSheetConfirmationTokenTest(
     @Test
     fun testSuccessfulSetup() {
         runPaymentSheetTest(
-        apiConfigurationTestType = apiConfigurationTestType,
+            apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             isLiveMode = false,
             builder = {
@@ -169,19 +169,21 @@ internal class PaymentSheetConfirmationTokenTest(
                     },
                     requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 ),
-                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .also {
-                        if (customerType == CustomerType.ReturningCustomer) {
-                            it.customer(
-                                PaymentSheet.CustomerConfiguration(
-                                    "cus_foobar",
-                                    TestApiKeys.EPHEMERAL
+                configuration = testContext.apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .also {
+                            if (customerType == CustomerType.ReturningCustomer) {
+                                it.customer(
+                                    PaymentSheet.CustomerConfiguration(
+                                        "cus_foobar",
+                                        TestApiKeys.EPHEMERAL
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
-                    .build())
+                        .build()
+                )
             )
         }
     }
