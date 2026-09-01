@@ -3148,18 +3148,26 @@ internal class DefaultPaymentElementLoaderTest {
 
         runScenario {
             val loader = createPaymentElementLoader()
+            val integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(
+                PaymentSheet.Configuration.Builder(
+                    merchantDisplayName = "Merchant, Inc.",
+                ).defaultBillingDetails(PaymentSheet.BillingDetails(email = "email@email.com"))
+                    .build(),
+            )
+            val expressCheckoutElementBillingDetailsCollectionConfiguration =
+                PaymentSheet.BillingDetailsCollectionConfiguration(allowedCountries = setOf("CA"))
+            val expressCheckoutElementConfiguration = integrationConfiguration.commonConfiguration.copy(
+                billingDetailsCollectionConfiguration =
+                    expressCheckoutElementBillingDetailsCollectionConfiguration,
+            )
 
             val checkoutSessionState = loader.loadForCheckoutSession(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
-                integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(
-                    PaymentSheet.Configuration.Builder(
-                        merchantDisplayName = "Merchant, Inc.",
-                    ).defaultBillingDetails(PaymentSheet.BillingDetails(email = "email@email.com"))
-                        .build(),
-                ),
+                integrationConfiguration = integrationConfiguration,
+                expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -3172,8 +3180,12 @@ internal class DefaultPaymentElementLoaderTest {
             // When removal is permitted, CheckoutSession doesn't restrict removing the last one.
             assertThat(paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(checkoutSessionState.expressCheckoutElementPaymentMethodMetadata)
-                .isEqualTo(paymentMethodMetadata)
+            assertThat(
+                checkoutSessionState.expressCheckoutElementPaymentMethodMetadata
+                    .billingDetailsCollectionConfiguration
+            ).isEqualTo(expressCheckoutElementBillingDetailsCollectionConfiguration)
+            assertThat(paymentMethodMetadata.billingDetailsCollectionConfiguration)
+                .isNotEqualTo(expressCheckoutElementBillingDetailsCollectionConfiguration)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()

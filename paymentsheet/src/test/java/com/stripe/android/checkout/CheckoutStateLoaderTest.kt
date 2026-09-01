@@ -57,10 +57,18 @@ import kotlin.test.assertFailsWith
 internal class CheckoutStateLoaderTest {
 
     @Test
-    fun `loadInitial commits state with payment method metadata`() = runScenario {
+    fun `loadInitial commits state with payment element and express checkout element metadata`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+        assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNotNull()
+        assertThat(
+            stateHolder.state?.expressCheckoutElementPaymentMethodMetadata
+                ?.billingDetailsCollectionConfiguration
+        ).isEqualTo(
+            paymentElementLoader.lastExpressCheckoutElementConfiguration
+                ?.billingDetailsCollectionConfiguration
+        )
     }
 
     @Test

@@ -80,6 +80,7 @@ internal interface PaymentElementLoader {
     suspend fun loadForCheckoutSession(
         initializationMode: InitializationMode.CheckoutSession,
         integrationConfiguration: Configuration,
+        expressCheckoutElementConfiguration: CommonConfiguration,
         metadata: Metadata,
     ): Result<CheckoutSessionState> = load(
         initializationMode = initializationMode,
@@ -324,29 +325,42 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     override suspend fun loadForCheckoutSession(
         initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession,
         integrationConfiguration: PaymentElementLoader.Configuration,
+        expressCheckoutElementConfiguration: CommonConfiguration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.CheckoutSessionState> = workContext.runCatching(::reportFailedLoad) {
         val validatedConfiguration = validateConfiguration(
             initializationMode = initializationMode,
             integrationConfiguration = integrationConfiguration,
         )
+        val expressCheckoutElementValidatedConfiguration = validateConfiguration(
+            initializationMode = initializationMode,
+            configuration = expressCheckoutElementConfiguration,
+        )
         val initialLoadResult = loadInitialData(
             initializationMode = initializationMode,
             validatedConfiguration = validatedConfiguration,
             metadata = metadata,
         )
-        val paymentMethodMetadataResult = createLinkStateAndPaymentMethodMetadata(
+        val paymentElementMetadataResult = createLinkStateAndPaymentMethodMetadata(
             initializationMode = initializationMode,
             integrationConfiguration = integrationConfiguration,
             validatedConfiguration = validatedConfiguration,
+            initialLoadResult = initialLoadResult,
+        )
+        val expressCheckoutElementMetadataResult = createLinkStateAndPaymentMethodMetadata(
+            initializationMode = initializationMode,
+            integrationConfiguration = integrationConfiguration,
+            validatedConfiguration = expressCheckoutElementValidatedConfiguration,
             initialLoadResult = initialLoadResult,
         )
         val loaderStateResult = createLoaderState(
             initializationMode = initializationMode,
             validatedConfiguration = validatedConfiguration,
             initialLoadResult = initialLoadResult,
-            paymentMethodMetadataResult = paymentMethodMetadataResult,
+            paymentMethodMetadataResult = paymentElementMetadataResult,
         )
+        val expressCheckoutElementPaymentMethodMetadata =
+            expressCheckoutElementMetadataResult.paymentMethodMetadata.await()
         val state = completeLoading(
             metadata = metadata,
             initialLoadResult = initialLoadResult,
@@ -355,7 +369,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         PaymentElementLoader.CheckoutSessionState(
             paymentElementState = state,
-            expressCheckoutElementPaymentMethodMetadata = state.paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
         )
     }
 
@@ -405,8 +419,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private fun validateConfiguration(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
+    ): ValidatedConfigurationResult = validateConfiguration(
+        initializationMode = initializationMode,
+        configuration = integrationConfiguration.commonConfiguration,
+    )
+
+    private fun validateConfiguration(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        configuration: CommonConfiguration,
     ): ValidatedConfigurationResult {
-        val configuration = integrationConfiguration.commonConfiguration
         initializationMode.validate()
         configuration.validate(
             initializationMode = initializationMode,

@@ -38,7 +38,7 @@ internal data class CheckoutControllerState(
                 paymentMethodMetadata = paymentMethodMetadata,
             ),
             availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
-                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
                 expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
             )
         )

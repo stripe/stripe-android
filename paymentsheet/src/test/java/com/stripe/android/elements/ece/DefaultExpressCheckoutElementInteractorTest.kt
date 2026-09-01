@@ -299,7 +299,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             ),
         )
         stateHolder.state = CheckoutControllerStateFactory.create(
-            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
             configuration = CheckoutController.Configuration()
                 .expressCheckoutElement(configuration)
                 .build(),

@@ -41,6 +41,8 @@ internal class FakePaymentElementLoader(
 
     var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
         private set
+    var lastExpressCheckoutElementConfiguration: CommonConfiguration? = null
+        private set
 
     fun updateStripeIntent(intent: StripeIntent) {
         this.stripeIntent = intent
@@ -116,6 +118,28 @@ internal class FakePaymentElementLoader(
                         }
                     },
                 )
+            )
+        }
+    }
+
+    override suspend fun loadForCheckoutSession(
+        initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        expressCheckoutElementConfiguration: CommonConfiguration,
+        metadata: PaymentElementLoader.Metadata,
+    ): Result<PaymentElementLoader.CheckoutSessionState> {
+        lastExpressCheckoutElementConfiguration = expressCheckoutElementConfiguration
+        return load(
+            initializationMode = initializationMode,
+            integrationConfiguration = integrationConfiguration,
+            metadata = metadata,
+        ).map { paymentElementState ->
+            PaymentElementLoader.CheckoutSessionState(
+                paymentElementState = paymentElementState,
+                expressCheckoutElementPaymentMethodMetadata = createPaymentMethodMetadata(
+                    integrationConfiguration = integrationConfiguration,
+                    configuration = expressCheckoutElementConfiguration,
+                ),
             )
         }
     }

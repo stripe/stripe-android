@@ -72,6 +72,11 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
+        val expressCheckoutElementConfiguration = commonConfigurationFactory.createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )
 
         val loaderState = paymentElementLoader.loadForCheckoutSession(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
@@ -83,6 +88,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 configuration = embeddedConfig,
                 paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
             ),
+            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = false,
                 initializedViaCompose = false,
