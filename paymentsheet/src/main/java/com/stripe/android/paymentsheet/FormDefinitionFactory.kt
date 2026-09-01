@@ -135,20 +135,24 @@ internal class DefaultFormDefinitionFactory(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
         ): FormDefinitionFactory {
-            return DefaultFormDefinitionFactory(
-                coroutineScope = viewModel.viewModelScope,
-                linkInlineHandler = LinkInlineHandler.create(),
-                cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
-                paymentMethodMetadata = paymentMethodMetadata,
-                newPaymentSelectionProvider = { viewModel.newPaymentSelection },
+            val formFactory = PaymentMethodFormFactory(
                 linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
-                setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
-                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                isLinkUI = false,
-                automaticallyLaunchedCardScanFormDataHelper = null,
-                tapToAddHelper = viewModel.tapToAddHelper,
-                paymentMethodMessagePromotionsHelper = null,
+                cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
+                savedStateHandle = viewModel.savedStateHandle,
                 isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
+            )
+            return formFactory.createFormDefinitionFactory(
+                PaymentMethodFormFactory.FormDefinitionArguments(
+                    coroutineScope = viewModel.viewModelScope,
+                    linkInlineHandler = LinkInlineHandler.create(),
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    newPaymentSelectionProvider = { viewModel.newPaymentSelection },
+                    setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
+                    automaticallyLaunchedCardScanFormDataHelper = null,
+                    tapToAddHelper = viewModel.tapToAddHelper,
+                    paymentMethodMessagePromotionsHelper = null,
+                    autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
+                )
             )
         }
     }
