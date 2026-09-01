@@ -39,6 +39,16 @@ class DefaultConfirmationHandlerTest {
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
+    fun `wasAwaitingResult returns false when awaiting result state is absent`() {
+        assertThat(DefaultConfirmationHandler.wasAwaitingResult(SavedStateHandle())).isFalse()
+    }
+
+    @Test
+    fun `wasAwaitingResult returns true when awaiting result state is present`() {
+        assertThat(DefaultConfirmationHandler.wasAwaitingResult(createPrepopulatedSavedStateHandle(false))).isTrue()
+    }
+
+    @Test
     fun `On initial register, should create launchers for each definition`() = test(shouldRegister = false) {
         assertThat(confirmationHandler.hasReloadedFromProcessDeath).isFalse()
 
