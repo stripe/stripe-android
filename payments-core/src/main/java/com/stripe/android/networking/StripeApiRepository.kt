@@ -11,7 +11,6 @@ import com.stripe.android.cards.Bin
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
@@ -143,10 +142,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
             context,
             productUsageTokens,
             requestSurface,
-            analyticsRequestExecutor
-        ) {
-            ApiConfiguration.State(publishableKeyProvider(), null)
-        },
+            analyticsRequestExecutor,
+            publishableKeyProvider
+        ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),

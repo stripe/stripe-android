@@ -3,7 +3,7 @@ package com.stripe.android.cards
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -30,7 +30,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val requestSurface: RequestSurface,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val apiConfigProvider: () -> ApiConfiguration.State
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
     private val cardAccountRangeRepository = lazy {
@@ -52,9 +52,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         productUsageTokens = productUsageTokens,
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-        apiConfigProvider = {
-            ApiConfiguration.State(PaymentConfiguration.getInstance(context).publishableKey, null)
-        }
+        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey }
     )
 
     @Throws(IllegalStateException::class)
@@ -91,7 +89,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         store: CardAccountRangeStore
     ): CardAccountRangeSource {
         return runCatching {
-            apiConfigProvider().publishableKey
+            publishableKeyProvider()
         }.onSuccess { publishableKey ->
             fireAnalyticsEvent(
                 publishableKey,
