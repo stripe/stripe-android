@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -28,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
@@ -35,6 +37,8 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -66,6 +70,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
+        pendingSavedPaymentMethodId = state.pendingSavedPaymentMethodId,
         linkBrand = state.linkBrand,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
@@ -102,6 +107,13 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         appearance = appearance
     )
 
+    state.selectionError?.let { error ->
+        ErrorMessage(
+            error = error.stripeErrorMessage().resolve(),
+            modifier = Modifier.padding(top = 8.dp),
+        )
+    }
+
     EmbeddedMandate(
         embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         mandate = state.mandate,
@@ -115,6 +127,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    pendingSavedPaymentMethodId: String? = null,
     linkBrand: LinkBrand,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
@@ -149,6 +162,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             savedPaymentMethodAction = savedPaymentMethodAction,
             selection = selection,
+            pendingSavedPaymentMethodId = pendingSavedPaymentMethodId,
             linkBrand = linkBrand,
             isEnabled = isEnabled,
             onViewMorePaymentMethods = onViewMorePaymentMethods,
@@ -263,6 +277,7 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    pendingSavedPaymentMethodId: String? = null,
     linkBrand: LinkBrand,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
@@ -278,12 +293,20 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             isEnabled = isEnabled,
             isSelected = selection?.isSaved == true,
             trailingContent = {
-                SavedPaymentMethodTrailingContent(
-                    viewMoreShowChevron = appearance.style.viewMoreShowsChevron,
-                    savedPaymentMethodAction = savedPaymentMethodAction,
-                    onViewMorePaymentMethods = onViewMorePaymentMethods,
-                    onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
-                )
+                if (pendingSavedPaymentMethodId == displayedSavedPaymentMethod.paymentMethod.id) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG),
+                    )
+                } else {
+                    SavedPaymentMethodTrailingContent(
+                        viewMoreShowChevron = appearance.style.viewMoreShowsChevron,
+                        savedPaymentMethodAction = savedPaymentMethodAction,
+                        onViewMorePaymentMethods = onViewMorePaymentMethods,
+                        onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
+                    )
+                }
             },
             modifier = Modifier.onGloballyPositioned { coordinates ->
                 updatePaymentMethodVisibility("saved", coordinates)
@@ -295,6 +318,8 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
         if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(appearance.style)
     }
 }
+
+internal const val EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG = "embedded_saved_payment_method_pending"
 
 @Composable
 internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(

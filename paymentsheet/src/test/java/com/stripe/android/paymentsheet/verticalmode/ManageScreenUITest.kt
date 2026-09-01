@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescriptionExactly
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -243,6 +244,26 @@ class ManageScreenUITest {
         getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()
         getChevronIcon(displayableSavedPaymentMethods[1]).assertExists()
         getChevronIcon(displayableSavedPaymentMethods[2]).assertExists()
+    }
+
+    @Test
+    fun processingDisablesRowsAndShowsSpinnerOnPendingRow() = runScenario(
+        initialState = ManageScreenInteractor.State(
+            paymentMethods = displayableSavedPaymentMethods,
+            currentSelection = null,
+            isEditing = false,
+            canEdit = true,
+            linkBrand = LinkBrand.Link,
+            isProcessing = true,
+            pendingPaymentMethodId = displayableSavedPaymentMethods[1].paymentMethod.id,
+        )
+    ) {
+        displayableSavedPaymentMethods.forEach {
+            composeRule.onNodeWithTag(
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${it.paymentMethod.id}"
+            ).assertIsNotEnabled()
+        }
+        composeRule.onNodeWithTag("manage_screen_pending", useUnmergedTree = true).assertExists()
     }
 
     private fun getChevronIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {

@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -11,7 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -33,7 +37,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
                 linkBrand = state.linkBrand,
-                isEnabled = true,
+                isEnabled = !state.isProcessing,
                 isSelected = isSelected,
                 onClick = {
                     rowOnClick(
@@ -47,12 +51,23 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                     )
                 },
                 trailingContent = {
-                    TrailingContent(
-                        isEditing = state.isEditing,
-                        paymentMethod = it,
-                    )
+                    if (state.pendingPaymentMethodId == it.paymentMethod.id) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .testTag(TEST_TAG_MANAGE_SCREEN_PENDING),
+                        )
+                    } else {
+                        TrailingContent(
+                            isEditing = state.isEditing,
+                            paymentMethod = it,
+                        )
+                    }
                 }
             )
+        }
+        state.error?.let {
+            ErrorMessage(error = it.resolve())
         }
     }
 }
@@ -77,3 +92,6 @@ private fun TrailingContent(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST = "manage_screen_saved_pms_list"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_MANAGE_SCREEN_PENDING = "manage_screen_pending"
