@@ -8,12 +8,11 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.DefaultFormDefinitionFactory
-import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormDefinitionFactory
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
+import com.stripe.android.paymentsheet.PaymentMethodFormFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
@@ -31,6 +30,13 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val isNfcScanningAvailable: IsNfcScanningAvailable,
 ) {
+    private val formFactory = PaymentMethodFormFactory(
+        linkConfigurationCoordinator = linkConfigurationCoordinator,
+        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+        savedStateHandle = savedStateHandle,
+        isNfcScanningAvailable = isNfcScanningAvailable,
+    )
+
     fun create(
         coroutineScope: CoroutineScope,
         setAsDefaultMatchesSaveForFutureUse: Boolean,
@@ -43,23 +49,20 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         val linkInlineHandler = LinkInlineHandler.create()
-        return DefaultFormHelper(
-            coroutineScope = coroutineScope,
-            linkInlineHandler = linkInlineHandler,
-            paymentMethodMetadata = paymentMethodMetadata,
-            selectionUpdater = selectionUpdater,
-            eventReporter = eventReporter,
-            savedStateHandle = savedStateHandle,
-            formDefinitionFactory = createFormDefinitionFactory(
+        return formFactory.createFormHelper(
+            PaymentMethodFormFactory.FormHelperArguments(
                 coroutineScope = coroutineScope,
-                setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+                linkInlineHandler = linkInlineHandler,
                 paymentMethodMetadata = paymentMethodMetadata,
+                newPaymentSelectionProvider = ::newPaymentSelection,
+                selectionUpdater = selectionUpdater,
+                eventReporter = eventReporter,
+                setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
                 tapToAddHelper = tapToAddHelper,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-                linkInlineHandler = linkInlineHandler,
-            ),
+            )
         )
     }
 
@@ -73,20 +76,18 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         linkInlineHandler: LinkInlineHandler,
     ): FormDefinitionFactory {
-        return DefaultFormDefinitionFactory(
-            coroutineScope = coroutineScope,
-            linkInlineHandler = linkInlineHandler,
-            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-            paymentMethodMetadata = paymentMethodMetadata,
-            newPaymentSelectionProvider = ::newPaymentSelection,
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
-            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-            isLinkUI = false,
-            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
-            tapToAddHelper = tapToAddHelper,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
-            isNfcScanningAvailable = isNfcScanningAvailable,
+        return formFactory.createFormDefinitionFactory(
+            PaymentMethodFormFactory.FormDefinitionArguments(
+                coroutineScope = coroutineScope,
+                linkInlineHandler = linkInlineHandler,
+                paymentMethodMetadata = paymentMethodMetadata,
+                newPaymentSelectionProvider = ::newPaymentSelection,
+                setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+                automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+                tapToAddHelper = tapToAddHelper,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            )
         )
     }
 
