@@ -165,9 +165,10 @@ internal class OnrampE2EPage(
     }
 
     fun collectKycInfo(user: FreshOnrampUser) {
-        val address = TestKycAddress.forCountry(user.country)
-        val residence = when (user.country.uppercase()) {
-            "US" -> null
+        val country = user.country.uppercase()
+        val address = TestKycAddress.forCountry(country)
+        val residence = when (country) {
+            "US" -> "United States"
             "CA" -> "Canada"
             "CO" -> "Colombia"
             "PH" -> "Philippines"
@@ -175,7 +176,7 @@ internal class OnrampE2EPage(
         }
 
         clickTag(KYC_SECTION_TAG)
-        if (residence != null) {
+        if (country != "US") {
             clickTag(KYC_RESIDENCE_DROPDOWN_TAG)
             clickText(residence)
         }
@@ -626,6 +627,24 @@ private data class TestKycAddress(
                     state = "",
                     country = "MT",
                     postalCode = "VLT 1117",
+                )
+                "CA" -> TestKycAddress(
+                    city = "Toronto",
+                    state = "ON",
+                    country = "CA",
+                    postalCode = "M5V 3L9",
+                )
+                "CO" -> TestKycAddress(
+                    city = "Bogota",
+                    state = "Bogota",
+                    country = "CO",
+                    postalCode = "110111",
+                )
+                "PH" -> TestKycAddress(
+                    city = "Manila",
+                    state = "Metro Manila",
+                    country = "PH",
+                    postalCode = "1000",
                 )
                 else -> TestKycAddress(
                     city = "San Francisco",
