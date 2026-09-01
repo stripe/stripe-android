@@ -7,6 +7,9 @@ NEXT_VERSION_BUMP: PATCH
 * [ADDED] Added support for SeQura.
 * [ADDED] Added support for PAYCO.
 
+### AddressElement
+* [CHANGED] Use Stripe-hosted address autocomplete by default.
+
 ## 23.17.1 - 2026-08-31
 
 ### PaymentSheet
