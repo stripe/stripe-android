@@ -141,8 +141,8 @@ class RequestMatchersTest {
     @Test
     fun `stripeApiKey matches analytics publishable key query parameter`() {
         val request = createRequest(
-            path = "/?event=mc_load&publishable_key=${TestApiKeys.PUBLISHABLE}",
-            headers = mapOf("original-host" to "q.stripe.com"),
+            path = "/0?event=mc_load&publishable_key=${TestApiKeys.PUBLISHABLE}",
+            headers = mapOf("original-host" to "r.stripe.com"),
         )
 
         assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
@@ -151,9 +151,9 @@ class RequestMatchersTest {
     @Test
     fun `stripeApiKey rejects authorization header for analytics request`() {
         val request = createRequest(
-            path = "/?publishable_key=${TestApiKeys.PUBLISHABLE}",
+            path = "/0?publishable_key=${TestApiKeys.PUBLISHABLE}",
             headers = mapOf(
-                "original-host" to "q.stripe.com",
+                "original-host" to "r.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
             ),
         )
@@ -164,8 +164,8 @@ class RequestMatchersTest {
     @Test
     fun `stripeApiKey rejects missing publishable key for analytics request`() {
         val request = createRequest(
-            path = "/?event=mc_load",
-            headers = mapOf("original-host" to "q.stripe.com"),
+            path = "/0?event=mc_load",
+            headers = mapOf("original-host" to "r.stripe.com"),
         )
 
         assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()

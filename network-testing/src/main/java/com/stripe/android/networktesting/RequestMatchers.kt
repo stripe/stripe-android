@@ -192,7 +192,7 @@ object RequestMatchers {
     private const val ORIGINAL_HOST_HEADER = "original-host"
     private const val AUTHORIZATION_HEADER = "Authorization"
     private const val API_HOST = "api.stripe.com"
-    private const val ANALYTICS_HOST = "q.stripe.com"
+    private const val ANALYTICS_HOST = "r.stripe.com"
     private const val PUBLISHABLE_KEY_QUERY = "publishable_key"
     private const val PAYMENT_METHODS_PATH = "/v1/payment_methods"
     private const val ELEMENTS_PAYMENT_METHODS_PATH = "/v1/elements/payment_methods/"

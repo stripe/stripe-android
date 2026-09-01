@@ -385,7 +385,7 @@ class PaymentAnalyticsRequestFactoryTest {
 
         // Verify URL contains all expected parameters including timestamp
         val url = analyticsRequest.url
-        assertThat(url).contains("https://q.stripe.com?")
+        assertThat(url).contains("https://r.stripe.com/0?")
         assertThat(url).contains("publishable_key=pk_abc123")
         assertThat(url).contains("app_version=0")
         assertThat(url).contains("bindings_version=$sdkVersion")
