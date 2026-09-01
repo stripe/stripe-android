@@ -312,6 +312,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
+        // Step 1: Configuration validation.
         val configuration = integrationConfiguration.commonConfiguration
         // Validate configuration before loading
         configuration.validate(
@@ -321,6 +322,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
 
+        // Step 2: Kick off async loading tasks
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionStarter.start(configuration)
 
@@ -340,8 +342,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
         }
 
-        val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-        val elementsSession = initializationMode.checkoutSessionResponse.elementsSession ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
+        val elementsSession = initializationMode.checkoutSessionResponse.elementsSession ?:
+            throw IllegalStateException("CheckoutSession init response missing elements_session")
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
@@ -378,7 +380,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
         )
 
-        deferred       val paymentMethodMetadata = createLinkAndPaymentMethodMetadata(
+        // TODO-codex: create an object which encapsulates all the things created in step 2 which are used in later steps here.
+        val resultsSoFar = TODO()
+
+        // Step 3: Create Link State and PMM
+        val paymentMethodMetadata = createLinkAndPaymentMethodMetadata(
             elementsSession,
             configuration,
             initializationMode,
@@ -389,6 +395,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isGooglePayReady
         )
 
+        // Step 4: Create loader state
         val customer = async {
             val paymentMethodMetadata = paymentMethodMetadata.await()
 
@@ -438,6 +445,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
+        // Step 5: Loading side effects / analytics + experiment reporting
         logExperimentExposures(
             elementsSession = elementsSession,
             state = state
