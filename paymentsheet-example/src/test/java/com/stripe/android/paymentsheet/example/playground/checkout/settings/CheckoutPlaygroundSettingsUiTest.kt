@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -92,7 +93,59 @@ class CheckoutPlaygroundSettingsUiTest {
         composeRule.onNodeWithText("Guest").assertIsDisplayed()
         composeRule.onNodeWithText("New").assertIsDisplayed().performClick()
 
-        assertThat(settings.value(definition)).isEqualTo("new")
+        assertThat(settings[definition]).isEqualTo("new")
+    }
+
+    @Test
+    fun `returning customer displays stored customer ID`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+        configureSettings = { saveReturningCustomer("cus_123") },
+    ) {
+        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag)
+            .assertIsDisplayed()
+            .assertTextContains("Customer ID")
+            .assertTextContains("cus_123")
+    }
+
+    @Test
+    fun `returning customer without stored ID displays backend fixture`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+        configureSettings = {
+            update(CheckoutPlaygroundDefinitions.session.customer, "returning")
+        },
+    ) {
+        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag)
+            .assertIsDisplayed()
+            .assertTextContains("Customer ID")
+            .assertTextContains("Backend fixture")
+    }
+
+    @Test
+    fun `customer ID is hidden for guest and new customers`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+    ) {
+        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag).assertDoesNotExist()
+
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag).assertDoesNotExist()
+    }
+
+    @Test
+    fun `payment method saving is displayed only for customers`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+    ) {
+        val definition = CheckoutPlaygroundDefinitions.session.paymentMethodSave
+        page.value(definition).assertDoesNotExist()
+
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        composeRule.waitForIdle()
+        page.value(definition).assertIsDisplayed()
+
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, "returning")
+        composeRule.waitForIdle()
+        page.value(definition).assertIsDisplayed()
     }
 
     @Test
@@ -109,9 +162,10 @@ class CheckoutPlaygroundSettingsUiTest {
 
     private fun runScenario(
         initialConfiguration: CheckoutPlaygroundSettingDefinition.Configuration = CheckoutPlaygroundDefinitions.root,
+        configureSettings: CheckoutPlaygroundSettings.() -> Unit = {},
         block: Scenario.() -> Unit,
     ) {
-        val settings = CheckoutPlaygroundSettings.createInMemory()
+        val settings = CheckoutPlaygroundSettings.createInMemory().apply(configureSettings)
         var current by mutableStateOf(initialConfiguration)
         composeRule.setContent {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {

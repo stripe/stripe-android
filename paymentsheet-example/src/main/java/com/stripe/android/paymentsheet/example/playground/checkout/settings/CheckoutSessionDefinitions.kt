@@ -26,6 +26,12 @@ internal object CheckoutSessionDefinitions {
         ),
         serialize = { it },
     )
+    val paymentMethodSave = boolean(
+        key = "session.payment_method_save",
+        displayName = "Save payment methods",
+        defaultValue = true,
+        isApplicable = { settings -> settings[customer] != GUEST_CUSTOMER },
+    )
     val customerEmail = text(
         key = "session.customer_email",
         displayName = "Customer email",
@@ -59,7 +65,7 @@ internal object CheckoutSessionDefinitions {
                     .distinct()
             )
         },
-        isVisible = { settings -> !settings.value(automaticPaymentMethods) },
+        isApplicable = { settings -> !settings[automaticPaymentMethods] },
     )
     val automaticTax = boolean(
         key = "session.automatic_tax",
@@ -82,6 +88,7 @@ internal object CheckoutSessionDefinitions {
         children = arrayOf(
             backendUrl,
             customer,
+            paymentMethodSave,
             customerEmail,
             currency,
             automaticPaymentMethods,
@@ -91,4 +98,6 @@ internal object CheckoutSessionDefinitions {
             billingAddressCollection,
         ),
     )
+
+    private const val GUEST_CUSTOMER = "guest"
 }

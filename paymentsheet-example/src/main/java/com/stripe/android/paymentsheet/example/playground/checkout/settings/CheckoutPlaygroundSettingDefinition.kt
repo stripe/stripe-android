@@ -16,7 +16,7 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
         val defaultValue: T,
         val options: List<Option<T>>,
         val input: Input,
-        val isVisible: (CheckoutPlaygroundSettings) -> Boolean,
+        val isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean,
         private val encode: (T) -> String,
         private val decode: (String) -> Result<T>,
     ) : CheckoutPlaygroundSettingDefinition {
@@ -43,6 +43,10 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
             Color,
         }
     }
+}
+
+internal interface CheckoutPlaygroundSettingValues {
+    operator fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T
 }
 
 internal fun CheckoutPlaygroundSettingDefinition.Configuration.values():
