@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
-import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.update
@@ -130,7 +129,7 @@ internal class USBankAccountFormArguments(
             hostedSurface: String,
             isCompleteFlow: Boolean,
             draftPaymentSelection: PaymentSelection?,
-            setSelection: (PaymentSelection?) -> Unit,
+            bankFormInteractor: BankFormInteractor,
             hasSavedPaymentMethods: Boolean,
             autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
@@ -146,13 +145,6 @@ internal class USBankAccountFormArguments(
                 hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
-            val bankFormInteractor = BankFormInteractor(
-                updateSelection = setSelection,
-                paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
-                    paymentMethodMetadata.paymentMethodIncentive
-                )
-            )
-
             return USBankAccountFormArguments(
                 showCheckbox = isSaveForFutureUseValueChangeable && instantDebits.not(),
                 hostedSurface = hostedSurface,

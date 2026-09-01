@@ -6,6 +6,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -23,6 +24,7 @@ import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
 import kotlin.time.Duration.Companion.seconds
 
 internal class EmbeddedFormPage(
@@ -163,6 +165,34 @@ internal class EmbeddedFormPage(
         waitUntilVisible()
 
         composeTestRule.onNodeWithTag(SHEET_MANDATE_TEST_TAG)
+            .assertDoesNotExist()
+    }
+
+    fun assertHeaderPromoBadgeIsDisplayed(text: String) {
+        waitUntilVisible()
+
+        val matcher = hasTestTag(TEST_TAG_HEADER_PROMO_BADGE).and(
+            hasAnyDescendant(hasText(text, substring = true))
+        )
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.onAllNodes(matcher, useUnmergedTree = true)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNode(matcher, useUnmergedTree = true)
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    fun waitUntilHeaderPromoBadgeIsMissing() {
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodesWithTag(TEST_TAG_HEADER_PROMO_BADGE)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+
+        composeTestRule.onNodeWithTag(TEST_TAG_HEADER_PROMO_BADGE)
             .assertDoesNotExist()
     }
 
