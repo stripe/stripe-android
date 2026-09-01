@@ -9,13 +9,12 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.runBlocking
-import okhttp3.mockwebserver.MockResponse
-import org.json.JSONObject
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -24,20 +23,13 @@ internal fun runExpressCheckoutElementTest(
     resultCallback: CheckoutController.ResultCallback = CheckoutController.ResultCallback {
         error("Override + validate if expected.")
     },
-    checkoutInitResponse: (MockResponse) -> Unit = { response ->
-        response.testBodyFromFile("checkout-session-init.json") { json ->
-            json.put("customer_email", "checkout@example.com")
-            json.put("account_settings", JSONObject().put("country", "US"))
-            json.getJSONObject("elements_session").remove("link_settings")
-        }
-    },
     successTimeoutSeconds: Long = 5L,
-    setup: suspend (CheckoutController) -> Unit,
+    assertions: (CheckoutController) -> Unit,
     block: () -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
 
-    networkRule.checkoutInit(responseFactory = checkoutInitResponse)
+    networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
@@ -52,8 +44,13 @@ internal fun runExpressCheckoutElementTest(
         }.build()
 
         runBlocking {
-            setup(controller)
+            controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                configuration = CheckoutController.Configuration()
+                    .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            ).getOrThrow()
         }
+        assertions(controller)
 
         scenario.onActivity { activity ->
             val expressCheckoutElement = controller.createPresenter(activity).expressCheckoutElement()
@@ -74,3 +71,5 @@ internal fun runExpressCheckoutElementTest(
         }
     }
 }
+
+private const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"

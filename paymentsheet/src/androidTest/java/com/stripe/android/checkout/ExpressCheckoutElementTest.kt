@@ -11,7 +11,6 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.core.utils.FeatureFlags
@@ -32,8 +31,6 @@ import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
-import okhttp3.mockwebserver.MockResponse
-import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 
@@ -49,18 +46,23 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testSuccessfulGooglePayPayment() {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
         runExpressCheckoutElementTest(
             networkRule = networkRule,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
             },
-            setup = { controller ->
-                controller.configure(
-                    DEFAULT_CLIENT_SECRET,
-                    configuration = CheckoutController.Configuration()
-                        .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-                ).getOrThrow()
-                assertThat(controller.session.value?.availableExpressCheckoutPaymentMethods).hasSize(1)
+            assertions = { controller ->
+                assertThat(
+                    controller.session.value?.availableExpressCheckoutPaymentMethods
+                        ?.filterIsInstance<ExpressCheckoutElement.PaymentMethod.GooglePay>()
+                ).hasSize(1)
             },
         ) {
             testRules.compose.waitUntil(timeoutMillis = 5_000) {
@@ -96,30 +98,19 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testSuccessfulNativeLinkPayment() {
-        // Link looks up the consumer during both the initial load and the post-confirmation refresh.
-        repeat(2) {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
         }
-        // Native Link confirms in its activity, so the controller refreshes the session after receiving the result.
-        networkRule.checkoutInit(responseFactory = ::nativeLinkCheckoutInitResponse)
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
             },
-            checkoutInitResponse = ::nativeLinkCheckoutInitResponse,
-            setup = { controller ->
-                controller.configure(
-                    DEFAULT_CLIENT_SECRET,
-                    configuration = CheckoutController.Configuration()
-                        .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-                ).getOrThrow()
+            assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
                         ?.filterIsInstance<ExpressCheckoutElement.PaymentMethod.Link>()
@@ -142,21 +133,21 @@ internal class ExpressCheckoutElementTest {
                 )
             )
 
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-lookup-success.json")
+            }
+            networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
+
             testRules.compose.onNodeWithTag(LinkButtonTestTag).performClick()
         }
 
         intended(hasComponent(LinkActivity::class.java.name))
     }
 
-    private fun nativeLinkCheckoutInitResponse(response: MockResponse) {
-        response.testBodyFromFile("checkout-session-init.json") { json ->
-            json.put("customer_email", "checkout@example.com")
-            json.put("account_settings", JSONObject().put("country", "US"))
-        }
-    }
-
     private companion object {
-        const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val GOOGLE_PAY_ACTIVITY_NAME =
             "com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherActivity"
     }
