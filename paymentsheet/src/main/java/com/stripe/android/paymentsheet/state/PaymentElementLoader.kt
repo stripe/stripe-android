@@ -378,38 +378,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
         )
 
-        val linkState = async {
-            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadCreateLinkState) {
-                createLinkState(
-                    elementsSession = elementsSession,
-                    configuration = configuration,
-                    initializationMode = initializationMode,
-                    customerMetadata = customerMetadata,
-                    clientAttributionMetadata = clientAttributionMetadata,
-                )
-            }
-        }
-
-        val paymentMethodMetadata = async {
-            val linkStateResult = linkState.await()
-            val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
-            } ?: false
-
-            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
-                createPaymentMethodMetadata(
-                    integrationConfiguration = integrationConfiguration,
-                    elementsSession = elementsSession,
-                    configuration = configuration,
-                    linkStateResult = linkStateResult,
-                    isGooglePayReady = isGooglePayReady,
-                    isGooglePaySupported = isGooglePaySupported,
-                    initializationMode = initializationMode,
-                    customerMetadata = customerMetadata,
-                    clientAttributionMetadata = clientAttributionMetadata,
-                )
-            }
-        }
+        deferred       val paymentMethodMetadata = createLinkAndPaymentMethodMetadata(
+            elementsSession,
+            configuration,
+            initializationMode,
+            customerMetadata,
+            clientAttributionMetadata,
+            isGooglePaySupportedOnDevice,
+            integrationConfiguration,
+            isGooglePayReady
+        )
 
         val customer = async {
             val paymentMethodMetadata = paymentMethodMetadata.await()
@@ -475,6 +453,51 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return@runCatching state
+    }
+
+    private fun CoroutineScope.createLinkAndPaymentMethodMetadata(
+        elementsSession: ElementsSession,
+        configuration: CommonConfiguration,
+        initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession,
+        customerMetadata: CustomerMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
+        isGooglePaySupportedOnDevice: Deferred<Boolean>,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        isGooglePayReady: Boolean
+    ): Deferred<PaymentMethodMetadata> {
+        val linkState = async {
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadCreateLinkState) {
+                createLinkState(
+                    elementsSession = elementsSession,
+                    configuration = configuration,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
+        }
+
+        val paymentMethodMetadata = async {
+            val linkStateResult = linkState.await()
+            val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
+                errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
+            } ?: false
+
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
+                createPaymentMethodMetadata(
+                    integrationConfiguration = integrationConfiguration,
+                    elementsSession = elementsSession,
+                    configuration = configuration,
+                    linkStateResult = linkStateResult,
+                    isGooglePayReady = isGooglePayReady,
+                    isGooglePaySupported = isGooglePaySupported,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
+        }
+        return paymentMethodMetadata
     }
 
     @Suppress("LongMethod")
