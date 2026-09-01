@@ -18,6 +18,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 /**
  * A [CardAccountRangeRepository.Factory] that returns a [DefaultCardAccountRangeRepositoryFactory].
@@ -30,7 +31,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val requestSurface: RequestSurface,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val apiConfigProvider: () -> ApiConfiguration.State
+    private val apiConfigProvider: Provider<ApiConfiguration.State>
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
     private val cardAccountRangeRepository = lazy {
@@ -95,7 +96,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         store: CardAccountRangeStore
     ): CardAccountRangeSource {
         return runCatching {
-            apiConfigProvider().publishableKey
+            apiConfigProvider.get().publishableKey
         }.onSuccess { publishableKey ->
             fireAnalyticsEvent(
                 publishableKey,

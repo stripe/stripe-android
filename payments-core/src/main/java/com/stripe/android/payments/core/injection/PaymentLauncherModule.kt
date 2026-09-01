@@ -17,6 +17,7 @@ import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerR
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -40,7 +41,7 @@ internal class PaymentLauncherModule {
         @IOContext workContext: CoroutineContext,
         @UIContext uiContext: CoroutineContext,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-        apiConfigurationProvider: () -> ApiConfiguration.State,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         @Named(IS_INSTANT_APP) isInstantApp: Boolean,
         @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextHandlers: Boolean,
@@ -50,7 +51,7 @@ internal class PaymentLauncherModule {
         enableLogging = enableLogging,
         workContext = workContext,
         uiContext = uiContext,
-        apiConfigurationState = apiConfigurationProvider(),
+        apiConfigurationState = apiConfigurationProvider.get(),
         productUsage = productUsage,
         isInstantApp = isInstantApp,
         includePaymentSheetNextActionHandlers = includePaymentSheetNextHandlers,

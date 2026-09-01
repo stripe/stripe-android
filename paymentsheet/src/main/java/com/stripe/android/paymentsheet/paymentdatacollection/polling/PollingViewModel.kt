@@ -259,12 +259,10 @@ internal class PollingViewModel @Inject constructor(
                     application = extras.requireApplication(),
                     config = config,
                     ioDispatcher = Dispatchers.IO,
-                    apiConfigurationProvider = {
-                        ApiConfiguration.State(
-                            publishableKey = args.publishableKey,
-                            stripeAccountId = args.stripeAccountId,
-                        )
-                    },
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId,
+                    ),
                 )
                 .subcomponentFactory
                 .create(

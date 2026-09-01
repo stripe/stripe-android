@@ -14,6 +14,7 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 
 @Module(includes = [StripeNetworkClientModule::class])
 internal object CheckoutModule {
@@ -30,11 +31,11 @@ internal object CheckoutModule {
 
     @Provides
     fun provideApiRequestOptionsProvider(
-        apiConfigProvider: () -> ApiConfiguration.State
+        apiConfigProvider: Provider<ApiConfiguration.State>
     ): () -> ApiRequest.Options = {
         ApiRequest.Options(
-            apiKey = apiConfigProvider().publishableKey,
-            stripeAccount = apiConfigProvider().stripeAccountId,
+            apiKey = apiConfigProvider.get().publishableKey,
+            stripeAccount = apiConfigProvider.get().stripeAccountId,
         )
     }
 

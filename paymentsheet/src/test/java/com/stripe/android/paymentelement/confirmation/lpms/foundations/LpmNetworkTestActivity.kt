@@ -50,6 +50,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -88,12 +89,10 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
                 val component = DaggerLpmNetworkTestViewModelComponent.factory()
                     .create(
                         application = extras.requireApplication(),
-                        apiConfigurationProvider = {
-                            ApiConfiguration.State(
-                                publishableKey = args.publishableKey,
-                                stripeAccountId = null,
-                            )
-                        },
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = null,
+                        ),
                         allowsManualConfirmation = args.allowsManualConfirmation,
                         paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                         savedStateHandle = extras.createSavedStateHandle(),
@@ -154,7 +153,7 @@ internal interface LpmNetworkTestViewModelComponent {
             @BindsInstance
             application: Application,
             @BindsInstance
-            apiConfigurationProvider: () -> ApiConfiguration.State,
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(ALLOWS_MANUAL_CONFIRMATION)
             allowsManualConfirmation: Boolean,
@@ -193,9 +192,9 @@ internal interface LpmNetworkTestModule {
 
         @Provides
         fun providesPaymentConfiguration(
-            apiConfigurationProvider: () -> ApiConfiguration.State,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
         ): PaymentConfiguration {
-            val apiConfigurationState = apiConfigurationProvider()
+            val apiConfigurationState = apiConfigurationProvider.get()
             return PaymentConfiguration(
                 publishableKey = apiConfigurationState.publishableKey,
                 stripeAccountId = apiConfigurationState.stripeAccountId,

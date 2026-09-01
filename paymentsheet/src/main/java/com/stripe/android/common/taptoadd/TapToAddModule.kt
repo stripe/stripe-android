@@ -8,6 +8,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import dagger.Module
 import dagger.Provides
+import javax.inject.Provider
 
 @OptIn(TapToAddPreview::class)
 @Module(
@@ -21,7 +22,7 @@ internal class TapToAddModule {
         isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
         connectionManager: TapToAddConnectionManager,
         stripeRepository: StripeRepository,
-        apiConfigurationProvider: () -> ApiConfiguration.State,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         terminalWrapper: TerminalWrapper,
         tapToPayUxConfiguration: TapToPayUxConfiguration,
         userFacingLogger: UserFacingLogger,

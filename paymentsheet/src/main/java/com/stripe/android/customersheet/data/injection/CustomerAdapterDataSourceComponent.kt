@@ -41,7 +41,7 @@ internal interface CustomerAdapterDataSourceComponent {
         fun create(
             @BindsInstance application: Application,
             @BindsInstance adapter: CustomerAdapter,
-            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
+            @BindsInstance apiConfiguration: ApiConfiguration.State,
         ): CustomerAdapterDataSourceComponent
     }
 }

@@ -37,6 +37,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
+import javax.inject.Provider
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
@@ -779,7 +780,7 @@ class CustomerAdapterTest {
             FakePrefsRepository()
         },
         paymentMethodTypes: List<String>? = null,
-        apiConfigurationProvider: () -> ApiConfiguration.State = {
+        apiConfigurationProvider: Provider<ApiConfiguration.State> = Provider {
             ApiConfiguration.State(
                 publishableKey = "pk_123",
                 stripeAccountId = "acct_123",

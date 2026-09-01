@@ -63,12 +63,10 @@ internal class AttestationViewModel @Inject constructor(
                 DaggerAttestationComponent.factory()
                     .build(
                         application = app,
-                        apiConfigurationProvider = {
-                            ApiConfiguration.State(
-                                publishableKey = args.publishableKey,
-                                stripeAccountId = null,
-                            )
-                        },
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = null,
+                        ),
                         productUsage = args.productUsage.toSet()
                     )
                     .attestationViewModel

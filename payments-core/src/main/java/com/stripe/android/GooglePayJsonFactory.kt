@@ -15,6 +15,7 @@ import org.json.JSONObject
 import java.util.Currency
 import java.util.Locale
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -113,14 +114,14 @@ class GooglePayJsonFactory internal constructor(
 
     @Inject
     internal constructor(
-        apiConfigProvider: () -> ApiConfiguration.State,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
         cardBrandFilter: CardBrandFilter,
         cardFundingFilter: CardFundingFilter
     ) : this(
         googlePayConfig = GooglePayConfig(
-            apiConfigProvider().publishableKey,
-            apiConfigProvider().stripeAccountId
+            apiConfigProvider.get().publishableKey,
+            apiConfigProvider.get().stripeAccountId
         ),
         isJcbEnabled = googlePayConfig.isJcbEnabled,
         cardBrandFilter = cardBrandFilter,

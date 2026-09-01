@@ -66,6 +66,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -218,14 +219,12 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
         )
 
         @Provides
-        fun providesApiConfigurationStateProvider(
+        fun providesApiConfiguration(
             config: PaymentConfiguration
-        ): () -> ApiConfiguration.State = {
-            ApiConfiguration.State(
-                publishableKey = config.publishableKey,
-                stripeAccountId = config.stripeAccountId,
-            )
-        }
+        ): ApiConfiguration.State = ApiConfiguration.State(
+            publishableKey = config.publishableKey,
+            stripeAccountId = config.stripeAccountId,
+        )
 
         @Provides
         @Singleton
@@ -246,9 +245,9 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
 
         @Provides
         fun providesApiRequestOptionsProvider(
-            apiConfigurationProvider: () -> ApiConfiguration.State
+            apiConfigurationProvider: Provider<ApiConfiguration.State>
         ): () -> ApiRequest.Options = {
-            val state = apiConfigurationProvider()
+            val state = apiConfigurationProvider.get()
             ApiRequest.Options(
                 apiKey = state.publishableKey,
                 stripeAccount = state.stripeAccountId,

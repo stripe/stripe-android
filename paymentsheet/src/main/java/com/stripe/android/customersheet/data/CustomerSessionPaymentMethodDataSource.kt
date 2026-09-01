@@ -10,13 +10,14 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     private val elementsSessionManager: CustomerSessionElementsSessionManager,
     private val customerRepository: CustomerRepository,
     private val errorReporter: ErrorReporter,
-    private val apiConfigProvider: () -> ApiConfiguration.State,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetPaymentMethodDataSource {
     override suspend fun retrievePaymentMethods(): CustomerSheetDataResult<List<PaymentMethod>> {
@@ -44,7 +45,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     paymentMethodId = paymentMethodId,
                     params = params,
-                    stripeAccountId = apiConfigProvider().stripeAccountId,
+                    stripeAccountId = apiConfigProvider.get().stripeAccountId,
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }
@@ -64,7 +65,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
-                val apiConfiguration = apiConfigProvider()
+                val apiConfiguration = apiConfigProvider.get()
                 customerRepository.detachPaymentMethodAndDuplicates(
                     customerId = ephemeralKey.customerId,
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,

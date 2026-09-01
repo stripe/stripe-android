@@ -18,6 +18,7 @@ import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -32,7 +33,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
-    private val apiConfigProvider: () -> ApiConfiguration.State,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val redirectResolver: RedirectResolver,
@@ -106,7 +107,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 shouldCancelSource = shouldCancelSource,
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
                 statusBarColor = host.statusBarColor,
-                publishableKey = apiConfigProvider().publishableKey,
+                publishableKey = apiConfigProvider.get().publishableKey,
                 isInstantApp = isInstantApp,
                 referrer = referrer,
                 forceInAppWebView = forceInAppWebView,

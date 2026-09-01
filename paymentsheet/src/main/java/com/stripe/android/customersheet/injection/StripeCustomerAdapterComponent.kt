@@ -41,7 +41,7 @@ internal interface StripeCustomerAdapterComponent {
             @BindsInstance customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
             @BindsInstance setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
             @BindsInstance paymentMethodTypes: List<String>?,
-            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
+            @BindsInstance apiConfiguration: ApiConfiguration.State,
         ): StripeCustomerAdapterComponent
     }
 }

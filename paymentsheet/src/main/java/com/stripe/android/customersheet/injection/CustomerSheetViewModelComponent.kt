@@ -45,7 +45,7 @@ internal interface CustomerSheetViewModelComponent {
             @BindsInstance
             savedStateHandle: SavedStateHandle,
             @BindsInstance
-            apiConfigurationProvider: () -> ApiConfiguration.State,
+            apiConfiguration: ApiConfiguration.State,
         ): CustomerSheetViewModelComponent
     }
 }

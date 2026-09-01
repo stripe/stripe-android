@@ -9,9 +9,7 @@ import javax.inject.Provider
 @Module
 internal object ApiConfigurationModule {
     @Provides
-    fun provideApiConfigurationStateProvider(
+    fun provideApiConfiguration(
         paymentMethodMetadata: Provider<PaymentMethodMetadata?>
-    ): () -> ApiConfiguration.State {
-        return { requireNotNull(paymentMethodMetadata.get()?.apiConfiguration) }
-    }
+    ): ApiConfiguration.State = requireNotNull(paymentMethodMetadata.get()?.apiConfiguration)
 }

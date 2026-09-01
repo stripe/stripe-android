@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
 
@@ -69,14 +70,14 @@ internal class DefaultGooglePayRepository(
         errorReporter: ErrorReporter,
         cardBrandFilter: CardBrandFilter,
         cardFundingFilter: CardFundingFilter,
-        apiConfigurationProvider: () -> ApiConfiguration.State,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
     ) : this(
         context.applicationContext,
         googlePayConfig.environment,
         googlePayConfig.billingAddressConfig.convert(),
         googlePayConfig.existingPaymentMethodRequired,
         googlePayConfig.allowCreditCards,
-        apiConfigurationProvider(),
+        apiConfigurationProvider.get(),
         DefaultPaymentsClientFactory(context),
         errorReporter,
         logger,

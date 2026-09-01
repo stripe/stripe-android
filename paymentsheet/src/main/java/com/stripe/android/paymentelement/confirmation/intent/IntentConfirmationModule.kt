@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
+import javax.inject.Provider
 
 @Module
 internal class IntentConfirmationModule {
@@ -44,7 +45,7 @@ internal class IntentConfirmationModule {
     fun providesIntentConfirmationDefinition(
         interceptorFactory: IntentConfirmationInterceptor.Factory,
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
-        apiConfigProvider: () -> ApiConfiguration.State,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
     ): ConfirmationDefinition<*, *, *, *> {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = interceptorFactory,

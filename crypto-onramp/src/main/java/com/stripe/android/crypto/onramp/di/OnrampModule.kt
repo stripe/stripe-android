@@ -27,6 +27,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -60,7 +61,7 @@ internal class OnrampModule {
         stripeNetworkClient: StripeNetworkClient,
         stripeRepository: StripeRepository,
         linkController: LinkController,
-        apiConfigProvider: () -> ApiConfiguration.State,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
     ): CryptoApiRepository {
         return CryptoApiRepository(
             stripeNetworkClient = stripeNetworkClient,
