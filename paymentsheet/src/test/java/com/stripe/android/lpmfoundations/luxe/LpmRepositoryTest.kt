@@ -23,9 +23,9 @@ class LpmRepositoryTest {
     )
 
     @Test
-    fun `Verify failing to read server schema reads from disk`() {
+    fun `Verify failing to read server schema reads required spec from disk`() {
         lpmRepository.getSharedDataSpecs(
-            paymentIntentWithShipping,
+            PaymentIntentFactory.create(paymentMethodTypes = listOf("bacs_debit")),
             """
           [
             {
@@ -34,7 +34,7 @@ class LpmRepositoryTest {
               }
          ]
             """.trimIndent()
-        ).verifyContainsTypes("affirm")
+        ).verifyContainsTypes("bacs_debit")
     }
 
     @Test
@@ -58,8 +58,8 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify latest server spec`() {
-        lpmRepository.getSharedDataSpecs(
+    fun `Simple UI definitions do not load specs from disk`() {
+        val result = lpmRepository.getSharedDataSpecs(
             PaymentIntentFactory.create(
                 paymentMethodTypes = listOf(
                     "bancontact",
@@ -83,7 +83,9 @@ class LpmRepositoryTest {
                   }
                 ]
             """.trimIndent()
-        ).verifyContainsTypes("ideal", "bancontact", "p24", "eps")
+        )
+
+        assertThat(result.sharedDataSpecs.map { it.type }).containsExactly("an lpm")
     }
 
     @Test
@@ -198,7 +200,7 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `getSharedDataSpecs loads missing LPMs from disk`() {
+    fun `getSharedDataSpecs loads missing required LPMs from disk`() {
         val serverSpecs = """
             [
                 {
@@ -209,38 +211,38 @@ class LpmRepositoryTest {
             ]
         """.trimIndent()
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodTypes = listOf("card", "cashapp")
+            paymentMethodTypes = listOf("card", "bacs_debit")
         )
         val result = lpmRepository.getSharedDataSpecs(paymentIntent, serverSpecs)
         assertThat(result.failedToParseServerResponse).isFalse()
         val sharedDataSpecs = result.sharedDataSpecs
         assertThat(sharedDataSpecs).hasSize(2)
         assertThat(sharedDataSpecs[0].type).isEqualTo("card")
-        assertThat(sharedDataSpecs[1].type).isEqualTo("cashapp")
+        assertThat(sharedDataSpecs[1].type).isEqualTo("bacs_debit")
     }
 
     @Test
     fun `getSharedDataSpecs loads from disk when server specs don't load`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodTypes = listOf("card", "cashapp")
+            paymentMethodTypes = listOf("card", "bacs_debit")
         )
         val result = lpmRepository.getSharedDataSpecs(paymentIntent, null)
         assertThat(result.failedToParseServerResponse).isFalse()
         val sharedDataSpecs = result.sharedDataSpecs
         assertThat(sharedDataSpecs).hasSize(1)
-        assertThat(sharedDataSpecs[0].type).isEqualTo("cashapp")
+        assertThat(sharedDataSpecs[0].type).isEqualTo("bacs_debit")
     }
 
     @Test
     fun `getSharedDataSpecs loads from disk when server specs are malformed`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodTypes = listOf("card", "cashapp")
+            paymentMethodTypes = listOf("card", "bacs_debit")
         )
         val result = lpmRepository.getSharedDataSpecs(paymentIntent, "{[]}")
         assertThat(result.failedToParseServerResponse).isTrue()
         val sharedDataSpecs = result.sharedDataSpecs
         assertThat(sharedDataSpecs).hasSize(1)
-        assertThat(sharedDataSpecs[0].type).isEqualTo("cashapp")
+        assertThat(sharedDataSpecs[0].type).isEqualTo("bacs_debit")
     }
 
     private fun LpmRepository.Result.verifyContainsTypes(vararg expectedTypes: String) {
