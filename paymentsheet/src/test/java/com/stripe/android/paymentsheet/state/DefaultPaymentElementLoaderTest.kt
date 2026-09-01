@@ -3149,7 +3149,7 @@ internal class DefaultPaymentElementLoaderTest {
         runScenario {
             val loader = createPaymentElementLoader()
 
-            val state = loader.loadForCheckoutSession(
+            val checkoutSessionState = loader.loadForCheckoutSession(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
@@ -3164,13 +3164,16 @@ internal class DefaultPaymentElementLoaderTest {
                     initializedViaCompose = false,
                 ),
             ).getOrThrow()
+            val paymentMethodMetadata = checkoutSessionState.paymentElementState.paymentMethodMetadata
 
-            assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
+            assertThat(paymentMethodMetadata.customerMetadata?.removePaymentMethod)
                 .isEqualTo(expectedPermission)
 
             // When removal is permitted, CheckoutSession doesn't restrict removing the last one.
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
+            assertThat(paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
+            assertThat(checkoutSessionState.expressCheckoutElementPaymentMethodMetadata)
+                .isEqualTo(paymentMethodMetadata)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()

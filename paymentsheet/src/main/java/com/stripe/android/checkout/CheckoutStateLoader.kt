@@ -88,15 +88,16 @@ internal class CheckoutStateLoader @Inject constructor(
                 initializedViaCompose = false,
             ),
         ).getOrThrow()
+        val paymentElementState = loaderState.paymentElementState
 
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
         // previous selection comes from the incoming state, not a separate holder.
         val selection = selectionChooser.choose(
-            paymentMethodMetadata = loaderState.paymentMethodMetadata,
-            paymentMethods = loaderState.customer?.paymentMethods,
+            paymentMethodMetadata = paymentElementState.paymentMethodMetadata,
+            paymentMethods = paymentElementState.customer?.paymentMethods,
             previousSelection = carryForward.previousSelection,
-            newSelection = loaderState.paymentSelection,
+            newSelection = paymentElementState.paymentSelection,
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
@@ -106,14 +107,16 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             flagImages = flagImages,
             collectedDetails = collectedDetails,
-            paymentMethodMetadata = loaderState.paymentMethodMetadata,
+            paymentMethodMetadata = paymentElementState.paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata =
+                loaderState.expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
         )
 
-        customerStateHolder.setCustomerState(loaderState.customer)
+        customerStateHolder.setCustomerState(paymentElementState.customer)
     }
 
     /**

@@ -81,11 +81,16 @@ internal interface PaymentElementLoader {
         initializationMode: InitializationMode.CheckoutSession,
         integrationConfiguration: Configuration,
         metadata: Metadata,
-    ): Result<State> = load(
+    ): Result<CheckoutSessionState> = load(
         initializationMode = initializationMode,
         integrationConfiguration = integrationConfiguration,
         metadata = metadata,
-    )
+    ).map { state ->
+        CheckoutSessionState(
+            paymentElementState = state,
+            expressCheckoutElementPaymentMethodMetadata = state.paymentMethodMetadata,
+        )
+    }
 
     data class Metadata(
         val isReloadingAfterProcessDeath: Boolean = false,
@@ -258,6 +263,11 @@ internal interface PaymentElementLoader {
         val stripeIntent: StripeIntent
             get() = paymentMethodMetadata.stripeIntent
     }
+
+    data class CheckoutSessionState(
+        val paymentElementState: State,
+        val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata,
+    )
 }
 
 /**
@@ -315,11 +325,39 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession,
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
-    ): Result<PaymentElementLoader.State> = loadInternal(
-        initializationMode = initializationMode,
-        integrationConfiguration = integrationConfiguration,
-        metadata = metadata,
-    )
+    ): Result<PaymentElementLoader.CheckoutSessionState> = workContext.runCatching(::reportFailedLoad) {
+        val validatedConfiguration = validateConfiguration(
+            initializationMode = initializationMode,
+            integrationConfiguration = integrationConfiguration,
+        )
+        val initialLoadResult = loadInitialData(
+            initializationMode = initializationMode,
+            validatedConfiguration = validatedConfiguration,
+            metadata = metadata,
+        )
+        val paymentMethodMetadataResult = createLinkStateAndPaymentMethodMetadata(
+            initializationMode = initializationMode,
+            integrationConfiguration = integrationConfiguration,
+            validatedConfiguration = validatedConfiguration,
+            initialLoadResult = initialLoadResult,
+        )
+        val loaderStateResult = createLoaderState(
+            initializationMode = initializationMode,
+            validatedConfiguration = validatedConfiguration,
+            initialLoadResult = initialLoadResult,
+            paymentMethodMetadataResult = paymentMethodMetadataResult,
+        )
+        val state = completeLoading(
+            metadata = metadata,
+            initialLoadResult = initialLoadResult,
+            loaderStateResult = loaderStateResult,
+        ).state
+
+        PaymentElementLoader.CheckoutSessionState(
+            paymentElementState = state,
+            expressCheckoutElementPaymentMethodMetadata = state.paymentMethodMetadata,
+        )
+    }
 
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
