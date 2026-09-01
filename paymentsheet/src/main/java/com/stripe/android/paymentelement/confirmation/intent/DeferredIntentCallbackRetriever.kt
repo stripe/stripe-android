@@ -20,7 +20,7 @@ import com.stripe.android.R as PaymentsCoreR
 
 internal abstract class CallbackRetriever(
     private val errorReporter: ErrorReporter,
-    private val requestOptionsProvider: () -> ApiRequest.Options,
+    private val requestOptionsProvider: Provider<ApiRequest.Options>,
 ) {
     protected suspend fun <T> waitForCallback(
         neededWaitEvent: SuccessEvent,
@@ -43,7 +43,7 @@ internal abstract class CallbackRetriever(
             throw CallbackNotFoundException(
                 message = notFoundMessage,
                 analyticsValue = analyticsValue,
-                resolvableError = if (requestOptionsProvider().apiKeyIsLiveMode) {
+                resolvableError = if (requestOptionsProvider.get().apiKeyIsLiveMode) {
                     PaymentsCoreR.string.stripe_internal_error.resolvableString
                 } else {
                     notFoundMessage.resolvableString
@@ -67,7 +67,7 @@ internal class DeferredIntentCallbackRetriever @Inject constructor(
     // Provider is required to defer ApiRequest.Options creation until after PaymentConfiguration is initialized.
     // Without it, Dagger would eagerly create ApiRequest.Options during graph construction, causing a crash
     // if PaymentConfiguration.init() hasn't been called yet.
-    requestOptionsProvider: () -> ApiRequest.Options,
+    requestOptionsProvider: Provider<ApiRequest.Options>,
 ) : CallbackRetriever(errorReporter, requestOptionsProvider) {
     suspend fun waitForConfirmationTokenCallback(): CreateIntentWithConfirmationTokenCallback {
         return waitForCallback(

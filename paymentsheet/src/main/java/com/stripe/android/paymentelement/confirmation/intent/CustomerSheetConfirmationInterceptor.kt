@@ -20,12 +20,13 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     @Assisted private val integrationMetadata: IntegrationMetadata.CustomerSheet,
     private val stripeRepository: StripeRepository,
-    private val requestOptionsProvider: () -> ApiRequest.Options,
+    private val requestOptionsProvider: Provider<ApiRequest.Options>,
     private val setupIntentInterceptorFactory: CustomerSheetSetupIntentInterceptor.Factory,
     private val attachPaymentMethodInterceptorFactory: CustomerSheetAttachPaymentMethodInterceptor.Factory,
     private val logger: Logger,
@@ -106,7 +107,7 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
     ): PaymentMethod {
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = paymentMethodCreateParams,
-            options = requestOptionsProvider(),
+            options = requestOptionsProvider.get(),
         ).onFailure { throwable ->
             logger.error(
                 msg = "Failed to create payment method for ${paymentMethodCreateParams.typeCode}",

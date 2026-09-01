@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import javax.inject.Provider
 
 /**
  * Confirmation interceptor for checkout sessions.
@@ -50,7 +51,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     context: Context,
     private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
-    private val requestOptionsProvider: () -> ApiRequest.Options,
+    private val requestOptionsProvider: Provider<ApiRequest.Options>,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
 ) : IntentConfirmationInterceptor {
 
@@ -66,7 +67,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = confirmationOption.createParams,
-            options = requestOptionsProvider(),
+            options = requestOptionsProvider.get(),
         ).fold(
             onSuccess = { paymentMethod ->
                 val params = createConfirmParams(

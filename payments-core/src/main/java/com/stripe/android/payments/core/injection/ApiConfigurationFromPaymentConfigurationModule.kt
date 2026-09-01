@@ -28,20 +28,13 @@ class ApiConfigurationFromPaymentConfigurationModule {
 @Module
 class ApiRequestOptionsModule {
     @Provides
-    fun provideApiRequestOptionsProvider(
-        apiConfigurationProvider: Provider<ApiConfiguration.State>
-    ): () -> ApiRequest.Options {
-        return {
-            val state = apiConfigurationProvider.get()
-            ApiRequest.Options(
-                apiKey = state.publishableKey,
-                stripeAccount = state.stripeAccountId,
-            )
-        }
-    }
-
-    @Provides
     fun provideApiRequestOptions(
-        apiRequestOptionsProvider: () -> ApiRequest.Options
-    ): ApiRequest.Options = apiRequestOptionsProvider()
+        apiConfigurationProvider: Provider<ApiConfiguration.State>
+    ): ApiRequest.Options {
+        val state = apiConfigurationProvider.get()
+        return ApiRequest.Options(
+            apiKey = state.publishableKey,
+            stripeAccount = state.stripeAccountId,
+        )
+    }
 }

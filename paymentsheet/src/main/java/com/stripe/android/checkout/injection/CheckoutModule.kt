@@ -30,19 +30,15 @@ internal object CheckoutModule {
     fun provideProductUsageTokens(): Set<String> = setOf("Checkout")
 
     @Provides
-    fun provideApiRequestOptionsProvider(
+    fun provideApiRequestOptions(
         apiConfigProvider: Provider<ApiConfiguration.State>
-    ): () -> ApiRequest.Options = {
-        ApiRequest.Options(
-            apiKey = apiConfigProvider.get().publishableKey,
-            stripeAccount = apiConfigProvider.get().stripeAccountId,
+    ): ApiRequest.Options {
+        val apiConfiguration = apiConfigProvider.get()
+        return ApiRequest.Options(
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
         )
     }
-
-    @Provides
-    fun provideApiRequestOptions(
-        apiRequestOptionsProvider: () -> ApiRequest.Options
-    ): ApiRequest.Options = apiRequestOptionsProvider()
 
     @Provides
     fun provideStripeImageLoader(context: Context): StripeImageLoader = DefaultStripeImageLoader(context)

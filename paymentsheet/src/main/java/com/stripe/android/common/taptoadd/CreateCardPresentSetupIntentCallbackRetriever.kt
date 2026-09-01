@@ -20,7 +20,7 @@ internal interface CreateCardPresentSetupIntentCallbackRetriever {
 @OptIn(TapToAddPreview::class)
 internal class DefaultCreateCardPresentSetupIntentCallbackRetriever @Inject constructor(
     errorReporter: ErrorReporter,
-    requestOptionsProvider: () -> ApiRequest.Options,
+    requestOptionsProvider: Provider<ApiRequest.Options>,
     private val createCardPresentSetupIntentCallbackProvider: Provider<CreateCardPresentSetupIntentCallback?>
 ) : CallbackRetriever(errorReporter, requestOptionsProvider), CreateCardPresentSetupIntentCallbackRetriever {
     override fun hasCallback(): Boolean {
