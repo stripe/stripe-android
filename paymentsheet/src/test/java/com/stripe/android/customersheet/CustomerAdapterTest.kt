@@ -79,6 +79,28 @@ class CustomerAdapterTest {
     }
 
     @Test
+    fun `CustomerAdapter can be created before PaymentConfiguration is initialized`() {
+        PaymentConfiguration.clearInstance()
+
+        val adapter = CustomerAdapter.create(
+            context = application,
+            customerEphemeralKeyProvider = {
+                CustomerAdapter.Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "cus_123",
+                        ephemeralKey = "ek_123",
+                    )
+                )
+            },
+            setupIntentClientSecretProvider = {
+                CustomerAdapter.Result.success("seti_123")
+            },
+        )
+
+        assertThat(adapter).isNotNull()
+    }
+
+    @Test
     fun `CustomerEphemeralKey is cached`() = runTest {
         val ephemeralKeyProviderCounter = AtomicInteger(0)
         val adapter = createAdapter(

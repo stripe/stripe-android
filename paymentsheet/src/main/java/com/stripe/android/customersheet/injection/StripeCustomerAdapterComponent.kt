@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet.injection
 
 import android.content.Context
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.IOContext
@@ -10,6 +9,7 @@ import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
 import com.stripe.android.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.customersheet.StripeCustomerAdapter
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -29,6 +29,7 @@ import kotlin.coroutines.CoroutineContext
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
     ]
 )
 internal interface StripeCustomerAdapterComponent {
@@ -41,7 +42,6 @@ internal interface StripeCustomerAdapterComponent {
             @BindsInstance customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
             @BindsInstance setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
             @BindsInstance paymentMethodTypes: List<String>?,
-            @BindsInstance apiConfiguration: ApiConfiguration.State,
         ): StripeCustomerAdapterComponent
     }
 }
