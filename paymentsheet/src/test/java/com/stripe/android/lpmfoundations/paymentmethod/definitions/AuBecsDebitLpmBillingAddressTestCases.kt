@@ -99,6 +99,36 @@ private val auBecsDebitWithBillingAddressExpectedPaymentMethodParams = PaymentMe
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
+private val auBecsDebitAutomaticWithTaxExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
+    code = PaymentMethod.Type.AuBecsDebit.code,
+    billingDetails = PaymentMethod.BillingDetails(
+        name = "Jenny Rosen",
+        email = "jenny.rosen@example.com",
+        address = Address(
+            line2 = null,
+            country = "AU",
+        ),
+    ),
+    requiresMandate = true,
+    overrideParamMap = mapOf(
+        "type" to PaymentMethod.Type.AuBecsDebit.code,
+        "au_becs_debit" to mapOf(
+            "bsb_number" to "000000",
+            "account_number" to "000123456",
+        ),
+        "billing_details" to mapOf(
+            "name" to "Jenny Rosen",
+            "email" to "jenny.rosen@example.com",
+            "address" to mapOf(
+                "country" to "AU",
+            ),
+        ),
+    ),
+    productUsage = emptySet(),
+    allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+)
+
 internal val auBecsDebitTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "AU BECS Debit Never",
@@ -126,6 +156,21 @@ internal val auBecsDebitTestCases = listOf(
         rawValues = auBecsDebitFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = auBecsDebitWithContactDetailsExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "AU BECS Debit AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.AuBecsDebit,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = auBecsDebitFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = auBecsDebitAutomaticWithTaxExpectedPaymentMethodParams,
             optionsParams = null,
             extraParams = null,
         ),

@@ -51,11 +51,21 @@ internal class FormElementsBuilder(
         }
     }
 
-    fun overrideContactInformationPosition(type: ContactInformationCollectionMode): FormElementsBuilder = apply {
+    fun overrideContactInformationPosition(type: ContactInformationCollectionMode): FormElementsBuilder {
+        return overrideContactInformationPosition(
+            type = type,
+            formElement = type.formElement(arguments.initialValues),
+        )
+    }
+
+    fun overrideContactInformationPosition(
+        type: ContactInformationCollectionMode,
+        formElement: FormElement,
+    ): FormElementsBuilder = apply {
         if (type in requiredContactInformationCollectionModes) {
             overriddenContactInformationCollectionModes += type
 
-            uiFormElements += type.formElement(arguments.initialValues)
+            uiFormElements += formElement
         }
     }
 
