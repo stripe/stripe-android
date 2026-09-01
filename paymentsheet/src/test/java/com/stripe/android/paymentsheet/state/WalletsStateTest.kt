@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.LinkBrand
@@ -126,6 +127,7 @@ class WalletsStateTest {
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
             isGooglePayReady = isGooglePayReady,
+            apiConfiguration = TEST_API_CONFIGURATION,
             googlePayButtonType = GooglePayButtonType.Pay,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
@@ -287,6 +289,7 @@ class WalletsStateTest {
             },
             googlePay = if (hasGooglePay) {
                 WalletsState.GooglePay(
+                    apiConfiguration = TEST_API_CONFIGURATION,
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
                     billingAddressParameters = null,
@@ -302,6 +305,13 @@ class WalletsStateTest {
             onLinkPressed = {},
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
+        )
+    }
+
+    private companion object {
+        val TEST_API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = "pk_test_123",
+            stripeAccountId = null,
         )
     }
 }
