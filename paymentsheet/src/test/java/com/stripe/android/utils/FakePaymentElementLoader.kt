@@ -42,6 +42,9 @@ internal class FakePaymentElementLoader(
     var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
         private set
 
+    var lastCheckoutIntegrationConfiguration: PaymentElementLoader.Configuration.Checkout? = null
+        private set
+
     fun updateStripeIntent(intent: StripeIntent) {
         this.stripeIntent = intent
     }
@@ -95,6 +98,8 @@ internal class FakePaymentElementLoader(
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
         lastIntegrationConfiguration = integrationConfiguration
+        lastCheckoutIntegrationConfiguration = integrationConfiguration as? PaymentElementLoader.Configuration.Checkout
+            ?: lastCheckoutIntegrationConfiguration
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("oh no"))

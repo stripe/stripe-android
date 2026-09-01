@@ -13,6 +13,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -87,21 +89,15 @@ internal class CheckoutStateLoader @Inject constructor(
             isReloadingAfterProcessDeath = false,
             initializedViaCompose = false,
         )
-        val paymentElementLoaderState = loadPaymentElement(
+        val loadedPaymentElements = loadPaymentElements(
             configuration = configuration,
+            response = response,
+            collectedDetails = collectedDetails,
             embeddedConfiguration = embeddedConfig,
             initializationMode = initializationMode,
             loaderMetadata = loaderMetadata,
         )
-
-        val expressCheckoutElementPaymentMethodMetadata = loadExpressCheckoutElementPaymentMethodMetadata(
-            configuration = configuration,
-            response = response,
-            collectedDetails = collectedDetails,
-            initializationMode = initializationMode,
-            loaderMetadata = loaderMetadata,
-            fallback = paymentElementLoaderState.paymentMethodMetadata,
-        )
+        val paymentElementLoaderState = loadedPaymentElements.paymentElementState
 
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
@@ -121,7 +117,7 @@ internal class CheckoutStateLoader @Inject constructor(
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentElementPaymentMethodMetadata = paymentElementLoaderState.paymentMethodMetadata,
-            expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = loadedPaymentElements.expressCheckoutElementMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
@@ -131,19 +127,52 @@ internal class CheckoutStateLoader @Inject constructor(
         customerStateHolder.setCustomerState(paymentElementLoaderState.customer)
     }
 
+    private suspend fun loadPaymentElements(
+        configuration: CheckoutController.Configuration.State,
+        response: CheckoutSessionResponse,
+        collectedDetails: CheckoutCollectedDetails,
+        embeddedConfiguration: EmbeddedPaymentElement.Configuration,
+        initializationMode: PaymentElementLoader.InitializationMode,
+        loaderMetadata: PaymentElementLoader.Metadata,
+    ): LoadedPaymentElements = coroutineScope {
+        val paymentElementState = async {
+            loadPaymentElement(
+                configuration = configuration,
+                embeddedConfiguration = embeddedConfiguration,
+                initializationMode = initializationMode,
+                loaderMetadata = loaderMetadata,
+            )
+        }
+        val expressCheckoutElementMetadata = async {
+            loadExpressCheckoutElementPaymentMethodMetadata(
+                configuration = configuration,
+                response = response,
+                collectedDetails = collectedDetails,
+                initializationMode = initializationMode,
+                loaderMetadata = loaderMetadata,
+            )
+        }
+
+        val loadedPaymentElementState = paymentElementState.await()
+        LoadedPaymentElements(
+            paymentElementState = loadedPaymentElementState,
+            expressCheckoutElementMetadata = expressCheckoutElementMetadata.await()
+                ?: loadedPaymentElementState.paymentMethodMetadata,
+        )
+    }
+
     private suspend fun loadExpressCheckoutElementPaymentMethodMetadata(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
         initializationMode: PaymentElementLoader.InitializationMode,
         loaderMetadata: PaymentElementLoader.Metadata,
-        fallback: PaymentMethodMetadata,
-    ): PaymentMethodMetadata {
+    ): PaymentMethodMetadata? {
         val commonConfiguration = commonConfigurationFactory.createForExpressCheckoutElement(
             configuration = configuration,
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
-        ) ?: return fallback
+        ) ?: return null
 
         return durationProvider.measureDuration(
             DurationProvider.Key.CheckoutSessionLoadExpressCheckoutElement
@@ -179,6 +208,11 @@ internal class CheckoutStateLoader @Inject constructor(
             ).getOrThrow()
         }
     }
+
+    private data class LoadedPaymentElements(
+        val paymentElementState: PaymentElementLoader.State,
+        val expressCheckoutElementMetadata: PaymentMethodMetadata,
+    )
 
     /**
      * The fields carried from the prior state (or fresh defaults) into the next committed state, so a
