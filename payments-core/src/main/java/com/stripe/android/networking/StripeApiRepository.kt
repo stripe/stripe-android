@@ -142,9 +142,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             context,
             productUsageTokens,
             requestSurface,
-            analyticsRequestExecutor,
-            publishableKeyProvider
-        ),
+            analyticsRequestExecutor
+        ) {
+            ApiConfiguration.State(publishableKeyProvider(), null)
+        },
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(
             context = context,
@@ -174,6 +175,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
+        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+            context = appContext,
+            productUsageTokens = productUsageTokens,
+            requestSurface = requestSurface,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            apiConfigProvider = apiConfigProvider,
+        ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor
     )
