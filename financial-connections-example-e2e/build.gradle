@@ -1,0 +1,47 @@
+apply plugin: 'com.android.test'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'com.stripe.android.financialconnections.example.e2e'
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    targetProjectPath = ':financial-connections-example'
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion rootProject.ext.compileSdkVersion
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    signingConfigs {
+        example {
+            keyAlias 'example'
+            keyPassword 'Stripe12345'
+            storeFile rootProject.file('stripe-example.keystore')
+            storePassword 'Stripe12345'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.example
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
+    }
+}
+
+dependencies {
+    implementation libs.androidx.lifecycle
+    implementation testLibs.androidx.junit
+    implementation testLibs.androidx.testRunner
+    implementation testLibs.androidx.uiAutomator
+}
