@@ -1,6 +1,7 @@
 package com.stripe.android.addresselement
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
@@ -27,7 +28,10 @@ internal class AddressElementTest {
         selectAddressButton.waitForEnabled()
         selectAddressButton.click()
         replaceText("Full name", "Real Name")
-        replaceText("Address line 1", "1234 Main St")
+        replaceText("Address", "1234 Main St")
+        waitUntilDisplayed("Enter address manually")
+        rules.compose.onNodeWithText("Enter address manually").performScrollTo().performClick()
+        waitUntilDisplayed("City", editable = true)
         replaceText("City", "Boston")
         replaceText("ZIP Code", "12345")
         rules.compose.onNodeWithText("State").performScrollTo().performClick()
@@ -41,6 +45,15 @@ internal class AddressElementTest {
     }
 
     private fun replaceText(label: String, text: String) {
-        rules.compose.onNodeWithText(label).performScrollTo().performTextReplacement(text)
+        rules.compose.onNode(hasText(label).and(hasSetTextAction())).performScrollTo().performTextReplacement(text)
+    }
+
+    private fun waitUntilDisplayed(label: String, editable: Boolean = false) {
+        val matcher = hasText(label).let { matcher ->
+            if (editable) matcher.and(hasSetTextAction()) else matcher
+        }
+        rules.compose.waitUntil {
+            rules.compose.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 }

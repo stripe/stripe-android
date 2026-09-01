@@ -140,16 +140,28 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `internal config can enable stripe-hosted autocomplete`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = createViewModel(
-            config = AddressLauncher.Configuration(
-                billingAddress = null,
-                useStripeHostedAutocomplete = true,
-            )
-        )
+    fun `default configuration enables stripe-hosted autocomplete with hosted countries`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(config = AddressLauncher.Configuration())
 
-        assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
-    }
+            assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+            assertThat(viewModel.autocompleteConfig.autocompleteCountries)
+                .isEqualTo(AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES)
+        }
+
+    @Test
+    fun `builder preserves custom autocomplete countries with stripe-hosted autocomplete`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val customCountries = setOf("US", "GB")
+            val viewModel = createViewModel(
+                config = AddressLauncher.Configuration.Builder()
+                    .autocompleteCountries(customCountries)
+                    .build()
+            )
+
+            assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+            assertThat(viewModel.autocompleteConfig.autocompleteCountries).isEqualTo(customCountries)
+        }
 
     @Test
     fun `viewModel emits onComplete event`() = runTest(UnconfinedTestDispatcher()) {
@@ -383,13 +395,12 @@ class InputAddressViewModelTest {
                 mapOf(
                     IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                    IdentifierSpec.Generic("address") to FormFieldEntry(value = "", isComplete = false),
                 )
             )
+
+            viewModel.onEnterManuallyFromInline()
+            assertThat(formValuesTurbine.awaitItem().keys).contains(IdentifierSpec.Line1)
 
             viewModel.setRawValues(
                 mapOf(
@@ -645,11 +656,7 @@ class InputAddressViewModelTest {
                 mapOf(
                     IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                    IdentifierSpec.Generic("address") to FormFieldEntry(value = "", isComplete = false),
                 )
             )
 
@@ -724,11 +731,7 @@ class InputAddressViewModelTest {
                 mapOf(
                     IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                    IdentifierSpec.Generic("address") to FormFieldEntry(value = "", isComplete = false),
                 )
             )
 
@@ -892,11 +895,7 @@ class InputAddressViewModelTest {
                 mapOf(
                     IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                    IdentifierSpec.Generic("address") to FormFieldEntry(value = "", isComplete = false),
                 )
             )
 
@@ -1007,7 +1006,7 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `onEnterManuallyFromInline emits OnExpandForm with null values when query is empty`() = runTest {
+    fun `onEnterManuallyFromInline emits OnExpandForm with current country when query is empty`() = runTest {
         val viewModel = createInlineViewModel()
         var emittedEvent: AutocompleteAddressInteractor.Event? = null
         viewModel.register { emittedEvent = it }
@@ -1015,7 +1014,11 @@ class InputAddressViewModelTest {
         viewModel.onEnterManuallyFromInline()
 
         assertThat(emittedEvent)
-            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+            .isEqualTo(
+                AutocompleteAddressInteractor.Event.OnExpandForm(
+                    values = mapOf(IdentifierSpec.Country to "US")
+                )
+            )
     }
 
     @Test
