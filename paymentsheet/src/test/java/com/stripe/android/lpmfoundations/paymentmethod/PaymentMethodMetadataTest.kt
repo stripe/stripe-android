@@ -132,19 +132,6 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `filterSupportedPaymentMethods filters payment methods without shared data specs`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "bacs_debit")
-            ),
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
-        )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
-        assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first()).isEqualTo("card")
-    }
-
-    @Test
     fun `filterSupportedPaymentMethods returns expected items`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -198,17 +185,6 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
         assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
-    }
-
-    @Test
-    fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("bacs_debit")
-            ),
-            sharedDataSpecs = emptyList(),
-        )
-        assertThat(metadata.supportedPaymentMethodForCode("bacs_debit")).isNull()
     }
 
     @Test
@@ -294,24 +270,6 @@ internal class PaymentMethodMetadataTest {
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
         assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("card")
-    }
-
-    @Test
-    fun `sortedSupportedPaymentMethods filters payment methods without a sharedDataSpec`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("affirm", "bacs_debit", "card"),
-            ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("card"),
-            ),
-        )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
-        assertThat(sortedSupportedPaymentMethods).hasSize(2)
-        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
-        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
     }
 
     @Test
@@ -671,7 +629,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryCustom`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val headerInformation = metadata.formHeaderInformationForCode(
             code = "card",
@@ -682,7 +640,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryRequiresSharedDataSpec`() = runTest {
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple with icon`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "bancontact")
