@@ -1,11 +1,15 @@
 package com.stripe.android.paymentelement
 
 import androidx.test.espresso.intent.rule.IntentsRule
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.UsBankAccountFormTestUtils
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -14,7 +18,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(TestParameterInjector::class)
 internal class EmbeddedPaymentElementBankIncentiveTest {
     private val networkRule = NetworkRule()
 
@@ -28,9 +34,13 @@ internal class EmbeddedPaymentElementBankIncentiveTest {
     private val embeddedFormPage = EmbeddedFormPage(testRules.compose)
     private val formPage = FormPage(testRules.compose)
 
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    lateinit var apiConfigurationTestType: ApiConfigurationTestType
+
     @Test
     fun testIneligibleLinkedBankAccountRemovesHeaderIncentive() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_12345") },
         resultCallback = {},
     ) { testContext ->
