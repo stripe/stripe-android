@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [ADDED] Added support for SeQura.
+* [ADDED] Added support for PAYCO.
 
 ## 23.17.1 - 2026-08-31
 
