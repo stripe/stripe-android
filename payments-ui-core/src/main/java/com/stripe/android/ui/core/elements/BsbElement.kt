@@ -17,6 +17,15 @@ class BsbElement(
     private val banks: List<BecsDebitBanks.Bank>,
     initialValue: String?
 ) : FormElement {
+    constructor(
+        identifierSpec: IdentifierSpec,
+        initialValue: String?,
+    ) : this(
+        identifierSpec = identifierSpec,
+        banks = auBecsDebitBanks,
+        initialValue = initialValue,
+    )
+
     override val controller: TextFieldController = SimpleTextFieldController(
         textFieldConfig = BsbConfig(banks),
         initialValue = initialValue,

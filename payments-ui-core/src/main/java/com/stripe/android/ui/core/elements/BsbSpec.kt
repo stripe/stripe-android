@@ -19,12 +19,12 @@ data class BsbSpec(
     fun transform(initialValues: Map<IdentifierSpec, String?>): BsbElement =
         BsbElement(
             this.apiPath,
-            banks,
+            auBecsDebitBanks,
             initialValues[this.apiPath]
         )
 }
 
-private val banks: List<BecsDebitBanks.Bank> = listOf(
+internal val auBecsDebitBanks: List<BecsDebitBanks.Bank> = listOf(
     BecsDebitBanks.Bank("00", "Stripe Test Bank"),
     BecsDebitBanks.Bank("10", "BankSA (division of Westpac Bank)"),
     BecsDebitBanks.Bank("11", "St George Bank (division of Westpac Bank)"),
