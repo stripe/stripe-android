@@ -201,7 +201,7 @@ internal class PreparePaymentMethodTest(
                 externalId = "external_789",
             )
 
-            context.embeddedPaymentElement.configure(
+            context.configure(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000L,
@@ -213,11 +213,10 @@ internal class PreparePaymentMethodTest(
                         externalId = "external_789",
                     )
                 ),
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                    .shippingDetails(SHIPPING_ADDRESS)
+            ) {
+                shippingDetails(SHIPPING_ADDRESS)
                     .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
-                    .build()
-            )
+            }
 
             embeddedContentPage.clickOnLpm(code = "card")
             embeddedFormPage.fillOutCardDetails()
