@@ -89,11 +89,14 @@ internal class CheckoutStateLoader @Inject constructor(
             ),
         ).getOrThrow()
 
+        // TODO-codex also call paymentElementLoader.load again but with the express checkout element configuration.
+
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
         // previous selection comes from the incoming state, not a separate holder.
         val selection = selectionChooser.choose(
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
+            // TODO-codex: set expressCheckoutElementPaymentMethodMetadata based on the ECE-specific load call.
             paymentMethods = loaderState.customer?.paymentMethods,
             previousSelection = carryForward.previousSelection,
             newSelection = loaderState.paymentSelection,
