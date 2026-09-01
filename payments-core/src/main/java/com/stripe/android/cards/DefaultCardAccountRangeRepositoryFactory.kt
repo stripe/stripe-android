@@ -3,7 +3,7 @@ package com.stripe.android.cards
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -30,7 +30,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val requestSurface: RequestSurface,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String
+    private val apiConfigProvider: () -> ApiConfiguration.State
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
     private val cardAccountRangeRepository = lazy {
@@ -52,7 +52,13 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         productUsageTokens = productUsageTokens,
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey }
+        apiConfigProvider = {
+            val paymentConfiguration = PaymentConfiguration.getInstance(context)
+            ApiConfiguration.State(
+                publishableKey = paymentConfiguration.publishableKey,
+                stripeAccountId = paymentConfiguration.stripeAccountId,
+            )
+        }
     )
 
     @Throws(IllegalStateException::class)
@@ -89,7 +95,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         store: CardAccountRangeStore
     ): CardAccountRangeSource {
         return runCatching {
-            publishableKeyProvider()
+            apiConfigProvider().publishableKey
         }.onSuccess { publishableKey ->
             fireAnalyticsEvent(
                 publishableKey,
