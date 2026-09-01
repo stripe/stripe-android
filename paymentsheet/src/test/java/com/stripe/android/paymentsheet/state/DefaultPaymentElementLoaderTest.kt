@@ -3149,15 +3149,17 @@ internal class DefaultPaymentElementLoaderTest {
         runScenario {
             val loader = createPaymentElementLoader()
 
-            val state = loader.load(
+            val state = loader.loadForCheckoutSession(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc.",
-                ).defaultBillingDetails(PaymentSheet.BillingDetails(email = "email@email.com"))
-                    .build(),
+                integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc.",
+                    ).defaultBillingDetails(PaymentSheet.BillingDetails(email = "email@email.com"))
+                        .build(),
+                ),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
