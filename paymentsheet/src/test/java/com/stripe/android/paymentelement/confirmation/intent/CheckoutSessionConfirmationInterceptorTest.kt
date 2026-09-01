@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
@@ -435,6 +436,90 @@ class CheckoutSessionConfirmationInterceptorTest {
         interceptSavedPm(shippingInformation = SHIPPING_INFORMATION)
     }
 
+    @Test
+    fun `intercept with new payment method passes controller shipping`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("shipping[name]", "Controller Shipping"),
+            bodyPart("shipping[address][line1]", "123 Controller Street"),
+            bodyPart("shipping[address][line2]", "Unit 4"),
+            bodyPart("shipping[address][city]", "San Francisco"),
+            bodyPart("shipping[address][state]", "CA"),
+            bodyPart("shipping[address][postal_code]", "94111"),
+            bodyPart("shipping[address][country]", "US"),
+            not(hasBodyPart("shipping[phone]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm(shippingValues = CONTROLLER_SHIPPING)
+    }
+
+    @Test
+    fun `intercept with saved payment method falls back to controller shipping`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("shipping[name]", "Controller Shipping"),
+            bodyPart("shipping[address][line1]", "123 Controller Street"),
+            bodyPart("shipping[address][line2]", "Unit 4"),
+            bodyPart("shipping[address][city]", "San Francisco"),
+            bodyPart("shipping[address][state]", "CA"),
+            bodyPart("shipping[address][postal_code]", "94111"),
+            bodyPart("shipping[address][country]", "US"),
+            not(hasBodyPart("shipping[phone]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(shippingValues = CONTROLLER_SHIPPING)
+    }
+
+    @Test
+    fun `intercept with saved payment method prefers Google Pay shipping over controller shipping`() =
+        runScenario {
+            networkRule.checkoutConfirm(
+                bodyPart("shipping[name]", "Jenny Rosen"),
+                bodyPart("shipping[address][line1]", "510 Townsend St"),
+                bodyPart("shipping[address][city]", "San Francisco"),
+                bodyPart("shipping[address][state]", "CA"),
+                bodyPart("shipping[address][postal_code]", "94103"),
+                bodyPart("shipping[address][country]", "US"),
+                not(bodyPart("shipping[name]", "Controller Shipping")),
+                not(bodyPart("shipping[address][line1]", "123 Controller Street")),
+                not(hasBodyPart("shipping[phone]")),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            interceptSavedPm(
+                shippingInformation = SHIPPING_INFORMATION,
+                shippingValues = CONTROLLER_SHIPPING,
+                originatedFromWallet = true,
+            )
+        }
+
+    @Test
+    fun `intercept with new payment method omits shipping when none is provided`() = runScenario {
+        networkRule.checkoutConfirm(
+            not(hasBodyPart("shipping[name]")),
+            not(hasBodyPart("shipping[address][line1]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm()
+    }
+
+    @Test
+    fun `intercept with saved payment method omits shipping when none is provided`() = runScenario {
+        networkRule.checkoutConfirm(
+            not(hasBodyPart("shipping[name]")),
+            not(hasBodyPart("shipping[address][line1]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm()
+    }
+
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
@@ -495,20 +580,26 @@ class CheckoutSessionConfirmationInterceptorTest {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,
             intent: StripeIntent = PaymentIntentFactory.create(),
+            shippingValues: ConfirmPaymentIntentParams.Shipping? = null,
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> = interceptor.intercept(
             intent = intent,
             confirmationOption = NEW_PM_OPTION.copy(shouldSave = shouldSave),
-            shippingValues = null,
+            shippingValues = shippingValues,
         )
 
         suspend fun interceptSavedPm(
             intent: StripeIntent = PaymentIntentFactory.create(),
             shippingInformation: ShippingInformation? = null,
+            shippingValues: ConfirmPaymentIntentParams.Shipping? = null,
+            originatedFromWallet: Boolean = false,
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             interceptor.intercept(
                 intent = intent,
-                confirmationOption = SAVED_PM_OPTION.copy(shippingInformation = shippingInformation),
-                shippingValues = null,
+                confirmationOption = SAVED_PM_OPTION.copy(
+                    shippingInformation = shippingInformation,
+                    originatedFromWallet = originatedFromWallet,
+                ),
+                shippingValues = shippingValues,
             )
     }
 
@@ -555,6 +646,19 @@ class CheckoutSessionConfirmationInterceptorTest {
                 postalCode = "94103",
                 country = "US",
             ),
+        )
+
+        val CONTROLLER_SHIPPING = ConfirmPaymentIntentParams.Shipping(
+            address = Address(
+                line1 = "123 Controller Street",
+                line2 = "Unit 4",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94111",
+                country = "US",
+            ),
+            name = "Controller Shipping",
+            phone = "1-800-555-0000",
         )
 
         val SAVE_ENABLED_CUSTOMER_METADATA = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
