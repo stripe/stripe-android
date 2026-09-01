@@ -174,6 +174,95 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure normalizes the default shipping address through the address form`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().defaults(
+                CheckoutController.Configuration.Defaults().shippingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails()
+                        .name("John Shipping")
+                        .address(
+                            CheckoutController.Address()
+                                .city(" San Francisco ")
+                                .country(" US ")
+                                .line1(" 510 Townsend St ")
+                                .postalCode(" 94103 ")
+                                .state(" CA ")
+                        )
+                )
+            )
+        ) {
+            result.getOrThrow()
+
+            val shippingAddress = requireNotNull(committedState?.collectedDetails?.shippingAddress)
+            assertThat(shippingAddress.city).isEqualTo("San Francisco")
+            assertThat(shippingAddress.country).isEqualTo("US")
+            assertThat(shippingAddress.line1).isEqualTo("510 Townsend St")
+            assertThat(shippingAddress.postalCode).isEqualTo("94103")
+            assertThat(shippingAddress.state).isEqualTo("CA")
+            assertThat(committedState?.collectedDetails?.shippingName).isEqualTo("John Shipping")
+        }
+
+    @Test
+    fun `configure drops a default shipping address outside the allowed countries`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().defaults(
+                CheckoutController.Configuration.Defaults().shippingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails()
+                        .name("John Shipping")
+                        .address(CheckoutController.Address().country("DE"))
+                )
+            ),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        allowedShippingCountries(listOf("US", "CA")),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(committedState?.collectedDetails?.shippingName).isNull()
+            assertThat(committedState?.collectedDetails?.shippingAddress).isNull()
+        }
+
+    @Test
+    fun `configure updates tax when the default shipping address is the tax source`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().defaults(
+                CheckoutController.Configuration.Defaults().shippingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails()
+                        .name("John Shipping")
+                        .address(
+                            CheckoutController.Address()
+                                .city("San Francisco")
+                                .country("US")
+                                .line1("510 Townsend St")
+                                .postalCode("94103")
+                                .state("CA")
+                        )
+                )
+            ),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(automaticTaxFor("shipping")),
+                )
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "US"),
+                    bodyPart("tax_region[city]", "San Francisco"),
+                    bodyPart("tax_region[state]", "CA"),
+                    bodyPart("tax_region[postal_code]", "94103"),
+                    bodyPart("tax_region[line1]", "510 Townsend St"),
+                    bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                    responseFactory = successResponseFactory(automaticTaxFor("shipping")),
+                )
+            },
+        ) {
+            assertThat(result.isSuccess).isTrue()
+            assertThat(committedState?.collectedDetails?.shippingAddress?.country).isEqualTo("US")
+        }
+
+    @Test
     fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(
         configuration = CheckoutController.Configuration().defaults(
             CheckoutController.Configuration.Defaults().billingDetails(
@@ -675,7 +764,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `updateShippingAddress stores address without a network call when automatic tax is disabled`() =
+    fun `updateShippingAddress reaches confirmation metadata without a network call when automatic tax is disabled`() =
         runMutationScenario {
             // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
             // and the payment element is reloaded from the existing response, firing no request.
@@ -685,6 +774,10 @@ internal class CheckoutControllerTest {
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
+            val shippingDetails = requireNotNull(state.paymentMethodMetadata.shippingDetails)
+            assertThat(shippingDetails.name).isEqualTo("John")
+            assertThat(shippingDetails.address?.line1).isEqualTo("123 Main St")
+            assertThat(shippingDetails.address?.country).isEqualTo("US")
         }
 
     @Test

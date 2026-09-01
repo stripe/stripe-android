@@ -75,8 +75,13 @@ internal class CheckoutControllerExampleViewModel(
         Log.d(TAG, "Result: $result")
         _confirmationResult.value = when (result) {
             is CheckoutController.Result.Completed -> {
-                _sessionComplete.tryEmit(Unit)
-                null
+                val scenario = (_status.value as? Status.Configured)?.scenario
+                if (scenario == CheckoutControllerExampleScenario.ShippingTax) {
+                    ConfirmationResult.Completed(controller.session.value)
+                } else {
+                    _sessionComplete.tryEmit(Unit)
+                    null
+                }
             }
             is CheckoutController.Result.Canceled -> ConfirmationResult.Canceled
             is CheckoutController.Result.Failed -> {
@@ -144,6 +149,7 @@ internal class CheckoutControllerExampleViewModel(
     }
 
     sealed interface ConfirmationResult {
+        data class Completed(val session: Session?) : ConfirmationResult
         data object Canceled : ConfirmationResult
         data class Failed(val message: String) : ConfirmationResult
     }

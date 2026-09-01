@@ -30,7 +30,6 @@ internal class CheckoutControllerExampleBackendRepository(
                 .suspendable()
                 .awaitModel(CheckoutResponse.serializer(), json)
         }
-
         return when (apiResponse) {
             is Result.Failure -> {
                 kotlin.Result.failure(apiResponse.getException())

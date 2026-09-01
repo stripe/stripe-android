@@ -118,11 +118,12 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
+    val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
     InputAddressScreen(
-        primaryButtonEnabled = completeValues != null,
+        primaryButtonEnabled = completeValues != null && formEnabled,
         primaryButtonText = buttonText,
         title = titleText,
         onPrimaryButtonClick = {
@@ -137,7 +138,9 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        onCloseClick = onCloseClick,
+        onCloseClick = {
+            if (formEnabled) onCloseClick()
+        },
         topContent = {
             val currentState = billingSameAsShippingState
 
@@ -156,6 +159,9 @@ internal fun InputAddressScreen(
             }
         },
         formContent = {
+            saveError?.let { error ->
+                Text(error.resolve(), color = MaterialTheme.colors.error)
+            }
             FormUI(
                 hiddenIdentifiersFlow = remember {
                     stateFlowOf(emptySet())
