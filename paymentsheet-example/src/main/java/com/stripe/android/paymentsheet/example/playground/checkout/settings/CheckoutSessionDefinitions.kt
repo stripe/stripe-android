@@ -26,6 +26,12 @@ internal object CheckoutSessionDefinitions {
         ),
         serialize = { it },
     )
+    val customerId = optionalText(
+        key = "session.customer_id",
+        displayName = "Customer ID",
+        validate = { null },
+        isApplicable = { settings -> settings[customer] == RETURNING_CUSTOMER },
+    )
     val paymentMethodSave = boolean(
         key = "session.payment_method_save",
         displayName = "Save payment methods",
@@ -88,6 +94,7 @@ internal object CheckoutSessionDefinitions {
         children = arrayOf(
             backendUrl,
             customer,
+            customerId,
             paymentMethodSave,
             customerEmail,
             currency,
@@ -100,4 +107,5 @@ internal object CheckoutSessionDefinitions {
     )
 
     private const val GUEST_CUSTOMER = "guest"
+    private const val RETURNING_CUSTOMER = "returning"
 }

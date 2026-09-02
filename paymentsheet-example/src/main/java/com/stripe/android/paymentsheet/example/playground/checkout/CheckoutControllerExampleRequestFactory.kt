@@ -14,18 +14,17 @@ internal data class CheckoutControllerExampleRequest(
 )
 
 internal object CheckoutControllerExampleRequestFactory {
-    fun create(
-        settings: CheckoutPlaygroundSettings.Snapshot,
-        returningCustomerId: String?,
-    ): CheckoutControllerExampleRequest {
+    fun create(settings: CheckoutPlaygroundSettings.Snapshot): CheckoutControllerExampleRequest {
         return CheckoutControllerExampleRequest(
             endpoint = "checkout_session",
             body = buildJsonObject {
                 val customer = settings[session.customer]
-                put(
-                    "customer",
-                    if (customer == RETURNING_CUSTOMER) returningCustomerId ?: customer else customer,
-                )
+                val customerId = if (session.customerId.isApplicable(settings)) {
+                    settings[session.customerId]
+                } else {
+                    null
+                }
+                put("customer", customerId ?: customer)
                 if (session.paymentMethodSave.isApplicable(settings)) {
                     put(
                         "checkout_session_payment_method_save",
@@ -50,6 +49,4 @@ internal object CheckoutControllerExampleRequestFactory {
             },
         )
     }
-
-    private const val RETURNING_CUSTOMER = "returning"
 }

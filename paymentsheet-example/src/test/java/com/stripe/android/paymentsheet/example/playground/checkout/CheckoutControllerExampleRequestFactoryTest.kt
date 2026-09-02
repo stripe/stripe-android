@@ -13,10 +13,7 @@ import org.junit.Test
 class CheckoutControllerExampleRequestFactoryTest {
     @Test
     fun `guest creates a Checkout Session request without payment method saving`() = runScenario {
-        val request = CheckoutControllerExampleRequestFactory.create(
-            settings = settings.snapshot(),
-            returningCustomerId = null,
-        )
+        val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
 
         assertThat(request.endpoint).isEqualTo("checkout_session")
         assertThat(request.body).isEqualTo(
@@ -34,6 +31,7 @@ class CheckoutControllerExampleRequestFactoryTest {
 
     @Test
     fun `new customer enables payment method saving`() = runScenario {
+        settings.update(session.customerId, "cus_ignored")
         settings.update(session.customer, "new")
         settings.update(session.customerEmail, "another@example.com")
         settings.update(session.currency, Currency.EUR)
@@ -41,10 +39,7 @@ class CheckoutControllerExampleRequestFactoryTest {
         settings.update(session.shippingAddressCollection, true)
         settings.update(session.billingAddressCollection, true)
 
-        val request = CheckoutControllerExampleRequestFactory.create(
-            settings = settings.snapshot(),
-            returningCustomerId = null,
-        )
+        val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
 
         assertThat(request.body).isEqualTo(
             buildJsonObject {
@@ -65,10 +60,7 @@ class CheckoutControllerExampleRequestFactoryTest {
         settings.update(session.customer, "new")
         settings.update(session.paymentMethodSave, false)
 
-        val request = CheckoutControllerExampleRequestFactory.create(
-            settings = settings.snapshot(),
-            returningCustomerId = null,
-        )
+        val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
 
         assertThat(request.body).isEqualTo(
             buildJsonObject {
@@ -85,17 +77,15 @@ class CheckoutControllerExampleRequestFactoryTest {
     }
 
     @Test
-    fun `returning customer with saved ID enables payment method saving`() = runScenario {
+    fun `returning customer with arbitrary ID enables payment method saving`() = runScenario {
         settings.update(session.customer, "returning")
+        settings.update(session.customerId, "cus_custom")
 
-        val request = CheckoutControllerExampleRequestFactory.create(
-            settings = settings.snapshot(),
-            returningCustomerId = "cus_123",
-        )
+        val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
 
         assertThat(request.body).isEqualTo(
             buildJsonObject {
-                put("customer", "cus_123")
+                put("customer", "cus_custom")
                 put("checkout_session_payment_method_save", "enabled")
                 put("customer_email", "email@example.com")
                 put("currency", "usd")
@@ -111,10 +101,7 @@ class CheckoutControllerExampleRequestFactoryTest {
     fun `returning customer without saved ID uses fixture and enables payment method saving`() = runScenario {
         settings.update(session.customer, "returning")
 
-        val request = CheckoutControllerExampleRequestFactory.create(
-            settings = settings.snapshot(),
-            returningCustomerId = null,
-        )
+        val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
 
         assertThat(request.body).isEqualTo(
             buildJsonObject {
@@ -135,10 +122,7 @@ class CheckoutControllerExampleRequestFactoryTest {
         settings.update(session.automaticPaymentMethods, false)
         settings.update(session.paymentMethodTypes, listOf("card", "klarna"))
 
-        val request = CheckoutControllerExampleRequestFactory.create(
-            settings = settings.snapshot(),
-            returningCustomerId = null,
-        )
+        val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
 
         assertThat(request.body).containsEntry(
             "payment_method_types",

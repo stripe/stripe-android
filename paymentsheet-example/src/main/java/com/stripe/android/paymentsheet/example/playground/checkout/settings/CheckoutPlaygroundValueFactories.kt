@@ -29,10 +29,25 @@ internal fun optionalText(
     displayName: String,
     validate: (String) -> String? = { null },
 ): CheckoutPlaygroundSettingDefinition.Value<String?> {
+    return optionalText(
+        key = key,
+        displayName = displayName,
+        validate = validate,
+        isApplicable = { true },
+    )
+}
+
+internal fun optionalText(
+    key: String,
+    displayName: String,
+    validate: (String) -> String?,
+    isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean,
+): CheckoutPlaygroundSettingDefinition.Value<String?> {
     return value(
         key = key,
         displayName = displayName,
         defaultValue = null,
+        isApplicable = isApplicable,
         encode = { it.orEmpty() },
         decode = { serialized ->
             validate(serialized)?.let { invalid(message = it) } ?: Result.success(serialized.trim().ifEmpty { null })
