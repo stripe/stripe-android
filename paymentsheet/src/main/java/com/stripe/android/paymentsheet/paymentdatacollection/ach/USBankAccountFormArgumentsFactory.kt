@@ -14,7 +14,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 
 internal object USBankAccountFormArgumentsFactory {
-    data class Host(
+    data class IntegrationInputs(
         val isCompleteFlow: Boolean,
         val shippingDetails: AddressDetails?,
         val draftPaymentSelection: PaymentSelection?,
@@ -34,7 +34,7 @@ internal object USBankAccountFormArgumentsFactory {
         paymentMethodMetadata: PaymentMethodMetadata,
         selectedPaymentMethodCode: PaymentMethodCode,
         hostedSurface: String,
-        host: Host,
+        integrationInputs: IntegrationInputs,
     ): USBankAccountFormArguments {
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = selectedPaymentMethodCode,
@@ -51,27 +51,27 @@ internal object USBankAccountFormArgumentsFactory {
             instantDebits = instantDebits,
             linkMode = paymentMethodMetadata.linkMode,
             onBehalfOf = paymentMethodMetadata.onBehalfOf,
-            isCompleteFlow = host.isCompleteFlow,
+            isCompleteFlow = integrationInputs.isCompleteFlow,
             isPaymentFlow = stripeIntent is PaymentIntent,
             stripeIntentId = stripeIntent.id,
             clientSecret = stripeIntent.clientSecret,
-            shippingDetails = host.shippingDetails,
-            draftPaymentSelection = host.draftPaymentSelection,
-            autocompleteAddressInteractorFactory = host.autocompleteAddressInteractorFactory,
-            onAnalyticsEvent = host.onAnalyticsEvent,
-            onMandateTextChanged = host.onMandateTextChanged,
-            onLinkedBankAccountChanged = host.onLinkedBankAccountChanged,
-            onUpdatePrimaryButtonUIState = host.onUpdatePrimaryButtonUIState,
-            onUpdatePrimaryButtonState = host.onUpdatePrimaryButtonState,
-            onError = host.onError,
-            onFormCompleted = host.onFormCompleted,
+            shippingDetails = integrationInputs.shippingDetails,
+            draftPaymentSelection = integrationInputs.draftPaymentSelection,
+            autocompleteAddressInteractorFactory = integrationInputs.autocompleteAddressInteractorFactory,
+            onAnalyticsEvent = integrationInputs.onAnalyticsEvent,
+            onMandateTextChanged = integrationInputs.onMandateTextChanged,
+            onLinkedBankAccountChanged = integrationInputs.onLinkedBankAccountChanged,
+            onUpdatePrimaryButtonUIState = integrationInputs.onUpdatePrimaryButtonUIState,
+            onUpdatePrimaryButtonState = integrationInputs.onUpdatePrimaryButtonState,
+            onError = integrationInputs.onError,
+            onFormCompleted = integrationInputs.onFormCompleted,
             incentive = paymentMethodMetadata.paymentMethodIncentive,
             setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
             financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
-            setAsDefaultMatchesSaveForFutureUse = host.setAsDefaultMatchesSaveForFutureUse,
-            termsDisplay = host.termsDisplay,
+            setAsDefaultMatchesSaveForFutureUse = integrationInputs.setAsDefaultMatchesSaveForFutureUse,
+            termsDisplay = integrationInputs.termsDisplay,
             sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
             forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
             clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
