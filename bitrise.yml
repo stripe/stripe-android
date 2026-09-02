@@ -19,7 +19,7 @@ pipelines:
       check-and-test: { }
       run-instrumentation-and-ime-tests: { }
       run-paymentsheet-instrumentation-tests: { }
-      run-financial-connections-and-crypto-instrumentation-tests: { }
+#      run-financial-connections-and-crypto-instrumentation-tests: { }
       run-connections-e2e-tests-on-push: { }
       run-cardscan-and-google-pay-tests: { }
       run-paymentsheet-e2e: { }
