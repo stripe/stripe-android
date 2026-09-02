@@ -584,44 +584,7 @@
   {
     "type": "au_becs_debit",
     "async": true,
-    "fields": [
-      {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        },
-        "translation_id": "upe.labels.name.onAccount"
-      },
-      {
-        "type": "email",
-        "api_path": {
-          "v1": "billing_details[email]"
-        }
-      },
-      {
-        "type": "placeholder",
-        "for": "phone"
-      },
-      {
-        "type": "au_becs_bsb_number",
-        "api_path": {
-          "v1": "au_becs_debit[bsb_number]"
-        }
-      },
-      {
-        "type": "au_becs_account_number",
-        "api_path": {
-          "v1": "au_becs_debit[account_number]"
-        }
-      },
-      {
-        "type": "placeholder",
-        "for": "billing_address"
-      },
-      {
-        "type": "au_becs_mandate"
-      }
-    ],
+    "fields": [],
     "next_action_spec": {
       "confirm_response_status_specs": {
         "processing": {
