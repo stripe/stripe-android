@@ -2344,7 +2344,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            paymentSheetConfiguration = CUSTOMER_SESSION_PAYMENT_SHEET_CONFIG,
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -2369,7 +2369,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            paymentSheetConfiguration = CUSTOMER_SESSION_PAYMENT_SHEET_CONFIG,
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -5093,6 +5093,13 @@ internal class DefaultPaymentElementLoaderTest {
             customer = PaymentSheet.CustomerConfiguration(
                 id = "cus_123",
                 ephemeralKeySecret = "ek_123",
+            ),
+        )
+        private val CUSTOMER_SESSION_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(
+            merchantDisplayName = "Some Name",
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "cuss_1",
             ),
         )
         private val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
