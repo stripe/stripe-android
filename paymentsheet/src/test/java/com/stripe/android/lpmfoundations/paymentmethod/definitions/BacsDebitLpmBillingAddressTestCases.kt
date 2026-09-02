@@ -74,6 +74,38 @@ private val bacsDebitWithBillingAddressExpectedPaymentMethodParams = PaymentMeth
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
+private val bacsDebitAutomaticWithTaxExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
+    code = PaymentMethod.Type.BacsDebit.code,
+    billingDetails = PaymentMethod.BillingDetails(
+        name = "Jenny Rosen",
+        email = "jenny.rosen@example.com",
+        address = Address(
+            line2 = null,
+            country = "GB",
+            postalCode = "SW1A2AA",
+        ),
+    ),
+    requiresMandate = true,
+    overrideParamMap = mapOf(
+        "type" to PaymentMethod.Type.BacsDebit.code,
+        "bacs_debit" to mapOf(
+            "sort_code" to "108800",
+            "account_number" to "00012345",
+        ),
+        "billing_details" to mapOf(
+            "name" to "Jenny Rosen",
+            "email" to "jenny.rosen@example.com",
+            "address" to mapOf(
+                "country" to "GB",
+                "postal_code" to "SW1A2AA",
+            ),
+        ),
+    ),
+    productUsage = emptySet(),
+    allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+)
+
 internal val bacsDebitTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Bacs Debit Never",
@@ -101,6 +133,21 @@ internal val bacsDebitTestCases = listOf(
         rawValues = bacsDebitFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = bacsDebitWithBillingAddressExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.BacsDebit(confirmed = true),
+        ),
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Bacs Debit AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.BacsDebit,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = bacsDebitFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = bacsDebitAutomaticWithTaxExpectedPaymentMethodParams,
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.BacsDebit(confirmed = true),
         ),
