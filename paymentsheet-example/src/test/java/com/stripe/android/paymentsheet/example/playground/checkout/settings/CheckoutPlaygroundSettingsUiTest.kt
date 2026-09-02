@@ -105,6 +105,23 @@ class CheckoutPlaygroundSettingsUiTest {
     }
 
     @Test
+    fun `clicking a search result breadcrumb opens its nested configuration`() = runScenario {
+        val cornerRadius = CheckoutPlaygroundDefinitions.Controller.payment.appearance.primaryButton.shape
+            .cornerRadius
+
+        setSearchQuery("corner radius")
+        page.breadcrumb(cornerRadius).performScrollTo().performClick()
+
+        page.value(cornerRadius).assertIsDisplayed()
+        page.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.cornerRadius)
+            .assertDoesNotExist()
+        assertThat(currentConfiguration()).isEqualTo(
+            CheckoutPlaygroundDefinitions.Controller.payment.appearance.primaryButton.shape.configuration
+        )
+        assertThat(searchQuery()).isEmpty()
+    }
+
+    @Test
     fun `search displays an empty state when there are no matches`() = runScenario {
         setSearchQuery("not a setting")
 
@@ -257,6 +274,10 @@ class CheckoutPlaygroundSettingsUiTest {
                     searchQuery = searchQuery,
                     settings = settings,
                     onOpenConfiguration = { current = it },
+                    onOpenConfigurationPath = { configurationPath ->
+                        current = configurationPath.lastOrNull() ?: CheckoutPlaygroundDefinitions.root
+                        searchQuery = ""
+                    },
                 )
             }
         }
@@ -264,7 +285,9 @@ class CheckoutPlaygroundSettingsUiTest {
             Scenario(
                 page = Page(composeRule),
                 settings = settings,
+                currentConfiguration = { current },
                 openConfiguration = { current = it },
+                searchQuery = { searchQuery },
                 setSearchQuery = { query ->
                     composeRule.runOnIdle {
                         searchQuery = query
@@ -277,7 +300,9 @@ class CheckoutPlaygroundSettingsUiTest {
     private data class Scenario(
         val page: Page,
         val settings: CheckoutPlaygroundSettings,
+        val currentConfiguration: () -> CheckoutPlaygroundSettingDefinition.Configuration,
         val openConfiguration: (CheckoutPlaygroundSettingDefinition.Configuration) -> Unit,
+        val searchQuery: () -> String,
         val setSearchQuery: (String) -> Unit,
     )
 

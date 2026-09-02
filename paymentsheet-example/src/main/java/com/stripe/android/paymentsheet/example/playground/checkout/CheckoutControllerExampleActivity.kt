@@ -127,6 +127,10 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                 searchQuery = settingsSearchQuery,
                                 settings = viewModel.settings,
                                 onOpenConfiguration = { navigationPath += it.key },
+                                onOpenConfigurationPath = { configurationPath ->
+                                    navigationPath = configurationPath.map { it.key }
+                                    settingsSearchQuery = ""
+                                },
                             )
                         }
                         CheckoutControllerExampleViewModel.Status.Loading -> LoadingContent()

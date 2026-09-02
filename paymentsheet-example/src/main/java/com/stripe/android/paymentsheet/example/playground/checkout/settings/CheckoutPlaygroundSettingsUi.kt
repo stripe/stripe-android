@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import com.godaddy.android.colorpicker.ClassicColorPicker
@@ -61,6 +62,7 @@ internal fun CheckoutPlaygroundSettingsUi(
     searchQuery: String,
     settings: CheckoutPlaygroundSettings,
     onOpenConfiguration: (CheckoutPlaygroundSettingDefinition.Configuration) -> Unit,
+    onOpenConfigurationPath: (List<CheckoutPlaygroundSettingDefinition.Configuration>) -> Unit,
 ) {
     val values by settings.values.collectAsState()
     val searchResults = remember(searchQuery) {
@@ -87,6 +89,7 @@ internal fun CheckoutPlaygroundSettingsUi(
                 results = searchResults,
                 values = values,
                 settings = settings,
+                onOpenConfigurationPath = onOpenConfigurationPath,
             )
         }
     }
@@ -122,15 +125,19 @@ private fun SearchResultsContent(
     results: List<SearchResult>,
     values: Map<CheckoutPlaygroundSettingDefinition.Value<*>, String>,
     settings: CheckoutPlaygroundSettings,
+    onOpenConfigurationPath: (List<CheckoutPlaygroundSettingDefinition.Configuration>) -> Unit,
 ) {
     results.forEach { result ->
         val enabled = result.definition.isApplicable(settings)
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = result.breadcrumb,
-                modifier = Modifier.testTag(checkoutSettingBreadcrumbTestTag(result.definition)),
+                modifier = Modifier
+                    .testTag(checkoutSettingBreadcrumbTestTag(result.definition))
+                    .clickable { onOpenConfigurationPath(result.configurationPath) },
                 style = MaterialTheme.typography.caption,
-                color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+                color = MaterialTheme.colors.primary.copy(alpha = ContentAlpha.medium),
+                textDecoration = TextDecoration.Underline,
             )
             ValueRow(
                 definition = result.definition,
@@ -148,19 +155,21 @@ private fun SearchResultsContent(
 
 private data class SearchResult(
     val definition: CheckoutPlaygroundSettingDefinition.Value<*>,
-    val breadcrumb: String,
-)
+    val configurationPath: List<CheckoutPlaygroundSettingDefinition.Configuration>,
+) {
+    val breadcrumb: String = configurationPath.joinToString(" › ") { it.displayName }
+}
 
 private fun CheckoutPlaygroundSettingDefinition.Configuration.searchResults(
     query: String,
-    parents: List<String>,
+    parents: List<CheckoutPlaygroundSettingDefinition.Configuration>,
 ): List<SearchResult> {
     return children.flatMap { definition ->
         when (definition) {
             is CheckoutPlaygroundSettingDefinition.Configuration -> {
                 definition.searchResults(
                     query = query,
-                    parents = parents + definition.displayName,
+                    parents = parents + definition,
                 )
             }
             is CheckoutPlaygroundSettingDefinition.Value<*> -> {
@@ -168,7 +177,7 @@ private fun CheckoutPlaygroundSettingDefinition.Configuration.searchResults(
                     listOf(
                         SearchResult(
                             definition = definition,
-                            breadcrumb = parents.joinToString(" › "),
+                            configurationPath = parents,
                         )
                     )
                 } else {
