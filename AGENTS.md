@@ -12,7 +12,7 @@
 
 **GitHub Issues** — use `gh` CLI with `GH_HOST=github.com` prefix (`export` for reads, inline for writes). Always use `--state all` when searching. Check existing issues before investigating user reports.
 
-**Pull requests** — always open pull requests as drafts. When an agent opens a pull request, include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
+**Pull requests** — always open pull requests as drafts. Create the PR description from `.github/PULL_REQUEST_TEMPLATE.md`, preserving its headings and section order; fill in the existing sections instead of replacing them with custom headings. In `# Testing`, check `Added tests` when the change adds tests and `Modified tests` when it changes existing tests (check both when both apply). Never check `Manually verified`: commands run from the CLI, including tests also run by CI, are automated validation rather than manual verification. Leave all inapplicable testing checkboxes unchecked. Include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
 
 **Internal Tools** — Jira: MOBILESDK, RUN_MOBILESDK | Trailhead space: mobile-sdk
 
