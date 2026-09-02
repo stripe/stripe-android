@@ -129,6 +129,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         publishableKey = args.publishableKey,
                         stripeAccountId = args.stripeAccountId,
                         elementsSessionContext = elementsSessionContext,
+                        preCollectedConsent = args.preCollectedConsent,
                     )
                 )
             }
