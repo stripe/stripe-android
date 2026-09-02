@@ -2,7 +2,11 @@ package com.stripe.android.checkout.injection
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutSheetLauncher
+import com.stripe.android.elements.DefaultPaymentElementHorizontalContentFactory
+import com.stripe.android.elements.DefaultPaymentElementHorizontalContentHelper
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.PaymentElementHorizontalContentFactory
+import com.stripe.android.elements.PaymentElementHorizontalContentHelper
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
@@ -24,6 +28,16 @@ import kotlinx.coroutines.flow.StateFlow
 
 @Module
 internal interface PaymentElementModule {
+    @Binds
+    fun bindsPaymentElementHorizontalContentFactory(
+        factory: DefaultPaymentElementHorizontalContentFactory
+    ): PaymentElementHorizontalContentFactory
+
+    @Binds
+    fun bindsPaymentElementHorizontalContentHelper(
+        helper: DefaultPaymentElementHorizontalContentHelper
+    ): PaymentElementHorizontalContentHelper
+
     @Binds
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
