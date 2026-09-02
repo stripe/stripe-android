@@ -73,6 +73,7 @@ internal fun runPaymentSheetTest(
         scenario.onActivity {
             effectiveApiConfigurationTestType.initializePaymentConfiguration(it)
             DefaultLinkStore(it.applicationContext).clear()
+            PrefsTestStore(it).clear()
         }
 
         lateinit var paymentSheet: PaymentSheet

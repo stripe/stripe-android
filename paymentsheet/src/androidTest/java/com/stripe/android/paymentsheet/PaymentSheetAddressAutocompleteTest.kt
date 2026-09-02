@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet
 
-import android.text.SpannableString
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import android.text.SpannableString
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -20,14 +19,15 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 @OptIn(AddressAutocompletePreview::class)
-@RunWith(TestParameterInjector::class)
-internal class PaymentSheetAddressAutocompleteTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
+@Burst
+class PaymentSheetAddressAutocompleteTest(
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
 ) {
+
     private val placesClientProxyTestRule = PlacesClientProxyTestRule()
 
     @get:Rule
