@@ -14,6 +14,7 @@ buildscript {
     dependencies {
         classpath buildLibs.androidGradlePlugin
         classpath buildLibs.binaryCompatibilityValidator
+        classpath buildLibs.burst
         classpath buildLibs.composeGradlePlugin
         classpath buildLibs.detektGradlePlugin
         classpath buildLibs.dokkaPlugin

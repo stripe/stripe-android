@@ -1,19 +1,15 @@
 package com.stripe.android.paymentsheet
 
-import androidx.test.espresso.intent.rule.IntentsRule
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import app.cash.burst.burstValues
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import app.cash.burst.Burst
+import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.paymentsheet.utils.ConfirmationType
-import com.stripe.android.paymentsheet.utils.ConfirmationTypeProvider
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.PaymentMethodType
-import com.stripe.android.paymentsheet.utils.PaymentMethodTypeProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
@@ -23,13 +19,17 @@ import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class DefaultPaymentMethodsConfirmationTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
+    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+    private val confirmationType: ConfirmationType = ConfirmationType.IntentFirst,
+    private val paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
 ) {
+
     private val testRules: TestRules = TestRules.create()
 
     @get:Rule
@@ -39,15 +39,6 @@ internal class DefaultPaymentMethodsConfirmationTest(
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
-
-    @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-    lateinit var integrationType: ProductIntegrationType
-
-    @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
-    lateinit var confirmationType: ConfirmationType
-
-    @TestParameter(valuesProvider = PaymentMethodTypeProvider::class)
-    lateinit var paymentMethodType: PaymentMethodType
 
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
     private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical
@@ -309,7 +300,7 @@ internal class DefaultPaymentMethodsConfirmationTest(
     private suspend fun ProductIntegrationTestRunnerContext.consumePaymentOptionEventForFlowController() {
         consumePaymentOptionEventForFlowController(
             paymentMethodType = paymentMethodType.type.code,
-            label = if (paymentMethodType is PaymentMethodType.Card) {
+            label = if (paymentMethodType == PaymentMethodType.Card) {
                 "4242"
             } else {
                 "6789"

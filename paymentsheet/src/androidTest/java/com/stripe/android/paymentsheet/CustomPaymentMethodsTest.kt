@@ -1,12 +1,11 @@
 package com.stripe.android.paymentsheet
 
+import app.cash.burst.burstValues
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import app.cash.burst.Burst
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -16,19 +15,19 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.assertCompleted
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class CustomPaymentMethodsTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
 ) {
+
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -41,8 +40,7 @@ internal class CustomPaymentMethodsTest(
 
     @Test
     fun testSuccessful(
-        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-        integrationType: ProductIntegrationType
+        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet
     ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
@@ -99,8 +97,7 @@ internal class CustomPaymentMethodsTest(
 
     @Test
     fun testSuccessfulWithBillingDetailsCollection(
-        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-        integrationType: ProductIntegrationType
+        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet
     ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
@@ -176,8 +173,7 @@ internal class CustomPaymentMethodsTest(
 
     @Test
     fun testSuccessfulWithBillingDetailsCollectionDisabled(
-        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-        integrationType: ProductIntegrationType
+        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet
     ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
