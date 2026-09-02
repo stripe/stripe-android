@@ -13,6 +13,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
@@ -36,7 +37,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
-@OptIn(CheckoutSessionPreview::class)
+@OptIn(CheckoutSessionPreview::class, ReactNativeSdkInternal::class)
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultCheckoutPaymentOptionFactoryTest {
     @get:Rule
@@ -164,25 +165,25 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     }
 
     @Test
-    fun `iconPainter uses light icon on light system`() = runScenario {
+    fun `loadIcon uses light icon on light system`() = runScenario {
         val option = factory.create(
             selection = customPaymentMethod,
             paymentMethodMetadata = metadata,
         )
 
-        renderIcon(requireNotNull(option), isSystemDarkTheme = false)
+        requireNotNull(option).loadIcon(isSystemDarkTheme = false)
 
         assertThat(imageLoader.awaitLoadCall().url).isEqualTo(LIGHT_ICON_URL)
     }
 
     @Test
-    fun `iconPainter uses dark icon on dark system`() = runScenario {
+    fun `loadIcon uses dark icon on dark system`() = runScenario {
         val option = factory.create(
             selection = customPaymentMethod,
             paymentMethodMetadata = metadata,
         )
 
-        renderIcon(requireNotNull(option), isSystemDarkTheme = true)
+        requireNotNull(option).loadIcon(isSystemDarkTheme = true)
 
         assertThat(imageLoader.awaitLoadCall().url).isEqualTo(DARK_ICON_URL)
     }

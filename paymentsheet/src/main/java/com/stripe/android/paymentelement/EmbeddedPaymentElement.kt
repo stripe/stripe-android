@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement
 
 import android.app.Activity
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -660,6 +662,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
         val mandateText: AnnotatedString?,
         private val _shippingDetails: AddressDetails?,
     ) {
+        /**
+         * Loads the payment method image for the provided raw system theme. Appearance-based theme
+         * overrides are resolved internally.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        suspend fun loadIcon(isSystemDarkTheme: Boolean): Drawable {
+            return paymentOptionResource.load(isSystemDarkTheme)
+        }
+
         /**
          * A shipping address that the user provided during checkout.
          */

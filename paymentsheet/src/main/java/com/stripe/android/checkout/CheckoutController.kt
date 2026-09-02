@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
@@ -13,6 +14,7 @@ import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -663,6 +665,16 @@ class CheckoutController @Inject internal constructor(
              */
             val mandateText: AnnotatedString?,
         ) {
+            /**
+             * Loads the payment method image for the provided raw system theme. Appearance-based theme
+             * overrides are resolved internally.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ReactNativeSdkInternal
+            suspend fun loadIcon(isSystemDarkTheme: Boolean): Drawable {
+                return paymentOptionResource.load(isSystemDarkTheme)
+            }
+
             /**
              * The billing details collected for a payment method.
              */
