@@ -115,6 +115,7 @@ import java.security.Security
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -161,7 +162,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @Inject
     constructor(
         appContext: Context,
-        apiConfigProvider: () -> ApiConfiguration.State,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
         requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
@@ -170,7 +171,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger: Logger
     ) : this(
         context = appContext,
-        publishableKeyProvider = { apiConfigProvider().publishableKey },
+        publishableKeyProvider = { apiConfigProvider.get().publishableKey },
         requestSurface = requestSurface,
         logger = logger,
         workContext = workContext,
