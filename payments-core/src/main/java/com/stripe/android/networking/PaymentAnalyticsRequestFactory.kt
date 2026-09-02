@@ -7,7 +7,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -64,16 +64,29 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
     )
 
-    @Inject
     internal constructor(
         context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
+        publishableKeyProvider: () -> String,
+        defaultProductUsageTokens: Set<String>
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = Provider { publishableKeyProvider() },
+        networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        defaultProductUsageTokens = defaultProductUsageTokens,
+    )
+
+    @Inject
+    internal constructor(
+        context: Context,
+        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
+    ) : this(
+        packageManager = context.applicationContext.packageManager,
+        packageInfo = context.applicationContext.packageInfo,
+        packageName = context.applicationContext.packageName.orEmpty(),
+        publishableKeyProvider = Provider { apiConfigurationProvider.get().publishableKey },
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
