@@ -17,7 +17,6 @@ import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForC
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -41,7 +40,6 @@ internal interface CustomerSheetLoader {
 internal class DefaultCustomerSheetLoader(
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
-    private val lpmRepository: LpmRepository,
     private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
     private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
     private val eventReporter: CustomerSheetEventReporter,
@@ -53,14 +51,12 @@ internal class DefaultCustomerSheetLoader(
     constructor(
         googlePayRepositoryFactory: GooglePayRepositoryFactory,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
-        lpmRepository: LpmRepository,
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
-        lpmRepository = lpmRepository,
         initializationDataSourceProvider = CustomerSheetHacks.initializationDataSource,
         intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
         eventReporter = eventReporter,
@@ -138,10 +134,6 @@ internal class DefaultCustomerSheetLoader(
         isPaymentMethodSyncDefaultEnabled: Boolean,
     ): PaymentMethodMetadata {
         val elementsSession = customerSheetSession.elementsSession
-        val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
-            stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        ).sharedDataSpecs
         val cardFundingFilter = DefaultCardFundingFilter
         val cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
 
@@ -168,7 +160,6 @@ internal class DefaultCustomerSheetLoader(
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
-            sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
             customerMetadata = customerMetadata,
             integrationMetadata = IntegrationMetadata.CustomerSheet(

@@ -10,7 +10,6 @@ private val LinkSupportedFundingSources = setOf("card", "bank_account")
 @Parcelize
 internal data class ElementsSession(
     val linkSettings: LinkSettings?,
-    val paymentMethodSpecs: String?,
     val externalPaymentMethodData: String?,
     val stripeIntent: StripeIntent,
     val orderedPaymentMethodTypesAndWallets: List<String>,
@@ -284,7 +283,6 @@ internal data class ElementsSession(
         ): ElementsSession {
             return ElementsSession(
                 linkSettings = null,
-                paymentMethodSpecs = null,
                 externalPaymentMethodData = null,
                 flags = emptyMap(),
                 stripeIntent = stripeIntent,

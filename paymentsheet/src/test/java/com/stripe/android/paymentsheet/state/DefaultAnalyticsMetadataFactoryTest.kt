@@ -811,7 +811,6 @@ class DefaultAnalyticsMetadataFactoryTest {
     ): ElementsSession {
         return ElementsSession(
             linkSettings = linkSettings,
-            paymentMethodSpecs = null,
             externalPaymentMethodData = externalPaymentMethodData,
             stripeIntent = stripeIntent,
             orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,

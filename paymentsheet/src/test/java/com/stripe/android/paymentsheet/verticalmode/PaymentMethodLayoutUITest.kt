@@ -102,8 +102,6 @@ internal class PaymentMethodLayoutUITest(
                 displayablePaymentMethods = listOf(
                     CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
                         metadata = metadata,
-                        definition = CardDefinition,
-                        sharedDataSpecs = emptyList()
                     )!!
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
@@ -134,8 +132,6 @@ internal class PaymentMethodLayoutUITest(
                 displayablePaymentMethods = listOf(
                     AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
                         metadata = metadata,
-                        definition = AffirmDefinition,
-                        sharedDataSpecs = emptyList()
                     )!!
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
@@ -169,8 +165,6 @@ internal class PaymentMethodLayoutUITest(
                 displayablePaymentMethods = listOf(
                     AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
                         metadata = metadata,
-                        definition = AffirmDefinition,
-                        sharedDataSpecs = emptyList()
                     )!!
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
@@ -205,8 +199,6 @@ internal class PaymentMethodLayoutUITest(
                 displayablePaymentMethods = listOf(
                     KlarnaDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
                         metadata = metadata,
-                        definition = KlarnaDefinition,
-                        sharedDataSpecs = emptyList()
                     )!!
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
@@ -250,8 +242,6 @@ internal class PaymentMethodLayoutUITest(
                 displayablePaymentMethods = listOf(
                     AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
                         metadata = metadata,
-                        definition = AffirmDefinition,
-                        sharedDataSpecs = emptyList()
                     )!!
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),

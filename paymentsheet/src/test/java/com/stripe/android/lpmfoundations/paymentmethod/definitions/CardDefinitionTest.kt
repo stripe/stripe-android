@@ -710,8 +710,6 @@ class CardDefinitionTest {
         val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = false)
         val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
             metadata = metadata,
-            definition = CardDefinition,
-            sharedDataSpecs = emptyList()
         )
 
         assertThat(nullablePaymentMethod).isNotNull()
@@ -730,8 +728,6 @@ class CardDefinitionTest {
         val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true)
         val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
             metadata = metadata,
-            definition = CardDefinition,
-            sharedDataSpecs = emptyList()
         )
 
         assertThat(nullablePaymentMethod).isNotNull()
