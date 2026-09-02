@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
@@ -15,7 +14,6 @@ import com.stripe.android.paymentsheet.utils.CustomerSheetTestTypeProvider
 import com.stripe.android.paymentsheet.utils.CustomerSheetUtils
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
-import com.stripe.android.paymentsheet.utils.PrefsTestStoreRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import org.junit.Rule
@@ -25,9 +23,7 @@ import org.junit.runner.RunWith
 @RunWith(TestParameterInjector::class)
 internal class CustomerSheetTest {
     @get:Rule
-    val testRules: TestRules = TestRules.create {
-        around(PrefsTestStoreRule())
-    }
+    val testRules: TestRules = TestRules.create()
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
