@@ -43,6 +43,11 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
                 configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse),
             linkConfiguration = expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
             billingDetailsCollectionConfiguration = PaymentSheetBillingDetails(
+                email = if (expressCheckoutElementConfiguration.emailRequired) {
+                    PaymentSheetBillingDetails.CollectionMode.Always
+                } else {
+                    PaymentSheetBillingDetails.CollectionMode.Automatic
+                },
                 address = if (checkoutSessionResponse.requiresBillingAddress) {
                     PaymentSheetBillingDetails.AddressCollectionMode.Full
                 } else {

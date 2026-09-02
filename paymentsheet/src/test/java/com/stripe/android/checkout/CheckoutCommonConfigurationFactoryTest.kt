@@ -235,6 +235,24 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
+    fun `createForExpressCheckoutElement always collects email when required`() {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration().emailRequired(true)
+            )
+            .build()
+
+        val result = factory().createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result?.billingDetailsCollectionConfiguration?.email)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+    }
+
+    @Test
     fun `createForPaymentElement uses payment element configuration`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(
