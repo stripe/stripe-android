@@ -275,7 +275,7 @@ internal interface CheckoutControllerModule {
         fun providePaymentMethodMetadata(
             stateHolder: CheckoutControllerStateHolder,
         ): PaymentMethodMetadata? {
-            return stateHolder.state?.paymentMethodMetadata
+            return stateHolder.state?.paymentElementPaymentMethodMetadata
         }
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -317,7 +317,7 @@ internal interface CheckoutControllerModule {
         fun providePaymentMethodMetadataFlow(
             stateHolder: CheckoutControllerStateHolder,
         ): StateFlow<PaymentMethodMetadata?> {
-            return stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata }
+            return stateHolder.stateFlow.mapAsStateFlow { it?.paymentElementPaymentMethodMetadata }
         }
     }
 }

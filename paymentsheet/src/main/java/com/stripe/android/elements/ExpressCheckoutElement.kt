@@ -11,7 +11,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-// TODO-codex: ensure this and its code always uses expressCheckoutElementPaymentMethodMetadata
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ExpressCheckoutElement @Inject internal constructor(

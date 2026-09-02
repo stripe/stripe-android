@@ -55,17 +55,17 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         )
         val confirmationOption = paymentSelection.toConfirmationOption(
             configuration = configuration,
-            linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
-            cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
+            linkConfiguration = state.paymentElementPaymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = state.paymentElementPaymentMethodMetadata.cardFundingFilter,
             googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                 configuration = configuration,
-                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethodMetadata = state.paymentElementPaymentMethodMetadata,
             ),
         ) ?: return null
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            paymentMethodMetadata = state.paymentElementPaymentMethodMetadata,
             statusBarColor = statusBarColor,
         )
     }

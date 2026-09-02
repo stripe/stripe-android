@@ -57,10 +57,12 @@ import kotlin.test.assertFailsWith
 internal class CheckoutStateLoaderTest {
 
     @Test
-    fun `loadInitial commits state with payment method metadata`() = runScenario {
+    fun `loadInitial commits metadata for both payment elements`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
-        assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+        val state = requireNotNull(stateHolder.state)
+        assertThat(state.paymentElementPaymentMethodMetadata)
+            .isSameInstanceAs(state.expressCheckoutElementPaymentMethodMetadata)
     }
 
     @Test
@@ -110,7 +112,7 @@ internal class CheckoutStateLoaderTest {
             checkoutSessionResponse = response(),
         )
 
-        assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
+        assertThat(stateHolder.state?.paymentElementPaymentMethodMetadata?.paymentMethodOrder)
             .isEqualTo(listOf("klarna", "card"))
     }
 
@@ -362,7 +364,8 @@ internal class CheckoutStateLoaderTest {
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
@@ -413,8 +416,12 @@ internal class CheckoutStateLoaderTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = stateHolder.selection,
-            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata },
-            customerMetadata = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata?.customerMetadata },
+            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentElementPaymentMethodMetadata
+            },
+            customerMetadata = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentElementPaymentMethodMetadata?.customerMetadata
+            },
         )
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser

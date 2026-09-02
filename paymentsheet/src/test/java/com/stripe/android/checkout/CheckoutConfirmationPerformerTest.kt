@@ -60,7 +60,8 @@ internal class CheckoutConfirmationPerformerTest {
 
         val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
-        assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+        assertThat(args.paymentMethodMetadata)
+            .isEqualTo(stateHolder.state?.paymentElementPaymentMethodMetadata)
         assertThat(args.statusBarColor).isEqualTo(STATUS_BAR_COLOR)
     }
 
@@ -100,7 +101,7 @@ internal class CheckoutConfirmationPerformerTest {
     private fun linkState(): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
                     configuration = LinkTestUtils.createLinkConfiguration(),
                     loginState = LinkState.LoginState.NeedsVerification,
