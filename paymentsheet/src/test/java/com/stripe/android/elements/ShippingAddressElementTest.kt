@@ -17,6 +17,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
@@ -27,6 +28,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
@@ -86,6 +88,20 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
+    fun `recreated element suppresses presentation while original is active`() = runScenario {
+        shippingAddressElement.present()
+        activityLauncher.launchCalls.awaitItem()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+
+        val recreated = createElement()
+        recreated.shippingAddressElement.present()
+
+        recreated.activityLauncher.launchCalls.expectNoEvents()
+        assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
+        recreated.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `present resolves the latest payment configuration`() = runScenario {
         shippingAddressElement.present()
 
@@ -123,6 +139,62 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
+    fun `recreated element result clears presentation after host destruction`() = runScenario {
+        shippingAddressElement.present()
+        activityLauncher.launchCalls.awaitItem()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        activityLauncher.unregisterCalls.awaitItem()
+        assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
+
+        val recreated = createElement()
+        recreated.shippingAddressElement.present()
+        recreated.activityLauncher.launchCalls.expectNoEvents()
+
+        recreated.registration.dispatch(AddressLauncherResult.Canceled())
+        assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
+
+        recreated.shippingAddressElement.present()
+        recreated.activityLauncher.launchCalls.awaitItem()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        recreated.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `presentation state survives process death`() {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = ShippingAddressElementStateHolder(savedStateHandle)
+        stateHolder.isPresenting = true
+
+        val restoredStateHolder = ShippingAddressElementStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        assertThat(restoredStateHolder.isPresenting).isTrue()
+    }
+
+    @Test
+    fun `synchronous launch failure clears presentation`() = runScenario {
+        val expectedException = IllegalStateException("Launch failed")
+        activityLauncher.launchException = expectedException
+
+        val exception = assertThrows(IllegalStateException::class.java) {
+            shippingAddressElement.present()
+        }
+
+        assertThat(exception).isSameInstanceAs(expectedException)
+        assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
+        activityLauncher.launchCalls.awaitItem()
+
+        activityLauncher.launchException = null
+        shippingAddressElement.present()
+        activityLauncher.launchCalls.awaitItem()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
     fun `lifecycle destruction unregisters the launcher`() = runScenario {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
@@ -133,42 +205,56 @@ internal class ShippingAddressElementTest {
         configured: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val activityResultCaller = RecordingActivityResultCaller()
-        val activityLauncher = activityResultCaller.launcher
-        val lifecycleOwner = TestLifecycleOwner()
+        val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(
-            savedStateHandle = SavedStateHandle(),
+            savedStateHandle = savedStateHandle,
         )
         if (configured) {
             stateHolder.state = CheckoutControllerStateFactory.create()
         }
+        val shippingAddressElementStateHolder = ShippingAddressElementStateHolder(savedStateHandle)
         val paymentConfiguration = RecordingProvider(
             PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         )
         val errorReporter = FakeErrorReporter()
-        val shippingAddressElement = ShippingAddressElement(
-            activityResultCaller = activityResultCaller,
-            lifecycleOwner = lifecycleOwner,
-            paymentConfiguration = paymentConfiguration,
-            stateHolder = stateHolder,
-            errorReporter = errorReporter,
-        )
-        val registration = activityResultCaller.registerCalls.awaitItem()
-        assertThat(registration.contract).isSameInstanceAs(AddressElementActivityContract)
+
+        suspend fun createElement(): ElementScenario {
+            val activityResultCaller = RecordingActivityResultCaller()
+            val lifecycleOwner = TestLifecycleOwner()
+            val shippingAddressElement = ShippingAddressElement(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+                paymentConfiguration = paymentConfiguration,
+                stateHolder = stateHolder,
+                shippingAddressElementStateHolder = shippingAddressElementStateHolder,
+                errorReporter = errorReporter,
+            )
+            val registration = activityResultCaller.registerCalls.awaitItem()
+            assertThat(registration.contract).isSameInstanceAs(AddressElementActivityContract)
+            return ElementScenario(
+                shippingAddressElement = shippingAddressElement,
+                activityResultCaller = activityResultCaller,
+                activityLauncher = activityResultCaller.launcher,
+                lifecycleOwner = lifecycleOwner,
+                registration = registration,
+            )
+        }
+
+        val element = createElement()
 
         Scenario(
-            shippingAddressElement = shippingAddressElement,
-            activityLauncher = activityLauncher,
-            lifecycleOwner = lifecycleOwner,
+            shippingAddressElement = element.shippingAddressElement,
+            activityLauncher = element.activityLauncher,
+            lifecycleOwner = element.lifecycleOwner,
             stateHolder = stateHolder,
+            shippingAddressElementStateHolder = shippingAddressElementStateHolder,
             paymentConfiguration = paymentConfiguration,
             errorReporter = errorReporter,
-            registration = registration,
+            registration = element.registration,
+            createElement = ::createElement,
         ).block()
 
-        activityResultCaller.registerCalls.ensureAllEventsConsumed()
-        activityLauncher.launchCalls.ensureAllEventsConsumed()
-        activityLauncher.unregisterCalls.ensureAllEventsConsumed()
+        element.ensureAllEventsConsumed()
         paymentConfiguration.getCalls.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
     }
@@ -203,7 +289,10 @@ internal class ShippingAddressElementTest {
             options: ActivityOptionsCompat?,
         ) {
             launchCalls.add(LaunchCall(input))
+            launchException?.let { throw it }
         }
+
+        var launchException: RuntimeException? = null
 
         override fun unregister() {
             unregisterCalls.add(Unit)
@@ -238,13 +327,33 @@ internal class ShippingAddressElementTest {
         val input: AddressElementActivityContract.Args,
     )
 
+    private data class ElementScenario(
+        val shippingAddressElement: ShippingAddressElement,
+        val activityResultCaller: RecordingActivityResultCaller,
+        val activityLauncher: RecordingActivityResultLauncher,
+        val lifecycleOwner: TestLifecycleOwner,
+        val registration: Registration,
+    ) {
+        fun ensureAllEventsConsumed() {
+            activityResultCaller.registerCalls.ensureAllEventsConsumed()
+            activityLauncher.launchCalls.ensureAllEventsConsumed()
+            activityLauncher.unregisterCalls.ensureAllEventsConsumed()
+        }
+    }
+
     private data class Scenario(
         val shippingAddressElement: ShippingAddressElement,
         val activityLauncher: RecordingActivityResultLauncher,
         val lifecycleOwner: TestLifecycleOwner,
         val stateHolder: CheckoutControllerStateHolder,
+        val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
         val paymentConfiguration: RecordingProvider<PaymentConfiguration>,
         val errorReporter: FakeErrorReporter,
         val registration: Registration,
+        val createElement: suspend () -> ElementScenario,
     )
+
+    @Suppress("RestrictedApi")
+    private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
+        SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
 }

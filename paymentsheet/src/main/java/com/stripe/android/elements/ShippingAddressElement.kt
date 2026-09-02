@@ -8,6 +8,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
@@ -23,13 +24,12 @@ class ShippingAddressElement @Inject internal constructor(
     lifecycleOwner: LifecycleOwner,
     private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
     private val errorReporter: ErrorReporter,
 ) {
-    private var isPresenting = false
-
     private val activityLauncher: ActivityResultLauncher<AddressElementActivityContract.Args> =
         activityResultCaller.registerForActivityResult(AddressElementActivityContract) {
-            isPresenting = false
+            shippingAddressElementStateHolder.isPresenting = false
         }
 
     init {
@@ -51,23 +51,28 @@ class ShippingAddressElement @Inject internal constructor(
             return
         }
 
-        if (isPresenting) {
+        if (shippingAddressElementStateHolder.isPresenting) {
             return
         }
 
-        isPresenting = true
-        activityLauncher.launch(
-            AddressElementActivityContract.Args(
-                publishableKey = paymentConfiguration.get().publishableKey,
-                config = AddressLauncher.Configuration(
-                    additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
-                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+        shippingAddressElementStateHolder.isPresenting = true
+        try {
+            activityLauncher.launch(
+                AddressElementActivityContract.Args(
+                    publishableKey = paymentConfiguration.get().publishableKey,
+                    config = AddressLauncher.Configuration(
+                        additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
+                            phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                        ),
+                        billingAddress = null,
+                        useStripeHostedAutocomplete = true,
                     ),
-                    billingAddress = null,
-                    useStripeHostedAutocomplete = true,
-                ),
+                )
             )
-        )
+        } catch (exception: IllegalStateException) {
+            shippingAddressElementStateHolder.isPresenting = false
+            throw exception
+        }
     }
 
     @CheckoutSessionPreview
