@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
@@ -15,6 +16,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -44,6 +46,7 @@ internal interface SheetActivityStateHolder {
     fun updateError(error: ResolvableString?)
     fun updateProcessing(isProcessing: Boolean)
     fun onPrimaryButtonDisabledClick()
+    fun selectSavedPaymentMethod(selection: PaymentSelection.Saved)
 
     fun setResult(result: EmbeddedActivityResult)
 
@@ -55,6 +58,7 @@ internal interface SheetActivityStateHolder {
         val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
+        val pendingPaymentMethodId: String? = null,
     )
 }
 
@@ -72,6 +76,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val launchMode: EmbeddedLaunchMode,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
+    private val sheetTaxRegionUpdaterProvider: Provider<SheetTaxRegionUpdater> = Provider { error("Not expected") },
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(
         SheetActivityStateHolder.State(
@@ -213,6 +218,49 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                 _validationRequested.emit(Unit)
             }
         }
+    }
+
+    override fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
+        if (_state.value.isProcessing) return
+
+        _state.update { it.copy(pendingPaymentMethodId = selection.paymentMethod.id, error = null) }
+
+        val update = sheetTaxRegionUpdaterProvider.get().prepareUpdate(paymentMethodMetadata, selection)
+        if (update == null) {
+            selectionHolder.setSelection(selection)
+            setResult(createSavedPaymentMethodResult(selection, null))
+            return
+        }
+
+        coroutineScope.launch {
+            updateProcessing(true)
+            update().fold(
+                onSuccess = { response ->
+                    selectionHolder.setSelection(selection)
+                    setResult(createSavedPaymentMethodResult(selection, response))
+                },
+                onFailure = { error ->
+                    updateProcessing(false)
+                    _state.update { it.copy(pendingPaymentMethodId = null) }
+                    updateError(error.stripeErrorMessage())
+                },
+            )
+        }
+    }
+
+    private fun createSavedPaymentMethodResult(
+        selection: PaymentSelection.Saved,
+        response: com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse?,
+    ): EmbeddedActivityResult.Complete {
+        return EmbeddedActivityResult.Complete(
+            selection = selection,
+            previousNewSelections = selectionHolder.previousNewSelections,
+            hasBeenConfirmed = false,
+            customerState = customerStateHolder.customer.value,
+            checkoutSessionResponse = response,
+            shouldInvokeSelectionCallback = true,
+            launchMode = launchMode,
+        )
     }
 
     override fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {

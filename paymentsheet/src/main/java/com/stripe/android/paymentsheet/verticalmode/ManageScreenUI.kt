@@ -11,7 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -33,8 +35,10 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
                 linkBrand = state.linkBrand,
-                isEnabled = true,
+                isEnabled = !state.isProcessing,
                 isSelected = isSelected,
+                isLoading = state.pendingPaymentMethodId == it.paymentMethod.id,
+                loadingIndicatorTestTag = TEST_TAG_MANAGE_SCREEN_PENDING,
                 onClick = {
                     rowOnClick(
                         isEditing = state.isEditing,
@@ -53,6 +57,9 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                     )
                 }
             )
+        }
+        state.error?.let {
+            ErrorMessage(error = it.resolve())
         }
     }
 }
@@ -77,3 +84,6 @@ private fun TrailingContent(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST = "manage_screen_saved_pms_list"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_MANAGE_SCREEN_PENDING = "manage_screen_pending"

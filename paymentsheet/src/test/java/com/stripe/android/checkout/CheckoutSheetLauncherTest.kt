@@ -454,6 +454,37 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `manageSheetLauncher refreshes session and selection before invoking immediate action`() = testScenario {
+        val response = CheckoutSessionResponseFactory.create()
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val releaseRefresh = kotlinx.coroutines.CompletableDeferred<Unit>()
+        sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            customerState = null,
+            selection = selection,
+            hasBeenConfirmed = false,
+            checkoutSessionResponse = response,
+            shouldInvokeSelectionCallback = true,
+            launchMode = EmbeddedLaunchMode.Manage,
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+        runCurrent()
+
+        assertThat(awaitRefreshCall()).isEqualTo(
+            FakeCheckoutSessionRefresher.Call.CommitWithSelection(response, selection)
+        )
+        assertThat(immediateActionWasInvoked()).isFalse()
+
+        releaseRefresh.complete(Unit)
+        runCurrent()
+
+        assertThat(immediateActionWasInvoked()).isTrue()
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+    }
+
+    @Test
     fun `manageSheetLauncher callback does not update state on cancelled result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
