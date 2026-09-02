@@ -56,6 +56,47 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
+    fun testSingleLpmDisplaysAndConfirmsInlineForm() {
+        var checkoutResult: CheckoutController.Result? = null
+        lateinit var controller: CheckoutController
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            checkoutInitResponse = { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put("customer_email", "checkout@example.com")
+                    json.getJSONObject("elements_session").apply {
+                        remove("link_settings")
+                        put("ordered_payment_method_types_and_wallets", JSONArray(listOf("card")))
+                        getJSONObject("payment_method_preference")
+                            .put("ordered_payment_method_types", JSONArray(listOf("card")))
+                    }
+                    json.getJSONObject("server_built_elements_session_params")
+                        .getJSONObject("deferred_intent")
+                        .put("payment_method_types", JSONArray(listOf("card")))
+                }
+            },
+            setup = {
+                controller = it
+                it.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+            },
+        ) { context ->
+            networkRule.createPaymentMethod()
+            networkRule.checkoutConfirm { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            formPage.fillOutCardDetails()
+            testRules.compose.waitUntil {
+                controller.session.value?.paymentOption != null
+            }
+            context.confirm()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
+    }
+
+    @Test
     fun testBackingOutOfFormPreservesPreviouslySelectedPaymentMethod() {
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
