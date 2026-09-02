@@ -48,6 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import java.util.Locale
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -119,9 +120,9 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         internal fun providesApiOptions(
-            apiConfigurationProvider: () -> ApiConfiguration.State
+            apiConfigurationProvider: Provider<ApiConfiguration.State>
         ): ApiRequest.Options {
-            val apiConfiguration = apiConfigurationProvider()
+            val apiConfiguration = apiConfigurationProvider.get()
             return ApiRequest.Options(
                 apiKey = apiConfiguration.publishableKey,
                 stripeAccount = apiConfiguration.stripeAccountId
@@ -183,13 +184,13 @@ internal interface FinancialConnectionsSheetSharedModule {
         @ActivityRetainedScope
         internal fun provideAnalyticsRequestFactory(
             application: Application,
-            apiConfigurationProvider: () -> ApiConfiguration.State
+            apiConfigurationProvider: Provider<ApiConfiguration.State>
         ): AnalyticsRequestFactory {
             return AnalyticsRequestFactory(
                 packageManager = application.packageManager,
                 packageName = application.packageName.orEmpty(),
                 packageInfo = application.packageInfo,
-                publishableKeyProvider = { apiConfigurationProvider().publishableKey },
+                publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
                 networkTypeProvider = NetworkTypeDetector(application)::invoke,
             )
         }

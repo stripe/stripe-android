@@ -60,6 +60,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import org.json.JSONObject
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /*
@@ -72,7 +73,7 @@ internal class CryptoApiRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
     private val linkController: LinkController,
-    private val apiConfigProvider: () -> ApiConfiguration.State,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     apiVersion: String,
     sdkVersion: String = StripeSdkVersion.VERSION,
     appInfo: AppInfo?
@@ -367,7 +368,7 @@ internal class CryptoApiRepository @Inject constructor(
     ): Result<PaymentMethod> {
         val options = ApiRequest.Options(
             apiKey = platformPublishableKey,
-            stripeAccount = apiConfigProvider().stripeAccountId,
+            stripeAccount = apiConfigProvider.get().stripeAccountId,
         )
 
         return stripeRepository.createToken(
@@ -430,15 +431,15 @@ internal class CryptoApiRepository @Inject constructor(
             expandFields = listOf("payment_method"),
             options = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = apiConfigProvider().stripeAccountId,
+                stripeAccount = apiConfigProvider.get().stripeAccountId,
             )
         )
     }
 
     private fun buildRequestOptions(): ApiRequest.Options {
         return ApiRequest.Options(
-            apiKey = apiConfigProvider().publishableKey,
-            stripeAccount = apiConfigProvider().stripeAccountId,
+            apiKey = apiConfigProvider.get().publishableKey,
+            stripeAccount = apiConfigProvider.get().stripeAccountId,
         )
     }
 
