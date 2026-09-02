@@ -12,16 +12,14 @@ import javax.inject.Provider
 @Module(includes = [PaymentConfigurationModule::class])
 class ApiConfigurationFromPaymentConfigurationModule {
     @Provides
-    fun provideApiConfigurationStateProvider(
+    fun provideApiConfiguration(
         paymentConfiguration: Provider<PaymentConfiguration>
-    ): () -> ApiConfiguration.State {
-        return {
-            val config = paymentConfiguration.get()
-            ApiConfiguration.State(
-                publishableKey = config.publishableKey,
-                stripeAccountId = config.stripeAccountId,
-            )
-        }
+    ): ApiConfiguration.State {
+        val config = paymentConfiguration.get()
+        return ApiConfiguration.State(
+            publishableKey = config.publishableKey,
+            stripeAccountId = config.stripeAccountId,
+        )
     }
 }
 
@@ -29,20 +27,13 @@ class ApiConfigurationFromPaymentConfigurationModule {
 @Module
 class ApiRequestOptionsModule {
     @Provides
-    fun provideApiRequestOptionsProvider(
-        apiConfigurationProvider: () -> ApiConfiguration.State
-    ): () -> ApiRequest.Options {
-        return {
-            val state = apiConfigurationProvider()
-            ApiRequest.Options(
-                apiKey = state.publishableKey,
-                stripeAccount = state.stripeAccountId,
-            )
-        }
-    }
-
-    @Provides
     fun provideApiRequestOptions(
-        apiRequestOptionsProvider: () -> ApiRequest.Options
-    ): ApiRequest.Options = apiRequestOptionsProvider()
+        apiConfigurationProvider: Provider<ApiConfiguration.State>
+    ): ApiRequest.Options {
+        val state = apiConfigurationProvider.get()
+        return ApiRequest.Options(
+            apiKey = state.publishableKey,
+            stripeAccount = state.stripeAccountId,
+        )
+    }
 }

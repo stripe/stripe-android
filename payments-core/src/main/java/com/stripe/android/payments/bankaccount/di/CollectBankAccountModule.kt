@@ -19,14 +19,12 @@ internal object CollectBankAccountModule {
     fun providesAppContext(application: Application): Context = application
 
     @Provides
-    fun provideApiConfigurationProvider(
+    fun provideApiConfiguration(
         args: CollectBankAccountContract.Args
-    ): () -> ApiConfiguration.State = {
-        ApiConfiguration.State(
-            publishableKey = args.publishableKey,
-            stripeAccountId = args.stripeAccountId,
-        )
-    }
+    ): ApiConfiguration.State = ApiConfiguration.State(
+        publishableKey = args.publishableKey,
+        stripeAccountId = args.stripeAccountId,
+    )
 
     @Provides
     @Named(PUBLISHABLE_KEY)

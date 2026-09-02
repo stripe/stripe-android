@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -30,7 +31,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
-    private val apiConfigProvider: () -> ApiConfiguration.State,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
@@ -47,7 +48,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         val requestOptions = ApiRequest.Options(
-            apiKey = apiConfigProvider().publishableKey,
+            apiKey = apiConfigProvider.get().publishableKey,
             stripeAccount = result.stripeAccountId
         )
 
@@ -336,7 +337,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 @Singleton
 internal class PaymentIntentFlowResultProcessor @Inject constructor(
     context: Context,
-    apiConfigProvider: () -> ApiConfiguration.State,
+    apiConfigProvider: Provider<ApiConfiguration.State>,
     stripeRepository: StripeRepository,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
@@ -404,7 +405,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
 @Singleton
 internal class SetupIntentFlowResultProcessor @Inject constructor(
     context: Context,
-    apiConfigProvider: () -> ApiConfiguration.State,
+    apiConfigProvider: Provider<ApiConfiguration.State>,
     stripeRepository: StripeRepository,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
