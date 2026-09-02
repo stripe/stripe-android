@@ -56,23 +56,18 @@ class ShippingAddressElement @Inject internal constructor(
         }
 
         shippingAddressElementStateHolder.isPresenting = true
-        try {
-            activityLauncher.launch(
-                AddressElementActivityContract.Args(
-                    publishableKey = paymentConfiguration.get().publishableKey,
-                    config = AddressLauncher.Configuration(
-                        additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
-                            phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
-                        ),
-                        billingAddress = null,
-                        useStripeHostedAutocomplete = true,
+        activityLauncher.launch(
+            AddressElementActivityContract.Args(
+                publishableKey = paymentConfiguration.get().publishableKey,
+                config = AddressLauncher.Configuration(
+                    additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
+                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
                     ),
-                )
+                    billingAddress = null,
+                    useStripeHostedAutocomplete = true,
+                ),
             )
-        } catch (exception: IllegalStateException) {
-            shippingAddressElementStateHolder.isPresenting = false
-            throw exception
-        }
+        )
     }
 
     @CheckoutSessionPreview

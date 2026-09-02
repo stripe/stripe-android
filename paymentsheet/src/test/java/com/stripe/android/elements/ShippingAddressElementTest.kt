@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
@@ -175,26 +174,6 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `synchronous launch failure clears presentation`() = runScenario {
-        val expectedException = IllegalStateException("Launch failed")
-        activityLauncher.launchException = expectedException
-
-        val exception = assertThrows(IllegalStateException::class.java) {
-            shippingAddressElement.present()
-        }
-
-        assertThat(exception).isSameInstanceAs(expectedException)
-        assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
-        activityLauncher.launchCalls.awaitItem()
-
-        activityLauncher.launchException = null
-        shippingAddressElement.present()
-        activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
     fun `lifecycle destruction unregisters the launcher`() = runScenario {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
@@ -289,10 +268,7 @@ internal class ShippingAddressElementTest {
             options: ActivityOptionsCompat?,
         ) {
             launchCalls.add(LaunchCall(input))
-            launchException?.let { throw it }
         }
-
-        var launchException: RuntimeException? = null
 
         override fun unregister() {
             unregisterCalls.add(Unit)
