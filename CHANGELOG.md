@@ -6,6 +6,7 @@ NEXT_VERSION_BUMP: MINOR
 ### PaymentSheet
 * [ADDED] Added support for SeQura.
 * [ADDED] Added support for PAYCO.
+* [ADDED] Added support for Korean cards.
 
 ### AddressElement
 * [CHANGED] Use Stripe-hosted address autocomplete by default.

@@ -533,6 +533,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        KrCard(
+            "kr_card",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         Payco(
             "payco",
             isReusable = false,

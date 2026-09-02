@@ -45,7 +45,6 @@ import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 
 internal const val CheckoutSettingsScreenTestTag = "checkout_settings_screen"
-internal const val CheckoutCustomerIdTestTag = "checkout_customer_id"
 private const val CheckoutSettingGroupTestTagPrefix = "checkout_setting_group:"
 private const val CheckoutSettingValueTestTagPrefix = "checkout_setting_value:"
 
@@ -72,20 +71,6 @@ internal fun CheckoutPlaygroundSettingsUi(
                     definition = definition,
                     value = requireNotNull(values[definition]),
                     onValueChanged = { settings.updateSerialized(definition, it) },
-                )
-            }
-            if (
-                definition == CheckoutPlaygroundDefinitions.session.customer &&
-                values[definition] == "returning"
-            ) {
-                OutlinedTextField(
-                    value = settings.returningCustomerId ?: "Backend fixture",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Customer ID") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(CheckoutCustomerIdTestTag),
                 )
             }
         }

@@ -8,8 +8,6 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
-import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
-import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownSpec
@@ -60,8 +58,6 @@ internal class TransformSpecToElements(
                 is AffirmTextSpec -> listOf(spec.transform())
                 is EmptyFormSpec -> listOf(EmptyFormElement())
                 is MandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-                is BacsDebitBankAccountSpec -> listOf(spec.transform(arguments.initialValues))
-                is BacsDebitConfirmSpec -> listOf(spec.transform(arguments.merchantName, arguments.initialValues))
                 is OTPSpec -> listOf(spec.transform())
                 is NameSpec -> listOf(spec.transform(arguments.initialValues))
                 is EmailSpec -> listOf(spec.transform(arguments.initialValues))

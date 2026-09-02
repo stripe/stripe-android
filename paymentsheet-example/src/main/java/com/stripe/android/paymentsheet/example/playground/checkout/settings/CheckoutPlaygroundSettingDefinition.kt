@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
+import kotlinx.serialization.json.JsonObjectBuilder
+
 internal sealed interface CheckoutPlaygroundSettingDefinition {
     val key: String
     val displayName: String
@@ -17,6 +19,7 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
         val options: List<Option<T>>,
         val input: Input,
         val isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean,
+        private val updateRequest: CheckoutPlaygroundRequestUpdater<T> = {},
         private val encode: (T) -> String,
         private val decode: (String) -> Result<T>,
     ) : CheckoutPlaygroundSettingDefinition {
@@ -28,6 +31,13 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
 
         fun validationError(value: String): String? {
             return decode(value).exceptionOrNull()?.message
+        }
+
+        fun updateRequest(
+            request: JsonObjectBuilder,
+            settings: CheckoutPlaygroundSettingValues,
+        ) {
+            updateRequest.invoke(request, settings[this])
         }
 
         data class Option<T>(
@@ -44,6 +54,8 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
         }
     }
 }
+
+internal typealias CheckoutPlaygroundRequestUpdater<T> = JsonObjectBuilder.(value: T) -> Unit
 
 internal interface CheckoutPlaygroundSettingValues {
     operator fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T
