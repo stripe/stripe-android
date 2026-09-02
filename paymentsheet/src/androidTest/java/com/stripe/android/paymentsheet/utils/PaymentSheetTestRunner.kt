@@ -73,6 +73,7 @@ internal fun runPaymentSheetTest(
                 }
             )
             DefaultLinkStore(it.applicationContext).clear()
+            PrefsTestStore(it).clear()
         }
 
         lateinit var paymentSheet: PaymentSheet

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import app.cash.burst.Burst
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isNotEnabled
@@ -9,8 +10,6 @@ import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.times
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -18,15 +17,13 @@ import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class FormValidationTest {
     @get:Rule
     val testRules: TestRules = TestRules.create {
@@ -40,8 +37,7 @@ internal class FormValidationTest {
 
     @Test
     fun testCard(
-        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-        integrationType: ProductIntegrationType,
+        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
     ) = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -62,8 +58,7 @@ internal class FormValidationTest {
 
     @Test
     fun testUsBankAccount(
-        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-        integrationType: ProductIntegrationType,
+        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
     ) = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,

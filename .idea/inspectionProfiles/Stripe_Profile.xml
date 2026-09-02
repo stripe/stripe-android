@@ -1,0 +1,14 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Stripe Profile" />
+    <inspection_tool class="JUnitMalformedDeclaration" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignorableAnnotations">
+        <list>
+          <option value="com.stripe.android.testing.BurstParameter" />
+          <option value="mockit.Mocked" />
+          <option value="org.junit.jupiter.api.io.TempDir" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

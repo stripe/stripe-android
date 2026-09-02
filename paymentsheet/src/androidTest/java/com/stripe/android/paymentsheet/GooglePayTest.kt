@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import app.cash.burst.Burst
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
@@ -16,8 +17,6 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -31,7 +30,6 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.expectNoResult
@@ -43,12 +41,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
-internal class GooglePayTest {
-    @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-    lateinit var integrationType: ProductIntegrationType
+@Burst
+internal class GooglePayTest(
+    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+) {
 
     @get:Rule
     val testRules: TestRules = TestRules.create()

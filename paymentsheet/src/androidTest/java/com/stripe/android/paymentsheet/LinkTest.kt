@@ -1,9 +1,8 @@
 package com.stripe.android.paymentsheet
 
+import app.cash.burst.Burst
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.closeSoftKeyboard
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.TestApiKeys
@@ -20,18 +19,18 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
-@RunWith(TestParameterInjector::class)
-internal class LinkTest {
+@Burst
+internal class LinkTest(
+    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+) {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
@@ -42,9 +41,6 @@ internal class LinkTest {
     private val composeTestRule = testRules.compose
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
-
-    @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-    lateinit var integrationType: ProductIntegrationType
 
     @Test
     fun testSuccessfulCardPaymentWithLinkSignUp() = runProductIntegrationTest(
