@@ -15,6 +15,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
@@ -25,11 +26,20 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
+import com.stripe.android.paymentsheet.addresselement.CheckoutShippingAddressUpdaterRegistry
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
 internal class ShippingAddressElementTest {
@@ -59,6 +69,9 @@ internal class ShippingAddressElementTest {
 
         val launch = activityLauncher.launchCalls.awaitItem()
         assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(launch.input.updaterKey).isNotNull()
+        assertThat(CheckoutShippingAddressUpdaterRegistry.get(launch.input.updaterKey))
+            .isSameInstanceAs(shippingAddressElement)
 
         val config = requireNotNull(launch.input.config)
         assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
@@ -89,10 +102,12 @@ internal class ShippingAddressElementTest {
     @Test
     fun `recreated element suppresses presentation while original is active`() = runScenario {
         shippingAddressElement.present()
-        activityLauncher.launchCalls.awaitItem()
+        val updaterKey = requireNotNull(activityLauncher.launchCalls.awaitItem().input.updaterKey)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
         val recreated = createElement()
+        assertThat(CheckoutShippingAddressUpdaterRegistry.get(updaterKey))
+            .isSameInstanceAs(recreated.shippingAddressElement)
         recreated.shippingAddressElement.present()
 
         recreated.activityLauncher.launchCalls.expectNoEvents()
@@ -122,13 +137,17 @@ internal class ShippingAddressElementTest {
     fun `result clears presentation and ignores saved address`() = runScenario {
         val originalState = stateHolder.state
         shippingAddressElement.present()
-        activityLauncher.launchCalls.awaitItem()
+        val updaterKey = requireNotNull(activityLauncher.launchCalls.awaitItem().input.updaterKey)
 
         registration.dispatch(
             AddressLauncherResult.Succeeded(
                 AddressDetails(name = "Ignored address"),
             )
         )
+
+        assertThat(CheckoutShippingAddressUpdaterRegistry.get(updaterKey)).isNull()
+        assertThat(shippingAddressElementStateHolder.updaterKey).isNull()
+        verifyNoInteractions(checkoutController)
 
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
@@ -138,7 +157,7 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `recreated element result clears presentation after host destruction`() = runScenario {
+    fun `recreated element cancellation clears presentation without updating checkout`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
@@ -153,6 +172,7 @@ internal class ShippingAddressElementTest {
 
         recreated.registration.dispatch(AddressLauncherResult.Canceled())
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
+        verifyNoInteractions(checkoutController)
 
         recreated.shippingAddressElement.present()
         recreated.activityLauncher.launchCalls.awaitItem()
@@ -165,12 +185,50 @@ internal class ShippingAddressElementTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = ShippingAddressElementStateHolder(savedStateHandle)
         stateHolder.isPresenting = true
+        stateHolder.updaterKey = "updater-key"
 
         val restoredStateHolder = ShippingAddressElementStateHolder(
             savedStateHandle = savedStateHandle.simulateProcessDeath(),
         )
 
         assertThat(restoredStateHolder.isPresenting).isTrue()
+        assertThat(restoredStateHolder.updaterKey).isEqualTo("updater-key")
+    }
+
+    @Test
+    fun `update sends complete name and address to checkout controller`() = runScenario {
+        val result = shippingAddressElement.update(
+            AddressDetails(
+                name = "Jenny Rosen",
+                address = PaymentSheet.Address(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "510 Townsend St",
+                    line2 = "Floor 2",
+                    postalCode = "94103",
+                    state = "CA",
+                ),
+                phoneNumber = "555-0100",
+                isCheckboxSelected = true,
+            )
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        val addressCaptor = argumentCaptor<CheckoutController.Address>()
+        verify(checkoutController).updateShippingAddress(
+            name = eq("Jenny Rosen"),
+            address = addressCaptor.capture(),
+        )
+        assertThat(addressCaptor.firstValue.build()).isEqualTo(
+            CheckoutController.Address.State(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            )
+        )
     }
 
     @Test
@@ -196,6 +254,9 @@ internal class ShippingAddressElementTest {
             PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         )
         val errorReporter = FakeErrorReporter()
+        val checkoutController = mock<CheckoutController>()
+        whenever(checkoutController.updateShippingAddress(anyOrNull(), any()))
+            .thenReturn(Result.success(Unit))
 
         suspend fun createElement(): ElementScenario {
             val activityResultCaller = RecordingActivityResultCaller()
@@ -204,6 +265,7 @@ internal class ShippingAddressElementTest {
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
                 paymentConfiguration = paymentConfiguration,
+                checkoutController = checkoutController,
                 stateHolder = stateHolder,
                 shippingAddressElementStateHolder = shippingAddressElementStateHolder,
                 errorReporter = errorReporter,
@@ -226,6 +288,7 @@ internal class ShippingAddressElementTest {
             activityLauncher = element.activityLauncher,
             lifecycleOwner = element.lifecycleOwner,
             stateHolder = stateHolder,
+            checkoutController = checkoutController,
             shippingAddressElementStateHolder = shippingAddressElementStateHolder,
             paymentConfiguration = paymentConfiguration,
             errorReporter = errorReporter,
@@ -233,6 +296,7 @@ internal class ShippingAddressElementTest {
             createElement = ::createElement,
         ).block()
 
+        CheckoutShippingAddressUpdaterRegistry.remove(shippingAddressElementStateHolder.updaterKey)
         element.ensureAllEventsConsumed()
         paymentConfiguration.getCalls.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
@@ -322,6 +386,7 @@ internal class ShippingAddressElementTest {
         val activityLauncher: RecordingActivityResultLauncher,
         val lifecycleOwner: TestLifecycleOwner,
         val stateHolder: CheckoutControllerStateHolder,
+        val checkoutController: CheckoutController,
         val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
         val paymentConfiguration: RecordingProvider<PaymentConfiguration>,
         val errorReporter: FakeErrorReporter,
