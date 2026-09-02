@@ -242,12 +242,10 @@ internal class AutocompleteViewModel @Inject constructor(
                         .build(
                             application = extras.requireApplication(),
                             args = args,
-                            apiConfigurationProvider = {
-                                ApiConfiguration.State(
-                                    publishableKey = args.publishableKey,
-                                    stripeAccountId = null,
-                                )
-                            },
+                            apiConfiguration = ApiConfiguration.State(
+                                publishableKey = args.publishableKey,
+                                stripeAccountId = null,
+                            ),
                         )
                         .autocompleteViewModel as T
                 }

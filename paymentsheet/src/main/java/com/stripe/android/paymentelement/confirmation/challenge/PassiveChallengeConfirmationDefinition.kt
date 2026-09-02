@@ -20,11 +20,12 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
     private val passiveChallengeWarmer: PassiveChallengeWarmer,
-    private val apiConfigProvider: () -> ApiConfiguration.State,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
 ) : ConfirmationDefinition<
@@ -44,7 +45,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         val passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams ?: return
         passiveChallengeWarmer.start(
             passiveCaptchaParams = passiveCaptchaParams,
-            publishableKey = apiConfigProvider().publishableKey,
+            publishableKey = apiConfigProvider.get().publishableKey,
             productUsage = productUsage
         )
     }
@@ -107,7 +108,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = PassiveChallengeActivityContract.Args(
                     passiveCaptchaParams,
-                    publishableKey = apiConfigProvider().publishableKey,
+                    publishableKey = apiConfigProvider.get().publishableKey,
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,

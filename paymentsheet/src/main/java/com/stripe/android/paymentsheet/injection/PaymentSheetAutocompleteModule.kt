@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteR
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import dagger.Module
 import dagger.Provides
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -15,12 +16,12 @@ internal class PaymentSheetAutocompleteModule {
     @Singleton
     fun provideStripeAutocompleteRepository(
         stripeNetworkClient: StripeNetworkClient,
-        apiConfigProvider: () -> ApiConfiguration.State,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
         requestOptionsProvider = {
-            ApiRequest.Options(apiKey = apiConfigProvider().publishableKey)
+            ApiRequest.Options(apiKey = apiConfigProvider.get().publishableKey)
         },
     )
 }

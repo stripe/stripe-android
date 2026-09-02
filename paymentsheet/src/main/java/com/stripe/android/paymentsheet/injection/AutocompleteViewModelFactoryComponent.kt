@@ -32,7 +32,7 @@ internal interface AutocompleteViewModelFactoryComponent {
         fun build(
             @BindsInstance application: Application,
             @BindsInstance args: AutocompleteContract.Args,
-            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
+            @BindsInstance apiConfiguration: ApiConfiguration.State,
         ): AutocompleteViewModelFactoryComponent
     }
 }

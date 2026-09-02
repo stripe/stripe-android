@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class AttestationConfirmationDefinition @Inject constructor(
@@ -34,7 +35,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     @AttestationScope private val coroutineScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
     private val attestationAnalyticsEventsReporter: AttestationAnalyticsEventsReporter,
-    private val apiConfigProvider: () -> ApiConfiguration.State,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(APPLICATION_ID) private val appId: String,
     private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
@@ -132,7 +133,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = AttestationActivityContract.Args(
-                    publishableKey = apiConfigProvider().publishableKey,
+                    publishableKey = apiConfigProvider.get().publishableKey,
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,
