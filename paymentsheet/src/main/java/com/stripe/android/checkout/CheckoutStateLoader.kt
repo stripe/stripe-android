@@ -10,6 +10,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -50,6 +52,7 @@ internal class CheckoutStateLoader @Inject constructor(
         customerStateHolder.setCustomerState(null)
     }
 
+    @Suppress("LongMethod")
     private suspend fun commit(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
@@ -73,21 +76,46 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
         )
 
-        val loaderState = paymentElementLoader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                instancesKey = response.id,
-                checkoutSessionResponse = response,
-            ),
-            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
-                isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
-                configuration = embeddedConfig,
-                paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
-            ),
-            metadata = PaymentElementLoader.Metadata(
-                isReloadingAfterProcessDeath = false,
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
+        val expressCheckoutElementConfiguration = commonConfigurationFactory.createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )
+
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(response.id, response)
+
+        val paymentElementLoaderMetadata = PaymentElementLoader.Metadata(
+            isReloadingAfterProcessDeath = false,
+            initializedViaCompose = false,
+        )
+
+        val (loaderState, expressCheckoutElementPaymentMethodMetadata) = coroutineScope {
+            val loaderState = async {
+                paymentElementLoader.load(
+                    initializationMode = initializationMode,
+                    integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                        isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
+                        configuration = embeddedConfig,
+                        paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout
+                            .asPaymentSheet(),
+                    ),
+                    metadata = paymentElementLoaderMetadata,
+                ).getOrThrow()
+            }
+            val expressCheckoutElementMetadata = expressCheckoutElementConfiguration?.let { eceConfiguration ->
+                async {
+                    paymentElementLoader.load(
+                        initializationMode = initializationMode,
+                        integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
+                            commonConfiguration = eceConfiguration,
+                        ),
+                        metadata = paymentElementLoaderMetadata,
+                    ).getOrThrow().paymentMethodMetadata
+                }
+            }
+
+            loaderState.await() to expressCheckoutElementMetadata?.await()
+        }
 
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
@@ -107,7 +135,7 @@ internal class CheckoutStateLoader @Inject constructor(
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
-            expressCheckoutElementPaymentMethodMetadata = loaderState.paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,

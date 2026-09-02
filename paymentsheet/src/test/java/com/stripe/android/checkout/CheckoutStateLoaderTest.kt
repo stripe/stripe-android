@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -47,6 +48,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(
     CheckoutSessionPreview::class,
@@ -57,11 +60,38 @@ import kotlin.test.assertFailsWith
 internal class CheckoutStateLoaderTest {
 
     @Test
-    fun `loadInitial commits state with payment method metadata`() = runScenario {
+    fun `loadInitial commits only payment element metadata when ECE is not configured`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+        assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNull()
+    }
+
+    @Test
+    fun `loadInitial commits ECE payment method metadata when ECE is configured`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
+
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
         assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `loadInitial loads payment element and ECE metadata in parallel`() = runScenario(
+        loaderDelay = 1.seconds,
+    ) {
+        val startTime = currentTime()
+
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration()
+                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+                .build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(currentTime() - startTime).isEqualTo(1.seconds.inWholeMilliseconds)
     }
 
     @Test
@@ -393,6 +423,7 @@ internal class CheckoutStateLoaderTest {
         isGooglePayAvailable: Boolean = false,
         customer: CustomerState? = null,
         internalRowSelectionCallback: (() -> Unit)? = null,
+        loaderDelay: Duration = Duration.ZERO,
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
@@ -429,6 +460,7 @@ internal class CheckoutStateLoaderTest {
             shouldFail = shouldFail,
             isGooglePayAvailable = isGooglePayAvailable,
             customer = customer,
+            delay = loaderDelay,
         )
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
@@ -448,6 +480,7 @@ internal class CheckoutStateLoaderTest {
             paymentElementLoader = paymentElementLoader,
             chooser = recordingChooser,
             imageLoader = imageLoader,
+            currentTime = { testScheduler.currentTime },
         ).block()
 
         imageLoader.ensureAllEventsConsumed()
@@ -460,6 +493,7 @@ internal class CheckoutStateLoaderTest {
         val paymentElementLoader: FakePaymentElementLoader,
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
+        val currentTime: () -> Long,
     )
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,
