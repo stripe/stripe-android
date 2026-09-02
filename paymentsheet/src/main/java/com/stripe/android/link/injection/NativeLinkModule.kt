@@ -214,11 +214,9 @@ internal interface NativeLinkModule {
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
 
         @Provides
-        fun provideApiConfigurationProvider(
+        fun provideApiConfiguration(
             paymentMethodMetadata: PaymentMethodMetadata
-        ): () -> ApiConfiguration.State {
-            return { paymentMethodMetadata.apiConfiguration }
-        }
+        ): ApiConfiguration.State = paymentMethodMetadata.apiConfiguration
 
         @Provides
         @NativeLinkScope

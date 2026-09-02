@@ -30,6 +30,7 @@ import kotlin.coroutines.CoroutineContext
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
     ]
 )
 internal interface StripeCustomerAdapterComponent {

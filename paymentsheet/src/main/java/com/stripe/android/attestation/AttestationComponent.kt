@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPublishableKeyModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -20,6 +21,7 @@ import javax.inject.Singleton
         CoreCommonModule::class,
         CoroutineContextModule::class,
         PaymentsIntegrityModule::class,
+        ApiConfigurationFromPublishableKeyModule::class,
         StripeRepositoryModule::class,
     ]
 )

@@ -2,7 +2,6 @@ package com.stripe.android.customersheet.data.injection
 
 import android.app.Application
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.customersheet.CustomerSheet
@@ -12,6 +11,7 @@ import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSourc
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.injection.CustomerSheetDataCommonModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -28,6 +28,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ElementsSessionClientParamsModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
     ]
 )
 internal interface CustomerSessionDataSourceComponent {
@@ -41,7 +42,6 @@ internal interface CustomerSessionDataSourceComponent {
         fun create(
             @BindsInstance application: Application,
             @BindsInstance customerSessionProvider: CustomerSheet.CustomerSessionProvider,
-            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
         ): CustomerSessionDataSourceComponent
     }
 }

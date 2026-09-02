@@ -38,6 +38,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
+import javax.inject.Provider
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
@@ -73,6 +74,28 @@ class CustomerAdapterTest {
             context = application,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = setupIntentClientSecretProvider
+        )
+
+        assertThat(adapter).isNotNull()
+    }
+
+    @Test
+    fun `CustomerAdapter can be created before PaymentConfiguration is initialized`() {
+        PaymentConfiguration.clearInstance()
+
+        val adapter = CustomerAdapter.create(
+            context = application,
+            customerEphemeralKeyProvider = {
+                CustomerAdapter.Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "cus_123",
+                        ephemeralKey = "ek_123",
+                    )
+                )
+            },
+            setupIntentClientSecretProvider = {
+                CustomerAdapter.Result.success("seti_123")
+            },
         )
 
         assertThat(adapter).isNotNull()
@@ -778,7 +801,7 @@ class CustomerAdapterTest {
             FakePrefsRepository()
         },
         paymentMethodTypes: List<String>? = null,
-        apiConfigurationProvider: () -> ApiConfiguration.State = {
+        apiConfigurationProvider: Provider<ApiConfiguration.State> = Provider {
             ApiConfiguration.State(
                 publishableKey = "pk_123",
                 stripeAccountId = null,

@@ -215,14 +215,12 @@ internal interface PaymentElementConfirmationTestModule {
         )
 
         @Provides
-        fun providesApiConfigurationProvider(
-            paymentConfiguration: PaymentConfiguration,
-        ): () -> ApiConfiguration.State = {
-            ApiConfiguration.State(
-                publishableKey = paymentConfiguration.publishableKey,
-                stripeAccountId = paymentConfiguration.stripeAccountId,
-            )
-        }
+        fun providesApiConfiguration(
+            config: PaymentConfiguration
+        ): ApiConfiguration.State = ApiConfiguration.State(
+            publishableKey = config.publishableKey,
+            stripeAccountId = config.stripeAccountId,
+        )
 
         @Provides
         @Named(PUBLISHABLE_KEY)
