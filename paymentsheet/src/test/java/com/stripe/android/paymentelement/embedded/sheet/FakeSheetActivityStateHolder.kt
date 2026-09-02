@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -53,6 +54,8 @@ internal class FakeSheetActivityStateHolder(
     }
 
     override fun onPrimaryButtonDisabledClick() = Unit
+
+    override fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) = Unit
 
     override fun setResult(result: EmbeddedActivityResult) {
         resultTurbine.add(result)
