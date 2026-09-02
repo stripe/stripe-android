@@ -7,6 +7,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED] Added support for SeQura.
 * [ADDED] Added support for PAYCO.
 * [FIXED] Checkout Embedded Payment Element now refreshes Automatic Tax before reporting direct saved payment method selection.
+* [FIXED] Checkout Embedded Payment Element now refreshes Automatic Tax before reporting saved payment method selection from View more.
 * [ADDED] Added support for Korean cards.
 
 ### AddressElement
