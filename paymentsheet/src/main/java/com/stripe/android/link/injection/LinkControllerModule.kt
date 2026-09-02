@@ -70,16 +70,14 @@ internal interface LinkControllerModule {
         }
 
         @Provides
-        fun provideApiConfigurationStateProvider(
+        fun provideApiConfiguration(
             interactor: Provider<LinkControllerInteractor>
-        ): () -> ApiConfiguration.State {
-            return {
-                val config = requireNotNull(interactor.get().configuration)
-                ApiConfiguration.State(
-                    publishableKey = config.publishableKey,
-                    stripeAccountId = config.stripeAccountId,
-                )
-            }
+        ): ApiConfiguration.State {
+            val config = requireNotNull(interactor.get().configuration)
+            return ApiConfiguration.State(
+                publishableKey = config.publishableKey,
+                stripeAccountId = config.stripeAccountId,
+            )
         }
 
         // TODO
