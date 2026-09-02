@@ -15,10 +15,9 @@ class ApiConfigurationFromPaymentConfigurationModule {
     fun provideApiConfiguration(
         paymentConfiguration: Provider<PaymentConfiguration>
     ): ApiConfiguration.State {
-        val config = paymentConfiguration.get()
         return ApiConfiguration.State(
-            publishableKey = config.publishableKey,
-            stripeAccountId = config.stripeAccountId,
+            publishableKey = paymentConfiguration.get().publishableKey,
+            stripeAccountId = paymentConfiguration.get().stripeAccountId,
         )
     }
 }
@@ -30,10 +29,9 @@ class ApiRequestOptionsModule {
     fun provideApiRequestOptions(
         apiConfigurationProvider: Provider<ApiConfiguration.State>
     ): ApiRequest.Options {
-        val state = apiConfigurationProvider.get()
         return ApiRequest.Options(
-            apiKey = state.publishableKey,
-            stripeAccount = state.stripeAccountId,
+            apiKey = apiConfigurationProvider.get().publishableKey,
+            stripeAccount = apiConfigurationProvider.get().stripeAccountId,
         )
     }
 }
