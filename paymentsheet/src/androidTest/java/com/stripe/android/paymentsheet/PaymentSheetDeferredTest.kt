@@ -1,8 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import app.cash.burst.Burst
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -15,7 +14,6 @@ import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.MultipleInstancesTestType
-import com.stripe.android.paymentsheet.utils.MultipleInstancesTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.expectNoResult
@@ -24,9 +22,8 @@ import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class PaymentSheetDeferredTest {
     @get:Rule
     val testRules: TestRules = TestRules.create()
@@ -752,8 +749,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentWithMultipleInstances(
-        @TestParameter(valuesProvider = MultipleInstancesTestTypeProvider::class)
-        testType: MultipleInstancesTestType,
+        testType: MultipleInstancesTestType = MultipleInstancesTestType.RunWithFirst,
     ) = runMultiplePaymentSheetInstancesTest(
         networkRule = networkRule,
         testType = testType,

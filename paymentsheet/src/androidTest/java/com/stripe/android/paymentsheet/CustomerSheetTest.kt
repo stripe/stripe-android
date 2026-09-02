@@ -1,9 +1,8 @@
 package com.stripe.android.paymentsheet
 
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
@@ -11,19 +10,19 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
-import com.stripe.android.paymentsheet.utils.CustomerSheetTestTypeProvider
 import com.stripe.android.paymentsheet.utils.CustomerSheetUtils
 import com.stripe.android.paymentsheet.utils.IntegrationType
-import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.PrefsTestStore
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
+import com.stripe.android.testing.BurstParameter
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
-internal class CustomerSheetTest {
+@Burst
+internal class CustomerSheetTest(
+    private val integrationType: IntegrationType = IntegrationType.Activity,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -32,13 +31,10 @@ internal class CustomerSheetTest {
 
     private val page: CustomerSheetPage = CustomerSheetPage(composeTestRule)
 
-    @TestParameter(valuesProvider = IntegrationTypeProvider::class)
-    lateinit var integrationType: IntegrationType
-
     @Test
     fun testSuccessfulCardSave(
-        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
-        customerSheetTestType: CustomerSheetTestType,
+        @BurstParameter customerSheetTestType: CustomerSheetTestType =
+            burstValues(CustomerSheetTestType.AttachToCustomer),
     ) = runCustomerSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -162,8 +158,8 @@ internal class CustomerSheetTest {
 
     @Test
     fun testSuccessfulCardSaveWithFullBillingDetailsCollection(
-        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
-        customerSheetTestType: CustomerSheetTestType,
+        @BurstParameter customerSheetTestType: CustomerSheetTestType =
+            burstValues(CustomerSheetTestType.AttachToCustomer),
     ) = runCustomerSheetTest(
         networkRule = networkRule,
         configuration = CustomerSheet.Configuration.builder("Merchant, Inc.")
@@ -217,8 +213,8 @@ internal class CustomerSheetTest {
 
     @Test
     fun testSuccessfulCardSaveWithCardBrandChoice_Selector(
-        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
-        customerSheetTestType: CustomerSheetTestType,
+        @BurstParameter customerSheetTestType: CustomerSheetTestType =
+            burstValues(CustomerSheetTestType.AttachToCustomer),
     ) = runCustomerSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
