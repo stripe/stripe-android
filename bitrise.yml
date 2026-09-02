@@ -10,19 +10,13 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
-    # Run PaymentSheet E2E tests in parallel on one machine so Bitrise bills a single job.
-    - PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT: 6
 
 pipelines:
   main-trigger-pipeline:
     workflows:
       check-and-test: { }
-      run-instrumentation-and-ime-tests: { }
-      run-paymentsheet-instrumentation-tests: { }
-#      run-financial-connections-and-crypto-instrumentation-tests: { }
+      run-instrumentation-tests-with-flank: { }
       run-connections-e2e-tests-on-push: { }
-      run-cardscan-and-google-pay-tests: { }
-      run-paymentsheet-e2e: { }
       check-dependencies-and-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
     stages:
@@ -346,196 +340,39 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CUX_BOTS
             - webhook_url_on_error: $WEBHOOK_SLACK_CUX_BOTS
-  run-instrumentation-and-ime-tests:
+  run-instrumentation-tests-with-flank:
     before_run:
       - prepare_all
     after_run:
       - conclude_all
     steps:
       - script@1:
-          title: Execute general instrumentation tests
+          title: Assemble instrumentation and E2E test APKs
           timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - script@1:
-          title: Execute PaymentSheet IME instrumentation tests
-          is_always_run: true
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33imeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export general and IME instrumentation test results
-          is_always_run: true
-          inputs:
-            - test_title: General and IME instrumentation tests
-  run-paymentsheet-instrumentation-tests:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Execute instrumentation tests
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export PaymentSheet instrumentation test results
-          inputs:
-            - test_title: PaymentSheet instrumentation tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-paymentsheet-ime-instrumentation-tests:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Execute PaymentSheet IME instrumentation tests
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33imeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export PaymentSheet IME instrumentation test results
-          inputs:
-            - test_title: PaymentSheet IME instrumentation tests
-  run-financial-connections-and-crypto-instrumentation-tests:
-    before_run:
-      - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Assemble Instrumentation tests
-          timeout: 600
-          inputs:
-            - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
-          title: Execute instrumentation tests
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest :crypto-onramp-example:connectedDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle --continue
-      - bundle::export_instrumentation_test_results:
-          title: Export FC and Crypto instrumentation test results
-          inputs:
-            - test_title: FC and Crypto instrumentation tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-cardscan-and-google-pay-tests:
-    before_run:
-      - start_cardscan_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Assemble Instrumentation tests
-          timeout: 600
-          inputs:
-            - content: ./gradlew :camera-core:assembleAndroidTest :stripecardscan:assembleAndroidTest :stripecardscan-example:assembleAndroidTest
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
-          title: Execute instrumentation tests
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export CardScan instrumentation test results
-          inputs:
-            - test_title: CardScan instrumentation tests
-      # Firebase Test Lab runs remotely, so it can share this job without
-      # competing with CardScan's local emulator.
-      - android-build-for-ui-testing@0:
-          title: Build PaymentSheet Google Pay E2E test APKs
-          is_always_run: true
-          timeout: 1200
-          inputs:
-            - module: paymentsheet-example
-            - variant: baseDebug
-            - arguments: -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
-      - virtual-device-testing-for-android@1:
-          title: Run TestGooglePay on virtual devices
-          is_always_run: true
-          timeout: 3600
-          inputs:
-            - test_type: instrumentation
-            - auto_google_login: "true"
-            - inst_test_targets: class com.stripe.android.lpm.TestGooglePay
-            - download_test_results: "true"
-            - test_timeout: "2700"
-      - deploy-to-bitrise-io@2:
-          title: Deploy Google Pay E2E test results
-          is_always_run: true
-          inputs:
-            - notify_user_groups: none
-            - is_enable_public_page: "false"
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-paymentsheet-e2e:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Execute PaymentSheet E2E tests
-          timeout: 2400
           inputs:
             - content: |-
-                #!/usr/bin/env bash
-                set -euo pipefail
-                # Keep the explicit class list so tests with dedicated workflows stay excluded.
-                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index 0 --num-shards 1)
-
-                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export PaymentSheet E2E test results
-          inputs:
-            - test_title: PaymentSheet E2E tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-paymentsheet-google-pay-e2e:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - android-build-for-ui-testing@0:
-          title: Build PaymentSheet Google Pay E2E test APKs
-          timeout: 1200
-          inputs:
-            - module: paymentsheet-example
-            - variant: baseDebug
-            - arguments: -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
-      - virtual-device-testing-for-android@1:
-          title: Run TestGooglePay on virtual devices
+                ./gradlew \
+                  :camera-core:assembleDebugAndroidTest \
+                  :connect:assembleDebugAndroidTest \
+                  :connect-example:assembleDebug \
+                  :connect-example:assembleDebugAndroidTest \
+                  :crypto-onramp-example:assembleDebug \
+                  :crypto-onramp-example:assembleDebugAndroidTest \
+                  :payment-method-messaging:assembleDebugAndroidTest \
+                  :payments-core:assembleDebugAndroidTest \
+                  :paymentsheet:assembleDebugAndroidTest \
+                  :paymentsheet-example:assembleBaseDebug \
+                  :paymentsheet-example:assembleBaseDebugAndroidTest \
+                  :stripecardscan:assembleDebugAndroidTest \
+                  -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN \
+                  --init-script build-configuration/instrumentation-test-init.gradle
+      - flank@0.1.2:
+          title: Run instrumentation and E2E tests with Flank
           timeout: 3600
           inputs:
-            - test_type: instrumentation
-            - auto_google_login: "true"
-            - inst_test_targets: class com.stripe.android.lpm.TestGooglePay
-            - download_test_results: "true"
-            - test_timeout: "2700"
-      - deploy-to-bitrise-io@2:
-          title: Deploy Google Pay E2E test results
-          inputs:
-            - notify_user_groups: none
-            - is_enable_public_page: "false"
+            - google_service_account_json: $PAYMENTS_GOOGLE_CLOUD_KEY
+            - config_path: ./flank.yml
+            - version: v23.10.1
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android

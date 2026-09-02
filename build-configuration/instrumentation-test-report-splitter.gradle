@@ -12,6 +12,15 @@ class InstrumentationTestReportSplitter {
             new File(moduleDir, it)
         }.findAll { it.directory }
 
+        splitResultRoots(resultRoots, outDir)
+    }
+
+    static void splitFlank(File rootDir, File outDir) {
+        def resultRoot = new File(rootDir, 'results')
+        splitResultRoots(resultRoot.directory ? [resultRoot] : [], outDir)
+    }
+
+    private static void splitResultRoots(List<File> resultRoots, File outDir) {
         def casesByClass = [:].withDefault { [] }
         xmlFilesUnder(resultRoots).each { file ->
             def suites = parseSuites(file)
@@ -179,6 +188,7 @@ class InstrumentationTestReportSplitter {
 
 def modulePath = project.path
 def moduleRootPath = project.projectDir.absolutePath
+def repositoryRootPath = rootProject.projectDir.absolutePath
 def outputDir =
     project.layout.buildDirectory.dir('instrumentation-test-results')
 def taskName = 'splitInstrumentationTestReportsByClass'
@@ -193,9 +203,18 @@ project.tasks.register(taskName) { task ->
 }
 
 if (rootProject.tasks.findByName(taskName) == null) {
-    rootProject.tasks.register(taskName) {
+    rootProject.tasks.register(taskName) { task ->
         group = 'verification'
         description = "Runs ${taskName} on every Android application/library module."
+        task.doLast {
+            InstrumentationTestReportSplitter.splitFlank(
+                    new File(repositoryRootPath),
+                    rootProject.layout.buildDirectory
+                            .dir('instrumentation-test-results/flank')
+                            .get()
+                            .asFile,
+            )
+        }
     }
 }
 

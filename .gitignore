@@ -48,6 +48,8 @@ proguard/
 .cursor/
 
 # Output
+flank-links.log
+results/
 payments/target
 payments/gen
 payments/bin
