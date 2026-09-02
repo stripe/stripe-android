@@ -64,7 +64,7 @@ internal fun SavedPaymentMethodRowButton(
     linkBrand: LinkBrand,
     isEnabled: Boolean,
     isSelected: Boolean,
-    isLoading: Boolean = false,
+    isLoading: Boolean,
     loadingIndicatorTestTag: String,
     modifier: Modifier = Modifier,
     appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),

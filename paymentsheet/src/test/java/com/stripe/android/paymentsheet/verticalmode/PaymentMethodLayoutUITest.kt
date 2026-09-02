@@ -477,6 +477,8 @@ internal class PaymentMethodLayoutUITest(
             availableSavedPaymentMethodAction = availableSavedPaymentMethodAction,
             mandate = mandate,
             linkBrand = LinkBrand.Link,
+            pendingSavedPaymentMethodId = null,
+            selectionError = null,
         )
     }
 }

@@ -2013,6 +2013,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 selection.value = paymentSelection
                 updateSelectionTurbine.add(isFormScreen)
             },
+            selectSavedPaymentMethod = null,
             isCurrentScreen = isCurrentScreen,
             reportPaymentMethodTypeSelected = { paymentMethodCode ->
                 reportPaymentMethodTypeSelectedTurbine.add(paymentMethodCode)
@@ -2035,7 +2036,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             },
             updateMandateText = updateMandateText,
             linkAccount = linkAccount,
-            paymentMethodMessagePromotionsHelper = promotionsHelper
+            paymentMethodMessagePromotionsHelper = promotionsHelper,
+            pendingSavedPaymentMethod = stateFlowOf(null),
+            selectionError = stateFlowOf(null),
         )
         closeInteractorRule.track(interactor)
 

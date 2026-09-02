@@ -240,6 +240,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+            pendingSavedPaymentMethodId = null,
             linkBrand = LinkBrand.Link,
             isEnabled = true,
             onViewMorePaymentMethods = {},
@@ -264,6 +265,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = selection,
+            pendingSavedPaymentMethodId = null,
             linkBrand = LinkBrand.Link,
             isEnabled = true,
             onViewMorePaymentMethods = {},
@@ -287,6 +289,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction = action,
                 selection = null,
+                pendingSavedPaymentMethodId = null,
                 linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},

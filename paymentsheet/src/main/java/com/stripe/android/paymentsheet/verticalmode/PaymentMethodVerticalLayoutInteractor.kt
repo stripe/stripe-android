@@ -65,8 +65,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
         val linkBrand: LinkBrand,
-        val pendingSavedPaymentMethodId: String? = null,
-        val selectionError: Throwable? = null,
+        val pendingSavedPaymentMethodId: String?,
+        val selectionError: Throwable?,
     )
 
     sealed interface Selection {
@@ -114,7 +114,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>,
     private val canChangeCbc: StateFlow<Boolean>,
     private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
-    private val selectSavedPaymentMethod: ((PaymentSelection.Saved) -> Unit)? = null,
+    private val selectSavedPaymentMethod: ((PaymentSelection.Saved) -> Unit)?,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
@@ -128,8 +128,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val coroutineScope: CoroutineScope,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
-    private val pendingSavedPaymentMethod: StateFlow<PaymentSelection.Saved?> = stateFlowOf(null),
-    private val selectionError: StateFlow<Throwable?> = stateFlowOf(null),
+    private val pendingSavedPaymentMethod: StateFlow<PaymentSelection.Saved?>,
+    private val selectionError: StateFlow<Throwable?>,
 ) : PaymentMethodVerticalLayoutInteractor {
 
     companion object {
@@ -195,6 +195,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         viewModel.updateSelection(selection)
                     }
                 },
+                selectSavedPaymentMethod = null,
                 walletsState = viewModel.walletsState,
                 canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
                     .canUpdateCardExpiryAndBillingDetails,
@@ -220,6 +221,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
                 coroutineScope = coroutineScope,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                pendingSavedPaymentMethod = stateFlowOf(null),
+                selectionError = stateFlowOf(null),
             )
         }
     }
