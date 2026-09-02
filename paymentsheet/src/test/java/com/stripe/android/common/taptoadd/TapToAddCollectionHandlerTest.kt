@@ -1214,7 +1214,10 @@ class TapToAddCollectionHandlerTest {
             action = StripeCoreR.string.stripe_try_again_later.resolvableString,
         )
 
-        val tapToPayUxConfiguration = createTapToAddUxConfiguration()
+        val tapToPayUxConfiguration = createTapToAddUxConfiguration(
+            appearance = PaymentSheet.Appearance(),
+            isSystemDark = false,
+        )
         val DEFAULT_METADATA = PaymentMethodMetadataFactory.create(
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
