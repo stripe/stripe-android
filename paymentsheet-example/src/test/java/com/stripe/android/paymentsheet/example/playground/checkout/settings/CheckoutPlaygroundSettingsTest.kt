@@ -51,6 +51,16 @@ class CheckoutPlaygroundSettingsTest {
     }
 
     @Test
+    fun `customer ID survives JSON round trip`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.customerId
+        settings.update(definition, "cus_custom")
+
+        val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
+
+        assertThat(restored[definition]).isEqualTo("cus_custom")
+    }
+
+    @Test
     fun `unknown and invalid persisted values fall back to defaults`() = runScenario(
         json = """{"unknown":"value","currency.appearance.scale":"not-a-number"}"""
     ) {
@@ -114,16 +124,18 @@ class CheckoutPlaygroundSettingsTest {
 
         assertThat(settings.returningCustomerId).isEqualTo("cus_123")
         assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo("returning")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isEqualTo("cus_123")
     }
 
     @Test
-    fun `reset clears returning customer`() = runScenario {
+    fun `reset preserves returning customer ID as default`() = runScenario {
         settings.saveReturningCustomer("cus_123")
-        assertThat(settings.returningCustomerId).isEqualTo("cus_123")
+        settings.update(CheckoutPlaygroundDefinitions.session.customerId, "cus_custom")
 
         settings.reset()
 
-        assertThat(settings.returningCustomerId).isNull()
+        assertThat(settings.returningCustomerId).isEqualTo("cus_123")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isEqualTo("cus_123")
         assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo("guest")
     }
 

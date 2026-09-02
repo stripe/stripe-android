@@ -20,13 +20,12 @@ internal class CheckoutPlaygroundSettings private constructor(
     private val persistReturningCustomerId: (String?) -> Unit,
 ) : CheckoutPlaygroundSettingValues {
     private val definitionsByKey = root.values().associateBy { it.key }
-    private val defaults = definitionsByKey.values.associateWith { it.defaultSerializedValue } +
+    private val definitionDefaults = definitionsByKey.values.associateWith { it.defaultSerializedValue } +
         defaultValues.sanitized()
-    private val _values = MutableStateFlow(defaults + initialValues.sanitized())
-    val values: StateFlow<Map<CheckoutPlaygroundSettingDefinition.Value<*>, String>> = _values.asStateFlow()
-
     var returningCustomerId: String? = initialReturningCustomerId
         private set
+    private val _values = MutableStateFlow(currentDefaults() + initialValues.sanitized())
+    val values: StateFlow<Map<CheckoutPlaygroundSettingDefinition.Value<*>, String>> = _values.asStateFlow()
 
     override operator fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T {
         return definition.deserialize(serializedValue(definition)).getOrThrow()
@@ -52,16 +51,18 @@ internal class CheckoutPlaygroundSettings private constructor(
     }
 
     fun reset() {
-        _values.value = defaults
-        returningCustomerId = null
+        _values.value = currentDefaults()
         persist(_values.value.serialized())
-        persistReturningCustomerId(null)
     }
 
     fun saveReturningCustomer(customerId: String) {
         returningCustomerId = customerId
         persistReturningCustomerId(customerId)
-        update(CheckoutPlaygroundDefinitions.session.customer, RETURNING_CUSTOMER)
+        _values.value += mapOf(
+            CheckoutPlaygroundDefinitions.session.customerId to customerId,
+            CheckoutPlaygroundDefinitions.session.customer to RETURNING_CUSTOMER,
+        )
+        persist(_values.value.serialized())
     }
 
     fun validationErrors(): Map<CheckoutPlaygroundSettingDefinition.Value<*>, String> {
@@ -88,6 +89,11 @@ internal class CheckoutPlaygroundSettings private constructor(
                 ?.takeIf { it.validationError(value) == null }
                 ?.let { it to value }
         }.toMap()
+    }
+
+    private fun currentDefaults(): Map<CheckoutPlaygroundSettingDefinition.Value<*>, String> {
+        val customerId = CheckoutPlaygroundDefinitions.session.customerId
+        return definitionDefaults + (customerId to customerId.serialize(returningCustomerId))
     }
 
     @JvmInline

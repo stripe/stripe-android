@@ -115,10 +115,7 @@ internal class CheckoutControllerExampleViewModel(
         configurationJob?.cancel()
         val generation = ++configurationGeneration
         configurationJob = viewModelScope.launch {
-            val request = CheckoutControllerExampleRequestFactory.create(
-                settings = snapshot,
-                returningCustomerId = settings.returningCustomerId,
-            )
+            val request = CheckoutControllerExampleRequestFactory.create(settings = snapshot)
             val fetchResult = repository.fetchCheckoutSession(
                 request = request,
                 backendUrl = snapshot[CheckoutPlaygroundDefinitions.session.backendUrl],

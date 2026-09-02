@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -103,35 +104,47 @@ class CheckoutPlaygroundSettingsUiTest {
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
         configureSettings = { saveReturningCustomer("cus_123") },
     ) {
-        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag)
+        page.value(CheckoutPlaygroundDefinitions.session.customerId)
             .assertIsDisplayed()
             .assertTextContains("Customer ID")
             .assertTextContains("cus_123")
     }
 
     @Test
-    fun `returning customer without stored ID displays backend fixture`() = runScenario(
+    fun `returning customer without stored ID displays empty customer ID setting`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
         configureSettings = {
             update(CheckoutPlaygroundDefinitions.session.customer, "returning")
         },
     ) {
-        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag)
+        page.value(CheckoutPlaygroundDefinitions.session.customerId)
             .assertIsDisplayed()
             .assertTextContains("Customer ID")
-            .assertTextContains("Backend fixture")
+    }
+
+    @Test
+    fun `returning customer can enter arbitrary customer ID`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+        configureSettings = {
+            update(CheckoutPlaygroundDefinitions.session.customer, "returning")
+        },
+    ) {
+        page.value(CheckoutPlaygroundDefinitions.session.customerId)
+            .performTextReplacement("cus_custom")
+
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isEqualTo("cus_custom")
     }
 
     @Test
     fun `customer ID is hidden for guest and new customers`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
     ) {
-        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag).assertDoesNotExist()
+        page.value(CheckoutPlaygroundDefinitions.session.customerId).assertDoesNotExist()
 
         settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag).assertDoesNotExist()
+        page.value(CheckoutPlaygroundDefinitions.session.customerId).assertDoesNotExist()
     }
 
     @Test
