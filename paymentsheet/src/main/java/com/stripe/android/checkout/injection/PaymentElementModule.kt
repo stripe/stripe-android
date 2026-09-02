@@ -3,7 +3,11 @@ package com.stripe.android.checkout.injection
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutLinkPaymentOptionsPresenter
 import com.stripe.android.checkout.CheckoutSheetLauncher
+import com.stripe.android.elements.DefaultPaymentElementHorizontalContentFactory
+import com.stripe.android.elements.DefaultPaymentElementHorizontalContentHelper
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.PaymentElementHorizontalContentFactory
+import com.stripe.android.elements.PaymentElementHorizontalContentHelper
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
@@ -39,6 +43,16 @@ internal const val CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER =
 
 @Module
 internal interface PaymentElementModule {
+    @Binds
+    fun bindsPaymentElementHorizontalContentFactory(
+        factory: DefaultPaymentElementHorizontalContentFactory
+    ): PaymentElementHorizontalContentFactory
+
+    @Binds
+    fun bindsPaymentElementHorizontalContentHelper(
+        helper: DefaultPaymentElementHorizontalContentHelper
+    ): PaymentElementHorizontalContentHelper
+
     @Binds
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 

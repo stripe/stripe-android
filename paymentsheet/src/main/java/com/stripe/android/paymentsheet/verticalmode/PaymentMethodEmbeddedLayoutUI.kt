@@ -189,7 +189,7 @@ private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
 }
 
 @Composable
-private fun EmbeddedMandate(
+internal fun EmbeddedMandate(
     embeddedViewDisplaysMandateText: Boolean,
     mandate: ResolvableString?,
 ) {
