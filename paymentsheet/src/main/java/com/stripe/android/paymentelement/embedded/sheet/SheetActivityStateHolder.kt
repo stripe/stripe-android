@@ -58,7 +58,7 @@ internal interface SheetActivityStateHolder {
         val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
-        val pendingPaymentMethodId: String? = null,
+        val pendingPaymentMethodId: String?,
     )
 }
 
@@ -76,7 +76,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val launchMode: EmbeddedLaunchMode,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
-    private val sheetTaxRegionUpdaterProvider: Provider<SheetTaxRegionUpdater> = Provider { error("Not expected") },
+    private val sheetTaxRegionUpdaterProvider: Provider<SheetTaxRegionUpdater>,
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(
         SheetActivityStateHolder.State(
@@ -86,6 +86,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             isProcessing = false,
             shouldDisplayLockIcon = launchMode !is EmbeddedLaunchMode.PaymentOptions &&
                 configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
+            pendingPaymentMethodId = null,
         )
     )
     override val state: StateFlow<SheetActivityStateHolder.State> = _state

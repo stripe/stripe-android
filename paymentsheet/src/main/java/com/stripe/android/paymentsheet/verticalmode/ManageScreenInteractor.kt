@@ -39,9 +39,9 @@ internal interface ManageScreenInteractor {
         val isEditing: Boolean,
         val canEdit: Boolean,
         val linkBrand: LinkBrand,
-        val isProcessing: Boolean = false,
-        val pendingPaymentMethodId: String? = null,
-        val error: ResolvableString? = null,
+        val isProcessing: Boolean,
+        val pendingPaymentMethodId: String?,
+        val error: ResolvableString?,
     ) {
         private val containsOnlyCards: Boolean by lazy {
             paymentMethods.isNotEmpty() && paymentMethods.all { it.isCard }
@@ -111,10 +111,10 @@ internal class DefaultManageScreenInteractor(
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
     private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
-    private val processing: StateFlow<Boolean> = com.stripe.android.uicore.utils.stateFlowOf(false),
-    private val pendingPaymentMethodId: StateFlow<String?> = com.stripe.android.uicore.utils.stateFlowOf(null),
-    private val error: StateFlow<ResolvableString?> = com.stripe.android.uicore.utils.stateFlowOf(null),
-    private val navigateBackAfterSelection: Boolean = true,
+    private val processing: StateFlow<Boolean>,
+    private val pendingPaymentMethodId: StateFlow<String?>,
+    private val error: StateFlow<ResolvableString?>,
+    private val navigateBackAfterSelection: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Main,
 ) : ManageScreenInteractor {
 
@@ -248,6 +248,10 @@ internal class DefaultManageScreenInteractor(
                 },
                 defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
                 linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
+                processing = com.stripe.android.uicore.utils.stateFlowOf(false),
+                pendingPaymentMethodId = com.stripe.android.uicore.utils.stateFlowOf(null),
+                error = com.stripe.android.uicore.utils.stateFlowOf(null),
+                navigateBackAfterSelection = true,
             )
         }
 

@@ -39,6 +39,9 @@ internal class ManageScreenUITransitionScreenshotTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         )
 

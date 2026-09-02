@@ -21,6 +21,7 @@ internal class FakeSheetActivityStateHolder(
         processingState = PrimaryButtonProcessingState.Idle(null),
         isProcessing = false,
         shouldDisplayLockIcon = true,
+        pendingPaymentMethodId = null,
     ),
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(initialState)
