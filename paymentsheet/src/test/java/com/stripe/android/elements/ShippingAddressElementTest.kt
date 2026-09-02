@@ -41,10 +41,10 @@ internal class ShippingAddressElementTest {
 
         val call = errorReporter.awaitCall()
         assertThat(call.errorEvent).isEqualTo(
-            ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
+            ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
         )
         assertThat(call.errorEvent.eventName).isEqualTo(
-            "unexpected_error.checkout.shipping_address_element.present.not_configured"
+            "checkout.shipping_address_element.present.not_configured"
         )
         assertThat(call.stripeException).isNull()
         assertThat(call.additionalNonPiiParams).isEmpty()

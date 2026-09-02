@@ -200,6 +200,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PAYMENT_OPTION_CARD_ART_LOAD_FAILURE(
             eventName = "elements.payment_option.card_art.load_failure"
+        ),
+        CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED(
+            eventName = "checkout.shipping_address_element.present.not_configured"
         )
     }
 
@@ -357,9 +360,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CHECKOUT_SELECTION_SET_BEFORE_LOAD(
             partialEventName = "checkout.selection_set_before_load"
-        ),
-        CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED(
-            partialEventName = "checkout.shipping_address_element.present.not_configured"
         ),
         CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
             partialEventName = "checkout.google_pay.unexpected_callback_trigger"

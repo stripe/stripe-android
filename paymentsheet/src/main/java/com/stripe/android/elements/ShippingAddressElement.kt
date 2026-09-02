@@ -46,7 +46,7 @@ class ShippingAddressElement @Inject internal constructor(
     fun present() {
         if (stateHolder.state == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
+                ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
             )
             return
         }
