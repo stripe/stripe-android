@@ -40,6 +40,7 @@ import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -67,7 +68,7 @@ constructor(
         analyticsRequestExecutor,
         paymentAnalyticsRequestFactory,
     )
-    private val apiConfigProvider: () -> ApiConfiguration.State = {
+    private val apiConfigProvider: Provider<ApiConfiguration.State> = Provider {
         ApiConfiguration.State(
             publishableKey = publishableKeyProvider(),
             stripeAccountId = null,
@@ -114,7 +115,7 @@ constructor(
             enableLogging = enableLogging,
             workContext = workContext,
             uiContext = uiContext,
-            publishableKeyProvider = { apiConfigProvider().publishableKey },
+            publishableKeyProvider = { apiConfigProvider.get().publishableKey },
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
             includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.
