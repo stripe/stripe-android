@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -32,6 +33,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val sheetActivityStateHolder: SheetActivityStateHolder,
 ) : EmbeddedManageScreenInteractorFactory {
     override fun createManageScreenInteractor(): ManageScreenInteractor {
+        val coordinatesCompletion = launchMode is EmbeddedLaunchMode.Manage
         return DefaultManageScreenInteractor(
             paymentMethods = customerStateHolder.paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -42,7 +44,11 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             onSelectPaymentMethod = {
                 val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
-                sheetActivityStateHolder.selectSavedPaymentMethod(savedPmSelection)
+                if (coordinatesCompletion) {
+                    sheetActivityStateHolder.selectSavedPaymentMethod(savedPmSelection)
+                } else {
+                    selectionHolder.setSelection(savedPmSelection)
+                }
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {
@@ -55,12 +61,22 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
             linkAccount = linkAccountHolder.linkAccountInfo,
-            processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
-            pendingPaymentMethodId = sheetActivityStateHolder.state.mapAsStateFlow {
-                it.pendingPaymentMethodId
+            processing = if (coordinatesCompletion) {
+                sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing }
+            } else {
+                stateFlowOf(false)
             },
-            error = sheetActivityStateHolder.state.mapAsStateFlow { it.error },
-            navigateBackAfterSelection = false,
+            pendingPaymentMethodId = if (coordinatesCompletion) {
+                sheetActivityStateHolder.state.mapAsStateFlow { it.pendingPaymentMethodId }
+            } else {
+                stateFlowOf(null)
+            },
+            error = if (coordinatesCompletion) {
+                sheetActivityStateHolder.state.mapAsStateFlow { it.error }
+            } else {
+                stateFlowOf(null)
+            },
+            navigateBackAfterSelection = !coordinatesCompletion,
         )
     }
 }

@@ -33,6 +33,7 @@ internal class FakeSheetActivityStateHolder(
     val resultTurbine = Turbine<EmbeddedActivityResult>()
     val updateErrorTurbine = Turbine<ResolvableString?>()
     val updateProcessingTurbine = Turbine<Boolean>()
+    val selectSavedPaymentMethodTurbine = Turbine<PaymentSelection.Saved>()
 
     override val result: SharedFlow<EmbeddedActivityResult> = MutableSharedFlow<EmbeddedActivityResult>()
     override val validationRequested: SharedFlow<Unit> = MutableSharedFlow<Unit>()
@@ -55,7 +56,9 @@ internal class FakeSheetActivityStateHolder(
 
     override fun onPrimaryButtonDisabledClick() = Unit
 
-    override fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) = Unit
+    override fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
+        selectSavedPaymentMethodTurbine.add(selection)
+    }
 
     override fun setResult(result: EmbeddedActivityResult) {
         resultTurbine.add(result)
@@ -65,5 +68,6 @@ internal class FakeSheetActivityStateHolder(
         resultTurbine.ensureAllEventsConsumed()
         updateErrorTurbine.ensureAllEventsConsumed()
         updateProcessingTurbine.ensureAllEventsConsumed()
+        selectSavedPaymentMethodTurbine.ensureAllEventsConsumed()
     }
 }
