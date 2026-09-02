@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.ConsentDestination
@@ -126,6 +127,19 @@ class ConsentScreenTest {
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(CONSENT_DECLINE_TEXT.uppercase())
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `when hideBrandingHeader is true consent header is hidden`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(
+            IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
+                hideBrandingHeader = true
+            )
+        )
+
+        setComposeTestRuleWith(Resource.success(verificationPage)) {
+            onNodeWithTag(CONSENT_HEADER_TAG).assertDoesNotExist()
         }
     }
 
