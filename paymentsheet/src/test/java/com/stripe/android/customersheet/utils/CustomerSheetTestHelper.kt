@@ -52,6 +52,7 @@ import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
+import javax.inject.Provider
 import org.mockito.kotlin.mock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -141,7 +142,7 @@ internal interface CustomerSheetTestHelper {
                     },
                     stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
                         override fun create(
-                            apiConfigurationProvider: () -> ApiConfiguration.State,
+                            apiConfigurationProvider: Provider<ApiConfiguration.State>,
                             statusBarColor: Int?,
                             includePaymentSheetNextHandlers: Boolean,
                             hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
