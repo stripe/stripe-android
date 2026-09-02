@@ -19,7 +19,7 @@ internal data class CheckoutControllerState(
     val checkoutSessionResponse: CheckoutSessionResponse,
     val flagImages: Map<String, Bitmap>?,
     val collectedDetails: CheckoutCollectedDetails,
-    val paymentElementPaymentMethodMetadata: PaymentMethodMetadata,
+    val paymentMethodMetadata: PaymentMethodMetadata,
     val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata,
     val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
     val paymentSelection: PaymentSelection?,
@@ -35,7 +35,7 @@ internal data class CheckoutControllerState(
             flagImages = flagImages,
             paymentOptionDisplayData = paymentOptionFactory.create(
                 selection = paymentSelection,
-                paymentMethodMetadata = paymentElementPaymentMethodMetadata,
+                paymentMethodMetadata = paymentMethodMetadata,
             ),
             availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
                 paymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,

@@ -60,7 +60,7 @@ internal class CheckoutStateLoaderTest {
     fun `loadInitial commits state with payment method metadata`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
-        assertThat(stateHolder.state?.paymentElementPaymentMethodMetadata).isNotNull()
+        assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
         assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNotNull()
     }
 
@@ -111,7 +111,7 @@ internal class CheckoutStateLoaderTest {
             checkoutSessionResponse = response(),
         )
 
-        assertThat(stateHolder.state?.paymentElementPaymentMethodMetadata?.paymentMethodOrder)
+        assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
             .isEqualTo(listOf("klarna", "card"))
     }
 
@@ -363,7 +363,7 @@ internal class CheckoutStateLoaderTest {
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),
-        paymentElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
@@ -416,10 +416,10 @@ internal class CheckoutStateLoaderTest {
             savedStateHandle = savedStateHandle,
             selection = stateHolder.selection,
             paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow {
-                it?.paymentElementPaymentMethodMetadata
+                it?.paymentMethodMetadata
             },
             customerMetadata = stateHolder.stateFlow.mapAsStateFlow {
-                it?.paymentElementPaymentMethodMetadata?.customerMetadata
+                it?.paymentMethodMetadata?.customerMetadata
             },
         )
         val recordingChooser = RecordingSelectionChooser(chosenSelection)

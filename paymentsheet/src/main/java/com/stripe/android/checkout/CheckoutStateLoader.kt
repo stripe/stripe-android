@@ -106,7 +106,7 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             flagImages = flagImages,
             collectedDetails = collectedDetails,
-            paymentElementPaymentMethodMetadata = loaderState.paymentMethodMetadata,
+            paymentMethodMetadata = loaderState.paymentMethodMetadata,
             expressCheckoutElementPaymentMethodMetadata = loaderState.paymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,

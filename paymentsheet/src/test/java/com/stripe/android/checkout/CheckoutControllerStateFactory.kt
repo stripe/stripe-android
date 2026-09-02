@@ -38,7 +38,7 @@ internal object CheckoutControllerStateFactory {
             checkoutSessionResponse = checkoutSessionResponse,
             flagImages = flagImages,
             collectedDetails = collectedDetails,
-            paymentElementPaymentMethodMetadata = paymentElementPaymentMethodMetadata,
+            paymentMethodMetadata = paymentElementPaymentMethodMetadata,
             expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfiguration,
             paymentSelection = paymentSelection,

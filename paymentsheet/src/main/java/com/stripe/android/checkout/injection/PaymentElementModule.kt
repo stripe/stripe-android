@@ -62,7 +62,7 @@ internal interface PaymentElementModule {
             return stateHolder.stateFlow.mapAsStateFlow { state ->
                 state?.let {
                     EmbeddedContentHelperStateHolder.State(
-                        paymentMethodMetadata = it.paymentElementPaymentMethodMetadata,
+                        paymentMethodMetadata = it.paymentMethodMetadata,
                         embeddedViewDisplaysMandateText = it.embeddedConfiguration.embeddedViewDisplaysMandateText,
                         configuration = it.embeddedConfiguration,
                     )

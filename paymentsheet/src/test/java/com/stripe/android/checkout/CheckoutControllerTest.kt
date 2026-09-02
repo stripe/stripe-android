@@ -146,7 +146,7 @@ internal class CheckoutControllerTest {
         result.getOrThrow()
         val state = committedState
         assertThat(state).isNotNull()
-        assertThat(state!!.paymentElementPaymentMethodMetadata).isNotNull()
+        assertThat(state!!.paymentMethodMetadata).isNotNull()
     }
 
     @Test
@@ -531,7 +531,7 @@ internal class CheckoutControllerTest {
         val result = controller.applyPromotionCode("10OFF")
 
         result.getOrThrow()
-        assertThat(committedState().paymentElementPaymentMethodMetadata).isNotNull()
+        assertThat(committedState().paymentMethodMetadata).isNotNull()
     }
 
     @Test
