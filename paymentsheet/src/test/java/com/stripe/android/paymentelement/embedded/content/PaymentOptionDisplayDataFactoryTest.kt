@@ -12,6 +12,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentMethod
@@ -46,7 +47,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(AppearanceAPIAdditionsPreview::class)
+@OptIn(AppearanceAPIAdditionsPreview::class, ReactNativeSdkInternal::class)
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionDisplayDataFactoryTest {
     @get:Rule
@@ -205,7 +206,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     @Test
-    fun `always dark with dark component uses dark icon on light system`() = runIconScenario(
+    fun `loadIcon uses dark icon for always dark appearance on light system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysDark,
         lightComponent = Color.White,
         darkComponent = Color.Black,
@@ -215,7 +216,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     @Test
-    fun `always light with light component uses light icon on dark system`() = runIconScenario(
+    fun `loadIcon uses light icon for always light appearance on dark system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysLight,
         lightComponent = Color.White,
         darkComponent = Color.Black,
@@ -225,7 +226,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     @Test
-    fun `automatic with light component uses light icon on light system`() = runIconScenario(
+    fun `loadIcon uses light icon for automatic appearance on light system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.Automatic,
         lightComponent = Color.White,
         darkComponent = Color.Black,
@@ -235,7 +236,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     @Test
-    fun `automatic with dark component uses dark icon on dark system`() = runIconScenario(
+    fun `loadIcon uses dark icon for automatic appearance on dark system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.Automatic,
         lightComponent = Color.White,
         darkComponent = Color.Black,
@@ -308,7 +309,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
                 appearance = appearance,
             )
         )
-        renderIcon(option, isSystemDarkTheme)
+        option.loadIcon(isSystemDarkTheme)
 
         IconScenario(loadedUrl = imageLoader.awaitLoadCall().url).apply(block)
         imageLoader.ensureAllEventsConsumed()
