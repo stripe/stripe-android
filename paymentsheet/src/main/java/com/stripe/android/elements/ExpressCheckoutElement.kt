@@ -334,6 +334,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
         private var shippingAddressRequired: Boolean = false
+        private var emailRequired: Boolean = false
         private var paymentMethodOrder: List<PaymentMethod> = emptyList()
         private var appearance: Appearance = Appearance()
 
@@ -354,6 +355,17 @@ class ExpressCheckoutElement @Inject internal constructor(
             shippingAddressRequired: Boolean,
         ): Configuration = apply {
             this.shippingAddressRequired = shippingAddressRequired
+        }
+
+        /**
+         * Sets whether an email address is required.
+         *
+         * @param emailRequired If true, the customer's email will be collected.
+         */
+        fun emailRequired(
+            emailRequired: Boolean,
+        ): Configuration = apply {
+            this.emailRequired = emailRequired
         }
 
         /**
@@ -379,6 +391,7 @@ class ExpressCheckoutElement @Inject internal constructor(
             val linkConfiguration: LinkConfiguration.State,
             val googlePayConfiguration: CheckoutGooglePayConfiguration,
             val shippingAddressRequired: Boolean,
+            val emailRequired: Boolean,
             val paymentMethodOrder: List<PaymentMethodType>,
             val appearance: Appearance.State,
         ) : Parcelable
@@ -392,6 +405,7 @@ class ExpressCheckoutElement @Inject internal constructor(
             linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
             shippingAddressRequired = shippingAddressRequired,
+            emailRequired = emailRequired,
             paymentMethodOrder = paymentMethodOrder.map { paymentMethod ->
                 when (paymentMethod) {
                     is PaymentMethod.GooglePay -> PaymentMethodType.GooglePay
