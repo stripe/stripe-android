@@ -47,7 +47,7 @@ internal interface GooglePayPaymentMethodLauncherViewModelFactoryComponent {
             @Named(ENABLE_LOGGING)
             enableLogging: Boolean,
             @BindsInstance
-            apiConfigurationProvider: () -> ApiConfiguration.State,
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
