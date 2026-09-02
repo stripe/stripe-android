@@ -1,12 +1,15 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -16,8 +19,10 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -39,12 +44,14 @@ class InputAddressViewModelTest {
         address: AddressDetails? = null,
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
-            .build()
+            .build(),
+        updaterKey: String? = null,
     ): InputAddressViewModel {
         return InputAddressViewModel(
             AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
                 config = config,
+                updaterKey = updaterKey,
             ),
             navigator,
             eventReporter,
@@ -974,6 +981,91 @@ class InputAddressViewModelTest {
     }
 
     @Test
+    fun `checkout save disables form and blocks duplicate submission while update is suspended`() = runTest {
+        val updateResult = CompletableDeferred<Result<Unit>>()
+        val updater = FakeUpdater { updateResult.await() }
+        val updaterKey = CheckoutShippingAddressUpdaterRegistry.register(updater)
+        try {
+            val viewModel = createViewModel(updaterKey = updaterKey)
+
+            viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+            viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+
+            assertThat(updater.updateCalls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            updater.updateCalls.expectNoEvents()
+            assertThat(viewModel.formEnabled.value).isFalse()
+            assertThat(viewModel.isUpdating.value).isTrue()
+            assertThat(CheckoutShippingAddressUpdaterRegistry.isBusy(updaterKey)).isTrue()
+            verify(navigator, never()).dismiss(any())
+
+            updateResult.complete(Result.success(Unit))
+            runCurrent()
+
+            assertThat(viewModel.isUpdating.value).isFalse()
+            assertThat(CheckoutShippingAddressUpdaterRegistry.isBusy(updaterKey)).isFalse()
+            verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
+        } finally {
+            CheckoutShippingAddressUpdaterRegistry.remove(updaterKey)
+            updater.updateCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `failed checkout save retains values shows error and permits successful retry`() = runTest {
+        val updater = FakeUpdater { Result.failure(IllegalStateException("Failed")) }
+        val updaterKey = CheckoutShippingAddressUpdaterRegistry.register(updater)
+        try {
+            val viewModel = createViewModel(
+                address = EXPECTED_ADDRESS,
+                updaterKey = updaterKey,
+            )
+            val originalFormValues = viewModel.addressFormController.getCurrentFormValues()
+
+            viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+            runCurrent()
+
+            assertThat(updater.updateCalls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(viewModel.formEnabled.value).isTrue()
+            assertThat(viewModel.isUpdating.value).isFalse()
+            assertThat(viewModel.saveError.value)
+                .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+            assertThat(viewModel.addressFormController.getCurrentFormValues())
+                .isEqualTo(originalFormValues)
+            verify(navigator, never()).dismiss(any())
+
+            updater.result = { Result.success(Unit) }
+            viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+            runCurrent()
+
+            assertThat(updater.updateCalls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(viewModel.saveError.value).isNull()
+            verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
+        } finally {
+            CheckoutShippingAddressUpdaterRegistry.remove(updaterKey)
+            updater.updateCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `standalone save dismisses without calling checkout updater`() = runTest {
+        val updater = FakeUpdater { Result.success(Unit) }
+        val unrelatedKey = CheckoutShippingAddressUpdaterRegistry.register(updater)
+        try {
+            val viewModel = createViewModel(updaterKey = null)
+
+            viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+
+            updater.updateCalls.expectNoEvents()
+            assertThat(viewModel.isUpdating.value).isFalse()
+            assertThat(viewModel.saveError.value).isNull()
+            verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
+        } finally {
+            CheckoutShippingAddressUpdaterRegistry.remove(unrelatedKey)
+            updater.updateCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun `isInlineAutocompleteEnabled is always true`() {
         val viewModel = createViewModel()
         assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
@@ -995,6 +1087,7 @@ class InputAddressViewModelTest {
                     .googlePlacesApiKey(googlePlacesApiKey)
                     .autocompleteCountries(autocompleteCountries)
                     .build(),
+                updaterKey = null,
             ),
             navigator,
             eventReporter,
@@ -1003,6 +1096,44 @@ class InputAddressViewModelTest {
                 fetchPlaceResult = Result.success(Address()),
             ),
         ).also { viewModelStoreRule.track(it) }
+    }
+
+    private class FakeUpdater(
+        var result: suspend (AddressDetails) -> Result<Unit>,
+    ) : CheckoutShippingAddressUpdaterRegistry.Updater {
+        val updateCalls = Turbine<AddressDetails>()
+
+        override suspend fun update(address: AddressDetails): Result<Unit> {
+            updateCalls.add(address)
+            return result(address)
+        }
+    }
+
+    private companion object {
+        val COMPLETED_ADDRESS = mapOf(
+            IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+            IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
+            IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
+            IdentifierSpec.Line1 to FormFieldEntry("510 Townsend St", isComplete = true),
+            IdentifierSpec.Line2 to FormFieldEntry("Floor 2", isComplete = true),
+            IdentifierSpec.PostalCode to FormFieldEntry("94103", isComplete = true),
+            IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
+            IdentifierSpec.Phone to FormFieldEntry("555-0100", isComplete = true),
+        )
+
+        val EXPECTED_ADDRESS = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+            phoneNumber = "555-0100",
+            isCheckboxSelected = false,
+        )
     }
 
     @Test

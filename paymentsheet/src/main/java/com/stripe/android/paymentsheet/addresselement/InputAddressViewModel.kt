@@ -5,7 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
@@ -116,6 +119,12 @@ internal class InputAddressViewModel @Inject constructor(
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
 
+    private val _isUpdating = MutableStateFlow(false)
+    val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
+
+    private val _saveError = MutableStateFlow<ResolvableString?>(null)
+    val saveError: StateFlow<ResolvableString?> = _saveError.asStateFlow()
+
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
@@ -211,22 +220,57 @@ internal class InputAddressViewModel @Inject constructor(
             addressFormController.elements.forEach { it.onValidationStateChanged(true) }
             return
         }
-        _formEnabled.value = false
-        dismissWithAddress(
-            AddressDetails(
-                name = completedFormValues?.get(IdentifierSpec.Name)?.value,
-                address = PaymentSheet.Address(
-                    city = completedFormValues?.get(IdentifierSpec.City)?.value,
-                    country = completedFormValues?.get(IdentifierSpec.Country)?.value,
-                    line1 = completedFormValues?.get(IdentifierSpec.Line1)?.value,
-                    line2 = completedFormValues?.get(IdentifierSpec.Line2)?.value,
-                    postalCode = completedFormValues?.get(IdentifierSpec.PostalCode)?.value,
-                    state = completedFormValues?.get(IdentifierSpec.State)?.value
-                ),
-                phoneNumber = completedFormValues?.get(IdentifierSpec.Phone)?.value,
-                isCheckboxSelected = checkboxChecked
-            )
+
+        val addressDetails = AddressDetails(
+            name = completedFormValues[IdentifierSpec.Name]?.value,
+            address = PaymentSheet.Address(
+                city = completedFormValues[IdentifierSpec.City]?.value,
+                country = completedFormValues[IdentifierSpec.Country]?.value,
+                line1 = completedFormValues[IdentifierSpec.Line1]?.value,
+                line2 = completedFormValues[IdentifierSpec.Line2]?.value,
+                postalCode = completedFormValues[IdentifierSpec.PostalCode]?.value,
+                state = completedFormValues[IdentifierSpec.State]?.value
+            ),
+            phoneNumber = completedFormValues[IdentifierSpec.Phone]?.value,
+            isCheckboxSelected = checkboxChecked
         )
+
+        val updaterKey = args.updaterKey
+        if (updaterKey == null) {
+            _formEnabled.value = false
+            dismissWithAddress(addressDetails)
+            return
+        }
+
+        if (_isUpdating.value) return
+
+        _saveError.value = null
+        _formEnabled.value = false
+        _isUpdating.value = true
+        CheckoutShippingAddressUpdaterRegistry.setBusy(updaterKey, true)
+        viewModelScope.launch {
+            val result = try {
+                val updater = CheckoutShippingAddressUpdaterRegistry.get(updaterKey)
+                if (updater == null) {
+                    Result.failure(IllegalStateException("Shipping address updater is unavailable."))
+                } else {
+                    updater.update(addressDetails)
+                }
+            } finally {
+                CheckoutShippingAddressUpdaterRegistry.setBusy(updaterKey, false)
+                _isUpdating.value = false
+            }
+
+            result.fold(
+                onSuccess = {
+                    dismissWithAddress(addressDetails)
+                },
+                onFailure = {
+                    _saveError.value = R.string.stripe_something_went_wrong.resolvableString
+                    _formEnabled.value = true
+                },
+            )
+        }
     }
 
     @VisibleForTesting

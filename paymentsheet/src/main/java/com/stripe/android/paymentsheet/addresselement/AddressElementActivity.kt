@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,6 +46,9 @@ internal class AddressElementActivity : ComponentActivity() {
         AddressElementActivityContract.Args.fromIntent(intent)
     }
 
+    private val activityArgs: AddressElementActivityContract.Args
+        get() = requireNotNull(starterArgs)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -63,10 +67,16 @@ internal class AddressElementActivity : ComponentActivity() {
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberStripeBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState(
+                confirmValueChange = { targetValue ->
+                    targetValue != ModalBottomSheetValue.Hidden || !isShippingAddressUpdateBusy()
+                },
+            )
 
             BackHandler {
-                viewModel.navigator.onBack()
+                if (!isShippingAddressUpdateBusy()) {
+                    viewModel.navigator.onBack()
+                }
             }
 
             viewModel.navigator.onDismiss = { result ->
@@ -89,7 +99,11 @@ internal class AddressElementActivity : ComponentActivity() {
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = viewModel.navigator::dismiss,
+                onDismissed = {
+                    if (!isShippingAddressUpdateBusy()) {
+                        viewModel.navigator.dismiss()
+                    }
+                },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
@@ -122,6 +136,10 @@ internal class AddressElementActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun isShippingAddressUpdateBusy(): Boolean {
+        return CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey)
     }
 
     private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled()) {
