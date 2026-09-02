@@ -23,6 +23,7 @@ import com.stripe.android.crypto.onramp.model.CryptoConsumerWalletResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.CryptoOnrampPartner
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
 import com.stripe.android.crypto.onramp.model.DeleteWalletRequestParams
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
@@ -31,9 +32,11 @@ import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRefreshRequest
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PartnerTermsResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
+import com.stripe.android.crypto.onramp.model.RetrievePartnerTermsRequest
 import com.stripe.android.crypto.onramp.model.SamsungPayTokenParams
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
@@ -200,12 +203,19 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     suspend fun retrievePartnerTerms(
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        partner: CryptoOnrampPartner,
+        declarationType: PartnerDeclarationType,
     ): Result<PartnerTerms> {
+        val requestParams = RetrievePartnerTermsRequest(
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
+            partner = partner,
+            declarationType = declarationType,
+        )
         val request = apiRequestFactory.createGet(
             url = partnerTermsUrl,
             options = buildRequestOptions(),
-            params = credentialsParams(consumerSessionClientSecret).toMap(),
+            params = Json.encodeToJsonElement(requestParams).jsonObject.toMap(),
         )
 
         return execute(

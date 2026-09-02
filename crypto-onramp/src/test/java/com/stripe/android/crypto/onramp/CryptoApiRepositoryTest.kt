@@ -10,7 +10,9 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.CryptoOnrampPartner
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
@@ -470,7 +472,9 @@ class CryptoApiRepositoryTest {
             .thenReturn(stripeResponse)
 
         val result = cryptoApiRepository.retrievePartnerTerms(
-            consumerSessionClientSecret = "test-secret"
+            consumerSessionClientSecret = "test-secret",
+            partner = CryptoOnrampPartner.Swapped,
+            declarationType = PartnerDeclarationType.TermsAndConditions,
         )
 
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -478,11 +482,54 @@ class CryptoApiRepositoryTest {
         assertThat(apiRequest.baseUrl)
             .isEqualTo("https://api.stripe.com/v1/crypto/internal/partner_terms")
         assertThat(apiRequest.params)
-            .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            .isEqualTo(
+                mapOf(
+                    "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
+                    "partner" to "swapped",
+                    "declaration_type" to "terms",
+                )
+            )
         val terms = result.getOrThrow() as PartnerTerms.Required
         assertThat(terms.partner).isEqualTo("example")
         assertThat(terms.text).isEqualTo("Please accept these terms.")
         assertThat(terms.declarationId).isEqualTo("declaration_123")
+    }
+
+    @Test
+    fun testRetrievePartnerTermsOfServiceRequiredSucceeds() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            """
+                {
+                    "required": true,
+                    "partner": "swapped",
+                    "text": "Please accept these terms of service.",
+                    "declaration_id": "declaration_456"
+                }
+            """,
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val result = cryptoApiRepository.retrievePartnerTerms(
+            consumerSessionClientSecret = "test-secret",
+            partner = CryptoOnrampPartner.Swapped,
+            declarationType = PartnerDeclarationType.TermsOfService,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.params).isEqualTo(
+            mapOf(
+                "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
+                "partner" to "swapped",
+                "declaration_type" to "tos",
+            )
+        )
+        val terms = result.getOrThrow() as PartnerTerms.Required
+        assertThat(terms.text).isEqualTo("Please accept these terms of service.")
+        assertThat(terms.declarationId).isEqualTo("declaration_456")
     }
 
     @Test
@@ -500,7 +547,9 @@ class CryptoApiRepositoryTest {
             .thenReturn(stripeResponse)
 
         val result = cryptoApiRepository.retrievePartnerTerms(
-            consumerSessionClientSecret = "test-secret"
+            consumerSessionClientSecret = "test-secret",
+            partner = CryptoOnrampPartner.Swapped,
+            declarationType = PartnerDeclarationType.TermsAndConditions,
         )
 
         assertThat(result.getOrThrow()).isEqualTo(PartnerTerms.NotRequired)

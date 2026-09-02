@@ -12,6 +12,7 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
  * invoked by the coordinator at the appropriate time.
  */
 @ExperimentalCryptoOnramp
+@Suppress("TooManyFunctions")
 class OnrampCallbacks {
 
     private var verifyIdentityCallback: OnrampVerifyIdentityCallback? = null
@@ -21,6 +22,7 @@ class OnrampCallbacks {
     private var checkoutCallback: OnrampCheckoutCallback? = null
     private var userAttestationCallback: OnrampUserAttestationCallback? = null
     private var termsAndConditionsCallback: OnrampTermsAndConditionsCallback? = null
+    private var termsOfServiceCallback: OnrampTermsOfServiceCallback? = null
     private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
     private var googlePayIsReadyCallback: ((Boolean) -> Unit)? = null
     private var samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null
@@ -75,6 +77,13 @@ class OnrampCallbacks {
     }
 
     /**
+     * Callback invoked when terms of service presentation completes.
+     */
+    fun termsOfServiceCallback(callback: OnrampTermsOfServiceCallback) = apply {
+        this.termsOfServiceCallback = callback
+    }
+
+    /**
      * An async closure that calls your backend to perform a checkout.
      *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout` endpoint with the session ID.
      *     The closure should return the onramp session client secret on success, or throw an Error on failure.
@@ -115,6 +124,7 @@ class OnrampCallbacks {
         val checkoutCallback: OnrampCheckoutCallback,
         val userAttestationCallback: OnrampUserAttestationCallback?,
         val termsAndConditionsCallback: OnrampTermsAndConditionsCallback?,
+        val termsOfServiceCallback: OnrampTermsOfServiceCallback?,
         val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
         val googlePayIsReadyCallback: ((Boolean) -> Unit)?,
         val samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)?,
@@ -139,6 +149,7 @@ class OnrampCallbacks {
             },
             userAttestationCallback = userAttestationCallback,
             termsAndConditionsCallback = termsAndConditionsCallback,
+            termsOfServiceCallback = termsOfServiceCallback,
             onrampSessionClientSecretProvider = requireNotNull(onrampSessionClientSecretProvider) {
                 "onrampSessionClientSecretProvider must be not null"
             },

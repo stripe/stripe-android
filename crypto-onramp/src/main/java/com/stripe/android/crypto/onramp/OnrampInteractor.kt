@@ -23,6 +23,7 @@ import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
 import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.CryptoOnrampPartner
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
@@ -42,16 +43,19 @@ import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersRe
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartTermsAndConditionsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartTermsOfServiceResult
 import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
+import com.stripe.android.crypto.onramp.model.OnrampTermsOfServiceResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
@@ -511,7 +515,11 @@ internal class OnrampInteractor @Inject constructor(
             return OnrampStartTermsAndConditionsResult.Failed(error)
         }
 
-        return cryptoApiRepository.retrievePartnerTerms(secret)
+        return cryptoApiRepository.retrievePartnerTerms(
+            consumerSessionClientSecret = secret,
+            partner = CryptoOnrampPartner.Swapped,
+            declarationType = PartnerDeclarationType.TermsAndConditions,
+        )
             .fold(
                 onSuccess = { terms ->
                     when (terms) {
@@ -529,6 +537,42 @@ internal class OnrampInteractor @Inject constructor(
                     OnrampStartTermsAndConditionsResult.Failed(mappedError)
                 }
             )
+    }
+
+    suspend fun startTermsOfService(): OnrampStartTermsOfServiceResult {
+        analyticsService?.track(OnrampAnalyticsEvent.TermsOfServiceStarted)
+
+        val secret = authenticatedConsumerSessionClientSecret()
+        if (secret == null) {
+            val error = mapError(
+                operation = Operation.PresentTermsOfServiceIfNeeded,
+                error = authenticatedLinkSessionError(),
+            )
+            trackError(Operation.PresentTermsOfServiceIfNeeded, error)
+            return OnrampStartTermsOfServiceResult.Failed(error)
+        }
+
+        return cryptoApiRepository.retrievePartnerTerms(
+            consumerSessionClientSecret = secret,
+            partner = CryptoOnrampPartner.Swapped,
+            declarationType = PartnerDeclarationType.TermsOfService,
+        ).fold(
+            onSuccess = { terms ->
+                when (terms) {
+                    PartnerTerms.NotRequired ->
+                        OnrampStartTermsOfServiceResult.NotRequired
+                    is PartnerTerms.Required -> OnrampStartTermsOfServiceResult.PresentationRequired(
+                        terms = terms,
+                        appearance = state.value.configurationState?.appearance,
+                    )
+                }
+            },
+            onFailure = { error ->
+                val mappedError = mapError(Operation.PresentTermsOfServiceIfNeeded, error)
+                trackError(Operation.PresentTermsOfServiceIfNeeded, mappedError)
+                OnrampStartTermsOfServiceResult.Failed(mappedError)
+            }
+        )
     }
 
     suspend fun startIdentityVerification(): OnrampStartVerificationResult {
@@ -1088,6 +1132,40 @@ internal class OnrampInteractor @Inject constructor(
                         val mappedError = mapError(Operation.PresentTermsAndConditionsIfNeeded, error)
                         trackError(Operation.PresentTermsAndConditionsIfNeeded, mappedError)
                         OnrampTermsAndConditionsResult.Failed(mappedError)
+                    }
+                )
+            }
+        }
+    }
+
+    suspend fun handleTermsOfServiceResult(
+        result: HTMLConfirmationResult,
+        declarationId: String?,
+    ): OnrampTermsOfServiceResult = when (result) {
+        HTMLConfirmationResult.Cancelled -> OnrampTermsOfServiceResult.Cancelled()
+        HTMLConfirmationResult.Confirmed -> {
+            requireNotNull(declarationId) { "Missing terms of service declaration ID." }
+            val secret = authenticatedConsumerSessionClientSecret()
+            if (secret == null) {
+                val error = mapError(
+                    operation = Operation.PresentTermsOfServiceIfNeeded,
+                    error = authenticatedLinkSessionError(),
+                )
+                trackError(Operation.PresentTermsOfServiceIfNeeded, error)
+                OnrampTermsOfServiceResult.Failed(error)
+            } else {
+                cryptoApiRepository.confirmPartnerTerms(
+                    secret,
+                    declarationId,
+                ).fold(
+                    onSuccess = {
+                        analyticsService?.track(OnrampAnalyticsEvent.TermsOfServiceCompleted)
+                        OnrampTermsOfServiceResult.Accepted()
+                    },
+                    onFailure = { error ->
+                        val mappedError = mapError(Operation.PresentTermsOfServiceIfNeeded, error)
+                        trackError(Operation.PresentTermsOfServiceIfNeeded, mappedError)
+                        OnrampTermsOfServiceResult.Failed(mappedError)
                     }
                 )
             }

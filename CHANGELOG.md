@@ -12,6 +12,7 @@ NEXT_VERSION_BUMP: MINOR
 
 ### CryptoOnramp
 * [ADDED] Added `presentTermsAndConditionsIfNeeded()` to present and record terms acceptance only when required.
+* [ADDED] Added `presentTermsOfServiceIfNeeded()` to present and record terms of service acceptance during onboarding only when required.
 * [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
 
 ## 23.17.1 - 2026-08-31

@@ -14,6 +14,29 @@ internal sealed interface PartnerTerms {
 }
 
 @Serializable
+internal enum class CryptoOnrampPartner {
+    @SerialName("swapped")
+    Swapped,
+}
+
+@Serializable
+internal enum class PartnerDeclarationType {
+    @SerialName("terms")
+    TermsAndConditions,
+
+    @SerialName("tos")
+    TermsOfService,
+}
+
+@Serializable
+internal data class RetrievePartnerTermsRequest(
+    val credentials: CryptoCustomerRequestParams.Credentials,
+    val partner: CryptoOnrampPartner,
+    @SerialName("declaration_type")
+    val declarationType: PartnerDeclarationType,
+)
+
+@Serializable
 internal data class PartnerTermsResponse(
     val required: Boolean,
     val partner: String? = null,

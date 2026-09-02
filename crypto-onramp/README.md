@@ -28,6 +28,7 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
 - Support seamless sign-in for returning users with `authenticateUserWithToken(linkAuthTokenClientSecret:)`
 
 **KYC and identity verification**:
+- Present required partner terms of service with `presentTermsOfServiceIfNeeded()` after Link authentication and before submitting initial KYC information
 - Submit KYC information with `attachKycInfo(info:)` and confirm it with `verifyKycInfo(updatedAddress:)`
 - Present identification document verification using `verifyIdentity()`
 
@@ -37,6 +38,7 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
 - Create crypto payment tokens with `createCryptoPaymentToken()`
 
 **Checkout handling**: 
+- Present required partner terms and conditions with `presentTermsAndConditionsIfNeeded()` before checkout
 - Complete purchases for an onramp session with `performCheckout(onrampSessionId:checkoutHandler:)`
 
 **Theming**:

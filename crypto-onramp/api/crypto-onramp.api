@@ -32,6 +32,7 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter 
 	public final fun collectPaymentMethod (Lcom/stripe/android/crypto/onramp/model/PaymentMethodSelection;)V
 	public final fun performCheckout (Ljava/lang/String;)V
 	public final fun presentTermsAndConditionsIfNeeded ()V
+	public final fun presentTermsOfServiceIfNeeded ()V
 	public final fun presentUserAttestation ()V
 	public final fun verifyIdentity ()V
 	public final fun verifyKycInfo (Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
@@ -325,6 +326,7 @@ public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
 	public final fun onrampSessionClientSecretProvider (Lkotlin/jvm/functions/Function2;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun samsungPayIsReadyCallback (Lkotlin/jvm/functions/Function2;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun termsAndConditionsCallback (Lcom/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun termsOfServiceCallback (Lcom/stripe/android/crypto/onramp/model/OnrampTermsOfServiceCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun userAttestationCallback (Lcom/stripe/android/crypto/onramp/model/OnrampUserAttestationCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun verifyIdentityCallback (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyIdentityCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun verifyKycCallback (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
@@ -554,6 +556,30 @@ public final class com/stripe/android/crypto/onramp/model/OnrampTermsAndConditio
 }
 
 public final class com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult$NotRequired : com/stripe/android/crypto/onramp/model/OnrampTermsAndConditionsResult {
+	public static final field $stable I
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult;)V
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult$Accepted : com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult$Failed : com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult$NotRequired : com/stripe/android/crypto/onramp/model/OnrampTermsOfServiceResult {
 	public static final field $stable I
 }
 

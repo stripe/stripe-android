@@ -19,9 +19,11 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartTermsAndConditionsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartTermsOfServiceResult
 import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
+import com.stripe.android.crypto.onramp.model.OnrampTermsOfServiceResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
@@ -126,6 +128,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             callback = ::handleTermsAndConditionsResult,
         )
 
+    private val termsOfServiceResultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_TermsOfServiceResultLauncher($onrampCallbackIdentifier)",
+            contract = HTMLConfirmationActivityContract(),
+            callback = ::handleTermsOfServiceResult,
+        )
+
     init {
         // Observe Link controller state
         lifecycleOwner.lifecycleScope.launch {
@@ -154,6 +163,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     verifyKycResultLauncher.unregister()
                     userAttestationResultLauncher.unregister()
                     termsAndConditionsResultLauncher.unregister()
+                    termsOfServiceResultLauncher.unregister()
 
                     if (activity.isFinishing) {
                         OnrampCallbackReferences.remove(onrampCallbackIdentifier)
@@ -247,6 +257,33 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 is OnrampStartTermsAndConditionsResult.Failed -> {
                     onrampCallbacksState.termsAndConditionsCallback?.onResult(
                         OnrampTermsAndConditionsResult.Failed(result.error)
+                    )
+                }
+            }
+        }
+    }
+
+    fun presentTermsOfServiceIfNeeded() {
+        coroutineScope.launch {
+            when (val result = interactor.startTermsOfService()) {
+                is OnrampStartTermsOfServiceResult.PresentationRequired -> {
+                    presentHTMLConfirmation(
+                        resultLauncher = termsOfServiceResultLauncher,
+                        html = result.terms.text,
+                        declarationId = result.terms.declarationId,
+                        appearance = result.appearance,
+                        headingResId =
+                            PaymentSheetR.string.stripe_link_onramp_terms_of_service_screen_title,
+                    )
+                }
+                OnrampStartTermsOfServiceResult.NotRequired -> {
+                    onrampCallbacksState.termsOfServiceCallback?.onResult(
+                        OnrampTermsOfServiceResult.NotRequired()
+                    )
+                }
+                is OnrampStartTermsOfServiceResult.Failed -> {
+                    onrampCallbacksState.termsOfServiceCallback?.onResult(
+                        OnrampTermsOfServiceResult.Failed(result.error)
                     )
                 }
             }
@@ -452,6 +489,16 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 declarationId = result.declarationId,
             )
             onrampCallbacksState.termsAndConditionsCallback?.onResult(termsAndConditionsResult)
+        }
+    }
+
+    private fun handleTermsOfServiceResult(result: HTMLConfirmationActivityResult) {
+        coroutineScope.launch {
+            val termsOfServiceResult = interactor.handleTermsOfServiceResult(
+                result = result.result,
+                declarationId = result.declarationId,
+            )
+            onrampCallbacksState.termsOfServiceCallback?.onResult(termsOfServiceResult)
         }
     }
 

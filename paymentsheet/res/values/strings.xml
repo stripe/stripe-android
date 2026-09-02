@@ -58,6 +58,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_carf_declaration_screen_title">Declarations</string>
   <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
   <string name="stripe_link_onramp_terms_and_conditions_screen_title">Terms and Conditions</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Terms of Service</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Address</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
