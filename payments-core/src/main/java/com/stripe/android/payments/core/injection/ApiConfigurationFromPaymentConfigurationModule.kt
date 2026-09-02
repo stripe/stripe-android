@@ -7,21 +7,20 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import dagger.Module
 import dagger.Provides
+import javax.inject.Provider
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
 class ApiConfigurationFromPaymentConfigurationModule {
     @Provides
-    fun provideApiConfigurationStateProvider(
+    fun provideApiConfiguration(
         context: Context
-    ): () -> ApiConfiguration.State {
-        return {
-            val config = PaymentConfiguration.getInstance(context)
-            ApiConfiguration.State(
-                publishableKey = config.publishableKey,
-                stripeAccountId = config.stripeAccountId,
-            )
-        }
+    ): ApiConfiguration.State {
+        val config = PaymentConfiguration.getInstance(context)
+        return ApiConfiguration.State(
+            publishableKey = config.publishableKey,
+            stripeAccountId = config.stripeAccountId,
+        )
     }
 }
 
@@ -29,20 +28,13 @@ class ApiConfigurationFromPaymentConfigurationModule {
 @Module
 class ApiRequestOptionsModule {
     @Provides
-    fun provideApiRequestOptionsProvider(
-        apiConfigurationProvider: () -> ApiConfiguration.State
-    ): () -> ApiRequest.Options {
-        return {
-            val state = apiConfigurationProvider()
-            ApiRequest.Options(
-                apiKey = state.publishableKey,
-                stripeAccount = state.stripeAccountId,
-            )
-        }
-    }
-
-    @Provides
     fun provideApiRequestOptions(
-        apiRequestOptionsProvider: () -> ApiRequest.Options
-    ): ApiRequest.Options = apiRequestOptionsProvider()
+        apiConfigurationProvider: Provider<ApiConfiguration.State>
+    ): ApiRequest.Options {
+        val state = apiConfigurationProvider.get()
+        return ApiRequest.Options(
+            apiKey = state.publishableKey,
+            stripeAccount = state.stripeAccountId,
+        )
+    }
 }
