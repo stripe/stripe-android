@@ -14,6 +14,7 @@ internal fun boolean(
     key: String,
     displayName: String,
     defaultValue: Boolean,
+    updateRequest: CheckoutPlaygroundRequestUpdater<Boolean> = {},
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
 ) = choice(
     key = key,
@@ -21,6 +22,7 @@ internal fun boolean(
     defaultValue = defaultValue,
     options = listOf("On" to true, "Off" to false),
     serialize = Boolean::toString,
+    updateRequest = updateRequest,
     isApplicable = isApplicable,
 )
 
@@ -28,12 +30,14 @@ internal inline fun <reified T : Enum<T>> enumChoice(
     key: String,
     displayName: String,
     defaultValue: T,
+    noinline updateRequest: CheckoutPlaygroundRequestUpdater<T> = {},
 ) = choice(
     key = key,
     displayName = displayName,
     defaultValue = defaultValue,
     options = enumValues<T>().map { it.name to it },
     serialize = { it.name },
+    updateRequest = updateRequest,
 )
 
 internal fun <T> choice(
@@ -42,6 +46,7 @@ internal fun <T> choice(
     defaultValue: T,
     options: List<Pair<String, T>>,
     serialize: (T) -> String,
+    updateRequest: CheckoutPlaygroundRequestUpdater<T> = {},
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
 ): CheckoutPlaygroundSettingDefinition.Value<T> {
     return value(
@@ -50,6 +55,7 @@ internal fun <T> choice(
         defaultValue = defaultValue,
         options = options,
         isApplicable = isApplicable,
+        updateRequest = updateRequest,
         encode = serialize,
         decode = { serialized ->
             options.firstOrNull { (_, option) -> serialize(option) == serialized }
@@ -67,6 +73,7 @@ internal fun <T> value(
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
     options: List<Pair<String, T>> = emptyList(),
     input: CheckoutPlaygroundSettingDefinition.Value.Input = CheckoutPlaygroundSettingDefinition.Value.Input.Text,
+    updateRequest: CheckoutPlaygroundRequestUpdater<T> = {},
     encode: (T) -> String,
     decode: (String) -> Result<T>,
 ) = CheckoutPlaygroundSettingDefinition.Value(
@@ -81,6 +88,7 @@ internal fun <T> value(
     },
     input = input,
     isApplicable = isApplicable,
+    updateRequest = updateRequest,
     encode = encode,
     decode = decode,
 )

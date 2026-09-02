@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.Controller
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.session
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -128,7 +129,17 @@ class CheckoutControllerExampleRequestFactoryTest {
             "payment_method_types",
             JsonArray(listOf(JsonPrimitive("card"), JsonPrimitive("klarna"))),
         )
-        assertThat(request.body).doesNotContainKey("automatic_payment_methods")
+        assertThat(request.body).containsEntry("automatic_payment_methods", JsonPrimitive(false))
+    }
+
+    @Test
+    fun `settings without request updates are ignored`() = runScenario {
+        val defaultRequest = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
+        settings.update(Controller.merchantDisplayName, "Merchant")
+
+        val updatedRequest = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
+
+        assertThat(updatedRequest.body).isEqualTo(defaultRequest.body)
     }
 
     private fun runScenario(block: Scenario.() -> Unit) {
