@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -27,7 +26,7 @@ import javax.inject.Provider
  * Will throw an exception if [PaymentConfiguration] has not been instantiated.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultCardAccountRangeRepositoryFactory internal constructor(
+class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val requestSurface: RequestSurface,
@@ -44,26 +43,6 @@ class DefaultCardAccountRangeRepositoryFactory internal constructor(
             store = store
         )
     }
-
-    @Inject
-    constructor(
-        context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
-        requestSurface: RequestSurface,
-        analyticsRequestExecutor: AnalyticsRequestExecutor,
-    ) : this(
-        context = context,
-        productUsageTokens = productUsageTokens,
-        requestSurface = requestSurface,
-        analyticsRequestExecutor = analyticsRequestExecutor,
-        apiConfigProvider = Provider {
-            ApiConfiguration.State(
-                publishableKey = publishableKeyProvider(),
-                stripeAccountId = null,
-            )
-        },
-    )
 
     @JvmOverloads
     constructor(
