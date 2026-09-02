@@ -28,6 +28,7 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.utils.PrefsTestStoreRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
@@ -40,7 +41,8 @@ internal class ExpressCheckoutElementTest {
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
-        around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
+        around(PrefsTestStoreRule())
+            .around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
             .around(IntentsRule())
     }
 

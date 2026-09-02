@@ -62,14 +62,17 @@ internal fun runExpressCheckoutElementTest(
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        block()
+        try {
+            block()
 
-        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
-        assertThat(didCompleteSuccessfully).isTrue()
-        afterCompletionAssertions()
-        networkRule.validate()
-        scenario.onActivity {
-            controller.destroy()
+            val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+            assertThat(didCompleteSuccessfully).isTrue()
+            afterCompletionAssertions()
+            networkRule.validate()
+        } finally {
+            scenario.onActivity {
+                controller.destroy()
+            }
         }
     }
 }
