@@ -8,6 +8,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -18,8 +20,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
+import com.stripe.android.paymentsheet.example.playground.SearchSettingsField
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettingsUi
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.configurations
@@ -56,52 +61,70 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
             var navigationPath by rememberSaveable {
                 mutableStateOf<List<String>>(emptyList())
             }
+            var settingsSearchQuery by rememberSaveable { mutableStateOf("") }
+            val isSearching = settingsSearchQuery.isNotBlank()
             val currentConfiguration = CheckoutPlaygroundDefinitions.root.configurations()
                 .firstOrNull { it.key == navigationPath.lastOrNull() }
                 ?: CheckoutPlaygroundDefinitions.root
             val navigateBack = {
                 if (status is CheckoutControllerExampleViewModel.Status.Settings) {
-                    navigationPath = navigationPath.dropLast(1)
+                    if (isSearching) {
+                        settingsSearchQuery = ""
+                    } else {
+                        navigationPath = navigationPath.dropLast(1)
+                    }
                 } else {
                     viewModel.returnToSettings()
                 }
             }
 
             BackHandler(
-                enabled = status !is CheckoutControllerExampleViewModel.Status.Settings || navigationPath.isNotEmpty()
+                enabled = status !is CheckoutControllerExampleViewModel.Status.Settings ||
+                    navigationPath.isNotEmpty() || isSearching
             ) { navigateBack() }
 
             PlaygroundTheme(
                 topBarContent = {
-                    TopAppBar(
-                        windowInsets = AppBarDefaults.topAppBarWindowInsets,
-                        title = {
-                            Text(
-                                if (status is CheckoutControllerExampleViewModel.Status.Settings) {
-                                    currentConfiguration.displayName
-                                } else {
-                                    "Checkout"
+                    Column {
+                        TopAppBar(
+                            windowInsets = AppBarDefaults.topAppBarWindowInsets,
+                            title = {
+                                Text(
+                                    when {
+                                        status !is CheckoutControllerExampleViewModel.Status.Settings -> "Checkout"
+                                        isSearching -> "Search settings"
+                                        else -> currentConfiguration.displayName
+                                    }
+                                )
+                            },
+                            navigationIcon = if (
+                                status !is CheckoutControllerExampleViewModel.Status.Settings ||
+                                navigationPath.isNotEmpty() || isSearching
+                            ) {
+                                {
+                                    IconButton(onClick = navigateBack) {
+                                        Text("‹", style = MaterialTheme.typography.h4)
+                                    }
                                 }
+                            } else {
+                                null
+                            },
+                        )
+                        if (status is CheckoutControllerExampleViewModel.Status.Settings) {
+                            SearchSettingsField(
+                                query = settingsSearchQuery,
+                                onQueryChanged = { settingsSearchQuery = it },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             )
-                        },
-                        navigationIcon = if (
-                            status !is CheckoutControllerExampleViewModel.Status.Settings || navigationPath.isNotEmpty()
-                        ) {
-                            {
-                                IconButton(onClick = navigateBack) {
-                                    Text("‹", style = MaterialTheme.typography.h4)
-                                }
-                            }
-                        } else {
-                            null
-                        },
-                    )
+                        }
+                    }
                 },
                 content = {
                     when (val currentStatus = status) {
                         CheckoutControllerExampleViewModel.Status.Settings -> {
                             CheckoutPlaygroundSettingsUi(
                                 configuration = currentConfiguration,
+                                searchQuery = settingsSearchQuery,
                                 settings = viewModel.settings,
                                 onOpenConfiguration = { navigationPath += it.key },
                             )

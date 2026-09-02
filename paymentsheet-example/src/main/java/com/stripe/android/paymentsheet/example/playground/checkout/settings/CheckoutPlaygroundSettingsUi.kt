@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
@@ -26,6 +27,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,45 +35,145 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
+import com.stripe.android.paymentsheet.example.playground.matchesQuery
 
 internal const val CheckoutSettingsScreenTestTag = "checkout_settings_screen"
 private const val CheckoutSettingGroupTestTagPrefix = "checkout_setting_group:"
 private const val CheckoutSettingValueTestTagPrefix = "checkout_setting_value:"
+private const val CheckoutSettingBreadcrumbTestTagPrefix = "checkout_setting_breadcrumb:"
 
 @Composable
 internal fun CheckoutPlaygroundSettingsUi(
     configuration: CheckoutPlaygroundSettingDefinition.Configuration,
+    searchQuery: String,
     settings: CheckoutPlaygroundSettings,
     onOpenConfiguration: (CheckoutPlaygroundSettingDefinition.Configuration) -> Unit,
 ) {
     val values by settings.values.collectAsState()
+    val searchResults = remember(searchQuery) {
+        CheckoutPlaygroundDefinitions.root.searchResults(
+            query = searchQuery,
+            parents = emptyList(),
+        )
+    }
     Column(
         modifier = Modifier.testTag(CheckoutSettingsScreenTestTag),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        configuration.children.filter { definition ->
-            definition !is CheckoutPlaygroundSettingDefinition.Value<*> || definition.isApplicable(settings)
-        }.forEach { definition ->
-            when (definition) {
-                is CheckoutPlaygroundSettingDefinition.Configuration -> ConfigurationRow(
-                    configuration = definition,
-                    onClick = { onOpenConfiguration(definition) },
+        if (searchQuery.isBlank()) {
+            ConfigurationContent(
+                configuration = configuration,
+                values = values,
+                settings = settings,
+                onOpenConfiguration = onOpenConfiguration,
+            )
+        } else if (searchResults.isEmpty()) {
+            Text("No matching settings found")
+        } else {
+            SearchResultsContent(
+                results = searchResults,
+                values = values,
+                settings = settings,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ConfigurationContent(
+    configuration: CheckoutPlaygroundSettingDefinition.Configuration,
+    values: Map<CheckoutPlaygroundSettingDefinition.Value<*>, String>,
+    settings: CheckoutPlaygroundSettings,
+    onOpenConfiguration: (CheckoutPlaygroundSettingDefinition.Configuration) -> Unit,
+) {
+    configuration.children.filter { definition ->
+        definition !is CheckoutPlaygroundSettingDefinition.Value<*> || definition.isApplicable(settings)
+    }.forEach { definition ->
+        when (definition) {
+            is CheckoutPlaygroundSettingDefinition.Configuration -> ConfigurationRow(
+                configuration = definition,
+                onClick = { onOpenConfiguration(definition) },
+            )
+            is CheckoutPlaygroundSettingDefinition.Value<*> -> ValueRow(
+                definition = definition,
+                value = requireNotNull(values[definition]),
+                enabled = true,
+                onValueChanged = { settings.updateSerialized(definition, it) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchResultsContent(
+    results: List<SearchResult>,
+    values: Map<CheckoutPlaygroundSettingDefinition.Value<*>, String>,
+    settings: CheckoutPlaygroundSettings,
+) {
+    results.forEach { result ->
+        val enabled = result.definition.isApplicable(settings)
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = result.breadcrumb,
+                modifier = Modifier.testTag(checkoutSettingBreadcrumbTestTag(result.definition)),
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+            )
+            ValueRow(
+                definition = result.definition,
+                value = requireNotNull(values[result.definition]),
+                enabled = enabled,
+                onValueChanged = { value ->
+                    if (enabled) {
+                        settings.updateSerialized(result.definition, value)
+                    }
+                },
+            )
+        }
+    }
+}
+
+private data class SearchResult(
+    val definition: CheckoutPlaygroundSettingDefinition.Value<*>,
+    val breadcrumb: String,
+)
+
+private fun CheckoutPlaygroundSettingDefinition.Configuration.searchResults(
+    query: String,
+    parents: List<String>,
+): List<SearchResult> {
+    return children.flatMap { definition ->
+        when (definition) {
+            is CheckoutPlaygroundSettingDefinition.Configuration -> {
+                definition.searchResults(
+                    query = query,
+                    parents = parents + definition.displayName,
                 )
-                is CheckoutPlaygroundSettingDefinition.Value<*> -> ValueRow(
-                    definition = definition,
-                    value = requireNotNull(values[definition]),
-                    onValueChanged = { settings.updateSerialized(definition, it) },
-                )
+            }
+            is CheckoutPlaygroundSettingDefinition.Value<*> -> {
+                if (definition.displayName.matchesQuery(query)) {
+                    listOf(
+                        SearchResult(
+                            definition = definition,
+                            breadcrumb = parents.joinToString(" › "),
+                        )
+                    )
+                } else {
+                    emptyList()
+                }
             }
         }
     }
@@ -104,16 +206,17 @@ private fun ConfigurationRow(
 private fun <T> ValueRow(
     definition: CheckoutPlaygroundSettingDefinition.Value<T>,
     value: String,
+    enabled: Boolean,
     onValueChanged: (String) -> Unit,
 ) {
     if (definition.input == CheckoutPlaygroundSettingDefinition.Value.Input.Color) {
-        ColorValue(definition, value, onValueChanged)
+        ColorValue(definition, value, enabled, onValueChanged)
     } else if (definition.options.isEmpty()) {
-        TextValue(definition, value, onValueChanged)
+        TextValue(definition, value, enabled, onValueChanged)
     } else if (definition.options.size <= MaxInlineOptions) {
-        RadioValue(definition, value, onValueChanged)
+        RadioValue(definition, value, enabled, onValueChanged)
     } else {
-        DropdownValue(definition, value, onValueChanged)
+        DropdownValue(definition, value, enabled, onValueChanged)
     }
 }
 
@@ -121,15 +224,22 @@ private fun <T> ValueRow(
 private fun <T> ColorValue(
     definition: CheckoutPlaygroundSettingDefinition.Value<T>,
     value: String,
+    enabled: Boolean,
     onValueChanged: (String) -> Unit,
 ) {
     var showPicker by remember { mutableStateOf(false) }
     val selectedColor = value.toComposeColorOrNull()
+    LaunchedEffect(enabled) {
+        if (!enabled) {
+            showPicker = false
+        }
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .testTag(checkoutSettingValueTestTag(definition))
-            .clickable { showPicker = true }
+            .alpha(if (enabled) 1f else ContentAlpha.disabled)
+            .clickable(enabled = enabled) { showPicker = true }
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -218,12 +328,14 @@ private fun Color.toSerializedColor(): String {
 private fun <T> TextValue(
     definition: CheckoutPlaygroundSettingDefinition.Value<T>,
     value: String,
+    enabled: Boolean,
     onValueChanged: (String) -> Unit,
 ) {
     val error = definition.validationError(value)
     OutlinedTextField(
         value = value,
         onValueChange = onValueChanged,
+        enabled = enabled,
         label = { Text(definition.displayName) },
         isError = error != null,
         keyboardOptions = KeyboardOptions(
@@ -247,9 +359,19 @@ private fun <T> TextValue(
 private fun <T> RadioValue(
     definition: CheckoutPlaygroundSettingDefinition.Value<T>,
     value: String,
+    enabled: Boolean,
     onValueChanged: (String) -> Unit,
 ) {
-    Column(modifier = Modifier.testTag(checkoutSettingValueTestTag(definition))) {
+    Column(
+        modifier = Modifier
+            .testTag(checkoutSettingValueTestTag(definition))
+            .semantics {
+                if (!enabled) {
+                    disabled()
+                }
+            }
+            .alpha(if (enabled) 1f else ContentAlpha.disabled)
+    ) {
         Text(text = definition.displayName, fontWeight = FontWeight.Bold)
         Row(modifier = Modifier.fillMaxWidth()) {
             definition.options.forEach { option ->
@@ -257,12 +379,17 @@ private fun <T> RadioValue(
                     modifier = Modifier
                         .selectable(
                             selected = value == definition.serialize(option.value),
+                            enabled = enabled,
                             onClick = { onValueChanged(definition.serialize(option.value)) },
                         )
                         .padding(end = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    RadioButton(selected = value == definition.serialize(option.value), onClick = null)
+                    RadioButton(
+                        selected = value == definition.serialize(option.value),
+                        onClick = null,
+                        enabled = enabled,
+                    )
                     Text(option.displayName)
                 }
             }
@@ -275,17 +402,30 @@ private fun <T> RadioValue(
 private fun <T> DropdownValue(
     definition: CheckoutPlaygroundSettingDefinition.Value<T>,
     value: String,
+    enabled: Boolean,
     onValueChanged: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selected = definition.options.firstOrNull { definition.serialize(it.value) == value }
+    LaunchedEffect(enabled) {
+        if (!enabled) {
+            expanded = false
+        }
+    }
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = it },
-        modifier = Modifier.testTag(checkoutSettingValueTestTag(definition)),
+        onExpandedChange = { expanded = enabled && it },
+        modifier = Modifier
+            .testTag(checkoutSettingValueTestTag(definition))
+            .semantics {
+                if (!enabled) {
+                    disabled()
+                }
+            },
     ) {
         OutlinedTextField(
             readOnly = true,
+            enabled = enabled,
             value = selected?.displayName.orEmpty(),
             onValueChange = {},
             label = { Text(definition.displayName) },
@@ -317,5 +457,9 @@ internal fun checkoutSettingGroupTestTag(
 internal fun checkoutSettingValueTestTag(
     definition: CheckoutPlaygroundSettingDefinition.Value<*>,
 ): String = CheckoutSettingValueTestTagPrefix + definition.key
+
+internal fun checkoutSettingBreadcrumbTestTag(
+    definition: CheckoutPlaygroundSettingDefinition.Value<*>,
+): String = CheckoutSettingBreadcrumbTestTagPrefix + definition.key
 
 private const val MaxInlineOptions = 4
