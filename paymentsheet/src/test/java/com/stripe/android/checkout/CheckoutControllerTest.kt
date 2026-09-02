@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -1127,15 +1128,6 @@ internal class CheckoutControllerTest {
                 .put("automatic_tax_address_source", source),
         )
     }
-
-    // Simulates process death by persisting the handle's registered providers into a bundle and
-    // rebuilding a fresh handle from it, the way SavedStateRegistry does across a real restart. The
-    // controller's namespaced child is then restored from that serialized state.
-    // Persisting a handle can only be done through the restricted savedStateProvider(); the same
-    // suppression the production code uses applies here.
-    @Suppress("RestrictedApi")
-    private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
-        SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
 
     @Suppress("RestrictedApi")
     private fun parentHandleWithState(state: CheckoutControllerState): SavedStateHandle {

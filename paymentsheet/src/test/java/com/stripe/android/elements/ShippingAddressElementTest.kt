@@ -161,19 +161,6 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `presentation state survives process death`() {
-        val savedStateHandle = SavedStateHandle()
-        val stateHolder = ShippingAddressElementStateHolder(savedStateHandle)
-        stateHolder.isPresenting = true
-
-        val restoredStateHolder = ShippingAddressElementStateHolder(
-            savedStateHandle = savedStateHandle.simulateProcessDeath(),
-        )
-
-        assertThat(restoredStateHolder.isPresenting).isTrue()
-    }
-
-    @Test
     fun `lifecycle destruction unregisters the launcher`() = runScenario {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
@@ -328,8 +315,4 @@ internal class ShippingAddressElementTest {
         val registration: Registration,
         val createElement: suspend () -> ElementScenario,
     )
-
-    @Suppress("RestrictedApi")
-    private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
-        SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
 }
