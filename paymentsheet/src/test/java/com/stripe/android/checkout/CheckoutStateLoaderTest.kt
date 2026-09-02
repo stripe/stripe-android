@@ -61,6 +61,7 @@ internal class CheckoutStateLoaderTest {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+        assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNotNull()
     }
 
     @Test
@@ -363,6 +364,7 @@ internal class CheckoutStateLoaderTest {
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
@@ -413,8 +415,12 @@ internal class CheckoutStateLoaderTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = stateHolder.selection,
-            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata },
-            customerMetadata = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata?.customerMetadata },
+            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentMethodMetadata
+            },
+            customerMetadata = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentMethodMetadata?.customerMetadata
+            },
         )
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser

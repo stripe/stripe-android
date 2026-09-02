@@ -5,7 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -50,6 +52,34 @@ internal class CheckoutControllerStateHolderTest {
 
             assertThat(stateHolder.session.value?.paymentOptionDisplayData).isSameInstanceAs(expectedOption)
             assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
+        }
+    }
+
+    @Test
+    fun `session builds payment element and express checkout element data with their respective metadata`() {
+        val paymentElementMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodOrder = listOf("card"),
+        )
+        val expressCheckoutElementMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodOrder = listOf("link"),
+        )
+
+        testScenario(
+            paymentOptionFactory = { _, metadata ->
+                assertThat(metadata).isSameInstanceAs(paymentElementMetadata)
+                null
+            },
+            availableExpressButtonTypesFactory = { metadata, _ ->
+                assertThat(metadata).isSameInstanceAs(expressCheckoutElementMetadata)
+                emptyList()
+            },
+        ) {
+            stateHolder.state = committedState(
+                paymentMethodMetadata = paymentElementMetadata,
+                expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementMetadata,
+            )
+
+            assertThat(stateHolder.session.value).isNotNull()
         }
     }
 
@@ -167,12 +197,15 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata = paymentMethodMetadata,
+        expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
@@ -182,6 +215,8 @@ internal class CheckoutControllerStateHolderTest {
     private fun testScenario(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory =
             CheckoutPaymentOptionDisplayDataFactory { _, _ -> null },
+        availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory =
+            FakeAvailableExpressButtonTypesFactory(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val errorReporter = FakeErrorReporter()
@@ -190,7 +225,7 @@ internal class CheckoutControllerStateHolderTest {
                 savedStateHandle = SavedStateHandle(),
                 errorReporter = errorReporter,
                 paymentOptionFactory = paymentOptionFactory,
-                availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(),
+                availableExpressButtonTypesFactory = availableExpressButtonTypesFactory,
             ),
             errorReporter = errorReporter,
         ).block()
