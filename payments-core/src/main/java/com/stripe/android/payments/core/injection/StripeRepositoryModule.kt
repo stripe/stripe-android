@@ -2,7 +2,6 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -20,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * A [Module] to provide [StripeRepository] and its corresponding dependencies.
- * [Context], [Logger], [ApiConfiguration.State], [PRODUCT_USAGE] and [IOContext] need to be
+ * [Context], [Logger], [PUBLISHABLE_KEY], [PRODUCT_USAGE] and [IOContext] need to be
  * provided elsewhere to use this module.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
