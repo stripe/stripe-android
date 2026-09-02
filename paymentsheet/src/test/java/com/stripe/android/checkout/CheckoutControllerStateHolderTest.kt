@@ -198,7 +198,7 @@ internal class CheckoutControllerStateHolderTest {
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(),

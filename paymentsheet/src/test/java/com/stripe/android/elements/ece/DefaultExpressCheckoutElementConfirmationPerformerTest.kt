@@ -81,7 +81,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = createGooglePayExpressButton(
-                paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
             ),
         ) {
             performer.confirm(expressButton)
@@ -104,7 +104,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = createGooglePayExpressButton(
-                paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
                 shippingAddressRequired = true,
             ),
         ) {
@@ -141,7 +141,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = createGooglePayExpressButton(
-                paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
             ),
         ) {
             performer.confirm(expressButton)
@@ -172,7 +172,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = createGooglePayExpressButton(
-                paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
             ),
         ) {
             performer.confirm(expressButton)
@@ -200,7 +200,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = ExpressButton.Link.create(
-                paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 buttonTheme = ButtonTheme.Automatic,
             ),
