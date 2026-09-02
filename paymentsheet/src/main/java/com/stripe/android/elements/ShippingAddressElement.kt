@@ -3,6 +3,7 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -43,6 +44,7 @@ class ShippingAddressElement @Inject internal constructor(
         )
     }
 
+    @MainThread
     fun present() {
         if (stateHolder.state == null) {
             errorReporter.report(
