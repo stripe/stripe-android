@@ -220,6 +220,21 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
+    fun `createForExpressCheckoutElement collects full address when required by checkout session`() {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
+
+        val result = factory().createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = true),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result?.billingDetailsCollectionConfiguration?.address).isEqualTo(PSFull)
+    }
+
+    @Test
     fun `createForPaymentElement uses payment element configuration`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(
