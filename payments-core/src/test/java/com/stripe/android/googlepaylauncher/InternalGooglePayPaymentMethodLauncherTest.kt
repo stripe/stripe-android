@@ -132,7 +132,10 @@ class InternalGooglePayPaymentMethodLauncherTest {
             transactionId = null,
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            ),
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
