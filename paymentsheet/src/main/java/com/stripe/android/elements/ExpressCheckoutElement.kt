@@ -42,87 +42,6 @@ class ExpressCheckoutElement @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         /**
-         * Configuration for how billing details are collected during checkout.
-         */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class BillingDetailsCollectionConfiguration {
-            private var name: CollectionMode = CollectionMode.Automatic
-            private var email: CollectionMode = CollectionMode.Automatic
-            private var address: AddressCollectionMode = AddressCollectionMode.Automatic
-
-            /**
-             * Billing details fields collection options.
-             */
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            enum class CollectionMode {
-                /**
-                 * The field will be collected depending on the Payment Method's requirements.
-                 */
-                Automatic,
-
-                /**
-                 * The field will never be collected.
-                 * If this field is required by the Payment Method, you must provide it as part of
-                 * the default billing details.
-                 */
-                Never,
-
-                /**
-                 * The field will always be collected, even if it isn't required for the Payment
-                 * Method.
-                 */
-                Always,
-            }
-
-            /**
-             * Billing address collection options.
-             */
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            enum class AddressCollectionMode {
-                /**
-                 * Only the fields required by the Payment Method will be collected, this may be
-                 * none.
-                 */
-                Automatic,
-
-                /**
-                 * Collect the full billing address, regardless of the Payment Method requirements.
-                 */
-                Full,
-            }
-
-            /** How to collect the name field. */
-            fun name(name: CollectionMode): BillingDetailsCollectionConfiguration = apply {
-                this.name = name
-            }
-
-            /** How to collect the email field. */
-            fun email(email: CollectionMode): BillingDetailsCollectionConfiguration = apply {
-                this.email = email
-            }
-
-            /** How to collect the billing address. */
-            fun address(address: AddressCollectionMode): BillingDetailsCollectionConfiguration = apply {
-                this.address = address
-            }
-
-            @Parcelize
-            internal data class State(
-                val name: CollectionMode,
-                val email: CollectionMode,
-                val address: AddressCollectionMode,
-            ) : Parcelable
-
-            internal fun build(): State = State(
-                name = name,
-                email = email,
-                address = address,
-            )
-        }
-
-        /**
          * Configuration related to Link.
          */
         @CheckoutSessionPreview
@@ -415,8 +334,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
         private var shippingAddressRequired: Boolean = false
-        private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
-            BillingDetailsCollectionConfiguration()
         private var paymentMethodOrder: List<PaymentMethod> = emptyList()
         private var appearance: Appearance = Appearance()
 
@@ -437,13 +354,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             shippingAddressRequired: Boolean,
         ): Configuration = apply {
             this.shippingAddressRequired = shippingAddressRequired
-        }
-
-        /** Sets how billing details are collected when displaying payment methods. */
-        fun billingDetailsCollectionConfiguration(
-            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
-        ): Configuration = apply {
-            this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
         }
 
         /**
@@ -469,7 +379,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             val linkConfiguration: LinkConfiguration.State,
             val googlePayConfiguration: CheckoutGooglePayConfiguration,
             val shippingAddressRequired: Boolean,
-            val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
             val paymentMethodOrder: List<PaymentMethodType>,
             val appearance: Appearance.State,
         ) : Parcelable
@@ -483,7 +392,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
             shippingAddressRequired = shippingAddressRequired,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
             paymentMethodOrder = paymentMethodOrder.map { paymentMethod ->
                 when (paymentMethod) {
                     is PaymentMethod.GooglePay -> PaymentMethodType.GooglePay
