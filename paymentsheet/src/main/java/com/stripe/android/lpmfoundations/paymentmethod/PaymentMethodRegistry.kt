@@ -21,6 +21,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealWeroDefi
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KonbiniDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.KrCardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
@@ -67,6 +68,7 @@ internal object PaymentMethodRegistry {
         InstantDebitsDefinition,
         KlarnaDefinition,
         KonbiniDefinition,
+        KrCardDefinition,
         MobilePayDefinition,
         MultibancoDefinition,
         OxxoDefinition,
