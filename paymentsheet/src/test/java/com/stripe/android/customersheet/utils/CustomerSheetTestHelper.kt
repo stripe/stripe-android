@@ -52,8 +52,8 @@ import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
-import javax.inject.Provider
 import org.mockito.kotlin.mock
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
