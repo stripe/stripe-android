@@ -35,7 +35,7 @@ internal interface PollingComponent {
             @BindsInstance application: Application,
             @BindsInstance config: IntentStatusPoller.Config,
             @BindsInstance ioDispatcher: CoroutineDispatcher,
-            @BindsInstance apiConfigurationProvider: () -> ApiConfiguration.State,
+            @BindsInstance apiConfiguration: ApiConfiguration.State,
         ): PollingComponent
     }
 }
