@@ -1,8 +1,6 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.customersheet.injection.DaggerStripeCustomerAdapterComponent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -126,14 +124,6 @@ interface CustomerAdapter {
                     customerEphemeralKeyProvider = customerEphemeralKeyProvider,
                     setupIntentClientSecretProvider = setupIntentClientSecretProvider,
                     paymentMethodTypes = paymentMethodTypes,
-                    apiConfigurationProvider = {
-                        PaymentConfiguration.getInstance(context).let {
-                            ApiConfiguration.State(
-                                publishableKey = it.publishableKey,
-                                stripeAccountId = it.stripeAccountId,
-                            )
-                        }
-                    },
                 )
             return component.stripeCustomerAdapter
         }
