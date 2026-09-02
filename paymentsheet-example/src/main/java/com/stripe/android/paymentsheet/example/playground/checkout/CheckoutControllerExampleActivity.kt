@@ -35,6 +35,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val presenter = viewModel.controller.createPresenter(this)
         val paymentElement = presenter.paymentElement()
+        val shippingAddressElement = presenter.shippingAddressElement()
         val currencySelectorElement = presenter.currencySelectorElement()
         val expressCheckoutElement = presenter.expressCheckoutElement()
 
@@ -148,6 +149,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                 displayMandate = viewModel.displayMandate,
                                 onClearPaymentMethod = viewModel::clearPaymentOption,
                                 onSelectPaymentMethod = paymentElement::present,
+                                onSetShippingAddress = shippingAddressElement::present,
                                 onConfirm = {
                                     viewModel.clearConfirmationMessage()
                                     presenter.confirm()
