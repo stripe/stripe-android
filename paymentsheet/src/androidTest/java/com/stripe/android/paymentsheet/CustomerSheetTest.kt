@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.utils.CustomerSheetTestTypeProvider
 import com.stripe.android.paymentsheet.utils.CustomerSheetUtils
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
-import com.stripe.android.paymentsheet.utils.PrefsTestStore
+import com.stripe.android.paymentsheet.utils.PrefsTestStoreRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import org.junit.Rule
@@ -25,7 +25,9 @@ import org.junit.runner.RunWith
 @RunWith(TestParameterInjector::class)
 internal class CustomerSheetTest {
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create {
+        around(PrefsTestStoreRule())
+    }
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
@@ -96,10 +98,6 @@ internal class CustomerSheetTest {
             assertThat(card?.brand).isEqualTo(CardBrand.Visa)
         }
     ) { context ->
-        context.scenario.onActivity {
-            PrefsTestStore(it).clear()
-        }
-
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
@@ -132,10 +130,6 @@ internal class CustomerSheetTest {
             assertThat(card?.brand).isEqualTo(CardBrand.Visa)
         }
     ) { context ->
-        context.scenario.onActivity {
-            PrefsTestStore(it).clear()
-        }
-
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
