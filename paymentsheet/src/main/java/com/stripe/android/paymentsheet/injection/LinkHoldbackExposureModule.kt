@@ -20,6 +20,7 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
+import javax.inject.Provider
 import javax.inject.Qualifier
 import kotlin.coroutines.CoroutineContext
 
@@ -59,7 +60,7 @@ internal class LinkHoldbackExposureModule {
     @LinkDisabledApiRepository
     fun providesLinkRepository(
         application: Application,
-        apiConfigProvider: () -> ApiConfiguration.State,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
         requestSurface: RequestSurface,
         stripeRepository: StripeRepository,
         @IOContext workContext: CoroutineContext,
