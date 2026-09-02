@@ -125,19 +125,14 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
     }
 
     private fun PaymentElementLoader.Configuration.analyticsMap() = buildMap<String, AnalyticsMetadata.Value> {
+        putAll(commonConfiguration.analyticsMap())
+
         when (this@analyticsMap) {
-            is PaymentElementLoader.Configuration.PaymentSheet -> {
-                putAll(commonConfiguration.analyticsMap())
-                putAll(analyticsMap())
-            }
-            is PaymentElementLoader.Configuration.Embedded -> {
-                putAll(commonConfiguration.analyticsMap())
-                putAll(analyticsMap())
-            }
-            is PaymentElementLoader.Configuration.ExpressCheckoutElement ->
-                putAll(commonConfiguration.analyticsMap())
+            is PaymentElementLoader.Configuration.PaymentSheet -> putAll(analyticsMap())
+            is PaymentElementLoader.Configuration.Embedded -> putAll(analyticsMap())
             is PaymentElementLoader.Configuration.CryptoOnramp,
-            is PaymentElementLoader.Configuration.StandaloneLink -> putAll(commonConfiguration.analyticsMap())
+            is PaymentElementLoader.Configuration.ExpressCheckoutElement,
+            is PaymentElementLoader.Configuration.StandaloneLink -> Unit
         }
     }
 
