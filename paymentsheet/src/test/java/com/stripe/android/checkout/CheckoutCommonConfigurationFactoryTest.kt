@@ -192,30 +192,14 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `createForExpressCheckoutElement maps billing configuration from express checkout element configuration`() {
+    fun `createForExpressCheckoutElement uses automatic billing collection`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().billingDetailsCollectionConfiguration(
-                    BillingDetailsCollectionConfiguration().address(Automatic)
+                    BillingDetailsCollectionConfiguration().address(Full)
                 )
             )
-            .expressCheckoutElement(
-                ExpressCheckoutElement.Configuration().billingDetailsCollectionConfiguration(
-                    ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
-                        .name(
-                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                                .CollectionMode.Always
-                        )
-                        .email(
-                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                                .CollectionMode.Never
-                        )
-                        .address(
-                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                                .AddressCollectionMode.Full
-                        )
-                )
-            )
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
 
         val result = factory().createForExpressCheckoutElement(
@@ -225,11 +209,29 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         assertThat(result?.billingDetailsCollectionConfiguration?.name)
-            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
+        assertThat(result?.billingDetailsCollectionConfiguration?.phone)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
         assertThat(result?.billingDetailsCollectionConfiguration?.email)
-            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
         assertThat(result?.billingDetailsCollectionConfiguration?.address)
-            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+        assertThat(result?.billingDetailsCollectionConfiguration?.attachDefaultsToPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `createForExpressCheckoutElement collects full address when required by checkout session`() {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
+
+        val result = factory().createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = true),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result?.billingDetailsCollectionConfiguration?.address).isEqualTo(PSFull)
     }
 
     @Test
@@ -262,9 +264,6 @@ internal class CheckoutCommonConfigurationFactoryTest {
                         ExpressCheckoutElement.Configuration.LinkConfiguration().display(
                             ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic
                         )
-                    )
-                    .billingDetailsCollectionConfiguration(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
                     )
             )
             .build()

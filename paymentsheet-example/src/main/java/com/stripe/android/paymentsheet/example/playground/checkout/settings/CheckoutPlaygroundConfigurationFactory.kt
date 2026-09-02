@@ -234,12 +234,6 @@ private fun CheckoutPlaygroundSettings.Snapshot.expressCheckoutConfiguration(): 
         )
         .googlePayConfiguration(expressGooglePayConfiguration())
         .shippingAddressRequired(this[Controller.express.shippingRequired])
-        .billingDetailsCollectionConfiguration(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
-                .name(this[Controller.express.billing.name])
-                .email(this[Controller.express.billing.email])
-                .address(this[Controller.express.billing.address])
-        )
         .appearance(
             ExpressCheckoutElement.Configuration.Appearance()
                 .buttonTheme(this[Controller.express.appearance.theme])

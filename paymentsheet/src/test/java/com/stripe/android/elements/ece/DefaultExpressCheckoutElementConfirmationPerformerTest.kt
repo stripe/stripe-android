@@ -122,21 +122,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm uses ECE billing details collection configuration`() {
-        val state = createState(
-            eceBillingDetailsCollectionConfiguration =
-                ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
-                    .name(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                    )
-                    .email(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
-                    )
-                    .address(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                            .AddressCollectionMode.Full
-                    )
-        )
+    fun `confirm uses automatic billing details collection configuration`() {
+        val state = createState()
 
         runScenario(
             state = state,
@@ -150,16 +137,16 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             val option = args.confirmationOption as GooglePayConfirmationOption
             val billingDetails = option.config.billingDetailsCollectionConfiguration
             assertThat(billingDetails.name).isEqualTo(
-                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
             )
             assertThat(billingDetails.phone).isEqualTo(
                 PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
             )
             assertThat(billingDetails.email).isEqualTo(
-                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
+                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
             )
             assertThat(billingDetails.address).isEqualTo(
-                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             )
             assertThat(billingDetails.attachDefaultsToPaymentMethod).isTrue()
         }
@@ -217,17 +204,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     private fun createState(
         allowedShippingCountries: List<String>? = null,
         requiresBillingAddress: Boolean = false,
-        eceBillingDetailsCollectionConfiguration:
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration =
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration(),
     ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
-                .expressCheckoutElement(
-                    ExpressCheckoutElement.Configuration().billingDetailsCollectionConfiguration(
-                        eceBillingDetailsCollectionConfiguration
-                    )
-                )
+                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
                 .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "US",
