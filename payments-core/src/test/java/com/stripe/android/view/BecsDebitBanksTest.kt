@@ -16,12 +16,12 @@ class BecsDebitBanksTest {
             ApplicationProvider.getApplicationContext<Context>()
         ).banks
         assertThat(banks)
-            .hasSize(121)
+            .hasSize(146)
         assertThat(banks)
             .contains(
                 BecsDebitBanks.Bank(
-                    prefix = "21",
-                    name = "JP Morgan Chase Bank"
+                    prefix = "369",
+                    name = "BNK Banking Corporation Ltd"
                 )
             )
     }

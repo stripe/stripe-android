@@ -1,0 +1,197 @@
+@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+
+package com.stripe.android.paymentsheet.example.playground.checkout.settings
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class CheckoutPlaygroundSettingsUiTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @Test
+    fun `opening nested configuration shows only its direct children`() = runScenario {
+        page.group(CheckoutPlaygroundDefinitions.Controller.configuration).assertIsDisplayed().performClick()
+
+        page.group(CheckoutPlaygroundDefinitions.Controller.currencySelector.configuration).assertIsDisplayed()
+        page.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.shouldSetConfiguration)
+            .assertDoesNotExist()
+        page.group(CheckoutPlaygroundDefinitions.session.configuration).assertDoesNotExist()
+        page.group(CheckoutPlaygroundDefinitions.Controller.payment.appearance.configuration).assertDoesNotExist()
+
+        page.group(CheckoutPlaygroundDefinitions.Controller.currencySelector.configuration).performClick()
+
+        page.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.shouldSetConfiguration)
+            .assertIsDisplayed()
+        page.group(CheckoutPlaygroundDefinitions.Controller.payment.configuration).assertDoesNotExist()
+
+        openConfiguration(CheckoutPlaygroundDefinitions.Controller.configuration)
+        page.group(CheckoutPlaygroundDefinitions.Controller.payment.configuration).performClick()
+
+        page.value(CheckoutPlaygroundDefinitions.Controller.payment.shouldSetConfiguration)
+            .assertIsDisplayed()
+        page.group(CheckoutPlaygroundDefinitions.Controller.payment.appearance.configuration)
+            .performScrollTo()
+            .assertIsDisplayed()
+        page.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.shouldSetConfiguration)
+            .assertDoesNotExist()
+
+        openConfiguration(CheckoutPlaygroundDefinitions.Controller.express.configuration)
+
+        page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration)
+            .performScrollTo()
+            .assertIsDisplayed()
+        page.value(CheckoutPlaygroundDefinitions.Controller.payment.shouldSetConfiguration)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun `color setting uses color picker`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.Controller.payment.appearance.lightColors.configuration,
+    ) {
+        val definition = CheckoutPlaygroundDefinitions.Controller.payment.appearance.lightColors.primary
+        settings.updateSerialized(definition, "")
+        composeRule.waitForIdle()
+        page.value(definition).performClick()
+
+        composeRule.onNodeWithText("Pick color").assertIsDisplayed().performClick()
+
+        assertThat(settings.serializedValue(definition)).isEqualTo("#FF000000")
+    }
+
+    @Test
+    fun `customer setting toggles between guest and new`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+    ) {
+        val definition = CheckoutPlaygroundDefinitions.session.customer
+        composeRule.onNodeWithText("Guest").assertIsDisplayed()
+        composeRule.onNodeWithText("New").assertIsDisplayed().performClick()
+
+        assertThat(settings[definition]).isEqualTo("new")
+    }
+
+    @Test
+    fun `returning customer displays stored customer ID`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+        configureSettings = { saveReturningCustomer("cus_123") },
+    ) {
+        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag)
+            .assertIsDisplayed()
+            .assertTextContains("Customer ID")
+            .assertTextContains("cus_123")
+    }
+
+    @Test
+    fun `returning customer without stored ID displays backend fixture`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+        configureSettings = {
+            update(CheckoutPlaygroundDefinitions.session.customer, "returning")
+        },
+    ) {
+        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag)
+            .assertIsDisplayed()
+            .assertTextContains("Customer ID")
+            .assertTextContains("Backend fixture")
+    }
+
+    @Test
+    fun `customer ID is hidden for guest and new customers`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+    ) {
+        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag).assertDoesNotExist()
+
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag(CheckoutCustomerIdTestTag).assertDoesNotExist()
+    }
+
+    @Test
+    fun `payment method saving is displayed only for customers`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+    ) {
+        val definition = CheckoutPlaygroundDefinitions.session.paymentMethodSave
+        page.value(definition).assertDoesNotExist()
+
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        composeRule.waitForIdle()
+        page.value(definition).assertIsDisplayed()
+
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, "returning")
+        composeRule.waitForIdle()
+        page.value(definition).assertIsDisplayed()
+    }
+
+    @Test
+    fun `payment method types are only displayed for manual payment methods`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+    ) {
+        page.value(CheckoutPlaygroundDefinitions.session.paymentMethodTypes).assertDoesNotExist()
+
+        settings.update(CheckoutPlaygroundDefinitions.session.automaticPaymentMethods, false)
+        composeRule.waitForIdle()
+
+        page.value(CheckoutPlaygroundDefinitions.session.paymentMethodTypes).assertIsDisplayed()
+    }
+
+    private fun runScenario(
+        initialConfiguration: CheckoutPlaygroundSettingDefinition.Configuration = CheckoutPlaygroundDefinitions.root,
+        configureSettings: CheckoutPlaygroundSettings.() -> Unit = {},
+        block: Scenario.() -> Unit,
+    ) {
+        val settings = CheckoutPlaygroundSettings.createInMemory().apply(configureSettings)
+        var current by mutableStateOf(initialConfiguration)
+        composeRule.setContent {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                CheckoutPlaygroundSettingsUi(
+                    configuration = current,
+                    settings = settings,
+                    onOpenConfiguration = { current = it },
+                )
+            }
+        }
+        block(Scenario(Page(composeRule), settings, openConfiguration = { current = it }))
+    }
+
+    private data class Scenario(
+        val page: Page,
+        val settings: CheckoutPlaygroundSettings,
+        val openConfiguration: (CheckoutPlaygroundSettingDefinition.Configuration) -> Unit,
+    )
+
+    private class Page(private val rule: ComposeContentTestRule) {
+        fun group(definition: CheckoutPlaygroundSettingDefinition.Configuration) =
+            rule.onNodeWithTag(checkoutSettingGroupTestTag(definition))
+
+        fun value(definition: CheckoutPlaygroundSettingDefinition.Value<*>) =
+            rule.onNodeWithTag(checkoutSettingValueTestTag(definition))
+    }
+}

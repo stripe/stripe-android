@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.example.model.AuthorizeEvent
 import com.stripe.android.crypto.onramp.example.model.CheckoutEvent
 import com.stripe.android.crypto.onramp.example.model.IdentifierInputEntry
 import com.stripe.android.crypto.onramp.example.model.KEY_UI_STATE
+import com.stripe.android.crypto.onramp.example.model.KycResidence
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
 import com.stripe.android.crypto.onramp.example.model.OnrampUserData
 import com.stripe.android.crypto.onramp.example.model.Screen
@@ -98,7 +99,9 @@ internal class OnrampViewModel(
     private val savedUiState: OnrampUiState?
         get() = savedStateHandle[KEY_UI_STATE]
 
-    private val _uiState = MutableStateFlow(savedUiState ?: OnrampUiState())
+    private val _uiState = MutableStateFlow(
+        savedUiState ?: OnrampUiState(kycResidence = KycResidence.UnitedStates)
+    )
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
 
     private val _message = MutableStateFlow<String?>(null)
@@ -296,11 +299,13 @@ internal class OnrampViewModel(
                 screen = Screen.SeamlessSignIn,
                 googlePayIsReady = googlePayIsReady,
                 samsungPayIsReady = samsungPayIsReady,
+                kycResidence = KycResidence.UnitedStates,
             )
         } ?: OnrampUiState(
             screen = Screen.LoginSignup,
             googlePayIsReady = googlePayIsReady,
             samsungPayIsReady = samsungPayIsReady,
+            kycResidence = KycResidence.UnitedStates,
         )
     }
 
@@ -1065,6 +1070,19 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(kycNationalities = value) }
     }
 
+    fun updateKycResidence(residence: KycResidence) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                kycResidence = residence,
+                sourceCurrency = residence.localCurrency,
+                kycBirthCountry = if (residence.followsEuFlow) currentState.kycBirthCountry else "",
+                kycBirthCity = if (residence.followsEuFlow) currentState.kycBirthCity else "",
+                kycNationalities = if (residence.followsEuFlow) currentState.kycNationalities else "",
+                kycAddress = currentState.kycAddress.replacingCountry(residence.countryCode.orEmpty()),
+            )
+        }
+    }
+
     fun updateKycAddress(address: PaymentSheet.Address) {
         _uiState.update { it.copy(kycAddress = address) }
     }
@@ -1356,6 +1374,7 @@ internal class OnrampViewModel(
                 screen = Screen.LoginSignup,
                 googlePayIsReady = currentState.googlePayIsReady,
                 samsungPayIsReady = currentState.samsungPayIsReady,
+                kycResidence = KycResidence.UnitedStates,
             )
         }
     }
@@ -1405,4 +1424,15 @@ private fun List<IdentifierInputEntry>.replaceAt(
 private fun List<IdentifierInputEntry>.removeEntryAt(index: Int): List<IdentifierInputEntry> {
     if (index !in indices) return this
     return filterIndexed { currentIndex, _ -> currentIndex != index }
+}
+
+private fun PaymentSheet.Address.replacingCountry(country: String): PaymentSheet.Address {
+    return PaymentSheet.Address(
+        city = city,
+        country = country,
+        line1 = line1,
+        line2 = line2,
+        postalCode = postalCode,
+        state = state,
+    )
 }

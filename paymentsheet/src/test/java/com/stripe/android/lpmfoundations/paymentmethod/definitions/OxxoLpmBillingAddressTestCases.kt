@@ -50,6 +50,32 @@ private val oxxoWithContactDetailsExpectedPaymentMethodParams = PaymentMethodCre
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
+private val oxxoAutomaticWithTaxExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
+    code = PaymentMethod.Type.Oxxo.code,
+    billingDetails = PaymentMethod.BillingDetails(
+        name = "Ana Garcia",
+        email = "ana.garcia@example.com",
+        address = Address(
+            line2 = null,
+            country = "MX",
+        ),
+    ),
+    requiresMandate = false,
+    overrideParamMap = mapOf(
+        "type" to PaymentMethod.Type.Oxxo.code,
+        "billing_details" to mapOf(
+            "name" to "Ana Garcia",
+            "email" to "ana.garcia@example.com",
+            "address" to mapOf(
+                "country" to "MX",
+            ),
+        ),
+    ),
+    productUsage = emptySet(),
+    allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+)
+
 private val oxxoWithBillingAddressExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
     code = PaymentMethod.Type.Oxxo.code,
     billingDetails = PaymentMethod.BillingDetails(
@@ -112,6 +138,21 @@ internal val oxxoTestCases = listOf(
         rawValues = oxxoFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = oxxoWithContactDetailsExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "OXXO AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Oxxo,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = oxxoFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = oxxoAutomaticWithTaxExpectedPaymentMethodParams,
             optionsParams = null,
             extraParams = null,
         ),

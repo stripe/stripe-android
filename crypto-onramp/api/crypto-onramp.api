@@ -229,8 +229,23 @@ public final class com/stripe/android/crypto/onramp/model/CryptoNetwork$Companio
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/crypto/onramp/model/IdType : java/lang/Enum {
+	public static final field CanadianSocialInsuranceNumber Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field ColombianTaxIdentificationNumber Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field PhilippinesTaxpayerIdentificationNumber Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field SocialSecurityNumber Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/IdType;
+}
+
 public final class com/stripe/android/crypto/onramp/model/KycInfo {
 	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -241,6 +256,7 @@ public final class com/stripe/android/crypto/onramp/model/KycInfo {
 	public final fun getDateOfBirth ()Lcom/stripe/android/model/DateOfBirth;
 	public final fun getFirstName ()Ljava/lang/String;
 	public final fun getIdNumber ()Ljava/lang/String;
+	public final fun getIdType ()Lcom/stripe/android/crypto/onramp/model/IdType;
 	public final fun getLastName ()Ljava/lang/String;
 	public final fun getNationalities ()Ljava/util/List;
 	public fun hashCode ()I

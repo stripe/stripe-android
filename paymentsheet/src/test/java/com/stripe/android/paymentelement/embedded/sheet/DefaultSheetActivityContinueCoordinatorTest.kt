@@ -107,11 +107,11 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         val customerStateHolder = FakeCustomerStateHolder()
         val stateHolder = FakeSheetActivityStateHolder()
         val taxRegionUpdater = SheetTaxRegionUpdater(
-            paymentMethodMetadata = paymentMethodMetadata,
             taxRegionUpdater = checkoutSessionTaxRegionUpdater(),
         )
         val continueCoordinator = DefaultSheetActivityContinueCoordinator(
             taxRegionUpdater = taxRegionUpdater,
+            paymentMethodMetadata = paymentMethodMetadata,
             stateHolder = stateHolder,
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,

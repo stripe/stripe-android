@@ -1,4 +1,4 @@
-@file:OptIn(CheckoutSessionPreview::class)
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.checkout
 
@@ -12,8 +12,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.checkoutControllerConfiguration
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -22,135 +24,183 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+@Suppress("TooManyFunctions")
 internal class CheckoutControllerExampleViewModel(
     private val repository: CheckoutControllerExampleBackendRepository,
     private val savedStateHandle: SavedStateHandle,
     application: Application,
 ) : ViewModel() {
-
-    private val selectedScenario = savedStateHandle.get<String>(SCENARIO_KEY)?.let(
-        CheckoutControllerExampleScenario::valueOf
-    )
-
-    private val _status = MutableStateFlow<Status>(
-        selectedScenario?.let(Status::Loading) ?: Status.ChooseScenario
-    )
-    val status: StateFlow<Status> = _status.asStateFlow()
-
-    private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
-
-    private val _confirmationResult = MutableStateFlow<ConfirmationResult?>(null)
-    val confirmationResult: StateFlow<ConfirmationResult?> = _confirmationResult.asStateFlow()
+    val settings = CheckoutPlaygroundSettings.create(application)
 
     val controller = CheckoutController.Builder(
         application = application,
         savedStateHandle = savedStateHandle,
     ).resultCallback(::onConfirmationResult).build()
 
+    private val _status = MutableStateFlow<Status>(
+        if (savedStateHandle.get<Boolean>(RUN_ACTIVE_KEY) == true && controller.session.value != null) {
+            Status.Configured
+        } else {
+            Status.Settings
+        }
+    )
+    val status: StateFlow<Status> = _status.asStateFlow()
+
+    private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
+
+    private val _confirmationMessage = MutableStateFlow<String?>(null)
+    val confirmationMessage: StateFlow<String?> = _confirmationMessage.asStateFlow()
+
+    private val _operationMessage = MutableStateFlow<String?>(null)
+    val operationMessage: StateFlow<String?> = _operationMessage.asStateFlow()
+
+    private var activeSnapshot = settings.snapshot()
+    private var configurationJob: Job? = null
+    private var configurationGeneration = 0L
+
+    val displayMandate: Boolean
+        get() = !activeSnapshot[CheckoutPlaygroundDefinitions.Controller.payment.embeddedMandate]
+
     init {
-        selectedScenario?.let(::fetchAndConfigure)
-        viewModelScope.launch {
-            controller.session.collect { session ->
-                updateConfiguredState { it.copy(session = session) }
-            }
-        }
+        savedStateHandle[RUN_ACTIVE_KEY] = _status.value is Status.Configured
     }
 
-    fun start(scenario: CheckoutControllerExampleScenario) {
-        if (savedStateHandle.get<String>(SCENARIO_KEY) != null) {
-            return
-        }
-
-        savedStateHandle[SCENARIO_KEY] = scenario.name
-        _status.value = Status.Loading(scenario)
-        fetchAndConfigure(scenario)
+    fun returnToSettings() {
+        configurationGeneration++
+        configurationJob?.cancel()
+        configurationJob = null
+        savedStateHandle[RUN_ACTIVE_KEY] = false
+        _status.value = Status.Settings
+        clearMessages()
     }
 
-    fun clearConfirmationResult() {
-        _confirmationResult.value = null
+    fun start() {
+        if (settings.validationErrors().isNotEmpty()) return
+        activeSnapshot = settings.snapshot()
+        savedStateHandle[RUN_ACTIVE_KEY] = false
+        clearMessages()
+        _status.value = Status.Loading
+        configure(activeSnapshot)
     }
 
-    private fun onConfirmationResult(result: CheckoutController.Result) {
-        Log.d(TAG, "Result: $result")
-        _confirmationResult.value = when (result) {
-            is CheckoutController.Result.Completed -> {
-                _sessionComplete.tryEmit(Unit)
-                null
-            }
-            is CheckoutController.Result.Canceled -> ConfirmationResult.Canceled
-            is CheckoutController.Result.Failed -> {
-                ConfirmationResult.Failed(result.error.message ?: "Confirmation failed")
-            }
-        }
+    fun retry() {
+        savedStateHandle[RUN_ACTIVE_KEY] = false
+        clearMessages()
+        _status.value = Status.Loading
+        configure(activeSnapshot)
     }
 
-    private fun updateConfiguredState(update: (Status.Configured) -> Status.Configured) {
-        val current = _status.value
-        if (current is Status.Configured) {
-            _status.value = update(current)
-        }
+    fun clearConfirmationMessage() {
+        _confirmationMessage.value = null
     }
 
-    private fun fetchAndConfigure(scenario: CheckoutControllerExampleScenario) {
-        viewModelScope.launch {
-            repository.fetchCheckoutSessionClientSecret(scenario).fold(
-                onSuccess = { clientSecret ->
-                    controller.configure(
-                        clientSecret = clientSecret,
-                    ).fold(
+    fun clearPaymentOption() {
+        runOperation("Payment option cleared") { controller.clearPaymentOption() }
+    }
+
+    fun applyPromotionCode(code: String) {
+        runOperation("Promotion code applied") { controller.applyPromotionCode(code) }
+    }
+
+    fun removePromotionCode() {
+        runOperation("Promotion code removed") { controller.removePromotionCode() }
+    }
+
+    fun updateEmail(email: String) {
+        runOperation("Email updated") { controller.updateEmail(email.trim().ifEmpty { null }) }
+    }
+
+    private fun configure(snapshot: CheckoutPlaygroundSettings.Snapshot) {
+        configurationJob?.cancel()
+        val generation = ++configurationGeneration
+        configurationJob = viewModelScope.launch {
+            val request = CheckoutControllerExampleRequestFactory.create(
+                settings = snapshot,
+                returningCustomerId = settings.returningCustomerId,
+            )
+            val fetchResult = repository.fetchCheckoutSession(
+                request = request,
+                backendUrl = snapshot[CheckoutPlaygroundDefinitions.session.backendUrl],
+            )
+            if (generation != configurationGeneration) return@launch
+
+            fetchResult.fold(
+                onSuccess = { response ->
+                    val configurationResult = controller.configure(
+                        clientSecret = response.clientSecret,
+                        configuration = snapshot.checkoutControllerConfiguration(),
+                    )
+                    if (generation != configurationGeneration) return@launch
+
+                    configurationResult.fold(
                         onSuccess = {
-                            _status.value = Status.Configured(
-                                scenario = scenario,
-                                session = controller.session.value,
-                            )
+                            if (snapshot[CheckoutPlaygroundDefinitions.session.customer] == NEW_CUSTOMER) {
+                                response.customerId?.let(settings::saveReturningCustomer)
+                            }
+                            savedStateHandle[RUN_ACTIVE_KEY] = true
+                            _status.value = Status.Configured
                         },
-                        onFailure = { error ->
-                            Log.e(TAG, "Failed to configure", error)
-                            _status.value = Status.Error(
-                                scenario = scenario,
-                                message = error.message ?: "Configure failed",
-                            )
-                        },
+                        onFailure = { error -> showError("Failed to configure", error) },
                     )
                 },
-                onFailure = { error ->
-                    Log.e(TAG, "Failed to fetch checkout session", error)
-                    _status.value = Status.Error(
-                        scenario = scenario,
-                        message = error.message ?: "Unknown error",
-                    )
-                },
+                onFailure = { error -> showError("Failed to fetch checkout session", error) },
             )
         }
     }
 
+    private fun runOperation(
+        successMessage: String,
+        operation: suspend () -> Result<Unit>,
+    ) {
+        viewModelScope.launch {
+            _operationMessage.value = operation().fold(
+                onSuccess = { successMessage },
+                onFailure = { it.message ?: "Operation failed" },
+            )
+        }
+    }
+
+    private fun onConfirmationResult(result: CheckoutController.Result) {
+        Log.d(TAG, "Result: $result")
+        _confirmationMessage.value = when (result) {
+            is CheckoutController.Result.Completed -> {
+                _sessionComplete.tryEmit(Unit)
+                null
+            }
+            is CheckoutController.Result.Canceled -> "Confirmation canceled"
+            is CheckoutController.Result.Failed -> {
+                result.error.message?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
+            }
+        }
+    }
+
+    private fun showError(prefix: String, error: Throwable) {
+        Log.e(TAG, prefix, error)
+        _status.value = Status.Error(error.message ?: prefix)
+    }
+
+    private fun clearMessages() {
+        _confirmationMessage.value = null
+        _operationMessage.value = null
+    }
+
     override fun onCleared() {
-        super.onCleared()
         controller.destroy()
+        super.onCleared()
     }
 
     sealed interface Status {
-        data object ChooseScenario : Status
-        data class Loading(val scenario: CheckoutControllerExampleScenario) : Status
-        data class Configured(
-            val scenario: CheckoutControllerExampleScenario,
-            val session: Session?,
-        ) : Status
-        data class Error(
-            val scenario: CheckoutControllerExampleScenario,
-            val message: String,
-        ) : Status
-    }
-
-    sealed interface ConfirmationResult {
-        data object Canceled : ConfirmationResult
-        data class Failed(val message: String) : ConfirmationResult
+        data object Settings : Status
+        data object Loading : Status
+        data object Configured : Status
+        data class Error(val message: String) : Status
     }
 
     companion object {
         private const val TAG = "CheckoutControllerExample"
-        private const val SCENARIO_KEY = "checkout_controller_example_scenario"
+        private const val RUN_ACTIVE_KEY = "checkout_controller_run_active"
+        private const val NEW_CUSTOMER = "new"
 
         val factory = viewModelFactory {
             initializer {
