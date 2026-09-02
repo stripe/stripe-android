@@ -107,6 +107,8 @@ internal class CheckoutStateLoader @Inject constructor(
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
+            // TODO-codex: set expressCheckoutElementPaymentMethodMetadata. For now it should also be set via
+            //  loaderState.paymentMethodMetadata. We'll set it to a different value later (in a different PR, dw about it)
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,

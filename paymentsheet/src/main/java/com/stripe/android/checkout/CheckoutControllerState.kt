@@ -19,7 +19,9 @@ internal data class CheckoutControllerState(
     val checkoutSessionResponse: CheckoutSessionResponse,
     val flagImages: Map<String, Bitmap>?,
     val collectedDetails: CheckoutCollectedDetails,
+    // TODO-codex rename to paymentElementPaymentMethodMetadata
     val paymentMethodMetadata: PaymentMethodMetadata,
+    // TODO-codex add a new expressCheckoutElementPaymentMethodMetadata
     val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
     val paymentSelection: PaymentSelection?,
     val temporarySelection: String?,

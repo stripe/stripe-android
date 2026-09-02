@@ -18,6 +18,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
+// TODO-codex: ensure this and its code always uses paymentElementPaymentMethodMetadata
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentElement @Inject internal constructor(
