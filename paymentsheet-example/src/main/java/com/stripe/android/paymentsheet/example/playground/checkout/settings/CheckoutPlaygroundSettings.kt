@@ -18,7 +18,7 @@ internal class CheckoutPlaygroundSettings private constructor(
     initialReturningCustomerId: String?,
     private val persist: (Map<String, String>) -> Unit,
     private val persistReturningCustomerId: (String?) -> Unit,
-) {
+) : CheckoutPlaygroundSettingValues {
     private val definitionsByKey = root.values().associateBy { it.key }
     private val defaults = definitionsByKey.values.associateWith { it.defaultSerializedValue } +
         defaultValues.sanitized()
@@ -28,7 +28,7 @@ internal class CheckoutPlaygroundSettings private constructor(
     var returningCustomerId: String? = initialReturningCustomerId
         private set
 
-    fun <T> value(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T {
+    override operator fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T {
         return definition.deserialize(serializedValue(definition)).getOrThrow()
     }
 
@@ -93,8 +93,8 @@ internal class CheckoutPlaygroundSettings private constructor(
     @JvmInline
     value class Snapshot internal constructor(
         private val values: Map<CheckoutPlaygroundSettingDefinition.Value<*>, String>,
-    ) {
-        operator fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T {
+    ) : CheckoutPlaygroundSettingValues {
+        override operator fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T {
             return definition.deserialize(requireNotNull(values[definition])).getOrThrow()
         }
     }

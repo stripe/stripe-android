@@ -14,12 +14,14 @@ internal fun boolean(
     key: String,
     displayName: String,
     defaultValue: Boolean,
+    isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
 ) = choice(
     key = key,
     displayName = displayName,
     defaultValue = defaultValue,
     options = listOf("On" to true, "Off" to false),
     serialize = Boolean::toString,
+    isApplicable = isApplicable,
 )
 
 internal inline fun <reified T : Enum<T>> enumChoice(
@@ -40,12 +42,14 @@ internal fun <T> choice(
     defaultValue: T,
     options: List<Pair<String, T>>,
     serialize: (T) -> String,
+    isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
 ): CheckoutPlaygroundSettingDefinition.Value<T> {
     return value(
         key = key,
         displayName = displayName,
         defaultValue = defaultValue,
         options = options,
+        isApplicable = isApplicable,
         encode = serialize,
         decode = { serialized ->
             options.firstOrNull { (_, option) -> serialize(option) == serialized }
@@ -60,7 +64,7 @@ internal fun <T> value(
     key: String,
     displayName: String,
     defaultValue: T,
-    isVisible: (CheckoutPlaygroundSettings) -> Boolean = { true },
+    isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
     options: List<Pair<String, T>> = emptyList(),
     input: CheckoutPlaygroundSettingDefinition.Value.Input = CheckoutPlaygroundSettingDefinition.Value.Input.Text,
     encode: (T) -> String,
@@ -76,7 +80,7 @@ internal fun <T> value(
         )
     },
     input = input,
-    isVisible = isVisible,
+    isApplicable = isApplicable,
     encode = encode,
     decode = decode,
 )

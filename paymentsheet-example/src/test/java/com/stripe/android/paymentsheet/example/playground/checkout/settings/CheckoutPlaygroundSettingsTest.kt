@@ -12,7 +12,7 @@ class CheckoutPlaygroundSettingsTest {
             defaultBackendUrl = "https://default.example/",
         )
 
-        assertThat(settings.value(CheckoutPlaygroundDefinitions.session.backendUrl))
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.backendUrl])
             .isEqualTo("https://default.example/")
     }
 
@@ -27,7 +27,7 @@ class CheckoutPlaygroundSettingsTest {
 
         settings.reset()
 
-        assertThat(settings.value(definition)).isEqualTo("https://default.example/")
+        assertThat(settings[definition]).isEqualTo("https://default.example/")
     }
 
     @Test
@@ -36,15 +36,25 @@ class CheckoutPlaygroundSettingsTest {
 
         val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
 
-        assertThat(restored.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale))
+        assertThat(restored[CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale])
             .isEqualTo(1.25f)
+    }
+
+    @Test
+    fun `payment method saving survives JSON round trip`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.paymentMethodSave
+        settings.update(definition, false)
+
+        val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
+
+        assertThat(restored[definition]).isFalse()
     }
 
     @Test
     fun `unknown and invalid persisted values fall back to defaults`() = runScenario(
         json = """{"unknown":"value","currency.appearance.scale":"not-a-number"}"""
     ) {
-        assertThat(settings.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale))
+        assertThat(settings[CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale])
             .isEqualTo(1f)
     }
 
@@ -55,14 +65,14 @@ class CheckoutPlaygroundSettingsTest {
 
         settings.reset()
 
-        assertThat(settings.value(definition)).isTrue()
+        assertThat(settings[definition]).isTrue()
     }
 
     @Test
     fun `terms display defaults to automatic`() = runScenario {
         val definitions = CheckoutPlaygroundDefinitions.Controller.payment.terms.values.values
 
-        assertThat(definitions.map(settings::value).distinct())
+        assertThat(definitions.map { settings[it] }.distinct())
             .containsExactly(CheckoutTermsDisplay.Automatic)
     }
 
@@ -93,7 +103,7 @@ class CheckoutPlaygroundSettingsTest {
 
         val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
 
-        assertThat(restored.value(definition)).isEqualTo(Color(0xFF112233))
+        assertThat(restored[definition]).isEqualTo(Color(0xFF112233))
     }
 
     @Test
@@ -103,7 +113,7 @@ class CheckoutPlaygroundSettingsTest {
         settings.saveReturningCustomer("cus_123")
 
         assertThat(settings.returningCustomerId).isEqualTo("cus_123")
-        assertThat(settings.value(CheckoutPlaygroundDefinitions.session.customer)).isEqualTo("returning")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo("returning")
     }
 
     @Test
@@ -114,7 +124,7 @@ class CheckoutPlaygroundSettingsTest {
         settings.reset()
 
         assertThat(settings.returningCustomerId).isNull()
-        assertThat(settings.value(CheckoutPlaygroundDefinitions.session.customer)).isEqualTo("guest")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo("guest")
     }
 
     private fun runScenario(

@@ -26,17 +26,23 @@ internal object CheckoutControllerExampleRequestFactory {
                     "customer",
                     if (customer == RETURNING_CUSTOMER) returningCustomerId ?: customer else customer,
                 )
+                if (session.paymentMethodSave.isApplicable(settings)) {
+                    put(
+                        "checkout_session_payment_method_save",
+                        if (settings[session.paymentMethodSave]) "enabled" else "disabled",
+                    )
+                }
                 put("customer_email", settings[session.customerEmail])
                 put("currency", settings[session.currency].value)
-                if (settings[session.automaticPaymentMethods]) {
-                    put("automatic_payment_methods", true)
-                } else {
+                if (session.paymentMethodTypes.isApplicable(settings)) {
                     put(
                         "payment_method_types",
                         JsonArray(
                             settings[session.paymentMethodTypes].map(::JsonPrimitive)
                         )
                     )
+                } else {
+                    put("automatic_payment_methods", true)
                 }
                 put("automatic_tax", settings[session.automaticTax])
                 put("shipping_address_collection", settings[session.shippingAddressCollection])
