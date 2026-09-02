@@ -20,6 +20,7 @@ import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACT
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -36,14 +37,14 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
     @IntentAuthenticatorMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
     @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
-    apiConfigurationProvider: () -> ApiConfiguration.State,
+    apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : PaymentNextActionHandlerRegistry {
 
     private val paymentSheetNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler> by lazy {
         paymentSheetNextActionHandlers(
             includePaymentSheetNextActionHandlers,
             applicationContext,
-            apiConfigurationProvider().publishableKey,
+            apiConfigurationProvider.get().publishableKey,
         )
     }
 
@@ -136,7 +137,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
                     enableLogging = enableLogging,
                     workContext = workContext,
                     uiContext = uiContext,
-                    apiConfigurationProvider = { apiConfigurationState },
+                    apiConfiguration = apiConfigurationState,
                     productUsage = productUsage,
                     isInstantApp = isInstantApp,
                     includePaymentSheetNextActionHandlers = includePaymentSheetNextActionHandlers,

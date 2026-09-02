@@ -35,7 +35,7 @@ internal interface PassiveChallengeWarmerActivityComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
-            apiConfigurationProvider: () -> ApiConfiguration.State,
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
