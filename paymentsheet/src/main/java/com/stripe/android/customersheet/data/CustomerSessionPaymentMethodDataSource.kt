@@ -65,6 +65,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
+                val apiConfiguration = apiConfigProvider.get()
                 customerRepository.detachPaymentMethodAndDuplicates(
                     customerId = ephemeralKey.customerId,
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,

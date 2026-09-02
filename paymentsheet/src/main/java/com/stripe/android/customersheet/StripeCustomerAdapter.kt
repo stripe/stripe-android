@@ -68,6 +68,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             paymentMethodTypes.mapNotNull { PaymentMethod.Type.fromCode(it) }
         }
 
+        val apiConfiguration = apiConfigurationProvider.get()
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.getPaymentMethods(
                 customerId = customerEphemeralKey.customerId,

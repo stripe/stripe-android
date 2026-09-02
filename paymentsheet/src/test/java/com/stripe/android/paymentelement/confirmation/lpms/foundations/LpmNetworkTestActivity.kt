@@ -35,6 +35,7 @@ import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.S
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.payments.core.injection.ApiConfigurationToNamedModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
@@ -51,6 +52,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -89,8 +91,10 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
                 val component = DaggerLpmNetworkTestViewModelComponent.factory()
                     .create(
                         application = extras.requireApplication(),
-                        publishableKeyProvider = { args.publishableKey },
-                        stripeAccountIdProvider = { null },
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = null,
+                        ),
                         allowsManualConfirmation = args.allowsManualConfirmation,
                         paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                         savedStateHandle = extras.createSavedStateHandle(),
@@ -138,6 +142,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LpmNetworkTestModule::class,
+        ApiConfigurationToNamedModule::class,
     ]
 )
 @Singleton
@@ -150,11 +155,7 @@ internal interface LpmNetworkTestViewModelComponent {
             @BindsInstance
             application: Application,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
-            @BindsInstance
-            @Named(STRIPE_ACCOUNT_ID)
-            stripeAccountIdProvider: () -> String?,
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(ALLOWS_MANUAL_CONFIRMATION)
             allowsManualConfirmation: Boolean,
@@ -193,22 +194,12 @@ internal interface LpmNetworkTestModule {
 
         @Provides
         fun providesPaymentConfiguration(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
         ): PaymentConfiguration {
+            val apiConfigurationState = apiConfigurationProvider.get()
             return PaymentConfiguration(
-                publishableKey = publishableKeyProvider(),
-                stripeAccountId = stripeAccountIdProvider(),
-            )
-        }
-
-        @Provides
-        fun providesApiConfigurationProvider(
-            paymentConfiguration: PaymentConfiguration,
-        ): () -> ApiConfiguration.State = {
-            ApiConfiguration.State(
-                publishableKey = paymentConfiguration.publishableKey,
-                stripeAccountId = paymentConfiguration.stripeAccountId,
+                publishableKey = apiConfigurationState.publishableKey,
+                stripeAccountId = apiConfigurationState.stripeAccountId,
             )
         }
 

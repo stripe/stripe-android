@@ -55,6 +55,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             }
         }
         is CustomerMetadata.CustomerSession -> {
+            val apiConfiguration = apiConfigProvider.get()
             customerRepository.detachPaymentMethodAndDuplicates(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
@@ -104,7 +105,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 paymentMethodId = paymentMethodId,
                 stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
                 params = params,
-                stripeAccountId = apiConfigProvider().stripeAccountId,
+                stripeAccountId = apiConfigProvider.get().stripeAccountId,
             )
         }
     }
