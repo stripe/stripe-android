@@ -5,9 +5,6 @@ import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
-import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.elements.PaymentElement.Configuration.TermsDisplay
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -102,20 +99,9 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `maps billingDetailsCollectionConfiguration address`() {
+    fun `collects full address when the session requires a billing address`() {
         val result = factory().create(
-            configuration = controllerConfiguration(billingDetailsAddress = Full),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = false),
-            collectedDetails = collectedDetails(),
-        )
-
-        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSFull)
-    }
-
-    @Test
-    fun `upgrades Automatic to Full when the session requires a billing address`() {
-        val result = factory().create(
-            configuration = controllerConfiguration(billingDetailsAddress = Automatic),
+            configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = true),
             collectedDetails = collectedDetails(),
         )
@@ -124,9 +110,9 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `leaves Automatic unchanged when the session does not require a billing address`() {
+    fun `uses Automatic when the session does not require a billing address`() {
         val result = factory().create(
-            configuration = controllerConfiguration(billingDetailsAddress = Automatic),
+            configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = false),
             collectedDetails = collectedDetails(),
         )
@@ -351,7 +337,6 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,
         appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),
-        billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
         googlePayConfiguration: GooglePayConfiguration? = null,
     ): CheckoutController.Configuration.State {
         val builder = CheckoutController.Configuration()
@@ -359,9 +344,6 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
                 PaymentElement.Configuration()
                     .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
                     .appearance(appearance)
-                    .billingDetailsCollectionConfiguration(
-                        BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
-                    )
             )
         if (googlePayConfiguration != null) {
             builder.expressCheckoutElement(
