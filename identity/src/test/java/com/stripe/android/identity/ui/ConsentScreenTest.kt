@@ -2,6 +2,7 @@ package com.stripe.android.identity.ui
 
 import android.os.Build
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -140,6 +141,28 @@ class ConsentScreenTest {
 
         setComposeTestRuleWith(Resource.success(verificationPage)) {
             onNodeWithTag(CONSENT_HEADER_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `when hideBrandingHeader is false consent header is shown`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(
+            IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
+                hideBrandingHeader = false
+            )
+        )
+
+        setComposeTestRuleWith(Resource.success(verificationPage)) {
+            onNodeWithTag(CONSENT_HEADER_TAG).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `when biometric consent configuration is null consent header is shown`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(null)
+
+        setComposeTestRuleWith(Resource.success(verificationPage)) {
+            onNodeWithTag(CONSENT_HEADER_TAG).assertIsDisplayed()
         }
     }
 
