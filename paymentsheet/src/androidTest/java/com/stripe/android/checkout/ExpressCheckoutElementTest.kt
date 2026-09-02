@@ -3,8 +3,9 @@ package com.stripe.android.checkout
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
@@ -68,8 +69,12 @@ internal class ExpressCheckoutElementTest {
                 )
             },
         ) {
-            testRules.compose.waitUntil(timeoutMillis = 5_000) {
-                testRules.compose.onAllNodes(hasTestTag(GOOGLE_PAY_BUTTON_TEST_TAG))
+            val googlePayButton = hasTestTag(GOOGLE_PAY_BUTTON_TEST_TAG) and isEnabled() and hasClickAction()
+            testRules.compose.waitUntil(
+                conditionDescription = "Google Pay button is enabled and clickable",
+                timeoutMillis = 5_000,
+            ) {
+                testRules.compose.onAllNodes(googlePayButton)
                     .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isNotEmpty()
             }
@@ -93,7 +98,7 @@ internal class ExpressCheckoutElementTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
-            testRules.compose.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).performClick()
+            testRules.compose.onNode(googlePayButton).performClick()
         }
 
         intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
@@ -121,8 +126,12 @@ internal class ExpressCheckoutElementTest {
                 )
             },
         ) {
-            testRules.compose.waitUntil(timeoutMillis = 5_000) {
-                testRules.compose.onAllNodes(hasTestTag(LinkButtonTestTag))
+            val linkButton = hasTestTag(LinkButtonTestTag) and isEnabled() and hasClickAction()
+            testRules.compose.waitUntil(
+                conditionDescription = "Link button is enabled and clickable",
+                timeoutMillis = 5_000,
+            ) {
+                testRules.compose.onAllNodes(linkButton)
                     .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isNotEmpty()
             }
@@ -145,7 +154,7 @@ internal class ExpressCheckoutElementTest {
             }
             networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
-            testRules.compose.onNodeWithTag(LinkButtonTestTag).performClick()
+            testRules.compose.onNode(linkButton).performClick()
         }
 
         intended(hasComponent(LinkActivity::class.java.name))
