@@ -9,19 +9,21 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
-import dagger.Lazy
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Provider
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ShippingAddressElement @Inject internal constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
-    private val paymentConfiguration: Lazy<PaymentConfiguration>,
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val errorReporter: ErrorReporter,
 ) {
     private var isPresenting = false
 
@@ -42,7 +44,14 @@ class ShippingAddressElement @Inject internal constructor(
     }
 
     fun present() {
-        if (stateHolder.state == null || isPresenting) {
+        if (stateHolder.state == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
+            )
+            return
+        }
+
+        if (isPresenting) {
             return
         }
 

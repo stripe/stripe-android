@@ -17,6 +17,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -24,19 +25,29 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementActivityCont
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.testing.CoroutineTestRule
-import dagger.Lazy
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import javax.inject.Provider
 
 internal class ShippingAddressElementTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `present before checkout configuration does not launch`() = runScenario(configured = false) {
+    fun `present before checkout configuration reports and does not launch`() = runScenario(configured = false) {
         shippingAddressElement.present()
 
+        val call = errorReporter.awaitCall()
+        assertThat(call.errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
+        )
+        assertThat(call.errorEvent.eventName).isEqualTo(
+            "unexpected_error.checkout.shipping_address_element.present.not_configured"
+        )
+        assertThat(call.stripeException).isNull()
+        assertThat(call.additionalNonPiiParams).isEmpty()
         activityLauncher.launchCalls.expectNoEvents()
         paymentConfiguration.getCalls.expectNoEvents()
     }
@@ -71,6 +82,24 @@ internal class ShippingAddressElementTest {
 
         activityLauncher.launchCalls.awaitItem()
         activityLauncher.launchCalls.expectNoEvents()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `present resolves the latest payment configuration`() = runScenario {
+        shippingAddressElement.present()
+
+        val firstLaunch = activityLauncher.launchCalls.awaitItem()
+        assertThat(firstLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+
+        registration.dispatch(AddressLauncherResult.Canceled())
+        paymentConfiguration.value = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+        shippingAddressElement.present()
+
+        val secondLaunch = activityLauncher.launchCalls.awaitItem()
+        assertThat(secondLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -113,14 +142,16 @@ internal class ShippingAddressElementTest {
         if (configured) {
             stateHolder.state = CheckoutControllerStateFactory.create()
         }
-        val paymentConfiguration = RecordingLazy(
+        val paymentConfiguration = RecordingProvider(
             PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         )
+        val errorReporter = FakeErrorReporter()
         val shippingAddressElement = ShippingAddressElement(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
             paymentConfiguration = paymentConfiguration,
             stateHolder = stateHolder,
+            errorReporter = errorReporter,
         )
         val registration = activityResultCaller.registerCalls.awaitItem()
         assertThat(registration.contract).isSameInstanceAs(AddressElementActivityContract)
@@ -131,6 +162,7 @@ internal class ShippingAddressElementTest {
             lifecycleOwner = lifecycleOwner,
             stateHolder = stateHolder,
             paymentConfiguration = paymentConfiguration,
+            errorReporter = errorReporter,
             registration = registration,
         ).block()
 
@@ -138,6 +170,7 @@ internal class ShippingAddressElementTest {
         activityLauncher.launchCalls.ensureAllEventsConsumed()
         activityLauncher.unregisterCalls.ensureAllEventsConsumed()
         paymentConfiguration.getCalls.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private class RecordingActivityResultCaller : ActivityResultCaller {
@@ -180,9 +213,9 @@ internal class ShippingAddressElementTest {
             get() = AddressElementActivityContract
     }
 
-    private class RecordingLazy<T>(
-        private val value: T,
-    ) : Lazy<T> {
+    private class RecordingProvider<T>(
+        var value: T,
+    ) : Provider<T> {
         val getCalls = Turbine<Unit>()
 
         override fun get(): T {
@@ -210,7 +243,8 @@ internal class ShippingAddressElementTest {
         val activityLauncher: RecordingActivityResultLauncher,
         val lifecycleOwner: TestLifecycleOwner,
         val stateHolder: CheckoutControllerStateHolder,
-        val paymentConfiguration: RecordingLazy<PaymentConfiguration>,
+        val paymentConfiguration: RecordingProvider<PaymentConfiguration>,
+        val errorReporter: FakeErrorReporter,
         val registration: Registration,
     )
 }
