@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -35,7 +36,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val customerSessionProvider: CustomerSheet.CustomerSessionProvider,
     private val errorReporter: ErrorReporter,
-    private val apiConfigurationProvider: () -> ApiConfiguration.State,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     private val timeProvider: () -> Long,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSessionElementsSessionManager {
@@ -92,7 +93,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     customPaymentMethods = listOf(),
                     externalPaymentMethods = listOf(),
                     countryOverride = null,
-                    apiConfiguration = apiConfigurationProvider(),
+                    apiConfiguration = apiConfigurationProvider.get(),
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()
                 }.onFailure {

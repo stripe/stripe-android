@@ -4,6 +4,7 @@ import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.polling.IntentStatusPoller
 import dagger.BindsInstance
@@ -18,7 +19,8 @@ import javax.inject.Singleton
         PollingViewModelModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
-        CoreCommonModule::class
+        CoreCommonModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
     ]
 )
 internal interface PollingComponent {
