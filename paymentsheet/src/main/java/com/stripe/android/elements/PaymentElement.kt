@@ -22,17 +22,20 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentElement @Inject internal constructor(
     private val contentHelper: EmbeddedContentHelper,
+    private val horizontalContentHelper: PaymentElementHorizontalContentHelper,
 ) {
 
     /**
      * A composable function that displays payment methods inline.
      *
-     * It can present a sheet to collect more details or display saved payment methods.
+     * It displays the full payment method form for horizontal layouts without saved payment methods.
+     * Otherwise, it can present a sheet to collect more details or display saved payment methods.
      */
     @Composable
     fun Content() {
+        val horizontalContent by horizontalContentHelper.content.collectAsState()
         val embeddedContent by contentHelper.embeddedContent.collectAsState()
-        embeddedContent?.Content()
+        horizontalContent?.Content() ?: embeddedContent?.Content()
     }
 
     /**
@@ -126,9 +129,7 @@ class PaymentElement @Inject internal constructor(
         }
 
         /**
-         * The layout of payment methods in the sheet. Defaults to [PaymentMethodLayout.Automatic].
-         *
-         * Note: Only used if you call [present].
+         * The layout of payment methods in [Content] and the sheet. Defaults to [PaymentMethodLayout.Automatic].
          *
          * @see [PaymentMethodLayout] for the list of available layouts.
          */
