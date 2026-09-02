@@ -68,7 +68,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
