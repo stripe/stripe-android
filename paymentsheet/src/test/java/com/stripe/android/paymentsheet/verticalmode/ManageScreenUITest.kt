@@ -48,6 +48,9 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         )
     ) {
         assertThat(
@@ -76,6 +79,9 @@ class ManageScreenUITest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -94,6 +100,9 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         )
     ) {
         assertThat(
@@ -127,6 +136,9 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -147,6 +159,9 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -164,6 +179,9 @@ class ManageScreenUITest {
             isEditing = true,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         )
     ) {
         assertThat(
@@ -189,6 +207,9 @@ class ManageScreenUITest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -212,6 +233,9 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             ),
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -234,6 +258,9 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -251,6 +278,9 @@ class ManageScreenUITest {
             isEditing = true,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         ),
     ) {
         getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()
@@ -268,6 +298,7 @@ class ManageScreenUITest {
             linkBrand = LinkBrand.Link,
             isProcessing = true,
             pendingPaymentMethodId = displayableSavedPaymentMethods[1].paymentMethod.id,
+            error = null,
         )
     ) {
         displayableSavedPaymentMethods.forEach {

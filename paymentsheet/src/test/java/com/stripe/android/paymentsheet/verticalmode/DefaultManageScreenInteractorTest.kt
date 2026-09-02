@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -412,6 +413,9 @@ class DefaultManageScreenInteractorTest {
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,
             linkAccount = linkAccount,
+            processing = stateFlowOf(false),
+            pendingPaymentMethodId = stateFlowOf(null),
+            error = stateFlowOf(null),
             navigateBackAfterSelection = navigateBackAfterSelection,
             dispatcher = dispatcher
         )

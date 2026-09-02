@@ -817,6 +817,7 @@ internal class DefaultSheetActivityStateHolderTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = false,
+                    pendingPaymentMethodId = null,
                 )
             ),
             onContinueClick = {},
@@ -834,6 +835,7 @@ internal class DefaultSheetActivityStateHolderTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = false,
+                    pendingPaymentMethodId = null,
                 )
             ),
             onContinueClick = {},
