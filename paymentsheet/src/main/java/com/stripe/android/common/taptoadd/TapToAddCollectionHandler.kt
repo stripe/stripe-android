@@ -26,6 +26,7 @@ import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
+import javax.inject.Provider
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 
@@ -59,7 +60,7 @@ internal interface TapToAddCollectionHandler {
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             stripeRepository: StripeRepository,
-            apiConfigurationProvider: () -> ApiConfiguration.State,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
             userFacingLogger: UserFacingLogger,

@@ -12,13 +12,14 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     private val elementsSessionManager: CustomerSessionElementsSessionManager,
     private val customerRepository: CustomerRepository,
     private val prefsRepositoryFactory: PrefsRepository.Factory,
-    private val apiConfigProvider: () -> ApiConfiguration.State,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetSavedSelectionDataSource {
     override suspend fun retrieveSavedSelection(
@@ -103,7 +104,7 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
             customerId = ephemeralKey.customerId,
             ephemeralKeySecret = ephemeralKey.ephemeralKey,
             paymentMethodId = paymentMethodId,
-            stripeAccountId = apiConfigProvider().stripeAccountId,
+            stripeAccountId = apiConfigProvider.get().stripeAccountId,
         ).getOrThrow()
     }
 
