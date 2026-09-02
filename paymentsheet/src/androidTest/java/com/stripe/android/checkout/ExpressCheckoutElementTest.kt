@@ -63,11 +63,9 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                        ?.filterIsInstance<ExpressCheckoutElement.PaymentMethod.GooglePay>()
-                ).hasSize(1)
-            },
-            afterCompletionAssertions = {
-                intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
+                ).contains(
+                    ExpressCheckoutElement.PaymentMethod.GooglePay()
+                )
             },
         ) {
             testRules.compose.waitUntil(timeoutMillis = 5_000) {
@@ -97,6 +95,8 @@ internal class ExpressCheckoutElementTest {
 
             testRules.compose.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).performClick()
         }
+
+        intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
     }
 
     @Test
@@ -116,11 +116,9 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                        ?.filterIsInstance<ExpressCheckoutElement.PaymentMethod.Link>()
-                ).hasSize(1)
-            },
-            afterCompletionAssertions = {
-                intended(hasComponent(LinkActivity::class.java.name))
+                ).contains(
+                    ExpressCheckoutElement.PaymentMethod.Link()
+                )
             },
         ) {
             testRules.compose.waitUntil(timeoutMillis = 5_000) {
@@ -149,6 +147,8 @@ internal class ExpressCheckoutElementTest {
 
             testRules.compose.onNodeWithTag(LinkButtonTestTag).performClick()
         }
+
+        intended(hasComponent(LinkActivity::class.java.name))
     }
 
     private companion object {

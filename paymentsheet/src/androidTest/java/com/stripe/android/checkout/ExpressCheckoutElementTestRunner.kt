@@ -25,7 +25,6 @@ internal fun runExpressCheckoutElementTest(
     },
     successTimeoutSeconds: Long = 5L,
     assertions: (CheckoutController) -> Unit,
-    afterCompletionAssertions: () -> Unit,
     block: () -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -67,7 +66,6 @@ internal fun runExpressCheckoutElementTest(
 
             val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
             assertThat(didCompleteSuccessfully).isTrue()
-            afterCompletionAssertions()
             networkRule.validate()
         } finally {
             scenario.onActivity {
