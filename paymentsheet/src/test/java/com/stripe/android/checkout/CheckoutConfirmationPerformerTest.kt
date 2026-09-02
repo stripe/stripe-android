@@ -101,7 +101,7 @@ internal class CheckoutConfirmationPerformerTest {
     private fun linkState(): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
-            paymentElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
                     configuration = LinkTestUtils.createLinkConfiguration(),
                     loginState = LinkState.LoginState.NeedsVerification,

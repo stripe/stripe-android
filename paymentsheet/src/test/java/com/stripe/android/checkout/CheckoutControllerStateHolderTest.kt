@@ -75,7 +75,7 @@ internal class CheckoutControllerStateHolderTest {
             },
         ) {
             stateHolder.state = committedState(
-                paymentElementPaymentMethodMetadata = paymentElementMetadata,
+                paymentMethodMetadata = paymentElementMetadata,
                 expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementMetadata,
             )
 
@@ -197,14 +197,14 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
-        paymentElementPaymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),
-        paymentMethodMetadata = paymentElementPaymentMethodMetadata,
+        paymentMethodMetadata = paymentMethodMetadata,
         expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
