@@ -234,5 +234,12 @@ internal class DefaultEmbeddedContentHelperTest {
             val selection: PaymentSelection?,
             val configuration: EmbeddedPaymentElement.Configuration?,
         )
+
+        override fun launchLoading(
+            paymentMethodMetadata: PaymentMethodMetadata,
+            customerState: CustomerState?,
+            selection: PaymentSelection?,
+            configuration: EmbeddedPaymentElement.Configuration?,
+        ) = error("Not expected.")
     }
 }

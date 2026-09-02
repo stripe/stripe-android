@@ -603,6 +603,28 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
+    fun `launchLoading launches activity with Loading mode`() = testScenario {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+        val configuration = EmbeddedConfigurationFactory.create()
+
+        sheetLauncher.launchLoading(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerState = customerState,
+            selection = PaymentSelection.GooglePay,
+            configuration = configuration,
+        )
+
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(launchCall.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
+        assertThat(launchCall.customerState).isEqualTo(customerState)
+        assertThat(launchCall.selection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(launchCall.configuration).isEqualTo(configuration)
+        assertThat(launchCall.launchMode).isEqualTo(EmbeddedLaunchMode.Loading)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
     fun `launchPaymentOptions logs error and returns if confirmation state is null`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 

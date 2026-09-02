@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -22,10 +23,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -47,13 +51,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class EmbeddedSheetActivity : AppCompatActivity() {
-    private val args: EmbeddedActivityArgs? by lazy {
-        EmbeddedActivityArgs.fromIntent(intent)
-    }
+    private var args: EmbeddedActivityArgs? = null
+    private var isReadyInitialized = false
 
     private val viewModel: EmbeddedSheetViewModel by viewModels {
         EmbeddedSheetViewModel.Factory {
-            requireNotNull(args)
+            requireNotNull(args).also {
+                require(it.launchMode !is EmbeddedLaunchMode.Loading)
+            }
         }
     }
 
@@ -78,19 +83,63 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val activityArgs = args ?: run {
+        val activityArgs = EmbeddedActivityArgs.fromIntent(intent) ?: run {
             finish()
             return
         }
+        args = activityArgs
 
         renderEdgeToEdge()
-        viewModel.component.inject(this)
 
+        onBackPressedDispatcher.addCallback {
+            if (!isReadyInitialized) {
+                dismissAndFinish()
+            } else if (!embeddedNavigator.screen.value.isPerformingNetworkOperation().value) {
+                embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
+            }
+        }
+
+        if (activityArgs.launchMode is EmbeddedLaunchMode.Loading) {
+            showLoading(activityArgs)
+        } else {
+            initializeReady(activityArgs)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleNewIntent(intent)
+    }
+
+    internal fun handleNewIntent(intent: Intent) {
+        if (
+            isFinishing ||
+            isReadyInitialized ||
+            args?.launchMode !is EmbeddedLaunchMode.Loading
+        ) {
+            return
+        }
+
+        val readyArgs = EmbeddedActivityArgs.fromIntent(intent) ?: return
+        if (readyArgs.launchMode !is EmbeddedLaunchMode.PaymentOptions) return
+
+        setIntent(intent)
+        args = readyArgs
+        initializeReady(readyArgs)
+    }
+
+    private fun initializeReady(activityArgs: EmbeddedActivityArgs) {
+        if (isReadyInitialized || isFinishing) return
+        isReadyInitialized = true
+
+        viewModel.component.inject(this)
         sheetActivityRegistrar.registerAndBootstrap(
-            activityResultCaller = this,
+            activityResultCaller = PaymentElementActivityResultCaller(
+                key = "EmbeddedSheetActivity_${activityArgs.paymentElementCallbackIdentifier}",
+                registryOwner = this,
+            ),
             lifecycleOwner = this,
         )
-
         lifecycleScope.launch {
             sheetActivityStateHolder.result.collect {
                 setActivityResult(it)
@@ -98,16 +147,27 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             }
         }
 
-        onBackPressedDispatcher.addCallback {
-            if (!embeddedNavigator.screen.value.isPerformingNetworkOperation().value) {
-                embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
-            }
-        }
-
         setContent {
             PaymentElementTheme(appearance = activityArgs.configuration.appearance) {
                 EventReporterProvider(eventReporter) {
                     SheetContent()
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    private fun showLoading(activityArgs: EmbeddedActivityArgs) {
+        setContent {
+            PaymentElementTheme(appearance = activityArgs.configuration.appearance) {
+                val bottomSheetState = rememberStripeBottomSheetState()
+                ElementsBottomSheetLayout(
+                    state = bottomSheetState,
+                    onDismissed = ::dismissAndFinish,
+                ) {
+                    BottomSheetLoadingIndicator(
+                        modifier = Modifier.testTag(EMBEDDED_SHEET_LOADING_TEST_TAG)
+                    )
                 }
             }
         }
@@ -133,6 +193,9 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                     embeddedNavigator.result.collect { result ->
                         hasResult = true
                         when (args?.launchMode) {
+                            is EmbeddedLaunchMode.Loading -> {
+                                error("Loading does not initialize the embedded sheet component.")
+                            }
                             is EmbeddedLaunchMode.Form -> dismissAndFinish()
                             is EmbeddedLaunchMode.PaymentOptions -> {
                                 setCancelledPaymentOptionsResult()
@@ -166,6 +229,14 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
 
     private fun dismissAndFinish() {
         when (val launchMode = args?.launchMode) {
+            is EmbeddedLaunchMode.Loading -> {
+                setActivityResult(
+                    EmbeddedActivityResult.Cancelled(
+                        customerState = null,
+                        launchMode = launchMode,
+                    )
+                )
+            }
             is EmbeddedLaunchMode.Form -> {
                 setActivityResult(
                     EmbeddedActivityResult.Cancelled(
@@ -264,3 +335,5 @@ internal fun EmbeddedSheetScreenContent(
         scrollState = scrollState,
     )
 }
+
+internal const val EMBEDDED_SHEET_LOADING_TEST_TAG = "embedded_sheet_loading"

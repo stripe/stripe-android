@@ -16,6 +16,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
@@ -28,6 +29,9 @@ import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -42,6 +46,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private val errorReporter: ErrorReporter,
     private val sessionRefresher: CheckoutSessionRefresher,
     private val operationCoordinator: CheckoutOperationCoordinator,
+    private val embeddedContentState: StateFlow<EmbeddedContentHelperStateHolder.State?>,
     private val logger: Logger,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
@@ -50,10 +55,13 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
 ) : EmbeddedSheetLauncher {
 
+    private var pendingReadyLaunch: Job? = null
+
     init {
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
+                    pendingReadyLaunch?.cancel()
                     activityLauncher.unregister()
                     super.onDestroy(owner)
                 }
@@ -63,6 +71,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
+            pendingReadyLaunch?.cancel()
+            pendingReadyLaunch = null
             sheetStateHolder.sheetIsOpen = false
             when (result.launchMode) {
                 is EmbeddedLaunchMode.Form -> {
@@ -71,6 +81,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
                 is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
+                is EmbeddedLaunchMode.Loading -> Unit
             }
         }
 
@@ -226,7 +237,91 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        val args = EmbeddedActivityArgs(
+        if (operationCoordinator.isUpdating.value) {
+            launchPaymentOptionsActivity(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = configuration,
+                selection = selection,
+                customerState = customerState,
+                launchMode = EmbeddedLaunchMode.Loading,
+            )
+            pendingReadyLaunch = coroutineScope.launch {
+                operationCoordinator.isUpdating.first { isUpdating -> !isUpdating }
+                if (!sheetStateHolder.sheetIsOpen) return@launch
+
+                val currentState = requireNotNull(embeddedContentState.value)
+                activityLauncher.launch(
+                    createPaymentOptionsArgs(
+                        paymentMethodMetadata = currentState.paymentMethodMetadata,
+                        configuration = currentState.configuration,
+                        selection = selectionHolder.selection.value,
+                        customerState = customerStateHolder.customer.value,
+                        launchMode = EmbeddedLaunchMode.PaymentOptions,
+                    )
+                )
+            }
+        } else {
+            activityLauncher.launch(
+                createPaymentOptionsArgs(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    configuration = configuration,
+                    selection = selection,
+                    customerState = customerState,
+                    launchMode = EmbeddedLaunchMode.PaymentOptions,
+                )
+            )
+        }
+    }
+
+    override fun launchLoading(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration?,
+    ) {
+        if (configuration == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+            )
+            return
+        }
+        if (sheetStateHolder.sheetIsOpen) return
+        sheetStateHolder.sheetIsOpen = true
+        launchPaymentOptionsActivity(
+            paymentMethodMetadata = paymentMethodMetadata,
+            configuration = configuration,
+            selection = selection,
+            customerState = customerState,
+            launchMode = EmbeddedLaunchMode.Loading,
+        )
+    }
+
+    private fun launchPaymentOptionsActivity(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration,
+        launchMode: EmbeddedLaunchMode,
+    ) {
+        activityLauncher.launch(
+            createPaymentOptionsArgs(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = configuration,
+                selection = selection,
+                customerState = customerState,
+                launchMode = launchMode,
+            )
+        )
+    }
+
+    private fun createPaymentOptionsArgs(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration,
+        launchMode: EmbeddedLaunchMode,
+    ): EmbeddedActivityArgs {
+        return EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
             productUsage = productUsage,
@@ -236,8 +331,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = launchMode,
         )
-        activityLauncher.launch(args)
     }
 }

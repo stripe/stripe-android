@@ -153,6 +153,7 @@ internal interface EmbeddedActivityModule {
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
             val initialBackStack = when (launchMode) {
+                is EmbeddedLaunchMode.Loading -> error("Loading does not initialize the embedded sheet component.")
                 is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
                 is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
                 is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
