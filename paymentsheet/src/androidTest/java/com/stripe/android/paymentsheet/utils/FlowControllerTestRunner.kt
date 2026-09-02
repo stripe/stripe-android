@@ -93,7 +93,6 @@ internal fun runFlowControllerTest(
 
         scenario.onActivity {
             apiConfigurationTestType.initializePaymentConfiguration(it)
-            DefaultLinkStore(it.applicationContext).clear()
         }
 
         var flowController: PaymentSheet.FlowController? = null
@@ -207,7 +206,6 @@ internal fun runMultipleFlowControllerInstancesTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             apiConfigurationTestType.initializePaymentConfiguration(it)
-            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var firstFlowController: PaymentSheet.FlowController

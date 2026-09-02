@@ -175,7 +175,6 @@ private fun runEmbeddedPaymentElementTestInternal(
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             apiConfigurationTestType.initializePaymentConfiguration(it)
-            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var embeddedPaymentElement: EmbeddedPaymentElement
