@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
+import javax.inject.Provider
 
 /**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment details.
@@ -65,10 +66,11 @@ class GooglePayPaymentMethodLauncher internal constructor(
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {
-    private val apiConfigurationProvider = {
+    private val apiConfigurationProvider = Provider {
+        val paymentConfiguration = PaymentConfiguration.getInstance(context)
         ApiConfiguration.State(
-            publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
-            stripeAccountId = PaymentConfiguration.getInstance(context).stripeAccountId,
+            publishableKey = paymentConfiguration.publishableKey,
+            stripeAccountId = paymentConfiguration.stripeAccountId,
         )
     }
     private var isReady = false
@@ -216,7 +218,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     environment = config.environment,
                     cardFundingFilter = cardFundingFilter,
                     cardBrandFilter = cardBrandFilter,
-                    apiConfiguration = apiConfigurationProvider(),
+                    apiConfiguration = apiConfigurationProvider.get(),
                 )
                 readyCallback.onReady(
                     repository.isReady().first().also {
@@ -257,7 +259,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             label = label,
             clientAttributionMetadata = null,
             isElements = false,
-            apiConfiguration = apiConfigurationProvider(),
+            apiConfiguration = apiConfigurationProvider.get(),
         )
     }
 
