@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -1337,12 +1336,6 @@ internal class CustomerSheetViewModel(
                     args = args,
                     integrationType = args.integrationType,
                     savedStateHandle = extras.createSavedStateHandle(),
-                    apiConfiguration = PaymentConfiguration.getInstance(application).let {
-                        ApiConfiguration.State(
-                            publishableKey = it.publishableKey,
-                            stripeAccountId = it.stripeAccountId,
-                        )
-                    },
                 )
 
             return component.viewModel as T

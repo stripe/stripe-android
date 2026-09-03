@@ -392,7 +392,8 @@ internal class PaymentSheetAnalyticsTest {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
             productUsage = setOf("PaymentSheet"),
-            *requestMatchers
+            requestMatchers = requestMatchers,
+            publishableKey = TestApiKeys.PUBLISHABLE,
         )
     }
 }

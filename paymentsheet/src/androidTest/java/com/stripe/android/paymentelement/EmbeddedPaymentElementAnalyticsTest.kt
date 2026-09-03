@@ -490,7 +490,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
             productUsage = setOf("EmbeddedPaymentElement").plus(additionalProductUsage),
-            *requestMatchers
+            requestMatchers = requestMatchers,
+            publishableKey = TestApiKeys.PUBLISHABLE,
         )
     }
 }

@@ -1,73 +1,27 @@
 package com.stripe.android.payments.core.injection
 
+import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import dagger.Module
 import dagger.Provides
-import javax.inject.Named
 import javax.inject.Provider
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module(includes = [PaymentConfigurationModule::class])
+@Module
 class ApiConfigurationFromPaymentConfigurationModule {
     @Provides
     fun provideApiConfiguration(
-        paymentConfiguration: Provider<PaymentConfiguration>
+        context: Context
     ): ApiConfiguration.State {
+        val config = PaymentConfiguration.getInstance(context)
         return ApiConfiguration.State(
-            publishableKey = paymentConfiguration.get().publishableKey,
-            stripeAccountId = paymentConfiguration.get().stripeAccountId,
+            publishableKey = config.publishableKey,
+            stripeAccountId = config.stripeAccountId,
         )
     }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module
-class ApiConfigurationFromNamedModule {
-    @Provides
-    fun provideApiConfiguration(
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
-    ): ApiConfiguration.State {
-        return ApiConfiguration.State(
-            publishableKey = publishableKeyProvider(),
-            stripeAccountId = stripeAccountIdProvider(),
-        )
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module
-class ApiConfigurationFromPublishableKeyModule {
-    @Provides
-    fun provideApiConfiguration(
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-    ): ApiConfiguration.State {
-        return ApiConfiguration.State(
-            publishableKey = publishableKeyProvider(),
-            stripeAccountId = null,
-        )
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module
-class ApiConfigurationToNamedModule {
-    @Provides
-    @Named(PUBLISHABLE_KEY)
-    fun providePublishableKeyProvider(
-        apiConfigurationProvider: Provider<ApiConfiguration.State>
-    ): () -> String = { apiConfigurationProvider.get().publishableKey }
-
-    @Provides
-    @Named(STRIPE_ACCOUNT_ID)
-    fun provideStripeAccountIdProvider(
-        apiConfigurationProvider: Provider<ApiConfiguration.State>
-    ): () -> String? = { apiConfigurationProvider.get().stripeAccountId }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -77,9 +31,10 @@ class ApiRequestOptionsModule {
     fun provideApiRequestOptions(
         apiConfigurationProvider: Provider<ApiConfiguration.State>
     ): ApiRequest.Options {
+        val state = apiConfigurationProvider.get()
         return ApiRequest.Options(
-            apiKey = apiConfigurationProvider.get().publishableKey,
-            stripeAccount = apiConfigurationProvider.get().stripeAccountId,
+            apiKey = state.publishableKey,
+            stripeAccount = state.stripeAccountId,
         )
     }
 }

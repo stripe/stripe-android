@@ -27,7 +27,6 @@ import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
@@ -116,6 +115,7 @@ import java.security.Security
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -148,7 +148,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
             ApiConfiguration.State(publishableKeyProvider(), null)
         },
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
+        PaymentAnalyticsRequestFactory(
+            context = context,
+            publishableKeyProvider = publishableKeyProvider,
+            defaultProductUsageTokens = productUsageTokens,
+        ),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
@@ -158,7 +162,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @Inject
     constructor(
         appContext: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
         requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
@@ -167,11 +171,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger: Logger
     ) : this(
         context = appContext,
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = { apiConfigProvider.get().publishableKey },
         requestSurface = requestSurface,
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
+        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+            context = appContext,
+            productUsageTokens = productUsageTokens,
+            requestSurface = requestSurface,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            apiConfigProvider = apiConfigProvider,
+        ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor
     )
@@ -883,6 +894,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
+        publishableKey: String,
         requestOptions: ApiRequest.Options
     ): Result<List<PaymentMethod>> {
         return fetchStripeModelResult(
@@ -896,7 +908,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 fireAnalyticsRequest(
                     paymentAnalyticsRequestFactory.createRequest(
                         PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-                        productUsageTokens = productUsageTokens
+                        productUsageTokens = productUsageTokens,
+                        publishableKey = publishableKey,
                     )
                 )
             },

@@ -16,6 +16,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -38,6 +39,7 @@ import javax.inject.Singleton
         EmbeddedLinkExtrasModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         PaymentSheetAutocompleteModule::class,
+        ApiRequestOptionsModule::class,
     ],
 )
 @Singleton

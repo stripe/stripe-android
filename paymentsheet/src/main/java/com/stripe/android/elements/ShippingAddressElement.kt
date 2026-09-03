@@ -6,9 +6,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
@@ -22,7 +22,7 @@ import javax.inject.Provider
 class ShippingAddressElement @Inject internal constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val apiConfiguration: Provider<ApiConfiguration.State>,
     private val stateHolder: CheckoutControllerStateHolder,
     private val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
     private val errorReporter: ErrorReporter,
@@ -58,7 +58,7 @@ class ShippingAddressElement @Inject internal constructor(
         shippingAddressElementStateHolder.isPresenting = true
         activityLauncher.launch(
             AddressElementActivityContract.Args(
-                publishableKey = paymentConfiguration.get().publishableKey,
+                publishableKey = apiConfiguration.get().publishableKey,
                 config = AddressLauncher.Configuration(
                     additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
                         phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,

@@ -75,6 +75,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 types = requestedTypes,
                 silentlyFail = false,
+                publishableKey = apiConfiguration.publishableKey,
                 stripeAccountId = apiConfiguration.stripeAccountId,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(

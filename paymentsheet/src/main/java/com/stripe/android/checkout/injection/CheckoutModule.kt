@@ -8,7 +8,6 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -17,7 +16,7 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
 
-@Module(includes = [PaymentConfigurationModule::class, StripeNetworkClientModule::class])
+@Module(includes = [StripeNetworkClientModule::class])
 internal object CheckoutModule {
     @Provides
     fun provideContext(application: Application): Context = application.applicationContext

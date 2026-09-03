@@ -7,7 +7,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -45,35 +45,36 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         context: Context,
-        publishableKey: String,
+        publishableKeyProvider: () -> String,
         defaultProductUsageTokens: Set<String> = emptySet()
-    ) : this(
-        context,
-        { publishableKey },
-        defaultProductUsageTokens
-    )
-
-    internal constructor(
-        context: Context,
-        publishableKeyProvider: Provider<String>
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
         publishableKeyProvider = publishableKeyProvider,
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        defaultProductUsageTokens = defaultProductUsageTokens,
+    )
+
+    internal constructor(
+        context: Context,
+        publishableKeyProvider: () -> String
+    ) : this(
+        context = context,
+        publishableKeyProvider = publishableKeyProvider,
+        defaultProductUsageTokens = emptySet(),
     )
 
     @Inject
     internal constructor(
         context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
+        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider = Provider { publishableKeyProvider() },
+        publishableKeyProvider = Provider { apiConfigurationProvider.get().publishableKey },
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
@@ -244,6 +245,20 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 threeDS2UiType = threeDS2UiType,
                 errorMessage = errorMessage,
             )
+        )
+    }
+
+    internal fun createRequest(
+        event: PaymentAnalyticsEvent,
+        productUsageTokens: Set<String>,
+        publishableKey: String,
+    ): AnalyticsRequest {
+        return createRequest(
+            event = event,
+            additionalParams = additionalParams(
+                productUsageTokens = productUsageTokens,
+                errorMessage = null,
+            ) + (AnalyticsFields.PUBLISHABLE_KEY to publishableKey),
         )
     }
 

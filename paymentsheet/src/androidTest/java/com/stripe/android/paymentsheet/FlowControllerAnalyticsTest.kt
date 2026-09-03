@@ -425,7 +425,8 @@ internal class FlowControllerAnalyticsTest {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
             productUsage = setOf("PaymentSheet.FlowController"),
-            *requestMatchers
+            requestMatchers = requestMatchers,
+            publishableKey = TestApiKeys.PUBLISHABLE,
         )
     }
 }

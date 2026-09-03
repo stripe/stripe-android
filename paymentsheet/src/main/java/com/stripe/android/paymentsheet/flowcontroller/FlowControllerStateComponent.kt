@@ -43,7 +43,6 @@ import javax.inject.Singleton
         TapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
         ApiConfigurationModule::class,
-        ApiRequestOptionsModule::class,
         PaymentElementRequestSurfaceModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class,
@@ -54,7 +53,8 @@ import javax.inject.Singleton
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
-        PaymentMethodMessagePromotionsExperimentHandlerModule::class
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
+        ApiRequestOptionsModule::class,
     ]
 )
 internal interface FlowControllerStateComponent {

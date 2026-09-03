@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
@@ -60,8 +61,12 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 true,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
+
+            assertThat(errorReporter.awaitCall().additionalNonPiiParams)
+                .containsEntry(AnalyticsFields.PUBLISHABLE_KEY, "pk_test")
 
             verify(stripeRepository).getPaymentMethods(
                 listPaymentMethodsParams = eq(
@@ -72,6 +77,7 @@ internal class CustomerRepositoryTest {
                     )
                 ),
                 productUsageTokens = any(),
+                publishableKey = any(),
                 requestOptions = any()
             )
         }
@@ -90,6 +96,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.PayPal),
                 true,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
 
@@ -102,6 +109,7 @@ internal class CustomerRepositoryTest {
                     )
                 ),
                 productUsageTokens = any(),
+                publishableKey = any(),
                 requestOptions = any()
             )
         }
@@ -154,6 +162,7 @@ internal class CustomerRepositoryTest {
                             )
                         ),
                         productUsageTokens = any(),
+                        publishableKey = any(),
                         requestOptions = any()
                     )
                 }.thenReturn(Result.success(mockedReturnPaymentMethods))
@@ -164,6 +173,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 true,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             ).getOrThrow()
 
@@ -212,6 +222,7 @@ internal class CustomerRepositoryTest {
                         )
                     ),
                     productUsageTokens = any(),
+                    publishableKey = any(),
                     requestOptions = any()
                 )
             }.thenReturn(Result.success(mockedReturnPaymentMethods))
@@ -222,6 +233,7 @@ internal class CustomerRepositoryTest {
             ephemeralKeySecret = "ephemeral_key",
             listOf(PaymentMethod.Type.Card),
             true,
+            publishableKey = "pk_test",
             stripeAccountId = null
         ).getOrThrow()
 
@@ -242,6 +254,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 silentlyFail = true,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
 
@@ -262,6 +275,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 silentlyFail = false,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
 
@@ -288,6 +302,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
                 silentlyFail = true,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
 
@@ -321,6 +336,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
                 silentlyFail = false,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
 
@@ -388,6 +404,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 customerSessionClientSecret = "cuss_123",
                 paymentMethodId = "payment_method_id",
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
 
@@ -414,6 +431,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
                 customerSessionClientSecret = FAKE_CUSTOMER_SESSION_CLIENT_SECRET,
                 paymentMethodId = paymentMethodToRemove.id,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
 
@@ -441,6 +459,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
                 customerSessionClientSecret = FAKE_CUSTOMER_SESSION_CLIENT_SECRET,
                 paymentMethodId = usBankAccount.id,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
 
@@ -497,6 +516,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
                 customerSessionClientSecret = FAKE_CUSTOMER_SESSION_CLIENT_SECRET,
                 paymentMethodId = paymentMethods.first().id,
+                publishableKey = "pk_test",
                 stripeAccountId = null
             )
 
@@ -601,6 +621,7 @@ internal class CustomerRepositoryTest {
             repository.getPaymentMethods(
                 listPaymentMethodsParams = any(),
                 productUsageTokens = any(),
+                publishableKey = any(),
                 requestOptions = any()
             )
         )
@@ -617,6 +638,7 @@ internal class CustomerRepositoryTest {
                 getPaymentMethods(
                     listPaymentMethodsParams = any(),
                     productUsageTokens = any(),
+                    publishableKey = any(),
                     requestOptions = any(),
                 )
             }.doReturn(result)
@@ -733,6 +755,7 @@ internal class CustomerRepositoryTest {
         override suspend fun getPaymentMethods(
             listPaymentMethodsParams: ListPaymentMethodsParams,
             productUsageTokens: Set<String>,
+            publishableKey: String,
             requestOptions: ApiRequest.Options
         ): Result<List<PaymentMethod>> {
             return Result.success(paymentMethodsToRetrieve)
