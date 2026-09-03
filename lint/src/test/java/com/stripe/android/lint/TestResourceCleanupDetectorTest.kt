@@ -175,6 +175,112 @@ class TestResourceCleanupDetectorTest {
     }
 
     @Test
+    fun `should not detect coroutine scope whose launched job is cancelled`() {
+        lint().files(
+            kotlin(
+                "src/main/java/com/stripe/android/example/ExampleInteractor.kt",
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+                    import kotlinx.coroutines.Job
+                    import kotlinx.coroutines.launch
+
+                    class ExampleInteractor(
+                        private val scope: CoroutineScope = CoroutineScope(),
+                    ) {
+                        private var job: Job? = null
+
+                        fun start() {
+                            job = scope.launch {}
+                        }
+
+                        fun close() {
+                            job?.cancel()
+                            job = null
+                        }
+                    }
+                """
+            ).indented(),
+            coroutineScopeStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun `should detect coroutine scope whose launched job is not cancelled`() {
+        lint().files(
+            kotlin(
+                "src/main/java/com/stripe/android/example/ExampleInteractor.kt",
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+                    import kotlinx.coroutines.Job
+                    import kotlinx.coroutines.launch
+
+                    class ExampleInteractor(
+                        private val scope: CoroutineScope = CoroutineScope(),
+                    ) {
+                        private var job: Job? = null
+
+                        fun start() {
+                            job = scope.launch {}
+                        }
+                    }
+                """
+            ).indented(),
+            coroutineScopeStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectErrorCount(1)
+            .expectMatches("CoroutineScope instances must be.*cancelled in production code")
+    }
+
+    @Test
+    fun `should detect coroutine scope with managed and unmanaged launched jobs`() {
+        lint().files(
+            kotlin(
+                "src/main/java/com/stripe/android/example/ExampleInteractor.kt",
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+                    import kotlinx.coroutines.Job
+                    import kotlinx.coroutines.launch
+
+                    class ExampleInteractor(
+                        private val scope: CoroutineScope = CoroutineScope(),
+                    ) {
+                        private var job: Job? = null
+
+                        fun start() {
+                            job = scope.launch {}
+                            scope.launch {}
+                        }
+
+                        fun close() {
+                            job?.cancel()
+                            job = null
+                        }
+                    }
+                """
+            ).indented(),
+            coroutineScopeStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectErrorCount(1)
+            .expectMatches("CoroutineScope instances must be.*cancelled in production code")
+    }
+
+    @Test
     fun `should detect derived coroutine scope whose owner does not cancel it`() {
         lint().files(
             kotlin(
@@ -677,6 +783,8 @@ class TestResourceCleanupDetectorTest {
             fun SupervisorJob(): Job = error("Not implemented")
 
             fun CoroutineScope(context: Any? = null): CoroutineScope = error("Not implemented")
+
+            fun CoroutineScope.launch(block: () -> Unit): Job = error("Not implemented")
 
             fun CoroutineScope.childScope(): CoroutineScope = CoroutineScope()
         """

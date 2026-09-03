@@ -11,6 +11,7 @@ import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiClass
 import org.jetbrains.kotlin.psi.KtSuperTypeCallEntry
+import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
@@ -20,6 +21,7 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.USimpleNameReferenceExpression
 import org.jetbrains.uast.UVariable
+import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.UastCallKind
 import org.jetbrains.uast.visitor.AbstractUastVisitor
 import java.util.EnumSet
@@ -42,6 +44,8 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
     ) : AbstractUastVisitor() {
         private val trackedVariables = mutableMapOf<CleanupKind, MutableSet<String>>()
         private val instantiations = mutableListOf<Instantiation>()
+        private val coroutineScopeJobVariables = mutableMapOf<String, MutableList<String?>>()
+        private val coroutineScopesWithUnknownUses = mutableSetOf<String>()
         private var file: UFile? = null
 
         override fun visitFile(node: UFile): Boolean {
@@ -55,6 +59,7 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
                     trackedVariables.getOrPut(trackingKind) { mutableSetOf() }.add(variableName)
                 }
             }
+            node.trackCoroutineScopeUse()
 
             if (
                 (node.kind == UastCallKind.CONSTRUCTOR_CALL || node.coroutineScopeCleanupKind() != null) &&
@@ -87,6 +92,9 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
 
         override fun afterVisitFile(node: UFile) {
             instantiations
+                .distinctBy { instantiation ->
+                    instantiation.cleanupKind to (instantiation.call.sourcePsi ?: instantiation.call)
+                }
                 .filterNot { it.isTracked(trackedVariables) }
                 .forEach { instantiation ->
                     context.report(
@@ -107,6 +115,9 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
                         trackedVariables[CleanupKind.COROUTINE_SCOPE].orEmpty()
                     ) ||
                     variableName in trackedVariables[CleanupKind.COROUTINE_SCOPE].orEmpty() ||
+                    hasOnlyCancelledChildJobs(
+                        trackedVariables[CleanupKind.COROUTINE_SCOPE].orEmpty()
+                    ) ||
                     isTransferredToOwner() ||
                     isChildOfViewModelScope() ||
                     isChildOfTransferredScope()
@@ -116,6 +127,41 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
                 call.isInsideTrackCall(cleanupKind) ||
                 call.isTrackedByScopeFunction(cleanupKind) ||
                 variableName in trackedVariables[cleanupKind].orEmpty()
+        }
+
+        private fun UCallExpression.trackCoroutineScopeUse() {
+            val scopeVariableNames = buildSet {
+                receiver
+                    ?.takeIf { it.isCoroutineScope() }
+                    ?.variableName()
+                    ?.let(::add)
+                valueArguments
+                    .filter { it.isCoroutineScope() }
+                    .mapNotNullTo(this) { it.variableName() }
+            }
+
+            scopeVariableNames.forEach { scopeVariableName ->
+                when {
+                    methodName == "cancel" -> Unit
+                    isCoroutineJob() ->
+                        coroutineScopeJobVariables
+                            .getOrPut(scopeVariableName) { mutableListOf() }
+                            .add(assignedVariableName())
+                    else -> coroutineScopesWithUnknownUses.add(scopeVariableName)
+                }
+            }
+        }
+
+        private fun Instantiation.hasOnlyCancelledChildJobs(cancelledVariables: Set<String>): Boolean {
+            val scopeVariableName = variableName ?: return false
+            if (scopeVariableName in coroutineScopesWithUnknownUses) {
+                return false
+            }
+
+            val jobVariables = coroutineScopeJobVariables[scopeVariableName].orEmpty()
+            return jobVariables.isNotEmpty() && jobVariables.all { jobVariableName ->
+                jobVariableName != null && jobVariableName in cancelledVariables
+            }
         }
 
         private fun Instantiation.isTransferredToOwner(): Boolean {
@@ -329,9 +375,18 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
 
         private fun UCallExpression.assignedVariableName(): String? {
             return generateSequence(uastParent) { it.uastParent }
-                .filterIsInstance<UVariable>()
+                .mapNotNull { parent ->
+                    when (parent) {
+                        is UVariable -> parent.name
+                        is UBinaryExpression ->
+                            parent
+                                .takeIf { it.operator == UastBinaryOperator.ASSIGN }
+                                ?.leftOperand
+                                ?.variableName()
+                        else -> null
+                    }
+                }
                 .firstOrNull()
-                ?.name
         }
 
         private fun UCallExpression.isInsideViewModelFactory(): Boolean {
@@ -383,7 +438,7 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
         ),
         COROUTINE_SCOPE(
             "CoroutineScope instances must be tracked with `CleanupTestRule.track(...)` in tests " +
-                "or cancelled in production code."
+                "or have the scope or all launched Jobs cancelled in production code."
         ),
     }
 
@@ -425,7 +480,8 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
                 instance is not closed or cleared. Track closeable instances with CleanupTestRule.track(...) and
                 ViewModels with ViewModelStoreTestRule.track(...).
 
-                Production code must cancel CoroutineScope instances that it owns.
+                Production code must cancel CoroutineScope instances that it owns or explicitly cancel every Job
+                launched from them.
             """,
             category = Category.CORRECTNESS,
             severity = Severity.ERROR,
