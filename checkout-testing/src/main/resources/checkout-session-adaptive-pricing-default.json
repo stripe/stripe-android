@@ -41,7 +41,6 @@
       "ordered_payment_method_types": ["card", "ideal"],
       "type": "deferred_intent"
     },
-    "payment_method_specs": [],
     "shipping_address_settings": {
       "autocomplete_allowed": true
     },
