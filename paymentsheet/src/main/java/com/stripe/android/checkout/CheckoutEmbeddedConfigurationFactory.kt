@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.checkout.injection.AppName
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -32,10 +33,15 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .termsDisplay(configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet())
             .appearance(configuration.paymentElementConfiguration.appearance.asPaymentSheet())
             .googlePay(configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse))
+            .link(configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet())
             .defaultBillingDetails(collectedDetails.toBillingDetails(checkoutSessionResponse))
             .shippingDetails(collectedDetails.toShippingDetails())
             .allowsDelayedPaymentMethods(true)
             .allowsPaymentMethodsRequiringShippingAddress(true)
+            .preferForm(
+                configuration.paymentElementConfiguration.paymentMethodLayout ==
+                    PaymentElement.Configuration.PaymentMethodLayout.PreferForm
+            )
             .build()
     }
 }

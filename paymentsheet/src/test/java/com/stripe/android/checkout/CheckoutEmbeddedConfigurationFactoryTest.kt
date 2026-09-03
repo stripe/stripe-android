@@ -248,6 +248,27 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
+    fun `maps payment element Link display setting`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().linkConfiguration(
+                    PaymentElement.Configuration.LinkConfiguration().display(
+                        PaymentElement.Configuration.LinkConfiguration.Display.Never
+                    )
+                )
+            )
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+    }
+
+    @Test
     fun `maps terms display to embedded payment element configuration`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(

@@ -138,6 +138,10 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                                 setCancelledPaymentOptionsResult()
                                 finish()
                             }
+                            is EmbeddedLaunchMode.VerticalPaymentOptions -> {
+                                setSelectedPaymentOptionResult(requireNotNull(args?.launchMode))
+                                finish()
+                            }
                             is EmbeddedLaunchMode.Manage, null -> {
                                 setManageResult(shouldInvokeSelectionCallback = result == true)
                                 finish()
@@ -228,6 +232,9 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             is EmbeddedLaunchMode.PaymentOptions -> {
                 setCancelledPaymentOptionsResult()
             }
+            is EmbeddedLaunchMode.VerticalPaymentOptions -> {
+                setCancelledPaymentOptionsResult()
+            }
         }
         finish()
     }
@@ -238,12 +245,28 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         setActivityResult(
             EmbeddedActivityResult.Complete(
                 selection = selectionHolder.selection.value,
+                temporarySelection = selectionHolder.temporarySelection.value,
                 previousNewSelections = selectionHolder.previousNewSelections,
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
                 checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
                 launchMode = args?.launchMode ?: EmbeddedLaunchMode.Manage,
+            )
+        )
+    }
+
+    private fun setSelectedPaymentOptionResult(launchMode: EmbeddedLaunchMode) {
+        setActivityResult(
+            EmbeddedActivityResult.Complete(
+                selection = selectionHolder.selection.value,
+                temporarySelection = selectionHolder.temporarySelection.value,
+                previousNewSelections = selectionHolder.previousNewSelections,
+                hasBeenConfirmed = false,
+                customerState = customerStateHolder.customer.value,
+                checkoutSessionResponse = null,
+                shouldInvokeSelectionCallback = false,
+                launchMode = launchMode,
             )
         )
     }

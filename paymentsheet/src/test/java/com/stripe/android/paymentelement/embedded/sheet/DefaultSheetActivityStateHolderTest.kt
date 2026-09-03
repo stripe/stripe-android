@@ -443,6 +443,7 @@ internal class DefaultSheetActivityStateHolderTest {
 
                 assertThat(awaitItem()).isEqualTo(
                     EmbeddedActivityResult.Complete(
+                        temporarySelection = null,
                         previousNewSelections = selectionHolder.previousNewSelections,
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
@@ -471,6 +472,7 @@ internal class DefaultSheetActivityStateHolderTest {
 
                 assertThat(awaitItem()).isEqualTo(
                     EmbeddedActivityResult.Complete(
+                        temporarySelection = null,
                         previousNewSelections = selectionHolder.previousNewSelections,
                         selection = null,
                         hasBeenConfirmed = true,
@@ -505,6 +507,7 @@ internal class DefaultSheetActivityStateHolderTest {
 
                 assertThat(awaitItem()).isEqualTo(
                     EmbeddedActivityResult.Complete(
+                        temporarySelection = null,
                         previousNewSelections = selectionHolder.previousNewSelections,
                         selection = expectedSelection,
                         hasBeenConfirmed = false,

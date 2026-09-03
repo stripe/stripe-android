@@ -5,6 +5,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentValidationStateHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CancellationException
@@ -21,10 +22,14 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
+    private val validationStateHolder: EmbeddedContentValidationStateHolder,
 ) {
     fun confirm() {
         val state = stateHolder.state ?: return
-        val paymentSelection = state.paymentSelection ?: return
+        val paymentSelection = state.paymentSelection ?: run {
+            validationStateHolder.requestValidation()
+            return
+        }
         val arguments = operationCoordinator.tryBeginConfirmation {
           confirmationArgs(
               state = state,

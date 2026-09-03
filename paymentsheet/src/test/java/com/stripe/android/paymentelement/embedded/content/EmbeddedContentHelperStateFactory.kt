@@ -15,9 +15,11 @@ internal object EmbeddedContentHelperStateFactory {
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                 .appearance(PaymentSheet.Appearance(embeddedAppearance = embeddedAppearance))
                 .build(),
+        preferFormDisabled: Boolean = false,
     ): EmbeddedContentHelperStateHolder.State = EmbeddedContentHelperStateHolder.State(
         paymentMethodMetadata = paymentMethodMetadata,
         embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         configuration = configuration,
+        preferFormDisabled = preferFormDisabled,
     )
 }

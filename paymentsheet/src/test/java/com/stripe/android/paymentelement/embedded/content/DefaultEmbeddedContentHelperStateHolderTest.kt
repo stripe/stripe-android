@@ -21,6 +21,7 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
                 paymentMethodMetadata = paymentMethodMetadata,
                 embeddedViewDisplaysMandateText = true,
                 configuration = configuration,
+                preferFormDisabled = false,
             )
             val state = awaitItem()
             assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
@@ -40,6 +41,7 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
                     paymentMethodMetadata = args.paymentMethodMetadata,
                     embeddedViewDisplaysMandateText = args.embeddedViewDisplaysMandateText,
                     configuration = args.configuration,
+                    preferFormDisabled = args.preferFormDisabled,
                 )
             }
             assertThat(awaitItem()).isEqualTo(args)
@@ -58,6 +60,7 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             embeddedViewDisplaysMandateText = true,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            preferFormDisabled = false,
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
         assertThat(stateHolder.state.value).isNotNull()

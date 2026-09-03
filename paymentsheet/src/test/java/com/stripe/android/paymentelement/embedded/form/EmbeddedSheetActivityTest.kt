@@ -190,6 +190,7 @@ internal class EmbeddedSheetActivityTest {
         scenario.onActivity { activity ->
             activity.sheetActivityStateHolder.setResult(
                 EmbeddedActivityResult.Complete(
+                    temporarySelection = null,
                     previousNewSelections = Bundle(),
                     selection = null,
                     hasBeenConfirmed = true,

@@ -15,4 +15,11 @@ internal sealed interface EmbeddedLaunchMode : Parcelable {
 
     @Parcelize
     data object PaymentOptions : EmbeddedLaunchMode
+
+    @Parcelize
+    data object VerticalPaymentOptions : EmbeddedLaunchMode
 }
+
+internal val EmbeddedLaunchMode.isPaymentOptions: Boolean
+    get() = this is EmbeddedLaunchMode.PaymentOptions ||
+        this is EmbeddedLaunchMode.VerticalPaymentOptions

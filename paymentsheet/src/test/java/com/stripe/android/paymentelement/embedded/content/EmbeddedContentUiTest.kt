@@ -1,12 +1,18 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -15,9 +21,16 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
+import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -56,6 +69,128 @@ internal class EmbeddedContentUiTest {
 
     @get:Rule
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @Test
+    fun `selected non-form payment method is the only inline option`() {
+        val clicks = ViewActionRecorder<Unit>()
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm"),
+            ),
+        )
+        val interactor = FakePaymentMethodVerticalLayoutInteractor.create(
+            paymentMethodMetadata = metadata,
+            selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
+                code = "affirm",
+                canBeChanged = false,
+            ),
+        )
+        val content = EmbeddedContent(
+            interactor = interactor,
+            embeddedViewDisplaysMandateText = true,
+            appearance = PaymentSheet.Appearance(),
+            isImmediateAction = false,
+            preferFormInteractor = null,
+            onMorePaymentMethods = { clicks.record(Unit) },
+            eventReporter = null,
+            preferForm = true,
+        )
+
+        composeRule.setContent { content.Content() }
+
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").assertExists()
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertDoesNotExist()
+        composeRule.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).performClick()
+        clicks.consume(Unit)
+    }
+
+    @Test
+    fun `selected payment method is the only vertical option when no form is displayed`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm"),
+            ),
+        )
+        val interactor = FakePaymentMethodVerticalLayoutInteractor.create(
+            paymentMethodMetadata = metadata,
+            selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
+                code = "affirm",
+                canBeChanged = true,
+            ),
+        )
+        val content = EmbeddedContent(
+            interactor = interactor,
+            embeddedViewDisplaysMandateText = true,
+            appearance = PaymentSheet.Appearance(),
+            isImmediateAction = false,
+            preferFormInteractor = null,
+            onMorePaymentMethods = {},
+            eventReporter = null,
+            preferForm = true,
+        )
+
+        composeRule.setContent { content.Content() }
+
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").assertExists()
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertDoesNotExist()
+        composeRule.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).assertExists()
+    }
+
+    @Test
+    fun `selected saved payment method replaces the inline payment method list`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm"),
+            ),
+        )
+        val displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        val interactor = FakePaymentMethodVerticalLayoutInteractor.create(
+            paymentMethodMetadata = metadata,
+            selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+        )
+        val content = EmbeddedContent(
+            interactor = interactor,
+            embeddedViewDisplaysMandateText = true,
+            appearance = PaymentSheet.Appearance(),
+            isImmediateAction = false,
+            preferFormInteractor = null,
+            onMorePaymentMethods = {},
+            eventReporter = null,
+            preferForm = true,
+        )
+
+        composeRule.setContent { content.Content() }
+
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${displayedSavedPaymentMethod.paymentMethod.id}"
+        ).assertExists()
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertDoesNotExist()
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").assertDoesNotExist()
+        composeRule.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).assertExists()
+    }
+
+    @Test
+    fun `temporary selection requiring user interaction displays its form`() = runScenario {
+        embeddedContentHelper.embeddedContent.test {
+            assertThat(awaitItem()).isNull()
+            state.value = EmbeddedContentHelperStateFactory.create(
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                    .preferForm(true)
+                    .build(),
+                preferFormDisabled = true,
+            )
+            assertThat(awaitItem()).isNotNull()
+
+            selectionHolder.setTemporarySelection("card")
+            val content = awaitItem()
+
+            composeRule.setContent { content?.Content() }
+            composeRule.waitForIdle()
+            composeRule.onNodeWithTag(FORM_ELEMENT_TEST_TAG).assertIsDisplayed()
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertDoesNotExist()
+        }
+    }
 
     @Test
     fun `rowStyle FlatWithDisclosure, dataLoaded emits embeddedContent event that passes validation`() =
@@ -124,6 +259,7 @@ internal class EmbeddedContentUiTest {
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
         val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
+        val selectionHolder: DefaultEmbeddedSelectionHolder,
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -198,10 +334,22 @@ internal class EmbeddedContentUiTest {
                 customerStateHolder = customerStateHolder,
                 selectionHolder = selectionHolder,
                 errorReporter = errorReporter,
+                preferFormInteractorFactory = DefaultEmbeddedPreferFormInteractorFactory(
+                    selectionHolder = selectionHolder,
+                    formHelperFactory = embeddedFormHelperFactory,
+                    customerStateHolder = customerStateHolder,
+                    confirmationHandler = confirmationHandler,
+                    eventReporter = eventReporter,
+                    promotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                    validationStateHolder = EmbeddedContentValidationStateHolder(),
+                    viewModelScope = viewModelScope,
+                ),
+                eventReporter = eventReporter,
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
             state = state,
+            selectionHolder = selectionHolder,
         ).block()
     }
 }

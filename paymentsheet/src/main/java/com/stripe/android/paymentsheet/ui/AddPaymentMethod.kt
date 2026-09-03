@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -21,6 +22,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getSetupFutureUseValue
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -69,6 +72,39 @@ internal fun AddPaymentMethod(
             )
         },
     )
+}
+
+@Composable
+internal fun AddPaymentMethodForm(
+    interactor: AddPaymentMethodInteractor,
+    modifier: Modifier = Modifier,
+) {
+    val state by interactor.state.collectAsState()
+    val horizontalPadding = androidx.compose.material.MaterialTheme.stripeFormInsets.getOuterFormInsets()
+
+    Box(modifier = modifier.testTag(PAYMENT_SHEET_FORM_TEST_TAG)) {
+        FormElement(
+            enabled = !state.processing,
+            selectedPaymentMethodCode = state.selectedPaymentMethodCode,
+            formElements = state.formUiElements,
+            formArguments = state.arguments,
+            usBankAccountFormArguments = state.usBankAccountFormArguments,
+            horizontalPaddingValues = horizontalPadding,
+            onFormFieldValuesChanged = { formValues ->
+                interactor.handleViewAction(
+                    AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
+                        formValues,
+                        state.selectedPaymentMethodCode,
+                    )
+                )
+            },
+            onInteractionEvent = {
+                interactor.handleViewAction(
+                    AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction(state.selectedPaymentMethodCode)
+                )
+            },
+        )
+    }
 }
 
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(

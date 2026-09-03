@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
@@ -12,6 +13,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentValidationStateHolder
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -28,6 +30,17 @@ import kotlin.test.Test
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutConfirmationPerformerTest {
+
+    @Test
+    fun `confirm requests validation when selection is incomplete`() = runScenario(
+        state = CheckoutControllerStateFactory.create(paymentSelection = null),
+    ) {
+        validationStateHolder.validationRequested.test {
+            performer.confirm()
+
+            awaitItem()
+        }
+    }
 
     @Test
     fun `confirm does nothing when state is not loaded`() = runScenario(state = null) {
@@ -137,6 +150,7 @@ internal class CheckoutConfirmationPerformerTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()
         }
+        val validationStateHolder = EmbeddedContentValidationStateHolder()
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
             stateHolder = stateHolder,
@@ -145,6 +159,7 @@ internal class CheckoutConfirmationPerformerTest {
             commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Test App"),
             statusBarColor = statusBarColor,
             viewModelScope = backgroundScope,
+            validationStateHolder = validationStateHolder,
         )
 
         Scenario(
@@ -152,6 +167,7 @@ internal class CheckoutConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
             stateHolder = stateHolder,
+            validationStateHolder = validationStateHolder,
         ).block()
 
         confirmationHandler.validate()
@@ -164,6 +180,7 @@ internal class CheckoutConfirmationPerformerTest {
         val confirmationHandler: FakeConfirmationHandler,
         val eventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
+        val validationStateHolder: EmbeddedContentValidationStateHolder,
     )
 
     private companion object {

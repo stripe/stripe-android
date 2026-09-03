@@ -55,6 +55,7 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
     ): EmbeddedActivityResult.Complete {
         return EmbeddedActivityResult.Complete(
             selection = selection,
+            temporarySelection = null,
             previousNewSelections = selectionHolder.previousNewSelections,
             hasBeenConfirmed = false,
             customerState = customerStateHolder.customer.value,

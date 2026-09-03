@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -83,6 +84,16 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New? {
         return previousNewSelections.previousNewSelection(code)
+    }
+
+    fun disablePreferForm() {
+        val current = state ?: return
+        if (current.configuration.paymentElementConfiguration.paymentMethodLayout !=
+            PaymentElement.Configuration.PaymentMethodLayout.PreferForm
+        ) {
+            return
+        }
+        state = current.copy(preferFormDisabled = true)
     }
 
     /**

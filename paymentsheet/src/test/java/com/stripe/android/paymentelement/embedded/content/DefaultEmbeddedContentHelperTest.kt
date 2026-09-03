@@ -11,12 +11,15 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -131,9 +134,35 @@ internal class DefaultEmbeddedContentHelperTest {
                     customerState = customerState,
                     selection = selection,
                     configuration = configuration,
+                    launchMode = EmbeddedLaunchMode.PaymentOptions,
                 )
             )
             assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        }
+    }
+
+    @Test
+    fun `presentPaymentOptions requests vertical options when prefer form is configured`() {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .preferForm(true)
+            .build()
+        val preferFormInteractor = object : AddPaymentMethodInteractor {
+            override val isLiveMode: Boolean = false
+            override val state get() = error("Not needed")
+            override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) = Unit
+            override fun close() = Unit
+        }
+        testScenario(
+            initialState = EmbeddedContentHelperStateFactory.create(configuration = configuration),
+            preferFormInteractorFactory = EmbeddedPreferFormInteractorFactory { _, _, _, _ -> preferFormInteractor },
+        ) {
+            val fakeLauncher = RecordingEmbeddedSheetLauncher()
+            sheetStateHolder.sheetLauncher = fakeLauncher
+
+            embeddedContentHelper.presentPaymentOptions()
+
+            assertThat(fakeLauncher.launchPaymentOptionsCalls.single().launchMode)
+                .isEqualTo(EmbeddedLaunchMode.VerticalPaymentOptions)
         }
     }
 
@@ -150,6 +179,8 @@ internal class DefaultEmbeddedContentHelperTest {
     private fun testScenario(
         initialState: EmbeddedContentHelperStateHolder.State? = null,
         setup: SavedStateHandle.() -> Unit = {},
+        preferFormInteractorFactory: EmbeddedPreferFormInteractorFactory =
+            EmbeddedPreferFormInteractorFactory { _, _, _, _ -> null },
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
         val savedStateHandle = SavedStateHandle().apply { setup() }
@@ -183,6 +214,8 @@ internal class DefaultEmbeddedContentHelperTest {
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
             errorReporter = errorReporter,
+            preferFormInteractorFactory = preferFormInteractorFactory,
+            eventReporter = FakeEventReporter(),
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
@@ -218,12 +251,23 @@ internal class DefaultEmbeddedContentHelperTest {
             selection: PaymentSelection?,
             configuration: EmbeddedPaymentElement.Configuration?,
         ) {
+            error("Expected launch mode overload")
+        }
+
+        override fun launchPaymentOptions(
+            paymentMethodMetadata: PaymentMethodMetadata,
+            customerState: CustomerState?,
+            selection: PaymentSelection?,
+            configuration: EmbeddedPaymentElement.Configuration?,
+            launchMode: EmbeddedLaunchMode,
+        ) {
             launchPaymentOptionsCalls.add(
                 LaunchPaymentOptionsCall(
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = customerState,
                     selection = selection,
                     configuration = configuration,
+                    launchMode = launchMode,
                 )
             )
         }
@@ -233,6 +277,7 @@ internal class DefaultEmbeddedContentHelperTest {
             val customerState: CustomerState?,
             val selection: PaymentSelection?,
             val configuration: EmbeddedPaymentElement.Configuration?,
+            val launchMode: EmbeddedLaunchMode,
         )
     }
 }

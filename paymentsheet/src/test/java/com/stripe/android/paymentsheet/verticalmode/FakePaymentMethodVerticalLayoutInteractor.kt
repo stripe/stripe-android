@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             initialShowsWalletsHeader: Boolean = true,
             selection: PaymentMethodVerticalLayoutInteractor.Selection? = null,
+            displayedSavedPaymentMethod: DisplayableSavedPaymentMethod? = null,
             mandate: ResolvableString? = null,
             viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction> =
                 ViewActionRecorder()
@@ -35,7 +37,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
                 displayablePaymentMethods = displayablePaymentMethods,
                 isProcessing = false,
                 selection = selection,
-                displayedSavedPaymentMethod = null,
+                displayedSavedPaymentMethod = displayedSavedPaymentMethod,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = mandate,

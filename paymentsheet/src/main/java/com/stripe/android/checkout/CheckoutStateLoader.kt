@@ -112,6 +112,7 @@ internal class CheckoutStateLoader @Inject constructor(
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
+            preferFormDisabled = carryForward.preferFormDisabled,
         )
 
         customerStateHolder.setCustomerState(loaderState.customer)
@@ -127,6 +128,7 @@ internal class CheckoutStateLoader @Inject constructor(
         val previousSelection: PaymentSelection?,
         val temporarySelection: String?,
         val previousNewSelections: Bundle,
+        val preferFormDisabled: Boolean,
     ) {
         companion object {
             fun initial() = CarryForward(
@@ -134,6 +136,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 previousSelection = null,
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
+                preferFormDisabled = false,
             )
 
             fun from(state: CheckoutControllerState) = CarryForward(
@@ -141,6 +144,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 previousSelection = state.paymentSelection,
                 temporarySelection = state.temporarySelection,
                 previousNewSelections = state.previousNewSelections,
+                preferFormDisabled = state.preferFormDisabled,
             )
         }
     }

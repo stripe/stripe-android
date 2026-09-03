@@ -25,6 +25,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
+import com.stripe.android.paymentelement.embedded.content.PREFER_FORM_FOOTER_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
@@ -54,6 +55,69 @@ internal class CheckoutPaymentElementTest {
     @After
     fun teardown() {
         GooglePayRepository.resetFactory()
+    }
+
+    @Test
+    fun testPreferFormInlineCardPayment() {
+        var checkoutResult: CheckoutController.Result? = null
+        lateinit var controller: CheckoutController
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            setup = { configuredController ->
+                controller = configuredController
+                configuredController.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.PreferForm),
+                ).getOrThrow()
+            },
+        ) { context ->
+            networkRule.createPaymentMethod()
+            networkRule.checkoutConfirm { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            formPage.waitUntilVisible()
+            formPage.fillOutCardDetails()
+            testRules.compose.waitUntil {
+                controller.session.value?.paymentOptionDisplayData?.paymentMethodType == "card"
+            }
+            context.confirm()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
+    }
+
+    @Test
+    fun testPreferFormInlineFooterOpensVerticalPaymentOptions() = runCheckoutPaymentElementTest(
+        networkRule = networkRule,
+        setup = { controller ->
+            controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.PreferForm),
+            ).getOrThrow()
+        },
+    ) { context ->
+        testRules.compose.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).performClick()
+        waitForPaymentOptionsLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
+        context.markTestSucceeded()
+    }
+
+    @Test
+    fun testPreferFormPresentStartsOnFormAndNavigatesToVerticalOptions() = runCheckoutPaymentElementTest(
+        networkRule = networkRule,
+        setup = { controller ->
+            controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.PreferForm),
+            ).getOrThrow()
+        },
+    ) { context ->
+        context.presentPaymentOptions()
+        formPage.waitUntilVisible()
+        testRules.compose.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).performClick()
+        waitForPaymentOptionsLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
+        context.markTestSucceeded()
     }
 
     @Test
@@ -282,6 +346,9 @@ internal class CheckoutPaymentElementTest {
             PaymentElement.Configuration.PaymentMethodLayout.Automatic -> {
                 error("Expected an explicit layout.")
             }
+            PaymentElement.Configuration.PaymentMethodLayout.PreferForm -> {
+                error("PreferForm is not used by this shared layout test.")
+            }
         }
     }
 
@@ -367,6 +434,9 @@ internal class CheckoutPaymentElementTest {
             PaymentElement.Configuration.PaymentMethodLayout.Vertical -> TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
             PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> TEST_TAG_LIST
             PaymentElement.Configuration.PaymentMethodLayout.Automatic -> error("Expected an explicit layout.")
+            PaymentElement.Configuration.PaymentMethodLayout.PreferForm -> {
+                error("PreferForm is not used by this shared layout test.")
+            }
         }
         testRules.compose.waitUntil(timeoutMillis = 5_000) {
             testRules.compose.onAllNodes(hasTestTag(layoutTag))

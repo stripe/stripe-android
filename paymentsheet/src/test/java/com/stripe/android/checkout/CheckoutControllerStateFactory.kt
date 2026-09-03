@@ -44,6 +44,7 @@ internal object CheckoutControllerStateFactory {
             paymentSelection = paymentSelection,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,
+            preferFormDisabled = false,
         )
     }
 

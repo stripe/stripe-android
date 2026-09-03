@@ -156,6 +156,8 @@ internal interface EmbeddedActivityModule {
                 is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
                 is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
                 is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
+                is EmbeddedLaunchMode.VerticalPaymentOptions ->
+                    listOf(initialPaymentOptionsScreenFactory.createVerticalInitialScreen())
             }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,

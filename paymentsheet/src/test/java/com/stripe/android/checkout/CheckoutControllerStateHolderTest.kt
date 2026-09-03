@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -25,6 +26,38 @@ import kotlin.test.Test
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutControllerStateHolderTest {
+    @Test
+    fun `disabling prefer form updates prefer form layout`() = testScenario {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().paymentMethodLayout(
+                    PaymentElement.Configuration.PaymentMethodLayout.PreferForm
+                )
+            )
+            .build()
+        stateHolder.state = committedState().copy(configuration = configuration)
+
+        stateHolder.disablePreferForm()
+
+        assertThat(stateHolder.state?.preferFormDisabled).isTrue()
+    }
+
+    @Test
+    fun `disabling prefer form is ignored for another layout`() = testScenario {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().paymentMethodLayout(
+                    PaymentElement.Configuration.PaymentMethodLayout.Vertical
+                )
+            )
+            .build()
+        stateHolder.state = committedState().copy(configuration = configuration)
+
+        stateHolder.disablePreferForm()
+
+        assertThat(stateHolder.state?.preferFormDisabled).isFalse()
+    }
+
     @Test
     fun `selection projects paymentSelection from the committed state`() = testScenario {
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
@@ -210,6 +243,7 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        preferFormDisabled = false,
     )
 
     private fun testScenario(
