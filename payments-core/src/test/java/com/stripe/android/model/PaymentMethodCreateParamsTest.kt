@@ -148,6 +148,12 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun `createNaverPay() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createNaverPay().toParamMap())
+            .isEqualTo(mapOf("type" to "naver_pay"))
+    }
+
+    @Test
     fun auBecsDebit_toParamMap_shouldCreateExpectedMap() {
         assertThat(PaymentMethodCreateParamsFixtures.AU_BECS_DEBIT.toParamMap())
             .isEqualTo(
