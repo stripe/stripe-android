@@ -14,6 +14,7 @@ import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
@@ -30,7 +31,9 @@ import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -65,6 +68,7 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
+    private val logger: Logger,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -172,6 +176,37 @@ class CheckoutController @Inject internal constructor(
                     shippingAddress = it,
                 ),
             )
+        }
+    }
+
+    internal fun commitShippingAddress(
+        name: String?,
+        address: Address.State,
+    ) {
+        viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            // Admit the mutation before the Activity result callback returns so confirmation cannot overtake it.
+            operationCoordinator.runMutation {
+                try {
+                    val state = requireNotNull(stateHolder.state) {
+                        "Cannot commit checkout shipping address before it is configured."
+                    }
+                    checkoutStateLoader.reload(
+                        state.copy(
+                            collectedDetails = state.collectedDetails.copy(
+                                shippingName = name,
+                                shippingAddress = address,
+                            ),
+                        )
+                    )
+                    kotlin.Result.success(Unit)
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
+                    kotlin.Result.failure(error)
+                }
+            }.onFailure { error ->
+                logger.error("Failed to commit the checkout shipping address.", error)
+            }
         }
     }
 

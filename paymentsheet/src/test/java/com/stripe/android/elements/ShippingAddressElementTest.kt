@@ -15,6 +15,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
@@ -30,6 +31,13 @@ import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import javax.inject.Provider
 
 internal class ShippingAddressElementTest {
@@ -119,22 +127,88 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `result clears presentation and ignores saved address`() = runScenario {
-        val originalState = stateHolder.state
+    fun `successful result clears presentation and commits complete address`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
 
+        val addressDetails = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+        )
         registration.dispatch(
             AddressLauncherResult.Succeeded(
-                AddressDetails(name = "Ignored address"),
+                addressDetails,
             )
         )
 
+        val address = argumentCaptor<CheckoutController.Address.State>()
+        verify(checkoutController).commitShippingAddress(
+            name = eq(addressDetails.name),
+            address = address.capture(),
+        )
+        assertThat(address.firstValue).isEqualTo(
+            CheckoutController.Address.State(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            )
+        )
+        assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
+
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(stateHolder.state).isSameInstanceAs(originalState)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `canceled result clears presentation without committing`() = runScenario {
+        shippingAddressElement.present()
+        activityLauncher.launchCalls.awaitItem()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+
+        registration.dispatch(AddressLauncherResult.Canceled())
+
+        assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
+        verify(checkoutController, never()).commitShippingAddress(
+            name = anyOrNull(),
+            address = any(),
+        )
+    }
+
+    @Test
+    fun `malformed successful result clears presentation without committing`() = runScenario {
+        shippingAddressElement.present()
+        activityLauncher.launchCalls.awaitItem()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+
+        registration.dispatch(
+            AddressLauncherResult.Succeeded(
+                AddressDetails(
+                    name = "Missing country",
+                    address = PaymentSheet.Address(
+                        line1 = "510 Townsend St",
+                        country = " ",
+                    ),
+                )
+            )
+        )
+
+        assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
+        verify(checkoutController, never()).commitShippingAddress(
+            name = anyOrNull(),
+            address = any(),
+        )
     }
 
     @Test
@@ -183,6 +257,7 @@ internal class ShippingAddressElementTest {
             PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         )
         val errorReporter = FakeErrorReporter()
+        val checkoutController = mock<CheckoutController>()
 
         suspend fun createElement(): ElementScenario {
             val activityResultCaller = RecordingActivityResultCaller()
@@ -191,6 +266,7 @@ internal class ShippingAddressElementTest {
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
                 paymentConfiguration = paymentConfiguration,
+                checkoutController = checkoutController,
                 stateHolder = stateHolder,
                 shippingAddressElementStateHolder = shippingAddressElementStateHolder,
                 errorReporter = errorReporter,
@@ -214,6 +290,7 @@ internal class ShippingAddressElementTest {
             lifecycleOwner = element.lifecycleOwner,
             stateHolder = stateHolder,
             shippingAddressElementStateHolder = shippingAddressElementStateHolder,
+            checkoutController = checkoutController,
             paymentConfiguration = paymentConfiguration,
             errorReporter = errorReporter,
             registration = element.registration,
@@ -310,6 +387,7 @@ internal class ShippingAddressElementTest {
         val lifecycleOwner: TestLifecycleOwner,
         val stateHolder: CheckoutControllerStateHolder,
         val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
+        val checkoutController: CheckoutController,
         val paymentConfiguration: RecordingProvider<PaymentConfiguration>,
         val errorReporter: FakeErrorReporter,
         val registration: Registration,

@@ -7,12 +7,15 @@ import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
@@ -23,13 +26,22 @@ class ShippingAddressElement @Inject internal constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
     private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val checkoutController: CheckoutController,
     private val stateHolder: CheckoutControllerStateHolder,
     private val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
     private val errorReporter: ErrorReporter,
 ) {
     private val activityLauncher: ActivityResultLauncher<AddressElementActivityContract.Args> =
-        activityResultCaller.registerForActivityResult(AddressElementActivityContract) {
+        activityResultCaller.registerForActivityResult(AddressElementActivityContract) { result ->
             shippingAddressElementStateHolder.isPresenting = false
+            val addressDetails = (result as? AddressLauncherResult.Succeeded)?.address
+                ?: return@registerForActivityResult
+            val address = addressDetails.address?.toCheckoutAddress()
+                ?: return@registerForActivityResult
+            checkoutController.commitShippingAddress(
+                name = addressDetails.name,
+                address = address,
+            )
         }
 
     init {
