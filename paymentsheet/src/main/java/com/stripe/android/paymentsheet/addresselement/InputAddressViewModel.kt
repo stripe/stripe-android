@@ -4,10 +4,12 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerReferences
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -244,7 +246,7 @@ internal class InputAddressViewModel @Inject constructor(
             }
             is AddressElementActivityContract.LaunchMode.CheckoutShipping -> {
                 saveCheckoutShippingAddress(
-                    paymentElementCallbackIdentifier = launchMode.paymentElementCallbackIdentifier,
+                    controllerInstanceId = launchMode.controllerInstanceId,
                     addressDetails = addressDetails,
                 )
             }
@@ -252,8 +254,9 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     @Suppress("TooGenericExceptionCaught")
+    @OptIn(CheckoutSessionPreview::class)
     private fun saveCheckoutShippingAddress(
-        paymentElementCallbackIdentifier: String,
+        controllerInstanceId: String,
         addressDetails: AddressDetails,
     ) {
         if (!processingState.tryStartProcessing()) return
@@ -262,14 +265,16 @@ internal class InputAddressViewModel @Inject constructor(
         _formEnabled.value = false
         viewModelScope.launch {
             val result = try {
-                val updater = PaymentElementCallbackReferences.getShippingAddressUpdater(
-                    paymentElementCallbackIdentifier
-                )
-                if (updater == null) {
-                    Result.failure(IllegalStateException("Shipping address updater is unavailable."))
-                } else {
-                    updater(addressDetails)
-                }
+                val controller = CheckoutControllerReferences[controllerInstanceId]
+                    ?: error("Checkout controller is unavailable.")
+                val address = CheckoutController.Address()
+                    .city(addressDetails.address?.city)
+                    .country(requireNotNull(addressDetails.address?.country))
+                    .line1(addressDetails.address?.line1)
+                    .line2(addressDetails.address?.line2)
+                    .postalCode(addressDetails.address?.postalCode)
+                    .state(addressDetails.address?.state)
+                controller.updateShippingAddress(addressDetails.name, address)
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {

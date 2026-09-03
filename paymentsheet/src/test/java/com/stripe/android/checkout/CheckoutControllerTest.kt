@@ -71,11 +71,11 @@ internal class CheckoutControllerTest {
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
 
-    // The controller resolves callbacks from the process-global PaymentElementCallbackReferences,
-    // keyed by integration name. Clear it between tests so registrations don't leak across cases.
+    // Clear process-global callback and controller registrations between tests.
     @After
     fun clearCallbackReferences() {
         PaymentElementCallbackReferences.clear()
+        CheckoutControllerReferences.clear()
     }
 
     @Test
@@ -487,6 +487,37 @@ internal class CheckoutControllerTest {
 
         assertThat(PaymentElementCallbackReferences[controller.paymentElementCallbackIdentifier])
             .isSameInstanceAs(callbacks)
+    }
+
+    @Test
+    fun `controller registers itself by its saved instance ID`() = runTest {
+        val controller = createController()
+
+        assertThat(CheckoutControllerReferences[controller.controllerInstanceId])
+            .isSameInstanceAs(controller)
+    }
+
+    @Test
+    fun `destroy unregisters the controller by its saved instance ID`() = runTest {
+        val controller = createController()
+        val instanceId = controller.controllerInstanceId
+
+        controller.destroy()
+
+        assertThat(CheckoutControllerReferences[instanceId]).isNull()
+    }
+
+    @Test
+    fun `recreated controller replaces the registry binding for its restored instance ID`() = runTest {
+        val parentHandle = SavedStateHandle()
+        val original = createController(parentHandle)
+        val restoredHandle = parentHandle.simulateProcessDeath()
+
+        val recreated = createController(restoredHandle)
+
+        assertThat(recreated.controllerInstanceId).isEqualTo(original.controllerInstanceId)
+        assertThat(CheckoutControllerReferences[original.controllerInstanceId])
+            .isSameInstanceAs(recreated)
     }
 
     @Test
