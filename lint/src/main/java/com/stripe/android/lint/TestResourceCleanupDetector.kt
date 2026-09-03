@@ -10,7 +10,6 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiClass
-import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtSuperTypeCallEntry
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UCallExpression
@@ -176,26 +175,22 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
                             return super.visitCallExpression(node)
                         }
 
+                        val argumentIndex = node.valueArguments.indexOfFirst { argument ->
+                            argument.variableName() == scopeName
+                        }
                         val constructor = node.resolve()
-                        val parameters = constructor?.parameterList?.parameters.orEmpty()
-                        val parameterName = node.namedParameterForVariable(scopeName)
-                            ?: parameters.indices
-                                .firstOrNull { parameterIndex ->
-                                    node.getArgumentForParameter(parameterIndex)?.variableName() == scopeName
-                                }
-                                ?.let { parameterIndex -> parameters[parameterIndex].name }
+                        val parameterName = constructor
+                            ?.parameterList
+                            ?.parameters
+                            ?.getOrNull(argumentIndex)
+                            ?.name
 
                         if (
                             parameterName != null &&
                             constructor?.containingClass
                                 ?.findMethodsByName("close", true)
                                 ?.any { method ->
-                                    method.navigationElement.text
-                                        .replace(Regex("\\s"), "")
-                                        .let { text ->
-                                            text.contains("$parameterName.cancel(") ||
-                                                text.contains("($parameterName).cancel(")
-                                        }
+                                    method.navigationElement.text.contains("$parameterName.cancel(")
                                 } == true
                         ) {
                             isTransferred = true
@@ -366,27 +361,6 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
         private fun UExpression.isCoroutineScope(): Boolean =
             (this as? UCallExpression)?.returnType?.canonicalText == COROUTINE_SCOPE ||
                 getExpressionType()?.canonicalText == COROUTINE_SCOPE
-
-        private fun UCallExpression.namedParameterForVariable(variableName: String): String? {
-            val call = generateSequence(sourcePsi) { it.parent }
-                .filterIsInstance<KtCallExpression>()
-                .firstOrNull()
-                ?: sourcePsi
-                    ?.children
-                    ?.filterIsInstance<KtCallExpression>()
-                    ?.firstOrNull()
-                ?: return null
-            return call.valueArguments
-                .firstOrNull { argument ->
-                    argument.getArgumentExpression()
-                        ?.text
-                        ?.trim()
-                        ?.removeSurrounding("(", ")") == variableName
-                }
-                ?.getArgumentName()
-                ?.asName
-                ?.identifier
-        }
 
         private fun UElement.variableName(): String? {
             if (this is USimpleNameReferenceExpression) {
