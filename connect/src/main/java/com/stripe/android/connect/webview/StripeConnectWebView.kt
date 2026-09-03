@@ -47,6 +47,7 @@ import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationException
@@ -89,6 +90,8 @@ internal class StripeConnectWebView private constructor(
     @VisibleForTesting
     internal val stripeJsInterface = StripeJsInterface()
 
+    private var stripeDownloadListener: StripeDownloadListener? = null
+
     private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
@@ -113,7 +116,6 @@ internal class StripeConnectWebView private constructor(
             mediaPlaybackRequiresUserGesture = false
         }
 
-        setDownloadListener(StripeDownloadListener(context))
         addJavascriptInterface(stripeJsInterface, ANDROID_JS_INTERFACE)
     }
 
@@ -161,12 +163,22 @@ internal class StripeConnectWebView private constructor(
         val activity = requireNotNull(findActivity())
         mutableContext.baseContext = activity
 
+        val lifecycleScope = requireNotNull(webViewLifecycleScope)
+        stripeDownloadListener = StripeDownloadListener(
+            context = context,
+            coroutineScope = lifecycleScope,
+            workContext = Dispatchers.IO,
+        ).also(::setDownloadListener)
+
         // Set up keyboard detection to resize the webview according to keyboard heights
         // This fixes input fields being covered by keyboard on Samsung devices.
         setupKeyboardHandling(activity)
     }
 
     override fun onDetachedFromWindow() {
+        setDownloadListener(null)
+        stripeDownloadListener = null
+
         // Clean up the global layout listener
         globalLayoutListener?.let { listener ->
             findActivity()?.window?.decorView?.viewTreeObserver?.removeOnGlobalLayoutListener(listener)

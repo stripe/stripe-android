@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -32,6 +33,7 @@ class StripeDownloadListenerTest {
     }
     private val stripeToastManager: StripeToastManager = mock()
     private val testScope = TestScope()
+    private val testDispatcher = StandardTestDispatcher(testScope.testScheduler)
 
     private lateinit var stripeDownloadListener: StripeDownloadListener
 
@@ -50,13 +52,14 @@ class StripeDownloadListenerTest {
         context: Context = this.context,
         stripeDownloadManager: StripeDownloadManager = this.stripeDownloadManager,
         stripeToastManager: StripeToastManager = this.stripeToastManager,
-        ioScope: CoroutineScope = testScope,
+        coroutineScope: CoroutineScope = testScope,
     ) {
         stripeDownloadListener = StripeDownloadListener(
             context = context,
             stripeDownloadManager = stripeDownloadManager,
             stripeToastManager = stripeToastManager,
-            ioScope = ioScope,
+            coroutineScope = coroutineScope,
+            workContext = testDispatcher,
         )
     }
 
