@@ -17,7 +17,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -68,7 +67,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 context = applicationContext,
-                publishableKeyProvider = { PaymentConfiguration.getInstance(applicationContext).publishableKey }
+                publishableKeyProvider = { "" }
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
