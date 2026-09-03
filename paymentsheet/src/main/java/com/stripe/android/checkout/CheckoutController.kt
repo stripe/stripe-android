@@ -192,16 +192,25 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    internal suspend fun updateBillingAddress(
-        name: String?,
+    /**
+     * Updates the billing tax region when this Checkout Session uses billing for automatic tax.
+     *
+     * This does not change the billing details shown in payment UI. Billing details collected by
+     * Payment Element continue to update the tax region during confirmation.
+     *
+     * @param address The billing address used to calculate automatic tax.
+     */
+    suspend fun updateBillingTaxRegionIfNecessary(
         address: Address,
-    ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
-        copy(
-            collectedDetails = collectedDetails.copy(
-                billingName = name,
-                billingAddress = it,
-            ),
-        )
+    ): kotlin.Result<Unit> {
+        val builtAddress = address.build()
+        return withCheckoutState {
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = builtAddress,
+            )
+        }
     }
 
     /**
@@ -247,10 +256,12 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Runs a mutation against the checkout session, serializing it behind the operation coordinator
-     * so mutations run in sequence. [block] produces the updated [CheckoutSessionResponse]; the
-     * result is folded into a new [CheckoutControllerState] (with any [additionalStateMutations]
-     * applied) and handed to [checkoutStateLoader] to reload the payment element and atomically
-     * commit the new state.
+     * so mutations run in sequence. [block] produces the updated [CheckoutSessionResponse]. If it
+     * returns the currently committed response, the original state is retained; otherwise the
+     * response is copied into a new [CheckoutControllerState]. [additionalStateMutations] is then
+     * applied, and the resulting state is handed to [checkoutStateLoader] to reload the payment
+     * element and atomically commit it when it differs from the original state. A successful
+     * no-change mutation therefore completes without reloading the payment element.
      *
      * Returns [kotlin.Result.failure] if the session hasn't been configured yet or a payment flow is
      * currently presented.
@@ -274,12 +285,17 @@ class CheckoutController @Inject internal constructor(
                 // build on each other's results rather than a stale snapshot.
                 val state = requireNotNull(stateHolder.state)
                 val response = state.block(state.checkoutSessionResponse.id).getOrThrow()
-                val newState = state
-                    .copy(checkoutSessionResponse = response)
-                    .additionalStateMutations()
-                // reload resolves flag images (reusing newState's carried-over cache) and commits
-                // the fully reloaded state to the holder.
-                checkoutStateLoader.reload(newState)
+                val stateWithResponse = if (response === state.checkoutSessionResponse) {
+                    state
+                } else {
+                    state.copy(checkoutSessionResponse = response)
+                }
+                val newState = stateWithResponse.additionalStateMutations()
+                if (newState !== state) {
+                    // Reload resolves flag images (reusing newState's carried-over cache) and
+                    // commits the fully reloaded state to the holder.
+                    checkoutStateLoader.reload(newState)
+                }
             }
         }
     }
@@ -971,7 +987,7 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Builder for an address passed to [updateShippingAddress] and [updateBillingAddress].
+     * Builder for an address passed to [updateShippingAddress] and [updateBillingTaxRegionIfNecessary].
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

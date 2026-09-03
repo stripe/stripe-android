@@ -711,66 +711,68 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `updateBillingAddress sends tax_region and stores address when automatic tax targets billing`() =
+    fun `updateBillingTaxRegionIfNecessary sends tax_region and reloads when automatic tax targets billing`() =
         runMutationScenario(initModifier = automaticTaxFor("billing")) {
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "Denver"),
                 bodyPart("tax_region[postal_code]", "80202"),
                 bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-                responseFactory = successResponseFactory(automaticTaxFor("billing")),
+                responseFactory = successResponseFactory(
+                    combine(
+                        automaticTaxFor("billing"),
+                        { json -> json.put("total_summary", totalSummaryJson(due = 5099)) },
+                    ),
+                ),
             )
 
-            val result = controller.updateBillingAddress(
-                name = "Jane",
-                address = fullAddress,
-            )
+            val result = controller.updateBillingTaxRegionIfNecessary(fullAddress)
 
             result.getOrThrow()
-            val state = committedState()
-            assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
-            assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
+            assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(5099)
         }
 
     @Test
-    fun `updateBillingAddress does not send tax_region when automatic tax targets shipping`() =
+    fun `updateBillingTaxRegionIfNecessary is a no-op when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
-            // Automatic tax targets shipping, so a billing address update stays local: no request.
-            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
+            val sessionBeforeUpdate = requireNotNull(controller.session.value)
+            val stateBeforeUpdate = committedState()
+
+            val result = controller.updateBillingTaxRegionIfNecessary(fullAddress)
 
             result.getOrThrow()
-            val state = committedState()
-            assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
-            assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
+            assertThat(controller.session.value).isEqualTo(sessionBeforeUpdate)
+            assertThat(committedState()).isSameInstanceAs(stateBeforeUpdate)
         }
 
     @Test
-    fun `updateBillingAddress stores address without a network call when automatic tax is disabled`() =
+    fun `updateBillingTaxRegionIfNecessary is a no-op when automatic tax is disabled`() =
         runMutationScenario {
-            // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
-            // and the payment element is reloaded from the existing response, firing no request.
-            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
+            val sessionBeforeUpdate = requireNotNull(controller.session.value)
+            val stateBeforeUpdate = committedState()
+
+            val result = controller.updateBillingTaxRegionIfNecessary(fullAddress)
 
             result.getOrThrow()
-            val state = committedState()
-            assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
-            assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
+            assertThat(controller.session.value).isEqualTo(sessionBeforeUpdate)
+            assertThat(committedState()).isSameInstanceAs(stateBeforeUpdate)
         }
 
     @Test
-    fun `updateBillingAddress does not store address on failure`() =
+    fun `updateBillingTaxRegionIfNecessary preserves committed state on server failure`() =
         runMutationScenario(initModifier = automaticTaxFor("billing")) {
             networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
+            val sessionBeforeUpdate = requireNotNull(controller.session.value)
+            val stateBeforeUpdate = committedState()
 
-            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
+            val result = controller.updateBillingTaxRegionIfNecessary(fullAddress)
 
             assertThat(result.isFailure).isTrue()
-            val state = committedState()
-            assertThat(state.collectedDetails.billingName).isNull()
-            assertThat(state.collectedDetails.billingAddress).isNull()
+            assertThat(controller.session.value).isEqualTo(sessionBeforeUpdate)
+            assertThat(committedState()).isSameInstanceAs(stateBeforeUpdate)
         }
 
     @Test
@@ -1042,12 +1044,9 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `updateBillingAddress is not gated by allowedShippingCountries`() =
+    fun `updateBillingTaxRegionIfNecessary is not gated by allowedShippingCountries`() =
         runMutationScenario(initModifier = allowedShippingCountries(listOf("US"))) {
-            val result = controller.updateBillingAddress(
-                name = null,
-                address = Address().country("DE"),
-            )
+            val result = controller.updateBillingTaxRegionIfNecessary(Address().country("DE"))
 
             assertThat(result.isSuccess).isTrue()
         }
