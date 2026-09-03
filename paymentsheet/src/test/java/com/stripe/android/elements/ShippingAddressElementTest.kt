@@ -28,6 +28,8 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -258,6 +260,7 @@ internal class ShippingAddressElementTest {
         )
         val errorReporter = FakeErrorReporter()
         val checkoutController = mock<CheckoutController>()
+        val coroutineScope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
 
         suspend fun createElement(): ElementScenario {
             val activityResultCaller = RecordingActivityResultCaller()
@@ -266,6 +269,7 @@ internal class ShippingAddressElementTest {
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
                 paymentConfiguration = paymentConfiguration,
+                coroutineScope = coroutineScope,
                 checkoutController = checkoutController,
                 stateHolder = stateHolder,
                 shippingAddressElementStateHolder = shippingAddressElementStateHolder,

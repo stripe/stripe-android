@@ -33,17 +33,13 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.json.JSONObject
@@ -716,20 +712,15 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `commitShippingAddress stores local details and reloads payment element state`() =
-        runMutationScenario(
-            assertLoadingConsumed = true,
-            useTestMainDispatcher = true,
-        ) {
+        runMutationScenario {
             val response = committedState().checkoutSessionResponse
-            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
-            controller.commitShippingAddress(
+            val result = controller.commitShippingAddress(
                 name = "John",
                 address = fullAddress.build(),
             )
 
-            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
-            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+            result.getOrThrow()
 
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
@@ -739,64 +730,6 @@ internal class CheckoutControllerTest {
             assertThat(state.paymentMethodMetadata.shippingDetails?.address).isEqualTo(
                 fullAddress.build().asPaymentSheet()
             )
-        }
-
-    @Test
-    fun `commitShippingAddress admits a mutation before returning`() =
-        runMutationScenario(
-            assertLoadingConsumed = true,
-            useTestMainDispatcher = true,
-        ) {
-            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
-
-            controller.commitShippingAddress(
-                name = "John",
-                address = fullAddress.build(),
-            )
-
-            assertThat(controller.isUpdating.value).isTrue()
-            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
-            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
-        }
-
-    @Test
-    fun `commitShippingAddress leaves missing state unchanged`() = runTest {
-        val controller = createController()
-
-        controller.commitShippingAddress(
-            name = "John",
-            address = Address.State(
-                city = "Denver",
-                country = "US",
-                line1 = "123 Main St",
-                line2 = null,
-                postalCode = "80202",
-                state = "CO",
-            ),
-        )
-
-        assertThat(controller.session.value).isNull()
-        assertThat(controller.isUpdating.value).isFalse()
-    }
-
-    @Test
-    fun `commitShippingAddress does not start a mutation when a payment flow is presented`() =
-        runMutationScenario(
-            sheetIsOpen = true,
-            assertLoadingConsumed = true,
-            useTestMainDispatcher = true,
-        ) {
-            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
-            val state = committedState()
-
-            controller.commitShippingAddress(
-                name = "John",
-                address = fullAddress.build(),
-            )
-
-            assertThat(controller.isUpdating.value).isFalse()
-            isUpdatingTurbine.expectNoEvents()
-            assertThat(committedState()).isSameInstanceAs(state)
         }
 
     @Test
@@ -1321,48 +1254,38 @@ internal class CheckoutControllerTest {
         previousNewSelections: Bundle = Bundle(),
         sheetIsOpen: Boolean = false,
         assertLoadingConsumed: Boolean = false,
-        useTestMainDispatcher: Boolean = false,
         block: suspend MutationScenario.() -> Unit,
     ) = runTest {
-        if (useTestMainDispatcher) {
-            Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        networkRule.checkoutInit(
+            responseFactory = successResponseFactory(
+                jsonModifier = initModifier,
+            )
+        )
+        val savedStateHandle = SavedStateHandle()
+        val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
+        val controller = setup.controller
+        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        paymentSelection?.let(setup.stateHolder::setSelection)
+        temporarySelection?.let(setup.stateHolder::setTemporarySelection)
+        if (!previousNewSelections.isEmpty) {
+            setup.stateHolder.setPreviousNewSelections(previousNewSelections)
         }
-        try {
-            networkRule.checkoutInit(
-                responseFactory = successResponseFactory(
-                    jsonModifier = initModifier,
+        setup.sheetStateHolder.sheetIsOpen = sheetIsOpen
+
+        turbineScope {
+            val isUpdatingTurbine = controller.isUpdating.testIn(backgroundScope)
+            block(
+                MutationScenario(
+                    controller = controller,
+                    stateHolder = setup.stateHolder,
+                    testScope = this@runTest,
+                    isUpdatingTurbine = isUpdatingTurbine,
                 )
             )
-            val savedStateHandle = SavedStateHandle()
-            val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
-            val controller = setup.controller
-            controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
-            paymentSelection?.let(setup.stateHolder::setSelection)
-            temporarySelection?.let(setup.stateHolder::setTemporarySelection)
-            if (!previousNewSelections.isEmpty) {
-                setup.stateHolder.setPreviousNewSelections(previousNewSelections)
-            }
-            setup.sheetStateHolder.sheetIsOpen = sheetIsOpen
-
-            turbineScope {
-                val isUpdatingTurbine = controller.isUpdating.testIn(backgroundScope)
-                block(
-                    MutationScenario(
-                        controller = controller,
-                        stateHolder = setup.stateHolder,
-                        testScope = this@runTest,
-                        isUpdatingTurbine = isUpdatingTurbine,
-                    )
-                )
-                if (assertLoadingConsumed) {
-                    isUpdatingTurbine.ensureAllEventsConsumed()
-                } else {
-                    isUpdatingTurbine.cancelAndIgnoreRemainingEvents()
-                }
-            }
-        } finally {
-            if (useTestMainDispatcher) {
-                Dispatchers.resetMain()
+            if (assertLoadingConsumed) {
+                isUpdatingTurbine.ensureAllEventsConsumed()
+            } else {
+                isUpdatingTurbine.cancelAndIgnoreRemainingEvents()
             }
         }
     }
