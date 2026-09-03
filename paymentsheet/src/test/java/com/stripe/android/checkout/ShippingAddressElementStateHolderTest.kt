@@ -11,11 +11,13 @@ internal class ShippingAddressElementStateHolderTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = ShippingAddressElementStateHolder(savedStateHandle)
         stateHolder.isPresenting = true
+        stateHolder.updaterKey = "updater-key"
 
         val restoredStateHolder = ShippingAddressElementStateHolder(
             savedStateHandle = savedStateHandle.simulateProcessDeath(),
         )
 
         assertThat(restoredStateHolder.isPresenting).isTrue()
+        assertThat(restoredStateHolder.updaterKey).isEqualTo("updater-key")
     }
 }
