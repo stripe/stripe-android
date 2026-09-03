@@ -14,13 +14,7 @@ import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec.PlaceholderField
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
-import com.stripe.android.uicore.elements.AddressFieldsElement
-import com.stripe.android.uicore.elements.CountryElement
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.PhoneNumberElement
-import com.stripe.android.uicore.elements.SectionElement
-import kotlinx.coroutines.flow.filterNotNull
 
 internal object PlaceholderHelper {
     /**
@@ -177,38 +171,5 @@ internal object PlaceholderHelper {
         }
 
         else -> null
-    }
-
-    internal suspend fun connectBillingDetailsFields(elements: List<FormElement>) {
-        val phoneNumberElement: PhoneNumberElement? = elements
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<PhoneNumberElement>()
-            .firstOrNull()
-
-        // Look for a standalone CountryElement.
-        // Note that this should be done first, because AddressElement always has a
-        // CountryElement, but it might be hidden.
-        var countryElement = elements
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<CountryElement>()
-            .firstOrNull()
-
-        // If not found, look for one inside an AddressElement.
-        if (countryElement == null) {
-            countryElement = elements
-                .filterIsInstance<SectionElement>()
-                .flatMap { it.fields }
-                .filterIsInstance<AddressFieldsElement>()
-                .firstOrNull()
-                ?.countryElement
-        }
-
-        countryElement?.controller?.rawFieldValue?.filterNotNull()?.collect {
-            if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
-                phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
-            }
-        }
     }
 }
