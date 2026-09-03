@@ -23,14 +23,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgsHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -47,20 +46,24 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal class EmbeddedSheetActivity : AppCompatActivity() {
-    private var args: EmbeddedActivityArgs? = null
-    private var isReadyInitialized = false
+    private val args: EmbeddedActivityArgs? by lazy {
+        EmbeddedActivityArgs.fromIntent(intent)
+    }
 
     private val viewModel: EmbeddedSheetViewModel by viewModels {
         EmbeddedSheetViewModel.Factory {
-            requireNotNull(args).also {
-                require(it.launchMode !is EmbeddedLaunchMode.Loading)
-            }
+            requireNotNull(args)
         }
     }
+
+    @Inject
+    lateinit var argsHolder: EmbeddedActivityArgsHolder
 
     @Inject
     lateinit var eventReporter: EventReporter
@@ -75,34 +78,55 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     lateinit var selectionHolder: EmbeddedSelectionHolder
 
     @Inject
-    lateinit var sheetActivityRegistrar: SheetActivityRegistrar
+    lateinit var sheetActivityRegistrarProvider: Provider<SheetActivityRegistrar>
 
     @Inject
-    lateinit var sheetActivityStateHolder: SheetActivityStateHolder
+    lateinit var sheetActivityStateHolderProvider: Provider<SheetActivityStateHolder>
+
+    internal val sheetActivityStateHolder: SheetActivityStateHolder
+        get() = sheetActivityStateHolderProvider.get()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val activityArgs = EmbeddedActivityArgs.fromIntent(intent) ?: run {
+        if (args == null) {
             finish()
             return
         }
-        args = activityArgs
 
         renderEdgeToEdge()
+        viewModel.component.inject(this)
 
         onBackPressedDispatcher.addCallback {
-            if (!isReadyInitialized) {
-                dismissAndFinish()
-            } else if (!embeddedNavigator.screen.value.isPerformingNetworkOperation().value) {
+            if (!embeddedNavigator.screen.value.isPerformingNetworkOperation().value) {
                 embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
             }
         }
 
-        if (activityArgs.launchMode is EmbeddedLaunchMode.Loading) {
-            showLoading(activityArgs)
-        } else {
-            initializeReady(activityArgs)
+        lifecycleScope.launch {
+            val readyArgs = argsHolder.args.first { args ->
+                (args.launchMode as? EmbeddedLaunchMode.PaymentOptions)?.isLoading != true
+            }
+            sheetActivityRegistrarProvider.get().registerAndBootstrap(
+                activityResultCaller = PaymentElementActivityResultCaller(
+                    key = "EmbeddedSheetActivity_${readyArgs.paymentElementCallbackIdentifier}",
+                    registryOwner = this@EmbeddedSheetActivity,
+                ),
+                lifecycleOwner = this@EmbeddedSheetActivity,
+            )
+            sheetActivityStateHolderProvider.get().result.collect {
+                setActivityResult(it)
+                finish()
+            }
+        }
+
+        setContent {
+            val currentArgs by argsHolder.args.collectAsState()
+            PaymentElementTheme(appearance = currentArgs.configuration.appearance) {
+                EventReporterProvider(eventReporter) {
+                    SheetContent()
+                }
+            }
         }
     }
 
@@ -112,64 +136,10 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     }
 
     internal fun handleNewIntent(intent: Intent) {
-        if (
-            isFinishing ||
-            isReadyInitialized ||
-            args?.launchMode !is EmbeddedLaunchMode.Loading
-        ) {
-            return
-        }
-
-        val readyArgs = EmbeddedActivityArgs.fromIntent(intent) ?: return
-        if (readyArgs.launchMode !is EmbeddedLaunchMode.PaymentOptions) return
-
-        setIntent(intent)
-        args = readyArgs
-        initializeReady(readyArgs)
-    }
-
-    private fun initializeReady(activityArgs: EmbeddedActivityArgs) {
-        if (isReadyInitialized || isFinishing) return
-        isReadyInitialized = true
-
-        viewModel.component.inject(this)
-        sheetActivityRegistrar.registerAndBootstrap(
-            activityResultCaller = PaymentElementActivityResultCaller(
-                key = "EmbeddedSheetActivity_${activityArgs.paymentElementCallbackIdentifier}",
-                registryOwner = this,
-            ),
-            lifecycleOwner = this,
-        )
-        lifecycleScope.launch {
-            sheetActivityStateHolder.result.collect {
-                setActivityResult(it)
-                finish()
-            }
-        }
-
-        setContent {
-            PaymentElementTheme(appearance = activityArgs.configuration.appearance) {
-                EventReporterProvider(eventReporter) {
-                    SheetContent()
-                }
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterialApi::class)
-    private fun showLoading(activityArgs: EmbeddedActivityArgs) {
-        setContent {
-            PaymentElementTheme(appearance = activityArgs.configuration.appearance) {
-                val bottomSheetState = rememberStripeBottomSheetState()
-                ElementsBottomSheetLayout(
-                    state = bottomSheetState,
-                    onDismissed = ::dismissAndFinish,
-                ) {
-                    BottomSheetLoadingIndicator(
-                        modifier = Modifier.testTag(EMBEDDED_SHEET_LOADING_TEST_TAG)
-                    )
-                }
-            }
+        if (isFinishing) return
+        val updatedArgs = EmbeddedActivityArgs.fromIntent(intent) ?: return
+        if (viewModel.updateArgs(updatedArgs)) {
+            setIntent(intent)
         }
     }
 
@@ -192,16 +162,13 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 LaunchedEffect(Unit) {
                     embeddedNavigator.result.collect { result ->
                         hasResult = true
-                        when (args?.launchMode) {
-                            is EmbeddedLaunchMode.Loading -> {
-                                error("Loading does not initialize the embedded sheet component.")
-                            }
+                        when (argsHolder.args.value.launchMode) {
                             is EmbeddedLaunchMode.Form -> dismissAndFinish()
                             is EmbeddedLaunchMode.PaymentOptions -> {
                                 setCancelledPaymentOptionsResult()
                                 finish()
                             }
-                            is EmbeddedLaunchMode.Manage, null -> {
+                            is EmbeddedLaunchMode.Manage -> {
                                 setManageResult(shouldInvokeSelectionCallback = result == true)
                                 finish()
                             }
@@ -228,15 +195,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     }
 
     private fun dismissAndFinish() {
-        when (val launchMode = args?.launchMode) {
-            is EmbeddedLaunchMode.Loading -> {
-                setActivityResult(
-                    EmbeddedActivityResult.Cancelled(
-                        customerState = null,
-                        launchMode = launchMode,
-                    )
-                )
-            }
+        when (val launchMode = argsHolder.args.value.launchMode) {
             is EmbeddedLaunchMode.Form -> {
                 setActivityResult(
                     EmbeddedActivityResult.Cancelled(
@@ -245,7 +204,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                     )
                 )
             }
-            is EmbeddedLaunchMode.Manage, null -> {
+            is EmbeddedLaunchMode.Manage -> {
                 setManageResult(shouldInvokeSelectionCallback = false)
             }
             is EmbeddedLaunchMode.PaymentOptions -> {
@@ -266,16 +225,17 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 customerState = customerStateHolder.customer.value,
                 checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
-                launchMode = args?.launchMode ?: EmbeddedLaunchMode.Manage,
+                launchMode = argsHolder.args.value.launchMode,
             )
         )
     }
 
     private fun setCancelledPaymentOptionsResult() {
+        val launchMode = argsHolder.args.value.launchMode as EmbeddedLaunchMode.PaymentOptions
         setActivityResult(
             EmbeddedActivityResult.Cancelled(
                 customerState = customerStateHolder.customer.value,
-                launchMode = EmbeddedLaunchMode.PaymentOptions,
+                launchMode = launchMode,
             )
         )
     }

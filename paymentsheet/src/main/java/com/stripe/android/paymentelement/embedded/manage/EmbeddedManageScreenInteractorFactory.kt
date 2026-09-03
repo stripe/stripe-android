@@ -44,8 +44,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {
                 val action = when (launchMode) {
-                    EmbeddedLaunchMode.Loading -> error("Loading does not initialize manage screens.")
-                    EmbeddedLaunchMode.PaymentOptions -> EmbeddedNavigator.Action.Back
+                    is EmbeddedLaunchMode.PaymentOptions -> EmbeddedNavigator.Action.Back
                     EmbeddedLaunchMode.Manage,
                     is EmbeddedLaunchMode.Form -> EmbeddedNavigator.Action.Close(true)
                 }

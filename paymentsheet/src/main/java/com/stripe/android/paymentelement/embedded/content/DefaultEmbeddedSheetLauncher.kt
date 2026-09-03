@@ -47,13 +47,6 @@ internal interface EmbeddedSheetLauncher {
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
     )
-
-    fun launchLoading(
-        paymentMethodMetadata: PaymentMethodMetadata,
-        customerState: CustomerState?,
-        selection: PaymentSelection?,
-        configuration: EmbeddedPaymentElement.Configuration?,
-    )
 }
 
 @EmbeddedPaymentElementScope
@@ -92,7 +85,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
                 is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
-                is EmbeddedLaunchMode.Loading -> Unit
             }
         }
 
@@ -241,37 +233,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
     ) {
-        launchPaymentOptions(
-            paymentMethodMetadata = paymentMethodMetadata,
-            customerState = customerState,
-            selection = selection,
-            configuration = configuration,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
-        )
-    }
-
-    override fun launchLoading(
-        paymentMethodMetadata: PaymentMethodMetadata,
-        customerState: CustomerState?,
-        selection: PaymentSelection?,
-        configuration: EmbeddedPaymentElement.Configuration?,
-    ) {
-        launchPaymentOptions(
-            paymentMethodMetadata = paymentMethodMetadata,
-            customerState = customerState,
-            selection = selection,
-            configuration = configuration,
-            launchMode = EmbeddedLaunchMode.Loading,
-        )
-    }
-
-    private fun launchPaymentOptions(
-        paymentMethodMetadata: PaymentMethodMetadata,
-        customerState: CustomerState?,
-        selection: PaymentSelection?,
-        configuration: EmbeddedPaymentElement.Configuration?,
-        launchMode: EmbeddedLaunchMode,
-    ) {
         if (configuration == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
@@ -290,7 +251,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
-            launchMode = launchMode,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         )
         activityLauncher.launch(args)
     }

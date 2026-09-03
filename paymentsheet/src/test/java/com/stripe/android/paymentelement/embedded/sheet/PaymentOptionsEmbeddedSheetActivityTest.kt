@@ -67,13 +67,16 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         .around(PaymentConfigurationTestRule(applicationContext))
 
     @Test
-    fun `loading launch renders loading and back returns cancelled without customer state`() = launch(
+    fun `loading launch renders loading and back returns cancelled with payment options state`() = launch(
         selection = null,
         previousNewSelections = Bundle(),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-        launchMode = EmbeddedLaunchMode.Loading,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = true),
     ) { scenario ->
+        scenario.onActivity { activity ->
+            assertThat(activity.embeddedNavigator.screen.value).isEqualTo(EmbeddedNavigator.Screen.Loading)
+        }
         composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
 
         Espresso.pressBack()
@@ -83,8 +86,8 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             scenario.result.resultCode,
             scenario.result.resultData,
         ) as EmbeddedActivityResult.Cancelled
-        assertThat(result.customerState).isNull()
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.Loading)
+        assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(isLoading = true))
     }
 
     @Test
@@ -95,7 +98,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
         customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-        launchMode = EmbeddedLaunchMode.Loading,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = true),
     ) { scenario ->
         val horizontalArgs = createArgs(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -111,6 +114,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         }
         composeTestRule.waitForIdle()
         scenario.onActivity { activity ->
+            assertThat(activity.argsHolder.args.value).isEqualTo(horizontalArgs)
             assertThat(activity.embeddedNavigator.screen.value)
                 .isInstanceOf(EmbeddedNavigator.Screen.HorizontalPaymentOptions::class.java)
 
@@ -128,6 +132,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         }
         composeTestRule.waitForIdle()
         scenario.onActivity { activity ->
+            assertThat(activity.argsHolder.args.value).isEqualTo(horizontalArgs)
             assertThat(activity.embeddedNavigator.screen.value)
                 .isInstanceOf(EmbeddedNavigator.Screen.HorizontalPaymentOptions::class.java)
         }
@@ -147,7 +152,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
+            EmbeddedLaunchMode.PaymentOptions(isLoading = false)
         )
     }
 
@@ -162,7 +167,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     customerState = null,
                     checkoutSessionResponse = null,
                     shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.PaymentOptions,
+                    launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
                 )
             )
         }
@@ -174,7 +179,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
         val complete = result as EmbeddedActivityResult.Complete
         assertThat(complete.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
+            EmbeddedLaunchMode.PaymentOptions(isLoading = false)
         )
     }
 
@@ -191,7 +196,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
+            EmbeddedLaunchMode.PaymentOptions(isLoading = false)
         )
     }
 
@@ -265,7 +270,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = activity.selectionHolder,
                 customerStateHolder = activity.customerStateHolder,
-                launchMode = EmbeddedLaunchMode.PaymentOptions,
+                launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
             )
             activity.embeddedNavigator.performAction(
                 EmbeddedNavigator.Action.ReplaceCurrentScreen(originalScreen)
@@ -396,7 +401,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         previousNewSelections: Bundle,
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
@@ -420,7 +425,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         previousNewSelections: Bundle = Bundle(),
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
     ): EmbeddedActivityArgs {
         return EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,

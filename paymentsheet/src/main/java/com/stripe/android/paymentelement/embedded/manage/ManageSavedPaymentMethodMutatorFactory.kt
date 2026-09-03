@@ -48,7 +48,6 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
                 val shouldNavigateBack = when (launchMode) {
-                    is EmbeddedLaunchMode.Loading -> error("Loading does not initialize saved payment method state.")
                     is EmbeddedLaunchMode.PaymentOptions -> true
                     is EmbeddedLaunchMode.Manage,
                     is EmbeddedLaunchMode.Form -> customerStateHolder.paymentMethods.value.size > 1
@@ -73,7 +72,6 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     private fun onPaymentMethodRemoved() {
         if (customerStateHolder.paymentMethods.value.isEmpty()) {
             when (launchMode) {
-                is EmbeddedLaunchMode.Loading -> error("Loading does not initialize saved payment method state.")
                 is EmbeddedLaunchMode.PaymentOptions -> Unit
                 is EmbeddedLaunchMode.Manage,
                 is EmbeddedLaunchMode.Form -> {

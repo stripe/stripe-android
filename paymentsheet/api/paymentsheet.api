@@ -836,12 +836,6 @@ public abstract interface class com/stripe/android/paymentelement/WalletButtonsV
 	public abstract fun onWalletButtonClick (Ljava/lang/String;)Z
 }
 
-public final class com/stripe/android/paymentelement/embedded/sheet/ComposableSingletons$EmbeddedSheetActivityKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentelement/embedded/sheet/ComposableSingletons$EmbeddedSheetActivityKt;
-	public fun <init> ()V
-	public final fun getLambda$471606769$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/paymentsheet/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z

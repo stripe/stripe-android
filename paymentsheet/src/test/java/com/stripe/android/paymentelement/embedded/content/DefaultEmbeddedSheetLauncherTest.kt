@@ -587,7 +587,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         )
 
         sheetLauncher.launchPaymentOptions(
@@ -599,28 +599,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
         assertThat(launchCall).isEqualTo(expectedArgs)
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
-    }
-
-    @Test
-    fun `launchLoading launches activity with Loading mode`() = testScenario {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val configuration = EmbeddedConfigurationFactory.create()
-
-        sheetLauncher.launchLoading(
-            paymentMethodMetadata = paymentMethodMetadata,
-            customerState = customerState,
-            selection = PaymentSelection.GooglePay,
-            configuration = configuration,
-        )
-
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(launchCall.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        assertThat(launchCall.customerState).isEqualTo(customerState)
-        assertThat(launchCall.selection).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(launchCall.configuration).isEqualTo(configuration)
-        assertThat(launchCall.launchMode).isEqualTo(EmbeddedLaunchMode.Loading)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
@@ -682,7 +660,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -704,7 +682,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -725,7 +703,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = true,
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -741,7 +719,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val result = EmbeddedActivityResult.Cancelled(
             customerState = customerState,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -761,7 +739,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = emptyList()),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
@@ -780,7 +758,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = listOf(paymentMethod)),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)

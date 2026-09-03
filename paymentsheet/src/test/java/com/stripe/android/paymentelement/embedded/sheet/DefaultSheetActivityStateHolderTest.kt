@@ -128,7 +128,7 @@ internal class DefaultSheetActivityStateHolderTest {
     @Test
     fun `PaymentOptions mode always uses continue label regardless of formSheetAction`() {
         testScenario(
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         ) {
             stateHolder.state.test {
                 val state = awaitItem()
@@ -572,7 +572,7 @@ internal class DefaultSheetActivityStateHolderTest {
         val formScreen = createFormScreen(formInteractor)
         testScenario(
             tapToAddHelper = tapToAddHelper,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
             initialBackStack = listOf(paymentOptionsScreen, formScreen),
             savedPaymentMethodConfirmInteractorFactory = interactorFactory,
         ) {

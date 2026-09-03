@@ -81,7 +81,6 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
                 is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
-                is EmbeddedLaunchMode.Loading -> Unit
             }
         }
 
@@ -243,7 +242,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 configuration = configuration,
                 selection = selection,
                 customerState = customerState,
-                launchMode = EmbeddedLaunchMode.Loading,
+                launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = true),
             )
             pendingReadyLaunch = coroutineScope.launch {
                 operationCoordinator.isUpdating.first { isUpdating -> !isUpdating }
@@ -256,7 +255,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                         configuration = currentState.configuration,
                         selection = selectionHolder.selection.value,
                         customerState = customerStateHolder.customer.value,
-                        launchMode = EmbeddedLaunchMode.PaymentOptions,
+                        launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
                     )
                 )
             }
@@ -267,33 +266,10 @@ internal class CheckoutSheetLauncher @Inject constructor(
                     configuration = configuration,
                     selection = selection,
                     customerState = customerState,
-                    launchMode = EmbeddedLaunchMode.PaymentOptions,
+                    launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
                 )
             )
         }
-    }
-
-    override fun launchLoading(
-        paymentMethodMetadata: PaymentMethodMetadata,
-        customerState: CustomerState?,
-        selection: PaymentSelection?,
-        configuration: EmbeddedPaymentElement.Configuration?,
-    ) {
-        if (configuration == null) {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
-            )
-            return
-        }
-        if (sheetStateHolder.sheetIsOpen) return
-        sheetStateHolder.sheetIsOpen = true
-        launchPaymentOptionsActivity(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
-            selection = selection,
-            customerState = customerState,
-            launchMode = EmbeddedLaunchMode.Loading,
-        )
     }
 
     private fun launchPaymentOptionsActivity(
@@ -301,7 +277,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         customerState: CustomerState?,
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration,
-        launchMode: EmbeddedLaunchMode,
+        launchMode: EmbeddedLaunchMode.PaymentOptions,
     ) {
         activityLauncher.launch(
             createPaymentOptionsArgs(
@@ -319,7 +295,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         customerState: CustomerState?,
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration,
-        launchMode: EmbeddedLaunchMode,
+        launchMode: EmbeddedLaunchMode.PaymentOptions,
     ): EmbeddedActivityArgs {
         return EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgsHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,6 +17,10 @@ internal class EmbeddedSheetViewModel(
     val component: EmbeddedSheetComponent,
     @ViewModelScope private val customViewModelScope: CoroutineScope,
 ) : ViewModel() {
+    fun updateArgs(args: EmbeddedActivityArgs): Boolean {
+        return component.argsUpdater.update(args)
+    }
+
     override fun onCleared() {
         customViewModelScope.cancel()
     }
@@ -26,17 +31,12 @@ internal class EmbeddedSheetViewModel(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argsSupplier()
+            val argsHolder = EmbeddedActivityArgsHolder(args)
             val customViewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
             val component = DaggerEmbeddedSheetComponent.factory().build(
-                paymentMethodMetadata = args.paymentMethodMetadata,
-                statusBarColor = args.statusBarColor,
-                configuration = args.configuration,
-                productUsage = args.productUsage,
-                paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+                argsHolder = argsHolder,
                 application = extras.requireApplication(),
                 savedStateHandle = extras.createSavedStateHandle(),
-                promotions = args.promotions,
-                launchMode = args.launchMode,
                 viewModelScope = customViewModelScope,
             )
 
