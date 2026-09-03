@@ -33,7 +33,7 @@ internal class NfcScanningTest {
 
     @Test
     fun success(
-        integrationType: NfcScanningIntegrationType = NfcScanningIntegrationType.PaymentSheet,
+        integrationType: NfcScanningIntegrationType,
     ) = runNfcScanningIntegrationTest(
         integrationType = integrationType,
         composeTestRule = composeTestRule,

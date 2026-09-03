@@ -20,9 +20,9 @@ import org.junit.rules.RuleChain
 
 @Burst
 internal class DefaultPaymentMethodsConfirmationTest(
-    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
-    private val confirmationType: ConfirmationType = ConfirmationType.IntentFirst,
-    private val paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
+    private val integrationType: ProductIntegrationType,
+    private val confirmationType: ConfirmationType,
+    private val paymentMethodType: PaymentMethodType,
 ) {
     private val testRules: TestRules = TestRules.create()
 

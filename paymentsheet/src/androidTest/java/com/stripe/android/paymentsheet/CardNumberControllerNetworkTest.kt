@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(CardFundingFilteringPrivatePreview::class)
 @Burst
 internal class CardNumberControllerNetworkTest(
-    private val integrationType: IntegrationType = IntegrationType.Activity,
+    private val integrationType: IntegrationType,
 ) {
     // The card-metadata request happens async during card number input. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.

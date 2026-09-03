@@ -35,7 +35,7 @@ import org.junit.Test
 
 @Burst
 internal class PaymentSheetTest(
-    private val integrationType: IntegrationType = IntegrationType.Activity,
+    private val integrationType: IntegrationType,
 ) {
     private val networkRule = NetworkRule()
 

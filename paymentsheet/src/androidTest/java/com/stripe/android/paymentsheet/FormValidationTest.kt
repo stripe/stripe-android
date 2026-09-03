@@ -37,7 +37,7 @@ internal class FormValidationTest {
 
     @Test
     fun testCard(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+        integrationType: ProductIntegrationType,
     ) = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -58,7 +58,7 @@ internal class FormValidationTest {
 
     @Test
     fun testUsBankAccount(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+        integrationType: ProductIntegrationType,
     ) = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,

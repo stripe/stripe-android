@@ -20,8 +20,8 @@ import org.junit.Test
 
 @Burst
 internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
-    private val confirmationType: ConfirmationType = ConfirmationType.IntentFirst,
-    private val paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
+    private val confirmationType: ConfirmationType,
+    private val paymentMethodType: PaymentMethodType,
 ) {
     @get:Rule
     val testRules: TestRules = TestRules.create {

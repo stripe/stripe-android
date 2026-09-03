@@ -218,8 +218,8 @@ internal class PaymentSheetBillingConfigurationTest {
 
     @Test
     fun testWithDefaults(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
-        layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical,
+        integrationType: ProductIntegrationType,
+        layoutType: PaymentSheetLayoutType,
     ) = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,

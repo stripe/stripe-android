@@ -44,7 +44,7 @@ import org.junit.Test
 
 @Burst
 internal class GooglePayTest(
-    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+    private val integrationType: ProductIntegrationType,
 ) {
 
     @get:Rule

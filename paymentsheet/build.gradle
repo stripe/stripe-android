@@ -149,6 +149,7 @@ dependencies {
 android {
     defaultConfig {
         testApplicationId "com.stripe.android.paymentsheet.test"
+        testInstrumentationRunner "com.stripe.android.paymentsheet.BurstAndroidJUnitRunner"
     }
 
     buildFeatures {

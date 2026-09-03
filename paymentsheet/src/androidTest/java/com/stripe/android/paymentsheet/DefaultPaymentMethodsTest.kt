@@ -18,8 +18,8 @@ import org.junit.Test
 
 @Burst
 internal class DefaultPaymentMethodsTest(
-    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
-    private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical,
+    private val integrationType: ProductIntegrationType,
+    private val layoutType: PaymentSheetLayoutType,
 ) {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()

@@ -33,7 +33,7 @@ internal class CustomPaymentMethodsTest {
 
     @Test
     fun testSuccessful(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet
+        integrationType: ProductIntegrationType
     ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
@@ -89,7 +89,7 @@ internal class CustomPaymentMethodsTest {
 
     @Test
     fun testSuccessfulWithBillingDetailsCollection(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet
+        integrationType: ProductIntegrationType
     ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
@@ -164,7 +164,7 @@ internal class CustomPaymentMethodsTest {
 
     @Test
     fun testSuccessfulWithBillingDetailsCollectionDisabled(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet
+        integrationType: ProductIntegrationType
     ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",

@@ -29,7 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @Burst
 internal class LinkTest(
-    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+    private val integrationType: ProductIntegrationType,
 ) {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.

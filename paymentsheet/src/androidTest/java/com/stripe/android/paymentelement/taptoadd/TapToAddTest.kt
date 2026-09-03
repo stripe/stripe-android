@@ -60,7 +60,7 @@ internal class TapToAddTest {
 
     @Test
     fun successWithCompleteMode(
-        integrationType: TapToAddIntegrationType.Complete = TapToAddIntegrationType.Complete.PaymentSheet
+        integrationType: TapToAddIntegrationType.Complete
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         composeTestRule = composeTestRule,
@@ -96,7 +96,7 @@ internal class TapToAddTest {
 
     @Test
     fun successWithContinueMode(
-        integrationType: TapToAddIntegrationType.Continue = TapToAddIntegrationType.Continue.FlowController
+        integrationType: TapToAddIntegrationType.Continue
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         composeTestRule = composeTestRule,
@@ -180,7 +180,7 @@ internal class TapToAddTest {
 
     @Test
     fun successAfterCancelAfterCardCollectedWithCompleteMode(
-        integrationType: TapToAddIntegrationType.Complete = TapToAddIntegrationType.Complete.PaymentSheet,
+        integrationType: TapToAddIntegrationType.Complete,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         composeTestRule = composeTestRule,

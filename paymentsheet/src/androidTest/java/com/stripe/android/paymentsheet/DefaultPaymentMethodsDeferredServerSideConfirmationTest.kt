@@ -14,7 +14,7 @@ import org.junit.Test
 
 @Burst
 internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest(
-    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+    private val integrationType: ProductIntegrationType,
 ) {
 
     @get:Rule

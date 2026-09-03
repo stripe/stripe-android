@@ -749,7 +749,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentWithMultipleInstances(
-        testType: MultipleInstancesTestType = MultipleInstancesTestType.RunWithFirst,
+        testType: MultipleInstancesTestType,
     ) = runMultiplePaymentSheetInstancesTest(
         networkRule = networkRule,
         testType = testType,

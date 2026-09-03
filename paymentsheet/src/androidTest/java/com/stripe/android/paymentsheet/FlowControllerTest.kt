@@ -78,7 +78,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testSuccessfulCardPayment(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -117,7 +117,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testSuccessfulCardPaymentWithVerticalMode(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -159,7 +159,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testCardRelaunchesIntoFormPage(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
             networkRule = networkRule,
@@ -201,7 +201,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testCashappRelaunchesIntoListPageWithCashappSelected(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
             networkRule = networkRule,
@@ -245,7 +245,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testCorrectMandatesDisplayedAfterNavigation(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
             networkRule = networkRule,
@@ -300,7 +300,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testFailedElementsSessionCall(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -388,7 +388,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testFailedConfirmCall(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
             networkRule = networkRule,
@@ -556,7 +556,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testDeferredIntentCardPayment(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -629,7 +629,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testDeferredIntentWithMultipleInstances(
-        testType: MultipleInstancesTestType = MultipleInstancesTestType.RunWithFirst,
+        testType: MultipleInstancesTestType,
     ) = runMultipleFlowControllerInstancesTest(
         networkRule = networkRule,
         testType = testType,
@@ -688,7 +688,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testDeferredIntentFailedCardPayment(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -748,7 +748,7 @@ internal class FlowControllerTest {
     @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -801,7 +801,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testDeferredIntentCardPaymentWithInvalidStripeIntent(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -868,7 +868,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testCvcRecollection(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -937,7 +937,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testSavedCardsInVerticalMode(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -1017,7 +1017,7 @@ internal class FlowControllerTest {
      */
     @Test
     fun testDefaultPaymentMethodOrderWithFailedSession(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -1220,7 +1220,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testFlowControllerConfigurationBuilderWithTermsDisplayNever(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -1266,7 +1266,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testOBO_PassedToElementsSessionCall(
-        integrationType: IntegrationType = IntegrationType.Activity,
+        integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
