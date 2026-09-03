@@ -2,7 +2,7 @@
 
 package com.stripe.android.paymentmethodmessaging.element
 
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethodMessage
@@ -26,7 +26,7 @@ internal interface PaymentMethodMessagingCoordinator {
 
 internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     private val eventReporter: PaymentMethodMessagingEventReporter,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val errorReporter: ErrorReporter
@@ -46,8 +46,8 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
             locale = configuration.locale,
             country = configuration.countryCode,
             requestOptions = ApiRequest.Options(
-                apiKey = paymentConfiguration.get().publishableKey,
-                stripeAccount = paymentConfiguration.get().stripeAccountId
+                apiKey = apiConfigProvider.get().publishableKey,
+                stripeAccount = apiConfigProvider.get().stripeAccountId
             )
         ).fold(
             onSuccess = { paymentMethodMessage ->
