@@ -21,7 +21,7 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
                 configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
             .billingDetailsCollectionConfiguration(
-                configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse)
+                checkoutSessionResponse.toBillingDetailsCollectionConfiguration()
             )
             .preferredNetworks(configuration.paymentElementConfiguration.preferredNetworks)
             .paymentMethodOrder(configuration.paymentElementConfiguration.paymentMethodOrder)

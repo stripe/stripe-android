@@ -7,12 +7,15 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.toBillingDetailsCollectionConfiguration(
-    checkoutSessionResponse: CheckoutSessionResponse,
-): PaymentSheet.BillingDetailsCollectionConfiguration =
-    paymentElementConfiguration.billingDetailsCollectionConfiguration
-        .reconcile(checkoutSessionResponse.requiresBillingAddress)
-        .asPaymentSheet()
+internal fun CheckoutSessionResponse.toBillingDetailsCollectionConfiguration():
+    PaymentSheet.BillingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+    address = if (requiresBillingAddress) {
+        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+    } else {
+        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+    },
+    attachDefaultsToPaymentMethod = true,
+)
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutController.Configuration.State.resolveMerchantDisplayName(
