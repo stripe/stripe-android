@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout.settings
 import android.content.Context
 import androidx.core.content.edit
 import com.stripe.android.paymentsheet.example.Settings
-import com.stripe.android.paymentsheet.example.playground.settings.applyFeatureFlags
+import com.stripe.android.paymentsheet.example.playground.applyFeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

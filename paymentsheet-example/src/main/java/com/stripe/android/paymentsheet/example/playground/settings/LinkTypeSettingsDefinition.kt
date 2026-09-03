@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.paymentsheet.example.playground.applyFeatureFlags
 
 internal object LinkTypeSettingsDefinition :
     PlaygroundSettingDefinition<LinkType>,
@@ -47,25 +47,4 @@ enum class LinkType(override val value: String) : ValueEnum {
     Native("Native"),
     NativeAttest("Native + Attest"),
     Web("Web"),
-}
-
-internal fun LinkType.applyFeatureFlags() {
-    when (this) {
-        LinkType.ServerControlled -> {
-            FeatureFlags.nativeLinkEnabled.reset()
-            FeatureFlags.nativeLinkAttestationEnabled.reset()
-        }
-        LinkType.Native -> {
-            FeatureFlags.nativeLinkEnabled.setEnabled(true)
-            FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
-        }
-        LinkType.NativeAttest -> {
-            FeatureFlags.nativeLinkEnabled.setEnabled(true)
-            FeatureFlags.nativeLinkAttestationEnabled.setEnabled(true)
-        }
-        LinkType.Web -> {
-            FeatureFlags.nativeLinkEnabled.setEnabled(false)
-            FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
-        }
-    }
 }
