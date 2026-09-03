@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.googlepaylauncher.utils.LauncherIntegrationType
 import com.stripe.android.googlepaylauncher.utils.runGooglePayPaymentMethodLauncherTest
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -14,6 +15,7 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -52,6 +54,7 @@ class GooglePayPaymentMethodLauncherTest {
                 skipReadyCheck = true,
                 context = activity,
                 googlePayRepositoryFactory = mock(),
+                apiConfigurationProvider = API_CONFIGURATION_PROVIDER,
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
                     publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
@@ -84,6 +87,7 @@ class GooglePayPaymentMethodLauncherTest {
                 skipReadyCheck = true,
                 context = activity,
                 googlePayRepositoryFactory = mock(),
+                apiConfigurationProvider = API_CONFIGURATION_PROVIDER,
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
                     publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
@@ -101,6 +105,7 @@ class GooglePayPaymentMethodLauncherTest {
                 skipReadyCheck = true,
                 context = activity,
                 googlePayRepositoryFactory = mock(),
+                apiConfigurationProvider = API_CONFIGURATION_PROVIDER,
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
                     publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
@@ -127,6 +132,13 @@ class GooglePayPaymentMethodLauncherTest {
     }
 
     private companion object {
+        val API_CONFIGURATION_PROVIDER = Provider {
+            ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            )
+        }
+
         val CONFIG = GooglePayPaymentMethodLauncher.Config(
             GooglePayEnvironment.Test,
             merchantCountryCode = "US",

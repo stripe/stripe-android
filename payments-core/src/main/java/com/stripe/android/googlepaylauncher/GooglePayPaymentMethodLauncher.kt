@@ -59,20 +59,14 @@ class GooglePayPaymentMethodLauncher internal constructor(
     googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val cardBrandFilter: CardBrandFilter,
     private val cardFundingFilter: CardFundingFilter,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context = context,
-        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+        publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
         defaultProductUsageTokens = setOf(PRODUCT_USAGE_TOKEN)
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {
-    private val apiConfigurationProvider = Provider {
-        val paymentConfiguration = PaymentConfiguration.getInstance(context)
-        ApiConfiguration.State(
-            publishableKey = paymentConfiguration.publishableKey,
-            stripeAccountId = paymentConfiguration.stripeAccountId,
-        )
-    }
     private var isReady = false
     private val internalLauncher = InternalGooglePayPaymentMethodLauncher(
         instanceId = INSTANCE_ID,
@@ -110,7 +104,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
         config,
         readyCallback,
         DefaultCardBrandFilter,
-        DefaultCardFundingFilter
+        DefaultCardFundingFilter,
+        paymentConfigurationApiConfigurationProvider(activity),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -134,7 +129,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
         config,
         readyCallback,
         DefaultCardBrandFilter,
-        DefaultCardFundingFilter
+        DefaultCardFundingFilter,
+        paymentConfigurationApiConfigurationProvider(activity),
     )
 
     /**
@@ -164,7 +160,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
         config,
         readyCallback,
         DefaultCardBrandFilter,
-        DefaultCardFundingFilter
+        DefaultCardFundingFilter,
+        paymentConfigurationApiConfigurationProvider(fragment.requireContext()),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -175,7 +172,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
         config: Config,
         readyCallback: ReadyCallback,
         cardBrandFilter: CardBrandFilter,
-        cardFundingFilter: CardFundingFilter
+        cardFundingFilter: CardFundingFilter,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
     ) : this(
         lifecycleOwner,
         config,
@@ -199,7 +197,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     apiConfiguration = apiConfiguration,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
-                        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                        publishableKeyProvider = { apiConfiguration.publishableKey },
                         productUsage = setOf(PRODUCT_USAGE_TOKEN),
                     ),
                     cardFundingFilter = cardFundingFilter,
@@ -208,7 +206,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
             }
         },
         cardBrandFilter = cardBrandFilter,
-        cardFundingFilter = cardFundingFilter
+        cardFundingFilter = cardFundingFilter,
+        apiConfigurationProvider = apiConfigurationProvider,
     )
 
     init {
@@ -479,7 +478,18 @@ fun rememberGooglePayPaymentMethodLauncher(
                 currentReadyCallback.onReady(it)
             },
             cardBrandFilter = DefaultCardBrandFilter,
-            cardFundingFilter = DefaultCardFundingFilter
+            cardFundingFilter = DefaultCardFundingFilter,
+            apiConfigurationProvider = paymentConfigurationApiConfigurationProvider(context),
         )
     }
+}
+
+private fun paymentConfigurationApiConfigurationProvider(
+    context: Context,
+): Provider<ApiConfiguration.State> = Provider {
+    val paymentConfiguration = PaymentConfiguration.getInstance(context)
+    ApiConfiguration.State(
+        publishableKey = paymentConfiguration.publishableKey,
+        stripeAccountId = paymentConfiguration.stripeAccountId,
+    )
 }
