@@ -20,6 +20,14 @@
   <string name="stripe_cashapp_afterpay_subtitle">Buy now or pay later with Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Buy now or pay later with Clearpay</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Discard changes?</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Your address changes have not been saved.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Discard changes</string>
+  <!-- Secondary action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_dismiss">Keep editing</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">Your payment information will not be saved.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
