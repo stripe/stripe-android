@@ -22,21 +22,6 @@ public final class com/stripe/android/ui/core/databinding/StripeActivityCardScan
 public final class com/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement$Companion {
 }
 
-public final class com/stripe/android/ui/core/elements/Capitalization : java/lang/Enum {
-	public static final field Characters Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static final field Companion Lcom/stripe/android/ui/core/elements/Capitalization$Companion;
-	public static final field None Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static final field Sentences Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static final field Words Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static fun values ()[Lcom/stripe/android/ui/core/elements/Capitalization;
-}
-
-public final class com/stripe/android/ui/core/elements/Capitalization$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public final synthetic class com/stripe/android/ui/core/elements/ExternalPaymentMethodSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ExternalPaymentMethodSpec$$serializer;
@@ -53,77 +38,8 @@ public final class com/stripe/android/ui/core/elements/ExternalPaymentMethodSpec
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/FormItemSpec$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/FormItemSpecSerializer : kotlinx/serialization/json/JsonContentPolymorphicSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/FormItemSpecSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/KeyboardType : java/lang/Enum {
-	public static final field Ascii Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Companion Lcom/stripe/android/ui/core/elements/KeyboardType$Companion;
-	public static final field Email Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Number Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field NumberPassword Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Password Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Phone Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Text Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Uri Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static fun values ()[Lcom/stripe/android/ui/core/elements/KeyboardType;
-}
-
-public final class com/stripe/android/ui/core/elements/KeyboardType$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/LayoutSpec$Companion {
-	public final fun create ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public final fun create ([Lcom/stripe/android/ui/core/elements/FormItemSpec;)Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
 	public static final field SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG Ljava/lang/String;
-}
-
-public final synthetic class com/stripe/android/ui/core/elements/SelectorIcon$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/SelectorIcon$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/SelectorIcon;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/SelectorIcon;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/SelectorIcon$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final synthetic class com/stripe/android/ui/core/elements/SharedDataSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/SharedDataSpec$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/SharedDataSpec;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/SharedDataSpec;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/SharedDataSpec$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/TranslationId$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final synthetic class com/stripe/android/ui/core/elements/autocomplete/model/AddressComponent$$serializer : kotlinx/serialization/internal/GeneratedSerializer {

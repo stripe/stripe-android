@@ -21,7 +21,6 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.link.LinkController
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -266,7 +265,6 @@ internal interface PaymentElementLoader {
 internal class DefaultPaymentElementLoader @Inject constructor(
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
-    private val lpmRepository: LpmRepository,
     private val logger: Logger,
     private val eventReporter: LoadingEventReporter,
     private val errorReporter: ErrorReporter,
@@ -562,15 +560,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): PaymentMethodMetadata {
-        val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
-            stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        )
-
-        if (sharedDataSpecsResult.failedToParseServerResponse) {
-            eventReporter.onLpmSpecFailure(sharedDataSpecsResult.failedToParseServerErrorMessage)
-        }
-
         val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
             elementsSession.externalPaymentMethodData
         )
@@ -607,7 +596,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val paymentMethodMetadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration,
-            sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
             linkStateResult = linkStateResult,
