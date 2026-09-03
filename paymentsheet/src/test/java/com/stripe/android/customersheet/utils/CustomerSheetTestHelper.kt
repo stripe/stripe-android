@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -52,6 +53,7 @@ import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import org.mockito.kotlin.mock
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -140,8 +142,7 @@ internal interface CustomerSheetTestHelper {
                     },
                     stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
                         override fun create(
-                            publishableKey: () -> String,
-                            stripeAccountId: () -> String?,
+                            apiConfigurationProvider: Provider<ApiConfiguration.State>,
                             statusBarColor: Int?,
                             includePaymentSheetNextHandlers: Boolean,
                             hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
