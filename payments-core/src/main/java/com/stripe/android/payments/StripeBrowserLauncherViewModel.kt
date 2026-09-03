@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -122,21 +121,22 @@ internal class StripeBrowserLauncherViewModel(
         )
     }
 
-    class Factory : ViewModelProvider.Factory {
+    class Factory(
+        private val args: PaymentBrowserAuthContract.Args,
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
-            val config = PaymentConfiguration.getInstance(application)
             val browserCapabilitiesSupplier = BrowserCapabilitiesSupplier(application)
 
             return StripeBrowserLauncherViewModel(
                 analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = application,
-                    publishableKeyProvider = { config.publishableKey },
+                    publishableKeyProvider = { args.publishableKey },
                 ),
                 browserCapabilities = browserCapabilitiesSupplier.get(),
                 customTabsPackage = CustomTabsClient.getPackageName(application, null),
