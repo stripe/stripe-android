@@ -41,7 +41,7 @@ class AddressLauncher internal constructor(
         activityResultLauncher = activity.registerForActivityResult(
             AddressElementActivityContract
         ) {
-            callback.onAddressLauncherResult(it)
+            callback.onAddressLauncherResult(it.addressOptionsResult)
         },
     )
 
@@ -58,7 +58,7 @@ class AddressLauncher internal constructor(
             signal,
             AddressElementActivityContract
         ) {
-            callback.onAddressLauncherResult(it)
+            callback.onAddressLauncherResult(it.addressOptionsResult)
         },
     )
 
@@ -76,7 +76,7 @@ class AddressLauncher internal constructor(
         activityResultLauncher = fragment.registerForActivityResult(
             AddressElementActivityContract
         ) {
-            callback.onAddressLauncherResult(it)
+            callback.onAddressLauncherResult(it.addressOptionsResult)
         },
     )
 
@@ -88,6 +88,7 @@ class AddressLauncher internal constructor(
         val args = AddressElementActivityContract.Args(
             publishableKey = publishableKey,
             config = configuration,
+            launchMode = AddressElementActivityContract.LaunchMode.Standalone,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -320,7 +321,7 @@ fun rememberAddressLauncher(
 ): AddressLauncher {
     val activityResultLauncher = rememberLauncherForActivityResult(
         contract = AddressElementActivityContract,
-        onResult = callback::onAddressLauncherResult
+        onResult = { callback.onAddressLauncherResult(it.addressOptionsResult) }
     )
 
     val context = LocalContext.current

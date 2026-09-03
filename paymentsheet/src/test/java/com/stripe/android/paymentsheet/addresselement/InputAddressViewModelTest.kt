@@ -1,13 +1,21 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.addresselement
 
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
@@ -16,17 +24,24 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
@@ -39,15 +54,22 @@ class InputAddressViewModelTest {
         address: AddressDetails? = null,
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
-            .build()
+            .build(),
+        launchMode: AddressElementActivityContract.LaunchMode =
+            AddressElementActivityContract.LaunchMode.Standalone,
+        processingState: AddressElementActivityProcessingState = AddressElementActivityProcessingState(),
+        checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater = mock(),
     ): InputAddressViewModel {
         return InputAddressViewModel(
             AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
                 config = config,
+                launchMode = launchMode,
             ),
             navigator,
+            processingState,
             eventReporter,
+            checkoutSessionTaxRegionUpdater,
             placesClient = null,
         ).also { viewModelStoreRule.track(it) }
     }
@@ -970,7 +992,195 @@ class InputAddressViewModelTest {
 
         assertThat(controller.validationMessage.value).isNotNull()
         assertThat(viewModel.formEnabled.value).isTrue()
-        verify(navigator, never()).dismiss(any())
+        verify(navigator, never()).dismiss(any(), anyOrNull())
+    }
+
+    @Test
+    fun `checkout save disables form and blocks duplicate submission while update is suspended`() = runTest {
+        val updateResult = CompletableDeferred<Result<CheckoutSessionResponse>>()
+        val taxRegionUpdater = mock<CheckoutSessionTaxRegionUpdater>()
+        whenever(
+            taxRegionUpdater.updateServerStateIfNeeded(any(), any(), any())
+        ).doSuspendableAnswer {
+            updateResult.await()
+        }
+        val processingState = AddressElementActivityProcessingState()
+        val viewModel = createViewModel(
+            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CHECKOUT_SESSION_RESPONSE),
+            processingState = processingState,
+            checkoutSessionTaxRegionUpdater = taxRegionUpdater,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+
+        verify(taxRegionUpdater).updateServerStateIfNeeded(
+            eq(CHECKOUT_SESSION_RESPONSE),
+            eq(CheckoutSessionResponse.TaxAddressSource.SHIPPING),
+            any(),
+        )
+        assertThat(viewModel.formEnabled.value).isFalse()
+        assertThat(viewModel.isProcessing.value).isTrue()
+        assertThat(processingState.isProcessing.value).isTrue()
+        verify(navigator, never()).dismiss(any(), anyOrNull())
+
+        updateResult.complete(Result.success(UPDATED_CHECKOUT_SESSION_RESPONSE))
+        runCurrent()
+
+        assertThat(viewModel.isProcessing.value).isFalse()
+        assertThat(processingState.isProcessing.value).isFalse()
+        verify(navigator).dismiss(
+            AddressLauncherResult.Succeeded(EXPECTED_ADDRESS),
+            UPDATED_CHECKOUT_SESSION_RESPONSE,
+        )
+    }
+
+    @Test
+    fun `failed checkout save retains values shows error and permits successful retry`() = runTest {
+        val taxRegionUpdater = mock<CheckoutSessionTaxRegionUpdater>()
+        whenever(taxRegionUpdater.updateServerStateIfNeeded(any(), any(), any()))
+            .thenReturn(
+                Result.failure(IllegalStateException("Failed")),
+                Result.success(UPDATED_CHECKOUT_SESSION_RESPONSE),
+            )
+        val processingState = AddressElementActivityProcessingState()
+        val viewModel = createViewModel(
+            address = EXPECTED_ADDRESS,
+            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CHECKOUT_SESSION_RESPONSE),
+            processingState = processingState,
+            checkoutSessionTaxRegionUpdater = taxRegionUpdater,
+        )
+        val originalFormValues = viewModel.addressFormController.getCurrentFormValues()
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(viewModel.isProcessing.value).isFalse()
+        assertThat(processingState.isProcessing.value).isFalse()
+        assertThat(viewModel.saveError.value)
+            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(viewModel.addressFormController.getCurrentFormValues())
+            .isEqualTo(originalFormValues)
+        verify(navigator, never()).dismiss(any(), anyOrNull())
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        assertThat(viewModel.saveError.value).isNull()
+        verify(navigator).dismiss(
+            AddressLauncherResult.Succeeded(EXPECTED_ADDRESS),
+            UPDATED_CHECKOUT_SESSION_RESPONSE,
+        )
+    }
+
+    @Test
+    fun `thrown tax region update shows retryable error`() = runTest {
+        val taxRegionUpdater = mock<CheckoutSessionTaxRegionUpdater>()
+        whenever(taxRegionUpdater.updateServerStateIfNeeded(any(), any(), any()))
+            .thenThrow(IllegalStateException("Failed"))
+        val viewModel = createViewModel(
+            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CHECKOUT_SESSION_RESPONSE),
+            checkoutSessionTaxRegionUpdater = taxRegionUpdater,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(viewModel.isProcessing.value).isFalse()
+        assertThat(viewModel.saveError.value)
+            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        verify(navigator, never()).dismiss(any(), anyOrNull())
+    }
+
+    @Test
+    fun `missing shipping country shows retryable error`() = runTest {
+        val taxRegionUpdater = mock<CheckoutSessionTaxRegionUpdater>()
+        val viewModel = createViewModel(
+            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CHECKOUT_SESSION_RESPONSE),
+            checkoutSessionTaxRegionUpdater = taxRegionUpdater,
+        )
+
+        viewModel.clickPrimaryButton(
+            completedFormValues = COMPLETED_ADDRESS - IdentifierSpec.Country,
+            checkboxChecked = false,
+        )
+        runCurrent()
+
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(viewModel.isProcessing.value).isFalse()
+        assertThat(viewModel.saveError.value)
+            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        verify(taxRegionUpdater, never()).updateServerStateIfNeeded(any(), any(), any())
+        verify(navigator, never()).dismiss(any(), anyOrNull())
+    }
+
+    @Test
+    fun `checkout save sends complete name and address to tax region updater`() = runTest {
+        val taxRegionUpdater = mock<CheckoutSessionTaxRegionUpdater>()
+        whenever(taxRegionUpdater.updateServerStateIfNeeded(any(), any(), any()))
+            .thenReturn(Result.success(UPDATED_CHECKOUT_SESSION_RESPONSE))
+        val viewModel = createViewModel(
+            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CHECKOUT_SESSION_RESPONSE),
+            checkoutSessionTaxRegionUpdater = taxRegionUpdater,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        val address = argumentCaptor<CheckoutController.Address.State>()
+        verify(taxRegionUpdater).updateServerStateIfNeeded(
+            checkoutSessionResponse = eq(CHECKOUT_SESSION_RESPONSE),
+            addressSource = eq(CheckoutSessionResponse.TaxAddressSource.SHIPPING),
+            address = address.capture(),
+        )
+        assertThat(address.firstValue).isEqualTo(
+            CheckoutController.Address.State(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            )
+        )
+    }
+
+    @Test
+    fun `checkout save cancellation finishes processing without showing retryable error`() = runTest {
+        val taxRegionUpdater = mock<CheckoutSessionTaxRegionUpdater>()
+        whenever(taxRegionUpdater.updateServerStateIfNeeded(any(), any(), any()))
+            .thenThrow(CancellationException())
+        val processingState = AddressElementActivityProcessingState()
+        val viewModel = createViewModel(
+            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CHECKOUT_SESSION_RESPONSE),
+            processingState = processingState,
+            checkoutSessionTaxRegionUpdater = taxRegionUpdater,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        assertThat(processingState.isProcessing.value).isFalse()
+        assertThat(viewModel.saveError.value).isNull()
+        verify(navigator, never()).dismiss(any(), anyOrNull())
+    }
+
+    @Test
+    fun `standalone save dismisses without calling checkout controller`() = runTest {
+        val taxRegionUpdater = mock<CheckoutSessionTaxRegionUpdater>()
+        val viewModel = createViewModel(
+            launchMode = AddressElementActivityContract.LaunchMode.Standalone,
+            checkoutSessionTaxRegionUpdater = taxRegionUpdater,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+
+        verifyNoInteractions(taxRegionUpdater)
+        assertThat(viewModel.isProcessing.value).isFalse()
+        assertThat(viewModel.saveError.value).isNull()
+        verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
     }
 
     @Test
@@ -995,14 +1205,60 @@ class InputAddressViewModelTest {
                     .googlePlacesApiKey(googlePlacesApiKey)
                     .autocompleteCountries(autocompleteCountries)
                     .build(),
+                launchMode = AddressElementActivityContract.LaunchMode.Standalone,
             ),
             navigator,
+            AddressElementActivityProcessingState(),
             eventReporter,
+            checkoutSessionTaxRegionUpdater = mock(),
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             ),
         ).also { viewModelStoreRule.track(it) }
+    }
+
+    private companion object {
+        val CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+        )
+        val UPDATED_CHECKOUT_SESSION_RESPONSE = CHECKOUT_SESSION_RESPONSE.copy(
+            totalSummary = CheckoutSessionResponse.TotalSummaryResponse(
+                subtotal = 1000L,
+                totalDueToday = 1100L,
+                totalAmountDue = 1100L,
+                discountAmounts = emptyList(),
+                taxAmounts = emptyList(),
+                shippingRate = null,
+                appliedBalance = null,
+            ),
+        )
+
+        val COMPLETED_ADDRESS = mapOf(
+            IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+            IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
+            IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
+            IdentifierSpec.Line1 to FormFieldEntry("510 Townsend St", isComplete = true),
+            IdentifierSpec.Line2 to FormFieldEntry("Floor 2", isComplete = true),
+            IdentifierSpec.PostalCode to FormFieldEntry("94103", isComplete = true),
+            IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
+            IdentifierSpec.Phone to FormFieldEntry("555-0100", isComplete = true),
+        )
+
+        val EXPECTED_ADDRESS = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+            phoneNumber = "555-0100",
+            isCheckboxSelected = false,
+        )
     }
 
     @Test

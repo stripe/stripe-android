@@ -14,6 +14,7 @@ import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
@@ -65,6 +66,7 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
+    private val logger: Logger,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -172,6 +174,39 @@ class CheckoutController @Inject internal constructor(
                     shippingAddress = it,
                 ),
             )
+        }
+    }
+
+    /**
+     * Commits the response and address collected by the checkout shipping Address Element.
+     * The tax request already happened in the child Activity, so this only reloads controller
+     * projections from the returned response and local collected details.
+     */
+    @OptIn(CheckoutSessionPreview::class)
+    internal fun commitShippingAddress(
+        checkoutSessionResponse: CheckoutSessionResponse,
+        name: String?,
+        address: Address.State,
+    ) {
+        viewModelScope.launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
+            operationCoordinator.runMutation {
+                runCatching {
+                    val state = requireNotNull(stateHolder.state) {
+                        "Cannot commit checkout shipping address before it is configured."
+                    }
+                    checkoutStateLoader.reload(
+                        state.copy(
+                            checkoutSessionResponse = checkoutSessionResponse,
+                            collectedDetails = state.collectedDetails.copy(
+                                shippingName = name,
+                                shippingAddress = address,
+                            ),
+                        )
+                    )
+                }
+            }.onFailure { error ->
+                logger.error("Failed to commit the checkout shipping address.", error)
+            }
         }
     }
 

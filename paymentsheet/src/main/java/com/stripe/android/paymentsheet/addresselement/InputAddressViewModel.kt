@@ -4,15 +4,24 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +35,9 @@ import javax.inject.Provider
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
+    private val processingState: AddressElementActivityProcessingState,
     private val eventReporter: AddressLauncherEventReporter,
+    private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
 ) : ViewModel(), AutocompleteAddressInteractor {
@@ -115,6 +126,11 @@ internal class InputAddressViewModel @Inject constructor(
 
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
+
+    val isProcessing: StateFlow<Boolean> = processingState.isProcessing
+
+    private val _saveError = MutableStateFlow<ResolvableString?>(null)
+    val saveError: StateFlow<ResolvableString?> = _saveError.asStateFlow()
 
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
@@ -211,26 +227,83 @@ internal class InputAddressViewModel @Inject constructor(
             addressFormController.elements.forEach { it.onValidationStateChanged(true) }
             return
         }
-        _formEnabled.value = false
-        dismissWithAddress(
-            AddressDetails(
-                name = completedFormValues?.get(IdentifierSpec.Name)?.value,
-                address = PaymentSheet.Address(
-                    city = completedFormValues?.get(IdentifierSpec.City)?.value,
-                    country = completedFormValues?.get(IdentifierSpec.Country)?.value,
-                    line1 = completedFormValues?.get(IdentifierSpec.Line1)?.value,
-                    line2 = completedFormValues?.get(IdentifierSpec.Line2)?.value,
-                    postalCode = completedFormValues?.get(IdentifierSpec.PostalCode)?.value,
-                    state = completedFormValues?.get(IdentifierSpec.State)?.value
-                ),
-                phoneNumber = completedFormValues?.get(IdentifierSpec.Phone)?.value,
-                isCheckboxSelected = checkboxChecked
-            )
+
+        val addressDetails = AddressDetails(
+            name = completedFormValues[IdentifierSpec.Name]?.value,
+            address = PaymentSheet.Address(
+                city = completedFormValues[IdentifierSpec.City]?.value,
+                country = completedFormValues[IdentifierSpec.Country]?.value,
+                line1 = completedFormValues[IdentifierSpec.Line1]?.value,
+                line2 = completedFormValues[IdentifierSpec.Line2]?.value,
+                postalCode = completedFormValues[IdentifierSpec.PostalCode]?.value,
+                state = completedFormValues[IdentifierSpec.State]?.value
+            ),
+            phoneNumber = completedFormValues[IdentifierSpec.Phone]?.value,
+            isCheckboxSelected = checkboxChecked
         )
+
+        when (val launchMode = args.launchMode) {
+            AddressElementActivityContract.LaunchMode.Standalone -> {
+                _formEnabled.value = false
+                dismissWithAddress(addressDetails)
+            }
+            is AddressElementActivityContract.LaunchMode.CheckoutShipping -> {
+                saveCheckoutShippingAddress(
+                    checkoutSessionResponse = launchMode.checkoutSessionResponse,
+                    addressDetails = addressDetails,
+                )
+            }
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    @OptIn(CheckoutSessionPreview::class)
+    private fun saveCheckoutShippingAddress(
+        checkoutSessionResponse: CheckoutSessionResponse,
+        addressDetails: AddressDetails,
+    ) {
+        if (!processingState.tryStartProcessing()) return
+
+        _saveError.value = null
+        _formEnabled.value = false
+        viewModelScope.launch {
+            val result = try {
+                val address = addressDetails.toCheckoutAddress()
+                    ?: error("Shipping address country is required.")
+                checkoutSessionResponse.validateShippingCountry(address.country).getOrThrow()
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                    address = address,
+                )
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Result.failure(error)
+            } finally {
+                processingState.finishProcessing()
+            }
+
+            result.fold(
+                onSuccess = { updatedResponse ->
+                    dismissWithAddress(
+                        addressDetails = addressDetails,
+                        checkoutSessionResponse = updatedResponse,
+                    )
+                },
+                onFailure = {
+                    _saveError.value = R.string.stripe_something_went_wrong.resolvableString
+                    _formEnabled.value = true
+                },
+            )
+        }
     }
 
     @VisibleForTesting
-    fun dismissWithAddress(addressDetails: AddressDetails) {
+    fun dismissWithAddress(
+        addressDetails: AddressDetails,
+        checkoutSessionResponse: CheckoutSessionResponse? = null,
+    ) {
         addressDetails.address?.country?.let { country ->
             eventReporter.onCompleted(
                 country = country,
@@ -238,9 +311,12 @@ internal class InputAddressViewModel @Inject constructor(
                 editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
-        navigator.dismiss(
-            AddressLauncherResult.Succeeded(addressDetails)
-        )
+        val result = AddressLauncherResult.Succeeded(addressDetails)
+        if (checkoutSessionResponse == null) {
+            navigator.dismiss(result)
+        } else {
+            navigator.dismiss(result, checkoutSessionResponse)
+        }
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {
@@ -355,13 +431,14 @@ internal class InputAddressViewModel @Inject constructor(
 
     internal class Factory(
         private val inputAddressViewModelSubcomponentFactoryProvider:
-        Provider<InputAddressViewModelSubcomponent.Factory>
+        Provider<InputAddressViewModelSubcomponent.Factory>,
+        private val processingState: AddressElementActivityProcessingState,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return inputAddressViewModelSubcomponentFactoryProvider.get()
-                .create().inputAddressViewModel as T
+                .create(processingState).inputAddressViewModel as T
         }
     }
 }

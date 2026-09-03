@@ -2,22 +2,24 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Context
 import android.content.Intent
+import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal object AddressElementActivityContract :
-    ActivityResultContract<AddressElementActivityContract.Args, AddressLauncherResult>() {
+    ActivityResultContract<AddressElementActivityContract.Args, AddressElementActivityContract.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(context, AddressElementActivity::class.java).putExtra(EXTRA_ARGS, input)
     }
 
     @Suppress("DEPRECATION")
-    override fun parseResult(resultCode: Int, intent: Intent?): AddressLauncherResult =
-        intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.addressOptionsResult
-            ?: AddressLauncherResult.Canceled()
+    override fun parseResult(resultCode: Int, intent: Intent?): Result =
+        intent?.getParcelableExtra<Result>(EXTRA_RESULT)
+            ?: Result(addressOptionsResult = AddressLauncherResult.Canceled())
 
     /**
      * Arguments for launching [AddressElementActivity] to collect an address.
@@ -29,6 +31,7 @@ internal object AddressElementActivityContract :
     data class Args internal constructor(
         internal val publishableKey: String,
         internal val config: AddressLauncher.Configuration?,
+        internal val launchMode: LaunchMode,
     ) : ActivityStarter.Args {
 
         internal companion object {
@@ -40,8 +43,20 @@ internal object AddressElementActivityContract :
     }
 
     @Parcelize
+    sealed class LaunchMode : Parcelable {
+        @Parcelize
+        data object Standalone : LaunchMode()
+
+        @Parcelize
+        data class CheckoutShipping(
+            val checkoutSessionResponse: CheckoutSessionResponse,
+        ) : LaunchMode()
+    }
+
+    @Parcelize
     data class Result(
-        val addressOptionsResult: AddressLauncherResult
+        val addressOptionsResult: AddressLauncherResult,
+        val checkoutSessionResponse: CheckoutSessionResponse? = null,
     ) : ActivityStarter.Result {
         override fun toBundle() = bundleOf(EXTRA_RESULT to this)
     }

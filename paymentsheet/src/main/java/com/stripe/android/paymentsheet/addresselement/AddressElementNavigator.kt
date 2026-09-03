@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import android.os.Parcelable
 import androidx.navigation.NavHostController
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.parcelize.Parcelize
@@ -22,7 +23,10 @@ internal interface AddressElementNavigator {
 
     fun <T : Any?> getResultFlow(key: String): Flow<T>?
 
-    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled())
+    fun dismiss(
+        result: AddressLauncherResult = AddressLauncherResult.Canceled(),
+        checkoutSessionResponse: CheckoutSessionResponse? = null,
+    )
 
     fun onBack()
 
@@ -44,7 +48,7 @@ internal interface AddressElementNavigator {
 @Singleton
 internal class NavHostAddressElementNavigator @Inject constructor() : AddressElementNavigator {
     var navigationController: NavHostController? = null
-    var onDismiss: ((AddressLauncherResult) -> Unit)? = null
+    var onDismiss: ((AddressElementActivityContract.Result) -> Unit)? = null
 
     override fun navigateTo(
         target: AddressElementScreen
@@ -64,8 +68,16 @@ internal class NavHostAddressElementNavigator @Inject constructor() : AddressEle
             .filterNotNull()
     }
 
-    override fun dismiss(result: AddressLauncherResult) {
-        onDismiss?.invoke(result)
+    override fun dismiss(
+        result: AddressLauncherResult,
+        checkoutSessionResponse: CheckoutSessionResponse?,
+    ) {
+        onDismiss?.invoke(
+            AddressElementActivityContract.Result(
+                addressOptionsResult = result,
+                checkoutSessionResponse = checkoutSessionResponse,
+            )
+        )
     }
 
     override fun onBack() {

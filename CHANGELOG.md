@@ -7,6 +7,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED] Added support for SeQura.
 * [ADDED] Added support for PAYCO.
 * [ADDED] Added support for Korean cards.
+* [CHANGED] Checkout shipping Address Element saves now propagate the updated Checkout Session tax region.
 
 ### AddressElement
 * [CHANGED] Use Stripe-hosted address autocomplete by default.

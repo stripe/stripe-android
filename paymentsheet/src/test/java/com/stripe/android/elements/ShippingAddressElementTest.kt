@@ -15,6 +15,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
@@ -30,6 +31,13 @@ import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import javax.inject.Provider
 
 internal class ShippingAddressElementTest {
@@ -59,6 +67,10 @@ internal class ShippingAddressElementTest {
 
         val launch = activityLauncher.launchCalls.awaitItem()
         assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        val checkoutSessionResponse = requireNotNull(stateHolder.state).checkoutSessionResponse
+        assertThat(launch.input.launchMode).isEqualTo(
+            AddressElementActivityContract.LaunchMode.CheckoutShipping(checkoutSessionResponse)
+        )
 
         val config = requireNotNull(launch.input.config)
         assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
@@ -91,8 +103,11 @@ internal class ShippingAddressElementTest {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-
         val recreated = createElement()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        activityLauncher.unregisterCalls.awaitItem()
+
         recreated.shippingAddressElement.present()
 
         recreated.activityLauncher.launchCalls.expectNoEvents()
@@ -108,7 +123,9 @@ internal class ShippingAddressElementTest {
         assertThat(firstLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
-        registration.dispatch(AddressLauncherResult.Canceled())
+        registration.dispatch(
+            AddressElementActivityContract.Result(AddressLauncherResult.Canceled())
+        )
         paymentConfiguration.value = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         shippingAddressElement.present()
@@ -119,14 +136,46 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `result clears presentation and ignores saved address`() = runScenario {
+    fun `result clears presentation and commits address and response`() = runScenario {
         val originalState = stateHolder.state
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
 
+        val updatedResponse = requireNotNull(stateHolder.state).checkoutSessionResponse.copy(
+            customerEmail = "updated@example.com",
+        )
+        val addressDetails = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+        )
         registration.dispatch(
-            AddressLauncherResult.Succeeded(
-                AddressDetails(name = "Ignored address"),
+            AddressElementActivityContract.Result(
+                addressOptionsResult = AddressLauncherResult.Succeeded(addressDetails),
+                checkoutSessionResponse = updatedResponse,
+            )
+        )
+
+        val address = argumentCaptor<CheckoutController.Address.State>()
+        verify(checkoutController).commitShippingAddress(
+            checkoutSessionResponse = eq(updatedResponse),
+            name = eq("Jenny Rosen"),
+            address = address.capture(),
+        )
+        assertThat(address.firstValue).isEqualTo(
+            CheckoutController.Address.State(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
             )
         )
 
@@ -138,7 +187,7 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `recreated element result clears presentation after host destruction`() = runScenario {
+    fun `recreated element cancellation clears presentation without updating checkout`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
@@ -151,8 +200,11 @@ internal class ShippingAddressElementTest {
         recreated.shippingAddressElement.present()
         recreated.activityLauncher.launchCalls.expectNoEvents()
 
-        recreated.registration.dispatch(AddressLauncherResult.Canceled())
+        recreated.registration.dispatch(
+            AddressElementActivityContract.Result(AddressLauncherResult.Canceled())
+        )
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
+        verify(checkoutController, never()).commitShippingAddress(any(), anyOrNull(), any())
 
         recreated.shippingAddressElement.present()
         recreated.activityLauncher.launchCalls.awaitItem()
@@ -162,6 +214,9 @@ internal class ShippingAddressElementTest {
 
     @Test
     fun `lifecycle destruction unregisters the launcher`() = runScenario {
+        shippingAddressElement.present()
+        activityLauncher.launchCalls.awaitItem()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         assertThat(activityLauncher.unregisterCalls.awaitItem()).isEqualTo(Unit)
@@ -183,7 +238,7 @@ internal class ShippingAddressElementTest {
             PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         )
         val errorReporter = FakeErrorReporter()
-
+        val checkoutController = mock<CheckoutController>()
         suspend fun createElement(): ElementScenario {
             val activityResultCaller = RecordingActivityResultCaller()
             val lifecycleOwner = TestLifecycleOwner()
@@ -191,6 +246,7 @@ internal class ShippingAddressElementTest {
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
                 paymentConfiguration = paymentConfiguration,
+                checkoutController = checkoutController,
                 stateHolder = stateHolder,
                 shippingAddressElementStateHolder = shippingAddressElementStateHolder,
                 errorReporter = errorReporter,
@@ -213,6 +269,7 @@ internal class ShippingAddressElementTest {
             activityLauncher = element.activityLauncher,
             lifecycleOwner = element.lifecycleOwner,
             stateHolder = stateHolder,
+            checkoutController = checkoutController,
             shippingAddressElementStateHolder = shippingAddressElementStateHolder,
             paymentConfiguration = paymentConfiguration,
             errorReporter = errorReporter,
@@ -281,8 +338,9 @@ internal class ShippingAddressElementTest {
         val callback: ActivityResultCallback<*>,
     ) {
         @Suppress("UNCHECKED_CAST")
-        fun dispatch(result: AddressLauncherResult) {
-            (callback as ActivityResultCallback<AddressLauncherResult>).onActivityResult(result)
+        fun dispatch(result: AddressElementActivityContract.Result) {
+            (callback as ActivityResultCallback<AddressElementActivityContract.Result>)
+                .onActivityResult(result)
         }
     }
 
@@ -309,6 +367,7 @@ internal class ShippingAddressElementTest {
         val activityLauncher: RecordingActivityResultLauncher,
         val lifecycleOwner: TestLifecycleOwner,
         val stateHolder: CheckoutControllerStateHolder,
+        val checkoutController: CheckoutController,
         val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
         val paymentConfiguration: RecordingProvider<PaymentConfiguration>,
         val errorReporter: FakeErrorReporter,

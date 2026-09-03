@@ -9,8 +9,11 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
@@ -59,25 +62,35 @@ internal class AddressElementActivity : ComponentActivity() {
 
         setContent {
             val coroutineScope = rememberCoroutineScope()
+            val isProcessing by viewModel.processingState.isProcessing.collectAsState()
 
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberStripeBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState(
+                confirmValueChange = { targetValue ->
+                    targetValue != ModalBottomSheetValue.Hidden ||
+                        !viewModel.processingState.isProcessing.value
+                },
+            )
 
             BackHandler {
-                viewModel.navigator.onBack()
-            }
-
-            viewModel.navigator.onDismiss = { result ->
-                coroutineScope.launch {
-                    bottomSheetState.hide()
-                    setResult(result)
-                    finish()
+                if (!isProcessing && !viewModel.processingState.isProcessing.value) {
+                    viewModel.navigator.onBack()
                 }
             }
 
-            AddressElementUi(bottomSheetState, navController)
+            viewModel.navigator.onDismiss = { result ->
+                if (!viewModel.processingState.isProcessing.value) {
+                    coroutineScope.launch {
+                        bottomSheetState.hide()
+                        setResult(result)
+                        finish()
+                    }
+                }
+            }
+
+            AddressElementUi(bottomSheetState, navController, isProcessing)
         }
     }
 
@@ -85,11 +98,16 @@ internal class AddressElementActivity : ComponentActivity() {
     private fun AddressElementUi(
         bottomSheetState: StripeBottomSheetState,
         navController: NavHostController,
+        isProcessing: Boolean,
     ) {
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = viewModel.navigator::dismiss,
+                onDismissed = {
+                    if (!isProcessing && !viewModel.processingState.isProcessing.value) {
+                        viewModel.navigator.dismiss()
+                    }
+                },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
@@ -97,7 +115,10 @@ internal class AddressElementActivity : ComponentActivity() {
                         startDestination = AddressElementScreen.InputAddress.route,
                     ) {
                         composable(AddressElementScreen.InputAddress.route) {
-                            InputAddressScreen(viewModel.inputAddressViewModelSubcomponentFactoryProvider)
+                            InputAddressScreen(
+                                viewModel.inputAddressViewModelSubcomponentFactoryProvider,
+                                viewModel.processingState,
+                            )
                         }
                         composable(
                             AddressElementScreen.Autocomplete.route,
@@ -124,11 +145,11 @@ internal class AddressElementActivity : ComponentActivity() {
         }
     }
 
-    private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled()) {
+    private fun setResult(result: AddressElementActivityContract.Result) {
         setResult(
-            result.resultCode,
+            result.addressOptionsResult.resultCode,
             Intent().putExtras(
-                AddressElementActivityContract.Result(result).toBundle()
+                result.toBundle()
             )
         )
     }
