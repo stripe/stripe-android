@@ -4,8 +4,6 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,8 +24,6 @@ internal fun CheckoutContent(
     onRemovePromotionCode: () -> Unit,
     onUpdateEmail: (String) -> Unit,
 ) {
-    Text(text = "Tax status: ${session.tax.status}", style = MaterialTheme.typography.h6)
-    Spacer(Modifier.height(16.dp))
     LineItemsSection(session)
     TotalSummarySection(session)
 
