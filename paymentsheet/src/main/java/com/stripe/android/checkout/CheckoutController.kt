@@ -66,6 +66,8 @@ class CheckoutController @Inject internal constructor(
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
 ) {
+    internal val controllerInstanceId: String = savedState.controllerInstanceId
+
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
      */
@@ -78,6 +80,8 @@ class CheckoutController @Inject internal constructor(
     val isUpdating: StateFlow<Boolean> = operationCoordinator.isUpdating
 
     init {
+        CheckoutControllerReferences.register(controllerInstanceId, this)
+
         viewModelScope.launch {
             operationCoordinator.observeConfirmationResults()
         }
@@ -318,6 +322,7 @@ class CheckoutController @Inject internal constructor(
      * controller is no longer needed.
      */
     fun destroy() {
+        CheckoutControllerReferences.unregister(controllerInstanceId, this)
         viewModelScope.cancel()
         checkoutStateLoader.clear()
         savedState.clear()

@@ -48,7 +48,7 @@ internal object AddressElementActivityContract :
 
         @Parcelize
         data class CheckoutShipping(
-            val paymentElementCallbackIdentifier: String,
+            val controllerInstanceId: String,
         ) : LaunchMode()
     }
 

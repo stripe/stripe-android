@@ -19,7 +19,6 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
@@ -29,26 +28,20 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.utils.PaymentElementCallbackTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
 internal class ShippingAddressElementTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
-
-    @get:Rule
-    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
 
     @Test
     fun `present before checkout configuration reports and does not launch`() = runScenario(configured = false) {
@@ -74,11 +67,8 @@ internal class ShippingAddressElementTest {
         val launch = activityLauncher.launchCalls.awaitItem()
         assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         assertThat(launch.input.launchMode).isEqualTo(
-            AddressElementActivityContract.LaunchMode.CheckoutShipping(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
+            AddressElementActivityContract.LaunchMode.CheckoutShipping(CONTROLLER_INSTANCE_ID)
         )
-        assertThat(
-            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
-        ).isNotNull()
 
         val config = requireNotNull(launch.input.config)
         assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
@@ -111,21 +101,10 @@ internal class ShippingAddressElementTest {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-        val originalUpdater = requireNotNull(
-            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
-        )
-
         val recreated = createElement()
-        val reboundUpdater = requireNotNull(
-            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
-        )
-        assertThat(reboundUpdater).isNotSameInstanceAs(originalUpdater)
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         activityLauncher.unregisterCalls.awaitItem()
-        assertThat(
-            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
-        ).isSameInstanceAs(reboundUpdater)
 
         recreated.shippingAddressElement.present()
 
@@ -164,10 +143,7 @@ internal class ShippingAddressElementTest {
             )
         )
 
-        assertThat(
-            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
-        ).isNull()
-        verifyNoInteractions(checkoutController)
+        verify(checkoutController, never()).updateShippingAddress(anyOrNull(), any())
 
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
@@ -192,7 +168,7 @@ internal class ShippingAddressElementTest {
 
         recreated.registration.dispatch(AddressLauncherResult.Canceled())
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
-        verifyNoInteractions(checkoutController)
+        verify(checkoutController, never()).updateShippingAddress(anyOrNull(), any())
 
         recreated.shippingAddressElement.present()
         recreated.activityLauncher.launchCalls.awaitItem()
@@ -201,62 +177,12 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `update sends complete name and address to checkout controller`() = runScenario {
+    fun `lifecycle destruction unregisters the launcher`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-        val updater = requireNotNull(
-            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
-        )
-
-        val result = updater(
-            AddressDetails(
-                name = "Jenny Rosen",
-                address = PaymentSheet.Address(
-                    city = "San Francisco",
-                    country = "US",
-                    line1 = "510 Townsend St",
-                    line2 = "Floor 2",
-                    postalCode = "94103",
-                    state = "CA",
-                ),
-                phoneNumber = "555-0100",
-                isCheckboxSelected = true,
-            )
-        )
-
-        assertThat(result.isSuccess).isTrue()
-        val addressCaptor = argumentCaptor<CheckoutController.Address>()
-        verify(checkoutController).updateShippingAddress(
-            name = eq("Jenny Rosen"),
-            address = addressCaptor.capture(),
-        )
-        assertThat(addressCaptor.firstValue.build()).isEqualTo(
-            CheckoutController.Address.State(
-                city = "San Francisco",
-                country = "US",
-                line1 = "510 Townsend St",
-                line2 = "Floor 2",
-                postalCode = "94103",
-                state = "CA",
-            )
-        )
-    }
-
-    @Test
-    fun `lifecycle destruction unregisters the updater and launcher`() = runScenario {
-        shippingAddressElement.present()
-        activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(
-            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
-        ).isNotNull()
-
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
-        assertThat(
-            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
-        ).isNull()
         assertThat(activityLauncher.unregisterCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -277,9 +203,7 @@ internal class ShippingAddressElementTest {
         )
         val errorReporter = FakeErrorReporter()
         val checkoutController = mock<CheckoutController>()
-        whenever(checkoutController.updateShippingAddress(anyOrNull(), any()))
-            .thenReturn(Result.success(Unit))
-
+        whenever(checkoutController.controllerInstanceId).thenReturn(CONTROLLER_INSTANCE_ID)
         suspend fun createElement(): ElementScenario {
             val activityResultCaller = RecordingActivityResultCaller()
             val lifecycleOwner = TestLifecycleOwner()
@@ -291,7 +215,6 @@ internal class ShippingAddressElementTest {
                 stateHolder = stateHolder,
                 shippingAddressElementStateHolder = shippingAddressElementStateHolder,
                 errorReporter = errorReporter,
-                paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
             )
             val registration = activityResultCaller.registerCalls.awaitItem()
             assertThat(registration.contract).isSameInstanceAs(AddressElementActivityContract)
@@ -417,6 +340,6 @@ internal class ShippingAddressElementTest {
     )
 
     private companion object {
-        const val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = "ShippingAddressElementTest"
+        const val CONTROLLER_INSTANCE_ID = "ShippingAddressElementTest"
     }
 }
