@@ -17,6 +17,8 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -60,7 +62,10 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
-internal class FlowControllerTest {
+internal class FlowControllerTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val networkRule = NetworkRule()
 
     @get:Rule
@@ -84,6 +89,7 @@ internal class FlowControllerTest {
     fun testSuccessfulCardPayment(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -95,7 +101,7 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -123,6 +129,7 @@ internal class FlowControllerTest {
     fun testSuccessfulCardPaymentWithVerticalMode(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -134,9 +141,9 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder("Example, Inc.")
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                    .build(),
+                    .build()),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -166,6 +173,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             callConfirmOnPaymentOptionCallback = false,
@@ -178,9 +186,9 @@ internal class FlowControllerTest {
             testContext.configureFlowController {
                 configureWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder("Example, Inc.")
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                        .build(),
+                        .build()),
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -208,6 +216,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             callConfirmOnPaymentOptionCallback = false,
@@ -220,9 +229,9 @@ internal class FlowControllerTest {
             testContext.configureFlowController {
                 configureWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder("Example, Inc.")
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                        .build(),
+                        .build()),
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -252,6 +261,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             callConfirmOnPaymentOptionCallback = false,
@@ -275,8 +285,8 @@ internal class FlowControllerTest {
                             setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
                         )
                     ),
-                    configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                        .build(),
+                    configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .build()),
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -306,6 +316,7 @@ internal class FlowControllerTest {
     fun testFailedElementsSessionCall(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -324,7 +335,7 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -378,7 +389,7 @@ internal class FlowControllerTest {
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isFalse()
                     assertThat(error).isNotNull()
@@ -395,6 +406,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             resultCallback = ::assertFailed,
@@ -406,7 +418,7 @@ internal class FlowControllerTest {
             testContext.configureFlowController {
                 configureWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = defaultConfiguration,
+                    configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -467,7 +479,7 @@ internal class FlowControllerTest {
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -491,7 +503,7 @@ internal class FlowControllerTest {
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -531,7 +543,7 @@ internal class FlowControllerTest {
             scenario.onActivity {
                 flowController.configureWithPaymentIntent(
                     paymentIntentClientSecret = paymentIntentClientSecret,
-                    configuration = defaultConfiguration,
+                    configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -562,6 +574,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentCardPayment(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -583,7 +596,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -636,6 +649,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = MultipleInstancesTestTypeProvider::class)
         testType: MultipleInstancesTestType,
     ) = runMultipleFlowControllerInstancesTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         testType = testType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
@@ -653,7 +667,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -695,6 +709,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentFailedCardPayment(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -723,7 +738,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -755,6 +770,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentCardPaymentWithForcedSuccess(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -776,7 +792,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -808,6 +824,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentCardPaymentWithInvalidStripeIntent(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -837,7 +854,7 @@ internal class FlowControllerTest {
                         currency = "cad",
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -875,6 +892,7 @@ internal class FlowControllerTest {
     fun testCvcRecollection(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -898,14 +916,14 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                ),
+                )),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -944,6 +962,7 @@ internal class FlowControllerTest {
     fun testSavedCardsInVerticalMode(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         callConfirmOnPaymentOptionCallback = false,
@@ -968,7 +987,7 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customer(
                         PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
@@ -976,7 +995,7 @@ internal class FlowControllerTest {
                         )
                     )
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                    .build(),
+                    .build()),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -1024,6 +1043,7 @@ internal class FlowControllerTest {
     fun testDefaultPaymentMethodOrderWithFailedSession(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -1042,11 +1062,11 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder("Example, Inc.")
                     .allowsDelayedPaymentMethods(true)
                     .allowsPaymentMethodsRequiringShippingAddress(true)
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .build(),
+                    .build()),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -1079,6 +1099,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testWalletButtonsShown() = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         showWalletButtons = true,
         resultCallback = ::assertCompleted,
@@ -1108,7 +1129,7 @@ internal class FlowControllerTest {
 
         testContext.flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = "pi_123_secret_123",
-            configuration = PaymentSheet.Configuration.Builder(
+            configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder(
                 merchantDisplayName = "Example, Inc."
             )
                 .customer(
@@ -1123,7 +1144,7 @@ internal class FlowControllerTest {
                         countryCode = "US",
                     )
                 )
-                .build(),
+                .build()),
             callback = { _, _ ->
                 isConfigured.countDown()
             },
@@ -1140,6 +1161,7 @@ internal class FlowControllerTest {
     @OptIn(WalletButtonsPreview::class)
     @Test
     fun testWalletsShownInExpectedScreensWhenFilteringWalletButtons() = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         showWalletButtons = true,
         resultCallback = ::assertCompleted,
@@ -1173,7 +1195,7 @@ internal class FlowControllerTest {
             activityLaunchObserver.prepareForLaunch(it)
             testContext.flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_123_secret_123",
-                configuration = PaymentSheet.Configuration.Builder(
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder(
                     merchantDisplayName = "Example, Inc."
                 )
                     .paymentMethodLayout(PaymentMethodLayout.Vertical)
@@ -1202,7 +1224,7 @@ internal class FlowControllerTest {
                             )
                         )
                     )
-                    .build(),
+                    .build()),
                 callback = { _, _ ->
                     isConfigured.countDown()
                 },
@@ -1227,6 +1249,7 @@ internal class FlowControllerTest {
     fun testFlowControllerConfigurationBuilderWithTermsDisplayNever(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -1249,14 +1272,14 @@ internal class FlowControllerTest {
                         setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
                     )
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder("Example, Inc.")
                     .termsDisplay(
                         mapOf(
                             com.stripe.android.model.PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER
                         )
                     )
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .build(),
+                    .build()),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -1273,6 +1296,7 @@ internal class FlowControllerTest {
     fun testOBO_PassedToElementsSessionCall(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -1299,8 +1323,8 @@ internal class FlowControllerTest {
                     ),
                     onBehalfOf = oboMerchantID
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .build()),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()

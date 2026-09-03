@@ -12,6 +12,8 @@ import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TerminalWrapperTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.tta.testing.TapToAddCardAddedPage
@@ -62,9 +64,12 @@ internal class TapToAddTest {
     @Test
     fun successWithCompleteMode(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Complete.Provider::class)
-        integrationType: TapToAddIntegrationType.Complete
+        integrationType: TapToAddIntegrationType.Complete,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
+        apiConfigurationTestType = apiConfigurationTestType,
         composeTestRule = composeTestRule,
         networkRule = networkRule,
         createIntentCallback = { _, _ ->
@@ -99,9 +104,12 @@ internal class TapToAddTest {
     @Test
     fun successWithContinueMode(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Continue.Provider::class)
-        integrationType: TapToAddIntegrationType.Continue
+        integrationType: TapToAddIntegrationType.Continue,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
+        apiConfigurationTestType = apiConfigurationTestType,
         composeTestRule = composeTestRule,
         networkRule = networkRule,
         createIntentCallback = { _, _ ->
@@ -137,9 +145,12 @@ internal class TapToAddTest {
     @Test
     fun canceledDuringCardCollection(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Provider::class)
-        integrationType: TapToAddIntegrationType
+        integrationType: TapToAddIntegrationType,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
+        apiConfigurationTestType = apiConfigurationTestType,
         composeTestRule = composeTestRule,
         networkRule = networkRule,
         createIntentCallback = { _, _ ->
@@ -181,8 +192,11 @@ internal class TapToAddTest {
     fun successAfterCancelAfterCardCollectedWithCompleteMode(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Complete.Provider::class)
         integrationType: TapToAddIntegrationType.Complete,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
+        apiConfigurationTestType = apiConfigurationTestType,
         composeTestRule = composeTestRule,
         networkRule = networkRule,
         createIntentCallback = { _, _ ->
@@ -225,9 +239,12 @@ internal class TapToAddTest {
     @Test
     fun successAfterCancelAfterCardCollectedWithLink(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Provider::class)
-        integrationType: TapToAddIntegrationType
+        integrationType: TapToAddIntegrationType,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
+        apiConfigurationTestType = apiConfigurationTestType,
         composeTestRule = composeTestRule,
         networkRule = networkRule,
         createIntentCallback = { _, _ ->

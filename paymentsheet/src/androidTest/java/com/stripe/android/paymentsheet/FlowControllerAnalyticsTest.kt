@@ -1,8 +1,12 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
@@ -37,8 +41,11 @@ import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-@RunWith(AndroidJUnit4::class)
-internal class FlowControllerAnalyticsTest {
+@RunWith(TestParameterInjector::class)
+internal class FlowControllerAnalyticsTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
@@ -76,6 +83,7 @@ internal class FlowControllerAnalyticsTest {
 
     @Test
     fun testSuccessfulCardPaymentInFlowController() = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         builder = {
             analyticEventCallback(analyticEventRule)
@@ -106,7 +114,7 @@ internal class FlowControllerAnalyticsTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -163,6 +171,7 @@ internal class FlowControllerAnalyticsTest {
 
     @Test
     fun testSuccessfulCardPaymentInFlowControllerInVerticalMode() = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         builder = {
             analyticEventCallback(analyticEventRule)
@@ -189,7 +198,7 @@ internal class FlowControllerAnalyticsTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = verticalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(verticalModeConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -248,6 +257,7 @@ internal class FlowControllerAnalyticsTest {
 
     @Test
     fun testSuccessfulCardPaymentInFlowControllerWithConfirmationToken() = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         builder = {
             createIntentCallback { _ ->
@@ -287,7 +297,7 @@ internal class FlowControllerAnalyticsTest {
                         currency = "usd"
                     )
                 ),
-                configuration = horizontalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -355,6 +365,7 @@ internal class FlowControllerAnalyticsTest {
 
     @Test
     fun testSavedPaymentMethodInFlowController() = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         builder = {
             analyticEventCallback(analyticEventRule)
@@ -381,13 +392,13 @@ internal class FlowControllerAnalyticsTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration.newBuilder()
+                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration.newBuilder()
                     .customer(
                         PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
                             ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
-                    ).build(),
+                    ).build()),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()

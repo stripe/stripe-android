@@ -73,7 +73,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                 context.presentPaymentSheet {
                     presentWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                     )
                 }
             }
@@ -95,7 +95,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                 context.configureFlowController {
                     configureWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()
