@@ -6,13 +6,241 @@ import com.android.tools.lint.detector.api.Scope
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+@Suppress("LargeClass")
 class TestResourceCleanupDetectorTest {
     @Test
-    fun `issue is registered for test source analysis`() {
+    fun `issue is registered for all source analysis`() {
         assertEquals(
-            java.util.EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
+            java.util.EnumSet.of(Scope.JAVA_FILE),
             TestResourceCleanupDetector.ISSUE.implementation.scope,
         )
+    }
+
+    @Test
+    fun `should detect coroutine scope in tests that is not tracked`() {
+        lint().files(
+            testFile(
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+
+                    class ExampleTest {
+                        fun test() {
+                            val scope = CoroutineScope()
+                        }
+                    }
+                """
+            ),
+            coroutineScopeStub(),
+            cleanupTestRuleStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectErrorCount(1)
+            .expectMatches("CoroutineScope instances must be tracked")
+    }
+
+    @Test
+    fun `should not detect coroutine scope in tests tracked with cleanup rule`() {
+        lint().files(
+            testFile(
+                """
+                    package com.stripe.android.example
+
+                    import com.stripe.android.testing.CleanupTestRule
+                    import kotlinx.coroutines.CoroutineScope
+
+                    class ExampleTest {
+                        private val cleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+                        fun test() {
+                            val scope = cleanupRule.track(CoroutineScope())
+                        }
+                    }
+                """
+            ),
+            coroutineScopeStub(),
+            cleanupTestRuleStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun `should detect coroutine scope in production that is not cancelled`() {
+        lint().files(
+            kotlin(
+                "src/main/java/com/stripe/android/example/ExampleInteractor.kt",
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+
+                    class ExampleInteractor {
+                        private val scope = CoroutineScope()
+                    }
+                """
+            ).indented(),
+            coroutineScopeStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectErrorCount(1)
+            .expectMatches("CoroutineScope instances must be.*cancelled in production code")
+    }
+
+    @Test
+    fun `should not detect coroutine scope in production that is cancelled`() {
+        lint().files(
+            kotlin(
+                "src/main/java/com/stripe/android/example/ExampleInteractor.kt",
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+
+                    class ExampleInteractor {
+                        private val scope = CoroutineScope()
+
+                        fun close() {
+                            scope.cancel()
+                        }
+                    }
+                """
+            ).indented(),
+            coroutineScopeStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun `should not detect coroutine scope created with an already-cancelled job`() {
+        lint().files(
+            kotlin(
+                "src/main/java/com/stripe/android/example/ExampleInteractor.kt",
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+                    import kotlinx.coroutines.Job
+
+                    class ExampleInteractor {
+                        private val scope = CoroutineScope(Job().apply { cancel() })
+                    }
+                """
+            ).indented(),
+            coroutineScopeStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun `should not detect coroutine scope whose backing job is cancelled`() {
+        lint().files(
+            kotlin(
+                "src/main/java/com/stripe/android/example/ExampleInteractor.kt",
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+                    import kotlinx.coroutines.SupervisorJob
+
+                    class ExampleInteractor {
+                        private val supervisorJob = SupervisorJob()
+                        private val scope = CoroutineScope(supervisorJob)
+
+                        fun close() {
+                            supervisorJob.cancel()
+                        }
+                    }
+                """
+            ).indented(),
+            coroutineScopeStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun `should detect derived coroutine scope whose owner does not cancel it`() {
+        lint().files(
+            kotlin(
+                "src/main/java/com/stripe/android/example/OwnerFactory.kt",
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+                    import kotlinx.coroutines.childScope
+
+                    class Owner(
+                        private val coroutineScope: CoroutineScope,
+                    ) {
+                        fun close() {}
+                    }
+
+                    object OwnerFactory {
+                        fun create(parentScope: CoroutineScope): Owner {
+                            val coroutineScope = parentScope.childScope()
+                            return Owner(coroutineScope)
+                        }
+                    }
+                """
+            ).indented(),
+            coroutineScopeStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectErrorCount(1)
+            .expectMatches("CoroutineScope instances must be.*cancelled in production code")
+    }
+
+    @Test
+    fun `should not detect derived coroutine scope whose owner cancels it`() {
+        lint().files(
+            kotlin(
+                "src/main/java/com/stripe/android/example/OwnerFactory.kt",
+                """
+                    package com.stripe.android.example
+
+                    import kotlinx.coroutines.CoroutineScope
+                    import kotlinx.coroutines.childScope
+
+                    class Owner(
+                        private val coroutineScope: CoroutineScope,
+                    ) {
+                        fun close() {
+                            coroutineScope.cancel()
+                        }
+                    }
+
+                    object OwnerFactory {
+                        fun create(parentScope: CoroutineScope): Owner {
+                            val coroutineScope = parentScope.childScope()
+                            return Owner(coroutineScope)
+                        }
+                    }
+                """
+            ).indented(),
+            coroutineScopeStub(),
+        )
+            .issues(TestResourceCleanupDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectClean()
     }
 
     @Test
@@ -428,6 +656,29 @@ class TestResourceCleanupDetectorTest {
             class CloseableInteractor {
                 fun close() {}
             }
+        """
+    ).indented()
+
+    private fun coroutineScopeStub() = kotlin(
+        "src/main/java/kotlinx/coroutines/CoroutineScope.kt",
+        """
+            package kotlinx.coroutines
+
+            interface CoroutineScope {
+                fun cancel() {}
+            }
+
+            interface Job {
+                fun cancel() {}
+            }
+
+            fun Job(): Job = error("Not implemented")
+
+            fun SupervisorJob(): Job = error("Not implemented")
+
+            fun CoroutineScope(context: Any? = null): CoroutineScope = error("Not implemented")
+
+            fun CoroutineScope.childScope(): CoroutineScope = CoroutineScope()
         """
     ).indented()
 

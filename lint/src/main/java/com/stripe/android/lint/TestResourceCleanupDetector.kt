@@ -13,6 +13,7 @@ import com.intellij.psi.PsiClass
 import org.jetbrains.kotlin.psi.KtSuperTypeCallEntry
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.ULambdaExpression
 import org.jetbrains.uast.UMethod
@@ -30,20 +31,23 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
     override fun createUastHandler(context: JavaContext): UElementHandler {
         return object : UElementHandler() {
             override fun visitFile(node: UFile) {
-                if (context.isInTestSourceSet().not()) {
-                    return
-                }
-
-                node.accept(TestResourceCleanupVisitor(context))
+                node.accept(TestResourceCleanupVisitor(context, context.isInTestSourceSet()))
             }
         }
     }
 
     private class TestResourceCleanupVisitor(
         private val context: JavaContext,
+        private val isTestSource: Boolean,
     ) : AbstractUastVisitor() {
         private val trackedVariables = mutableMapOf<CleanupKind, MutableSet<String>>()
         private val instantiations = mutableListOf<Instantiation>()
+        private var file: UFile? = null
+
+        override fun visitFile(node: UFile): Boolean {
+            file = node
+            return super.visitFile(node)
+        }
 
         override fun visitCallExpression(node: UCallExpression): Boolean {
             node.trackingKind()?.let { trackingKind ->
@@ -52,14 +56,15 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
                 }
             }
 
-            if (node.kind == UastCallKind.CONSTRUCTOR_CALL && node.isSuperTypeConstructorCall().not()) {
+            if (
+                (node.kind == UastCallKind.CONSTRUCTOR_CALL || node.coroutineScopeCleanupKind() != null) &&
+                node.isSuperTypeConstructorCall().not()
+            ) {
                 val constructedClass = node.resolve()?.containingClass
                 val cleanupKind = constructedClass?.cleanupKind(context)
+                    ?: node.coroutineScopeCleanupKind()
 
-                if (
-                    cleanupKind != null &&
-                    (cleanupKind != CleanupKind.VIEW_MODEL || node.isInsideViewModelFactory().not())
-                ) {
+                if (cleanupKind != null && cleanupKind.shouldTrack(node)) {
                     instantiations.add(
                         Instantiation(
                             call = node,
@@ -71,6 +76,13 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
             }
 
             return super.visitCallExpression(node)
+        }
+
+        private fun CleanupKind.shouldTrack(node: UCallExpression): Boolean {
+            if (isTestSource.not() && this != CleanupKind.COROUTINE_SCOPE) {
+                return false
+            }
+            return this != CleanupKind.VIEW_MODEL || node.isInsideViewModelFactory().not()
         }
 
         override fun afterVisitFile(node: UFile) {
@@ -89,9 +101,111 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
         private fun Instantiation.isTracked(
             trackedVariables: Map<CleanupKind, Set<String>>,
         ): Boolean {
-            return call.isInsideTrackCall(cleanupKind) ||
+            if (cleanupKind == CleanupKind.COROUTINE_SCOPE && isTestSource.not()) {
+                return variableName == null ||
+                    call.isCreatedWithCancelledJob(
+                        trackedVariables[CleanupKind.COROUTINE_SCOPE].orEmpty()
+                    ) ||
+                    variableName in trackedVariables[CleanupKind.COROUTINE_SCOPE].orEmpty() ||
+                    isTransferredToOwner() ||
+                    isChildOfViewModelScope() ||
+                    isChildOfTransferredScope()
+            }
+
+            return (cleanupKind == CleanupKind.COROUTINE_SCOPE && call.isInsideTrackCall(CleanupKind.CLOSEABLE)) ||
+                call.isInsideTrackCall(cleanupKind) ||
                 call.isTrackedByScopeFunction(cleanupKind) ||
                 variableName in trackedVariables[cleanupKind].orEmpty()
+        }
+
+        private fun Instantiation.isTransferredToOwner(): Boolean {
+            val scopeName = variableName ?: return false
+            var isTransferred = false
+
+            file?.accept(
+                object : AbstractUastVisitor() {
+                    override fun visitCallExpression(node: UCallExpression): Boolean {
+                        if (node.kind != UastCallKind.CONSTRUCTOR_CALL) {
+                            return super.visitCallExpression(node)
+                        }
+
+                        val argumentIndex = node.valueArguments.indexOfFirst { argument ->
+                            argument.variableName() == scopeName
+                        }
+                        val constructor = node.resolve()
+                        val parameterName = constructor
+                            ?.parameterList
+                            ?.parameters
+                            ?.getOrNull(argumentIndex)
+                            ?.name
+
+                        if (
+                            parameterName != null &&
+                            constructor?.containingClass
+                                ?.findMethodsByName("close", true)
+                                ?.any { method ->
+                                    method.navigationElement.text.contains("$parameterName.cancel(")
+                                } == true
+                        ) {
+                            isTransferred = true
+                        }
+
+                        return super.visitCallExpression(node)
+                    }
+                }
+            )
+
+            return isTransferred
+        }
+
+        private fun Instantiation.isChildOfTransferredScope(): Boolean {
+            if (call.methodName != CHILD_SCOPE_FUNCTION) {
+                return false
+            }
+
+            val parentScopeName = call.receiver?.variableName() ?: return false
+            return instantiations.any { instantiation ->
+                instantiation.variableName == parentScopeName &&
+                    (instantiation.isTransferredToOwner() || instantiation.isChildOfViewModelScope())
+            }
+        }
+
+        private fun Instantiation.isChildOfViewModelScope(): Boolean {
+            return call.methodName == CHILD_SCOPE_FUNCTION &&
+                call.receiver?.asSourceString()?.endsWith("viewModelScope") == true
+        }
+
+        private fun UCallExpression.isCreatedWithCancelledJob(cancelledVariables: Set<String>): Boolean {
+            if (methodName != "CoroutineScope") {
+                return false
+            }
+
+            return valueArguments.any { argument ->
+                argument.isCoroutineJob() &&
+                    (argument.containsCancelCall() || argument.variableName() in cancelledVariables)
+            }
+        }
+
+        private fun UExpression.isCoroutineJob(): Boolean {
+            val expressionClass = context.evaluator.getTypeClass(getExpressionType()) ?: return false
+            return expressionClass.qualifiedName == COROUTINE_JOB ||
+                context.evaluator.extendsClass(expressionClass, COROUTINE_JOB, false) ||
+                context.evaluator.implementsInterface(expressionClass, COROUTINE_JOB, false)
+        }
+
+        private fun UElement.containsCancelCall(): Boolean {
+            var containsCancelCall = false
+            accept(
+                object : AbstractUastVisitor() {
+                    override fun visitCallExpression(node: UCallExpression): Boolean {
+                        if (node.methodName == "cancel") {
+                            containsCancelCall = true
+                        }
+                        return super.visitCallExpression(node)
+                    }
+                }
+            )
+            return containsCancelCall
         }
 
         private fun UCallExpression.isInsideTrackCall(cleanupKind: CleanupKind): Boolean {
@@ -162,6 +276,13 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
         }
 
         private fun UCallExpression.trackingKind(): CleanupKind? {
+            if (methodName == "cancel") {
+                receiver?.variableName()?.let { variableName ->
+                    trackedVariables.getOrPut(CleanupKind.COROUTINE_SCOPE) { mutableSetOf() }.add(variableName)
+                }
+                return null
+            }
+
             if (methodName != "track") {
                 return null
             }
@@ -172,11 +293,28 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
             // local copy. Matching by name lets any `ViewModelStoreTestRule`/`CleanupTestRule` satisfy
             // the check regardless of package.
             return when (resolve()?.containingClass?.name) {
-                CLEANUP_TEST_RULE_NAME -> CleanupKind.CLOSEABLE
+                CLEANUP_TEST_RULE_NAME -> if (valueArguments.singleOrNull()?.isCoroutineScope() == true) {
+                    CleanupKind.COROUTINE_SCOPE
+                } else {
+                    CleanupKind.CLOSEABLE
+                }
                 VIEW_MODEL_STORE_TEST_RULE_NAME -> CleanupKind.VIEW_MODEL
                 else -> null
             }
         }
+
+        private fun UCallExpression.coroutineScopeCleanupKind(): CleanupKind? {
+            val returnsCoroutineScope = returnType?.canonicalText == COROUTINE_SCOPE ||
+                getExpressionType()?.canonicalText == COROUTINE_SCOPE
+            return CleanupKind.COROUTINE_SCOPE.takeIf {
+                methodName == CHILD_SCOPE_FUNCTION ||
+                    (methodName in COROUTINE_SCOPE_FACTORY_FUNCTIONS && returnsCoroutineScope)
+            }
+        }
+
+        private fun UExpression.isCoroutineScope(): Boolean =
+            (this as? UCallExpression)?.returnType?.canonicalText == COROUTINE_SCOPE ||
+                getExpressionType()?.canonicalText == COROUTINE_SCOPE
 
         private fun UElement.variableName(): String? {
             if (this is USimpleNameReferenceExpression) {
@@ -242,7 +380,11 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
         VIEW_MODEL(
             "ViewModel test instances must be tracked with `ViewModelStoreTestRule.track(...)` " +
                 "so they are cleared when the test finishes."
-        )
+        ),
+        COROUTINE_SCOPE(
+            "CoroutineScope instances must be tracked with `CleanupTestRule.track(...)` in tests " +
+                "or cancelled in production code."
+        ),
     }
 
     private data class Instantiation(
@@ -253,28 +395,37 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
 
     companion object {
         private const val CLEANUP_TEST_RULE_NAME = "CleanupTestRule"
+        private const val COROUTINE_SCOPE = "kotlinx.coroutines.CoroutineScope"
+        private const val COROUTINE_JOB = "kotlinx.coroutines.Job"
         private const val VIEW_MODEL = "androidx.lifecycle.ViewModel"
         private const val VIEW_MODEL_PROVIDER_FACTORY = "androidx.lifecycle.ViewModelProvider.Factory"
         private const val VIEW_MODEL_STORE_TEST_RULE_NAME = "ViewModelStoreTestRule"
 
         private val SCOPE_FUNCTIONS = setOf("also", "apply", "let", "run")
+        private val COROUTINE_SCOPE_FACTORY_FUNCTIONS = setOf(
+            "CoroutineScope",
+            "MainScope",
+        )
+        private const val CHILD_SCOPE_FUNCTION = "childScope"
         private val VIEW_MODEL_FACTORY_FUNCTIONS = setOf("initializer", "viewModelFactory")
         private val VARIABLE_NAME_REGEX = Regex("[A-Za-z_][A-Za-z0-9_]*")
 
         private val IMPLEMENTATION = Implementation(
             TestResourceCleanupDetector::class.java,
-            EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
+            EnumSet.of(Scope.JAVA_FILE)
         )
 
         @JvmField
         val ISSUE = Issue.create(
             id = "TestResourceCleanup",
             priority = 8,
-            briefDescription = "Closeable and ViewModel test instances must be cleaned up",
+            briefDescription = "Closeable, ViewModel, and CoroutineScope instances must be cleaned up",
             explanation = """
                 Tests that directly create closeable objects or ViewModels can leak work into later tests when the
                 instance is not closed or cleared. Track closeable instances with CleanupTestRule.track(...) and
                 ViewModels with ViewModelStoreTestRule.track(...).
+
+                Production code must cancel CoroutineScope instances that it owns.
             """,
             category = Category.CORRECTNESS,
             severity = Severity.ERROR,
@@ -290,6 +441,10 @@ internal class TestResourceCleanupDetector : Detector(), SourceCodeScanner {
         private fun PsiClass.cleanupKind(context: JavaContext): CleanupKind? {
             if (qualifiedName == null || isTestDouble()) {
                 return null
+            }
+
+            if (qualifiedName == COROUTINE_SCOPE) {
+                return CleanupKind.COROUTINE_SCOPE
             }
 
             if (context.evaluator.extendsClass(this, VIEW_MODEL, false)) {
