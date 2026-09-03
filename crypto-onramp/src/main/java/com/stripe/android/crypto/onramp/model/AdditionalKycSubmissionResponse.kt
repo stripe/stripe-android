@@ -7,17 +7,15 @@ import kotlinx.serialization.Serializable
 internal data class AdditionalKycSubmissionResponse(
     val id: String,
     @SerialName("object")
-    val objectType: String? = null,
+    val objectType: String,
     @SerialName("liquidity_provider")
-    val liquidityProvider: String? = null,
+    val liquidityProvider: String,
     @SerialName("submission_type")
-    val submissionType: String? = null,
+    val submissionType: String,
     val documents: List<AdditionalKycDocumentSubmissionResponse>? = null,
     val questionnaire: AdditionalKycQuestionnaireSubmissionResponse? = null,
-    val status: String? = null,
-    @SerialName("submitted_at")
-    val submittedAt: Long? = null,
-    val created: Long? = null,
+    val status: String,
+    val created: Long,
 )
 
 @Serializable
@@ -28,7 +26,7 @@ internal data class AdditionalKycDocumentSubmissionResponse(
     val documentSubtype: String? = null,
     @SerialName("file_ids")
     val fileIds: List<String>,
-    val status: String? = null,
+    val status: String,
 )
 
 @Serializable

@@ -9,13 +9,12 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 @Serializable
 @JsonIgnoreUnknownKeys
 internal data class RetrieveCryptoCustomerResponse(
-    val id: String,
-    val requirements: AdditionalKycRequirementsResponse? = null,
+    val requirements: AdditionalKycRequirementsResponse,
 )
 
 @Serializable
 internal data class AdditionalKycRequirementsResponse(
-    val entries: List<AdditionalKycRequirementResponse> = emptyList(),
+    val entries: List<AdditionalKycRequirementResponse>,
 ) {
     fun toAdditionalKycRequirements(): AdditionalKycRequirements {
         val requirements = entries.map { it.toAdditionalKycRequirement() }
@@ -44,43 +43,11 @@ internal data class AdditionalKycRequirementResponse(
     val requestedBy: String,
     @SerialName("awaiting_action_from")
     val awaitingActionFrom: String,
-    val impact: AdditionalKycRequirementImpactResponse? = null,
-    @SerialName("requested_reasons")
-    val requestedReasons: List<String> = emptyList(),
-    val errors: List<AdditionalKycRequirementErrorResponse> = emptyList(),
+    val errors: List<AdditionalKycRequirementErrorResponse>,
     @SerialName("submission_type")
     val submissionType: String,
     val document: AdditionalKycDocumentRequirementResponse? = null,
     val questionnaire: AdditionalKycQuestionnaireResponse? = null,
-)
-
-@Serializable
-internal data class AdditionalKycRequirementImpactResponse(
-    @SerialName("restricts_capabilities")
-    val restrictsCapabilities: List<AdditionalKycCapabilityImpactResponse> = emptyList(),
-)
-
-@Serializable
-internal data class AdditionalKycCapabilityImpactResponse(
-    val capability: String,
-    val restriction: AdditionalKycCapabilityRestrictionResponse,
-)
-
-@Serializable
-internal data class AdditionalKycCapabilityRestrictionResponse(
-    @SerialName("max_transaction_amount")
-    val maxTransactionAmount: AdditionalKycAmountResponse? = null,
-    @SerialName("lifetime_volume_limit")
-    val lifetimeVolumeLimit: AdditionalKycAmountResponse? = null,
-    @SerialName("lifetime_volume_threshold")
-    val lifetimeVolumeThreshold: AdditionalKycAmountResponse? = null,
-    val regions: List<String> = emptyList(),
-)
-
-@Serializable
-internal data class AdditionalKycAmountResponse(
-    val amount: Long? = null,
-    val currency: String,
 )
 
 @Serializable
@@ -92,12 +59,12 @@ internal data class AdditionalKycRequirementErrorResponse(
 @Serializable
 internal data class AdditionalKycDocumentRequirementResponse(
     @SerialName("accepted_subtypes")
-    val acceptedSubtypes: List<AdditionalKycDocumentSubtypeResponse> = emptyList(),
+    val acceptedSubtypes: List<AdditionalKycDocumentSubtypeResponse>,
     @SerialName("accepted_formats")
-    val acceptedFormats: List<String> = emptyList(),
+    val acceptedFormats: List<String>,
     @SerialName("min_documents")
-    val minDocuments: Int = 1,
-    val instructions: List<String> = emptyList(),
+    val minDocuments: Int,
+    val instructions: List<String>,
     @SerialName("additional_requirements")
     val additionalRequirements: AdditionalKycCollectionRequirementsResponse? = null,
 )
@@ -134,8 +101,6 @@ private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(): Addit
         description = description,
         requestedBy = requestedBy,
         awaitingActionFrom = awaitingActionFrom,
-        impact = impact?.toAdditionalKycRequirementImpact(),
-        requestedReasons = requestedReasons,
         errors = errors.map { error ->
             AdditionalKycRequirementError(
                 code = error.code,
@@ -145,35 +110,6 @@ private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(): Addit
         submissionType = submissionType,
         document = document?.toAdditionalKycDocumentRequirement(),
         questionnaire = normalizedQuestionnaire?.toAdditionalKycQuestionnaire(),
-    )
-}
-
-private fun AdditionalKycRequirementImpactResponse.toAdditionalKycRequirementImpact():
-    AdditionalKycRequirementImpact {
-    return AdditionalKycRequirementImpact(
-        restrictsCapabilities = restrictsCapabilities.map { capabilityImpact ->
-            AdditionalKycCapabilityImpact(
-                capability = capabilityImpact.capability,
-                restriction = capabilityImpact.restriction.toAdditionalKycCapabilityRestriction(),
-            )
-        }
-    )
-}
-
-private fun AdditionalKycCapabilityRestrictionResponse.toAdditionalKycCapabilityRestriction():
-    AdditionalKycCapabilityRestriction {
-    return AdditionalKycCapabilityRestriction(
-        maxTransactionAmount = maxTransactionAmount?.toAdditionalKycAmount(),
-        lifetimeVolumeLimit = lifetimeVolumeLimit?.toAdditionalKycAmount(),
-        lifetimeVolumeThreshold = lifetimeVolumeThreshold?.toAdditionalKycAmount(),
-        regions = regions,
-    )
-}
-
-private fun AdditionalKycAmountResponse.toAdditionalKycAmount(): AdditionalKycAmount {
-    return AdditionalKycAmount(
-        amount = amount,
-        currency = currency,
     )
 }
 

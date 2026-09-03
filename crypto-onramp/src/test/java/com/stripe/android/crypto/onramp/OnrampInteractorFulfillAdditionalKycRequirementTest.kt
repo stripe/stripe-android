@@ -8,6 +8,7 @@ import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.MissingAdditionalKycFileIdException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
+import com.stripe.android.crypto.onramp.exception.UnexpectedException
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
@@ -115,7 +116,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             documentSubmission(files = listOf(firstFile))
         )
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(MissingConsumerSecretException::class.java)
+        assertUnexpectedError<MissingConsumerSecretException>(result.exceptionOrNull())
         verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any())
         verifyFulfillmentWasNotRequested()
     }
@@ -130,7 +131,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             documentSubmission(files = listOf(firstFile, secondFile))
         )
 
-        assertThat(result.exceptionOrNull()).isSameInstanceAs(uploadError)
+        val error = assertUnexpectedError<IllegalStateException>(result.exceptionOrNull())
+        assertThat(error.underlyingError).isSameInstanceAs(uploadError)
         verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(secondFile)
         verifyFulfillmentWasNotRequested()
     }
@@ -144,7 +146,12 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             documentSubmission(files = listOf(firstFile))
         )
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(MissingAdditionalKycFileIdException::class.java)
+        val error = assertUnexpectedError<MissingAdditionalKycFileIdException>(result.exceptionOrNull())
+        assertThat(error.code).isEqualTo("unexpected_error")
+        assertThat(error.userMessage).isEqualTo("Something went wrong. Please try again later.")
+        assertThat(error.developerMessage).contains("Uploaded additional KYC document is missing a file ID")
+        assertThat(error.developerMessage).contains("operation: fulfill_additional_kyc_requirement")
+        assertThat(error.docUrl).isNull()
         verifyFulfillmentWasNotRequested()
     }
 
@@ -171,14 +178,15 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
 
         val result = interactor.fulfillAdditionalKycRequirement(questionnaireSubmission())
 
-        assertThat(result.exceptionOrNull()).isSameInstanceAs(submissionError)
+        val error = assertUnexpectedError<IllegalStateException>(result.exceptionOrNull())
+        assertThat(error.underlyingError).isSameInstanceAs(submissionError)
     }
 
     private fun runScenario(
         consumerSessionClientSecret: String? = CONSUMER_SESSION_CLIENT_SECRET,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val application: Application = RuntimeEnvironment.getApplication()
+        val application = createApplication()
         val linkController = mock<LinkController>()
         val cryptoApiRepository = mock<CryptoApiRepository>()
         whenever(linkController.state(any())).thenReturn(
@@ -216,6 +224,22 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
                 consumerSessionClientSecret = any(),
             )
         }
+    }
+
+    private inline fun <reified T : Throwable> assertUnexpectedError(error: Throwable?): UnexpectedException {
+        assertThat(error).isInstanceOf(UnexpectedException::class.java)
+        return (error as UnexpectedException).also {
+            assertThat(it.underlyingError).isInstanceOf(T::class.java)
+        }
+    }
+
+    private fun createApplication(): Application {
+        val application = mock<Application>()
+        val runtimeApplication: Application = RuntimeEnvironment.getApplication()
+        whenever(application.packageName).thenReturn(runtimeApplication.packageName)
+        whenever(application.getString(R.string.stripe_onramp_default_api_error_user_message))
+            .thenReturn("Something went wrong. Please try again later.")
+        return application
     }
 
     private companion object {
@@ -287,7 +311,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
                 objectType = "crypto_onramp_kyc_submission",
                 liquidityProvider = "swapped",
                 submissionType = submissionType,
-                submittedAt = 1_786_998_400,
+                status = "pending_verification",
+                created = 1_786_998_400,
             )
         }
 

@@ -4,16 +4,15 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.exception.LinkAccountNotVerifiedException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
-import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
+import com.stripe.android.crypto.onramp.exception.UnexpectedException
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementResponse
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementsResponse
-import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.RetrieveCryptoCustomerResponse
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
-import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -49,15 +48,16 @@ class OnrampInteractorAdditionalKycRequirementsTest {
         assertThat(result.pendingStripeAction).isEmpty()
         assertThat(result.unrecognizedActionOwner).isEmpty()
         verify(cryptoApiRepository).retrieveCryptoCustomer(
-            cryptoCustomerId = CRYPTO_CUSTOMER_ID,
             consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
         )
     }
 
     @Test
-    fun `customer without requirements returns empty classifications`() = runScenario(
+    fun `customer with no requirement entries returns empty classifications`() = runScenario(
         repositoryResult = Result.success(
-            RetrieveCryptoCustomerResponse(id = CRYPTO_CUSTOMER_ID)
+            RetrieveCryptoCustomerResponse(
+                requirements = AdditionalKycRequirementsResponse(entries = emptyList())
+            )
         ),
     ) {
         val result = interactor.retrieveAdditionalKycRequirements().getOrThrow()
@@ -69,13 +69,11 @@ class OnrampInteractorAdditionalKycRequirementsTest {
     }
 
     @Test
-    fun `missing crypto customer returns failure without requesting customer`() = runScenario(
-        cryptoCustomerId = null,
-    ) {
-        val error = interactor.retrieveAdditionalKycRequirements().exceptionOrNull()
+    fun `requirements are retrieved without a crypto customer ID`() = runScenario {
+        val result = interactor.retrieveAdditionalKycRequirements()
 
-        assertThat(error).isInstanceOf(MissingCryptoCustomerException::class.java)
-        verify(cryptoApiRepository, never()).retrieveCryptoCustomer(any(), any())
+        assertThat(result.isSuccess).isTrue()
+        verify(cryptoApiRepository).retrieveCryptoCustomer(CONSUMER_SESSION_CLIENT_SECRET)
     }
 
     @Test
@@ -84,8 +82,18 @@ class OnrampInteractorAdditionalKycRequirementsTest {
     ) {
         val error = interactor.retrieveAdditionalKycRequirements().exceptionOrNull()
 
-        assertThat(error).isInstanceOf(MissingConsumerSecretException::class.java)
-        verify(cryptoApiRepository, never()).retrieveCryptoCustomer(any(), any())
+        assertUnexpectedError<MissingConsumerSecretException>(error)
+        verify(cryptoApiRepository, never()).retrieveCryptoCustomer(any())
+    }
+
+    @Test
+    fun `unverified Link account returns failure without requesting customer`() = runScenario(
+        linkSessionState = LinkController.SessionState.NeedsVerification,
+    ) {
+        val error = interactor.retrieveAdditionalKycRequirements().exceptionOrNull()
+
+        assertUnexpectedError<LinkAccountNotVerifiedException>(error)
+        verify(cryptoApiRepository, never()).retrieveCryptoCustomer(any())
     }
 
     @Test
@@ -94,26 +102,25 @@ class OnrampInteractorAdditionalKycRequirementsTest {
     ) {
         val error = interactor.retrieveAdditionalKycRequirements().exceptionOrNull()
 
-        assertThat(error).isSameInstanceAs(expectedRepositoryError)
+        val unexpectedError = assertUnexpectedError<IllegalStateException>(error)
+        assertThat(unexpectedError.underlyingError).isSameInstanceAs(expectedRepositoryError)
     }
 
     private fun runScenario(
-        cryptoCustomerId: String? = CRYPTO_CUSTOMER_ID,
         consumerSessionClientSecret: String? = CONSUMER_SESSION_CLIENT_SECRET,
+        linkSessionState: LinkController.SessionState = LinkController.SessionState.LoggedIn,
         repositoryResult: Result<RetrieveCryptoCustomerResponse> = Result.success(customerResponse()),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val application: Application = RuntimeEnvironment.getApplication()
+        val application = createApplication()
         val linkController = mock<LinkController>()
         val cryptoApiRepository = mock<CryptoApiRepository>()
-        val linkState = linkState(consumerSessionClientSecret)
+        val linkState = linkState(consumerSessionClientSecret, linkSessionState)
 
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(linkState))
-        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
-        if (cryptoCustomerId != null && consumerSessionClientSecret != null) {
+        if (consumerSessionClientSecret != null) {
             whenever(
                 cryptoApiRepository.retrieveCryptoCustomer(
-                    cryptoCustomerId = cryptoCustomerId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
                 )
             ).thenReturn(repositoryResult)
@@ -128,10 +135,6 @@ class OnrampInteractorAdditionalKycRequirementsTest {
             checkoutHandler = OnrampSessionClientSecretProvider { "unused" },
             savedStateHandle = SavedStateHandle(),
         )
-        if (cryptoCustomerId != null) {
-            interactor.configure(configuration(cryptoCustomerId))
-        }
-
         Scenario(
             interactor = interactor,
             cryptoApiRepository = cryptoApiRepository,
@@ -143,25 +146,34 @@ class OnrampInteractorAdditionalKycRequirementsTest {
         val cryptoApiRepository: CryptoApiRepository,
     )
 
+    private inline fun <reified T : Throwable> assertUnexpectedError(error: Throwable?): UnexpectedException {
+        assertThat(error).isInstanceOf(UnexpectedException::class.java)
+        return (error as UnexpectedException).also {
+            assertThat(it.underlyingError).isInstanceOf(T::class.java)
+        }
+    }
+
+    private fun createApplication(): Application {
+        val application = mock<Application>()
+        val runtimeApplication: Application = RuntimeEnvironment.getApplication()
+        whenever(application.packageName).thenReturn(runtimeApplication.packageName)
+        whenever(application.getString(R.string.stripe_onramp_default_api_error_user_message))
+            .thenReturn("Something went wrong. Please try again later.")
+        return application
+    }
+
     private companion object {
-        const val CRYPTO_CUSTOMER_ID = "crc_123"
         const val CONSUMER_SESSION_CLIENT_SECRET = "secret_123"
 
-        fun configuration(cryptoCustomerId: String): OnrampConfiguration.State {
-            return OnrampConfiguration()
-                .merchantDisplayName("Test merchant")
-                .publishableKey("pk_test_123")
-                .appearance(LinkAppearance())
-                .cryptoCustomerId(cryptoCustomerId)
-                .build()
-        }
-
-        fun linkState(consumerSessionClientSecret: String?): LinkController.State {
+        fun linkState(
+            consumerSessionClientSecret: String?,
+            sessionState: LinkController.SessionState,
+        ): LinkController.State {
             return LinkController.State(
                 internalLinkAccount = LinkController.LinkAccount(
                     email = "test@example.com",
                     redactedPhoneNumber = "***-***-1234",
-                    sessionState = LinkController.SessionState.LoggedIn,
+                    sessionState = sessionState,
                     consumerSessionClientSecret = consumerSessionClientSecret,
                 ),
                 merchantLogoUrl = null,
@@ -175,7 +187,6 @@ class OnrampInteractorAdditionalKycRequirementsTest {
             entries: List<AdditionalKycRequirementResponse> = emptyList(),
         ): RetrieveCryptoCustomerResponse {
             return RetrieveCryptoCustomerResponse(
-                id = CRYPTO_CUSTOMER_ID,
                 requirements = AdditionalKycRequirementsResponse(entries),
             )
         }
@@ -188,6 +199,7 @@ class OnrampInteractorAdditionalKycRequirementsTest {
                 description = description,
                 requestedBy = "swapped",
                 awaitingActionFrom = awaitingActionFrom,
+                errors = emptyList(),
                 submissionType = "document",
             )
         }

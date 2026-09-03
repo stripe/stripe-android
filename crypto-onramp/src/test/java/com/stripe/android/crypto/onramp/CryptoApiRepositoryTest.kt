@@ -129,13 +129,13 @@ class CryptoApiRepositoryTest {
             200,
             """
                 {
-                    "id": "crc_123",
                     "requirements": {
                         "entries": [
                             {
                                 "description": "proof_of_address",
                                 "requested_by": "swapped",
                                 "awaiting_action_from": "user",
+                                "errors": [],
                                 "submission_type": "document",
                                 "document": {
                                     "accepted_subtypes": [
@@ -158,20 +158,18 @@ class CryptoApiRepositoryTest {
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
 
         val result = cryptoApiRepository.retrieveCryptoCustomer(
-            cryptoCustomerId = "crc_123",
             consumerSessionClientSecret = "test-secret",
         )
 
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.GET)
-        assertThat(apiRequest.baseUrl).isEqualTo("https://api.stripe.com/v1/crypto/customers/crc_123")
+        assertThat(apiRequest.baseUrl).isEqualTo("https://api.stripe.com/v1/crypto/internal/customer")
         assertThat(apiRequest.params).isEqualTo(
             mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret"))
         )
         val customer = result.getOrThrow()
-        assertThat(customer.id).isEqualTo("crc_123")
-        assertThat(requireNotNull(customer.requirements).entries.single().description)
+        assertThat(customer.requirements.entries.single().description)
             .isEqualTo("proof_of_address")
     }
 

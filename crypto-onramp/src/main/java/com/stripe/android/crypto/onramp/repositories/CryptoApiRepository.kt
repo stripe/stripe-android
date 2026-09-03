@@ -121,11 +121,10 @@ internal class CryptoApiRepository @Inject constructor(
      * Retrieves the current crypto customer, including any additional KYC requirements.
      */
     suspend fun retrieveCryptoCustomer(
-        cryptoCustomerId: String,
         consumerSessionClientSecret: String,
     ): Result<RetrieveCryptoCustomerResponse> {
         val request = apiRequestFactory.createGet(
-            url = getCustomerUrl(cryptoCustomerId),
+            url = customerUrl,
             options = buildRequestOptions(),
             params = credentialsParams(consumerSessionClientSecret).toMap(),
         )
@@ -656,11 +655,10 @@ internal class CryptoApiRepository @Inject constructor(
             get() = getApiUrl("crypto/internal/customers")
 
         /**
-         * @return `https://api.stripe.com/v1/crypto/customers/:id`
+         * @return `https://api.stripe.com/v1/crypto/internal/customer`
          */
-        internal fun getCustomerUrl(cryptoCustomerId: String): String {
-            return getApiUrl("crypto/customers/$cryptoCustomerId")
-        }
+        internal val customerUrl: String
+            get() = getApiUrl("crypto/internal/customer")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/fulfill_additional_kyc_requirement`

@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.json.Json
 import org.junit.Test
 
@@ -11,15 +12,12 @@ class RetrieveCryptoCustomerResponseTest {
 
     @Test
     fun `proof of address requirement is parsed`() {
-        val response = parseFixture("proof_of_address_required.json")
-        val requirement = requireNotNull(response.requirements).entries.single()
+        val requirement = parseFixture("proof_of_address_required.json").requirements.entries.single()
         val document = requireNotNull(requirement.document)
 
-        assertThat(response.id).isEqualTo("crc_poa")
         assertThat(requirement.description).isEqualTo("proof_of_address")
         assertThat(requirement.requestedBy).isEqualTo("swapped")
         assertThat(requirement.awaitingActionFrom).isEqualTo("user")
-        assertThat(requirement.requestedReasons).containsExactly("kyc_step_up")
         assertThat(requirement.errors).isEmpty()
         assertThat(requirement.submissionType).isEqualTo("document")
         assertThat(document.acceptedSubtypes.map { it.id })
@@ -33,33 +31,24 @@ class RetrieveCryptoCustomerResponseTest {
 
     @Test
     fun `source of funds questionnaire is parsed`() {
-        val response = parseFixture("source_of_funds_required.json")
-        val requirement = requireNotNull(response.requirements).entries.single()
+        val requirement = parseFixture("source_of_funds_required.json").requirements.entries.single()
         val questionnaire = requireNotNull(requirement.document)
             .additionalRequirements
             ?.questionnaire
         val questions = requireNotNull(questionnaire).questions
 
         assertThat(requirement.description).isEqualTo("source_of_funds")
+        assertThat(requirement.errors).isEmpty()
         assertThat(questions.map { it.id })
             .containsExactly("purchase_purpose", "third_party_advised", "funding_sources")
             .inOrder()
         assertThat(questions.map { it.answerType }).containsExactly("free_text", "free_text", "free_text")
         assertThat(questions.all { it.required }).isTrue()
-
-        val capabilityImpact = requireNotNull(requirement.impact).restrictsCapabilities.single()
-        assertThat(capabilityImpact.capability).isEqualTo("crypto_onramp_transactions")
-        assertThat(capabilityImpact.restriction.maxTransactionAmount?.amount).isEqualTo(2500000L)
-        assertThat(capabilityImpact.restriction.maxTransactionAmount?.currency).isEqualTo("eur")
-        assertThat(capabilityImpact.restriction.lifetimeVolumeLimit?.amount).isNull()
-        assertThat(capabilityImpact.restriction.lifetimeVolumeLimit?.currency).isEqualTo("eur")
-        assertThat(capabilityImpact.restriction.regions).containsExactly("CO", "PH", "CA").inOrder()
     }
 
     @Test
     fun `top-level questionnaire is parsed`() {
-        val response = parseFixture("questionnaire_required.json")
-        val requirement = requireNotNull(response.requirements).entries.single()
+        val requirement = parseFixture("questionnaire_required.json").requirements.entries.single()
         val questions = requireNotNull(requirement.questionnaire).questions
 
         assertThat(requirement.submissionType).isEqualTo("questionnaire")
@@ -70,8 +59,7 @@ class RetrieveCryptoCustomerResponseTest {
 
     @Test
     fun `requirement awaiting partner action is parsed`() {
-        val response = parseFixture("pending_review.json")
-        val requirement = requireNotNull(response.requirements).entries.single()
+        val requirement = parseFixture("pending_review.json").requirements.entries.single()
 
         assertThat(requirement.description).isEqualTo("proof_of_address")
         assertThat(requirement.awaitingActionFrom).isEqualTo("partner")
@@ -80,8 +68,7 @@ class RetrieveCryptoCustomerResponseTest {
 
     @Test
     fun `unknown submission type and fields are preserved or ignored`() {
-        val response = parseFixture("unknown_submission_type.json")
-        val requirement = requireNotNull(response.requirements).entries.single()
+        val requirement = parseFixture("unknown_submission_type.json").requirements.entries.single()
 
         assertThat(requirement.description).isEqualTo("ownership_attestation")
         assertThat(requirement.requestedBy).isEqualTo("future_partner")
@@ -91,41 +78,50 @@ class RetrieveCryptoCustomerResponseTest {
     }
 
     @Test
-    fun `missing requirements are supported`() {
+    fun `empty requirement entries are supported`() {
         val response = json.decodeFromString(
             RetrieveCryptoCustomerResponse.serializer(),
-            """{"id":"crc_without_requirements"}""",
+            """{"requirements":{"entries":[]}}""",
         )
 
-        assertThat(response.id).isEqualTo("crc_without_requirements")
-        assertThat(response.requirements).isNull()
+        assertThat(response.requirements.entries).isEmpty()
     }
 
     @Test
-    fun `missing document collection configuration uses defaults`() {
-        val response = json.decodeFromString(
-            RetrieveCryptoCustomerResponse.serializer(),
-            """
-                {
-                  "id": "crc_defaults",
-                  "requirements": {
-                    "entries": [{
-                      "description": "proof_of_address",
-                      "requested_by": "swapped",
-                      "awaiting_action_from": "user",
-                      "submission_type": "document",
-                      "document": {}
-                    }]
-                  }
-                }
-            """.trimIndent(),
-        )
-        val document = requireNotNull(requireNotNull(response.requirements).entries.single().document)
+    fun `missing requirements fail decoding`() {
+        val result = runCatching {
+            json.decodeFromString(
+                RetrieveCryptoCustomerResponse.serializer(),
+                "{}",
+            )
+        }
 
-        assertThat(document.acceptedSubtypes).isEmpty()
-        assertThat(document.acceptedFormats).isEmpty()
-        assertThat(document.minDocuments).isEqualTo(1)
-        assertThat(document.instructions).isEmpty()
+        assertThat(result.exceptionOrNull()).isInstanceOf(MissingFieldException::class.java)
+    }
+
+    @Test
+    fun `missing required document collection fields fail decoding`() {
+        val result = runCatching {
+            json.decodeFromString(
+                RetrieveCryptoCustomerResponse.serializer(),
+                """
+                    {
+                      "requirements": {
+                        "entries": [{
+                          "description": "proof_of_address",
+                          "requested_by": "swapped",
+                          "awaiting_action_from": "user",
+                          "errors": [],
+                          "submission_type": "document",
+                          "document": {}
+                        }]
+                      }
+                    }
+                """.trimIndent(),
+            )
+        }
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(MissingFieldException::class.java)
     }
 
     private fun parseFixture(fileName: String): RetrieveCryptoCustomerResponse {

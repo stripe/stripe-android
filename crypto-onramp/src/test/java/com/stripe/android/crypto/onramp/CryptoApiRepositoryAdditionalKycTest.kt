@@ -97,7 +97,7 @@ class CryptoApiRepositoryAdditionalKycTest {
     }
 
     @Test
-    fun `minimal fulfillment response is parsed`() = runScenario(
+    fun `fulfillment response missing required fields fails parsing`() = runScenario(
         responseBody = minimalSubmissionResponse,
     ) {
         val result = repository.fulfillAdditionalKycRequirement(
@@ -106,15 +106,9 @@ class CryptoApiRepositoryAdditionalKycTest {
             documents = null,
             questionnaire = null,
             consumerSessionClientSecret = "secret_123",
-        ).getOrThrow()
+        )
 
-        assertThat(result.id).isEqualTo("submission_123")
-        assertThat(result.objectType).isEqualTo("crypto_onramp_kyc_submission")
-        assertThat(result.status).isEqualTo("pending_verification")
-        assertThat(result.liquidityProvider).isNull()
-        assertThat(result.submissionType).isNull()
-        assertThat(result.submittedAt).isNull()
-        assertThat(result.created).isNull()
+        assertThat(result.isFailure).isTrue()
     }
 
     @Test
@@ -284,7 +278,8 @@ class CryptoApiRepositoryAdditionalKycTest {
                       }
                     ]
                   },
-                  "submitted_at": 1723264801
+                  "status": "pending_verification",
+                  "created": 1723264801
                 }
             """.trimIndent()
 
@@ -298,10 +293,12 @@ class CryptoApiRepositoryAdditionalKycTest {
                   "documents": [
                     {
                       "document_type": "proof_of_address",
-                      "file_ids": ["file_1"]
+                      "file_ids": ["file_1"],
+                      "status": "pending_verification"
                     }
                   ],
-                  "submitted_at": 1723264802
+                  "status": "pending_verification",
+                  "created": 1723264802
                 }
             """.trimIndent()
 

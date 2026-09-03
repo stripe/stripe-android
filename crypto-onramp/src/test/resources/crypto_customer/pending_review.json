@@ -1,12 +1,10 @@
 {
-  "id": "crc_pending",
   "requirements": {
     "entries": [
       {
         "description": "proof_of_address",
         "requested_by": "swapped",
         "awaiting_action_from": "partner",
-        "requested_reasons": ["kyc_step_up"],
         "errors": [],
         "submission_type": "document",
         "document": {

@@ -45,39 +45,6 @@ class AdditionalKycRequirementsResponseTest {
     }
 
     @Test
-    fun `requirement impact is mapped`() = runScenario(
-        entries = listOf(
-            requirement(
-                description = "source_of_funds",
-                awaitingActionFrom = "user",
-                impact = AdditionalKycRequirementImpactResponse(
-                    restrictsCapabilities = listOf(
-                        AdditionalKycCapabilityImpactResponse(
-                            capability = "crypto_onramp_transactions",
-                            restriction = AdditionalKycCapabilityRestrictionResponse(
-                                lifetimeVolumeThreshold = AdditionalKycAmountResponse(
-                                    amount = null,
-                                    currency = "eur",
-                                ),
-                                regions = listOf("CO", "PH", "CA"),
-                            ),
-                        )
-                    ),
-                ),
-            )
-        )
-    ) {
-        val capabilityImpact = requireNotNull(requirements.userActionRequired.single().impact)
-            .restrictsCapabilities
-            .single()
-
-        assertThat(capabilityImpact.capability).isEqualTo("crypto_onramp_transactions")
-        assertThat(capabilityImpact.restriction.lifetimeVolumeThreshold?.amount).isNull()
-        assertThat(capabilityImpact.restriction.lifetimeVolumeThreshold?.currency).isEqualTo("eur")
-        assertThat(capabilityImpact.restriction.regions).containsExactly("CO", "PH", "CA").inOrder()
-    }
-
-    @Test
     fun `top-level questionnaire is normalized`() = runScenario(
         entries = listOf(
             requirement(
@@ -173,13 +140,12 @@ class AdditionalKycRequirementsResponseTest {
             submissionType: String = "document",
             document: AdditionalKycDocumentRequirementResponse? = null,
             questionnaire: AdditionalKycQuestionnaireResponse? = null,
-            impact: AdditionalKycRequirementImpactResponse? = null,
         ): AdditionalKycRequirementResponse {
             return AdditionalKycRequirementResponse(
                 description = description,
                 requestedBy = "swapped",
                 awaitingActionFrom = awaitingActionFrom,
-                impact = impact,
+                errors = emptyList(),
                 submissionType = submissionType,
                 document = document,
                 questionnaire = questionnaire,
