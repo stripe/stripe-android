@@ -14,6 +14,7 @@ import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromot
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -5027,7 +5028,8 @@ internal class DefaultPaymentElementLoaderTest {
                 override fun invoke(
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
+                    cardBrandFilter: CardBrandFilter,
+                    apiConfiguration: ApiConfiguration.State,
                 ): GooglePayRepository {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }

@@ -12,6 +12,7 @@ import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromot
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.DurationProvider
@@ -704,7 +705,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return googlePayRepositoryFactory(
             environment = environment,
             cardFundingFilter = DefaultCardFundingFilter,
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = DefaultCardBrandFilter,
+            apiConfiguration = paymentConfiguration.get().let {
+                ApiConfiguration.State(
+                    publishableKey = it.publishableKey,
+                    stripeAccountId = it.stripeAccountId,
+                )
+            },
         ).isReady().first()
     }
 

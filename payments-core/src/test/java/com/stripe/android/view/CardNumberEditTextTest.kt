@@ -35,6 +35,7 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.NullCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
@@ -95,7 +96,10 @@ internal class CardNumberEditTextTest {
 
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
     private val analyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        PaymentAnalyticsRequestFactory(
+            context = context,
+            publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY }
+        )
 
     private val cardNumberEditText = CardNumberEditText(
         context,
@@ -1076,7 +1080,13 @@ internal class CardNumberEditTextTest {
         val repository = FakeCardElementConfigRepository()
 
         val cardWidgetViewModel = CardWidgetViewModel(
-            paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
+            apiConfigProvider = {
+                val config = PaymentConfiguration.getInstance(context)
+                ApiConfiguration.State(
+                    publishableKey = config.publishableKey,
+                    stripeAccountId = config.stripeAccountId,
+                )
+            },
             stripeRepository = repository,
             dispatcher = dispatcher
         ).also { viewModelStoreRule.track(it) }
