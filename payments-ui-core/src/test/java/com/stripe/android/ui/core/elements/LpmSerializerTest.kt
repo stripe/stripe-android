@@ -11,58 +11,6 @@ import com.stripe.android.uicore.R as UiCoreR
 class LpmSerializerTest {
 
     @Test
-    fun `Verify a DropdownSpec parses correctly`() {
-        val serializedString = """
-            [
-              {
-                "type": "eps",
-                "fields": [
-                  {
-                    "type": "selector",
-                    "api_path": {
-                      "v1": "eps[bank]"
-                    },
-                    "translation_id": "upe.labels.eps.bank",
-                    "items": [
-                      {
-                        "display_text": "Ärzte- und Apothekerbank",
-                        "api_value": "arzte_und_apotheker_bank"
-                      },
-                      {
-                        "display_text": "VR-Bank Braunau",
-                        "api_value": "vr_bank_braunau"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-        """.trimIndent()
-
-        val result = LpmSerializer.deserializeList(serializedString).getOrThrow()
-
-        val dropdownSpec = result.first { it.type == "eps" }
-            .fields.single() as DropdownSpec
-
-        assertThat(dropdownSpec.apiPath.v1).isEqualTo("eps[bank]")
-        assertThat(dropdownSpec.labelTranslationId).isEqualTo(TranslationId.EpsBank)
-        assertThat(dropdownSpec.items).hasSize(2)
-        assertThat(dropdownSpec.items[0]).isEqualTo(
-            DropdownItemSpec(
-                displayText = "Ärzte- und Apothekerbank",
-                apiValue = "arzte_und_apotheker_bank"
-            )
-        )
-
-        assertThat(dropdownSpec.items[1]).isEqualTo(
-            DropdownItemSpec(
-                displayText = "VR-Bank Braunau",
-                apiValue = "vr_bank_braunau"
-            )
-        )
-    }
-
-    @Test
     fun `Verify SimpleTextSpec parses correctly`() {
         val serializedString = """
             [
@@ -121,54 +69,6 @@ class LpmSerializerTest {
         assertThat(addressSpec.capitalization).isEqualTo(Capitalization.None)
         assertThat(addressSpec.keyboardType).isEqualTo(KeyboardType.Ascii)
         assertThat(addressSpec.showOptionalLabel).isFalse()
-    }
-
-    @Test
-    fun `Verify DropdownSpec parses correctly`() {
-        val serializedString = """
-            [
-              {
-                "type": "new_lpm",
-                "async": true,
-                "fields": [
-                  {
-                    "type": "selector",
-                    "api_path": {
-                      "v1": "something_bogus"
-                    },
-                    "translation_id": "upe.labels.ideal.bank",
-                    "items": [
-                      {
-                        "api_value": "123",
-                        "display_text": "abc"
-                      },
-                      {
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-        """.trimIndent()
-
-        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
-        val dropdownSpec = results.first().fields.first() as DropdownSpec
-
-        assertThat(dropdownSpec.apiPath.v1).isEqualTo("something_bogus")
-        assertThat(dropdownSpec.labelTranslationId).isEqualTo(TranslationId.IdealBank)
-        assertThat(dropdownSpec.items.size).isEqualTo(2)
-        assertThat(dropdownSpec.items[0]).isEqualTo(
-            DropdownItemSpec(
-                "123",
-                "abc"
-            )
-        )
-        assertThat(dropdownSpec.items[1]).isEqualTo(
-            DropdownItemSpec(
-                null,
-                "Other"
-            )
-        )
     }
 
     @Test

@@ -10,7 +10,6 @@ import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.CountrySpec
-import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -65,7 +64,6 @@ internal class TransformSpecToElements(
                 is SimpleTextSpec -> listOf(spec.transform(arguments.initialValues))
                 is IbanSpec -> listOf(spec.transform(arguments.initialValues))
                 is KlarnaHeaderStaticTextSpec -> listOf(spec.transform())
-                is DropdownSpec -> listOf(spec.transform(arguments.initialValues))
                 is CountrySpec -> listOf(spec.transform(arguments.initialValues))
                 is AddressSpec -> spec.transform(
                     arguments.initialValues,

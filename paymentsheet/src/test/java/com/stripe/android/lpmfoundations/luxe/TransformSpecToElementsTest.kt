@@ -18,15 +18,12 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CountrySpec
-import com.stripe.android.ui.core.elements.DropdownItemSpec
-import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
-import com.stripe.android.ui.core.elements.SimpleDropdownElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
@@ -91,27 +88,6 @@ internal class TransformSpecToElementsTest {
             assertThat(countrySectionElement.identifier.v1).isEqualTo("billing_details[address][country]_section")
 
             assertThat(countryElement.identifier.v1).isEqualTo("billing_details[address][country]")
-        }
-
-    @Test
-    fun `Adding a ideal bank section sets up the section and country elements correctly`() =
-        runBlocking {
-            val idealSection = IDEAL_BANK_CONFIG
-            val formElement = transformSpecToElements.transform(
-                metadata = PaymentMethodMetadataFactory.create(),
-                specs = listOf(idealSection),
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            )
-
-            val idealSectionElement = formElement.first() as SectionElement
-            val idealElement = idealSectionElement.fields[0] as SimpleDropdownElement
-
-            // Verify the correct config is setup for the controller
-            assertThat(idealElement.controller.label.first()).isEqualTo(resolvableString(R.string.stripe_ideal_bank))
-
-            assertThat(idealSectionElement.identifier.v1).isEqualTo("ideal[bank]_section")
-
-            assertThat(idealElement.identifier.v1).isEqualTo("ideal[bank]")
         }
 
     @Test
@@ -363,67 +339,6 @@ internal class TransformSpecToElementsTest {
 
         assertThat(sectionElement.fields.size).isEqualTo(1)
         assertThat(sectionElement.fields.firstOrNull()).isInstanceOf<AutocompleteAddressElement>()
-    }
-
-    companion object {
-        val IDEAL_BANK_CONFIG = DropdownSpec(
-            IdentifierSpec.Generic("ideal[bank]"),
-            TranslationId.IdealBank,
-            listOf(
-                DropdownItemSpec(
-                    apiValue = "abn_amro",
-                    displayText = "ABN Amro"
-                ),
-                DropdownItemSpec(
-                    apiValue = "asn_bank",
-                    displayText = "ASN Bank"
-                ),
-                DropdownItemSpec(
-                    apiValue = "bunq",
-                    displayText = "bunq B.V.‎"
-                ),
-                DropdownItemSpec(
-                    apiValue = "handelsbanken",
-                    displayText = "Handelsbanken"
-                ),
-                DropdownItemSpec(
-                    apiValue = "ing",
-                    displayText = "ING Bank"
-                ),
-                DropdownItemSpec(
-                    apiValue = "knab",
-                    displayText = "Knab"
-                ),
-                DropdownItemSpec(
-                    apiValue = "rabobank",
-                    displayText = "Rabobank"
-                ),
-                DropdownItemSpec(
-                    apiValue = "regiobank",
-                    displayText = "RegioBank"
-                ),
-                DropdownItemSpec(
-                    apiValue = "revolut",
-                    displayText = "Revolut"
-                ),
-                DropdownItemSpec(
-                    apiValue = "sns_bank",
-                    displayText = "SNS Bank"
-                ),
-                DropdownItemSpec(
-                    apiValue = "triodos_bank",
-                    displayText = "Triodos Bank"
-                ),
-                DropdownItemSpec(
-                    apiValue = "van_lanschot",
-                    displayText = "Van Lanschot"
-                ),
-                DropdownItemSpec(
-                    apiValue = null, // HIGHLIGHT
-                    displayText = "Other"
-                )
-            )
-        )
     }
 }
 

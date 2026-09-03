@@ -42,7 +42,6 @@ object FormItemSpecSerializer :
             "affirm_header" -> AffirmTextSpec.serializer()
             "afterpay_header" -> AfterpayClearpayTextSpec.serializer()
             "country" -> CountrySpec.serializer()
-            "selector" -> DropdownSpec.serializer()
             "email" -> EmailSpec.serializer()
             "iban" -> IbanSpec.serializer()
             "klarna_country" -> CountrySpec.serializer()
