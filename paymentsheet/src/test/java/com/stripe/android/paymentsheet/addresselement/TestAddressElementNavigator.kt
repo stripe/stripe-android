@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.flow.Flow
 
 internal class TestAddressElementNavigator private constructor() : AddressElementNavigator {
@@ -25,8 +26,11 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
         return null
     }
 
-    override fun dismiss(result: AddressLauncherResult) {
-        dismissCalls.add(Call.Dismiss(result))
+    override fun dismiss(
+        result: AddressLauncherResult,
+        checkoutSessionResponse: CheckoutSessionResponse?,
+    ) {
+        dismissCalls.add(Call.Dismiss(result, checkoutSessionResponse))
     }
 
     override fun onBack() {
@@ -37,7 +41,10 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
         data class NavigateTo(val target: AddressElementScreen) : Call
         data class SetResult(val key: String, val value: Any?) : Call
         data class GetResultFlow(val key: String) : Call
-        data class Dismiss(val result: AddressLauncherResult) : Call
+        data class Dismiss(
+            val result: AddressLauncherResult,
+            val checkoutSessionResponse: CheckoutSessionResponse?,
+        ) : Call
         data object OnBack : Call
     }
 

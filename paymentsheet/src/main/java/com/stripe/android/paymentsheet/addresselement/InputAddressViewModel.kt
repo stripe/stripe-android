@@ -4,14 +4,19 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -32,7 +37,7 @@ internal class InputAddressViewModel @Inject constructor(
     val navigator: AddressElementNavigator,
     private val processingState: AddressElementActivityProcessingState,
     private val eventReporter: AddressLauncherEventReporter,
-    private val checkoutShippingAddressHandler: CheckoutShippingAddressHandler,
+    private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
 ) : ViewModel(), AutocompleteAddressInteractor {
@@ -244,7 +249,7 @@ internal class InputAddressViewModel @Inject constructor(
             }
             is AddressElementActivityContract.LaunchMode.CheckoutShipping -> {
                 saveCheckoutShippingAddress(
-                    controllerInstanceId = launchMode.controllerInstanceId,
+                    checkoutSessionResponse = launchMode.checkoutSessionResponse,
                     addressDetails = addressDetails,
                 )
             }
@@ -252,8 +257,9 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     @Suppress("TooGenericExceptionCaught")
+    @OptIn(CheckoutSessionPreview::class)
     private fun saveCheckoutShippingAddress(
-        controllerInstanceId: String,
+        checkoutSessionResponse: CheckoutSessionResponse,
         addressDetails: AddressDetails,
     ) {
         if (!processingState.tryStartProcessing()) return
@@ -262,7 +268,14 @@ internal class InputAddressViewModel @Inject constructor(
         _formEnabled.value = false
         viewModelScope.launch {
             val result = try {
-                checkoutShippingAddressHandler.update(controllerInstanceId, addressDetails)
+                val address = addressDetails.toCheckoutAddress()
+                    ?: error("Shipping address country is required.")
+                checkoutSessionResponse.validateShippingCountry(address.country).getOrThrow()
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                    address = address,
+                )
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
@@ -272,8 +285,11 @@ internal class InputAddressViewModel @Inject constructor(
             }
 
             result.fold(
-                onSuccess = {
-                    dismissWithAddress(addressDetails)
+                onSuccess = { updatedResponse ->
+                    dismissWithAddress(
+                        addressDetails = addressDetails,
+                        checkoutSessionResponse = updatedResponse,
+                    )
                 },
                 onFailure = {
                     _saveError.value = R.string.stripe_something_went_wrong.resolvableString
@@ -284,7 +300,10 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     @VisibleForTesting
-    fun dismissWithAddress(addressDetails: AddressDetails) {
+    fun dismissWithAddress(
+        addressDetails: AddressDetails,
+        checkoutSessionResponse: CheckoutSessionResponse? = null,
+    ) {
         addressDetails.address?.country?.let { country ->
             eventReporter.onCompleted(
                 country = country,
@@ -292,9 +311,12 @@ internal class InputAddressViewModel @Inject constructor(
                 editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
-        navigator.dismiss(
-            AddressLauncherResult.Succeeded(addressDetails)
-        )
+        val result = AddressLauncherResult.Succeeded(addressDetails)
+        if (checkoutSessionResponse == null) {
+            navigator.dismiss(result)
+        } else {
+            navigator.dismiss(result, checkoutSessionResponse)
+        }
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {

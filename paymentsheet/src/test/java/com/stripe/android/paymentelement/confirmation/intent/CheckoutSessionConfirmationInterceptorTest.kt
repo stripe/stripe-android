@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
@@ -435,6 +436,34 @@ class CheckoutSessionConfirmationInterceptorTest {
         interceptSavedPm(shippingInformation = SHIPPING_INFORMATION)
     }
 
+    @Test
+    fun `intercept with new payment method passes refreshed shipping values`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("shipping[name]", "Jenny Rosen"),
+            bodyPart("shipping[address][line1]", "510 Townsend St"),
+            bodyPart("shipping[address][postal_code]", "94103"),
+            not(hasBodyPart("shipping[phone]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm(shippingValues = SHIPPING_VALUES)
+    }
+
+    @Test
+    fun `intercept with saved payment method falls back to refreshed shipping values`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("shipping[name]", "Jenny Rosen"),
+            bodyPart("shipping[address][line1]", "510 Townsend St"),
+            bodyPart("shipping[address][postal_code]", "94103"),
+            not(hasBodyPart("shipping[phone]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(shippingValues = SHIPPING_VALUES)
+    }
+
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
@@ -495,20 +524,22 @@ class CheckoutSessionConfirmationInterceptorTest {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,
             intent: StripeIntent = PaymentIntentFactory.create(),
+            shippingValues: ConfirmPaymentIntentParams.Shipping? = null,
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> = interceptor.intercept(
             intent = intent,
             confirmationOption = NEW_PM_OPTION.copy(shouldSave = shouldSave),
-            shippingValues = null,
+            shippingValues = shippingValues,
         )
 
         suspend fun interceptSavedPm(
             intent: StripeIntent = PaymentIntentFactory.create(),
             shippingInformation: ShippingInformation? = null,
+            shippingValues: ConfirmPaymentIntentParams.Shipping? = null,
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             interceptor.intercept(
                 intent = intent,
                 confirmationOption = SAVED_PM_OPTION.copy(shippingInformation = shippingInformation),
-                shippingValues = null,
+                shippingValues = shippingValues,
             )
     }
 
@@ -548,6 +579,17 @@ class CheckoutSessionConfirmationInterceptorTest {
         val SHIPPING_INFORMATION = ShippingInformation(
             name = "Jenny Rosen",
             phone = "1-800-555-1234",
+            address = Address(
+                line1 = "510 Townsend St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US",
+            ),
+        )
+
+        val SHIPPING_VALUES = ConfirmPaymentIntentParams.Shipping(
+            name = "Jenny Rosen",
             address = Address(
                 line1 = "510 Townsend St",
                 city = "San Francisco",

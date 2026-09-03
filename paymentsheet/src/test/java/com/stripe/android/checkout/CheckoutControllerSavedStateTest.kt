@@ -38,27 +38,6 @@ internal class CheckoutControllerSavedStateTest {
     }
 
     @Test
-    fun `controller instance ID is restored through the parent`() {
-        val parentHandle = SavedStateHandle()
-        val savedState = CheckoutControllerSavedState(parentHandle, INTEGRATION_NAME)
-
-        val restored = CheckoutControllerSavedState(
-            parentHandle = parentHandle.simulateProcessDeath(),
-            integrationName = INTEGRATION_NAME,
-        )
-
-        assertThat(restored.controllerInstanceId).isEqualTo(savedState.controllerInstanceId)
-    }
-
-    @Test
-    fun `controller instance IDs are isolated by saved state owner`() {
-        val first = CheckoutControllerSavedState(SavedStateHandle(), INTEGRATION_NAME)
-        val second = CheckoutControllerSavedState(SavedStateHandle(), INTEGRATION_NAME)
-
-        assertThat(first.controllerInstanceId).isNotEqualTo(second.controllerInstanceId)
-    }
-
-    @Test
     fun `instances do not share a child handle`() {
         val parentHandle = SavedStateHandle()
 

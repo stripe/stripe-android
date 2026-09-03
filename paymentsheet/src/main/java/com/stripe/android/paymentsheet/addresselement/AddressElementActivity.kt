@@ -145,11 +145,11 @@ internal class AddressElementActivity : ComponentActivity() {
         }
     }
 
-    private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled()) {
+    private fun setResult(result: AddressElementActivityContract.Result) {
         setResult(
-            result.resultCode,
+            result.addressOptionsResult.resultCode,
             Intent().putExtras(
-                AddressElementActivityContract.Result(result).toBundle()
+                result.toBundle()
             )
         )
     }

@@ -2,20 +2,20 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
-import com.stripe.android.paymentsheet.addresselement.CheckoutShippingAddressHandler
-import com.stripe.android.paymentsheet.addresselement.DefaultCheckoutShippingAddressHandler
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Binds
 import dagger.Module
@@ -44,6 +44,15 @@ internal class AddressElementViewModelModule {
     @Named(PRODUCT_USAGE)
     @Singleton
     fun providesProductUsage() = setOf("PaymentSheet.AddressController")
+
+    @Provides
+    @Singleton
+    fun provideElementsSessionClientParams(context: Context): ElementsSessionClientParams {
+        return ElementsSessionClientParams(
+            mobileAppId = context.packageName,
+            mobileSessionIdProvider = { AnalyticsRequestFactory.sessionId.toString() },
+        )
+    }
 
     @Provides
     @Named(PUBLISHABLE_KEY)
@@ -103,10 +112,5 @@ internal class AddressElementViewModelModule {
     interface Bindings {
         @Binds
         fun bindsAddressElementNavigator(navigator: NavHostAddressElementNavigator): AddressElementNavigator
-
-        @Binds
-        fun bindsCheckoutShippingAddressHandler(
-            handler: DefaultCheckoutShippingAddressHandler,
-        ): CheckoutShippingAddressHandler
     }
 }

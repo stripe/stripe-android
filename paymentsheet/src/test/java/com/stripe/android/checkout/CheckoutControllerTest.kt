@@ -29,6 +29,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
@@ -49,6 +50,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLooper.idleMainLooper
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -71,11 +73,9 @@ internal class CheckoutControllerTest {
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
 
-    // Clear process-global callback and controller registrations between tests.
     @After
     fun clearCallbackReferences() {
         PaymentElementCallbackReferences.clear()
-        CheckoutControllerReferences.clear()
     }
 
     @Test
@@ -490,37 +490,6 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `controller registers itself by its saved instance ID`() = runTest {
-        val controller = createController()
-
-        assertThat(CheckoutControllerReferences[controller.controllerInstanceId])
-            .isSameInstanceAs(controller)
-    }
-
-    @Test
-    fun `destroy unregisters the controller by its saved instance ID`() = runTest {
-        val controller = createController()
-        val instanceId = controller.controllerInstanceId
-
-        controller.destroy()
-
-        assertThat(CheckoutControllerReferences[instanceId]).isNull()
-    }
-
-    @Test
-    fun `recreated controller replaces the registry binding for its restored instance ID`() = runTest {
-        val parentHandle = SavedStateHandle()
-        val original = createController(parentHandle)
-        val restoredHandle = parentHandle.simulateProcessDeath()
-
-        val recreated = createController(restoredHandle)
-
-        assertThat(recreated.controllerInstanceId).isEqualTo(original.controllerInstanceId)
-        assertThat(CheckoutControllerReferences[original.controllerInstanceId])
-            .isSameInstanceAs(recreated)
-    }
-
-    @Test
     fun `controllers with different integration names keep separate state on one saved state handle`() =
         runTest {
             networkRule.defaultInit()
@@ -740,6 +709,56 @@ internal class CheckoutControllerTest {
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
         }
+
+    @Test
+    fun `commitShippingAddress stores local details and refreshes controller state`() = runMutationScenario {
+        val response = committedState().checkoutSessionResponse.copy(
+            customerEmail = "updated@example.com",
+        )
+
+        controller.commitShippingAddress(
+            checkoutSessionResponse = response,
+            name = "John",
+            address = fullAddress.build(),
+        )
+
+        assertThat(controller.isUpdating.value).isTrue()
+        testScheduler.advanceUntilIdle()
+        idleMainLooper()
+
+        val state = committedState()
+        assertThat(state.checkoutSessionResponse).isEqualTo(response)
+        assertThat(controller.session.value?.email).isEqualTo("updated@example.com")
+        assertThat(state.collectedDetails.shippingName).isEqualTo("John")
+        assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
+        assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
+        assertThat(state.paymentMethodMetadata.shippingDetails?.address).isEqualTo(
+            fullAddress.build().asPaymentSheet()
+        )
+        assertThat(controller.isUpdating.value).isFalse()
+    }
+
+    @Test
+    fun `commitShippingAddress leaves session empty when state is missing`() = runTest {
+        val controller = createController()
+
+        controller.commitShippingAddress(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            name = "John",
+            address = Address.State(
+                city = "Denver",
+                country = "US",
+                line1 = "123 Main St",
+                line2 = null,
+                postalCode = "80202",
+                state = "CO",
+            ),
+        )
+        testScheduler.advanceUntilIdle()
+
+        assertThat(controller.session.value).isNull()
+        assertThat(controller.isUpdating.value).isFalse()
+    }
 
     @Test
     fun `updateBillingAddress sends tax_region and stores address when automatic tax targets billing`() =

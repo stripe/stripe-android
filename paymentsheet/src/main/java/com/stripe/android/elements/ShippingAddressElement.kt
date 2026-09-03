@@ -10,10 +10,12 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
@@ -30,8 +32,19 @@ class ShippingAddressElement @Inject internal constructor(
     private val errorReporter: ErrorReporter,
 ) {
     private val activityLauncher: ActivityResultLauncher<AddressElementActivityContract.Args> =
-        activityResultCaller.registerForActivityResult(AddressElementActivityContract) {
+        activityResultCaller.registerForActivityResult(AddressElementActivityContract) { result ->
             shippingAddressElementStateHolder.isPresenting = false
+            val succeeded = result.addressOptionsResult as? AddressLauncherResult.Succeeded
+                ?: return@registerForActivityResult
+            val checkoutSessionResponse = result.checkoutSessionResponse
+                ?: return@registerForActivityResult
+            val address = succeeded.address.toCheckoutAddress()
+                ?: return@registerForActivityResult
+            checkoutController.commitShippingAddress(
+                checkoutSessionResponse = checkoutSessionResponse,
+                name = succeeded.address.name,
+                address = address,
+            )
         }
 
     init {
@@ -69,7 +82,7 @@ class ShippingAddressElement @Inject internal constructor(
                     useStripeHostedAutocomplete = true,
                 ),
                 launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(
-                    controllerInstanceId = checkoutController.controllerInstanceId,
+                    checkoutSessionResponse = requireNotNull(stateHolder.state).checkoutSessionResponse,
                 ),
             )
         )
