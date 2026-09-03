@@ -8,7 +8,6 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -56,7 +55,6 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,11 +67,6 @@ import com.stripe.android.R as PaymentsCoreR
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationDefinitionTest {
-    @Before
-    fun setUp() {
-        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), "pk_test_123")
-    }
-
     @get:Rule
     val allowNoExistingPaymentMethodForGooglePayRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.allowNoExistingPaymentMethodForGooglePay,
@@ -429,7 +422,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -466,7 +459,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -504,7 +497,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -543,7 +536,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -597,7 +590,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = listOf(
                 GooglePayJsonFactory.DisplayItem(
                     label = "Widget x2",
@@ -718,7 +711,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -751,7 +744,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+            apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,

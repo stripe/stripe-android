@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -241,6 +242,10 @@ internal class AutocompleteViewModel @Inject constructor(
                         .build(
                             application = extras.requireApplication(),
                             args = args,
+                            apiConfiguration = ApiConfiguration.State(
+                                publishableKey = args.publishableKey,
+                                stripeAccountId = null,
+                            ),
                         )
                         .autocompleteViewModel as T
                 }

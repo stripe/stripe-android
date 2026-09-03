@@ -26,6 +26,7 @@ internal object AutocompleteContract :
         internal val id: String,
         internal val country: String,
         internal val googlePlacesApiKey: String,
+        internal val publishableKey: String,
         internal val appearanceContext: AutocompleteAppearanceContext,
     ) : ActivityStarter.Args {
         internal companion object {

@@ -19,8 +19,6 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -45,6 +43,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationToNamedModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -128,6 +128,8 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
         PaymentElementConfirmationModule::class,
         PaymentElementConfirmationTestModule::class,
         GooglePayLauncherModule::class,
+        ApiConfigurationToNamedModule::class,
+        ApiRequestOptionsModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
     ]
 )
@@ -221,14 +223,6 @@ internal interface PaymentElementConfirmationTestModule {
             publishableKey = config.publishableKey,
             stripeAccountId = config.stripeAccountId,
         )
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providesPublishableKey(config: PaymentConfiguration): () -> String = { config.publishableKey }
-
-        @Provides
-        @Named(STRIPE_ACCOUNT_ID)
-        fun providesStripeAccountId(config: PaymentConfiguration): () -> String? = { config.stripeAccountId }
 
         @Provides
         @Singleton

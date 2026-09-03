@@ -96,6 +96,22 @@ class GooglePayJsonFactory internal constructor(
         cardFundingFilter = DefaultCardFundingFilter
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        apiConfiguration: ApiConfiguration.State,
+        cardBrandFilter: CardBrandFilter,
+        cardFundingFilter: CardFundingFilter,
+        additionalEnabledNetworks: List<String>
+    ) : this(
+        googlePayConfig = GooglePayConfig(
+            publishableKey = apiConfiguration.publishableKey,
+            connectedAccountId = apiConfiguration.stripeAccountId,
+        ),
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
+        additionalEnabledNetworks = additionalEnabledNetworks
+    )
+
     @Inject
     internal constructor(
         apiConfigProvider: Provider<ApiConfiguration.State>,

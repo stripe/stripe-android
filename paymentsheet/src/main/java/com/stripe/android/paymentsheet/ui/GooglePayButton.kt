@@ -9,7 +9,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -25,6 +24,7 @@ import com.google.android.gms.wallet.button.ButtonOptions
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.uicore.stripeThemeIsDark
@@ -32,6 +32,7 @@ import org.json.JSONArray
 
 @Composable
 internal fun GooglePayButton(
+    apiConfiguration: ApiConfiguration.State,
     state: PrimaryButton.State?,
     allowCreditCards: Boolean,
     buttonType: GooglePayButtonType,
@@ -44,21 +45,23 @@ internal fun GooglePayButton(
     additionalEnabledNetworks: List<String>,
     theme: GooglePayButtonTheme? = null,
 ) {
-    val context = LocalContext.current
     val isInspectionMode = LocalInspectionMode.current
 
     val allowedPaymentMethods = remember(
-        context,
         isInspectionMode,
+        apiConfiguration,
         billingAddressParameters,
-        allowCreditCards
+        allowCreditCards,
+        cardBrandFilter,
+        cardFundingFilter,
+        additionalEnabledNetworks,
     ) {
         if (isInspectionMode) {
             ""
         } else {
             JSONArray().put(
                 GooglePayJsonFactory(
-                    context = context,
+                    apiConfiguration = apiConfiguration,
                     cardBrandFilter = cardBrandFilter,
                     cardFundingFilter = cardFundingFilter,
                     additionalEnabledNetworks = additionalEnabledNetworks

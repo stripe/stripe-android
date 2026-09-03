@@ -6,12 +6,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
@@ -26,7 +25,6 @@ import com.stripe.android.paymentsheet.utils.RecordingInternalGooglePayPaymentMe
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -36,11 +34,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationFlowTest {
-    @Before
-    fun setUp() {
-        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), "pk_test_123")
-    }
-
     @Test
     fun `on launch, should persist parameters & launch using launcher as expected`() = runTest {
         val internalGooglePayPaymentMethodLauncher = mock<InternalGooglePayPaymentMethodLauncher>()
@@ -99,7 +92,7 @@ class GooglePayConfirmationFlowTest {
                     transactionId = "pi_12345",
                     label = null,
                     isElements = true,
-                    apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+                    apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
                     displayItems = emptyList(),
                     billingEmailOverride = null,
                     shippingAddressParameters = null,
