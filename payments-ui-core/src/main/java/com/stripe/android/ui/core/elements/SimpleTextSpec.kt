@@ -1,14 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SimpleTextElement
-import com.stripe.android.uicore.elements.SimpleTextFieldConfig
-import com.stripe.android.uicore.elements.SimpleTextFieldController
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -52,52 +43,4 @@ enum class KeyboardType {
 
     @SerialName("number_password")
     NumberPassword
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Serializable
-@Parcelize
-data class SimpleTextSpec(
-    @SerialName("api_path")
-    override val apiPath: IdentifierSpec,
-    @SerialName("label")
-    @StringRes
-    val label: Int,
-    @SerialName("capitalization")
-    val capitalization: Capitalization = Capitalization.None,
-    @SerialName("keyboard_type")
-    val keyboardType: KeyboardType = KeyboardType.Ascii,
-    @SerialName("show_optional_label")
-    val showOptionalLabel: Boolean = false
-) : FormItemSpec() {
-    fun transform(
-        initialValues: Map<IdentifierSpec, String?> = mapOf()
-    ) = createSectionElement(
-        SimpleTextElement(
-            this.apiPath,
-            SimpleTextFieldController(
-                SimpleTextFieldConfig(
-                    label = resolvableString(this.label),
-                    capitalization = when (this.capitalization) {
-                        Capitalization.None -> KeyboardCapitalization.None
-                        Capitalization.Characters -> KeyboardCapitalization.Characters
-                        Capitalization.Words -> KeyboardCapitalization.Words
-                        Capitalization.Sentences -> KeyboardCapitalization.Sentences
-                    },
-                    keyboard = when (this.keyboardType) {
-                        KeyboardType.Text -> androidx.compose.ui.text.input.KeyboardType.Text
-                        KeyboardType.Ascii -> androidx.compose.ui.text.input.KeyboardType.Ascii
-                        KeyboardType.Number -> androidx.compose.ui.text.input.KeyboardType.Number
-                        KeyboardType.Phone -> androidx.compose.ui.text.input.KeyboardType.Phone
-                        KeyboardType.Uri -> androidx.compose.ui.text.input.KeyboardType.Uri
-                        KeyboardType.Email -> androidx.compose.ui.text.input.KeyboardType.Email
-                        KeyboardType.Password -> androidx.compose.ui.text.input.KeyboardType.Password
-                        KeyboardType.NumberPassword -> androidx.compose.ui.text.input.KeyboardType.NumberPassword
-                    },
-                    optional = this.showOptionalLabel
-                ),
-                initialValue = initialValues[this.apiPath],
-            )
-        )
-    )
 }

@@ -9,10 +9,9 @@ import com.stripe.android.uicore.elements.SectionFieldElement
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * This is used to define each section in the visual form layout specification
@@ -37,22 +36,6 @@ sealed class FormItemSpec : Parcelable {
 object FormItemSpecSerializer :
     JsonContentPolymorphicSerializer<FormItemSpec>(FormItemSpec::class) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<FormItemSpec> {
-        return when (element.jsonObject["type"]?.jsonPrimitive?.content) {
-            "billing_address" -> AddressSpec.serializer()
-            "affirm_header" -> AffirmTextSpec.serializer()
-            "afterpay_header" -> AfterpayClearpayTextSpec.serializer()
-            "country" -> CountrySpec.serializer()
-            "email" -> EmailSpec.serializer()
-            "iban" -> IbanSpec.serializer()
-            "klarna_country" -> CountrySpec.serializer()
-            "klarna_header" -> KlarnaHeaderStaticTextSpec.serializer()
-            "static_text" -> StaticTextSpec.serializer()
-            "name" -> NameSpec.serializer()
-            "mandate" -> MandateTextSpec.serializer()
-            "sepa_mandate" -> SepaMandateTextSpec.serializer()
-            "text" -> SimpleTextSpec.serializer()
-            "placeholder" -> PlaceholderSpec.serializer()
-            else -> EmptyFormSpec.serializer()
-        }
+        throw SerializationException("Unsupported FormItemSpec: $element")
     }
 }
