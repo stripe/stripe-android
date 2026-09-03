@@ -5,8 +5,8 @@ import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetState
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParams

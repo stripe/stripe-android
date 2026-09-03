@@ -12,7 +12,7 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
