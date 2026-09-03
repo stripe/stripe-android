@@ -8,9 +8,11 @@ import com.google.android.gms.wallet.callback.PaymentDataRequestUpdate
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.payments.core.analytics.ErrorReporter
 
 internal class StripeGooglePayPaymentDataCallbacks(
+    private val stringResolver: (ResolvableString) -> String,
     private val googlePayJsonFactory: GooglePayJsonFactory,
     private val errorReporter: ErrorReporter,
 ) : BasePaymentDataCallbacks() {
@@ -23,6 +25,7 @@ internal class StripeGooglePayPaymentDataCallbacks(
         context: Context,
         paymentConfiguration: PaymentConfiguration,
     ) : this(
+        stringResolver = { it.resolve(context) },
         googlePayJsonFactory = GooglePayJsonFactory(
             googlePayConfig = GooglePayConfig(
                 publishableKey = paymentConfiguration.publishableKey,
@@ -44,6 +47,7 @@ internal class StripeGooglePayPaymentDataCallbacks(
             onCompleteListener = onCompleteListener,
             googlePayJsonFactory = googlePayJsonFactory,
             errorReporter = errorReporter,
+            stringResolver = stringResolver,
         )
     }
 }

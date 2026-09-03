@@ -31,18 +31,18 @@ class GooglePayPaymentDataCallbackHandlerTest {
     }
 
     @Test
-    fun `missing request reports error and completes with empty update`() = runScenario(
+    fun `missing request reports error and completes with error update`() = runScenario(
         callbackResult = { error("Should not be called!") }
     ) {
         onPaymentDataChanged(null)
 
         assertThat(errorReporter.awaitCall().errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST)
-        assertThat(listener.completions.awaitItem().toJson()).isEqualTo("{}")
+        assertErrorUpdate(listener.completions.awaitItem())
     }
 
     @Test
-    fun `missing callback reports error and completes with empty update`() = runScenario(
+    fun `missing callback reports error and completes with error update`() = runScenario(
         registerCallback = false,
         callbackResult = { error("Should not be called!") }
     ) {
@@ -50,7 +50,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
 
         assertThat(errorReporter.awaitCall().errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK)
-        assertThat(listener.completions.awaitItem().toJson()).isEqualTo("{}")
+        assertErrorUpdate(listener.completions.awaitItem())
     }
 
     @Test
@@ -153,6 +153,13 @@ class GooglePayPaymentDataCallbackHandlerTest {
         assertThat(error.getString("intent")).isEqualTo(expectedIntent)
     }
 
+    private fun assertErrorUpdate(update: PaymentDataRequestUpdate) {
+        val error = JSONObject(update.toJson()).getJSONObject("error")
+        assertThat(error.getString("reason")).isEqualTo("OTHER_ERROR")
+        assertThat(error.getString("message")).isEqualTo(INTERNAL_ERROR_MESSAGE)
+        assertThat(error.getString("intent")).isEqualTo("SHIPPING_ADDRESS")
+    }
+
     private fun runScenario(
         registerCallback: Boolean = true,
         callbackResult: (GooglePayPaymentDataUpdate) -> GooglePayPaymentDataUpdateResponse,
@@ -191,6 +198,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
                 onCompleteListener = listener,
                 googlePayJsonFactory = JSON_FACTORY,
                 errorReporter = errorReporter,
+                stringResolver = { INTERNAL_ERROR_MESSAGE },
             )
             testScope.advanceUntilIdle()
         }
@@ -227,6 +235,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
 
     private companion object {
         const val CALLBACK_KEY = "callback-key"
+        const val INTERNAL_ERROR_MESSAGE = "An internal error occurred."
         val JSON_FACTORY = GooglePayJsonFactory(
             GooglePayConfig(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         )

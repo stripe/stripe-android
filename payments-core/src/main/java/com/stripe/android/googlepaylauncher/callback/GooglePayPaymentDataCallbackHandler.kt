@@ -4,6 +4,9 @@ import com.google.android.gms.wallet.callback.IntermediatePaymentData
 import com.google.android.gms.wallet.callback.OnCompleteListener
 import com.google.android.gms.wallet.callback.PaymentDataRequestUpdate
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.R
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallbackRegistry
@@ -17,21 +20,21 @@ internal object GooglePayPaymentDataCallbackHandler {
         onCompleteListener: OnCompleteListener<PaymentDataRequestUpdate>,
         googlePayJsonFactory: GooglePayJsonFactory,
         errorReporter: ErrorReporter,
+        stringResolver: (ResolvableString) -> String
     ) {
         val selection = GooglePayPaymentDataUpdateCallbackRegistry.get()
 
         val hasNoRequest = request == null
 
         if (hasNoRequest || selection == null) {
-            val event = if (hasNoRequest) {
-                ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST
-            } else {
-                ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK
-            }
+            handleMissingRequestOrSelection(
+                hasNoRequest = hasNoRequest,
+                googlePayJsonFactory = googlePayJsonFactory,
+                errorReporter = errorReporter,
+                stringResolver = stringResolver,
+                onCompleteListener = onCompleteListener,
+            )
 
-            errorReporter.report(event)
-
-            onCompleteListener.complete(PaymentDataRequestUpdate.fromJson("{}"))
             return
         }
 
@@ -65,14 +68,41 @@ internal object GooglePayPaymentDataCallbackHandler {
                                             GooglePayPaymentDataError.Intent.Offer
                                     },
                                 ),
-                            ).toJson(
-                                googlePayJsonFactory = googlePayJsonFactory,
-                            ).toString()
+                            ).toJson(googlePayJsonFactory = googlePayJsonFactory).toString()
                         )
                     )
                 }
             )
-        }.invokeOnCompletion { cause ->
         }
+    }
+
+    private fun handleMissingRequestOrSelection(
+        hasNoRequest: Boolean,
+        onCompleteListener: OnCompleteListener<PaymentDataRequestUpdate>,
+        googlePayJsonFactory: GooglePayJsonFactory,
+        errorReporter: ErrorReporter,
+        stringResolver: (ResolvableString) -> String
+    ) {
+        val event = if (hasNoRequest) {
+            ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST
+        } else {
+            ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK
+        }
+
+        errorReporter.report(event)
+
+        onCompleteListener.complete(
+            PaymentDataRequestUpdate.fromJson(
+                GooglePayPaymentDataUpdateResponse(
+                    newTransactionInfo = null,
+                    error = GooglePayPaymentDataError(
+                        reason = GooglePayPaymentDataError.Reason.OtherError,
+                        message = stringResolver(R.string.stripe_internal_error.resolvableString),
+                    ),
+                ).toJson(
+                    googlePayJsonFactory = googlePayJsonFactory,
+                ).toString()
+            )
+        )
     }
 }
