@@ -2,10 +2,12 @@
 
 package com.stripe.android.elements
 
+import android.os.Bundle
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
@@ -18,6 +20,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
@@ -30,8 +33,11 @@ import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
 
+@RunWith(RobolectricTestRunner::class)
 internal class ShippingAddressElementTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -87,17 +93,19 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `recreated element suppresses presentation while original is active`() = runScenario {
-        shippingAddressElement.present()
-        activityLauncher.launchCalls.awaitItem()
+    fun `present is suppressed while another presenter is active`() = runScenario {
+        val registry = RecordingActivityResultRegistry()
+        val firstPresenter = createRegistryElement(registry)
+
+        firstPresenter.shippingAddressElement.present()
+        registry.launchCalls.awaitItem()
+
+        val secondPresenter = createRegistryElement(registry)
+        secondPresenter.shippingAddressElement.present()
+
+        registry.launchCalls.expectNoEvents()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-
-        val recreated = createElement()
-        recreated.shippingAddressElement.present()
-
-        recreated.activityLauncher.launchCalls.expectNoEvents()
-        assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
-        recreated.ensureAllEventsConsumed()
+        registry.ensureAllEventsConsumed()
     }
 
     @Test
@@ -138,26 +146,38 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `recreated element result clears presentation after host destruction`() = runScenario {
-        shippingAddressElement.present()
-        activityLauncher.launchCalls.awaitItem()
+    fun `host recreation restores the active launch`() = runScenario {
+        val originalRegistry = RecordingActivityResultRegistry()
+        val originalPresenter = createRegistryElement(originalRegistry)
+
+        originalPresenter.shippingAddressElement.present()
+        val originalLaunch = originalRegistry.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        activityLauncher.unregisterCalls.awaitItem()
-        assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
+        val registryState = Bundle()
+        originalRegistry.onSaveInstanceState(registryState)
+        originalPresenter.lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
-        val recreated = createElement()
-        recreated.shippingAddressElement.present()
-        recreated.activityLauncher.launchCalls.expectNoEvents()
+        val restoredRegistry = RecordingActivityResultRegistry()
+        restoredRegistry.onRestoreInstanceState(registryState)
+        val replacementPresenter = createRegistryElement(restoredRegistry)
 
-        recreated.registration.dispatch(AddressLauncherResult.Canceled())
+        replacementPresenter.shippingAddressElement.present()
+        restoredRegistry.launchCalls.expectNoEvents()
+
+        assertThat(
+            restoredRegistry.dispatchResult(
+                originalLaunch.requestCode,
+                AddressLauncherResult.Canceled(),
+            )
+        ).isTrue()
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
 
-        recreated.shippingAddressElement.present()
-        recreated.activityLauncher.launchCalls.awaitItem()
+        replacementPresenter.shippingAddressElement.present()
+        restoredRegistry.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-        recreated.ensureAllEventsConsumed()
+        originalRegistry.ensureAllEventsConsumed()
+        restoredRegistry.ensureAllEventsConsumed()
     }
 
     @Test
@@ -219,6 +239,30 @@ internal class ShippingAddressElementTest {
             )
         }
 
+        fun createRegistryElement(
+            registry: RecordingActivityResultRegistry,
+        ): RegistryElementScenario {
+            val lifecycleOwner = TestLifecycleOwner()
+            val registryOwner = object : ActivityResultRegistryOwner {
+                override val activityResultRegistry: ActivityResultRegistry = registry
+            }
+            val shippingAddressElement = ShippingAddressElement(
+                activityResultCaller = PaymentElementActivityResultCaller(
+                    key = ACTIVITY_RESULT_KEY,
+                    registryOwner = registryOwner,
+                ),
+                lifecycleOwner = lifecycleOwner,
+                paymentConfiguration = paymentConfiguration,
+                stateHolder = stateHolder,
+                shippingAddressElementStateHolder = shippingAddressElementStateHolder,
+                errorReporter = errorReporter,
+            )
+            return RegistryElementScenario(
+                shippingAddressElement = shippingAddressElement,
+                lifecycleOwner = lifecycleOwner,
+            )
+        }
+
         val element = createElement()
 
         Scenario(
@@ -230,7 +274,7 @@ internal class ShippingAddressElementTest {
             paymentConfiguration = paymentConfiguration,
             errorReporter = errorReporter,
             registration = element.registration,
-            createElement = ::createElement,
+            createRegistryElement = ::createRegistryElement,
         ).block()
 
         element.ensureAllEventsConsumed()
@@ -278,6 +322,27 @@ internal class ShippingAddressElementTest {
             get() = AddressElementActivityContract
     }
 
+    private class RecordingActivityResultRegistry : ActivityResultRegistry() {
+        val launchCalls = Turbine<RegistryLaunchCall>()
+
+        override fun <I, O> onLaunch(
+            requestCode: Int,
+            contract: ActivityResultContract<I, O>,
+            input: I,
+            options: ActivityOptionsCompat?,
+        ) {
+            launchCalls.add(
+                RegistryLaunchCall(
+                    requestCode = requestCode,
+                )
+            )
+        }
+
+        fun ensureAllEventsConsumed() {
+            launchCalls.ensureAllEventsConsumed()
+        }
+    }
+
     private class RecordingProvider<T>(
         var value: T,
     ) : Provider<T> {
@@ -303,6 +368,10 @@ internal class ShippingAddressElementTest {
         val input: AddressElementActivityContract.Args,
     )
 
+    private data class RegistryLaunchCall(
+        val requestCode: Int,
+    )
+
     private data class ElementScenario(
         val shippingAddressElement: ShippingAddressElement,
         val activityResultCaller: RecordingActivityResultCaller,
@@ -317,6 +386,11 @@ internal class ShippingAddressElementTest {
         }
     }
 
+    private data class RegistryElementScenario(
+        val shippingAddressElement: ShippingAddressElement,
+        val lifecycleOwner: TestLifecycleOwner,
+    )
+
     private data class Scenario(
         val shippingAddressElement: ShippingAddressElement,
         val activityLauncher: RecordingActivityResultLauncher,
@@ -326,10 +400,14 @@ internal class ShippingAddressElementTest {
         val paymentConfiguration: RecordingProvider<PaymentConfiguration>,
         val errorReporter: FakeErrorReporter,
         val registration: Registration,
-        val createElement: suspend () -> ElementScenario,
+        val createRegistryElement: (RecordingActivityResultRegistry) -> RegistryElementScenario,
     )
 
     @Suppress("RestrictedApi")
     private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
         SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
+
+    private companion object {
+        const val ACTIVITY_RESULT_KEY = "CheckoutController"
+    }
 }
