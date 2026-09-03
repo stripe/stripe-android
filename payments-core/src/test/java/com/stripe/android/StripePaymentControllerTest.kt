@@ -183,7 +183,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun `confirmAndAuthenticateAlipay() should return expected outcome`() =
+    fun `confirmAndAuthenticateAlipay() adds a return URL when one is not provided`() =
         runTest {
             whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
                 AlipayAuthResult(
@@ -203,6 +203,8 @@ internal class StripePaymentControllerTest {
             ).getOrThrow()
 
             assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.returnUrl)
+                .isEqualTo("stripe://return_url")
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.shouldUseStripeSdk()).isTrue()
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].second).isSameInstanceAs(
                 REQUEST_OPTIONS
@@ -212,6 +214,31 @@ internal class StripePaymentControllerTest {
             )
             assertThat(actualResponse.intent).isEqualTo(PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION)
             assertThat(actualResponse.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+        }
+
+    @Test
+    fun `confirmAndAuthenticateAlipay() preserves a provided return URL`() =
+        runTest {
+            whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
+                AlipayAuthResult(
+                    StripeIntentResult.Outcome.SUCCEEDED
+                )
+            )
+            stripeRepository.retrievePaymentIntentResponse =
+                PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
+
+            controller.confirmAndAuthenticateAlipay(
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                    "pm_123",
+                    "client_secret"
+                ).copy(returnUrl = "example://return_url"),
+                mock(),
+                REQUEST_OPTIONS
+            ).getOrThrow()
+
+            assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.returnUrl)
+                .isEqualTo("example://return_url")
         }
 
     private fun createController(): StripePaymentController {
