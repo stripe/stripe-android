@@ -28,14 +28,18 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  * See [BrowserCapabilities] and [PaymentBrowserAuthContract.Args.hasDefaultReturnUrl].
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
+    private val args: PaymentBrowserAuthContract.Args? by lazy {
+        PaymentBrowserAuthContract.parseArgs(intent)
+    }
+
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
-        StripeBrowserLauncherViewModel.Factory()
+        StripeBrowserLauncherViewModel.Factory(requireNotNull(args))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = PaymentBrowserAuthContract.parseArgs(intent)
+        val args = args
         if (args == null) {
             finish()
             ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { "" })
