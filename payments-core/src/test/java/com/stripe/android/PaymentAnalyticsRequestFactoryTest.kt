@@ -32,8 +32,8 @@ class PaymentAnalyticsRequestFactoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        API_KEY
+        context = context,
+        publishableKeyProvider = { API_KEY },
     )
 
     @Test
@@ -413,8 +413,8 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun `product_usage param should include defaultProductUsageTokens and method argument`() {
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context,
-            API_KEY,
+            context = context,
+            publishableKeyProvider = { API_KEY },
             defaultProductUsageTokens = setOf("Hello")
         )
 
@@ -431,8 +431,8 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun `product_usage param should de-dupe defaultProductUsageTokens and method argument`() {
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context,
-            API_KEY,
+            context = context,
+            publishableKeyProvider = { API_KEY },
             defaultProductUsageTokens = setOf("Hello")
         )
 
@@ -448,8 +448,8 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun `product_usage param should use defaultProductUsageTokens`() {
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context,
-            API_KEY,
+            context = context,
+            publishableKeyProvider = { API_KEY },
             defaultProductUsageTokens = setOf("Hello")
         )
 
@@ -471,8 +471,8 @@ class PaymentAnalyticsRequestFactoryTest {
 
         try {
             val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                context,
-                API_KEY
+                context = context,
+                publishableKeyProvider = { API_KEY }
             )
 
             val params = analyticsRequestFactory.createSourceCreation(

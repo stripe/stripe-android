@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
@@ -43,6 +44,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        fun createFallbackInstance(
+            context: Context,
+            productUsage: Set<String> = emptySet(),
+        ): ErrorReporter = createFallbackInstance(
+            context = context,
+            publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+            productUsage = productUsage,
+        )
+
         /**
          * Prefer using an injected version of [ErrorReporter].
          *
@@ -50,12 +60,14 @@ interface ErrorReporter : FraudDetectionErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
+            publishableKeyProvider: () -> String,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .factory()
                 .create(
                     context = context.applicationContext,
+                    publishableKeyProvider = publishableKeyProvider,
                     productUsage = productUsage,
                 )
                 .errorReporter
@@ -440,6 +452,9 @@ internal interface DefaultErrorReporterComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
         ): DefaultErrorReporterComponent
@@ -476,9 +491,11 @@ internal interface DefaultErrorReporterModule {
         }
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(context: Context): () -> String {
-            return { PaymentConfiguration.getInstance(context).publishableKey }
-        }
+        fun provideApiConfiguration(
+            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
+        ): ApiConfiguration.State = ApiConfiguration.State(
+            publishableKey = publishableKeyProvider(),
+            stripeAccountId = null,
+        )
     }
 }

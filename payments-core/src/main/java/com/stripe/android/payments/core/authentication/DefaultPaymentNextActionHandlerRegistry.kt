@@ -8,6 +8,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.StripeIntent
@@ -19,6 +20,7 @@ import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACT
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -35,10 +37,15 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
     @IntentAuthenticatorMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
     @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
+    apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : PaymentNextActionHandlerRegistry {
 
     private val paymentSheetNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler> by lazy {
-        paymentSheetNextActionHandlers(includePaymentSheetNextActionHandlers, applicationContext)
+        paymentSheetNextActionHandlers(
+            includePaymentSheetNextActionHandlers,
+            applicationContext,
+            apiConfigurationProvider.get().publishableKey,
+        )
     }
 
     @VisibleForTesting
@@ -118,7 +125,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
             enableLogging: Boolean,
             workContext: CoroutineContext,
             uiContext: CoroutineContext,
-            publishableKeyProvider: () -> String,
+            apiConfigurationState: ApiConfiguration.State,
             productUsage: Set<String>,
             isInstantApp: Boolean,
             includePaymentSheetNextActionHandlers: Boolean,
@@ -130,7 +137,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
                     enableLogging = enableLogging,
                     workContext = workContext,
                     uiContext = uiContext,
-                    publishableKeyProvider = publishableKeyProvider,
+                    apiConfiguration = apiConfigurationState,
                     productUsage = productUsage,
                     isInstantApp = isInstantApp,
                     includePaymentSheetNextActionHandlers = includePaymentSheetNextActionHandlers,
@@ -143,7 +150,8 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
 @Suppress("TooGenericExceptionCaught")
 private fun paymentSheetNextActionHandlers(
     includePaymentSheetNextActionHandlers: Boolean,
-    applicationContext: Context
+    applicationContext: Context,
+    publishableKey: String,
 ): Map<NextActionHandlerKey, NextActionHandler> {
     return try {
         if (includePaymentSheetNextActionHandlers) {
@@ -156,7 +164,7 @@ private fun paymentSheetNextActionHandlers(
             emptyMap()
         }
     } catch (e: Exception) {
-        ErrorReporter.createFallbackInstance(applicationContext)
+        ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { publishableKey })
             .report(
                 // [PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND] will not be changed to avoid skewed metrics
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND,

@@ -28,17 +28,21 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  * See [BrowserCapabilities] and [PaymentBrowserAuthContract.Args.hasDefaultReturnUrl].
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
+    private val args: PaymentBrowserAuthContract.Args? by lazy {
+        PaymentBrowserAuthContract.parseArgs(intent)
+    }
+
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
-        StripeBrowserLauncherViewModel.Factory()
+        StripeBrowserLauncherViewModel.Factory(requireNotNull(args))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = PaymentBrowserAuthContract.parseArgs(intent)
+        val args = args
         if (args == null) {
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { "" })
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_NULL_ARGS,
                 )
@@ -70,14 +74,14 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             launcher.launch(intent)
             viewModel.hasLaunched = true
         } catch (e: ActivityNotFoundException) {
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { args.publishableKey })
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),
                 )
             finishWithFailure(args)
         } catch (e: SecurityException) {
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { args.publishableKey })
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),
