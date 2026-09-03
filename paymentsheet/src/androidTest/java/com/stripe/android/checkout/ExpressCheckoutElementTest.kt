@@ -29,7 +29,6 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.utils.PrefsTestStoreRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
@@ -42,18 +41,20 @@ internal class ExpressCheckoutElementTest {
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
-        around(PrefsTestStoreRule())
-            .around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
+            around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
             .around(IntentsRule())
     }
 
     @Test
     fun testSuccessfulGooglePayPayment() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
+        // This is called twice during load
+        repeat (2) {
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-lookup-success.json")
+            }
         }
 
         runExpressCheckoutElementTest(
@@ -106,11 +107,14 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testSuccessfulNativeLinkPayment() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
+        // This is called twice during load
+        repeat (2) {
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-lookup-success.json")
+            }
         }
 
         runExpressCheckoutElementTest(
@@ -146,6 +150,12 @@ internal class ExpressCheckoutElementTest {
                 )
             )
 
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-lookup-success.json")
+            }
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/sessions/lookup"),
