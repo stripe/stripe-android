@@ -335,15 +335,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onLpmSpecFailure(errorMessage: String?) {
-        fireEvent(
-            event = PaymentSheetEvent.LpmSerializeFailureEvent(
-                errorMessage = errorMessage
-            ),
-            paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
-        )
-    }
-
     override fun onAutofill(
         type: String,
     ) {

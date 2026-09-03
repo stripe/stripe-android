@@ -218,7 +218,6 @@ internal class DefaultCreateLinkStateTest {
     ): ElementsSession {
         return ElementsSession(
             linkSettings = null,
-            paymentMethodSpecs = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             merchantCountry = "US",
             isGooglePayEnabled = false,

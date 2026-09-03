@@ -41,7 +41,6 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
-import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -66,7 +65,6 @@ internal data class PaymentMethodMetadata(
     val sellerBusinessName: String?,
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
-    val sharedDataSpecs: List<SharedDataSpec>,
     val displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
@@ -205,7 +203,7 @@ internal data class PaymentMethodMetadata(
                 ?.createSupportedPaymentMethod(metadata = this)
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory(this).supportedPaymentMethod(this, definition, sharedDataSpecs)
+            definition.uiDefinitionFactory(this).createSupportedPaymentMethod(this)
         }
     }
 
@@ -290,9 +288,6 @@ internal data class PaymentMethodMetadata(
         return paymentMethodTypes.filterNot {
             stripeIntent.isLiveMode &&
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
-        }.filter { paymentMethodDefinition ->
-            paymentMethodDefinition.uiDefinitionFactory(this)
-                .canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
         }
     }
 
@@ -325,11 +320,10 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory(this).formHeaderInformation(
+            definition.uiDefinitionFactory(this).createFormHeaderInformation(
                 metadata = this,
-                definition = definition,
-                sharedDataSpecs = sharedDataSpecs,
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = paymentMethodIncentive,
             )
         }
     }
@@ -351,10 +345,8 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory(this).formElements(
+            definition.uiDefinitionFactory(this).createFormElements(
                 metadata = this,
-                definition = definition,
-                sharedDataSpecs = sharedDataSpecs,
                 arguments = uiDefinitionFactoryArgumentsFactory.create(
                     metadata = this,
                     requiresMandate = definition.requiresMandate(this),
@@ -379,7 +371,6 @@ internal data class PaymentMethodMetadata(
         internal fun createForPaymentElement(
             elementsSession: ElementsSession,
             configuration: CommonConfiguration,
-            sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,
             linkStateResult: LinkStateResult?,
@@ -415,7 +406,6 @@ internal data class PaymentMethodMetadata(
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = configuration.shippingDetails,
                 customerMetadata = customerMetadata,
-                sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
@@ -459,7 +449,6 @@ internal data class PaymentMethodMetadata(
         internal fun createForCustomerSheet(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
-            sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
@@ -485,7 +474,6 @@ internal data class PaymentMethodMetadata(
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
                 customerMetadata = customerMetadata,
-                sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,

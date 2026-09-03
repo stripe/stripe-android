@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.ui.IconHelper
 import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
-import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal data class SupportedPaymentMethod(
     /**
@@ -42,7 +41,6 @@ internal data class SupportedPaymentMethod(
 ) {
     constructor(
         paymentMethodDefinition: PaymentMethodDefinition,
-        sharedDataSpec: SharedDataSpec? = null,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
         @DrawableRes iconResourceNight: Int?,
@@ -54,8 +52,8 @@ internal data class SupportedPaymentMethod(
         displayName = displayNameResource.resolvableString,
         iconResource = iconResource,
         iconResourceNight = iconResourceNight,
-        lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
-        darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
         iconRequiresTinting = iconRequiresTinting,
         subtitle = subtitle,
         outlinedIconResource = outlinedIconResource,
