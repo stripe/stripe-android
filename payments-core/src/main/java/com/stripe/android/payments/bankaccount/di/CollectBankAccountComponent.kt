@@ -21,7 +21,7 @@ import javax.inject.Singleton
         CollectBankAccountModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
-        CoreCommonModule::class,
+        CoreCommonModule::class
     ]
 )
 internal interface CollectBankAccountComponent {
