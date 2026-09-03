@@ -107,6 +107,9 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
             savePaymentMethod = null,
+            // ECE Google Pay returns the buyer's final shipping address after confirmation starts.
+            // It cannot be reconciled with the earlier shippingValues snapshot, so use it for this
+            // confirmation and otherwise retain the controller shipping.
             shipping = confirmationOption.shippingInformation.toCheckoutSessionShipping()
                 ?: shippingValues.toCheckoutSessionShipping(),
         )
