@@ -11,11 +11,13 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.ShippingAddressUpdater
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
-import com.stripe.android.paymentsheet.addresselement.CheckoutShippingAddressUpdaterRegistry
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
@@ -30,24 +32,27 @@ class ShippingAddressElement @Inject internal constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
     private val errorReporter: ErrorReporter,
-) : CheckoutShippingAddressUpdaterRegistry.Updater {
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+) {
+    private val shippingAddressUpdater: ShippingAddressUpdater = { address ->
+        update(address)
+    }
+
     private val activityLauncher: ActivityResultLauncher<AddressElementActivityContract.Args> =
         activityResultCaller.registerForActivityResult(AddressElementActivityContract) {
-            CheckoutShippingAddressUpdaterRegistry.remove(shippingAddressElementStateHolder.updaterKey)
-            shippingAddressElementStateHolder.updaterKey = null
+            unregisterShippingAddressUpdater()
             shippingAddressElementStateHolder.isPresenting = false
         }
 
     init {
         if (shippingAddressElementStateHolder.isPresenting) {
-            shippingAddressElementStateHolder.updaterKey?.let { updaterKey ->
-                CheckoutShippingAddressUpdaterRegistry.register(updaterKey, this)
-            }
+            registerShippingAddressUpdater()
         }
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
+                    unregisterShippingAddressUpdater()
                     activityLauncher.unregister()
                     super.onDestroy(owner)
                 }
@@ -67,8 +72,7 @@ class ShippingAddressElement @Inject internal constructor(
             return
         }
 
-        val updaterKey = CheckoutShippingAddressUpdaterRegistry.register(this)
-        shippingAddressElementStateHolder.updaterKey = updaterKey
+        registerShippingAddressUpdater()
         shippingAddressElementStateHolder.isPresenting = true
         activityLauncher.launch(
             AddressElementActivityContract.Args(
@@ -80,12 +84,28 @@ class ShippingAddressElement @Inject internal constructor(
                     billingAddress = null,
                     useStripeHostedAutocomplete = true,
                 ),
-                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(updaterKey),
+                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(
+                    paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                ),
             )
         )
     }
 
-    override suspend fun update(address: AddressDetails): Result<Unit> {
+    private fun registerShippingAddressUpdater() {
+        PaymentElementCallbackReferences.registerShippingAddressUpdater(
+            key = paymentElementCallbackIdentifier,
+            updater = shippingAddressUpdater,
+        )
+    }
+
+    private fun unregisterShippingAddressUpdater() {
+        PaymentElementCallbackReferences.unregisterShippingAddressUpdater(
+            key = paymentElementCallbackIdentifier,
+            updater = shippingAddressUpdater,
+        )
+    }
+
+    private suspend fun update(address: AddressDetails): Result<Unit> {
         val checkoutAddress = runCatching {
             CheckoutController.Address()
                 .city(address.address?.city)

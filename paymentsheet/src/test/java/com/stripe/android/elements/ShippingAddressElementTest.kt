@@ -19,6 +19,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
@@ -26,9 +27,9 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
-import com.stripe.android.paymentsheet.addresselement.CheckoutShippingAddressUpdaterRegistry
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -45,6 +46,9 @@ import javax.inject.Provider
 internal class ShippingAddressElementTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
 
     @Test
     fun `present before checkout configuration reports and does not launch`() = runScenario(configured = false) {
@@ -69,12 +73,12 @@ internal class ShippingAddressElementTest {
 
         val launch = activityLauncher.launchCalls.awaitItem()
         assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-        val updaterKey = requireNotNull(shippingAddressElementStateHolder.updaterKey)
         assertThat(launch.input.launchMode).isEqualTo(
-            AddressElementActivityContract.LaunchMode.CheckoutShipping(updaterKey)
+            AddressElementActivityContract.LaunchMode.CheckoutShipping(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
         )
-        assertThat(CheckoutShippingAddressUpdaterRegistry.get(updaterKey))
-            .isSameInstanceAs(shippingAddressElement)
+        assertThat(
+            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
+        ).isNotNull()
 
         val config = requireNotNull(launch.input.config)
         assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
@@ -106,12 +110,23 @@ internal class ShippingAddressElementTest {
     fun `recreated element suppresses presentation while original is active`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        val updaterKey = requireNotNull(shippingAddressElementStateHolder.updaterKey)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        val originalUpdater = requireNotNull(
+            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
+        )
 
         val recreated = createElement()
-        assertThat(CheckoutShippingAddressUpdaterRegistry.get(updaterKey))
-            .isSameInstanceAs(recreated.shippingAddressElement)
+        val reboundUpdater = requireNotNull(
+            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
+        )
+        assertThat(reboundUpdater).isNotSameInstanceAs(originalUpdater)
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        activityLauncher.unregisterCalls.awaitItem()
+        assertThat(
+            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
+        ).isSameInstanceAs(reboundUpdater)
+
         recreated.shippingAddressElement.present()
 
         recreated.activityLauncher.launchCalls.expectNoEvents()
@@ -142,7 +157,6 @@ internal class ShippingAddressElementTest {
         val originalState = stateHolder.state
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        val updaterKey = requireNotNull(shippingAddressElementStateHolder.updaterKey)
 
         registration.dispatch(
             AddressLauncherResult.Succeeded(
@@ -150,8 +164,9 @@ internal class ShippingAddressElementTest {
             )
         )
 
-        assertThat(CheckoutShippingAddressUpdaterRegistry.get(updaterKey)).isNull()
-        assertThat(shippingAddressElementStateHolder.updaterKey).isNull()
+        assertThat(
+            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
+        ).isNull()
         verifyNoInteractions(checkoutController)
 
         shippingAddressElement.present()
@@ -186,23 +201,15 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `presentation state survives process death`() {
-        val savedStateHandle = SavedStateHandle()
-        val stateHolder = ShippingAddressElementStateHolder(savedStateHandle)
-        stateHolder.isPresenting = true
-        stateHolder.updaterKey = "updater-key"
-
-        val restoredStateHolder = ShippingAddressElementStateHolder(
-            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+    fun `update sends complete name and address to checkout controller`() = runScenario {
+        shippingAddressElement.present()
+        activityLauncher.launchCalls.awaitItem()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        val updater = requireNotNull(
+            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
         )
 
-        assertThat(restoredStateHolder.isPresenting).isTrue()
-        assertThat(restoredStateHolder.updaterKey).isEqualTo("updater-key")
-    }
-
-    @Test
-    fun `update sends complete name and address to checkout controller`() = runScenario {
-        val result = shippingAddressElement.update(
+        val result = updater(
             AddressDetails(
                 name = "Jenny Rosen",
                 address = PaymentSheet.Address(
@@ -237,9 +244,19 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `lifecycle destruction unregisters the launcher`() = runScenario {
+    fun `lifecycle destruction unregisters the updater and launcher`() = runScenario {
+        shippingAddressElement.present()
+        activityLauncher.launchCalls.awaitItem()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(
+            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
+        ).isNotNull()
+
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
+        assertThat(
+            PaymentElementCallbackReferences.getShippingAddressUpdater(PAYMENT_ELEMENT_CALLBACK_IDENTIFIER)
+        ).isNull()
         assertThat(activityLauncher.unregisterCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -274,6 +291,7 @@ internal class ShippingAddressElementTest {
                 stateHolder = stateHolder,
                 shippingAddressElementStateHolder = shippingAddressElementStateHolder,
                 errorReporter = errorReporter,
+                paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
             )
             val registration = activityResultCaller.registerCalls.awaitItem()
             assertThat(registration.contract).isSameInstanceAs(AddressElementActivityContract)
@@ -301,7 +319,6 @@ internal class ShippingAddressElementTest {
             createElement = ::createElement,
         ).block()
 
-        CheckoutShippingAddressUpdaterRegistry.remove(shippingAddressElementStateHolder.updaterKey)
         element.ensureAllEventsConsumed()
         paymentConfiguration.getCalls.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
@@ -399,7 +416,7 @@ internal class ShippingAddressElementTest {
         val createElement: suspend () -> ElementScenario,
     )
 
-    @Suppress("RestrictedApi")
-    private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
-        SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
+    private companion object {
+        const val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = "ShippingAddressElementTest"
+    }
 }

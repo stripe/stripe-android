@@ -8,6 +8,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.ShippingAddressUpdater
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -19,6 +21,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -67,6 +70,9 @@ class InputAddressViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
 
     @Test
     fun `onScreenShown fires onShow with initial country`() {
@@ -987,11 +993,16 @@ class InputAddressViewModelTest {
     fun `checkout save disables form and blocks duplicate submission while update is suspended`() = runTest {
         val updateResult = CompletableDeferred<Result<Unit>>()
         val updater = FakeUpdater { updateResult.await() }
-        val updaterKey = CheckoutShippingAddressUpdaterRegistry.register(updater)
+        PaymentElementCallbackReferences.registerShippingAddressUpdater(
+            PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
+            updater.callback,
+        )
         val processingState = AddressElementActivityProcessingState()
         try {
             val viewModel = createViewModel(
-                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(updaterKey),
+                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(
+                    PAYMENT_ELEMENT_CALLBACK_IDENTIFIER
+                ),
                 processingState = processingState,
             )
 
@@ -1012,7 +1023,10 @@ class InputAddressViewModelTest {
             assertThat(processingState.isProcessing.value).isFalse()
             verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
         } finally {
-            CheckoutShippingAddressUpdaterRegistry.remove(updaterKey)
+            PaymentElementCallbackReferences.unregisterShippingAddressUpdater(
+                PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
+                updater.callback,
+            )
             updater.updateCalls.ensureAllEventsConsumed()
         }
     }
@@ -1020,12 +1034,17 @@ class InputAddressViewModelTest {
     @Test
     fun `failed checkout save retains values shows error and permits successful retry`() = runTest {
         val updater = FakeUpdater { Result.failure(IllegalStateException("Failed")) }
-        val updaterKey = CheckoutShippingAddressUpdaterRegistry.register(updater)
+        PaymentElementCallbackReferences.registerShippingAddressUpdater(
+            PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
+            updater.callback,
+        )
         val processingState = AddressElementActivityProcessingState()
         try {
             val viewModel = createViewModel(
                 address = EXPECTED_ADDRESS,
-                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(updaterKey),
+                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(
+                    PAYMENT_ELEMENT_CALLBACK_IDENTIFIER
+                ),
                 processingState = processingState,
             )
             val originalFormValues = viewModel.addressFormController.getCurrentFormValues()
@@ -1051,15 +1070,71 @@ class InputAddressViewModelTest {
             assertThat(viewModel.saveError.value).isNull()
             verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
         } finally {
-            CheckoutShippingAddressUpdaterRegistry.remove(updaterKey)
+            PaymentElementCallbackReferences.unregisterShippingAddressUpdater(
+                PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
+                updater.callback,
+            )
             updater.updateCalls.ensureAllEventsConsumed()
         }
     }
 
     @Test
+    fun `thrown checkout shipping callback shows retryable error`() = runTest {
+        val updater = FakeUpdater { throw IllegalStateException("Failed") }
+        PaymentElementCallbackReferences.registerShippingAddressUpdater(
+            PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
+            updater.callback,
+        )
+        try {
+            val viewModel = createViewModel(
+                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(
+                    PAYMENT_ELEMENT_CALLBACK_IDENTIFIER
+                ),
+            )
+
+            viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+            runCurrent()
+
+            assertThat(updater.updateCalls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(viewModel.formEnabled.value).isTrue()
+            assertThat(viewModel.isProcessing.value).isFalse()
+            assertThat(viewModel.saveError.value)
+                .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+            verify(navigator, never()).dismiss(any())
+        } finally {
+            PaymentElementCallbackReferences.unregisterShippingAddressUpdater(
+                PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
+                updater.callback,
+            )
+            updater.updateCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `missing checkout shipping callback shows retryable error`() = runTest {
+        val viewModel = createViewModel(
+            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(
+                PAYMENT_ELEMENT_CALLBACK_IDENTIFIER
+            ),
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(viewModel.isProcessing.value).isFalse()
+        assertThat(viewModel.saveError.value)
+            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        verify(navigator, never()).dismiss(any())
+    }
+
+    @Test
     fun `standalone save dismisses without calling checkout updater`() = runTest {
         val updater = FakeUpdater { Result.success(Unit) }
-        val unrelatedKey = CheckoutShippingAddressUpdaterRegistry.register(updater)
+        PaymentElementCallbackReferences.registerShippingAddressUpdater(
+            PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
+            updater.callback,
+        )
         try {
             val viewModel = createViewModel(
                 launchMode = AddressElementActivityContract.LaunchMode.Standalone,
@@ -1072,7 +1147,10 @@ class InputAddressViewModelTest {
             assertThat(viewModel.saveError.value).isNull()
             verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
         } finally {
-            CheckoutShippingAddressUpdaterRegistry.remove(unrelatedKey)
+            PaymentElementCallbackReferences.unregisterShippingAddressUpdater(
+                PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
+                updater.callback,
+            )
             updater.updateCalls.ensureAllEventsConsumed()
         }
     }
@@ -1113,16 +1191,18 @@ class InputAddressViewModelTest {
 
     private class FakeUpdater(
         var result: suspend (AddressDetails) -> Result<Unit>,
-    ) : CheckoutShippingAddressUpdaterRegistry.Updater {
+    ) {
         val updateCalls = Turbine<AddressDetails>()
 
-        override suspend fun update(address: AddressDetails): Result<Unit> {
+        val callback: ShippingAddressUpdater = { address ->
             updateCalls.add(address)
-            return result(address)
+            result(address)
         }
     }
 
     private companion object {
+        const val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = "InputAddressViewModelTest"
+
         val COMPLETED_ADDRESS = mapOf(
             IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
             IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),

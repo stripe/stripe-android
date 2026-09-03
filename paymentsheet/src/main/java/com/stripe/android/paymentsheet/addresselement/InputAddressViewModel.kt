@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -16,6 +17,7 @@ import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -242,15 +244,16 @@ internal class InputAddressViewModel @Inject constructor(
             }
             is AddressElementActivityContract.LaunchMode.CheckoutShipping -> {
                 saveCheckoutShippingAddress(
-                    updaterKey = launchMode.updaterKey,
+                    paymentElementCallbackIdentifier = launchMode.paymentElementCallbackIdentifier,
                     addressDetails = addressDetails,
                 )
             }
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun saveCheckoutShippingAddress(
-        updaterKey: String,
+        paymentElementCallbackIdentifier: String,
         addressDetails: AddressDetails,
     ) {
         if (!processingState.tryStartProcessing()) return
@@ -259,12 +262,18 @@ internal class InputAddressViewModel @Inject constructor(
         _formEnabled.value = false
         viewModelScope.launch {
             val result = try {
-                val updater = CheckoutShippingAddressUpdaterRegistry.get(updaterKey)
+                val updater = PaymentElementCallbackReferences.getShippingAddressUpdater(
+                    paymentElementCallbackIdentifier
+                )
                 if (updater == null) {
                     Result.failure(IllegalStateException("Shipping address updater is unavailable."))
                 } else {
-                    updater.update(addressDetails)
+                    updater(addressDetails)
                 }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Result.failure(error)
             } finally {
                 processingState.finishProcessing()
             }
