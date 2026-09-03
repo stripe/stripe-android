@@ -84,7 +84,7 @@ internal class CustomPaymentMethodsAnalyticsTest(
         context.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customPaymentMethods(
                         listOf(
                             PaymentSheet.CustomPaymentMethod(
@@ -96,7 +96,7 @@ internal class CustomPaymentMethodsAnalyticsTest(
                     )
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .paymentMethodOrder(listOf("cpmt_123", "card"))
-                    .build())
+                    .build()
             )
         }
 

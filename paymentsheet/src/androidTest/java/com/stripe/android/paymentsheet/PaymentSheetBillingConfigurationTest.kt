@@ -65,7 +65,7 @@ internal class PaymentSheetBillingConfigurationTest(
         scenario.onActivity {
             paymentSheet.presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration(
+                configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
                     defaultBillingDetails = PaymentSheet.BillingDetails(
                         name = "Jenny Rosen",
@@ -84,7 +84,7 @@ internal class PaymentSheetBillingConfigurationTest(
                         attachDefaultsToPaymentMethod = true,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                )),
+                ),
             )
         }
 
@@ -139,7 +139,7 @@ internal class PaymentSheetBillingConfigurationTest(
         scenario.onActivity {
             paymentSheet.presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration(
+                configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
                     defaultBillingDetails = PaymentSheet.BillingDetails(
                         name = "Jenny Rosen",
@@ -155,7 +155,7 @@ internal class PaymentSheetBillingConfigurationTest(
                         attachDefaultsToPaymentMethod = false,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                )),
+                ),
             )
         }
 
@@ -192,7 +192,7 @@ internal class PaymentSheetBillingConfigurationTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration(
+                configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
                     defaultBillingDetails = PaymentSheet.BillingDetails(
                         name = "Jenny Rosen",
@@ -212,7 +212,7 @@ internal class PaymentSheetBillingConfigurationTest(
                         attachDefaultsToPaymentMethod = false,
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                )),
+                ),
             )
         }
 

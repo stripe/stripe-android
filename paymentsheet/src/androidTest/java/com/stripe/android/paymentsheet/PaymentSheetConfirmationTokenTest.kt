@@ -169,7 +169,7 @@ internal class PaymentSheetConfirmationTokenTest(
                     },
                     requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 ),
-                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder("Example, Inc.")
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .also {
                         if (customerType == CustomerType.ReturningCustomer) {
@@ -181,7 +181,7 @@ internal class PaymentSheetConfirmationTokenTest(
                             )
                         }
                     }
-                    .build())
+                    .build()
             )
         }
     }

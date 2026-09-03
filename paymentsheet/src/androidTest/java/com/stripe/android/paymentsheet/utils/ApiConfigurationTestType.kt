@@ -4,7 +4,6 @@ import android.content.Context
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.TestApiKeys
-import com.stripe.android.paymentsheet.PaymentSheet
 
 internal sealed class ApiConfigurationTestType(
     val paymentConfigurationPublishableKey: String,
@@ -20,10 +19,6 @@ internal sealed class ApiConfigurationTestType(
 
     fun withPublishableKey(publishableKey: String): ApiConfigurationTestType {
         return Configured(publishableKey)
-    }
-
-    fun applyTo(configuration: PaymentSheet.Configuration): PaymentSheet.Configuration {
-        return configuration
     }
 
     data object PaymentConfigurationOnly : ApiConfigurationTestType(

@@ -54,7 +54,7 @@ internal class PaymentSheetAddressAutocompleteTest(
         context.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_123_secret_123",
-                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                     .billingDetailsCollectionConfiguration(
                         PaymentSheet.BillingDetailsCollectionConfiguration(
                             address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
@@ -62,7 +62,7 @@ internal class PaymentSheetAddressAutocompleteTest(
                         ),
                     )
                     .googlePlacesApiKey("gp_123")
-                    .build()),
+                    .build(),
             )
         }
 
@@ -92,7 +92,7 @@ internal class PaymentSheetAddressAutocompleteTest(
         context.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_123_secret_123",
-                configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                     .billingDetailsCollectionConfiguration(
                         PaymentSheet.BillingDetailsCollectionConfiguration(
                             address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
@@ -111,7 +111,7 @@ internal class PaymentSheetAddressAutocompleteTest(
                         )
                     )
                     .googlePlacesApiKey("gp_123")
-                    .build()),
+                    .build(),
             )
         }
 

@@ -80,9 +80,9 @@ internal class PreparePaymentMethodTest(
                             externalId = "external_123",
                         )
                     ),
-                    configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                    configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                         .shippingDetails(SHIPPING_ADDRESS)
-                        .build())
+                        .build()
                 )
             }
 
@@ -141,9 +141,9 @@ internal class PreparePaymentMethodTest(
                             externalId = "external_456",
                         )
                     ),
-                    configuration = apiConfigurationTestType.applyTo(PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                    configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                         .shippingDetails(SHIPPING_ADDRESS)
-                        .build()),
+                        .build(),
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()

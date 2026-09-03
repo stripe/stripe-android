@@ -507,5 +507,4 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             *requestMatchers
         )
     }
-
 }

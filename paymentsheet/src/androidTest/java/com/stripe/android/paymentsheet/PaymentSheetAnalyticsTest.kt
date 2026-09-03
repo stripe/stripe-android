@@ -108,7 +108,7 @@ internal class PaymentSheetAnalyticsTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration),
+                configuration = horizontalModeConfiguration,
             )
         }
 
@@ -186,7 +186,7 @@ internal class PaymentSheetAnalyticsTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(verticalModeConfiguration),
+                configuration = verticalModeConfiguration,
             )
         }
 
@@ -275,7 +275,7 @@ internal class PaymentSheetAnalyticsTest(
                         currency = "usd"
                     )
                 ),
-                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration)
+                configuration = horizontalModeConfiguration
             )
         }
 
@@ -364,14 +364,14 @@ internal class PaymentSheetAnalyticsTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration.newBuilder()
+                configuration = horizontalModeConfiguration.newBuilder()
                     .customer(
                         PaymentSheet.CustomerConfiguration(
                             id = "cus_1",
                             ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                         )
                     )
-                    .build())
+                    .build()
             )
         }
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())

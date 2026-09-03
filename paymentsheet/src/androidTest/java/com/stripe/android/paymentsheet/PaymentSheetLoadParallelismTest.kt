@@ -176,10 +176,10 @@ internal class PaymentSheetLoadParallelismTest(
             testContext.presentPaymentSheet {
                 presentWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = apiConfigurationTestType.applyTo(buildConfiguration(
+                    configuration = buildConfiguration(
                         customerType = customerType,
                         defaultEmail = defaultEmail,
-                    )),
+                    ),
                 )
             }
 

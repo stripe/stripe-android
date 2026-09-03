@@ -60,7 +60,7 @@ internal class CardNumberControllerNetworkTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(configuration),
+                configuration = configuration,
             )
         }
 
@@ -98,7 +98,7 @@ internal class CardNumberControllerNetworkTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(configuration),
+                configuration = configuration,
             )
         }
 
@@ -148,7 +148,7 @@ internal class CardNumberControllerNetworkTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(configuration),
+                configuration = configuration,
             )
         }
 
@@ -206,7 +206,7 @@ internal class CardNumberControllerNetworkTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = apiConfigurationTestType.applyTo(configuration),
+                configuration = configuration,
             )
         }
 
