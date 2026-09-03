@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet
 
-import app.cash.burst.burstValues
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -19,10 +19,8 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest(
     private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
         ApiConfigurationTestType.PaymentConfigurationOnly,
     ),
-    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+    private val integrationType: ProductIntegrationType,
 ) {
-
-
     @get:Rule
     val testRules: TestRules = TestRules.create()
 

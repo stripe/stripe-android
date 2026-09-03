@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement.nfcscan
 
-import app.cash.burst.burstValues
-import app.cash.burst.Burst
 import androidx.test.espresso.intent.rule.IntentsRule
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.common.nfcscan.NfcScanningContract
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.networktesting.NetworkRule
@@ -20,7 +20,6 @@ import org.junit.Test
 
 @Burst
 internal class NfcScanningTest {
-
     private val networkRule = NetworkRule()
 
     @get:Rule
@@ -41,7 +40,7 @@ internal class NfcScanningTest {
         @BurstParameter apiConfigurationTestType: ApiConfigurationTestType = burstValues(
             ApiConfigurationTestType.PaymentConfigurationOnly,
         ),
-        @BurstParameter integrationType: NfcScanningIntegrationType = NfcScanningIntegrationType.PaymentSheet,
+        @BurstParameter integrationType: NfcScanningIntegrationType,
     ) = runNfcScanningIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,

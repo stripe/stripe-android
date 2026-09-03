@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet
 
-import app.cash.burst.burstValues
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import app.cash.burst.Burst
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.elementsSession
@@ -14,6 +13,7 @@ import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.assertCompleted
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
@@ -27,7 +27,6 @@ internal class CustomPaymentMethodsTest(
         ApiConfigurationTestType.PaymentConfigurationOnly,
     ),
 ) {
-
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -40,7 +39,7 @@ internal class CustomPaymentMethodsTest(
 
     @Test
     fun testSuccessful(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet
+        integrationType: ProductIntegrationType
     ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
@@ -97,7 +96,7 @@ internal class CustomPaymentMethodsTest(
 
     @Test
     fun testSuccessfulWithBillingDetailsCollection(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet
+        integrationType: ProductIntegrationType
     ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
@@ -173,7 +172,7 @@ internal class CustomPaymentMethodsTest(
 
     @Test
     fun testSuccessfulWithBillingDetailsCollectionDisabled(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet
+        integrationType: ProductIntegrationType
     ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",

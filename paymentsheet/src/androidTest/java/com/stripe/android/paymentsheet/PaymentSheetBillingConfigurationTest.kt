@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet
 
-import app.cash.burst.burstValues
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import app.cash.burst.Burst
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -15,6 +14,7 @@ import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet.Builder
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -22,10 +22,10 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
-import org.junit.Rule
-import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import org.junit.Rule
+import org.junit.Test
 
 @Burst
 internal class PaymentSheetBillingConfigurationTest(
@@ -33,7 +33,6 @@ internal class PaymentSheetBillingConfigurationTest(
         ApiConfigurationTestType.PaymentConfigurationOnly,
     ),
 ) {
-
     private val composeTestRule = createAndroidComposeRule<MainActivity>()
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -227,8 +226,8 @@ internal class PaymentSheetBillingConfigurationTest(
 
     @Test
     fun testWithDefaults(
-        integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
-        layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical,
+        integrationType: ProductIntegrationType,
+        layoutType: PaymentSheetLayoutType,
     ) = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,

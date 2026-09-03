@@ -22,7 +22,7 @@ import org.junit.Test
 
 @OptIn(AddressAutocompletePreview::class)
 @Burst
-class PaymentSheetAddressAutocompleteTest(
+internal class PaymentSheetAddressAutocompleteTest(
     private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
         ApiConfigurationTestType.PaymentConfigurationOnly,
     ),
