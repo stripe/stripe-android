@@ -12,6 +12,7 @@ import com.stripe.android.model.CardFunding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -84,7 +85,7 @@ class DefaultCardAccountRangeService(
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     private val accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener? = null,
-    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext + SupervisorJob())
+    private val coroutineScope: CoroutineScope? = null
 ) : CardAccountRangeService {
 
     private val needsRemoteQueryForFunding = CardFunding.entries.any {
@@ -156,7 +157,8 @@ class DefaultCardAccountRangeService(
             // Emit loading state before fetching
             _accountRangesStateFlow.value = CardAccountRangeService.AccountRangesState.Loading
 
-            accountRangeRepositoryJob = coroutineScope.launch(workContext) {
+            val queryScope = coroutineScope ?: CoroutineScope(uiContext + SupervisorJob())
+            accountRangeRepositoryJob = queryScope.launch(workContext) {
                 val bin = cardNumber.bin
 
                 val accountRanges = if (bin != null) {
@@ -167,6 +169,11 @@ class DefaultCardAccountRangeService(
 
                 withContext(uiContext) {
                     updateAccountRangesResult(accountRanges.orEmpty())
+                }
+            }
+            if (coroutineScope == null) {
+                accountRangeRepositoryJob?.invokeOnCompletion {
+                    queryScope.cancel()
                 }
             }
         }
