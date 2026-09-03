@@ -1,4 +1,4 @@
-package com.stripe.android.lpmfoundations.luxe
+package com.stripe.android.lpmfoundations
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType

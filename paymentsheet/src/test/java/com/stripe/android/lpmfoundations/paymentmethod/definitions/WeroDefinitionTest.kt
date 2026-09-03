@@ -1,7 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.luxe.countryElements
+import com.stripe.android.lpmfoundations.countryElements
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.paymentsheet.PaymentSheet

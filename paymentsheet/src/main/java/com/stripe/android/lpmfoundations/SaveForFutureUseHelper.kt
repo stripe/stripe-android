@@ -1,4 +1,4 @@
-package com.stripe.android.lpmfoundations.luxe
+package com.stripe.android.lpmfoundations
 
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata

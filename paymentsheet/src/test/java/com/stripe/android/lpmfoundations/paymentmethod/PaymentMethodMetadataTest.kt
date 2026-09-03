@@ -10,8 +10,8 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.countryElements
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.countryElements
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_INTEGRATION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata

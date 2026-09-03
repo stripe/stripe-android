@@ -2,7 +2,7 @@ package com.stripe.android.customersheet
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.core.analytics.ErrorReporter

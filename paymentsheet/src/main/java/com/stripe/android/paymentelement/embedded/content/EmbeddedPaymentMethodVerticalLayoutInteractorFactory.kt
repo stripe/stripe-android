@@ -123,8 +123,6 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
                 selectionHolder.setSelection(updatedSelection)
             },
             selectSavedPaymentMethod = savedPaymentMethodSelectionHandler::select,
-            pendingSavedPaymentMethod = savedPaymentMethodSelectionHandler.pendingSelection,
-            selectionError = savedPaymentMethodSelectionHandler.error,
             isCurrentScreen = stateFlowOf(true),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
@@ -155,6 +153,8 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             linkAccount = linkAccountHolder.linkAccountInfo,
             coroutineScope = interactorScope,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            pendingSavedPaymentMethod = savedPaymentMethodSelectionHandler.pendingSelection,
+            selectionError = savedPaymentMethodSelectionHandler.error,
         )
     }
 }

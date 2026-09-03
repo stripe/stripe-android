@@ -1,4 +1,4 @@
-package com.stripe.android.lpmfoundations.luxe
+package com.stripe.android.lpmfoundations
 
 import com.stripe.android.ui.core.R
 

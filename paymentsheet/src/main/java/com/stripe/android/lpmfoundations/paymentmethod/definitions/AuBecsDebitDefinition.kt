@@ -3,9 +3,9 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
