@@ -1,11 +1,10 @@
-package com.stripe.android.lpmfoundations.luxe
+package com.stripe.android.lpmfoundations
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode

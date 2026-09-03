@@ -18,7 +18,7 @@ import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionData
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
