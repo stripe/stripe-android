@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for card number entry text field -->
+  <string name="stripe_acc_label_card_number">رقم البطاقة</string>
+  <string name="stripe_acc_label_card_number_node">%s، رقم البطاقة</string>
+  <string name="stripe_acc_label_cvc_node">%s، ‏CVC</string>
+  <string name="stripe_acc_label_expiry_date">تاريخ انتهاء الصلاحية</string>
+  <string name="stripe_acc_label_expiry_date_node">%s، تاريخ انتهاء الصلاحية</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="stripe_acc_label_zip">الرمز البريدي</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="stripe_acc_label_zip_short">الرمز البريدي</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="stripe_added">تمت إضافة %s</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="stripe_address_city_required">يُرجى إدخال مدينتك</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="stripe_address_country_invalid">بلدك غير صالح</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="stripe_address_county_required">يُرجى إدخال مقاطعتك</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="stripe_address_label_address_line1_optional">سطر العنوان 1 (اختياري)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="stripe_address_label_address_line2_optional">سطر العنوان 2 (اختياري)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="stripe_address_label_address_optional">العنوان (اختياري) </string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="stripe_address_label_apt_optional">شقة (اختياري)</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="stripe_address_label_city_optional">المدينة (اختياري)</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="stripe_address_label_county_optional">المقاطعة (اختياري)</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="stripe_address_label_phone_number_optional">رقم الهاتف (اختياري)</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="stripe_address_label_postal_code_optional">الرمز البريدي (اختياري)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="stripe_address_label_postcode">الرمز البريدي</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="stripe_address_label_postcode_optional">الرمز البريدي (اختياري)</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="stripe_address_label_province_optional">المقاطعة (اختياري)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="stripe_address_label_region_generic">الولاية / المقاطعة / المنطقة</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="stripe_address_label_region_generic_optional">الولاية / المقاطعة / المنطقة (اختياري)</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="stripe_address_label_state_optional">الولاية (اختياري)</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="stripe_address_label_zip_code_optional">الرمز البريدي (اختياري)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="stripe_address_label_zip_postal_code">الرمز البريدي</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="stripe_address_label_zip_postal_code_optional">الرمز البريدي (اختياري)</string>
+  <!-- Error text indicating name is required -->
+  <string name="stripe_address_name_required">يُرجى إدخال اسمك</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="stripe_address_phone_number_required">يُرجى إدخال رقم هاتفك</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="stripe_address_postcode_invalid">الرمز البريدي غير صالح</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="stripe_address_province_required">يُرجى إدخال المقاطعة</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="stripe_address_region_generic_required">يُرجى إدخال الولاية/المقاطعة/المنطقة الخاصة بك</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="stripe_address_required">يُرجى إدخال عنوانك</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="stripe_address_state_required">يُرجى إدخال ولايتك</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="stripe_affirm_buy_now_pay_later"><![CDATA[ادفع على أقساط مع <img src=\"affirm\">.]]></string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">الدفع بمرور الوقت باستخدام Affirm</string>
+  <!-- Label for Name on account field on form -->
+  <string name="stripe_au_becs_account_name">الاسم المسجل في الحساب</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="stripe_au_becs_bsb_number">رقم BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="stripe_au_becs_mandate"><![CDATA[من خلال تقديم تفاصيل حسابك البنكي وتأكيد عملية الدفع، أنت توافق على طلب الخصم المباشر هذا و<a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\">Direct اتفاقية خدمة طلب الخصم</a>، وتفوض شركة Stripe Payments Australia Pty Ltd ACN 160 180 343 رقم هوية مستخدم الخصم المباشر 507156 (\"Stripe\") بخصم حسابك من خلال نظام مقاصة الإلكترونيات الجماعية (BECS) نيابةً عن %s (\"التاجر\") لأي مبالغ يبلغك بها التاجر بشكل منفصل. أنت تقر بأنك إما صاحب الحساب أو مفوض بالتوقيع على الحساب المدرج أعلاه.]]></string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="stripe_becs_mandate_acceptance">\n    من خلال تقديم تفاصيل حسابك البنكي وتأكيد هذا الدفع، أنت توافق على\n    طلب الخصم المباشر واتفاقية خدمة طلب الخصم المباشر، وتفوض\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 رقم معرف مستخدم الخصم المباشر 507156\n    (“Stripe”) بخصم مبلغ من حسابك عبر نظام المقاصة الإلكترونية المجمعة (BECS) نيابةً\n    عن %1$s (\"التاجر\") لأي مبالغ يتم إبلاغك بها بشكلٍ منفصل\n    من قبل التاجر. وأنت تقر بأنك إما صاحب الحساب أو مفوض\n    مخول بالتوقيع على الحساب المدرج أعلاه.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="stripe_becs_widget_account_number">رقم الحساب</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">رقم الحساب الذي أدخلته غير مكتمل.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="stripe_becs_widget_account_number_required">رقم حسابك مطلوب.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="stripe_becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="stripe_becs_widget_bsb_incomplete">رمز BSB الذي أدخلته غير مكتمل.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="stripe_becs_widget_bsb_invalid">رمز BSB الذي أدخلته غير صالح.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="stripe_becs_widget_email">عنوان البريد الإلكتروني</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="stripe_becs_widget_email_invalid">عنوان بريدك الإلكتروني غير صالح.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="stripe_becs_widget_email_required">عنوان بريدك الإلكتروني مطلوب.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="stripe_becs_widget_name">الاسم</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="stripe_becs_widget_name_required">اسمك مطلوب.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="stripe_cancel">إلغاء</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">اختر علامة تجارية للبطاقة</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">لم يتم تحديد شيء</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">حدد العلامة التجارية للبطاقة (اختياري)</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="stripe_card_declined">تم رفض بطاقتك</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="stripe_card_ending_in">%1$s المنتهي بـ %2$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">تُقبل البطاقات الائتمانية فقط</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">تُقبل البطاقات الائتمانية والمدفوعة مسبقًا فقط</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">تُقبل بطاقات الخصم فقط</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">تُقبل بطاقات الخصم والبطاقات الائتمانية فقط</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">تُقبل بطاقات الخصم والبطاقات المدفوعة مسبقًا فقط</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">تُقبل البطاقات المدفوعة مسبقًا فقط</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
+  <string name="stripe_card_plus_last_4">%1$s = %2$s</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
+  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <!-- Text for close button -->
+  <string name="stripe_close">إغلاق</string>
+  <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
+  <string name="stripe_confirming_transaction_status">جارٍ تأكيد المعاملة</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="stripe_delete_payment_method">حذف طريقة الدفع</string>
+  <string name="stripe_delete_payment_method_prompt_title">هل تريد حذف طريقة الدفع؟</string>
+  <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
+  <string name="stripe_disallowed_card_brand">%s غير مقبول</string>
+  <!-- Done button title -->
+  <string name="stripe_done">تم</string>
+  <!-- Button title to enter editing mode -->
+  <string name="stripe_edit">تحرير</string>
+  <!-- Error when the card has already expired -->
+  <string name="stripe_expired_card">انتهت صلاحية بطاقتك</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_expiry_date_hint">شهر/سنة</string>
+  <string name="stripe_expiry_label_short">انتهاء الصلاحية</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">نواجه مشكلات في الاتصال بموفر المدفوعات لدينا. يُرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">تعذرت علينا مصادقة طريقة الدفع الخاصة بك. يُرجى اختيار طريقة دفع مختلفة والمحاولة مرة أخرى.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">انتهت مهلة مصادقة طريقة الدفع الخاصة بك -- حاول مرة أخرى</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="stripe_fpx_bank_offline">%s - غير متصل بالإنترنت</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="stripe_generic_decline">تم رفض طريقة الدفع الخاصة بك.</string>
+  <!-- Google Pay line item showing the amount before exclusive taxes. -->
+  <string name="stripe_google_pay_cost_excluding_tax">التكلفة باستثناء الضريبة</string>
+  <!-- Google Pay total label when the final tax may change with the selected billing address. -->
+  <string name="stripe_google_pay_estimated_total">الإجمالي التقديري (قد تختلف الضريبة النهائية)</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">الإجمالي</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">لا توجد أموال كافية في بطاقتك.</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">حدث خطأ داخلي.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="stripe_invalid_bank_account_iban">رقم IBAN الذي أدخلته غير صالح.</string>
+  <string name="stripe_invalid_card_number">رقم بطاقتك غير صالح.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="stripe_invalid_cvc">رمز أمان بطاقتك غير صالح.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="stripe_invalid_owner_name">اسمك غير صالح.</string>
+  <!-- Shipping form error message -->
+  <string name="stripe_invalid_shipping_information">عنوان الشحن غير صالح</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_invalid_zip">الرمز البريدي غير مكتمل.</string>
+  <!-- Label for Payment method text field -->
+  <string name="stripe_label_payment_method">تفاصيل طريقة الدفع</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">مدفوعات بسيطة وآمنة بنقرة واحدة</string>
+  <string name="stripe_payment_method_add_new_card">أضِف بطاقة جديدة…</string>
+  <string name="stripe_payment_method_add_new_fpx">حدد الحساب البنكي (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="stripe_price_free">مجانًا</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="stripe_processing_error">حدث خطأ ما في أثناء معالجة بطاقتك -- حاول مرة أخرى بعد بضع ثوانٍ</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="stripe_remove">إزالة</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="stripe_removed">تمت إزالة %s</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">حدث خطأ ما. معرّف الطلب: %1$s</string>
+  <string name="stripe_secure_checkout">الدفع الآمن</string>
+  <string name="stripe_title_add_a_card">إضافة بطاقة</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="stripe_title_add_an_address">تعيين العنوان</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="stripe_title_bank_account">الحساب البنكي</string>
+  <!-- Title for Payment Method screen -->
+  <string name="stripe_title_payment_method">طريقة الدفع</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="stripe_title_select_shipping_method">اختيار طريقة الشحن</string>
+  <!-- Title of screen to update a card -->
+  <string name="stripe_title_update_card">تحديث البطاقة</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">تحديث</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">تحقق من عملية الدفع</string>
+</resources>
