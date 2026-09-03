@@ -194,6 +194,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
     ): EmbeddedPaymentMethodVerticalLayoutInteractorFactory
 
     @Binds
+    fun bindsPreferFormInteractorFactory(
+        factory: DefaultEmbeddedPreferFormInteractorFactory,
+    ): EmbeddedPreferFormInteractorFactory
+
+    @Binds
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
         handler: DefaultEmbeddedRowSelectionImmediateActionHandler
     ): EmbeddedRowSelectionImmediateActionHandler

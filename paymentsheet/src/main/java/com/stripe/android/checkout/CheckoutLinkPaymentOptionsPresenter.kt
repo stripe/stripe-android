@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
 import com.stripe.android.link.LinkPaymentMethodSelectionOutcome
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.handleLinkPaymentMethodSelectionResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -65,6 +66,10 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
         if (!didLaunch) {
             presentDefault()
         }
+    }
+
+    override fun present(launchMode: EmbeddedLaunchMode) {
+        defaultPresenter.present(launchMode)
     }
 
     private fun onLinkResult(result: LinkActivityResult) {

@@ -78,6 +78,13 @@ internal class EmbeddedInitialScreenFactoryTest {
     }
 
     @Test
+    fun `create returns vertical payment options screen for vertical payment options launch mode`() = runScenario(
+        launchMode = EmbeddedLaunchMode.VerticalPaymentOptions,
+    ) {
+        assertThat(factory.create().single()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+    }
+
+    @Test
     fun `create returns vertical payment options screen for vertical layout`() = runScenario(
         launchMode = EmbeddedLaunchMode.PaymentOptions,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(

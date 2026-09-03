@@ -102,7 +102,8 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
                 shouldInvokeSelectionCallback = false,
                 launchMode = launchMode,
             )
-            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedLaunchMode.PaymentOptions,
+            is EmbeddedLaunchMode.VerticalPaymentOptions -> createPaymentOptionsCancellationResult(launchMode)
         }
     }
 
@@ -113,7 +114,8 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
                 shouldInvokeSelectionCallback = result == true,
                 launchMode = launchMode,
             )
-            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult(launchMode)
+            is EmbeddedLaunchMode.VerticalPaymentOptions -> createSelectedPaymentOptionResult(launchMode)
         }
     }
 
@@ -123,6 +125,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     ): EmbeddedActivityResult {
         return EmbeddedActivityResult.Complete(
             selection = selectionHolder.selection.value,
+            temporarySelection = selectionHolder.temporarySelection.value,
             previousNewSelections = selectionHolder.previousNewSelections,
             hasBeenConfirmed = false,
             customerState = customerStateHolder.customer.value,
@@ -132,10 +135,27 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         )
     }
 
-    private fun createPaymentOptionsCancellationResult(): EmbeddedActivityResult {
+    private fun createSelectedPaymentOptionResult(
+        launchMode: EmbeddedLaunchMode.VerticalPaymentOptions,
+    ): EmbeddedActivityResult {
+        return EmbeddedActivityResult.Complete(
+            selection = selectionHolder.selection.value,
+            temporarySelection = selectionHolder.temporarySelection.value,
+            previousNewSelections = selectionHolder.previousNewSelections,
+            hasBeenConfirmed = false,
+            customerState = customerStateHolder.customer.value,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = launchMode,
+        )
+    }
+
+    private fun createPaymentOptionsCancellationResult(
+        launchMode: EmbeddedLaunchMode,
+    ): EmbeddedActivityResult {
         return EmbeddedActivityResult.Cancelled(
             customerState = customerStateHolder.customer.value,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = launchMode,
         )
     }
 

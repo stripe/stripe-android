@@ -1,10 +1,14 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -91,6 +95,8 @@ internal class DefaultEmbeddedContentHelperTest {
     @Suppress("LongMethod")
     private fun testScenario(
         initialState: EmbeddedContentHelperStateHolder.State? = null,
+        preferFormInteractorFactory: EmbeddedPreferFormInteractorFactory =
+            EmbeddedPreferFormInteractorFactory { _, _, _, _ -> null },
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
         val state = MutableStateFlow(initialState)
@@ -109,6 +115,9 @@ internal class DefaultEmbeddedContentHelperTest {
             embeddedWalletsHelper = { stateFlowOf(null) },
             internalRowSelectionCallback = { null },
             paymentOptionsPresenter = presenter,
+            selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+            preferFormInteractorFactory = preferFormInteractorFactory,
+            eventReporter = FakeEventReporter(),
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
@@ -118,13 +127,19 @@ internal class DefaultEmbeddedContentHelperTest {
         ).block()
         verticalLayoutInteractors.forEach(FakePaymentMethodVerticalLayoutInteractor::validate)
         presenter.presentCalls.ensureAllEventsConsumed()
+        presenter.presentWithLaunchModeCalls.ensureAllEventsConsumed()
     }
 
     private class FakeEmbeddedPaymentOptionsPresenter : EmbeddedPaymentOptionsPresenter {
         val presentCalls = Turbine<Unit>()
+        val presentWithLaunchModeCalls = Turbine<EmbeddedLaunchMode>()
 
         override fun present() {
             presentCalls.add(Unit)
+        }
+
+        override fun present(launchMode: EmbeddedLaunchMode) {
+            presentWithLaunchModeCalls.add(launchMode)
         }
     }
 }

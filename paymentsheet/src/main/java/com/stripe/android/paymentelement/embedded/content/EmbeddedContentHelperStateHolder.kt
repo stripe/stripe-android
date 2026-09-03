@@ -17,6 +17,7 @@ internal interface EmbeddedContentHelperStateHolder {
         paymentMethodMetadata: PaymentMethodMetadata,
         embeddedViewDisplaysMandateText: Boolean,
         configuration: EmbeddedPaymentElement.Configuration,
+        preferFormDisabled: Boolean,
     )
 
     fun clearEmbeddedContent()
@@ -26,6 +27,7 @@ internal interface EmbeddedContentHelperStateHolder {
         val paymentMethodMetadata: PaymentMethodMetadata,
         val embeddedViewDisplaysMandateText: Boolean,
         val configuration: EmbeddedPaymentElement.Configuration,
+        val preferFormDisabled: Boolean,
     ) : Parcelable
 
     companion object {
@@ -49,12 +51,14 @@ internal class DefaultEmbeddedContentHelperStateHolder @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         embeddedViewDisplaysMandateText: Boolean,
         configuration: EmbeddedPaymentElement.Configuration,
+        preferFormDisabled: Boolean,
     ) {
         eventReporter.onShowNewPaymentOptions()
         val state = EmbeddedContentHelperStateHolder.State(
             paymentMethodMetadata = paymentMethodMetadata,
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             configuration = configuration,
+            preferFormDisabled = preferFormDisabled,
         )
         savedStateHandle[EmbeddedContentHelperStateHolder.STATE_KEY_EMBEDDED_CONTENT] = state
     }

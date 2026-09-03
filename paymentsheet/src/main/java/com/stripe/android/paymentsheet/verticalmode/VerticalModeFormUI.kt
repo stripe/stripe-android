@@ -35,6 +35,9 @@ const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_HEADER_PROMO_BADGE = "TEST_TAG_HEADER_PROMO_BADGE"
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_HEADER_ICON = "TEST_TAG_HEADER_ICON"
+
 @Composable
 internal fun VerticalModeFormUI(
     interactor: VerticalModeFormInteractor,
@@ -103,7 +106,8 @@ internal fun VerticalModeFormHeaderUI(
                 iconRequiresTinting = formHeaderInformation.iconRequiresTinting,
                 modifier = Modifier
                     .padding(end = 12.dp)
-                    .size(20.dp),
+                    .size(20.dp)
+                    .testTag(TEST_TAG_HEADER_ICON),
                 contentAlignment = Alignment.Center,
             )
         }

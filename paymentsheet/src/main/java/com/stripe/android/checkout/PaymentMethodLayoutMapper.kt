@@ -9,6 +9,7 @@ internal fun PaymentElement.Configuration.PaymentMethodLayout.asPaymentSheet(): 
     return when (this) {
         PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> PaymentSheet.PaymentMethodLayout.Horizontal
         PaymentElement.Configuration.PaymentMethodLayout.Vertical -> PaymentSheet.PaymentMethodLayout.Vertical
+        PaymentElement.Configuration.PaymentMethodLayout.PreferForm -> PaymentSheet.PaymentMethodLayout.Vertical
         PaymentElement.Configuration.PaymentMethodLayout.Automatic -> PaymentSheet.PaymentMethodLayout.Automatic
     }
 }

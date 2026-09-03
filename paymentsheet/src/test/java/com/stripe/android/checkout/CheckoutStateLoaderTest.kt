@@ -329,6 +329,13 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `reload carries prefer form disabled forward`() = runScenario {
+        loader.reload(committedState(preferFormDisabled = true))
+
+        assertThat(stateHolder.state?.preferFormDisabled).isTrue()
+    }
+
+    @Test
     fun `loadInitial resets the temporary selection and previous new selections`() = runScenario {
         // A prior state carries a temporary selection and a stashed new payment method; a fresh
         // configuration load must start from a clean slate rather than carrying them forward.
@@ -354,6 +361,15 @@ internal class CheckoutStateLoaderTest {
         assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isFalse()
     }
 
+    @Test
+    fun `loadInitial resets prefer form disabled`() = runScenario {
+        stateHolder.state = committedState(preferFormDisabled = true)
+
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        assertThat(stateHolder.state?.preferFormDisabled).isFalse()
+    }
+
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
 
     private fun response(
@@ -371,6 +387,7 @@ internal class CheckoutStateLoaderTest {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
+        preferFormDisabled: Boolean = false,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         linkEagerPresentationSuppressed: Boolean = false,
     ) = CheckoutControllerState(
@@ -385,6 +402,7 @@ internal class CheckoutStateLoaderTest {
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
+        preferFormDisabled = preferFormDisabled,
     )
 
     // Adaptive pricing (usd → eur) drives flag image resolution during load.
