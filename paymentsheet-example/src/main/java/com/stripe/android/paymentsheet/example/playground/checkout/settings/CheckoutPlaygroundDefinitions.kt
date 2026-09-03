@@ -2,6 +2,8 @@
 
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
+import com.stripe.android.paymentsheet.example.playground.settings.LinkType
+
 internal object CheckoutPlaygroundDefinitions {
     val root: CheckoutPlaygroundSettingDefinition.Configuration by lazy {
         configuration(
@@ -21,6 +23,13 @@ internal object CheckoutPlaygroundDefinitions {
             key = "controller.merchant_display_name",
             displayName = "Merchant display name",
         )
+        val linkType = choice(
+            key = "controller.link_type",
+            displayName = "Link Type",
+            defaultValue = LinkType.Web,
+            options = LinkType.entries.map { it.value to it },
+            serialize = LinkType::value,
+        )
         val defaults = CheckoutDefaultsDefinitions
         val payment = CheckoutPaymentDefinitions
         val currencySelector = CheckoutCurrencySelectorDefinitions
@@ -32,6 +41,7 @@ internal object CheckoutPlaygroundDefinitions {
                 displayName = "CheckoutController.Configuration",
                 children = arrayOf(
                     merchantDisplayName,
+                    linkType,
                     defaults.configuration,
                     payment.configuration,
                     currencySelector.configuration,

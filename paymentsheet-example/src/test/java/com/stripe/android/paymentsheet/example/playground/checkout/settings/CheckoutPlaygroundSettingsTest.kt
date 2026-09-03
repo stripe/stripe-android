@@ -2,9 +2,38 @@ package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.paymentsheet.example.playground.settings.LinkType
+import org.junit.After
 import org.junit.Test
 
 class CheckoutPlaygroundSettingsTest {
+    @After
+    fun tearDown() {
+        FeatureFlags.nativeLinkEnabled.reset()
+        FeatureFlags.nativeLinkAttestationEnabled.reset()
+    }
+
+    @Test
+    fun `web Link disables native Link`() = runScenario {
+        settings.update(CheckoutPlaygroundDefinitions.Controller.linkType, LinkType.Web)
+
+        settings.snapshot().applyFeatureFlags()
+
+        assertThat(FeatureFlags.nativeLinkEnabled.isEnabled).isFalse()
+        assertThat(FeatureFlags.nativeLinkAttestationEnabled.isEnabled).isFalse()
+    }
+
+    @Test
+    fun `native Link enables native Link without attestation`() = runScenario {
+        settings.update(CheckoutPlaygroundDefinitions.Controller.linkType, LinkType.Native)
+
+        settings.snapshot().applyFeatureFlags()
+
+        assertThat(FeatureFlags.nativeLinkEnabled.isEnabled).isTrue()
+        assertThat(FeatureFlags.nativeLinkAttestationEnabled.isEnabled).isFalse()
+    }
+
     @Test
     fun `backend URL defaults to configured playground backend`() {
         val settings = CheckoutPlaygroundSettings.createInMemory(

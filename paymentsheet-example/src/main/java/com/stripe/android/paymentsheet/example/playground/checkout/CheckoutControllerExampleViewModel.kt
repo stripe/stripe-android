@@ -63,6 +63,9 @@ internal class CheckoutControllerExampleViewModel(
         get() = !activeSnapshot[CheckoutPlaygroundDefinitions.Controller.payment.embeddedMandate]
 
     init {
+        if (_status.value is Status.Configured) {
+            activeSnapshot.applyFeatureFlags()
+        }
         savedStateHandle[RUN_ACTIVE_KEY] = _status.value is Status.Configured
     }
 
@@ -77,7 +80,7 @@ internal class CheckoutControllerExampleViewModel(
 
     fun start() {
         if (settings.validationErrors().isNotEmpty()) return
-        activeSnapshot = settings.snapshot()
+        activeSnapshot = settings.snapshot().also { it.applyFeatureFlags() }
         savedStateHandle[RUN_ACTIVE_KEY] = false
         clearMessages()
         _status.value = Status.Loading

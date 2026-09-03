@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout.settings
 import android.content.Context
 import androidx.core.content.edit
 import com.stripe.android.paymentsheet.example.Settings
+import com.stripe.android.paymentsheet.example.playground.settings.applyFeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -102,6 +103,10 @@ internal class CheckoutPlaygroundSettings private constructor(
     ) : CheckoutPlaygroundSettingValues {
         override operator fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T {
             return definition.deserialize(requireNotNull(values[definition])).getOrThrow()
+        }
+
+        fun applyFeatureFlags() {
+            this[CheckoutPlaygroundDefinitions.Controller.linkType].applyFeatureFlags()
         }
     }
 

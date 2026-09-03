@@ -38,24 +38,7 @@ internal object LinkTypeSettingsDefinition :
     }
 
     override fun setValue(value: LinkType) {
-        when (value) {
-            LinkType.ServerControlled -> {
-                FeatureFlags.nativeLinkEnabled.reset()
-                FeatureFlags.nativeLinkAttestationEnabled.reset()
-            }
-            LinkType.Native -> {
-                FeatureFlags.nativeLinkEnabled.setEnabled(true)
-                FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
-            }
-            LinkType.NativeAttest -> {
-                FeatureFlags.nativeLinkEnabled.setEnabled(true)
-                FeatureFlags.nativeLinkAttestationEnabled.setEnabled(true)
-            }
-            LinkType.Web -> {
-                FeatureFlags.nativeLinkEnabled.setEnabled(false)
-                FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
-            }
-        }
+        value.applyFeatureFlags()
     }
 }
 
@@ -64,4 +47,25 @@ enum class LinkType(override val value: String) : ValueEnum {
     Native("Native"),
     NativeAttest("Native + Attest"),
     Web("Web"),
+}
+
+internal fun LinkType.applyFeatureFlags() {
+    when (this) {
+        LinkType.ServerControlled -> {
+            FeatureFlags.nativeLinkEnabled.reset()
+            FeatureFlags.nativeLinkAttestationEnabled.reset()
+        }
+        LinkType.Native -> {
+            FeatureFlags.nativeLinkEnabled.setEnabled(true)
+            FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
+        }
+        LinkType.NativeAttest -> {
+            FeatureFlags.nativeLinkEnabled.setEnabled(true)
+            FeatureFlags.nativeLinkAttestationEnabled.setEnabled(true)
+        }
+        LinkType.Web -> {
+            FeatureFlags.nativeLinkEnabled.setEnabled(false)
+            FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
+        }
+    }
 }
