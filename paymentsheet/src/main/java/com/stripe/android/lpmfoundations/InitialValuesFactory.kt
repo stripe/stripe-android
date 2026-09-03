@@ -1,4 +1,4 @@
-package com.stripe.android.lpmfoundations.luxe
+package com.stripe.android.lpmfoundations
 
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams

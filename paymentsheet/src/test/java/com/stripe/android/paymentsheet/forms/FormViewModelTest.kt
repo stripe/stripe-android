@@ -5,7 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod

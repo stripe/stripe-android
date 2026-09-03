@@ -17,7 +17,7 @@ import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForC
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata

@@ -26,8 +26,8 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
