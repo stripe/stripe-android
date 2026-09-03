@@ -780,6 +780,26 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `commitShippingAddress does not start a mutation when a payment flow is presented`() =
+        runMutationScenario(
+            sheetIsOpen = true,
+            assertLoadingConsumed = true,
+            useTestMainDispatcher = true,
+        ) {
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+            val state = committedState()
+
+            controller.commitShippingAddress(
+                name = "John",
+                address = fullAddress.build(),
+            )
+
+            assertThat(controller.isUpdating.value).isFalse()
+            isUpdatingTurbine.expectNoEvents()
+            assertThat(committedState()).isSameInstanceAs(state)
+        }
+
+    @Test
     fun `updateBillingAddress sends tax_region and stores address when automatic tax targets billing`() =
         runMutationScenario(initModifier = automaticTaxFor("billing")) {
             networkRule.checkoutUpdate(

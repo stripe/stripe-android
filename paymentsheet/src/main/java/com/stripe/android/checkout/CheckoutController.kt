@@ -31,7 +31,6 @@ import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.cancel
@@ -184,26 +183,17 @@ class CheckoutController @Inject internal constructor(
         address: Address.State,
     ) {
         viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            // Admit the mutation before the Activity result callback returns so confirmation cannot overtake it.
-            operationCoordinator.runMutation {
-                try {
-                    val state = requireNotNull(stateHolder.state) {
-                        "Cannot commit checkout shipping address before it is configured."
-                    }
-                    checkoutStateLoader.reload(
-                        state.copy(
-                            collectedDetails = state.collectedDetails.copy(
-                                shippingName = name,
-                                shippingAddress = address,
-                            ),
-                        )
+            withCheckoutState(
+                additionalStateMutations = {
+                    copy(
+                        collectedDetails = collectedDetails.copy(
+                            shippingName = name,
+                            shippingAddress = address,
+                        ),
                     )
-                    kotlin.Result.success(Unit)
-                } catch (error: CancellationException) {
-                    throw error
-                } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
-                    kotlin.Result.failure(error)
-                }
+                },
+            ) {
+                kotlin.Result.success(checkoutSessionResponse)
             }.onFailure { error ->
                 logger.error("Failed to commit the checkout shipping address.", error)
             }
