@@ -101,6 +101,10 @@ class LinkControllerInteractorTest {
     @Test
     fun `state is updated when account changes`() = runTest {
         val interactor = createInteractor()
+        val linkSessionKey = "lsk_123"
+        val linkAccount = LinkAccount(
+            TestFactory.CONSUMER_SESSION.copy(linkSessionKey = linkSessionKey)
+        )
 
         interactor.state(application).test {
             awaitItem().run {
@@ -108,16 +112,17 @@ class LinkControllerInteractorTest {
                 assertThat(internalLinkAccount).isNull()
             }
 
-            linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+            linkAccountHolder.set(LinkAccountUpdate.Value(linkAccount))
 
             awaitItem().run {
                 assertThat(isConsumerVerified).isTrue()
                 assertThat(internalLinkAccount).isEqualTo(
                     LinkController.LinkAccount(
-                        email = TestFactory.LINK_ACCOUNT.email,
-                        redactedPhoneNumber = TestFactory.LINK_ACCOUNT.redactedPhoneNumber,
+                        email = linkAccount.email,
+                        redactedPhoneNumber = linkAccount.redactedPhoneNumber,
                         sessionState = LinkController.SessionState.LoggedIn,
-                        consumerSessionClientSecret = TestFactory.LINK_ACCOUNT.clientSecret,
+                        consumerSessionClientSecret = linkAccount.clientSecret,
+                        linkSessionKey = linkSessionKey,
                     )
                 )
             }

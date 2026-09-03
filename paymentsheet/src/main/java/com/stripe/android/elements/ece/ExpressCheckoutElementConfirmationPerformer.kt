@@ -75,6 +75,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             checkoutSessionResponse = state.checkoutSessionResponse,
             collectedDetails = state.collectedDetails,
         ) ?: return null
+        val paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata ?: return null
         val shippingAddressRequired = (expressButton as? ExpressButton.GooglePay)?.shippingAddressRequired == true
         val shippingAddressParameters = if (shippingAddressRequired) {
             GooglePayJsonFactory.ShippingAddressParameters(
@@ -86,18 +87,18 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         }
         val confirmationOption = expressButton.toSelection().toConfirmationOption(
             configuration = configuration,
-            linkConfiguration = state.expressCheckoutElementPaymentMethodMetadata.linkState?.configuration,
-            cardFundingFilter = state.expressCheckoutElementPaymentMethodMetadata.cardFundingFilter,
+            linkConfiguration = paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                 configuration = configuration,
-                paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata,
+                paymentMethodMetadata = paymentMethodMetadata,
             ),
             googlePayShippingAddressParameters = shippingAddressParameters,
         ) ?: return null
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
-            paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata,
+            paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,
         )
     }

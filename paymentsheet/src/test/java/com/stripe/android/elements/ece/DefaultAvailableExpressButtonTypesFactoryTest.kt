@@ -21,6 +21,16 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
+    fun `create returns no express button types when ECE metadata is absent`() {
+        val availableExpressButtonTypes = DefaultAvailableExpressButtonTypesFactory().create(
+            paymentMethodMetadata = null,
+            expressCheckoutElementConfiguration = ExpressCheckoutElement.Configuration().build(),
+        )
+
+        assertThat(availableExpressButtonTypes).isEmpty()
+    }
+
+    @Test
     fun `create keeps only express button types returned by metadata`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay),

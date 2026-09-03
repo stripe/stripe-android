@@ -31,7 +31,28 @@ interface IdentityVerificationSheet {
          * Optional color to use for the native flow's primary action buttons.
          */
         @get:ColorInt val brandColor: Int? = null
-    )
+    ) {
+        /**
+         * Configuration for the biometric consent screen's header.
+         *
+         * When `null`, the biometric consent screen uses the default header.
+         */
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var biometricConsent: BiometricConsentConfiguration? = null
+
+        /**
+         * Configuration for the biometric consent screen's header.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class BiometricConsentConfiguration(
+            /**
+             * Whether to hide the branding header above the consent title.
+             */
+            val hideBrandingHeader: Boolean
+        ) : Parcelable
+    }
 
     /**
      * Result of verification.

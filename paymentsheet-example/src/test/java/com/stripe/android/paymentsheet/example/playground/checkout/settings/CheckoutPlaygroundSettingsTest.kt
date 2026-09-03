@@ -117,6 +117,56 @@ class CheckoutPlaygroundSettingsTest {
     }
 
     @Test
+    fun `import replaces current settings`() = runScenario {
+        val currency = CheckoutPlaygroundDefinitions.session.currency
+        val paymentMethodSave = CheckoutPlaygroundDefinitions.session.paymentMethodSave
+        settings.updateSerialized(currency, "eur")
+        settings.update(paymentMethodSave, false)
+        val exportedJson = settings.asJsonString()
+        settings.updateSerialized(currency, "usd")
+        settings.update(paymentMethodSave, true)
+
+        val result = settings.importJson(exportedJson)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(settings.serializedValue(currency)).isEqualTo("eur")
+        assertThat(settings[paymentMethodSave]).isFalse()
+    }
+
+    @Test
+    fun `malformed import does not change current settings`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.currency
+        settings.updateSerialized(definition, "eur")
+
+        val result = settings.importJson("not json")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(settings.serializedValue(definition)).isEqualTo("eur")
+    }
+
+    @Test
+    fun `import ignores unknown setting`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.currency
+        settings.updateSerialized(definition, "usd")
+
+        val result = settings.importJson("""{"unknown":"value","session.currency":"eur"}""")
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(settings.serializedValue(definition)).isEqualTo("eur")
+    }
+
+    @Test
+    fun `import with invalid setting does not change current settings`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale
+        settings.update(definition, 1.25f)
+
+        val result = settings.importJson("""{"currency.appearance.scale":"not-a-number"}""")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(settings[definition]).isEqualTo(1.25f)
+    }
+
+    @Test
     fun `new customer is saved as returning customer`() = runScenario {
         settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
 

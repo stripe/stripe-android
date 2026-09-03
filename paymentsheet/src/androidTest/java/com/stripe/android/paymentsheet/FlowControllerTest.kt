@@ -17,6 +17,8 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -60,7 +62,10 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
-internal class FlowControllerTest {
+internal class FlowControllerTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val networkRule = NetworkRule()
 
     @get:Rule
@@ -84,6 +89,7 @@ internal class FlowControllerTest {
     fun testSuccessfulCardPayment(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -123,6 +129,7 @@ internal class FlowControllerTest {
     fun testSuccessfulCardPaymentWithVerticalMode(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -166,6 +173,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             callConfirmOnPaymentOptionCallback = false,
@@ -208,6 +216,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             callConfirmOnPaymentOptionCallback = false,
@@ -252,6 +261,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             callConfirmOnPaymentOptionCallback = false,
@@ -306,6 +316,7 @@ internal class FlowControllerTest {
     fun testFailedElementsSessionCall(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -395,6 +406,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             resultCallback = ::assertFailed,
@@ -562,6 +574,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentCardPayment(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -636,6 +649,7 @@ internal class FlowControllerTest {
         @TestParameter(valuesProvider = MultipleInstancesTestTypeProvider::class)
         testType: MultipleInstancesTestType,
     ) = runMultipleFlowControllerInstancesTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         testType = testType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
@@ -695,6 +709,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentFailedCardPayment(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -755,6 +770,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentCardPaymentWithForcedSuccess(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -808,6 +824,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentCardPaymentWithInvalidStripeIntent(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -875,6 +892,7 @@ internal class FlowControllerTest {
     fun testCvcRecollection(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -944,6 +962,7 @@ internal class FlowControllerTest {
     fun testSavedCardsInVerticalMode(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         callConfirmOnPaymentOptionCallback = false,
@@ -1024,6 +1043,7 @@ internal class FlowControllerTest {
     fun testDefaultPaymentMethodOrderWithFailedSession(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -1079,6 +1099,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testWalletButtonsShown() = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         showWalletButtons = true,
         resultCallback = ::assertCompleted,
@@ -1140,6 +1161,7 @@ internal class FlowControllerTest {
     @OptIn(WalletButtonsPreview::class)
     @Test
     fun testWalletsShownInExpectedScreensWhenFilteringWalletButtons() = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         showWalletButtons = true,
         resultCallback = ::assertCompleted,
@@ -1227,6 +1249,7 @@ internal class FlowControllerTest {
     fun testFlowControllerConfigurationBuilderWithTermsDisplayNever(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -1273,6 +1296,7 @@ internal class FlowControllerTest {
     fun testOBO_PassedToElementsSessionCall(
         @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {

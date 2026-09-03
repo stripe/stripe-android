@@ -708,15 +708,9 @@ class CardDefinitionTest {
     @Test
     fun `createSupportedPaymentMethod returns expected supported PM when tap to add is not supported`() {
         val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = false)
-        val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+        val supportedPaymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
             metadata = metadata,
-            definition = CardDefinition,
-            sharedDataSpecs = emptyList()
         )
-
-        assertThat(nullablePaymentMethod).isNotNull()
-
-        val supportedPaymentMethod = requireNotNull(nullablePaymentMethod)
 
         assertThat(supportedPaymentMethod.iconResource)
             .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card)
@@ -728,15 +722,9 @@ class CardDefinitionTest {
     @Test
     fun `createSupportedPaymentMethod returns tap to add icon when tap to add is supported`() {
         val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true)
-        val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+        val supportedPaymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
             metadata = metadata,
-            definition = CardDefinition,
-            sharedDataSpecs = emptyList()
         )
-
-        assertThat(nullablePaymentMethod).isNotNull()
-
-        val supportedPaymentMethod = requireNotNull(nullablePaymentMethod)
 
         assertThat(supportedPaymentMethod.iconResource)
             .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap)

@@ -10,7 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.DropdownItemSpec
+import com.stripe.android.ui.core.elements.DropdownItem
 import com.stripe.android.ui.core.elements.SimpleDropdownConfig
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -72,111 +72,111 @@ private object EpsUiDefinitionFactory : UiDefinitionFactory.Simple() {
     }
 
     private val items = listOf(
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "arzte_und_apotheker_bank",
             displayText = "Ärzte- und Apothekerbank",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "austrian_anadi_bank_ag",
             displayText = "Austrian Anadi Bank AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "bank_austria",
             displayText = "Bank Austria",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "brull_kallmus_bank_ag",
             displayText = "bank99 AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "bankhaus_carl_spangler",
             displayText = "Bankhaus Carl Spängler & Co.AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "bankhaus_schelhammer_und_schattera_ag",
             displayText = "Bankhaus Schelhammer & Schattera AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "bawag_psk_ag",
             displayText = "BAWAG P.S.K. AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "bks_bank_ag",
             displayText = "BKS Bank AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "btv_vier_lander_bank",
             displayText = "BTV VIER LÄNDER BANK",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "capital_bank_grawe_gruppe_ag",
             displayText = "Capital Bank Grawe Gruppe AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "dolomitenbank",
             displayText = "Dolomitenbank",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "easybank_ag",
             displayText = "Easybank AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "erste_bank_und_sparkassen",
             displayText = "Erste Bank und Sparkassen",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "hypo_alpeadriabank_international_ag",
             displayText = "Hypo Alpe-Adria-Bank International AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "hypo_noe_lb_fur_niederosterreich_u_wien",
             displayText = "HYPO NOE LB für Niederösterreich u. Wien",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "hypo_oberosterreich_salzburg_steiermark",
             displayText = "HYPO Oberösterreich,Salzburg,Steiermark",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "hypo_tirol_bank_ag",
             displayText = "Hypo Tirol Bank AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "hypo_vorarlberg_bank_ag",
             displayText = "Hypo Vorarlberg Bank AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "hypo_bank_burgenland_aktiengesellschaft",
             displayText = "HYPO-BANK BURGENLAND Aktiengesellschaft",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "marchfelder_bank",
             displayText = "Marchfelder Bank",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "oberbank_ag",
             displayText = "Oberbank AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "raiffeisen_bankengruppe_osterreich",
             displayText = "Raiffeisen Bankengruppe Österreich",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "schoellerbank_ag",
             displayText = "Schoellerbank AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "sparda_bank_wien",
             displayText = "Sparda-Bank Wien",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "volksbank_gruppe",
             displayText = "Volksbank Gruppe",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "volkskreditbank_ag",
             displayText = "Volkskreditbank AG",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "vr_bank_braunau",
             displayText = "VR-Bank Braunau",
         ),

@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet.forms
 import androidx.annotation.StringRes
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
@@ -14,18 +16,15 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
-import com.stripe.android.ui.core.elements.CountrySpec
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IbanSpec
-import com.stripe.android.ui.core.elements.MandateTextSpec
-import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.PhoneSpec
+import com.stripe.android.ui.core.elements.IbanConfig
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
+import com.stripe.android.uicore.elements.AddressInputMode
+import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
@@ -34,6 +33,7 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
+import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -54,7 +54,7 @@ import com.stripe.android.uicore.R as UiCoreR
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
-    private val emailSection = EmailSpec()
+    private val emailIdentifier = IdentifierSpec.Email
 
     private val viewModelStoreRule = ViewModelStoreTestRule()
 
@@ -90,7 +90,7 @@ internal class FormViewModelTest {
         val formViewModel = createViewModel(
             args,
             listOf(
-                CountrySpec().transform(emptyMap())
+                createCountryElement(CountryUtils.supportedBillingCountries)
             )
         )
 
@@ -111,9 +111,9 @@ internal class FormViewModelTest {
             val formViewModel = createViewModel(
                 args,
                 listOf(
-                    NameSpec().transform(emptyMap()),
-                    EmailSpec().transform(emptyMap()),
-                    CountrySpec().transform(emptyMap()),
+                    createNameElement(),
+                    createEmailElement(),
+                    createCountryElement(CountryUtils.supportedBillingCountries),
                 )
             )
 
@@ -135,8 +135,8 @@ internal class FormViewModelTest {
         val formViewModel = createViewModel(
             args,
             listOf(
-                EmailSpec().transform(emptyMap()),
-                CountrySpec().transform(emptyMap()),
+                createEmailElement(),
+                createCountryElement(CountryUtils.supportedBillingCountries),
             )
         )
 
@@ -144,7 +144,7 @@ internal class FormViewModelTest {
             getSectionFieldTextControllerWithLabel(formViewModel, UiCoreR.string.stripe_email)
 
         // Add text to the name to make it valid
-        emailController?.onValueChange("email@valid.com")
+        emailController?.onValueChange("email@example.com")
 
         // Verify formFieldValues contains email
         assertThat(
@@ -169,8 +169,8 @@ internal class FormViewModelTest {
             val formViewModel = createViewModel(
                 args,
                 listOf(
-                    EmailSpec().transform(emptyMap()),
-                    CountrySpec().transform(emptyMap()),
+                    createEmailElement(),
+                    createCountryElement(CountryUtils.supportedBillingCountries),
                     SaveForFutureUseElement(true, ""),
                 )
             )
@@ -210,9 +210,9 @@ internal class FormViewModelTest {
         val formViewModel = createViewModel(
             args,
             listOf(
-                NameSpec().transform(emptyMap()),
-                EmailSpec().transform(emptyMap()),
-                CountrySpec(
+                createNameElement(),
+                createEmailElement(),
+                createCountryElement(
                     allowedCountryCodes = setOf(
                         "AT",
                         "BE",
@@ -221,7 +221,7 @@ internal class FormViewModelTest {
                         "IT",
                         "NL"
                     )
-                ).transform(emptyMap()),
+                ),
                 SaveForFutureUseElement(true, ""),
             )
         )
@@ -236,11 +236,11 @@ internal class FormViewModelTest {
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
         ).isNull()
 
-        emailElement?.onValueChange("joe@gmail.com")
+        emailElement?.onValueChange("joe@example.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
                 ?.value
-        ).isEqualTo("joe@gmail.com")
+        ).isEqualTo("joe@example.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
                 ?.value
@@ -259,24 +259,21 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             billingDetails = null
         )
-        val addressElements = AddressSpec(
-            IdentifierSpec.Generic("address"),
-            allowedCountryCodes = setOf("US", "JP")
+        val addressElements = createAddressElements(
+            identifier = IdentifierSpec.Generic("address"),
+            allowedCountryCodes = setOf("US", "JP"),
+            hideCountry = false,
         )
-            .transform(emptyMap(), emptyMap(), null)
             .toTypedArray()
 
         val formViewModel = createViewModel(
             args,
             listOfNotNull(
-                NameSpec().transform(emptyMap()),
-                EmailSpec().transform(emptyMap()),
-                IbanSpec().transform(emptyMap()),
+                createNameElement(),
+                createEmailElement(),
+                createIbanElement(),
                 *addressElements,
-                MandateTextSpec(
-                    IdentifierSpec.Generic("mandate"),
-                    R.string.stripe_sepa_mandate
-                ).transform(""),
+                createMandateElement(),
             )
         )
 
@@ -292,7 +289,7 @@ internal class FormViewModelTest {
         getSectionFieldTextControllerWithLabel(
             formViewModel,
             UiCoreR.string.stripe_email
-        )?.onValueChange("joe@gmail.com")
+        )?.onValueChange("joe@example.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
                 ?.value
@@ -315,7 +312,7 @@ internal class FormViewModelTest {
                     .completeFormValues
                     .first()
                     ?.fieldValuePairs
-                    ?.get(emailSection.apiPath)
+                    ?.get(emailIdentifier)
                     ?.value
             ).isNull()
         }
@@ -327,7 +324,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.apiPath)
+                        ?.get(emailIdentifier)
                         ?.value
                 ).isNotNull()
             } else {
@@ -336,7 +333,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.apiPath)
+                        ?.get(emailIdentifier)
                         ?.value
                 ).isNull()
             }
@@ -355,24 +352,21 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             billingDetails = null
         )
-        val addressElements = AddressSpec(
-            IdentifierSpec.Generic("address"),
-            allowedCountryCodes = setOf("US", "JP")
+        val addressElements = createAddressElements(
+            identifier = IdentifierSpec.Generic("address"),
+            allowedCountryCodes = setOf("US", "JP"),
+            hideCountry = false,
         )
-            .transform(emptyMap(), emptyMap(), null)
             .toTypedArray()
 
         val formViewModel = createViewModel(
             args,
             listOfNotNull(
-                NameSpec().transform(emptyMap()),
-                EmailSpec().transform(emptyMap()),
-                IbanSpec().transform(emptyMap()),
+                createNameElement(),
+                createEmailElement(),
+                createIbanElement(),
                 *addressElements,
-                MandateTextSpec(
-                    IdentifierSpec.Generic("mandate"),
-                    R.string.stripe_sepa_mandate
-                ).transform("")
+                createMandateElement()
             )
         )
 
@@ -381,16 +375,16 @@ internal class FormViewModelTest {
             CoreR.string.stripe_address_label_full_name
         )?.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailIdentifier)
                 ?.value
         ).isNull()
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
             UiCoreR.string.stripe_email
-        )?.onValueChange("joe@gmail.com")
+        )?.onValueChange("joe@example.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailIdentifier)
                 ?.value
         ).isNull()
 
@@ -399,7 +393,7 @@ internal class FormViewModelTest {
             R.string.stripe_iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailIdentifier)
                 ?.value
         ).isNull()
 
@@ -416,7 +410,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.apiPath)
+                        ?.get(emailIdentifier)
                         ?.value
                 ).isNull()
             }
@@ -429,7 +423,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.apiPath)
+                        ?.get(emailIdentifier)
                         ?.value
                 ).isNotNull()
             } else {
@@ -438,7 +432,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.apiPath)
+                        ?.get(emailIdentifier)
                         ?.value
                 ).isNull()
             }
@@ -581,7 +575,7 @@ internal class FormViewModelTest {
 
             val formViewModel = createViewModel(
                 args,
-                cardFormElements + PhoneSpec().transform(emptyMap()),
+                cardFormElements + createPhoneElement(),
             )
 
             val elements = formViewModel.elements
@@ -625,20 +619,19 @@ internal class FormViewModelTest {
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
-            val addressElements = AddressSpec(hideCountry = true)
-                .transform(
-                    initialValues = emptyMap(),
-                    shippingValues = emptyMap(),
-                    autocompleteAddressInteractorFactory = null,
-                )
+            val addressElements = createAddressElements(
+                identifier = IdentifierSpec.BillingAddress,
+                allowedCountryCodes = CountryUtils.supportedBillingCountries,
+                hideCountry = true,
+            )
                 .toTypedArray()
             val formViewModel = createViewModel(
                 args,
                 listOfNotNull(
-                    NameSpec().transform(emptyMap()),
-                    EmailSpec().transform(emptyMap()),
-                    PhoneSpec().transform(emptyMap()),
-                    CountrySpec().transform(emptyMap()),
+                    createNameElement(),
+                    createEmailElement(),
+                    createPhoneElement(),
+                    createCountryElement(CountryUtils.supportedBillingCountries),
                     *addressElements,
                 ),
             )
@@ -770,15 +763,15 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.Card.code
         )
         val originalElements = listOf(
-            EmailSpec().transform(emptyMap()),
+            createEmailElement(),
         )
         val formViewModel = createViewModel(args, originalElements)
 
         assertThat(formViewModel.elements).isEqualTo(originalElements)
 
         val newElements = listOf(
-            NameSpec().transform(emptyMap()),
-            EmailSpec().transform(emptyMap()),
+            createNameElement(),
+            createEmailElement(),
         )
         formViewModel.updateFormElements(newElements)
 
@@ -791,8 +784,8 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.P24.code
         )
         val originalElements = listOf(
-            NameSpec().transform(emptyMap()),
-            EmailSpec().transform(emptyMap()),
+            createNameElement(),
+            createEmailElement(),
         )
         val formViewModel = createViewModel(args, originalElements)
 
@@ -809,8 +802,8 @@ internal class FormViewModelTest {
         emailController?.onValueChange("jane@example.com")
 
         val newElementsWithSameIdentifiers = listOf(
-            NameSpec().transform(emptyMap()),
-            EmailSpec().transform(emptyMap()),
+            createNameElement(),
+            createEmailElement(),
         )
         formViewModel.updateFormElements(newElementsWithSameIdentifiers)
 
@@ -858,18 +851,84 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.Card.code
         )
         val originalElements = listOf(
-            EmailSpec().transform(emptyMap()),
-            CountrySpec().transform(emptyMap()),
+            createEmailElement(),
+            createCountryElement(CountryUtils.supportedBillingCountries),
         )
         val formViewModel = createViewModel(args, originalElements)
 
         val newElementsWithSameIdentifiers = listOf(
-            EmailSpec().transform(emptyMap()),
-            CountrySpec().transform(emptyMap()),
+            createEmailElement(),
+            createCountryElement(CountryUtils.supportedBillingCountries),
         )
         formViewModel.updateFormElements(newElementsWithSameIdentifiers)
 
         assertThat(formViewModel.elements).isSameInstanceAs(originalElements)
+    }
+
+    private fun createCountryElement(
+        allowedCountryCodes: Set<String>,
+    ): FormElement {
+        return SectionElement.wrap(
+            CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = DropdownFieldController(
+                    config = CountryConfig(allowedCountryCodes),
+                    initialValue = null,
+                ),
+            )
+        )
+    }
+
+    private fun createNameElement(): FormElement {
+        return ContactInformationCollectionMode.Name.formElement(emptyMap())
+    }
+
+    private fun createEmailElement(): FormElement {
+        return ContactInformationCollectionMode.Email.formElement(emptyMap())
+    }
+
+    private fun createPhoneElement(): FormElement {
+        return ContactInformationCollectionMode.Phone.formElement(emptyMap())
+    }
+
+    private fun createAddressElements(
+        identifier: IdentifierSpec,
+        allowedCountryCodes: Set<String>,
+        hideCountry: Boolean,
+    ): List<FormElement> {
+        val addressElement = AddressElement(
+            _identifier = identifier,
+            rawValuesMap = emptyMap(),
+            countryCodes = allowedCountryCodes,
+            addressInputMode = AddressInputMode.NoAutocomplete(),
+            sameAsShippingElement = null,
+            shippingValuesMap = emptyMap(),
+            hideCountry = hideCountry,
+        )
+        return listOf(
+            SectionElement.wrap(addressElement, resolvableString(R.string.stripe_billing_details))
+        )
+    }
+
+    private fun createIbanElement(): FormElement {
+        val identifier = IdentifierSpec.Generic("sepa_debit[iban]")
+        return SectionElement.wrap(
+            SimpleTextElement(
+                identifier = identifier,
+                controller = SimpleTextFieldController(
+                    textFieldConfig = IbanConfig(),
+                    initialValue = null,
+                ),
+            )
+        )
+    }
+
+    private fun createMandateElement(): FormElement {
+        return MandateTextElement(
+            identifier = IdentifierSpec.Generic("mandate"),
+            stringResId = R.string.stripe_sepa_mandate,
+            args = listOf(""),
+        )
     }
 
     private fun createViewModel(

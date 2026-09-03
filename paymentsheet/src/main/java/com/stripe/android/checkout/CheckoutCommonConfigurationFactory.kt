@@ -26,7 +26,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse),
         linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
         billingDetailsCollectionConfiguration =
-            configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
+            checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
     )
 
     fun createForExpressCheckoutElement(
@@ -43,6 +43,11 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
                 configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse),
             linkConfiguration = expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
             billingDetailsCollectionConfiguration = PaymentSheetBillingDetails(
+                email = if (expressCheckoutElementConfiguration.emailRequired) {
+                    PaymentSheetBillingDetails.CollectionMode.Always
+                } else {
+                    PaymentSheetBillingDetails.CollectionMode.Automatic
+                },
                 address = if (checkoutSessionResponse.requiresBillingAddress) {
                     PaymentSheetBillingDetails.AddressCollectionMode.Full
                 } else {
@@ -64,7 +69,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         googlePayConfiguration = configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
         linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
         billingDetailsCollectionConfiguration =
-            configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
+            checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
     )
 
     private fun createCommonConfiguration(

@@ -10,6 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -72,6 +74,88 @@ class CheckoutPlaygroundSettingsUiTest {
             .assertIsDisplayed()
         page.value(CheckoutPlaygroundDefinitions.Controller.payment.shouldSetConfiguration)
             .assertDoesNotExist()
+    }
+
+    @Test
+    fun `search finds settings globally and restores the current configuration when cleared`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.Controller.express.configuration,
+    ) {
+        val paymentCornerRadius = CheckoutPlaygroundDefinitions.Controller.payment.appearance.primaryButton.shape
+            .cornerRadius
+        val currencyCornerRadius = CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.cornerRadius
+
+        page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration).assertIsDisplayed()
+
+        setSearchQuery("CoRn Ra")
+
+        page.value(paymentCornerRadius).performScrollTo().assertIsDisplayed()
+        page.breadcrumb(paymentCornerRadius).assertTextContains(
+            "CheckoutController.Configuration › Payment Element › Appearance › Primary button › Shape"
+        )
+        page.value(currencyCornerRadius).performScrollTo().assertIsDisplayed()
+        page.breadcrumb(currencyCornerRadius).assertTextContains(
+            "CheckoutController.Configuration › Currency Selector Element › Appearance"
+        )
+        page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration).assertDoesNotExist()
+
+        setSearchQuery("")
+
+        page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration).assertIsDisplayed()
+        page.value(paymentCornerRadius).assertDoesNotExist()
+    }
+
+    @Test
+    fun `clicking a search result breadcrumb opens its nested configuration`() = runScenario {
+        val cornerRadius = CheckoutPlaygroundDefinitions.Controller.payment.appearance.primaryButton.shape
+            .cornerRadius
+
+        setSearchQuery("corner radius")
+        page.breadcrumb(cornerRadius).performScrollTo().performClick()
+
+        page.value(cornerRadius).assertIsDisplayed()
+        page.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.cornerRadius)
+            .assertDoesNotExist()
+        assertThat(currentConfiguration()).isEqualTo(
+            CheckoutPlaygroundDefinitions.Controller.payment.appearance.primaryButton.shape.configuration
+        )
+        assertThat(searchQuery()).isEmpty()
+    }
+
+    @Test
+    fun `search displays an empty state when there are no matches`() = runScenario {
+        setSearchQuery("not a setting")
+
+        composeRule.onNodeWithText("No matching settings found").assertIsDisplayed()
+    }
+
+    @Test
+    fun `search displays non-applicable choice settings as disabled`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.paymentMethodSave
+        setSearchQuery("save payment")
+
+        page.value(definition).performScrollTo().assertIsDisplayed().assertIsNotEnabled()
+        assertThat(settings[definition]).isTrue()
+
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        composeRule.waitForIdle()
+
+        page.value(definition).assertIsEnabled()
+        composeRule.onNodeWithText("Off").performClick()
+        assertThat(settings[definition]).isFalse()
+    }
+
+    @Test
+    fun `search displays non-applicable text settings as disabled`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.paymentMethodTypes
+        setSearchQuery("payment method types")
+
+        page.value(definition).performScrollTo().assertIsDisplayed().assertIsNotEnabled()
+
+        settings.update(CheckoutPlaygroundDefinitions.session.automaticPaymentMethods, false)
+        composeRule.waitForIdle()
+
+        page.value(definition).assertIsEnabled().performTextReplacement("card, cashapp")
+        assertThat(settings[definition]).containsExactly("card", "cashapp").inOrder()
     }
 
     @Test
@@ -182,22 +266,44 @@ class CheckoutPlaygroundSettingsUiTest {
     ) {
         val settings = CheckoutPlaygroundSettings.createInMemory().apply(configureSettings)
         var current by mutableStateOf(initialConfiguration)
+        var searchQuery by mutableStateOf("")
         composeRule.setContent {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 CheckoutPlaygroundSettingsUi(
                     configuration = current,
+                    searchQuery = searchQuery,
                     settings = settings,
                     onOpenConfiguration = { current = it },
+                    onOpenConfigurationPath = { configurationPath ->
+                        current = configurationPath.lastOrNull() ?: CheckoutPlaygroundDefinitions.root
+                        searchQuery = ""
+                    },
                 )
             }
         }
-        block(Scenario(Page(composeRule), settings, openConfiguration = { current = it }))
+        block(
+            Scenario(
+                page = Page(composeRule),
+                settings = settings,
+                currentConfiguration = { current },
+                openConfiguration = { current = it },
+                searchQuery = { searchQuery },
+                setSearchQuery = { query ->
+                    composeRule.runOnIdle {
+                        searchQuery = query
+                    }
+                },
+            )
+        )
     }
 
     private data class Scenario(
         val page: Page,
         val settings: CheckoutPlaygroundSettings,
+        val currentConfiguration: () -> CheckoutPlaygroundSettingDefinition.Configuration,
         val openConfiguration: (CheckoutPlaygroundSettingDefinition.Configuration) -> Unit,
+        val searchQuery: () -> String,
+        val setSearchQuery: (String) -> Unit,
     )
 
     private class Page(private val rule: ComposeContentTestRule) {
@@ -206,5 +312,8 @@ class CheckoutPlaygroundSettingsUiTest {
 
         fun value(definition: CheckoutPlaygroundSettingDefinition.Value<*>) =
             rule.onNodeWithTag(checkoutSettingValueTestTag(definition))
+
+        fun breadcrumb(definition: CheckoutPlaygroundSettingDefinition.Value<*>) =
+            rule.onNodeWithTag(checkoutSettingBreadcrumbTestTag(definition))
     }
 }

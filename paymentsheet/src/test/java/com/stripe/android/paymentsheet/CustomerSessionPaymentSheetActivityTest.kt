@@ -525,13 +525,6 @@ internal class CustomerSessionPaymentSheetActivityTest {
                     },
                     "type": "payment_intent"
                   },
-                  "payment_method_specs": [
-                    {
-                      "async": false,
-                      "fields": [],
-                      "type": "card"
-                    }
-                  ],
                   "paypal_express_config": {
                     "client_id": null,
                     "paypal_merchant_id": null

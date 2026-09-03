@@ -53,6 +53,9 @@ internal data class LinkAccount(
     val clientSecret = consumerSession.clientSecret
 
     @IgnoredOnParcel
+    val linkSessionKey = consumerSession.linkSessionKey
+
+    @IgnoredOnParcel
     val email = consumerSession.emailAddress
 
     @IgnoredOnParcel

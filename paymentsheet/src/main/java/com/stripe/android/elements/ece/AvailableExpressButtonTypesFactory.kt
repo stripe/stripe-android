@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 internal fun interface AvailableExpressButtonTypesFactory {
     fun create(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
     ): List<ExpressButtonType>
 }
@@ -18,10 +18,11 @@ internal fun interface AvailableExpressButtonTypesFactory {
 internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constructor() :
     AvailableExpressButtonTypesFactory {
     override fun create(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
     ): List<ExpressButtonType> {
         expressCheckoutElementConfiguration ?: return emptyList()
+        paymentMethodMetadata ?: return emptyList()
 
         val availableExpressButtonTypes = paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
             when (walletType) {

@@ -6,7 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -444,7 +444,7 @@ internal class EmbeddedNavigatorTest {
         val screen = createHorizontalPaymentOptionsScreen(
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState().copy(
-                    supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
+                    supportedPaymentMethods = listOf(SupportedPaymentMethodFixtures.usBankAccount),
                 ),
             ),
         )
@@ -457,7 +457,7 @@ internal class EmbeddedNavigatorTest {
         val screen = createHorizontalPaymentOptionsScreen(
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState().copy(
-                    supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.card),
+                    supportedPaymentMethods = listOf(SupportedPaymentMethodFixtures.card),
                 ),
             ),
         )
@@ -472,8 +472,8 @@ internal class EmbeddedNavigatorTest {
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState().copy(
                     supportedPaymentMethods = listOf(
-                        LpmRepositoryTestHelpers.card,
-                        LpmRepositoryTestHelpers.usBankAccount,
+                        SupportedPaymentMethodFixtures.card,
+                        SupportedPaymentMethodFixtures.usBankAccount,
                     ),
                 ),
             ),

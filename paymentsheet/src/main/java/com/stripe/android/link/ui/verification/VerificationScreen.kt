@@ -9,7 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.LinkBrand
-import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.uicore.elements.OTPElementFactory
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -49,7 +49,7 @@ fun VerificationPreview() {
                     allowLogout = true,
                     linkBrand = LinkBrand.Link,
                 ),
-                otpElement = OTPSpec.transform(),
+                otpElement = OTPElementFactory.create(),
                 onBack = {},
                 onChangeEmailClick = {},
                 onResendCodeClick = {},
