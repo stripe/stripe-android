@@ -1,11 +1,16 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -23,6 +28,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
     private val paymentOptionsPresenter: EmbeddedPaymentOptionsPresenter,
+    private val selectionHolder: EmbeddedSelectionHolder,
+    private val preferFormInteractorFactory: EmbeddedPreferFormInteractorFactory,
+    private val eventReporter: EventReporter,
 ) : EmbeddedContentHelper {
 
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
@@ -30,25 +38,41 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
 
     init {
         coroutineScope.launch {
-            state.collect { state ->
-                val replacement = state?.let { currentState ->
-                    val isImmediateAction = internalRowSelectionCallback.get() != null
-                    EmbeddedContent(
-                        interactor = verticalLayoutInteractorFactory.create(
-                            paymentMethodMetadata = currentState.paymentMethodMetadata,
-                            configuration = currentState.configuration,
-                            walletsState = embeddedWalletsHelper.walletsState(currentState.paymentMethodMetadata),
-                            isImmediateAction = isImmediateAction,
-                            embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
-                        ),
-                        embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
-                        appearance = currentState.configuration.appearance,
-                        isImmediateAction = isImmediateAction,
-                    )
-                }
-                _embeddedContent.value?.close()
-                _embeddedContent.value = replacement
+            combine(state, selectionHolder.temporarySelection) { state, temporarySelection ->
+                state to temporarySelection.takeIf { state?.configuration?.preferForm == true }
             }
+                .distinctUntilChanged()
+                .collect { (state, _) ->
+                    val replacement = state?.let { currentState ->
+                        val isImmediateAction = internalRowSelectionCallback.get() != null
+                        val walletsState = embeddedWalletsHelper.walletsState(currentState.paymentMethodMetadata)
+                        EmbeddedContent(
+                            interactor = verticalLayoutInteractorFactory.create(
+                                paymentMethodMetadata = currentState.paymentMethodMetadata,
+                                configuration = currentState.configuration,
+                                walletsState = walletsState,
+                                isImmediateAction = isImmediateAction,
+                                embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
+                            ),
+                            embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
+                            appearance = currentState.configuration.appearance,
+                            isImmediateAction = isImmediateAction,
+                            preferFormInteractor = preferFormInteractorFactory.create(
+                                paymentMethodMetadata = currentState.paymentMethodMetadata,
+                                configuration = currentState.configuration,
+                                walletsState = walletsState,
+                                preferFormDisabled = currentState.preferFormDisabled,
+                            ),
+                            onMorePaymentMethods = {
+                                paymentOptionsPresenter.present(EmbeddedLaunchMode.VerticalPaymentOptions)
+                            },
+                            eventReporter = eventReporter,
+                            preferForm = currentState.configuration.preferForm,
+                        )
+                    }
+                    _embeddedContent.value?.close()
+                    _embeddedContent.value = replacement
+                }
         }
     }
 

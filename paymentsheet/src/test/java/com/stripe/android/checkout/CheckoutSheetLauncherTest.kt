@@ -211,6 +211,7 @@ internal class CheckoutSheetLauncherTest {
 
         val customerState = createCustomerState()
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
@@ -235,6 +236,7 @@ internal class CheckoutSheetLauncherTest {
     fun `formActivityLauncher invokes immediate action when complete result has selection`() = testScenario {
         launchForm("cashapp")
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
@@ -254,6 +256,7 @@ internal class CheckoutSheetLauncherTest {
     fun `formActivityLauncher does not invoke immediate action when the result is confirmed`() = testScenario {
         launchForm("cashapp")
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = true,
@@ -274,6 +277,7 @@ internal class CheckoutSheetLauncherTest {
         val response = CheckoutSessionResponseFactory.create()
         sessionRefresher.enqueueRefreshAction {}
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
@@ -298,6 +302,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `formActivityLauncher does not refresh checkout session when complete result has no response`() = testScenario {
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
@@ -360,6 +365,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `form result handled correctly without prior launchForm call (simulates host recreation)`() = testScenario {
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             hasBeenConfirmed = true,
@@ -443,6 +449,7 @@ internal class CheckoutSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             customerState = customerState,
             linkAccountInfo = LinkAccountUpdate.Value(null),
@@ -465,6 +472,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `manageSheetLauncher invokes immediate action for saved selection when flagged`() = testScenario {
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             customerState = null,
             linkAccountInfo = LinkAccountUpdate.Value(null),
@@ -521,6 +529,7 @@ internal class CheckoutSheetLauncherTest {
     private fun manageCompleteResult(
         checkoutSessionResponse: CheckoutSessionResponse,
     ) = EmbeddedActivityResult.Complete(
+        temporarySelection = null,
         previousNewSelections = Bundle(),
         customerState = null,
         linkAccountInfo = LinkAccountUpdate.Value(null),
@@ -626,6 +635,7 @@ internal class CheckoutSheetLauncherTest {
             paymentMethodMetadata = refreshedMetadata,
             embeddedViewDisplaysMandateText = true,
             configuration = refreshedConfiguration,
+            preferFormDisabled = false,
         )
         customerStateHolder.setCustomerState(refreshedCustomer)
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -825,6 +835,7 @@ internal class CheckoutSheetLauncherTest {
             stashNewSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         }
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = returnedSelections,
             customerState = null,
             linkAccountInfo = LinkAccountUpdate.Value(null),
@@ -852,6 +863,7 @@ internal class CheckoutSheetLauncherTest {
             lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed,
         )
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             customerState = customerState,
             linkAccountInfo = linkAccountInfo,
@@ -877,6 +889,7 @@ internal class CheckoutSheetLauncherTest {
         val expectedError = IllegalStateException("Refresh failed")
         sessionRefresher.enqueueRefreshAction { throw expectedError }
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             customerState = null,
             linkAccountInfo = LinkAccountUpdate.Value(null),
@@ -1056,6 +1069,7 @@ internal class CheckoutSheetLauncherTest {
                 paymentMethodMetadata = paymentMethodMetadata,
                 embeddedViewDisplaysMandateText = true,
                 configuration = EmbeddedConfigurationFactory.create(),
+                preferFormDisabled = false,
             )
         )
 

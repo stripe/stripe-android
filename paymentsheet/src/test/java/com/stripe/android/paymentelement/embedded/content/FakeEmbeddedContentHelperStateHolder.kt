@@ -21,12 +21,14 @@ internal class FakeEmbeddedContentHelperStateHolder(
         paymentMethodMetadata: PaymentMethodMetadata,
         embeddedViewDisplaysMandateText: Boolean,
         configuration: EmbeddedPaymentElement.Configuration,
+        preferFormDisabled: Boolean,
     ) {
         _dataLoadedTurbine.add(
             EmbeddedContentHelperStateHolder.State(
                 paymentMethodMetadata = paymentMethodMetadata,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 configuration = configuration,
+                preferFormDisabled = preferFormDisabled,
             )
         )
     }

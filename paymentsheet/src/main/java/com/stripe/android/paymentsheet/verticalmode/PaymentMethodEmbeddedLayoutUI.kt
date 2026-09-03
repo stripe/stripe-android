@@ -50,11 +50,14 @@ const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMB
 internal const val EMBEDDED_MANDATE_TEXT_TEST_TAG = "EMBEDDED_MANDATE"
 
 @Composable
+@Suppress("LongMethod")
 internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
     embeddedViewDisplaysMandateText: Boolean,
     modifier: Modifier = Modifier,
-    appearance: Embedded
+    appearance: Embedded,
+    displayedPaymentMethodCode: String?,
+    displaySavedPaymentMethodOnly: Boolean,
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
@@ -62,10 +65,19 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     }
 
     val state by interactor.state.collectAsState()
+    val displayedPaymentMethods = when {
+        displaySavedPaymentMethodOnly -> emptyList()
+        displayedPaymentMethodCode != null -> state.displayablePaymentMethods.filter {
+            it.syntheticCode == displayedPaymentMethodCode
+        }
+        else -> state.displayablePaymentMethods
+    }
 
     PaymentMethodEmbeddedLayoutUI(
-        paymentMethods = state.displayablePaymentMethods,
-        displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
+        paymentMethods = displayedPaymentMethods,
+        displayedSavedPaymentMethod = state.displayedSavedPaymentMethod.takeIf {
+            displaySavedPaymentMethodOnly || displayedPaymentMethodCode == null
+        },
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
         linkBrand = state.linkBrand,
@@ -200,7 +212,7 @@ private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
 }
 
 @Composable
-private fun EmbeddedMandate(
+internal fun EmbeddedMandate(
     embeddedViewDisplaysMandateText: Boolean,
     mandate: ResolvableString?,
 ) {
@@ -212,6 +224,32 @@ private fun EmbeddedMandate(
                 .testTag(EMBEDDED_MANDATE_TEXT_TEST_TAG),
         )
     }
+}
+
+@Composable
+internal fun EmbeddedMandateForPaymentMethod(
+    interactor: PaymentMethodVerticalLayoutInteractor,
+    paymentMethodCode: String,
+    embeddedViewDisplaysMandateText: Boolean,
+) {
+    val state by interactor.state.collectAsState()
+    val selectedCode = (state.selection as? PaymentMethodVerticalLayoutInteractor.Selection.New)?.code
+    EmbeddedMandate(
+        embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+        mandate = state.mandate.takeIf { selectedCode == paymentMethodCode },
+    )
+}
+
+@Composable
+internal fun EmbeddedMandate(
+    interactor: PaymentMethodVerticalLayoutInteractor,
+    embeddedViewDisplaysMandateText: Boolean,
+) {
+    val state by interactor.state.collectAsState()
+    EmbeddedMandate(
+        embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+        mandate = state.mandate,
+    )
 }
 
 private fun Embedded.RowStyle.bottomSeparatorEnabled(): Boolean {

@@ -9,7 +9,6 @@ import androidx.compose.ui.platform.testTag
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 
 internal class LoadingEmbeddedSheetPresentation(
     private val activity: EmbeddedSheetActivity,
@@ -46,7 +45,7 @@ internal class LoadingEmbeddedSheetPresentation(
         return EmbeddedActivityResult.Cancelled(
             customerState = args.customerState,
             linkAccountInfo = args.linkAccountInfo,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = args.launchMode,
         )
     }
 

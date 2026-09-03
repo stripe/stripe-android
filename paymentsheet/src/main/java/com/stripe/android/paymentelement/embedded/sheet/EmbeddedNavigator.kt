@@ -342,7 +342,7 @@ internal class EmbeddedNavigator private constructor(
         }
 
         class VerticalPaymentOptions(
-            private val interactor: PaymentMethodVerticalLayoutInteractor,
+            internal val interactor: PaymentMethodVerticalLayoutInteractor,
             private val isLiveMode: Boolean,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
             private val onContinueClick: () -> Unit,
@@ -503,6 +503,7 @@ private fun successfulConfirmationResult(
     launchMode: EmbeddedLaunchMode,
 ) = EmbeddedActivityResult.Complete(
     selection = null,
+    temporarySelection = null,
     previousNewSelections = embeddedSelectionHolder.previousNewSelections,
     hasBeenConfirmed = true,
     customerState = customerStateHolder.customer.value,

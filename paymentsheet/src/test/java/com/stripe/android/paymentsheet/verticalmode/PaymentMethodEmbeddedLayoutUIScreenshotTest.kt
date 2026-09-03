@@ -330,6 +330,8 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             PaymentMethodEmbeddedLayoutUI(
                 interactor = interactor,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                displayedPaymentMethodCode = null,
+                displaySavedPaymentMethodOnly = false,
                 appearance = getEmbeddedAppearance(FloatingButton::class),
             )
         }

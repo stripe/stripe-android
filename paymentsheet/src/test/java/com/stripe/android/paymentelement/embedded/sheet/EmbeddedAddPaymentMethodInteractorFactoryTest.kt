@@ -72,6 +72,22 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
     }
 
     @Test
+    fun `explicit initial code overrides the current new selection`() = runScenario(
+        initialSelection = PaymentSelection.New.GenericPaymentMethod(
+            label = "Cash App Pay".resolvableString,
+            iconResource = 0,
+            iconResourceNight = null,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        ),
+        explicitInitialCode = "card",
+    ) {
+        assertThat(interactor.state.value.selectedPaymentMethodCode).isEqualTo("card")
+    }
+
+    @Test
     fun `OnPaymentMethodSelected updates the selected code`() = runScenario {
         interactor.handleViewAction(
             AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected("cashapp")
@@ -127,6 +143,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             ),
         ),
         initialSelection: PaymentSelection? = null,
+        explicitInitialCode: String? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         // A separate scope so the interactor's never-completing state collectors don't keep runTest from finishing.
@@ -160,7 +177,11 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
-        val interactor = factory.create()
+        val interactor = if (explicitInitialCode == null) {
+            factory.create()
+        } else {
+            factory.create(explicitInitialCode)
+        }
 
         Scenario(
             interactor = interactor,

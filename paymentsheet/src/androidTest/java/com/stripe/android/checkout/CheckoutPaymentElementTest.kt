@@ -1,5 +1,7 @@
 package com.stripe.android.checkout
 
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -19,6 +21,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
+import com.stripe.android.paymentelement.embedded.content.PREFER_FORM_FOOTER_TEST_TAG
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.waitUntilWithIdle
@@ -53,6 +56,69 @@ internal class CheckoutPaymentElementTest {
     @After
     fun teardown() {
         GooglePayRepository.resetFactory()
+    }
+
+    @Test
+    fun testPreferFormInlineCardPayment() {
+        var checkoutResult: CheckoutController.Result? = null
+        lateinit var controller: CheckoutController
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            setup = { configuredController ->
+                controller = configuredController
+                configuredController.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.PreferForm),
+                ).getOrThrow()
+            },
+        ) { context ->
+            networkRule.createPaymentMethod()
+            networkRule.checkoutConfirm { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            formPage.waitUntilVisible()
+            formPage.fillOutCardDetails()
+            testRules.compose.waitUntil {
+                controller.session.value?.paymentOption?.paymentMethodType == "card"
+            }
+            context.confirm()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
+    }
+
+    @Test
+    fun testPreferFormInlineFooterOpensVerticalPaymentOptions() = runCheckoutPaymentElementTest(
+        networkRule = networkRule,
+        setup = { controller ->
+            controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.PreferForm),
+            ).getOrThrow()
+        },
+    ) { context ->
+        testRules.compose.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).performClick()
+        verticalModePage.waitUntilVisible()
+        context.markTestSucceeded()
+    }
+
+    @Test
+    fun testPreferFormPresentStartsOnFormAndNavigatesToVerticalOptions() = runCheckoutPaymentElementTest(
+        networkRule = networkRule,
+        setup = { controller ->
+            controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.PreferForm),
+            ).getOrThrow()
+        },
+    ) { context ->
+        context.presentPaymentOptions()
+        formPage.waitUntilVisible()
+        testRules.compose.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).performClick()
+        verticalModePage.waitUntilVisible()
+        context.markTestSucceeded()
     }
 
     @Test
@@ -287,6 +353,14 @@ internal class CheckoutPaymentElementTest {
             // Just testing loading events, mark test succeeded once that has completed.
             context.markTestSucceeded()
         }
+    }
+
+    private fun checkoutConfiguration(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ): CheckoutController.Configuration {
+        return CheckoutController.Configuration().paymentElement(
+            PaymentElement.Configuration().paymentMethodLayout(paymentMethodLayout)
+        )
     }
 
     private companion object {

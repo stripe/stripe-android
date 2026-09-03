@@ -18,6 +18,7 @@ internal sealed interface EmbeddedActivityResult : Parcelable {
     @Parcelize
     data class Complete(
         val selection: PaymentSelection?,
+        val temporarySelection: String?,
         val previousNewSelections: Bundle,
         val hasBeenConfirmed: Boolean,
         val customerState: CustomerState?,

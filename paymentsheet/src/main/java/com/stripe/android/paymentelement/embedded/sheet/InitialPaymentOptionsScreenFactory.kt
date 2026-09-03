@@ -68,6 +68,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         }
     }
 
+    fun createVerticalInitialScreen(): EmbeddedNavigator.Screen.VerticalPaymentOptions {
+        return createVerticalPaymentOptionsScreen(closeOnSelection = true)
+    }
+
     private fun createVerticalInitialScreens(): List<EmbeddedNavigator.Screen> {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
         if (supportedPaymentMethodTypes.size == 1 &&
@@ -79,13 +83,11 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
 
         val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
         val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
-        val formHelper = createFormHelper(formHelperScope)
-        val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
-            interactor = createInteractor(formHelper, coroutineScope),
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-            sheetActivityState = sheetActivityStateHolder.state,
-            onContinueClick = ::onContinueClick,
-            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+        val formHelper = createFormHelper(formHelperScope, closeOnSelection = false)
+        val paymentOptionsScreen = createVerticalPaymentOptionsScreen(
+            formHelper = formHelper,
+            coroutineScope = coroutineScope,
+            closeOnSelection = false,
         )
         return buildList {
             add(paymentOptionsScreen)
@@ -112,6 +114,32 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 add(createHorizontalScreen())
             }
         }
+    }
+
+    private fun createVerticalPaymentOptionsScreen(
+        closeOnSelection: Boolean,
+    ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
+        val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
+        val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
+        return createVerticalPaymentOptionsScreen(
+            formHelper = createFormHelper(formHelperScope, closeOnSelection),
+            coroutineScope = coroutineScope,
+            closeOnSelection = closeOnSelection,
+        )
+    }
+
+    private fun createVerticalPaymentOptionsScreen(
+        formHelper: FormHelper,
+        coroutineScope: CoroutineScope,
+        closeOnSelection: Boolean,
+    ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
+        return EmbeddedNavigator.Screen.VerticalPaymentOptions(
+            interactor = createInteractor(formHelper, coroutineScope, closeOnSelection),
+            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+            sheetActivityState = sheetActivityStateHolder.state,
+            onContinueClick = ::onContinueClick,
+            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+        )
     }
 
     private fun createHorizontalScreen(): EmbeddedNavigator.Screen {
@@ -161,12 +189,21 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         continueCoordinator.onContinue()
     }
 
-    private fun createFormHelper(coroutineScope: CoroutineScope): FormHelper {
+    private fun createFormHelper(
+        coroutineScope: CoroutineScope,
+        closeOnSelection: Boolean,
+    ): FormHelper {
         return embeddedFormHelperFactory.createForVerticalLayout(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            selectionUpdater = { selectionHolder.setSelection(it) },
+            selectionUpdater = { selection ->
+                selectionHolder.setTemporarySelection(null)
+                selectionHolder.setSelection(selection)
+                if (closeOnSelection) {
+                    closePaymentOptions()
+                }
+            },
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
@@ -175,6 +212,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private fun createInteractor(
         formHelper: FormHelper,
         coroutineScope: CoroutineScope,
+        closeOnSelection: Boolean,
     ): PaymentMethodVerticalLayoutInteractor {
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -189,8 +227,14 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             transitionToManageScreen = ::navigateToManageScreen,
             transitionToFormScreen = { code ->
-                val formScreen = formScreenFactory.createFormScreen(code)
-                embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+                if (closeOnSelection) {
+                    selectionHolder.setSelection(null)
+                    selectionHolder.setTemporarySelection(code)
+                    closePaymentOptions()
+                } else {
+                    val formScreen = formScreenFactory.createFormScreen(code)
+                    embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+                }
             },
             paymentMethods = customerStateHolder.paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
@@ -199,11 +243,12 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = stateFlowOf(walletsState()),
             updateSelection = { updatedSelection ->
+                selectionHolder.setTemporarySelection(null)
                 selectionHolder.setSelection(updatedSelection)
             },
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
                 updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
-                completionAction = null,
+                completionAction = if (closeOnSelection) ::closePaymentOptions else null,
             ),
             isCurrentScreen = isCurrentScreen<EmbeddedNavigator.Screen.VerticalPaymentOptions>(),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
@@ -229,6 +274,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             linkAccount = linkAccountHolder.linkAccountInfo,
         )
+    }
+
+    private fun closePaymentOptions() {
+        embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Close())
     }
 
     // The navigator is built from this initial screen (see EmbeddedActivityModule.provideEmbeddedNavigator), so

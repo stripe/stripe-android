@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">More payment methods</string>
   <!-- Button prompt to add a bank account as a payment method. -->
   <string name="stripe_add_bank_account">Add bank account</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->

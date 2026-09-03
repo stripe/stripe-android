@@ -266,6 +266,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
         internal val apiConfiguration: ApiConfiguration.State?,
+        internal val preferForm: Boolean,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -304,6 +305,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
             private var apiConfiguration: ApiConfiguration.State? = null
+            private var preferForm: Boolean = false
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -551,6 +553,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.apiConfiguration = apiConfiguration.build()
             }
 
+            internal fun preferForm(preferForm: Boolean) = apply {
+                this.preferForm = preferForm
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -576,6 +582,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
                 apiConfiguration = apiConfiguration,
+                preferForm = preferForm,
             )
         }
 
@@ -606,6 +613,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .termsDisplay(termsDisplay)
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .userOverrideCountry(userOverrideCountry)
+            .preferForm(preferForm)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
                 apiConfiguration?.let {

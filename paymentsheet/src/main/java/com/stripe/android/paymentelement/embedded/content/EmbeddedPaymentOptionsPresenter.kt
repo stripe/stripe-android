@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -8,6 +9,7 @@ import javax.inject.Inject
 
 internal interface EmbeddedPaymentOptionsPresenter {
     fun present()
+    fun present(launchMode: EmbeddedLaunchMode)
 }
 
 internal class DefaultEmbeddedPaymentOptionsPresenter @Inject constructor(
@@ -18,6 +20,15 @@ internal class DefaultEmbeddedPaymentOptionsPresenter @Inject constructor(
     private val errorReporter: ErrorReporter,
 ) : EmbeddedPaymentOptionsPresenter {
     override fun present() {
+        val launchMode = if (state.value?.configuration?.preferForm == true) {
+            EmbeddedLaunchMode.VerticalPaymentOptions
+        } else {
+            EmbeddedLaunchMode.PaymentOptions
+        }
+        present(launchMode)
+    }
+
+    override fun present(launchMode: EmbeddedLaunchMode) {
         val state = state.value
         if (state == null) {
             errorReporter.report(
@@ -37,6 +48,7 @@ internal class DefaultEmbeddedPaymentOptionsPresenter @Inject constructor(
             customerState = customerStateHolder.customer.value,
             selection = selectionHolder.selection.value,
             configuration = state.configuration,
+            launchMode = launchMode,
         )
     }
 }

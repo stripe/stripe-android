@@ -50,6 +50,7 @@ internal object CheckoutControllerStateFactory {
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,
             linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
+            preferFormDisabled = false,
         )
     }
 

@@ -49,6 +49,21 @@ internal interface EmbeddedSheetLauncher {
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
     )
+
+    fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration?,
+        launchMode: EmbeddedLaunchMode,
+    ) {
+        launchPaymentOptions(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerState = customerState,
+            selection = selection,
+            configuration = configuration,
+        )
+    }
 }
 
 @EmbeddedPaymentElementScope
@@ -89,6 +104,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
                 is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
+                is EmbeddedLaunchMode.VerticalPaymentOptions -> handlePaymentOptionsResult(result)
             }
         }
 
@@ -149,6 +165,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         applyCustomerState(result.customerState)
         selectionHolder.setPreviousNewSelections(result.previousNewSelections)
         selectionHolder.setSelection(result.selection)
+        selectionHolder.setTemporarySelection(result.temporarySelection)
     }
 
     private fun applyCustomerState(customerState: CustomerState?) {
@@ -241,6 +258,22 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
     ) {
+        launchPaymentOptions(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerState = customerState,
+            selection = selection,
+            configuration = configuration,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+        )
+    }
+
+    override fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration?,
+        launchMode: EmbeddedLaunchMode,
+    ) {
         if (configuration == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
@@ -260,7 +293,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             customerState = customerState,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = launchMode,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         activityLauncher.launch(args)

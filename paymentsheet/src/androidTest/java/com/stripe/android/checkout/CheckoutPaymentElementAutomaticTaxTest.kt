@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import app.cash.turbine.Turbine
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -19,6 +18,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
@@ -560,6 +560,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                     .performScrollToNode(hasTestTag(cashAppTag))
                 testRules.compose.onNodeWithTag(cashAppTag).performClick()
             }
+            PaymentElement.Configuration.PaymentMethodLayout.PreferForm,
             PaymentElement.Configuration.PaymentMethodLayout.Automatic -> {
                 error("Expected an explicit layout.")
             }
@@ -693,6 +694,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         val layoutTag = when (paymentMethodLayout) {
             PaymentElement.Configuration.PaymentMethodLayout.Vertical -> TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
             PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> TEST_TAG_LIST
+            PaymentElement.Configuration.PaymentMethodLayout.PreferForm,
             PaymentElement.Configuration.PaymentMethodLayout.Automatic -> error("Expected an explicit layout.")
         }
         testRules.compose.waitUntilWithIdle {

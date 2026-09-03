@@ -16,12 +16,14 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory
+import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPreferFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedWalletsHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentMethodVerticalLayoutInteractorFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentOptionsPresenter
+import com.stripe.android.paymentelement.embedded.content.EmbeddedPreferFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.EmbeddedWalletsHelper
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -51,6 +53,11 @@ internal interface PaymentElementModule {
     ): EmbeddedPaymentMethodVerticalLayoutInteractorFactory
 
     @Binds
+    fun bindsPreferFormInteractorFactory(
+        factory: DefaultEmbeddedPreferFormInteractorFactory,
+    ): EmbeddedPreferFormInteractorFactory
+
+    @Binds
     fun bindsWalletsHelper(helper: DefaultEmbeddedWalletsHelper): EmbeddedWalletsHelper
 
     @Binds
@@ -78,6 +85,7 @@ internal interface PaymentElementModule {
                         paymentMethodMetadata = it.paymentMethodMetadata,
                         embeddedViewDisplaysMandateText = it.embeddedConfiguration.embeddedViewDisplaysMandateText,
                         configuration = it.embeddedConfiguration,
+                        preferFormDisabled = it.preferFormDisabled,
                     )
                 }
             }

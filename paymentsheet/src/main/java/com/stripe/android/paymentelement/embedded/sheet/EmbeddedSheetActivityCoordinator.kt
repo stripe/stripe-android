@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.isPaymentOptions
 
 internal class EmbeddedSheetActivityCoordinator(
     private val activity: EmbeddedSheetActivity,
@@ -47,9 +47,9 @@ internal class EmbeddedSheetActivityCoordinator(
         val isValidTransition =
             !activity.isFinishing &&
                 state.args.presentationState == EmbeddedActivityArgs.PresentationState.Loading &&
-                state.args.launchMode is EmbeddedLaunchMode.PaymentOptions &&
+                state.args.launchMode.isPaymentOptions &&
                 updatedArgs.presentationState == EmbeddedActivityArgs.PresentationState.Ready &&
-                updatedArgs.launchMode is EmbeddedLaunchMode.PaymentOptions
+                updatedArgs.launchMode.isPaymentOptions
         if (!isValidTransition) return
 
         activity.intent = intent

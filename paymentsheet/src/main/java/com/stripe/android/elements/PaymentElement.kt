@@ -115,9 +115,9 @@ class PaymentElement @Inject internal constructor(
         }
 
         /**
-         * The layout of payment methods in the sheet. Defaults to [PaymentMethodLayout.Automatic].
-         *
-         * Note: Only used if you call [present].
+         * The layout of payment methods. Defaults to [PaymentMethodLayout.Automatic].
+         * [PaymentMethodLayout.PreferForm] also changes the inline [Content] when its eligibility
+         * requirements are met.
          *
          * @see [PaymentMethodLayout] for the list of available layouts.
          */
@@ -470,6 +470,12 @@ class PaymentElement @Inject internal constructor(
              * Users can scroll up or down to navigate through different payment methods.
              */
             Vertical,
+
+            /**
+             * Displays the preferred payment method's form directly when possible. Other payment
+             * methods remain available from a footer below the form.
+             */
+            PreferForm,
 
             /**
              * This lets Stripe choose the best layout for payment methods.

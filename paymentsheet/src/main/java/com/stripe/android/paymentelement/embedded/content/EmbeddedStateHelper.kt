@@ -55,6 +55,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,
             embeddedViewDisplaysMandateText = state.confirmationState.configuration.embeddedViewDisplaysMandateText,
             configuration = state.confirmationState.configuration,
+            preferFormDisabled = false,
         )
         confirmationHandler.bootstrap(state.confirmationState.paymentMethodMetadata)
     }
