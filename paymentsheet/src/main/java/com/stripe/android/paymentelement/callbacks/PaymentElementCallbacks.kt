@@ -14,6 +14,9 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+
+internal typealias ShippingAddressUpdater = suspend (AddressDetails) -> Result<Unit>
 
 @OptIn(
     ExperimentalAnalyticEventCallbackApi::class,
@@ -30,7 +33,23 @@ internal data class PaymentElementCallbacks private constructor(
     val rowSelectionCallback: InternalRowSelectionCallback?,
     val preparePaymentMethodHandler: PreparePaymentMethodHandler?,
     val createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback?,
+    val shippingAddressUpdater: ShippingAddressUpdater?,
 ) {
+    fun withShippingAddressUpdater(updater: ShippingAddressUpdater?): PaymentElementCallbacks {
+        return copy(shippingAddressUpdater = updater)
+    }
+
+    fun hasCallbacksBesidesShippingAddressUpdater(): Boolean {
+        return createIntentCallback != null ||
+            createIntentWithConfirmationTokenCallback != null ||
+            confirmCustomPaymentMethodCallback != null ||
+            externalPaymentMethodConfirmHandler != null ||
+            analyticEventCallback != null ||
+            rowSelectionCallback != null ||
+            preparePaymentMethodHandler != null ||
+            createCardPresentSetupIntentCallback != null
+    }
+
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
         private var createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback? = null
@@ -113,6 +132,7 @@ internal data class PaymentElementCallbacks private constructor(
                 rowSelectionCallback = rowSelectionCallback,
                 preparePaymentMethodHandler = preparePaymentMethodHandler,
                 createCardPresentSetupIntentCallback = createCardPresentSetupIntentCallback,
+                shippingAddressUpdater = null,
             )
         }
     }
