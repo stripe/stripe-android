@@ -17,11 +17,12 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.childScope
+import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 
 internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
@@ -34,6 +35,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val customerStateHolder: CustomerStateHolder,
+    private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
 ) {
     @Suppress("LongMethod")
     fun create(): AddPaymentMethodInteractor {
@@ -56,16 +58,21 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        )
+        val bankFormInteractor = BankFormInteractor(
+            updateSelection = embeddedSelectionHolder::setSelection,
+            paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
+                paymentMethodMetadata.paymentMethodIncentive
+            ),
         )
 
         return DefaultAddPaymentMethodInteractor(
             initiallySelectedPaymentMethodType = initialCode,
             selection = embeddedSelectionHolder.selection,
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
-            validationRequested = MutableSharedFlow(),
-            incentive = PaymentMethodIncentiveInteractor(
-                paymentMethodMetadata.paymentMethodIncentive
-            ).displayedIncentive,
+            validationRequested = sheetActivityStateHolder.validationRequested,
+            incentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
             supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
             createFormArguments = formHelper::createFormArguments,
             formElementsForCode = formHelper::formElementsForCode,
@@ -77,7 +84,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
                 paymentMethodMessagePromotionsHelper.reportPromotionDisplayed(code, paymentMethodMetadata)
             },
             createUSBankAccountFormArguments = { code ->
-                createUsBankAccountFormArguments(code, hasSavedPaymentMethods)
+                createUsBankAccountFormArguments(code, hasSavedPaymentMethods, bankFormInteractor)
             },
             coroutineScope = coroutineScope,
             uiContext = Dispatchers.Main,
@@ -96,13 +103,17 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
     private fun createUsBankAccountFormArguments(
         paymentMethodCode: PaymentMethodCode,
         hasSavedPaymentMethods: Boolean,
+        bankFormInteractor: BankFormInteractor,
     ): USBankAccountFormArguments {
         return USBankAccountFormArguments.createForEmbedded(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            setSelection = embeddedSelectionHolder::setSelection,
+            isCompleteFlow = false,
+            draftPaymentSelection = null,
+            bankFormInteractor = bankFormInteractor,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->
                 sheetActivityStateHolder.updateMandate(mandateText)

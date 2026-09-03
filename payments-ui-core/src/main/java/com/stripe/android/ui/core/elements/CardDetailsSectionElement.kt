@@ -10,12 +10,14 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardDetailsSectionElement(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
+    coroutineScope: CoroutineScope,
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
@@ -23,6 +25,7 @@ class CardDetailsSectionElement(
     override val identifier: IdentifierSpec,
     private val cardDetailsAction: CardDetailsAction? = null,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
+        coroutineScope = coroutineScope,
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
         initialValues = initialValues,
         collectName = collectName,

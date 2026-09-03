@@ -11,34 +11,6 @@ import com.stripe.android.uicore.R as UiCoreR
 class LpmSerializerTest {
 
     @Test
-    fun `Verify a DropdownSpec in lpms_json parses correctly`() {
-        val inputStream = SharedDataSpecParcelerTest::class.java.classLoader!!.getResourceAsStream("lpms.json")
-        val serializedString = inputStream.bufferedReader().use { it.readText() }
-
-        val result = LpmSerializer.deserializeList(serializedString).getOrThrow()
-
-        val dropdownSpec = result.first { it.type == "eps" }
-            .fields[3] as DropdownSpec
-
-        assertThat(dropdownSpec.apiPath.v1).isEqualTo("eps[bank]")
-        assertThat(dropdownSpec.labelTranslationId).isEqualTo(TranslationId.EpsBank)
-        assertThat(dropdownSpec.items.size).isEqualTo(27)
-        assertThat(dropdownSpec.items[0]).isEqualTo(
-            DropdownItemSpec(
-                displayText = "Ärzte- und Apothekerbank",
-                apiValue = "arzte_und_apotheker_bank"
-            )
-        )
-
-        assertThat(dropdownSpec.items[26]).isEqualTo(
-            DropdownItemSpec(
-                displayText = "VR-Bank Braunau",
-                apiValue = "vr_bank_braunau"
-            )
-        )
-    }
-
-    @Test
     fun `Verify SimpleTextSpec parses correctly`() {
         val serializedString = """
             [
@@ -100,54 +72,6 @@ class LpmSerializerTest {
     }
 
     @Test
-    fun `Verify DropdownSpec parses correctly`() {
-        val serializedString = """
-            [
-              {
-                "type": "new_lpm",
-                "async": true,
-                "fields": [
-                  {
-                    "type": "selector",
-                    "api_path": {
-                      "v1": "something_bogus"
-                    },
-                    "translation_id": "upe.labels.ideal.bank",
-                    "items": [
-                      {
-                        "api_value": "123",
-                        "display_text": "abc"
-                      },
-                      {
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-        """.trimIndent()
-
-        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
-        val dropdownSpec = results.first().fields.first() as DropdownSpec
-
-        assertThat(dropdownSpec.apiPath.v1).isEqualTo("something_bogus")
-        assertThat(dropdownSpec.labelTranslationId).isEqualTo(TranslationId.IdealBank)
-        assertThat(dropdownSpec.items.size).isEqualTo(2)
-        assertThat(dropdownSpec.items[0]).isEqualTo(
-            DropdownItemSpec(
-                "123",
-                "abc"
-            )
-        )
-        assertThat(dropdownSpec.items[1]).isEqualTo(
-            DropdownItemSpec(
-                null,
-                "Other"
-            )
-        )
-    }
-
-    @Test
     fun `Verify address spec country codes parsed correctly`() {
         val serializedString = """
             [
@@ -178,9 +102,6 @@ class LpmSerializerTest {
             "billing_address",
             "affirm_header",
             "afterpay_header",
-            "au_becs_bsb_number",
-            "au_becs_account_number",
-            "au_becs_mandate",
             "country",
             "email",
             "iban",
@@ -223,9 +144,6 @@ class LpmSerializerTest {
             "billing_address" to "billing_details[address]",
             "affirm_header" to "affirm_header",
             "afterpay_header" to "afterpay_text",
-            "au_becs_bsb_number" to "au_becs_debit[bsb_number]",
-            "au_becs_account_number" to "au_becs_debit[account_number]",
-            "au_becs_mandate" to "au_becs_mandate",
             "country" to "billing_details[address][country]",
             "email" to "billing_details[email]",
             "iban" to "sepa_debit[iban]",
@@ -327,7 +245,7 @@ class LpmSerializerTest {
     @Test
     fun `Deserialize each field type`() {
         val lpms = LpmSerializer.deserializeList(JSON_ALL_FIELDS).getOrThrow()
-        assertThat(lpms.first().fields.size).isEqualTo(17)
+        assertThat(lpms.first().fields.size).isEqualTo(14)
 
         // Empty would mean a field is not recognized/ignored.
         assertThat(lpms.filterIsInstance<EmptyFormSpec>()).isEmpty()
@@ -416,21 +334,6 @@ class LpmSerializerTest {
                           "v1": "billing_details[name]"
                         },
                         "translation_id": "upe.labels.name.onAccount"
-                      },
-                      {
-                        "type": "au_becs_bsb_number",
-                        "api_path": {
-                          "v1": "au_becs_debit[bsb_number]"
-                        }
-                      },
-                      {
-                        "type": "au_becs_account_number",
-                        "api_path": {
-                          "v1": "au_becs_debit[account_number]"
-                        }
-                      },
-                      {
-                        "type": "au_becs_mandate"
                       },
                       {
                         "type": "card_details"

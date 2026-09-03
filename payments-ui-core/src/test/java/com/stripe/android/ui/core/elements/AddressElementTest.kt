@@ -145,6 +145,39 @@ class AddressElementTest {
     }
 
     @Test
+    fun `changing country rebuilds form values`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            rawValuesMap = mapOf(
+                IdentifierSpec.Country to "US",
+            ),
+            countryCodes = setOf("US", "BS"),
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+        val formFieldValueFlow = addressElement.getFormFieldValueFlow()
+        val usValues = mapOf(
+            IdentifierSpec.PostalCode to "10001",
+            IdentifierSpec.State to "NY",
+        )
+        addressElement.fields.value
+            .filterNot { it.identifier == IdentifierSpec.Country }
+            .forEach { it.setRawValue(usValues) }
+
+        val initialFormValues = formFieldValueFlow.value.toMap()
+        assertThat(initialFormValues).containsKey(IdentifierSpec.PostalCode)
+        assertThat(initialFormValues).containsKey(IdentifierSpec.State)
+        assertThat(initialFormValues[IdentifierSpec.PostalCode]?.value).isEqualTo("10001")
+        assertThat(initialFormValues[IdentifierSpec.State]?.value).isEqualTo("NY")
+
+        addressElement.countryElement.controller.onRawValueChange("BS")
+
+        val bahamasValues = formFieldValueFlow.value.toMap()
+        assertThat(bahamasValues).doesNotContainKey(IdentifierSpec.PostalCode)
+        assertThat(bahamasValues[IdentifierSpec.State]?.value).isEmpty()
+    }
+
+    @Test
     fun `condensed address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),

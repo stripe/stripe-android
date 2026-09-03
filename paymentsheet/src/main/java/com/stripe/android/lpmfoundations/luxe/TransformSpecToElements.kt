@@ -8,14 +8,8 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
-import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
-import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
-import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
-import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
-import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.CountrySpec
-import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -63,19 +57,13 @@ internal class TransformSpecToElements(
                 is AffirmTextSpec -> listOf(spec.transform())
                 is EmptyFormSpec -> listOf(EmptyFormElement())
                 is MandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-                is AuBecsDebitMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-                is BacsDebitBankAccountSpec -> listOf(spec.transform(arguments.initialValues))
-                is BacsDebitConfirmSpec -> listOf(spec.transform(arguments.merchantName, arguments.initialValues))
-                is BsbSpec -> listOf(spec.transform(arguments.initialValues))
                 is OTPSpec -> listOf(spec.transform())
                 is NameSpec -> listOf(spec.transform(arguments.initialValues))
                 is EmailSpec -> listOf(spec.transform(arguments.initialValues))
                 is PhoneSpec -> listOf(spec.transform(arguments.initialValues))
                 is SimpleTextSpec -> listOf(spec.transform(arguments.initialValues))
-                is AuBankAccountNumberSpec -> listOf(spec.transform(arguments.initialValues))
                 is IbanSpec -> listOf(spec.transform(arguments.initialValues))
                 is KlarnaHeaderStaticTextSpec -> listOf(spec.transform())
-                is DropdownSpec -> listOf(spec.transform(arguments.initialValues))
                 is CountrySpec -> listOf(spec.transform(arguments.initialValues))
                 is AddressSpec -> spec.transform(
                     arguments.initialValues,

@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Selfi pildistamine</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Suurepärane! Kontrollime teie pilte....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Teie loal võib Stripe kasutada teie pilte pettuste tuvastamise parandamiseks. Keeldumine ei mõjuta teie kinnitamist.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Kinnitage selfiga</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">jäädvustatud üks selfi</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

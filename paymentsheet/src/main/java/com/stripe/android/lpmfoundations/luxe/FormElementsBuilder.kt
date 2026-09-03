@@ -2,11 +2,11 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.uicore.elements.FormElement
 
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
+    private val supportsAutomaticTaxBillingAddress: Boolean,
 ) {
     private val headerFormElements: MutableList<FormElement> = mutableListOf()
     private val uiFormElements: MutableList<FormElement> = mutableListOf()
@@ -19,6 +19,7 @@ internal class FormElementsBuilder(
     private var requireBillingAddressCollection: Boolean = false
     private var availableCountries: Set<String> =
         arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
+    private var countryRequirement: CountryRequirement? = null
 
     init {
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.
@@ -50,11 +51,21 @@ internal class FormElementsBuilder(
         }
     }
 
-    fun overrideContactInformationPosition(type: ContactInformationCollectionMode): FormElementsBuilder = apply {
+    fun overrideContactInformationPosition(type: ContactInformationCollectionMode): FormElementsBuilder {
+        return overrideContactInformationPosition(
+            type = type,
+            formElement = type.formElement(arguments.initialValues),
+        )
+    }
+
+    fun overrideContactInformationPosition(
+        type: ContactInformationCollectionMode,
+        formElement: FormElement,
+    ): FormElementsBuilder = apply {
         if (type in requiredContactInformationCollectionModes) {
             overriddenContactInformationCollectionModes += type
 
-            uiFormElements += type.formElement(arguments.initialValues)
+            uiFormElements += formElement
         }
     }
 
@@ -78,6 +89,16 @@ internal class FormElementsBuilder(
         }
     }
 
+    fun requireCountry(
+        allowedCountryCodes: Set<String>,
+        initialValue: String?,
+    ): FormElementsBuilder = apply {
+        countryRequirement = CountryRequirement(
+            allowedCountryCodes = allowedCountryCodes,
+            initialValue = initialValue,
+        )
+    }
+
     fun footer(formElement: FormElement): FormElementsBuilder = apply {
         footerFormElements += formElement
     }
@@ -94,15 +115,15 @@ internal class FormElementsBuilder(
 
             addAll(uiFormElements)
 
-            if (requireBillingAddressCollection) {
-                val elements = AddressSpec(allowedCountryCodes = availableCountries).transform(
-                    initialValues = arguments.initialValues,
-                    shippingValues = arguments.shippingValues,
-                    autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
-                )
-
-                addAll(elements)
-            }
+            addAll(
+                BillingAddressFormElementsBuilder(
+                    arguments = arguments,
+                    supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
+                    requireBillingAddressCollection = requireBillingAddressCollection,
+                    fallbackCountryCodes = availableCountries,
+                    countryRequirement = countryRequirement,
+                ).build()
+            )
 
             addAll(footerFormElements) // Order footers last.
         }

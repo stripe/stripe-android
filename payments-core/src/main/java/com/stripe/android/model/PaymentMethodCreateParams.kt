@@ -26,6 +26,8 @@ class PaymentMethodCreateParams
 constructor(
     internal val code: PaymentMethodCode,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val requiresMandate: Boolean,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val requiresMandateForPaymentIntent: Boolean =
+        requiresMandate,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val card: Card? = null,
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
@@ -60,6 +62,7 @@ constructor(
     fun copy(
         code: PaymentMethodCode = this.code,
         requiresMandate: Boolean = this.requiresMandate,
+        requiresMandateForPaymentIntent: Boolean = this.requiresMandateForPaymentIntent,
         card: Card? = this.card,
         ideal: Ideal? = this.ideal,
         fpx: Fpx? = this.fpx,
@@ -82,6 +85,7 @@ constructor(
         return PaymentMethodCreateParams(
             code = code,
             requiresMandate = requiresMandate,
+            requiresMandateForPaymentIntent = requiresMandateForPaymentIntent,
             card = card,
             ideal = ideal,
             fpx = fpx,
@@ -126,6 +130,7 @@ constructor(
     ) : this(
         type.code,
         type.requiresMandate,
+        type.requiresMandateForPaymentIntent,
         card,
         ideal,
         fpx,
@@ -1380,6 +1385,21 @@ constructor(
 
         @JvmStatic
         @JvmOverloads
+        fun createSequra(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Sequra,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
         fun createPayByBank(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
@@ -1387,6 +1407,51 @@ constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.PayByBank,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createKrCard(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.KrCard,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createNaverPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.NaverPay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createPayco(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Payco,
                 billingDetails = billingDetails,
                 metadata = metadata,
                 allowRedisplay = allowRedisplay,

@@ -1099,9 +1099,10 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Google Places API key to support autocomplete when collecting billing details
+             * Google Places API key. This is no longer required for address autocomplete.
              */
             @AddressAutocompletePreview
+            @Deprecated("Google Places API key is no longer required. This method will be removed in a future release.")
             fun googlePlacesApiKey(googlePlacesApiKey: String) = apply {
                 this.googlePlacesApiKey = googlePlacesApiKey
             }
@@ -1167,7 +1168,7 @@ class PaymentSheet internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             WalletButtonsPreview::class,
             CardFundingFilteringPrivatePreview::class,
-            AddressAutocompletePreview::class
+            AddressAutocompletePreview::class,
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1192,6 +1193,7 @@ class PaymentSheet internal constructor(
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
+                @Suppress("DEPRECATION")
                 googlePlacesApiKey?.let { googlePlacesApiKey(it) }
                 userOverrideCountry?.let { userOverrideCountry(it) }
             }

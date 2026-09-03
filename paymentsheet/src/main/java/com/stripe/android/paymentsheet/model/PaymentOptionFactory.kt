@@ -1,10 +1,15 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
+import com.stripe.android.paymentsheet.ui.isDarkTheme
+import com.stripe.android.uicore.isSystemDarkTheme
 import javax.inject.Inject
 
 internal class PaymentOptionFactory @Inject constructor(
@@ -12,7 +17,11 @@ internal class PaymentOptionFactory @Inject constructor(
     private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
 ) {
-    fun create(selection: PaymentSelection, linkBrand: LinkBrand?): PaymentOption {
+    fun create(
+        selection: PaymentSelection,
+        linkBrand: LinkBrand?,
+        appearance: PaymentSheet.Appearance?,
+    ): PaymentOption {
         val drawableResourceId = selection.drawableResourceId
         val lightThemeIconUrl = selection.lightThemeIconUrl
         val darkThemeIconUrl = selection.darkThemeIconUrl
@@ -30,10 +39,17 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
+                    useDarkThemeIcon = appearance?.shouldUseDarkThemeIcon(context),
                 )
             },
         )
     }
+}
+
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(context: Context): Boolean {
+    val isDark = themeMode.isDarkTheme(context.isSystemDarkTheme())
+    val componentColor = Color(getColors(isDark).component)
+    return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }
 
 internal val PaymentSelection.shippingDetails: AddressDetails?

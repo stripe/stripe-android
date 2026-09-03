@@ -30,9 +30,11 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.coroutines.CoroutineScope
 
 internal sealed interface UiDefinitionFactory {
-    class Arguments(
+    data class Arguments(
+        val coroutineScope: CoroutineScope,
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
         val initialValues: Map<IdentifierSpec, String?>,
@@ -64,6 +66,7 @@ internal sealed interface UiDefinitionFactory {
             ): Arguments
 
             class Default(
+                private val coroutineScope: CoroutineScope,
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
                 private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
                 private val linkInlineHandler: LinkInlineHandler?,
@@ -88,6 +91,7 @@ internal sealed interface UiDefinitionFactory {
                     requiresMandate: Boolean,
                 ): Arguments {
                     return Arguments(
+                        coroutineScope = coroutineScope,
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                         linkConfigurationCoordinator = linkConfigurationCoordinator,
                         merchantName = metadata.merchantName,
@@ -168,6 +172,8 @@ internal sealed interface UiDefinitionFactory {
     }
 
     abstract class Simple : UiDefinitionFactory {
+        protected open val supportsAutomaticTaxBillingAddress: Boolean = true
+
         abstract fun createSupportedPaymentMethod(
             metadata: PaymentMethodMetadata,
         ): SupportedPaymentMethod
@@ -181,7 +187,10 @@ internal sealed interface UiDefinitionFactory {
         }
 
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement> {
-            val builder = FormElementsBuilder(arguments)
+            val builder = FormElementsBuilder(
+                arguments = arguments,
+                supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
+            )
 
             buildFormElements(metadata, arguments, builder)
 

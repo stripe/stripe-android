@@ -273,7 +273,7 @@ constructor(
             "alipay",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = false,
+            requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
@@ -517,6 +517,14 @@ constructor(
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
         ),
+        Sequra(
+            "sequra",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
         PayByBank(
             "pay_by_bank",
             isReusable = false,
@@ -524,6 +532,30 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
+        ),
+        KrCard(
+            "kr_card",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        NaverPay(
+            "naver_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        Payco(
+            "payco",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

@@ -5,7 +5,8 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.paymentsheet.DefaultFormHelper
+import com.stripe.android.paymentsheet.BaseSheetFormHelperFactory
+import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -94,10 +95,10 @@ internal class DefaultAddPaymentMethodInteractor(
             paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
         ): AddPaymentMethodInteractor {
             val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Main)
-            val formHelper = DefaultFormHelper.create(
-                viewModel = viewModel,
+            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
                 coroutineScope = coroutineScope,
                 paymentMethodMetadata = paymentMethodMetadata,
+                linkInlineHandler = LinkInlineHandler.create(),
                 shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
@@ -204,6 +205,14 @@ internal class DefaultAddPaymentMethodInteractor(
             processing.collect {
                 _state.value = _state.value.copy(
                     processing = it
+                )
+            }
+        }
+
+        coroutineScope.launch {
+            incentive.collect {
+                _state.value = _state.value.copy(
+                    incentive = it
                 )
             }
         }

@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -26,6 +27,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
+    private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
 ) : EmbeddedUpdateScreenInteractorFactory {
     override fun createUpdateScreenInteractor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
@@ -84,7 +86,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             onUpdateSuccess = {
                 embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
             },
-            autocompleteAddressInteractorFactory = null,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
     }
 }

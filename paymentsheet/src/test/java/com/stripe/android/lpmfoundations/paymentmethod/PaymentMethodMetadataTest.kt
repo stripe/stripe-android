@@ -11,6 +11,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.countryElements
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_INTEGRATION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
@@ -44,7 +45,6 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
@@ -132,19 +132,6 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `filterSupportedPaymentMethods filters payment methods without shared data specs`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "bacs_debit")
-            ),
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
-        )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
-        assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first()).isEqualTo("card")
-    }
-
-    @Test
     fun `filterSupportedPaymentMethods returns expected items`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -198,17 +185,6 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
         assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
-    }
-
-    @Test
-    fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("bacs_debit")
-            ),
-            sharedDataSpecs = emptyList(),
-        )
-        assertThat(metadata.supportedPaymentMethodForCode("bacs_debit")).isNull()
     }
 
     @Test
@@ -294,24 +270,6 @@ internal class PaymentMethodMetadataTest {
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
         assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("card")
-    }
-
-    @Test
-    fun `sortedSupportedPaymentMethods filters payment methods without a sharedDataSpec`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("affirm", "bacs_debit", "card"),
-            ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("card"),
-            ),
-        )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
-        assertThat(sortedSupportedPaymentMethods).hasSize(2)
-        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
-        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
     }
 
     @Test
@@ -627,7 +585,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
+    fun `formElementsForCode creates one country field in the Klarna address`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -645,19 +603,33 @@ internal class PaymentMethodMetadataTest {
             uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
         )!!
 
-        val countrySection = formElement[4] as SectionElement
-        val countryElement = countrySection.fields[0] as CountryElement
-        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
-
-        val addressSection = formElement[5] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-        val addressIdentifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element doesn't contain country.
-        assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
+        assertThat(formElement.countryElements()).hasSize(1)
     }
 
     @Test
-    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
+    fun `formElementsForCode creates one country field in the Wero address`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "wero")
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
+        )
+        val formElement = metadata.formElementsForCode(
+            code = "wero",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        assertThat(formElement.countryElements()).hasSize(1)
+    }
+
+    @Test
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryCustom`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val headerInformation = metadata.formHeaderInformationForCode(
             code = "card",
@@ -668,7 +640,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryRequiresSharedDataSpec`() = runTest {
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple with icon`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "bancontact")

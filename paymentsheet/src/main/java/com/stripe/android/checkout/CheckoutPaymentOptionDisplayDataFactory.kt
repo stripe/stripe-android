@@ -64,6 +64,7 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
+                    useDarkThemeIcon = null,
                 )
             },
             label = selection.label(
@@ -79,10 +80,10 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): CheckoutController.BillingDetails {
-    return CheckoutController.BillingDetails(
+private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): PaymentOptionDisplayData.BillingDetails {
+    return PaymentOptionDisplayData.BillingDetails(
         address = address?.let { modelAddress ->
-            CheckoutController.BillingDetails.Address(
+            PaymentOptionDisplayData.BillingDetails.Address(
                 city = modelAddress.city,
                 country = modelAddress.country,
                 line1 = modelAddress.line1,

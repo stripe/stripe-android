@@ -103,6 +103,62 @@ class DefaultPaymentMethodFilterTest {
         )
     }
 
+    @Test
+    fun `Filters saved payment methods with insufficient automatic tax billing details`() = runTest {
+        val insufficientPaymentMethod = PaymentMethodFactory.card(
+            id = "pm_insufficient",
+            last4 = "4242",
+        )
+        val sufficientPaymentMethod = PaymentMethodFactory.card(
+            id = "pm_sufficient",
+            last4 = "4243",
+            billingDetails = PaymentMethod.BillingDetails(address = Address(country = "DE")),
+        )
+
+        val result = filter(
+            paymentMethods = listOf(insufficientPaymentMethod, sufficientPaymentMethod),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(result).containsExactly(sufficientPaymentMethod)
+    }
+
+    @Test
+    fun `Does not filter saved payment methods when automatic tax billing details are not required`() = runTest {
+        val paymentMethods = listOf(
+            PaymentMethodFactory.card(
+                id = "pm_card",
+                last4 = "4242",
+            ),
+            PaymentMethodFactory.usBankAccount().copy(id = "pm_us_bank_account"),
+        )
+
+        val result = filter(
+            paymentMethods = paymentMethods,
+            requiresBillingAddressForAutomaticTax = false,
+        )
+
+        assertThat(result).containsExactlyElementsIn(paymentMethods).inOrder()
+    }
+
+    @Test
+    fun `Filters non-card saved payment methods with insufficient automatic tax billing details`() = runTest {
+        val insufficientPaymentMethod = PaymentMethodFactory.usBankAccount().copy(
+            id = "pm_insufficient",
+        )
+        val sufficientPaymentMethod = PaymentMethodFactory.usBankAccount().copy(
+            id = "pm_sufficient",
+            billingDetails = PaymentMethod.BillingDetails(address = Address(country = "DE")),
+        )
+
+        val result = filter(
+            paymentMethods = listOf(insufficientPaymentMethod, sufficientPaymentMethod),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(result).containsExactly(sufficientPaymentMethod)
+    }
+
     @OptIn(CardFundingFilteringPrivatePreview::class)
     @Test
     fun `Should filter saved cards with credit funding type only`() = runTest {
@@ -197,6 +253,7 @@ class DefaultPaymentMethodFilterTest {
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
         remoteDefaultPaymentMethodId: String? = null,
         localSavedSelection: SavedSelection = SavedSelection.None,
+        requiresBillingAddressForAutomaticTax: Boolean = false,
         cardBrandFilter: PaymentSheetCardBrandFilter = PaymentSheetCardBrandFilter(
             cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         ),
@@ -208,6 +265,7 @@ class DefaultPaymentMethodFilterTest {
             paymentMethods = paymentMethods,
             params = PaymentMethodFilter.FilterParams(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
                 customerMetadata = CustomerMetadata.CustomerSession(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_123",

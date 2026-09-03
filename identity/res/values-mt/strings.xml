@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Ġbid tal-istessu</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Eċċellenti! Qed niċċekkjaw ir-ritratti tiegħek....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Bil-permess tiegħek, Stripe jista\' juża l-immaġnijiet tiegħek biex itejjeb id-detezzjoni tal-frodi. Li tirrifjuta ma jaffettwax il-verifika tiegħek.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Ivverifika bi stessu</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">ittieħed stessu wieħed</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

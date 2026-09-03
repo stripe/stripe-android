@@ -5,7 +5,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import org.junit.Test
 import org.mockito.kotlin.mock
 
@@ -13,21 +15,20 @@ class AddressElementViewModelModuleTest {
     private val module = AddressElementViewModelModule()
 
     @Test
-    fun `provideInlinePlacesClient returns hosted client without google api key when hosted autocomplete is enabled`() {
+    fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
+        val googlePlacesClient = mock<PlacesClientProxy>()
         val placesClient = module.provideInlinePlacesClient(
             args = AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
-                config = AddressLauncher.Configuration(
-                    billingAddress = null,
-                    useStripeHostedAutocomplete = true,
-                ),
+                config = AddressLauncher.Configuration(),
             ),
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
-            googlePlacesClient = null,
+            googlePlacesClient = googlePlacesClient,
             addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
         )
 
-        assertThat(placesClient).isNotNull()
+        assertThat(placesClient).isInstanceOf(StripeHostedPlacesClientProxy::class.java)
+        assertThat(placesClient).isNotSameInstanceAs(googlePlacesClient)
     }
 
     @Test

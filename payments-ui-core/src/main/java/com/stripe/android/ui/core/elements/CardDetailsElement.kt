@@ -17,6 +17,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -27,6 +28,7 @@ internal class CardDetailsElement(
     identifier: IdentifierSpec,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
+    coroutineScope: CoroutineScope,
     collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
@@ -34,6 +36,7 @@ internal class CardDetailsElement(
     val controller: CardDetailsController = CardDetailsController(
         cardAccountRangeRepositoryFactory,
         initialValues,
+        coroutineScope,
         collectName,
         cbcEligibility,
         cardBrandFilter = cardBrandFilter,

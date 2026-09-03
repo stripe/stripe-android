@@ -14,9 +14,10 @@ import com.stripe.android.view.BecsDebitBanks
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BsbElement(
     private val identifierSpec: IdentifierSpec,
-    private val banks: List<BecsDebitBanks.Bank>,
     initialValue: String?
 ) : FormElement {
+    private val banks = BecsDebitBanks()
+
     override val controller: TextFieldController = SimpleTextFieldController(
         textFieldConfig = BsbConfig(banks),
         initialValue = initialValue,
@@ -27,10 +28,7 @@ class BsbElement(
     override val mandateText: ResolvableString? = null
 
     val bankName = controller.fieldValue.mapAsStateFlow { textFieldValue ->
-        banks
-            .filter { textFieldValue.startsWith(it.prefix) }
-            .map { it.name }
-            .firstOrNull()
+        banks.byPrefix(textFieldValue)?.name
     }
 
     override fun getFormFieldValueFlow() = combineAsStateFlow(

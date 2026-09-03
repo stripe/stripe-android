@@ -1,0 +1,168 @@
+package com.stripe.android.googlepaylauncher
+
+import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.FakeActivityResultLauncher
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class InternalGooglePayPaymentMethodLauncherTest {
+    @Test
+    fun `init registers callback with registry when callback is provided`() = runTest {
+        val callback = GooglePayPaymentDataUpdateCallback { _ ->
+            GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null)
+        }
+
+        createLauncher(instanceId = "instanceId", onPaymentDataChangedCallback = callback)
+        GooglePayPaymentDataUpdateCallbackRegistry.select("instanceId", this)
+
+        assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()?.callback).isSameInstanceAs(callback)
+        GooglePayPaymentDataUpdateCallbackRegistry.deselect()
+    }
+
+    @Test
+    fun `init does not register anything when callback is null`() = runTest {
+        createLauncher(instanceId = "instanceId", onPaymentDataChangedCallback = null)
+        GooglePayPaymentDataUpdateCallbackRegistry.select("instanceId", this)
+
+        assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()).isNull()
+    }
+
+    @Test
+    fun `callback is deregistered when lifecycle owner is destroyed`() = runTest {
+        val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.CREATED)
+        val callback = GooglePayPaymentDataUpdateCallback { _ ->
+            GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null)
+        }
+
+        createLauncher(
+            instanceId = "instanceId",
+            lifecycleOwner = lifecycleOwner,
+            onPaymentDataChangedCallback = callback,
+        )
+
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        GooglePayPaymentDataUpdateCallbackRegistry.select("instanceId", this)
+
+        assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()).isNull()
+    }
+
+    @Test
+    fun `present launches activity result launcher with expected args`() {
+        val activityResultLauncher = FakeActivityResultLauncher(GooglePayPaymentMethodLauncherContractV2())
+        val config = GooglePayPaymentMethodLauncher.Config(
+            environment = GooglePayEnvironment.Test,
+            merchantCountryCode = "US",
+            merchantName = "Widget Store",
+        )
+        val launcher = createLauncher(activityResultLauncher = activityResultLauncher)
+
+        launcher.present(
+            currencyCode = "usd",
+            amount = 1000L,
+            config = config,
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = null,
+            transactionId = "pi_12345",
+            label = null,
+            isElements = true,
+            publishableKey = null,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+            shippingAddressParameters = null,
+        )
+
+        assertThat(activityResultLauncher.launchArgs[0]).isEqualTo(
+            GooglePayPaymentMethodLauncherContractV2.Args(
+                config = config,
+                currencyCode = "usd",
+                amount = 1000L,
+                label = null,
+                transactionId = "pi_12345",
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
+                clientAttributionMetadata = null,
+                isElements = true,
+                publishableKey = null,
+                displayItems = emptyList(),
+                billingEmailOverride = null,
+                shippingAddressParameters = null,
+                dynamicCallbackId = null,
+            )
+        )
+    }
+
+    @Test
+    fun `present includes dynamic callback id when callback is provided`() {
+        val activityResultLauncher = FakeActivityResultLauncher(GooglePayPaymentMethodLauncherContractV2())
+        val callback = GooglePayPaymentDataUpdateCallback {
+            GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null)
+        }
+        val launcher = createLauncher(
+            instanceId = "instanceId",
+            activityResultLauncher = activityResultLauncher,
+            onPaymentDataChangedCallback = callback,
+        )
+
+        launcher.present(
+            currencyCode = "usd",
+            amount = 1000L,
+            config = CONFIG,
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = null,
+            transactionId = null,
+            label = null,
+            isElements = true,
+            publishableKey = null,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+            shippingAddressParameters = null,
+        )
+
+        assertThat(activityResultLauncher.launchArgs.single().dynamicCallbackId).isEqualTo("instanceId")
+    }
+
+    private fun createLauncher(
+        instanceId: String = "instanceId",
+        lifecycleOwner: TestLifecycleOwner = TestLifecycleOwner(),
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args> = mock(),
+        onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback? = null,
+        analyticsRequestExecutor: AnalyticsRequestExecutor = AnalyticsRequestExecutor { },
+    ): InternalGooglePayPaymentMethodLauncher {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        return InternalGooglePayPaymentMethodLauncher(
+            instanceId = instanceId,
+            lifecycleOwner = lifecycleOwner,
+            activityResultLauncher = activityResultLauncher,
+            onPaymentDataChangedCallback = onPaymentDataChangedCallback,
+            context = context,
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = context,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            ),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+        )
+    }
+
+    private companion object {
+        val CONFIG = GooglePayPaymentMethodLauncher.Config(
+            environment = GooglePayEnvironment.Test,
+            merchantCountryCode = "US",
+            merchantName = "Widget Store",
+        )
+    }
+}

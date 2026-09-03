@@ -136,6 +136,24 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun `createPayco() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createPayco().toParamMap())
+            .isEqualTo(mapOf("type" to "payco"))
+    }
+
+    @Test
+    fun `createKrCard() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createKrCard().toParamMap())
+            .isEqualTo(mapOf("type" to "kr_card"))
+    }
+
+    @Test
+    fun `createNaverPay() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createNaverPay().toParamMap())
+            .isEqualTo(mapOf("type" to "naver_pay"))
+    }
+
+    @Test
     fun auBecsDebit_toParamMap_shouldCreateExpectedMap() {
         assertThat(PaymentMethodCreateParamsFixtures.AU_BECS_DEBIT.toParamMap())
             .isEqualTo(

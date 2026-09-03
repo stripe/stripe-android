@@ -134,7 +134,7 @@ internal class TestCard : BasePlaygroundTest() {
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText(cardNumber.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -183,7 +183,7 @@ internal class TestCard : BasePlaygroundTest() {
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText(secondCardNumber.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -219,7 +219,7 @@ internal class TestCard : BasePlaygroundTest() {
                 selectors.composeTestRule.waitUntilExactlyOneExists(
                     matcher = hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
                         .and(hasText(cardNumber.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -269,7 +269,7 @@ internal class TestCard : BasePlaygroundTest() {
                 selectors.composeTestRule.waitUntilExactlyOneExists(
                     matcher = hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
                         .and(hasText(secondCardNumber.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )

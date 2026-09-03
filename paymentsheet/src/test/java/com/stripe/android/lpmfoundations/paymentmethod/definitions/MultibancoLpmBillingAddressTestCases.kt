@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val multibancoRawValues = mapOf(
@@ -91,22 +92,34 @@ private val multibancoFullExpectedParams = LpmBillingAddressFormParams(
 internal val multibancoTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Multibanco Never",
-        paymentMethodType = PaymentMethod.Type.Multibanco,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Multibanco,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = multibancoRawValues,
         expectedParams = multibancoNeverExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Multibanco Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.Multibanco,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Multibanco,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = multibancoRawValues,
         expectedParams = multibancoAutomaticWithoutTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Multibanco Full",
-        paymentMethodType = PaymentMethod.Type.Multibanco,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Multibanco,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = multibancoRawValues,
         expectedParams = multibancoFullExpectedParams,
     ),

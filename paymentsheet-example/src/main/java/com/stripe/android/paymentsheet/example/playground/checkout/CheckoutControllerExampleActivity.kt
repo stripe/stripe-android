@@ -1,53 +1,48 @@
-@file:OptIn(CheckoutSessionPreview::class)
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
+import androidx.compose.material.AppBarDefaults
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
-import com.stripe.android.uicore.format.CurrencyFormatter
+import com.stripe.android.paymentsheet.example.playground.SearchSettingsField
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettingsUi
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.configurations
 import kotlinx.coroutines.launch
 
 internal class CheckoutControllerExampleActivity : AppCompatActivity() {
-
     private val viewModel: CheckoutControllerExampleViewModel by viewModels {
         CheckoutControllerExampleViewModel.factory
     }
 
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val presenter = viewModel.controller.createPresenter(this)
         val paymentElement = presenter.paymentElement()
+        val shippingAddressElement = presenter.shippingAddressElement()
+        val currencySelectorElement = presenter.currencySelectorElement()
+        val expressCheckoutElement = presenter.expressCheckoutElement()
 
         lifecycleScope.launch {
             viewModel.sessionComplete.collect {
@@ -58,183 +53,140 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 
         setContent {
             val status by viewModel.status.collectAsState()
+            val session by viewModel.controller.session.collectAsState()
+            val confirmationMessage by viewModel.confirmationMessage.collectAsState()
+            val operationMessage by viewModel.operationMessage.collectAsState()
+            val isUpdating by viewModel.controller.isUpdating.collectAsState()
+            val settingValues by viewModel.settings.values.collectAsState()
+            var navigationPath by rememberSaveable {
+                mutableStateOf<List<String>>(emptyList())
+            }
+            var settingsSearchQuery by rememberSaveable { mutableStateOf("") }
+            val isSearching = settingsSearchQuery.isNotBlank()
+            val currentConfiguration = CheckoutPlaygroundDefinitions.root.configurations()
+                .firstOrNull { it.key == navigationPath.lastOrNull() }
+                ?: CheckoutPlaygroundDefinitions.root
+            val navigateBack = {
+                if (status is CheckoutControllerExampleViewModel.Status.Settings) {
+                    if (isSearching) {
+                        settingsSearchQuery = ""
+                    } else {
+                        navigationPath = navigationPath.dropLast(1)
+                    }
+                } else {
+                    viewModel.returnToSettings()
+                }
+            }
+
+            BackHandler(
+                enabled = status !is CheckoutControllerExampleViewModel.Status.Settings ||
+                    navigationPath.isNotEmpty() || isSearching
+            ) { navigateBack() }
 
             PlaygroundTheme(
+                topBarContent = {
+                    Column {
+                        TopAppBar(
+                            windowInsets = AppBarDefaults.topAppBarWindowInsets,
+                            title = {
+                                Text(
+                                    when {
+                                        status !is CheckoutControllerExampleViewModel.Status.Settings -> "Checkout"
+                                        isSearching -> "Search settings"
+                                        else -> currentConfiguration.displayName
+                                    }
+                                )
+                            },
+                            navigationIcon = if (
+                                status !is CheckoutControllerExampleViewModel.Status.Settings ||
+                                navigationPath.isNotEmpty() || isSearching
+                            ) {
+                                {
+                                    IconButton(onClick = navigateBack) {
+                                        Text("‹", style = MaterialTheme.typography.h4)
+                                    }
+                                }
+                            } else {
+                                null
+                            },
+                        )
+                        if (status is CheckoutControllerExampleViewModel.Status.Settings) {
+                            SearchSettingsField(
+                                query = settingsSearchQuery,
+                                onQueryChanged = { settingsSearchQuery = it },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            )
+                        }
+                    }
+                },
                 content = {
                     when (val currentStatus = status) {
-                        is CheckoutControllerExampleViewModel.Status.Loading -> {
-                            LoadingContent()
+                        CheckoutControllerExampleViewModel.Status.Settings -> {
+                            CheckoutPlaygroundSettingsUi(
+                                configuration = currentConfiguration,
+                                searchQuery = settingsSearchQuery,
+                                settings = viewModel.settings,
+                                onOpenConfiguration = { navigationPath += it.key },
+                                onOpenConfigurationPath = { configurationPath ->
+                                    navigationPath = configurationPath.map { it.key }
+                                    settingsSearchQuery = ""
+                                },
+                            )
                         }
-                        is CheckoutControllerExampleViewModel.Status.Error -> {
-                            ErrorContent(currentStatus.message)
-                        }
-                        is CheckoutControllerExampleViewModel.Status.Configured -> {
-                            val session = currentStatus.session
-                            if (session != null) {
-                                LineItemsSection(session)
-                                TotalSummarySection(session)
-                                if (session.availableExpressCheckoutPaymentMethods.isNotEmpty()) {
-                                    presenter.expressCheckoutElement().Content()
-                                }
-                                paymentElement.Content()
-                            }
+                        CheckoutControllerExampleViewModel.Status.Loading -> LoadingContent()
+                        is CheckoutControllerExampleViewModel.Status.Error -> ErrorContent(
+                            message = currentStatus.message,
+                            onRetry = viewModel::retry,
+                            onBack = viewModel::returnToSettings,
+                        )
+                        CheckoutControllerExampleViewModel.Status.Configured -> {
+                            session?.let { currentSession ->
+                                CheckoutContent(
+                                    session = currentSession,
+                                    paymentElement = paymentElement,
+                                    currencySelectorElement = currencySelectorElement,
+                                    expressCheckoutElement = expressCheckoutElement,
+                                    isUpdating = isUpdating,
+                                    operationMessage = operationMessage,
+                                    onApplyPromotionCode = viewModel::applyPromotionCode,
+                                    onRemovePromotionCode = viewModel::removePromotionCode,
+                                    onUpdateEmail = viewModel::updateEmail,
+                                )
+                            } ?: LoadingContent()
                         }
                     }
                 },
                 bottomBarContent = {
-                    val configured = status as? CheckoutControllerExampleViewModel.Status.Configured
-                    PaymentOptionRow(configured?.session?.paymentOptionDisplayData)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { paymentElement.present() },
-                        enabled = configured != null,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Select Payment Method")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { presenter.confirm() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Confirm")
+                    when (status) {
+                        CheckoutControllerExampleViewModel.Status.Settings -> {
+                            if (navigationPath.isEmpty()) {
+                                SettingsActions(
+                                    canStart = settingValues.isNotEmpty() &&
+                                        viewModel.settings.validationErrors().isEmpty(),
+                                    onStart = viewModel::start,
+                                    onReset = viewModel.settings::reset,
+                                )
+                            }
+                        }
+                        CheckoutControllerExampleViewModel.Status.Configured -> {
+                            ConfirmationControls(
+                                paymentOption = session?.paymentOptionDisplayData,
+                                confirmationMessage = confirmationMessage,
+                                isUpdating = isUpdating,
+                                displayMandate = viewModel.displayMandate,
+                                onClearPaymentMethod = viewModel::clearPaymentOption,
+                                onSelectPaymentMethod = paymentElement::present,
+                                onSetShippingAddress = shippingAddressElement::present,
+                                onConfirm = {
+                                    viewModel.clearConfirmationMessage()
+                                    presenter.confirm()
+                                },
+                            )
+                        }
+                        else -> Unit
                     }
                 },
             )
         }
     }
-}
-
-@Composable
-private fun LoadingContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun ErrorContent(message: String) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = "Error",
-            style = MaterialTheme.typography.h6,
-            color = Color.Red,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = message)
-    }
-}
-
-@Composable
-private fun PaymentOptionRow(paymentOption: PaymentOptionDisplayData?) {
-    if (paymentOption != null) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Image(
-                painter = paymentOption.iconPainter,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-            )
-            Text(
-                text = paymentOption.label,
-                style = MaterialTheme.typography.body1,
-            )
-        }
-    } else {
-        Text(
-            text = "No payment method selected",
-            style = MaterialTheme.typography.body2,
-            color = Color.Gray,
-        )
-    }
-}
-
-@Composable
-private fun LineItemsSection(session: Session) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Line Items", style = MaterialTheme.typography.h6)
-        Spacer(modifier = Modifier.height(8.dp))
-
-        for (item in session.lineItems) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = "${item.name} x${item.quantity}",
-                    style = MaterialTheme.typography.body2,
-                )
-                Text(
-                    text = formatAmount(item.total, session.currency),
-                    style = MaterialTheme.typography.body2,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TotalSummarySection(session: Session) {
-    val summary = session.totalSummary ?: return
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Divider(modifier = Modifier.padding(vertical = 12.dp))
-
-        SummaryRow(label = "Subtotal", amount = formatAmount(summary.subtotal, session.currency))
-
-        for (discount in summary.discountAmounts) {
-            SummaryRow(
-                label = discount.displayName,
-                amount = "-${formatAmount(discount.amount, session.currency)}",
-            )
-        }
-
-        summary.shippingRate?.let { shipping ->
-            val amountText = if (shipping.amount == 0L) "Free" else formatAmount(shipping.amount, session.currency)
-            SummaryRow(label = "Shipping", amount = amountText)
-        }
-
-        for (tax in summary.taxAmounts) {
-            val label = if (tax.inclusive) "${tax.displayName} (included)" else tax.displayName
-            SummaryRow(label = label, amount = formatAmount(tax.amount, session.currency))
-        }
-
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(text = "Total", style = MaterialTheme.typography.subtitle1)
-            Text(
-                text = formatAmount(summary.totalDueToday, session.currency),
-                style = MaterialTheme.typography.subtitle1,
-            )
-        }
-    }
-}
-
-@Composable
-private fun SummaryRow(label: String, amount: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(text = label, style = MaterialTheme.typography.body2)
-        Text(text = amount, style = MaterialTheme.typography.body2)
-    }
-}
-
-private fun formatAmount(amount: Long, currency: String): String {
-    return CurrencyFormatter.format(amount, currency)
 }

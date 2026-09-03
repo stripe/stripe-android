@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val p24FullRawValues = mapOf(
@@ -88,8 +89,12 @@ private val p24WithBillingAddressExpectedPaymentMethodParams = PaymentMethodCrea
 internal val p24TestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "P24 Never",
-        paymentMethodType = PaymentMethod.Type.P24,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.P24,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = p24FullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = p24NoBillingDetailsExpectedPaymentMethodParams,
@@ -99,8 +104,12 @@ internal val p24TestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "P24 Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.P24,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.P24,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = p24FullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = p24WithContactDetailsExpectedPaymentMethodParams,
@@ -110,8 +119,12 @@ internal val p24TestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "P24 Full",
-        paymentMethodType = PaymentMethod.Type.P24,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.P24,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = p24FullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = p24WithBillingAddressExpectedPaymentMethodParams,

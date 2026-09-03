@@ -1,7 +1,37 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### PaymentSheet
+* [ADDED] Added support for SeQura.
+* [ADDED] Added support for PAYCO.
+* [ADDED] Added support for Korean cards.
+* [ADDED] Added support for Naver Pay.
+
+### AddressElement
+* [CHANGED] Use Stripe-hosted address autocomplete by default.
+
+## 23.17.1 - 2026-08-31
+
+### PaymentSheet
+* [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
+* [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
+* [FIXED][13323](https://github.com/stripe/stripe-android/pull/13323) Fixed an issue where selecting "Not you?" during Link 2FA did not fully log out the previous account, preventing subsequent logins.
+
+### CryptoOnramp
+* [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
+
+## 23.17.0 - 2026-08-24
+
+### PaymentSheet
+* [DEPRECATED] Deprecated the `googlePlacesApiKey` builder methods and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key. Address autocomplete is now available to all merchants without providing a Google Places API key. Existing integrations can remove the key without losing autocomplete, and integrations that did not provide one receive autocomplete automatically.
+
+### Payments
+* [ADDED][14089](https://github.com/stripe/stripe-android/pull/14089) Support for Alipay when using `SetupIntent` through the direct APIs.
+
+### Identity
+* [ADDED][13176](https://github.com/stripe/stripe-android/pull/13176) Added guided 3D selfie capture for supported verification sessions, including left and right pose collection.
 
 ## 23.16.0 - 2026-08-18
 
@@ -27,6 +57,9 @@ NEXT_VERSION_BUMP: PATCH
 
 ### CryptoOnramp
 * [ADDED][13623](https://github.com/stripe/stripe-android/pull/13623) Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
+
+### Identity
+* [CHANGED][13176](https://github.com/stripe/stripe-android/pull/13176) Stripe Identity and Crypto Onramp now require Android API 24 or later to support MediaPipe-based 3D selfie capture.
 
 ## 23.14.0 - 2026-08-03
 

@@ -4,6 +4,7 @@ package com.stripe.android.elements.ece
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -18,6 +19,7 @@ internal interface ExpressCheckoutElementInteractor {
 
     data class State(
         val expressButtons: List<ExpressButton>,
+        val buttonLayout: ExpressCheckoutElement.Configuration.Appearance.ButtonLayout.State,
     )
 
     sealed class ViewAction {
@@ -48,25 +50,32 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         stateHolder.stateFlow,
         stateHolder.session,
     ) { linkAccountInfo, state, session, ->
-        if (state == null || session == null) {
-            return@combineAsStateFlow ExpressCheckoutElementInteractor.State(expressButtons = emptyList())
+        val configuration = state?.configuration?.expressCheckoutElementConfiguration
+        val paymentMethodMetadata = state?.expressCheckoutElementPaymentMethodMetadata
+        if (configuration == null || paymentMethodMetadata == null || session == null) {
+            return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
+                expressButtons = emptyList(),
+                buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+            )
         }
 
         ExpressCheckoutElementInteractor.State(
             expressButtons = session.availableExpressButtonTypes.map { expressButtonType ->
                 when (expressButtonType) {
                     ExpressButtonType.Link -> ExpressButton.Link.create(
-                        paymentMethodMetadata = state.paymentMethodMetadata,
+                        paymentMethodMetadata = paymentMethodMetadata,
                         linkAccountInfo = linkAccountInfo,
+                        buttonTheme = configuration.appearance.buttonTheme,
                     )
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
-                        paymentMethodMetadata = state.paymentMethodMetadata,
+                        paymentMethodMetadata = paymentMethodMetadata,
                         googlePayConfiguration = expressButtonType.googlePayConfiguration,
-                        shippingAddressRequired =
-                            state.configuration.expressCheckoutElementConfiguration.shippingAddressRequired,
+                        shippingAddressRequired = configuration.shippingAddressRequired,
+                        buttonTheme = configuration.appearance.buttonTheme,
                     )
                 }
             },
+            buttonLayout = configuration.appearance.buttonLayout,
         )
     }
 

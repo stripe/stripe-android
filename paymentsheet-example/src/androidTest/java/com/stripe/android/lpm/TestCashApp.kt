@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Initializatio
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
@@ -61,7 +61,7 @@ internal class TestCashApp : BasePlaygroundTest() {
                 authorizationAction = AuthorizeAction.Cancel,
             ),
             afterAuthorization = {
-                it.composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG))
+                it.composeTestRule.onNode(hasTestTag(SHEET_ERROR_TEST_TAG))
                     .assertDoesNotExist()
             }
         )

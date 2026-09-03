@@ -2,12 +2,14 @@ package com.stripe.android.customersheet
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -15,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -24,6 +27,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
@@ -33,14 +37,20 @@ import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
+import java.util.Locale
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 internal class CustomerSheetScreenshotTest {
     private val paparazzi = PaparazziRule(
         SystemAppearance.entries,
@@ -60,16 +70,31 @@ internal class CustomerSheetScreenshotTest {
             .fillMaxWidth(),
     )
 
+    private val scopedThemePaparazzi = PaparazziRule(
+        SystemAppearance.entries,
+        boxModifier = Modifier
+            .padding(0.dp)
+            .fillMaxWidth(),
+        includeStripeTheme = false,
+    )
+
     private val coroutineRule = CoroutineTestRule()
 
+    private val localeRule = LocaleTestRule(Locale.US)
+
     private val closeInteractorRule = CleanupTestRule(UpdatePaymentMethodInteractor::close)
+
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain.emptyRuleChain()
         .around(closeInteractorRule)
         .around(paparazzi)
         .around(paparazziWithEveryAppearance)
+        .around(scopedThemePaparazzi)
+        .around(localeRule)
         .around(coroutineRule)
+        .around(coroutineScopeCleanupRule)
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
@@ -114,47 +139,50 @@ internal class CustomerSheetScreenshotTest {
         canRemovePaymentMethods = true,
     )
 
-    private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
-        paymentMethodCode = PaymentMethod.Type.Card.code,
-        formFieldValues = FormFieldValues(
-            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
-        ),
-        formElements = PaymentMethodMetadataFactory.create(
-            stripeIntent = SetupIntentFactory.create()
-        ).formElementsForCode(
-            code = PaymentMethod.Type.Card.code,
-            uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                linkConfigurationCoordinator = null,
-                onLinkInlineSignupStateChanged = {},
-                autocompleteAddressInteractorFactory = null,
-                linkInlineHandler = null
-            )
-        ) ?: listOf(),
-        formArguments = FormArguments(
+    private val addPaymentMethodViewState by lazy {
+        CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-            merchantName = "",
-            hasIntentToSetup = true,
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-        ),
-        usBankAccountFormArguments = usBankAccountFormArguments,
-        supportedPaymentMethods = listOf(
-            LpmRepositoryTestHelpers.card,
-            LpmRepositoryTestHelpers.usBankAccount,
-        ),
-        enabled = true,
-        isLiveMode = false,
-        isProcessing = false,
-        errorMessage = null,
-        isFirstPaymentMethod = false,
-        primaryButtonLabel = "Save".resolvableString,
-        primaryButtonEnabled = false,
-        customPrimaryButtonUiState = null,
-        bankAccountSelection = null,
-        draftPaymentSelection = null,
-        errorReporter = FakeErrorReporter(),
-    )
+            formFieldValues = FormFieldValues(
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+            ),
+            formElements = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFactory.create()
+            ).formElementsForCode(
+                code = PaymentMethod.Type.Card.code,
+                uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                    coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
+                    cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                    linkConfigurationCoordinator = null,
+                    onLinkInlineSignupStateChanged = {},
+                    autocompleteAddressInteractorFactory = null,
+                    linkInlineHandler = null
+                )
+            ) ?: listOf(),
+            formArguments = FormArguments(
+                paymentMethodCode = PaymentMethod.Type.Card.code,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                merchantName = "",
+                hasIntentToSetup = true,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            ),
+            usBankAccountFormArguments = usBankAccountFormArguments,
+            supportedPaymentMethods = listOf(
+                SupportedPaymentMethodFixtures.card,
+                SupportedPaymentMethodFixtures.usBankAccount,
+            ),
+            enabled = true,
+            isLiveMode = false,
+            isProcessing = false,
+            errorMessage = null,
+            isFirstPaymentMethod = false,
+            primaryButtonLabel = "Save".resolvableString,
+            primaryButtonEnabled = false,
+            customPrimaryButtonUiState = null,
+            bankAccountSelection = null,
+            draftPaymentSelection = null,
+            errorReporter = FakeErrorReporter(),
+        )
+    }
 
     @Test
     fun testDefault() {
@@ -165,6 +193,30 @@ internal class CustomerSheetScreenshotTest {
                 userFacingLogger = FakeUserFacingLogger(),
             )
         }
+    }
+
+    @Test
+    fun testAlwaysDarkTheme() {
+        snapshotWithAppearance(
+            PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysDark),
+        )
+    }
+
+    @Test
+    fun testAlwaysLightTheme() {
+        snapshotWithAppearance(
+            PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysLight),
+        )
+    }
+
+    @Test
+    fun testAutomaticTheme() {
+        snapshotWithAppearance(PaymentSheet.Appearance())
+    }
+
+    @Test
+    fun testCustomAppearanceTheme() {
+        snapshotWithAppearance(PaymentSheetAppearance.CrazyAppearance.appearance)
     }
 
     @Test
@@ -405,5 +457,19 @@ internal class CustomerSheetScreenshotTest {
             ).also { closeInteractorRule.track(it) },
             isLiveMode = true,
         )
+    }
+
+    private fun snapshotWithAppearance(appearance: PaymentSheet.Appearance) {
+        scopedThemePaparazzi.snapshot {
+            PaymentElementTheme(appearance = appearance) {
+                Surface(color = MaterialTheme.colors.surface) {
+                    CustomerSheetScreen(
+                        viewState = selectPaymentMethodViewState,
+                        paymentMethodNameProvider = { it!!.resolvableString },
+                        userFacingLogger = FakeUserFacingLogger(),
+                    )
+                }
+            }
+        }
     }
 }

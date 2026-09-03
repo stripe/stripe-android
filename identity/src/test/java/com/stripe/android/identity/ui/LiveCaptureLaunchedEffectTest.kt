@@ -19,11 +19,13 @@ import com.stripe.android.identity.navigation.CouldNotCaptureDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -33,6 +35,7 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -52,6 +55,7 @@ class LiveCaptureLaunchedEffectTest {
     }
     private val mockVerificationPage = mock<VerificationPage> {
         on { documentCapture } doReturn mockDocumentCapture
+        on { experiments } doReturn emptyList()
     }
     private val pageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
     private val mockScreenTracker = mock<ScreenTracker>()
@@ -61,12 +65,14 @@ class LiveCaptureLaunchedEffectTest {
         on { pageAndModelFiles } doReturn pageAndModel
         on { workContext } doReturn UnconfinedTestDispatcher()
         on { screenTracker } doReturn mockScreenTracker
+        on { selfieTrainingConsent } doReturn false
     }
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>()
     private val mockNavController = mock<NavController>()
 
     @Test
     fun verifyFaceDetectorFinishedResult() {
+        val faceDetectorTransitioner = mock<FaceDetectorTransitioner>()
         val faceScannedState = IdentityScanViewModel.State.Scanned(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -76,7 +82,7 @@ class LiveCaptureLaunchedEffectTest {
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.SELFIE,
-                    transitioner = mock()
+                    transitioner = faceDetectorTransitioner
                 )
             )
         )
@@ -84,11 +90,20 @@ class LiveCaptureLaunchedEffectTest {
         testLiveCaptureLaunchedEffect(
             scannerState = faceScannedState
         ) {
+            verify(mockIdentityViewModel).clearSelfieUploadedState()
             verify(mockIdentityViewModel).updateAnalyticsState(
                 argWhere { block ->
                     block(AnalyticsState()).selfieModelScore == FACE_SCORE
                 }
             )
+            runBlocking {
+                verify(mockIdentityViewModel).collectDataForSelfieScreen(
+                    same(mockNavController),
+                    same(faceDetectorTransitioner),
+                    same(mockVerificationPage),
+                    eq(false)
+                )
+            }
         }
     }
 

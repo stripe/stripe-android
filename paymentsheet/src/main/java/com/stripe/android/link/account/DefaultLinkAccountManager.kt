@@ -120,21 +120,25 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
         }.mapCatching { account ->
-            runCatching {
-                linkRepository.logOut(
-                    consumerSessionClientSecret = account.clientSecret,
-                    consumerAccountPublishableKey = account.consumerPublishableKey,
-                ).getOrThrow()
-            }.onSuccess {
-                errorReporter.report(ErrorReporter.SuccessEvent.LINK_LOG_OUT_SUCCESS)
-                Logger.getInstance(BuildConfig.DEBUG).debug("Logged out of Link successfully")
-            }.onFailure { error ->
-                errorReporter.report(
-                    ErrorReporter.ExpectedErrorEvent.LINK_LOG_OUT_FAILURE,
-                    StripeException.create(error)
-                )
-                Logger.getInstance(BuildConfig.DEBUG).warning("Failed to log out of Link: $error")
-            }.getOrThrow()
+            logOut(account).getOrThrow()
+        }
+    }
+
+    override suspend fun logOut(linkAccount: LinkAccount): Result<ConsumerSession> {
+        return runCatching {
+            linkRepository.logOut(
+                consumerSessionClientSecret = linkAccount.clientSecret,
+                consumerAccountPublishableKey = linkAccount.consumerPublishableKey,
+            ).getOrThrow()
+        }.onSuccess {
+            errorReporter.report(ErrorReporter.SuccessEvent.LINK_LOG_OUT_SUCCESS)
+            Logger.getInstance(BuildConfig.DEBUG).debug("Logged out of Link successfully")
+        }.onFailure { error ->
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.LINK_LOG_OUT_FAILURE,
+                StripeException.create(error)
+            )
+            Logger.getInstance(BuildConfig.DEBUG).warning("Failed to log out of Link: $error")
         }
     }
 

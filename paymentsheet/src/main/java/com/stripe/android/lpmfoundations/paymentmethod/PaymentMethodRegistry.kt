@@ -21,18 +21,22 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealWeroDefi
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KonbiniDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.KrCardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayByBankDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayNowDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.PaycoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PromptPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.SequraDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
@@ -65,17 +69,21 @@ internal object PaymentMethodRegistry {
         InstantDebitsDefinition,
         KlarnaDefinition,
         KonbiniDefinition,
+        KrCardDefinition,
         MobilePayDefinition,
         MultibancoDefinition,
+        NaverPayDefinition,
         OxxoDefinition,
         P24Definition,
         PayByBankDefinition,
         PayNowDefinition,
         PayPalDefinition,
         PayPayDefinition,
+        PaycoDefinition,
         PromptPayDefinition,
         RevolutPayDefinition,
         SatispayDefinition,
+        SequraDefinition,
         SepaDebitDefinition,
         SunbitDefinition,
         SwishDefinition,

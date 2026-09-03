@@ -380,7 +380,7 @@ private fun PaymentSheetContent(
                 modifier = Modifier
                     .padding(horizontalPadding)
                     .padding(bottom = 8.dp)
-                    .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
+                    .testTag(SHEET_MANDATE_TEST_TAG),
             )
         }
 
@@ -390,7 +390,7 @@ private fun PaymentSheetContent(
                 modifier = Modifier
                     .padding(horizontalPadding)
                     .padding(top = 2.dp, bottom = 8.dp)
-                    .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
+                    .testTag(SHEET_ERROR_TEST_TAG),
             )
         }
     }
@@ -404,7 +404,7 @@ private fun PaymentSheetContent(
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .padding(horizontalPadding)
-                    .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
+                    .testTag(SHEET_MANDATE_TEST_TAG),
             )
         }
     }
@@ -501,7 +501,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
 
     val modifier = Modifier
         .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
-        .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+        .testTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button
 
@@ -547,7 +547,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
         if (uiState?.canClickWhileDisabled == true && uiState?.enabled != true) {
             Box(
                 Modifier
-                    .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
+                    .testTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
                     .matchParentSize()
                     .pointerInput(Unit) {
                         detectTapGestures { uiState?.onDisabledClick?.invoke() }
@@ -577,10 +577,4 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     }
 }
 
-const val PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG = "PRIMARY_BUTTON_DISABLED_OVERLAY"
-const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
-const val PAYMENT_SHEET_ERROR_TEXT_TEST_TAG = "PAYMENT_SHEET_ERROR"
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG = "PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG"
 private const val POST_SUCCESS_ANIMATION_DELAY = 1500L

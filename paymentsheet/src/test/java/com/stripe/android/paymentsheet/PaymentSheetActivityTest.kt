@@ -24,6 +24,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -38,6 +39,7 @@ import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
@@ -88,10 +90,10 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
@@ -956,7 +958,7 @@ internal class PaymentSheetActivityTest {
             val text = "some text"
             val mandateNode = composeTestRule.onNode(hasText(text))
             val primaryButtonNode = composeTestRule
-                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
             mandateNode.assertIsDisplayed()
@@ -979,7 +981,7 @@ internal class PaymentSheetActivityTest {
             val text = "some text"
             val mandateNode = composeTestRule.onNode(hasText(text))
             val primaryButtonNode = composeTestRule
-                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
             mandateNode.assertIsDisplayed()
@@ -1007,7 +1009,7 @@ internal class PaymentSheetActivityTest {
             val text = "some text"
             val mandateNode = composeTestRule.onNode(hasText(text))
             val primaryButtonNode = composeTestRule
-                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
             mandateNode.performScrollTo()
@@ -1160,7 +1162,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             composeTestRule
-                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
                 .performClick()
 
             composeTestRule.waitForIdle()
@@ -1191,7 +1193,7 @@ internal class PaymentSheetActivityTest {
             scenario.onActivity {
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isEqualTo(initialSelection)
-                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
                 assertThat(viewModel.navigationHandler.currentScreen.value)
                     .isInstanceOf<SelectSavedPaymentMethods>()
 
@@ -1200,13 +1202,13 @@ internal class PaymentSheetActivityTest {
 
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isEqualTo(newSelection)
-                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
 
                 viewModel.transitionToAddPaymentScreen()
 
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isNull()
-                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsNotEnabled()
+                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsNotEnabled()
                 assertThat(viewModel.navigationHandler.currentScreen.value)
                     .isInstanceOf<AddAnotherPaymentMethod>()
 
@@ -1214,7 +1216,7 @@ internal class PaymentSheetActivityTest {
 
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isEqualTo(newSelection)
-                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
                 assertThat(viewModel.navigationHandler.currentScreen.value)
                     .isInstanceOf<SelectSavedPaymentMethods>()
             }
@@ -1378,7 +1380,10 @@ internal class PaymentSheetActivityTest {
     private fun createGooglePayPaymentMethodLauncherFactory() =
         object : InternalGooglePayPaymentMethodLauncherFactory {
             override fun create(
+                instanceId: String,
+                lifecycleOwner: LifecycleOwner,
                 activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+                onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
             ): InternalGooglePayPaymentMethodLauncher {
                 return mock<InternalGooglePayPaymentMethodLauncher>()
             }

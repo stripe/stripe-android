@@ -32,6 +32,11 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                     VerificationSessionCreationRequest.serializer(),
                     VerificationSessionCreationRequest(
                         type = submissionState.verificationType.value,
+                        threeDFaceCaptureEnabled = if (submissionState.requireSelfie) {
+                            submissionState.threeDFaceCaptureEnabled
+                        } else {
+                            null
+                        },
                         options =
                         when (submissionState.verificationType) {
                             VerificationType.DOCUMENT -> {

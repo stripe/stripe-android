@@ -12,7 +12,6 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -24,13 +23,11 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.uicore.FormInsets
@@ -45,11 +42,7 @@ import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -63,26 +56,23 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutStateLoaderTest {
 
-    @get:Rule
-    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
-
     @Test
     fun `loadInitial commits state with payment method metadata`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+        assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNotNull()
     }
 
     @Test
-    fun `loadInitial commits common configuration derived from the controller configuration`() = runScenario {
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
-                .build(),
-            checkoutSessionResponse = response(merchantCountry = "US"),
-        )
+    fun `loadInitial reports immediate row selection action to payment element loader`() = runScenario(
+        internalRowSelectionCallback = {},
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
-        assertThat(stateHolder.state?.commonConfiguration?.googlePay?.countryCode).isEqualTo("US")
+        val integrationConfiguration = paymentElementLoader.lastIntegrationConfiguration
+            as PaymentElementLoader.Configuration.Embedded
+        assertThat(integrationConfiguration.isRowSelectionImmediateAction).isTrue()
     }
 
     @Test
@@ -123,52 +113,6 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
             .isEqualTo(listOf("klarna", "card"))
-    }
-
-    @Test
-    fun `loadInitial passes preferred networks to common configuration`() = runScenario {
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration()
-                .paymentElement(
-                    PaymentElement.Configuration().preferredNetworks(
-                        listOf(CardBrand.CartesBancaires, CardBrand.Visa)
-                    )
-                )
-                .build(),
-            checkoutSessionResponse = response(),
-        )
-
-        assertThat(stateHolder.state?.commonConfiguration?.preferredNetworks)
-            .isEqualTo(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
-    }
-
-    @Test
-    fun `loadInitial passes opens card scanner automatically to common configuration`() = runScenario {
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration()
-                .paymentElement(PaymentElement.Configuration().opensCardScannerAutomatically(true))
-                .build(),
-            checkoutSessionResponse = response(),
-        )
-
-        assertThat(stateHolder.state?.commonConfiguration?.opensCardScannerAutomatically).isTrue()
-    }
-
-    @Test
-    fun `loadInitial passes allowed card funding types to common configuration`() = runScenario {
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration()
-                .paymentElement(
-                    PaymentElement.Configuration().allowedCardFundingTypes(
-                        listOf(PaymentElement.Configuration.CardFundingType.Debit)
-                    )
-                )
-                .build(),
-            checkoutSessionResponse = response(),
-        )
-
-        assertThat(stateHolder.state?.commonConfiguration?.allowedCardFundingTypes)
-            .isEqualTo(listOf(PaymentSheet.CardFundingType.Debit))
     }
 
     @Test
@@ -308,8 +252,6 @@ internal class CheckoutStateLoaderTest {
                     savedStateHandle = savedStateHandle,
                     isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 ),
-                eventReporter = FakeEventReporter(),
-                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
                 internalRowSelectionCallback = { null },
             )
         },
@@ -420,14 +362,10 @@ internal class CheckoutStateLoaderTest {
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
-        collectedDetails = CheckoutCollectedDetails(),
+        collectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration = CheckoutCommonConfigurationFactory(appName = "Example, Inc.").create(
-            configuration = CheckoutController.Configuration().build(),
-            checkoutSessionResponse = checkoutSessionResponse,
-            collectedDetails = CheckoutCollectedDetails(),
-        ),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
@@ -454,6 +392,7 @@ internal class CheckoutStateLoaderTest {
         shouldFail: Boolean = false,
         isGooglePayAvailable: Boolean = false,
         customer: CustomerState? = null,
+        internalRowSelectionCallback: (() -> Unit)? = null,
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
@@ -476,8 +415,12 @@ internal class CheckoutStateLoaderTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = stateHolder.selection,
-            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata },
-            customerMetadata = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata?.customerMetadata },
+            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentMethodMetadata
+            },
+            customerMetadata = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentMethodMetadata?.customerMetadata
+            },
         )
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
@@ -495,6 +438,7 @@ internal class CheckoutStateLoaderTest {
             selectionChooser = chooser,
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
+            internalRowSelectionCallback = { internalRowSelectionCallback },
         )
 
         Scenario(

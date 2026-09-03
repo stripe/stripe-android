@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val mobilePayFullRawValues = mapOf(
@@ -55,11 +56,41 @@ private val mobilePayWithBillingAddressExpectedPaymentMethodParams = PaymentMeth
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
+private val mobilePayAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.MobilePay.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line2 = null,
+                country = "DK",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.MobilePay.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "country" to "DK",
+                ),
+            ),
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
 internal val mobilePayTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "MobilePay Never",
-        paymentMethodType = PaymentMethod.Type.MobilePay,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.MobilePay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = mobilePayFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = mobilePayNoBillingDetailsExpectedPaymentMethodParams,
@@ -69,8 +100,12 @@ internal val mobilePayTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "MobilePay Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.MobilePay,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.MobilePay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = mobilePayFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = mobilePayNoBillingDetailsExpectedPaymentMethodParams,
@@ -79,9 +114,24 @@ internal val mobilePayTestCases = listOf(
         ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
+        name = "MobilePay AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.MobilePay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = mobilePayFullRawValues,
+        expectedParams = mobilePayAutomaticWithTaxExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
         name = "MobilePay Full",
-        paymentMethodType = PaymentMethod.Type.MobilePay,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.MobilePay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = mobilePayFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = mobilePayWithBillingAddressExpectedPaymentMethodParams,

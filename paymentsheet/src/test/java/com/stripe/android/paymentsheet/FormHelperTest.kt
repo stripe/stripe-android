@@ -12,7 +12,7 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -179,7 +179,7 @@ internal class FormHelperTest {
                 stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION
             )
         ).createFormArguments(
-            paymentMethodCode = LpmRepositoryTestHelpers.card.code,
+            paymentMethodCode = SupportedPaymentMethodFixtures.card.code,
         )
 
         assertThat(observedArgs).isEqualTo(
@@ -234,23 +234,31 @@ internal class FormHelperTest {
             val cardBrand = "visa"
             val name = "Joe"
             val receivedSelection = CompletableDeferred<PaymentSelection?>()
+            val linkInlineHandler = LinkInlineHandler.create()
+            val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
             val formHelper = DefaultFormHelper(
                 coroutineScope = coroutineScope,
-                linkInlineHandler = LinkInlineHandler.create(),
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                newPaymentSelectionProvider = { null },
-                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                linkInlineHandler = linkInlineHandler,
+                paymentMethodMetadata = paymentMethodMetadata,
                 selectionUpdater = { selection -> receivedSelection.complete(selection) },
-                setAsDefaultMatchesSaveForFutureUse = false,
                 eventReporter = FakeEventReporter(),
                 savedStateHandle = SavedStateHandle(),
-                autocompleteAddressInteractorFactory = null,
-                automaticallyLaunchedCardScanFormDataHelper = null,
-                tapToAddHelper = null,
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-                isNfcScanningAvailable = null,
+                formDefinitionFactory = DefaultFormDefinitionFactory(
+                    coroutineScope = coroutineScope,
+                    linkInlineHandler = linkInlineHandler,
+                    cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    newPaymentSelectionProvider = { null },
+                    linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                    setAsDefaultMatchesSaveForFutureUse = false,
+                    autocompleteAddressInteractorFactory = null,
+                    isLinkUI = false,
+                    automaticallyLaunchedCardScanFormDataHelper = null,
+                    tapToAddHelper = null,
+                    paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                    isNfcScanningAvailable = null,
+                ),
             )
 
             val formFieldValues = FormFieldValues(
@@ -768,22 +776,29 @@ internal class FormHelperTest {
             { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
+        val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher()))
         return DefaultFormHelper(
-            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
-            newPaymentSelectionProvider = newPaymentSelectionProvider,
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
-            setAsDefaultMatchesSaveForFutureUse = false,
             eventReporter = eventReporter,
             savedStateHandle = SavedStateHandle(),
-            autocompleteAddressInteractorFactory = null,
-            automaticallyLaunchedCardScanFormDataHelper = null,
-            tapToAddHelper = tapToAddHelper,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
-            isNfcScanningAvailable = null,
+            formDefinitionFactory = DefaultFormDefinitionFactory(
+                coroutineScope = coroutineScope,
+                linkInlineHandler = linkInlineHandler,
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                paymentMethodMetadata = paymentMethodMetadata,
+                newPaymentSelectionProvider = newPaymentSelectionProvider,
+                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                setAsDefaultMatchesSaveForFutureUse = false,
+                autocompleteAddressInteractorFactory = null,
+                isLinkUI = false,
+                automaticallyLaunchedCardScanFormDataHelper = null,
+                tapToAddHelper = tapToAddHelper,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                isNfcScanningAvailable = null,
+            ),
         )
     }
 

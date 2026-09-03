@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 internal class FakeSavedPaymentMethodConfirmInteractor(
     formEnabled: Boolean = false,
 ) : SavedPaymentMethodConfirmInteractor {
+    val closeCalls = Turbine<Unit>()
+
     private val _state = MutableStateFlow(
         SavedPaymentMethodConfirmInteractor.State(
             displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
@@ -56,6 +59,14 @@ internal class FakeSavedPaymentMethodConfirmInteractor(
         )
     )
     override val state: StateFlow<SavedPaymentMethodConfirmInteractor.State> = _state.asStateFlow()
+
+    override fun close() {
+        closeCalls.add(Unit)
+    }
+
+    fun validate() {
+        closeCalls.ensureAllEventsConsumed()
+    }
 
     class Factory : SavedPaymentMethodConfirmInteractor.Factory {
         override fun create(

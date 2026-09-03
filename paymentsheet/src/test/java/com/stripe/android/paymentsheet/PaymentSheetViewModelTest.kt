@@ -35,7 +35,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -813,11 +813,12 @@ internal class PaymentSheetViewModelTest {
             )
 
             val linkInlineHandler = LinkInlineHandler.create()
-            val formHelper = DefaultFormHelper.create(
-                viewModel = viewModel,
+            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
                 coroutineScope = viewModel.viewModelScope,
                 paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                 linkInlineHandler = linkInlineHandler,
+                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+                paymentMethodMessagePromotionsHelper = null,
             )
 
             formHelper.onFormFieldValuesChanged(
@@ -1610,12 +1611,14 @@ internal class PaymentSheetViewModelTest {
             stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
         )
 
-        val observedArgs = DefaultFormHelper.create(
-            viewModel = viewModel,
+        val observedArgs = BaseSheetFormHelperFactory(viewModel).create(
             coroutineScope = viewModel.viewModelScope,
             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+            linkInlineHandler = LinkInlineHandler.create(),
+            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+            paymentMethodMessagePromotionsHelper = null,
         ).createFormArguments(
-            paymentMethodCode = LpmRepositoryTestHelpers.card.code,
+            paymentMethodCode = SupportedPaymentMethodFixtures.card.code,
         )
 
         assertThat(observedArgs).isEqualTo(
@@ -2790,11 +2793,12 @@ internal class PaymentSheetViewModelTest {
                 assertThat(awaitItem()?.enabled).isFalse()
 
                 val linkInlineHandler = LinkInlineHandler.create()
-                val formHelper = DefaultFormHelper.create(
-                    viewModel = viewModel,
+                val formHelper = BaseSheetFormHelperFactory(viewModel).create(
                     coroutineScope = viewModel.viewModelScope,
                     paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                     linkInlineHandler = linkInlineHandler,
+                    shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+                    paymentMethodMessagePromotionsHelper = null,
                 )
 
                 formHelper.onFormFieldValuesChanged(

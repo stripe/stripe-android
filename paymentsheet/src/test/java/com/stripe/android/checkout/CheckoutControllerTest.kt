@@ -13,9 +13,9 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -116,8 +117,8 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends adaptive_pricing allowed true when configured`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().adaptivePricing(
-            CheckoutController.Configuration.AdaptivePricing().allowed(true),
+        configuration = CheckoutController.Configuration().currencySelectorElement(
+            CurrencySelectorElement.Configuration(),
         ),
         networkSetup = {
             networkRule.checkoutInit(
@@ -208,19 +209,12 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure sends the trimmed default email to the checkout session`() = runConfigureScenario(
+    fun `configure seeds the default email locally`() = runConfigureScenario(
         configuration = CheckoutController.Configuration().defaults(
-            CheckoutController.Configuration.Defaults().email("  prefill@example.com  ")
+            CheckoutController.Configuration.Defaults().email("prefill@example.com")
         ),
         networkSetup = {
             networkRule.checkoutInit(responseFactory = ::successResponse)
-            networkRule.checkoutUpdate(
-                bodyPart("customer_email", "prefill@example.com"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-                responseFactory = successResponseFactory { json ->
-                    json.put("customer_email", "prefill@example.com")
-                },
-            )
         },
     ) {
         result.getOrThrow()
@@ -272,10 +266,7 @@ internal class CheckoutControllerTest {
     fun `configure upgrades Automatic to Full when session requires billing address`() =
         runConfigureScenario(
             configuration = CheckoutController.Configuration().paymentElement(
-                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
-                    BillingDetailsCollectionConfiguration()
-                        .address(BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
-                )
+                PaymentElement.Configuration()
             ),
             networkSetup = {
                 networkRule.checkoutInit(
@@ -405,25 +396,24 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `clearPaymentOption clears paymentOptionDisplayData`() = runTest {
-        val savedStateHandle = parentHandleWithState(
-            CheckoutControllerStateFactory.create(
-                paymentSelection = PaymentSelection.GooglePay,
-                temporarySelection = "card",
-                previousNewSelections = Bundle().apply {
-                    putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-                },
-            )
-        )
-
-        val controller = createController(savedStateHandle)
+    fun `clearPaymentOption clears payment option state`() = runMutationScenario(
+        paymentSelection = PaymentSelection.GooglePay,
+        temporarySelection = "card",
+        previousNewSelections = Bundle().apply {
+            putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        },
+    ) {
         controller.session.test {
             assertThat(awaitItem()?.paymentOptionDisplayData).isNotNull()
 
-            assertThat(controller.clearPaymentOption().isSuccess).isTrue()
+            controller.clearPaymentOption().getOrThrow()
 
             assertThat(requireNotNull(awaitItem()).paymentOptionDisplayData).isNull()
         }
+        val clearedState = committedState()
+        assertThat(clearedState.paymentSelection).isNull()
+        assertThat(clearedState.temporarySelection).isNull()
+        assertThat(clearedState.previousNewSelections.isEmpty).isTrue()
     }
 
     @Test
@@ -452,7 +442,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `clearPaymentOption returns failure and preserves selection while a mutation is in flight`() =
+    fun `clearPaymentOption waits for an in-flight mutation before clearing the selection`() =
         runMutationScenario(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION) {
             val holdResponse = CountDownLatch(1)
             networkRule.checkoutUpdate(
@@ -463,17 +453,15 @@ internal class CheckoutControllerTest {
             }
             val mutation = async { controller.applyPromotionCode("10OFF") }
             testScheduler.advanceUntilIdle()
+            val clearPaymentOption = async { controller.clearPaymentOption() }
+            testScheduler.advanceUntilIdle()
 
-            val result = controller.clearPaymentOption()
-
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).hasMessageThat()
-                .isEqualTo("Cannot mutate checkout session while another mutation is in progress.")
             assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
 
             holdResponse.countDown()
             assertThat(mutation.await().isSuccess).isTrue()
-            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+            assertThat(clearPaymentOption.await().isSuccess).isTrue()
+            assertThat(controller.session.value?.paymentOptionDisplayData).isNull()
         }
 
     @Test
@@ -611,13 +599,9 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `updateEmail sends customer_email and updates session on success`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("customer_email", "checkout@example.com"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-            responseFactory = successResponseFactory(),
-        )
-
+    fun `updateEmail stores email locally without a network call`() = runMutationScenario {
+        // No checkoutUpdate is enqueued: email is client-only state and reloads from the existing
+        // response, so NetworkRule will fail the test if a request is made.
         val result = controller.updateEmail("checkout@example.com")
 
         result.getOrThrow()
@@ -625,41 +609,20 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `updateEmail trims whitespace`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("customer_email", "checkout@example.com"),
-            responseFactory = successResponseFactory(),
-        )
-
-        val result = controller.updateEmail("  checkout@example.com  ")
-
-        assertThat(result.isSuccess).isTrue()
-    }
-
-    @Test
-    fun `updateEmail sends empty customer_email when cleared with null`() = runMutationScenario {
-        networkRule.checkoutUpdate(
-            bodyPart("customer_email", ""),
-            responseFactory = successResponseFactory(),
-        )
-
+    fun `updateEmail clears email when session has no customer email`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
         val result = controller.updateEmail(null)
 
-        assertThat(result.isSuccess).isTrue()
+        result.getOrThrow()
+        assertThat(controller.session.value?.email).isNull()
     }
 
     @Test
-    fun `updateEmail returns failure and preserves session on error`() = runMutationScenario {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "Invalid email"}}""")
-        }
-        val before = controller.session.value
+    fun `updateEmail takes precedence over the session customer email`() = runMutationScenario {
+        controller.updateEmail("local@example.com").getOrThrow()
 
-        val result = controller.updateEmail("invalid")
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(controller.session.value).isEqualTo(before)
+        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
     }
 
     @Test
@@ -825,6 +788,19 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `refresh commits a complete session status to the state holder`() = runMutationScenario {
+        networkRule.checkoutInit(
+            responseFactory = successResponseFactory { json -> json.put("status", "complete") },
+        )
+
+        val result = controller.runServerUpdate { Result.success(Unit) }
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(controller.session.value?.status)
+            .isInstanceOf(CheckoutController.Session.Status.Complete::class.java)
+    }
+
+    @Test
     fun `runServerUpdate returns failure when serverUpdate throws`() = runMutationScenario {
         val before = controller.session.value
 
@@ -941,14 +917,14 @@ internal class CheckoutControllerTest {
             // The second mutation must target the session id produced by the first, proving the
             // mutex serialized them (an unserialized call would hit the original id and fail).
             networkRule.checkoutUpdate(
-                bodyPart("customer_email", "example3@example.com"),
+                bodyPart("updated_currency", "eur"),
                 sessionId = "cs_test_after_promo",
                 responseFactory = successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") },
             )
 
             val results = listOf(
                 async { controller.applyPromotionCode("10OFF") },
-                async { controller.updateEmail("example3@example.com") },
+                async { controller.updateCurrency("eur") },
             ).awaitAll()
 
             assertThat(results[0].isSuccess).isTrue()
@@ -1097,8 +1073,8 @@ internal class CheckoutControllerTest {
         checkoutInit(responseFactory = ::successResponse)
     }
 
-    // The merged loader configuration requires a billing email, which `configure` sources from the
-    // session's customer_email. The base fixture omits it, so inject one for the success paths.
+    // The base fixture omits customer_email. Inject one for standard success paths; a test can
+    // remove it in the JSON modifier when exercising an absent session email.
     // Link is disabled so the loader doesn't fire a consumer session lookup that's unrelated to
     // what these tests verify.
     private fun successResponse(response: MockResponse) {
@@ -1148,15 +1124,6 @@ internal class CheckoutControllerTest {
                 .put("automatic_tax_address_source", source),
         )
     }
-
-    // Simulates process death by persisting the handle's registered providers into a bundle and
-    // rebuilding a fresh handle from it, the way SavedStateRegistry does across a real restart. The
-    // controller's namespaced child is then restored from that serialized state.
-    // Persisting a handle can only be done through the restricted savedStateProvider(); the same
-    // suppression the production code uses applies here.
-    @Suppress("RestrictedApi")
-    private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
-        SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
 
     @Suppress("RestrictedApi")
     private fun parentHandleWithState(state: CheckoutControllerState): SavedStateHandle {
@@ -1212,6 +1179,7 @@ internal class CheckoutControllerTest {
                 application = applicationContext,
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = CheckoutController.ResultCallback {},
+                rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
                 checkoutControllerSavedState = controllerSavedState,
             ).checkoutController
         )
@@ -1260,16 +1228,26 @@ internal class CheckoutControllerTest {
     private fun runMutationScenario(
         initModifier: (JSONObject) -> Unit = {},
         paymentSelection: PaymentSelection? = null,
+        temporarySelection: String? = null,
+        previousNewSelections: Bundle = Bundle(),
         sheetIsOpen: Boolean = false,
         assertLoadingConsumed: Boolean = false,
         block: suspend MutationScenario.() -> Unit,
     ) = runTest {
-        networkRule.checkoutInit(responseFactory = successResponseFactory(initModifier))
+        networkRule.checkoutInit(
+            responseFactory = successResponseFactory(
+                jsonModifier = initModifier,
+            )
+        )
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
         controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
         paymentSelection?.let(setup.stateHolder::setSelection)
+        temporarySelection?.let(setup.stateHolder::setTemporarySelection)
+        if (!previousNewSelections.isEmpty) {
+            setup.stateHolder.setPreviousNewSelections(previousNewSelections)
+        }
         setup.sheetStateHolder.sheetIsOpen = sheetIsOpen
 
         turbineScope {

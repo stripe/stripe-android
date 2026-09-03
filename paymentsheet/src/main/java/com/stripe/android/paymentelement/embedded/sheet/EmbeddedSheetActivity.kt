@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,13 +32,15 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.launch
@@ -75,7 +78,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (args == null) {
+        val activityArgs = args ?: run {
             finish()
             return
         }
@@ -102,8 +105,10 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         }
 
         setContent {
-            StripeTheme {
-                SheetContent()
+            PaymentElementTheme(appearance = activityArgs.configuration.appearance) {
+                EventReporterProvider(eventReporter) {
+                    SheetContent()
+                }
             }
         }
     }
@@ -122,7 +127,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             var hasResult by remember { mutableStateOf(false) }
             if (!hasResult) {
                 Box(modifier = Modifier.padding(bottom = 20.dp)) {
-                    ScreenContent(embeddedNavigator, screen)
+                    EmbeddedSheetScreenContent(embeddedNavigator, screen)
                 }
                 LaunchedEffect(Unit) {
                     embeddedNavigator.result.collect { result ->
@@ -142,54 +147,6 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    @Composable
-    private fun ScreenContent(
-        navigator: EmbeddedNavigator,
-        screen: EmbeddedNavigator.Screen
-    ) {
-        val density = LocalDensity.current
-        var contentHeight by remember { mutableStateOf(0.dp) }
-        val scrollState = rememberScrollState()
-        BottomSheetScaffold(
-            topBar = {
-                val topBarState by remember(screen) {
-                    screen.topBarState()
-                }.collectAsState()
-                val isPerformingNetworkOperation by remember(screen) {
-                    screen.isPerformingNetworkOperation()
-                }.collectAsState()
-                PaymentSheetTopBar(
-                    state = topBarState,
-                    canNavigateBack = navigator.canGoBack,
-                    isEnabled = !isPerformingNetworkOperation,
-                    handleBackPressed = { embeddedNavigator.performAction(EmbeddedNavigator.Action.Back) },
-                )
-            },
-            content = {
-                val horizontalPadding = StripeTheme.getOuterFormInsets()
-                val headerText by remember(screen) {
-                    screen.title()
-                }.collectAsState()
-                headerText?.let { text ->
-                    H4Text(
-                        text = text.resolve(),
-                        modifier = Modifier
-                            .padding(bottom = 16.dp)
-                            .padding(horizontalPadding),
-                    )
-                }
-
-                Column(modifier = Modifier.animateContentSize()) {
-                    screen.Content()
-                }
-            },
-            modifier = Modifier.onGloballyPositioned {
-                contentHeight = with(density) { it.size.height.toDp() }
-            },
-            scrollState = scrollState,
-        )
     }
 
     override fun finish() {
@@ -236,6 +193,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 previousNewSelections = selectionHolder.previousNewSelections,
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
+                checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
                 launchMode = args?.launchMode ?: EmbeddedLaunchMode.Manage,
             )
@@ -257,4 +215,52 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             EmbeddedActivityResult.toIntent(intent, result)
         )
     }
+}
+
+@Composable
+internal fun EmbeddedSheetScreenContent(
+    navigator: EmbeddedNavigator,
+    screen: EmbeddedNavigator.Screen,
+) {
+    val density = LocalDensity.current
+    var contentHeight by remember { mutableStateOf(0.dp) }
+    val scrollState = rememberScrollState()
+    BottomSheetScaffold(
+        topBar = {
+            val topBarState by remember(screen) {
+                screen.topBarState()
+            }.collectAsState()
+            val isPerformingNetworkOperation by remember(screen) {
+                screen.isPerformingNetworkOperation()
+            }.collectAsState()
+            PaymentSheetTopBar(
+                state = topBarState,
+                canNavigateBack = navigator.canGoBack,
+                isEnabled = !isPerformingNetworkOperation,
+                handleBackPressed = { navigator.performAction(EmbeddedNavigator.Action.Back) },
+            )
+        },
+        content = {
+            val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
+            val headerText by remember(screen) {
+                screen.title()
+            }.collectAsState()
+            headerText?.let { text ->
+                H4Text(
+                    text = text.resolve(),
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .padding(horizontalPadding),
+                )
+            }
+
+            Column(modifier = Modifier.animateContentSize()) {
+                screen.Content()
+            }
+        },
+        modifier = Modifier.onGloballyPositioned {
+            contentHeight = with(density) { it.size.height.toDp() }
+        },
+        scrollState = scrollState,
+    )
 }

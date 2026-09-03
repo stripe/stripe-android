@@ -655,7 +655,7 @@ class CryptoApiRepositoryTest {
             assertThat(params["first_name"]).isEqualTo("Test")
             assertThat(params["last_name"]).isEqualTo("User")
             assertThat(params["id_number_last4"]).isEqualTo("7777")
-            assertThat(params["id_type"]).isEqualTo("social_security_number") // Hardcoded to match iOS
+            assertThat(params["id_type"]).isEqualTo("social_security_number")
             assertThat(dobValue["day"]).isEqualTo("1")
             assertThat(dobValue["month"]).isEqualTo("3")
             assertThat(dobValue["year"]).isEqualTo("1975")
@@ -1080,7 +1080,7 @@ class CryptoApiRepositoryTest {
         assertThat(params["first_name"]).isEqualTo("Test")
         assertThat(params["last_name"]).isEqualTo("User")
         assertThat(params["id_number"]).isEqualTo("999-88-7777")
-        assertThat(params["id_type"]).isEqualTo("social_security_number") // Hardcoded to match iOS
+        assertThat(params["id_type"]).isEqualTo("social_security_number")
         assertThat(dobValue["day"]).isEqualTo("1")
         assertThat(dobValue["month"]).isEqualTo("3")
         assertThat(dobValue["year"]).isEqualTo("1975")

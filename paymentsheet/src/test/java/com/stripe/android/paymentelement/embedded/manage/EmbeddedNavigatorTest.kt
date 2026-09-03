@@ -6,7 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -22,6 +22,7 @@ import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirm
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
@@ -243,6 +244,46 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `ReplaceCurrentScreen reports replaced screen hidden and replacement shown`() = testScenario {
+        val updateInteractor = FakeUpdatePaymentMethodInteractor()
+        val manageUpdateScreen = EmbeddedNavigator.Screen.ManageUpdate(updateInteractor)
+        val paymentOptionsScreen = createPaymentOptionsScreen()
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(manageUpdateScreen))
+            assertThat(awaitItem()).isEqualTo(manageUpdateScreen)
+            assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(paymentOptionsScreen))
+
+            assertThat(awaitItem()).isEqualTo(paymentOptionsScreen)
+        }
+
+        assertThat(eventReporter.hideEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(updateInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `ReplaceCurrentScreen does not report dropped replacement shown`() = testScenario {
+        val (formScreen, formInteractor) = createFormScreen()
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = createPaymentOptionsScreen(interactor = paymentOptionsInteractor)
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(paymentOptionsScreen))
+
+            assertThat(paymentOptionsInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(awaitItem()).isEqualTo(formScreen)
+        }
+
+        paymentOptionsInteractor.validate()
+        formInteractor.validate()
+    }
+
+    @Test
     fun `initial screen ManageUpdate calls onShowEditablePaymentOption`() = runTest {
         val eventReporter = FakeEventReporter()
         EmbeddedNavigator(
@@ -391,7 +432,7 @@ internal class EmbeddedNavigatorTest {
         val screen = createHorizontalPaymentOptionsScreen(
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState().copy(
-                    supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
+                    supportedPaymentMethods = listOf(SupportedPaymentMethodFixtures.usBankAccount),
                 ),
             ),
         )
@@ -404,7 +445,7 @@ internal class EmbeddedNavigatorTest {
         val screen = createHorizontalPaymentOptionsScreen(
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState().copy(
-                    supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.card),
+                    supportedPaymentMethods = listOf(SupportedPaymentMethodFixtures.card),
                 ),
             ),
         )
@@ -419,8 +460,8 @@ internal class EmbeddedNavigatorTest {
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState().copy(
                     supportedPaymentMethods = listOf(
-                        LpmRepositoryTestHelpers.card,
-                        LpmRepositoryTestHelpers.usBankAccount,
+                        SupportedPaymentMethodFixtures.card,
+                        SupportedPaymentMethodFixtures.usBankAccount,
                     ),
                 ),
             ),
@@ -428,6 +469,13 @@ internal class EmbeddedNavigatorTest {
 
         assertThat(screen.title().value)
             .isEqualTo(PaymentSheetR.string.stripe_paymentsheet_choose_payment_method.resolvableString)
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions isPerformingNetworkOperation returns processing state`() {
+        val screen = createHorizontalPaymentOptionsScreen(isProcessing = true)
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
     }
 
     @Test
@@ -445,10 +493,10 @@ internal class EmbeddedNavigatorTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = true,
-                    savedPaymentSelectionToConfirm = null,
                 )
             ),
             onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
         )
         val (formScreen, formInteractor) = createFormScreen()
 
@@ -501,6 +549,13 @@ internal class EmbeddedNavigatorTest {
     fun `PaymentOptions isPerformingNetworkOperation returns false`() {
         val screen = createPaymentOptionsScreen()
         assertThat(screen.isPerformingNetworkOperation().value).isFalse()
+    }
+
+    @Test
+    fun `PaymentOptions isPerformingNetworkOperation returns processing state`() {
+        val screen = createPaymentOptionsScreen(isProcessing = true)
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
     }
 
     @Test
@@ -565,6 +620,67 @@ internal class EmbeddedNavigatorTest {
         formScreen.close()
         assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
         formInteractor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm close calls interactor close`() = runTest {
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen()
+
+        screen.close()
+
+        assertThat(interactor.closeCalls.awaitItem()).isEqualTo(Unit)
+        interactor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm topBarState hides test mode label in live mode`() {
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen(isLiveMode = true)
+
+        val topBarState = screen.topBarState().value!!
+
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+        interactor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm topBarState shows test mode label in test mode`() {
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen(isLiveMode = false)
+
+        val topBarState = screen.topBarState().value!!
+
+        assertThat(topBarState.showTestModeLabel).isTrue()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+        interactor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm title returns null`() {
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen()
+
+        assertThat(screen.title().value).isNull()
+        interactor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm maps processing state from state holder`() {
+        val stateHolder = FakeSheetActivityStateHolder(
+            initialState = SheetActivityStateHolder.State(
+                primaryButtonLabel = "Confirm".resolvableString,
+                isEnabled = false,
+                processingState = PrimaryButtonProcessingState.Processing,
+                isProcessing = true,
+                shouldDisplayLockIcon = true,
+            )
+        )
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen(
+            stateHolder = stateHolder,
+        )
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
+        interactor.validate()
     }
 
     @Test
@@ -696,56 +812,58 @@ internal class EmbeddedNavigatorTest {
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
         )
         return EmbeddedNavigator.Screen.Form.Factory(
             interactorFactory = interactorFactory,
-            eventReporter = FakeEventReporter(),
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
-            savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
             customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
         )
     }
 
     private fun createPaymentOptionsScreen(
         isLiveMode: Boolean = true,
+        isProcessing: Boolean = false,
+        interactor: FakePaymentMethodVerticalLayoutInteractor =
+            FakePaymentMethodVerticalLayoutInteractor.create(),
     ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
         return EmbeddedNavigator.Screen.VerticalPaymentOptions(
-            interactor = FakePaymentMethodVerticalLayoutInteractor.create(),
+            interactor = interactor,
             isLiveMode = isLiveMode,
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
                     isEnabled = false,
                     processingState = PrimaryButtonProcessingState.Idle(null),
-                    isProcessing = false,
+                    isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
-                    savedPaymentSelectionToConfirm = null,
                 )
             ),
             onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
         )
     }
 
     private fun createHorizontalPaymentOptionsScreen(
         interactor: AddPaymentMethodInteractor =
             FakeAddPaymentMethodInteractor(FakeAddPaymentMethodInteractor.createState()),
+        isProcessing: Boolean = false,
     ): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = interactor,
-            eventReporter = FakeEventReporter(),
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
                     isEnabled = false,
                     processingState = PrimaryButtonProcessingState.Idle(null),
-                    isProcessing = false,
+                    isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
-                    savedPaymentSelectionToConfirm = null,
                 )
             ),
             onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
         )
     }
 
@@ -755,17 +873,41 @@ internal class EmbeddedNavigatorTest {
         val formInteractor = TestFormInteractor(isLiveMode = isLiveMode)
         val screen = EmbeddedNavigator.Screen.Form(
             formInteractor = formInteractor,
-            eventReporter = FakeEventReporter(),
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
-            savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
             customerStateHolder = FakeCustomerStateHolder(),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
         )
         return screen to formInteractor
+    }
+
+    private fun createSavedPaymentMethodConfirmScreen(
+        isLiveMode: Boolean = true,
+        stateHolder: FakeSheetActivityStateHolder = FakeSheetActivityStateHolder(),
+        confirmationHelper: FakeSheetActivityConfirmationHelper = FakeSheetActivityConfirmationHelper(),
+        selectionHolder: DefaultEmbeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+        customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.Form(
+            selectedPaymentMethodCode = "card",
+        ),
+    ): Pair<
+        EmbeddedNavigator.Screen.SavedPaymentMethodConfirm,
+        FakeSavedPaymentMethodConfirmInteractor
+    > {
+        val interactor = FakeSavedPaymentMethodConfirmInteractor()
+        val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
+            interactor = interactor,
+            isLiveMode = isLiveMode,
+            sheetActivityStateHolder = stateHolder,
+            confirmationHelper = confirmationHelper,
+            embeddedSelectionHolder = selectionHolder,
+            customerStateHolder = customerStateHolder,
+            launchMode = launchMode,
+        )
+        return screen to interactor
     }
 
     private class TestFormInteractor(

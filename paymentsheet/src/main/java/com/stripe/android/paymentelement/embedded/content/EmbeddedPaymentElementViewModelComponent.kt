@@ -17,12 +17,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -64,6 +66,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         EmbeddedPaymentElementViewModelModule::class,
+        GooglePayPaymentDataUpdateNoOpModule::class,
         GooglePayLauncherModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         TapToAddConnectionStarterModule::class,
@@ -195,6 +198,10 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Suppress("TooManyFunctions")
     companion object {
+        @Provides
+        @Named(PRODUCT_USAGE)
+        fun provideProductUsageTokens(): Set<String> = setOf("EmbeddedPaymentElement")
+
         @Provides
         fun providesContext(application: Application): Context {
             return application

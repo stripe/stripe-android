@@ -34,6 +34,7 @@ class PaymentSheetAddressAutocompleteTest {
 
     private val paymentSheetPage = PaymentSheetPage(composeTestRule)
 
+    @Suppress("DEPRECATION")
     @Test
     fun testUnfilled() = runPaymentSheetTest(
         networkRule = networkRule,
@@ -70,6 +71,7 @@ class PaymentSheetAddressAutocompleteTest {
         paymentSheetPage.clickPrimaryButton()
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun testPrefilled() = runPaymentSheetTest(
         networkRule = networkRule,

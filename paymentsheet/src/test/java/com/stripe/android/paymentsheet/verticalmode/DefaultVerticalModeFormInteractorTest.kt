@@ -8,9 +8,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -23,11 +26,14 @@ import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideIm
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.errorTest
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
 import com.stripe.android.testing.CleanupTestRule
@@ -61,6 +67,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoMoreInteractions
+import javax.inject.Provider
 import com.stripe.android.uicore.R as UiCoreR
 
 internal class DefaultVerticalModeFormInteractorTest {
@@ -257,6 +264,40 @@ internal class DefaultVerticalModeFormInteractorTest {
         assertThat(parentScope.isActive).isTrue()
     }
 
+    @Test
+    fun `linked bank account removes embedded form incentive`() = runTest {
+        val incentive = PaymentMethodIncentive(
+            identifier = "link_instant_debits",
+            displayText = "$5",
+        )
+        val interactor = createEmbeddedFormInteractor(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf(PaymentMethod.Type.Link.code),
+                ),
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+                paymentMethodIncentive = incentive,
+            ),
+            paymentMethodCode = PaymentMethod.Type.Link.code,
+        )
+        closeInteractorRule.track(interactor)
+
+        interactor.state.test {
+            val initialState = awaitItem()
+            assertThat(initialState.headerInformation?.promoBadge).isEqualTo("$5")
+
+            initialState.usBankAccountFormArguments.onLinkedBankAccountChanged(
+                PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+            )
+
+            assertThat(awaitItem().headerInformation?.promoBadge).isNull()
+        }
+    }
+
     private fun testSetAsDefaultElements(
         hasSavedPaymentMethods: Boolean,
         block: (SaveForFutureUseElement?, SetAsDefaultPaymentMethodElement?) -> Unit
@@ -326,6 +367,8 @@ internal class DefaultVerticalModeFormInteractorTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = paymentMethodCode,
             ),
+            embeddedNavigatorProvider = Provider { error("Not expected") },
+            savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -342,7 +385,8 @@ internal class DefaultVerticalModeFormInteractorTest {
             sheetActivityStateHolder = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = FakeEventReporter(),
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
         ).create(
             paymentMethodCode = paymentMethodCode,
             hasSavedPaymentMethods = hasSavedPaymentMethods,

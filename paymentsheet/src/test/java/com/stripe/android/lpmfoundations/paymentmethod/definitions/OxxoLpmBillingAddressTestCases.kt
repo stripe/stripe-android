@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 private val oxxoFullRawValues = mapOf(
@@ -49,6 +50,32 @@ private val oxxoWithContactDetailsExpectedPaymentMethodParams = PaymentMethodCre
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
+private val oxxoAutomaticWithTaxExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
+    code = PaymentMethod.Type.Oxxo.code,
+    billingDetails = PaymentMethod.BillingDetails(
+        name = "Ana Garcia",
+        email = "ana.garcia@example.com",
+        address = Address(
+            line2 = null,
+            country = "MX",
+        ),
+    ),
+    requiresMandate = false,
+    overrideParamMap = mapOf(
+        "type" to PaymentMethod.Type.Oxxo.code,
+        "billing_details" to mapOf(
+            "name" to "Ana Garcia",
+            "email" to "ana.garcia@example.com",
+            "address" to mapOf(
+                "country" to "MX",
+            ),
+        ),
+    ),
+    productUsage = emptySet(),
+    allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+)
+
 private val oxxoWithBillingAddressExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
     code = PaymentMethod.Type.Oxxo.code,
     billingDetails = PaymentMethod.BillingDetails(
@@ -87,8 +114,12 @@ private val oxxoWithBillingAddressExpectedPaymentMethodParams = PaymentMethodCre
 internal val oxxoTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "OXXO Never",
-        paymentMethodType = PaymentMethod.Type.Oxxo,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Oxxo,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = oxxoFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = oxxoNoBillingDetailsExpectedPaymentMethodParams,
@@ -98,8 +129,12 @@ internal val oxxoTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "OXXO Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.Oxxo,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Oxxo,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = oxxoFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = oxxoWithContactDetailsExpectedPaymentMethodParams,
@@ -108,9 +143,28 @@ internal val oxxoTestCases = listOf(
         ),
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
+        name = "OXXO AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Oxxo,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = oxxoFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = oxxoAutomaticWithTaxExpectedPaymentMethodParams,
+            optionsParams = null,
+            extraParams = null,
+        ),
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
         name = "OXXO Full",
-        paymentMethodType = PaymentMethod.Type.Oxxo,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Oxxo,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = oxxoFullRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = oxxoWithBillingAddressExpectedPaymentMethodParams,

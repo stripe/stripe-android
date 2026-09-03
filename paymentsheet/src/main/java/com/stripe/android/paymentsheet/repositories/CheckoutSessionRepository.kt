@@ -144,17 +144,6 @@ internal class CheckoutSessionRepository @Inject constructor(
         },
     )
 
-    suspend fun updateEmail(
-        sessionId: String,
-        email: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "customer_email" to email,
-            "elements_session_client[is_aggregation_expected]" to "true",
-        ),
-    )
-
     suspend fun updateCurrency(
         sessionId: String,
         currencyCode: String,

@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Pengambilan gambar swafoto</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Bagus! Memeriksa gambar Anda....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Dengan seizin Anda, Stripe mungkin menggunakan gambar Anda untuk meningkatkan deteksi penipuan. Penolakan tidak memengaruhi verifikasi Anda.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Verifikasikan dengan swafoto</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">Satu swafoto diambil</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

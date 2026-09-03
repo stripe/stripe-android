@@ -66,5 +66,7 @@ class TestAutocompleteAddressInteractor private constructor(
         ) = TestAutocompleteAddressInteractor(
             autocompleteConfig = autocompleteConfig,
         )
+
+        fun noOpFactory() = AutocompleteAddressInteractor.Factory { noOp() }
     }
 }

@@ -10,18 +10,18 @@ class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
         resolvableString(R.string.stripe_ideal_bank),
         listOf(
-            DropdownItemSpec(displayText = "ABN AMRO", apiValue = "abn_amro"),
-            DropdownItemSpec(displayText = "ASN Bank", apiValue = "asn_bank"),
-            DropdownItemSpec(displayText = "Bunq", apiValue = "bunq"),
-            DropdownItemSpec(displayText = "Handelsbanken", apiValue = "handelsbanken"),
-            DropdownItemSpec(displayText = "ING", apiValue = "ing"),
-            DropdownItemSpec(displayText = "Knab", apiValue = "knab"),
-            DropdownItemSpec(displayText = "Rabobank", apiValue = "rabobank"),
-            DropdownItemSpec(displayText = "Revolut", apiValue = "revolut"),
-            DropdownItemSpec(displayText = "RegioBank", apiValue = "regiobank"),
-            DropdownItemSpec(displayText = "SNS Bank (De Volksbank)", apiValue = "sns_bank"),
-            DropdownItemSpec(displayText = "Triodos Bank", apiValue = "triodos_bank"),
-            DropdownItemSpec(displayText = "Van Lanschot", apiValue = "van_lanschot")
+            DropdownItem(displayText = "ABN AMRO", apiValue = "abn_amro"),
+            DropdownItem(displayText = "ASN Bank", apiValue = "asn_bank"),
+            DropdownItem(displayText = "Bunq", apiValue = "bunq"),
+            DropdownItem(displayText = "Handelsbanken", apiValue = "handelsbanken"),
+            DropdownItem(displayText = "ING", apiValue = "ing"),
+            DropdownItem(displayText = "Knab", apiValue = "knab"),
+            DropdownItem(displayText = "Rabobank", apiValue = "rabobank"),
+            DropdownItem(displayText = "Revolut", apiValue = "revolut"),
+            DropdownItem(displayText = "RegioBank", apiValue = "regiobank"),
+            DropdownItem(displayText = "SNS Bank (De Volksbank)", apiValue = "sns_bank"),
+            DropdownItem(displayText = "Triodos Bank", apiValue = "triodos_bank"),
+            DropdownItem(displayText = "Van Lanschot", apiValue = "van_lanschot")
         )
     )
 

@@ -4,12 +4,14 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.paymentsheet.forms.PlaceholderHelper.connectBillingDetailsFields
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.uicore.elements.AddressFieldsElement
+import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -17,6 +19,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -129,6 +132,33 @@ internal class FormViewModel(
     ) { hiddenIds, textFieldControllerIds ->
         textFieldControllerIds.lastOrNull {
             !hiddenIds.contains(it)
+        }
+    }
+}
+
+private suspend fun connectBillingDetailsFields(elements: List<FormElement>) {
+    val phoneNumberElement = elements
+        .filterIsInstance<SectionElement>()
+        .flatMap { it.fields }
+        .filterIsInstance<PhoneNumberElement>()
+        .firstOrNull()
+
+    // Prefer a standalone country field because an address field's country may be hidden.
+    val countryElement = elements
+        .filterIsInstance<SectionElement>()
+        .flatMap { it.fields }
+        .filterIsInstance<CountryElement>()
+        .firstOrNull()
+        ?: elements
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<AddressFieldsElement>()
+            .firstOrNull()
+            ?.countryElement
+
+    countryElement?.controller?.rawFieldValue?.filterNotNull()?.collect { countryCode ->
+        if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
+            phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(countryCode)
         }
     }
 }

@@ -124,6 +124,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         return buildList {
             add(
                 CardDetailsSectionElement(
+                    coroutineScope = arguments.coroutineScope,
                     cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
                     initialValues = arguments.initialValues,
                     identifier = IdentifierSpec.Generic("card_details"),

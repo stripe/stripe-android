@@ -11,12 +11,12 @@ import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsAction
@@ -41,6 +42,7 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
@@ -48,13 +50,25 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.filterOutHiddenIdentifiers
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.lpmfoundations.paymentmethod.formElements as createFormElements
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class CardDefinitionTest {
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @get:Rule
+    val cleanupRule = coroutineScopeCleanupRule
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
+
     @Test
     fun `createFormElements returns minimal set of fields`() {
         val formElements = CardDefinition.formElements(
@@ -842,6 +856,31 @@ class CardDefinitionTest {
     private fun createLinkConfiguration(): LinkConfiguration {
         return TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        )
+    }
+
+    private fun CardDefinition.formElements(
+        metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
+        setAsDefaultMatchesSaveForFutureUse: Boolean = false,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+        tapToAddHelper: TapToAddHelper? = null,
+        isNfcScanningAvailable: IsNfcScanningAvailable? = null,
+    ): List<FormElement> {
+        return createFormElements(
+            coroutineScope = coroutineScope,
+            metadata = metadata,
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
+            paymentMethodExtraParams = paymentMethodExtraParams,
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+            tapToAddHelper = tapToAddHelper,
+            isNfcScanningAvailable = isNfcScanningAvailable,
         )
     }
 

@@ -1,19 +1,23 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
-import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
-import com.stripe.android.ui.core.elements.PlaceholderSpec
-import com.stripe.android.ui.core.elements.SharedDataSpec
-import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.ui.core.elements.BacsDebitAccountNumberConfig
+import com.stripe.android.ui.core.elements.BacsDebitSortCodeConfig
+import com.stripe.android.uicore.elements.CheckboxFieldController
+import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SimpleTextElement
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 
 internal object BacsDebitDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.BacsDebit
@@ -33,13 +37,14 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
     ): UiDefinitionFactory = BacsDebitUiDefinitionFactory
 }
 
-private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
+private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    private val sortCodeIdentifier = IdentifierSpec.Generic("bacs_debit[sort_code]")
+    private val accountNumberIdentifier = IdentifierSpec.Generic("bacs_debit[account_number]")
+
     override fun createSupportedPaymentMethod(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
     ) = SupportedPaymentMethod(
         paymentMethodDefinition = BacsDebitDefinition,
-        sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_bacs_debit,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
         iconResourceNight = null,
@@ -47,41 +52,58 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         iconRequiresTinting = true,
     )
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements
-    ): List<FormElement> {
-        val localFields = listOfNotNull(
-            PlaceholderSpec(
-                apiPath = IdentifierSpec.Name,
-                field = PlaceholderSpec.PlaceholderField.Name
-            ),
-            PlaceholderSpec(
-                apiPath = IdentifierSpec.Email,
-                field = PlaceholderSpec.PlaceholderField.Email
-            ),
-            PlaceholderSpec(
-                apiPath = IdentifierSpec.Phone,
-                field = PlaceholderSpec.PlaceholderField.Phone
-            ),
-            BacsDebitBankAccountSpec(),
-            PlaceholderSpec(
-                apiPath = IdentifierSpec.BillingAddress,
-                field = PlaceholderSpec.PlaceholderField.BillingAddress
-            ),
-            BacsDebitConfirmSpec().takeIf { metadata.mandateAllowed(BacsDebitDefinition.type) }
-        )
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
+        builder
+            .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
+            .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
+            .element(
+                SectionElement.wrap(
+                    sectionFieldElements = listOf(
+                        SimpleTextElement(
+                            identifier = sortCodeIdentifier,
+                            controller = SimpleTextFieldController(
+                                textFieldConfig = BacsDebitSortCodeConfig(),
+                                initialValue = arguments.initialValues[sortCodeIdentifier],
+                            ),
+                        ),
+                        SimpleTextElement(
+                            identifier = accountNumberIdentifier,
+                            controller = SimpleTextFieldController(
+                                textFieldConfig = BacsDebitAccountNumberConfig(),
+                                initialValue = arguments.initialValues[accountNumberIdentifier],
+                            ),
+                        ),
+                    ),
+                    label = resolvableString(R.string.stripe_bacs_bank_account_title),
+                )
+            )
+            .apply {
+                if (!arguments.requiresBillingAddressForAutomaticTax) {
+                    requireBillingAddressIfAllowed()
+                }
 
-        return transformSpecToElements.transform(
-            metadata = metadata,
-            specs = sharedDataSpec.fields + localFields,
-            placeholderOverrideList = listOf(
-                IdentifierSpec.Name,
-                IdentifierSpec.Email,
-                IdentifierSpec.BillingAddress
-            ),
-            termsDisplay = metadata.termsDisplayForType(BacsDebitDefinition.type),
-        )
+                if (metadata.mandateAllowed(BacsDebitDefinition.type)) {
+                    footer(
+                        CheckboxFieldElement(
+                            identifier = IdentifierSpec.BacsDebitConfirmed,
+                            controller = CheckboxFieldController(
+                                labelResource = CheckboxFieldController.LabelResource(
+                                    R.string.stripe_bacs_confirm_mandate_label,
+                                    arguments.merchantName,
+                                ),
+                                debugTag = "BACS_MANDATE_CHECKBOX",
+                                initialValue = arguments.initialValues[IdentifierSpec.BacsDebitConfirmed].toBoolean(),
+                            ),
+                        )
+                    )
+                }
+            }
     }
 }

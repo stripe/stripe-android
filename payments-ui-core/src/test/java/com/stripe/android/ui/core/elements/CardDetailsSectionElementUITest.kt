@@ -86,6 +86,7 @@ internal class CardDetailsSectionElementUITest {
         val controller = CardDetailsSectionController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
+            coroutineScope = backgroundScope,
             collectName = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             cardBrandFilter = DefaultCardBrandFilter,
