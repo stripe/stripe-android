@@ -29,6 +29,7 @@ import javax.inject.Provider
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
+    private val processingState: AddressElementActivityProcessingState,
     private val eventReporter: AddressLauncherEventReporter,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
@@ -119,8 +120,7 @@ internal class InputAddressViewModel @Inject constructor(
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
 
-    private val _isUpdating = MutableStateFlow(false)
-    val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
+    val isProcessing: StateFlow<Boolean> = processingState.isProcessing
 
     private val _saveError = MutableStateFlow<ResolvableString?>(null)
     val saveError: StateFlow<ResolvableString?> = _saveError.asStateFlow()
@@ -235,19 +235,28 @@ internal class InputAddressViewModel @Inject constructor(
             isCheckboxSelected = checkboxChecked
         )
 
-        val updaterKey = args.updaterKey
-        if (updaterKey == null) {
-            _formEnabled.value = false
-            dismissWithAddress(addressDetails)
-            return
+        when (val launchMode = args.launchMode) {
+            AddressElementActivityContract.LaunchMode.Standalone -> {
+                _formEnabled.value = false
+                dismissWithAddress(addressDetails)
+            }
+            is AddressElementActivityContract.LaunchMode.CheckoutShipping -> {
+                saveCheckoutShippingAddress(
+                    updaterKey = launchMode.updaterKey,
+                    addressDetails = addressDetails,
+                )
+            }
         }
+    }
 
-        if (_isUpdating.value) return
+    private fun saveCheckoutShippingAddress(
+        updaterKey: String,
+        addressDetails: AddressDetails,
+    ) {
+        if (!processingState.tryStartProcessing()) return
 
         _saveError.value = null
         _formEnabled.value = false
-        _isUpdating.value = true
-        CheckoutShippingAddressUpdaterRegistry.setBusy(updaterKey, true)
         viewModelScope.launch {
             val result = try {
                 val updater = CheckoutShippingAddressUpdaterRegistry.get(updaterKey)
@@ -257,8 +266,7 @@ internal class InputAddressViewModel @Inject constructor(
                     updater.update(addressDetails)
                 }
             } finally {
-                CheckoutShippingAddressUpdaterRegistry.setBusy(updaterKey, false)
-                _isUpdating.value = false
+                processingState.finishProcessing()
             }
 
             result.fold(
@@ -399,13 +407,14 @@ internal class InputAddressViewModel @Inject constructor(
 
     internal class Factory(
         private val inputAddressViewModelSubcomponentFactoryProvider:
-        Provider<InputAddressViewModelSubcomponent.Factory>
+        Provider<InputAddressViewModelSubcomponent.Factory>,
+        private val processingState: AddressElementActivityProcessingState,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return inputAddressViewModelSubcomponentFactoryProvider.get()
-                .create().inputAddressViewModel as T
+                .create(processingState).inputAddressViewModel as T
         }
     }
 }

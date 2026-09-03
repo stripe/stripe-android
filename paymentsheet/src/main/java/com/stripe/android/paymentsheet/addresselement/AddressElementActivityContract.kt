@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Context
 import android.content.Intent
+import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
 import com.stripe.android.view.ActivityStarter
@@ -29,7 +30,7 @@ internal object AddressElementActivityContract :
     data class Args internal constructor(
         internal val publishableKey: String,
         internal val config: AddressLauncher.Configuration?,
-        internal val updaterKey: String?,
+        internal val launchMode: LaunchMode,
     ) : ActivityStarter.Args {
 
         internal companion object {
@@ -38,6 +39,17 @@ internal object AddressElementActivityContract :
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
         }
+    }
+
+    @Parcelize
+    sealed class LaunchMode : Parcelable {
+        @Parcelize
+        data object Standalone : LaunchMode()
+
+        @Parcelize
+        data class CheckoutShipping(
+            val updaterKey: String,
+        ) : LaunchMode()
     }
 
     @Parcelize

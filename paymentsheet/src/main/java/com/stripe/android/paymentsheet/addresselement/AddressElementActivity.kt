@@ -12,6 +12,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
@@ -46,9 +48,6 @@ internal class AddressElementActivity : ComponentActivity() {
         AddressElementActivityContract.Args.fromIntent(intent)
     }
 
-    private val activityArgs: AddressElementActivityContract.Args
-        get() = requireNotNull(starterArgs)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -63,18 +62,19 @@ internal class AddressElementActivity : ComponentActivity() {
 
         setContent {
             val coroutineScope = rememberCoroutineScope()
+            val isProcessing by viewModel.processingState.isProcessing.collectAsState()
 
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
             val bottomSheetState = rememberStripeBottomSheetState(
                 confirmValueChange = { targetValue ->
-                    targetValue != ModalBottomSheetValue.Hidden || !isShippingAddressUpdateBusy()
+                    targetValue != ModalBottomSheetValue.Hidden || !isProcessing
                 },
             )
 
             BackHandler {
-                if (!isShippingAddressUpdateBusy()) {
+                if (!isProcessing) {
                     viewModel.navigator.onBack()
                 }
             }
@@ -87,7 +87,7 @@ internal class AddressElementActivity : ComponentActivity() {
                 }
             }
 
-            AddressElementUi(bottomSheetState, navController)
+            AddressElementUi(bottomSheetState, navController, isProcessing)
         }
     }
 
@@ -95,12 +95,13 @@ internal class AddressElementActivity : ComponentActivity() {
     private fun AddressElementUi(
         bottomSheetState: StripeBottomSheetState,
         navController: NavHostController,
+        isProcessing: Boolean,
     ) {
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 onDismissed = {
-                    if (!isShippingAddressUpdateBusy()) {
+                    if (!isProcessing) {
                         viewModel.navigator.dismiss()
                     }
                 },
@@ -111,7 +112,10 @@ internal class AddressElementActivity : ComponentActivity() {
                         startDestination = AddressElementScreen.InputAddress.route,
                     ) {
                         composable(AddressElementScreen.InputAddress.route) {
-                            InputAddressScreen(viewModel.inputAddressViewModelSubcomponentFactoryProvider)
+                            InputAddressScreen(
+                                viewModel.inputAddressViewModelSubcomponentFactoryProvider,
+                                viewModel.processingState,
+                            )
                         }
                         composable(
                             AddressElementScreen.Autocomplete.route,
@@ -136,10 +140,6 @@ internal class AddressElementActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun isShippingAddressUpdateBusy(): Boolean {
-        return CheckoutShippingAddressUpdaterRegistry.isBusy(activityArgs.updaterKey)
     }
 
     private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled()) {

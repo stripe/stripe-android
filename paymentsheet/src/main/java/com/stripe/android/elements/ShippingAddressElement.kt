@@ -80,7 +80,7 @@ class ShippingAddressElement @Inject internal constructor(
                     billingAddress = null,
                     useStripeHostedAutocomplete = true,
                 ),
-                updaterKey = updaterKey,
+                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(updaterKey),
             )
         )
     }

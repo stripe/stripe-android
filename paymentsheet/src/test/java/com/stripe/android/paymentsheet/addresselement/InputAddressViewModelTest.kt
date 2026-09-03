@@ -45,15 +45,18 @@ class InputAddressViewModelTest {
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
             .build(),
-        updaterKey: String? = null,
+        launchMode: AddressElementActivityContract.LaunchMode =
+            AddressElementActivityContract.LaunchMode.Standalone,
+        processingState: AddressElementActivityProcessingState = AddressElementActivityProcessingState(),
     ): InputAddressViewModel {
         return InputAddressViewModel(
             AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
                 config = config,
-                updaterKey = updaterKey,
+                launchMode = launchMode,
             ),
             navigator,
+            processingState,
             eventReporter,
             placesClient = null,
         ).also { viewModelStoreRule.track(it) }
@@ -985,8 +988,12 @@ class InputAddressViewModelTest {
         val updateResult = CompletableDeferred<Result<Unit>>()
         val updater = FakeUpdater { updateResult.await() }
         val updaterKey = CheckoutShippingAddressUpdaterRegistry.register(updater)
+        val processingState = AddressElementActivityProcessingState()
         try {
-            val viewModel = createViewModel(updaterKey = updaterKey)
+            val viewModel = createViewModel(
+                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(updaterKey),
+                processingState = processingState,
+            )
 
             viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
             viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
@@ -994,15 +1001,15 @@ class InputAddressViewModelTest {
             assertThat(updater.updateCalls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
             updater.updateCalls.expectNoEvents()
             assertThat(viewModel.formEnabled.value).isFalse()
-            assertThat(viewModel.isUpdating.value).isTrue()
-            assertThat(CheckoutShippingAddressUpdaterRegistry.isBusy(updaterKey)).isTrue()
+            assertThat(viewModel.isProcessing.value).isTrue()
+            assertThat(processingState.isProcessing.value).isTrue()
             verify(navigator, never()).dismiss(any())
 
             updateResult.complete(Result.success(Unit))
             runCurrent()
 
-            assertThat(viewModel.isUpdating.value).isFalse()
-            assertThat(CheckoutShippingAddressUpdaterRegistry.isBusy(updaterKey)).isFalse()
+            assertThat(viewModel.isProcessing.value).isFalse()
+            assertThat(processingState.isProcessing.value).isFalse()
             verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
         } finally {
             CheckoutShippingAddressUpdaterRegistry.remove(updaterKey)
@@ -1014,10 +1021,12 @@ class InputAddressViewModelTest {
     fun `failed checkout save retains values shows error and permits successful retry`() = runTest {
         val updater = FakeUpdater { Result.failure(IllegalStateException("Failed")) }
         val updaterKey = CheckoutShippingAddressUpdaterRegistry.register(updater)
+        val processingState = AddressElementActivityProcessingState()
         try {
             val viewModel = createViewModel(
                 address = EXPECTED_ADDRESS,
-                updaterKey = updaterKey,
+                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(updaterKey),
+                processingState = processingState,
             )
             val originalFormValues = viewModel.addressFormController.getCurrentFormValues()
 
@@ -1026,7 +1035,8 @@ class InputAddressViewModelTest {
 
             assertThat(updater.updateCalls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
             assertThat(viewModel.formEnabled.value).isTrue()
-            assertThat(viewModel.isUpdating.value).isFalse()
+            assertThat(viewModel.isProcessing.value).isFalse()
+            assertThat(processingState.isProcessing.value).isFalse()
             assertThat(viewModel.saveError.value)
                 .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
             assertThat(viewModel.addressFormController.getCurrentFormValues())
@@ -1051,12 +1061,14 @@ class InputAddressViewModelTest {
         val updater = FakeUpdater { Result.success(Unit) }
         val unrelatedKey = CheckoutShippingAddressUpdaterRegistry.register(updater)
         try {
-            val viewModel = createViewModel(updaterKey = null)
+            val viewModel = createViewModel(
+                launchMode = AddressElementActivityContract.LaunchMode.Standalone,
+            )
 
             viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
 
             updater.updateCalls.expectNoEvents()
-            assertThat(viewModel.isUpdating.value).isFalse()
+            assertThat(viewModel.isProcessing.value).isFalse()
             assertThat(viewModel.saveError.value).isNull()
             verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
         } finally {
@@ -1087,9 +1099,10 @@ class InputAddressViewModelTest {
                     .googlePlacesApiKey(googlePlacesApiKey)
                     .autocompleteCountries(autocompleteCountries)
                     .build(),
-                updaterKey = null,
+                launchMode = AddressElementActivityContract.LaunchMode.Standalone,
             ),
             navigator,
+            AddressElementActivityProcessingState(),
             eventReporter,
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),

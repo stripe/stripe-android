@@ -32,41 +32,29 @@ internal class InputAddressScreenTest {
     @Test
     fun `updating shows loading and blocks save and close actions`() {
         val viewActionRecorder = ViewActionRecorder<ViewAction>()
-        val updaterKey = CheckoutShippingAddressUpdaterRegistry.register(FakeUpdater())
-        CheckoutShippingAddressUpdaterRegistry.setBusy(updaterKey, true)
-        try {
-            composeRule.setContent {
-                StripeTheme {
-                    InputAddressScreen(
-                        primaryButtonEnabled = false,
-                        primaryButtonLoading = true,
-                        primaryButtonText = "Save",
-                        title = "Shipping address",
-                        onPrimaryButtonClick = { viewActionRecorder.record(ViewAction.Save) },
-                        onDisabledButtonClick = { viewActionRecorder.record(ViewAction.DisabledSave) },
-                        canDismiss = { !CheckoutShippingAddressUpdaterRegistry.isBusy(updaterKey) },
-                        onCloseClick = { viewActionRecorder.record(ViewAction.Close) },
-                        topContent = {},
-                        formContent = { Text("Address form") },
-                        bottomContent = {},
-                    )
-                }
+        composeRule.setContent {
+            StripeTheme {
+                InputAddressScreen(
+                    primaryButtonEnabled = false,
+                    primaryButtonLoading = true,
+                    primaryButtonText = "Save",
+                    title = "Shipping address",
+                    onPrimaryButtonClick = { viewActionRecorder.record(ViewAction.Save) },
+                    onDisabledButtonClick = { viewActionRecorder.record(ViewAction.DisabledSave) },
+                    canDismiss = { false },
+                    onCloseClick = { viewActionRecorder.record(ViewAction.Close) },
+                    topContent = {},
+                    formContent = { Text("Address form") },
+                    bottomContent = {},
+                )
             }
-
-            composeRule.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).assertExists()
-            composeRule.onNodeWithText("Save").performClick()
-            composeRule.onNodeWithContentDescription("Close").performClick()
-
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        } finally {
-            CheckoutShippingAddressUpdaterRegistry.remove(updaterKey)
         }
-    }
 
-    private class FakeUpdater : CheckoutShippingAddressUpdaterRegistry.Updater {
-        override suspend fun update(address: AddressDetails): Result<Unit> {
-            return Result.success(Unit)
-        }
+        composeRule.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).assertExists()
+        composeRule.onNodeWithText("Save").performClick()
+        composeRule.onNodeWithContentDescription("Close").performClick()
+
+        assertThat(viewActionRecorder.viewActions).isEmpty()
     }
 
     private enum class ViewAction {

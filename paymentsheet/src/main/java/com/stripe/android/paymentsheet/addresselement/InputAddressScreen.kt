@@ -101,11 +101,13 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>
+    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
+    processingState: AddressElementActivityProcessingState,
 ) {
     val viewModel: InputAddressViewModel = viewModel(
         factory = InputAddressViewModel.Factory(
-            inputAddressViewModelSubcomponentFactoryProvider
+            inputAddressViewModelSubcomponentFactoryProvider,
+            processingState,
         )
     )
     LaunchedEffect(Unit) {
@@ -122,14 +124,14 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
-    val isUpdating by viewModel.isUpdating.collectAsState()
+    val isProcessing by viewModel.isProcessing.collectAsState()
     val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
     InputAddressScreen(
         primaryButtonEnabled = completeValues != null && formEnabled,
-        primaryButtonLoading = isUpdating,
+        primaryButtonLoading = isProcessing,
         primaryButtonText = buttonText,
         title = titleText,
         onPrimaryButtonClick = {
@@ -144,9 +146,7 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        canDismiss = {
-            !CheckoutShippingAddressUpdaterRegistry.isBusy(viewModel.args.updaterKey)
-        },
+        canDismiss = { !isProcessing },
         onCloseClick = { viewModel.navigator.dismiss() },
         topContent = {
             val currentState = billingSameAsShippingState

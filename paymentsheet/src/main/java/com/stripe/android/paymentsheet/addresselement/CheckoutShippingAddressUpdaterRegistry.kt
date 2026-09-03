@@ -9,7 +9,6 @@ internal object CheckoutShippingAddressUpdaterRegistry {
     }
 
     private val updaters = mutableMapOf<String, WeakReference<Updater>>()
-    private val busyKeys = mutableSetOf<String>()
 
     @Synchronized
     fun register(updater: Updater): String {
@@ -38,23 +37,6 @@ internal object CheckoutShippingAddressUpdaterRegistry {
     fun remove(key: String?) {
         if (key != null) {
             updaters.remove(key)
-            busyKeys.remove(key)
         }
-    }
-
-    @Synchronized
-    fun setBusy(key: String?, busy: Boolean) {
-        if (key == null) return
-
-        if (busy) {
-            busyKeys.add(key)
-        } else {
-            busyKeys.remove(key)
-        }
-    }
-
-    @Synchronized
-    fun isBusy(key: String?): Boolean {
-        return key != null && key in busyKeys
     }
 }
