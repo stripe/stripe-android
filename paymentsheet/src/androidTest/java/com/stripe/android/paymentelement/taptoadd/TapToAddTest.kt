@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement.taptoadd
 
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -27,11 +27,10 @@ import com.stripe.stripeterminal.external.models.TerminalException
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(TapToAddPreview::class)
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class TapToAddTest {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure
     // it happens, but it's okay if it takes a bit to happen.
@@ -61,7 +60,6 @@ internal class TapToAddTest {
 
     @Test
     fun successWithCompleteMode(
-        @TestParameter(valuesProvider = TapToAddIntegrationType.Complete.Provider::class)
         integrationType: TapToAddIntegrationType.Complete
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
@@ -98,7 +96,6 @@ internal class TapToAddTest {
 
     @Test
     fun successWithContinueMode(
-        @TestParameter(valuesProvider = TapToAddIntegrationType.Continue.Provider::class)
         integrationType: TapToAddIntegrationType.Continue
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
@@ -136,8 +133,12 @@ internal class TapToAddTest {
 
     @Test
     fun canceledDuringCardCollection(
-        @TestParameter(valuesProvider = TapToAddIntegrationType.Provider::class)
-        integrationType: TapToAddIntegrationType
+        integrationType: TapToAddIntegrationType = burstValues(
+            TapToAddIntegrationType.Complete.PaymentSheet,
+            TapToAddIntegrationType.Complete.Embedded,
+            TapToAddIntegrationType.Continue.FlowController,
+            TapToAddIntegrationType.Continue.Embedded,
+        )
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         composeTestRule = composeTestRule,
@@ -179,7 +180,6 @@ internal class TapToAddTest {
 
     @Test
     fun successAfterCancelAfterCardCollectedWithCompleteMode(
-        @TestParameter(valuesProvider = TapToAddIntegrationType.Complete.Provider::class)
         integrationType: TapToAddIntegrationType.Complete,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
@@ -224,8 +224,12 @@ internal class TapToAddTest {
 
     @Test
     fun successAfterCancelAfterCardCollectedWithLink(
-        @TestParameter(valuesProvider = TapToAddIntegrationType.Provider::class)
-        integrationType: TapToAddIntegrationType
+        integrationType: TapToAddIntegrationType = burstValues(
+            TapToAddIntegrationType.Complete.PaymentSheet,
+            TapToAddIntegrationType.Complete.Embedded,
+            TapToAddIntegrationType.Continue.FlowController,
+            TapToAddIntegrationType.Continue.Embedded,
+        )
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         composeTestRule = composeTestRule,

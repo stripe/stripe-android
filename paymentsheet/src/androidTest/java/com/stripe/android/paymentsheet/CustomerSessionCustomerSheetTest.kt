@@ -1,14 +1,12 @@
 package com.stripe.android.paymentsheet
 
+import app.cash.burst.Burst
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
@@ -23,7 +21,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
 import com.stripe.android.paymentsheet.utils.IntegrationType
-import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import com.stripe.android.testing.PaymentMethodFactory
@@ -31,10 +28,11 @@ import com.stripe.android.testing.PaymentMethodFactory.update
 import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
-internal class CustomerSessionCustomerSheetTest {
+@Burst
+internal class CustomerSessionCustomerSheetTest(
+    private val integrationType: IntegrationType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -42,9 +40,6 @@ internal class CustomerSessionCustomerSheetTest {
     private val networkRule = testRules.networkRule
 
     private val page: CustomerSheetPage = CustomerSheetPage(composeTestRule)
-
-    @TestParameter(valuesProvider = IntegrationTypeProvider::class)
-    lateinit var integrationType: IntegrationType
 
     @Test
     fun testSuccessfulCardSave() = runCustomerSheetTest(

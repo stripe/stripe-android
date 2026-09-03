@@ -74,7 +74,6 @@ private fun runCustomerSheetTest(
 
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            DefaultLinkStore(it.applicationContext).clear()
         }
 
         var customerSheet: CustomerSheet? = null

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -24,10 +23,8 @@ import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import kotlinx.coroutines.CompletableDeferred
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
-@RunWith(TestParameterInjector::class)
 internal class PreparePaymentMethodTest {
     @get:Rule
     val testRules: TestRules = TestRules.create()

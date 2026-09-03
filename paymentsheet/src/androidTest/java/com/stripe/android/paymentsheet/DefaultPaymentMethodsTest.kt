@@ -1,27 +1,26 @@
 package com.stripe.android.paymentsheet
 
+import app.cash.burst.Burst
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
-import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
-internal class DefaultPaymentMethodsTest {
+@Burst
+internal class DefaultPaymentMethodsTest(
+    private val integrationType: ProductIntegrationType,
+    private val layoutType: PaymentSheetLayoutType,
+) {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
@@ -30,12 +29,6 @@ internal class DefaultPaymentMethodsTest {
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
-
-    @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-    lateinit var integrationType: ProductIntegrationType
-
-    @TestParameter(valuesProvider = PaymentSheetLayoutTypeProvider::class)
-    lateinit var layoutType: PaymentSheetLayoutType
 
     @Test
     fun setDefaultCard_selectsCard() = runProductIntegrationTest(

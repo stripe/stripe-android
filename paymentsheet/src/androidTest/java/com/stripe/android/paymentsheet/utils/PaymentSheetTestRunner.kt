@@ -72,7 +72,6 @@ internal fun runPaymentSheetTest(
                     "pk_test_123"
                 }
             )
-            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var paymentSheet: PaymentSheet
@@ -152,7 +151,6 @@ internal fun runMultiplePaymentSheetInstancesTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var firstPaymentSheet: PaymentSheet

@@ -41,6 +41,7 @@ class TestRules private constructor(
                 }
                 .around(networkRule)
                 .around(terminalTestRule)
+                .around(SharedPrefsTestRule())
                 .block()
             return TestRules(chain, composeTestRule, networkRule)
         }

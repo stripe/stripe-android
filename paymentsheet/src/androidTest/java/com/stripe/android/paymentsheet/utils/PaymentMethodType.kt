@@ -1,19 +1,14 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetPage
 import com.stripe.paymentelementtestpages.FormPage
 
-internal sealed class PaymentMethodType(
+internal enum class PaymentMethodType(
     val type: PaymentMethod.Type
 ) {
-    abstract fun paymentMethodSetup()
-
-    abstract fun fillOutFormDetails(composeTestRule: ComposeTestRule)
-
-    data object Card : PaymentMethodType(
+    Card(
         type = PaymentMethod.Type.Card
     ) {
         override fun paymentMethodSetup() {}
@@ -22,9 +17,9 @@ internal sealed class PaymentMethodType(
             val paymentSheetPage = PaymentSheetPage(composeTestRule)
             paymentSheetPage.fillOutCardDetails()
         }
-    }
+    },
 
-    data object UsBankAccount : PaymentMethodType(
+    UsBankAccount(
         type = PaymentMethod.Type.USBankAccount
     ) {
         override fun paymentMethodSetup() {
@@ -40,14 +35,9 @@ internal sealed class PaymentMethodType(
 
             paymentSheetPage.clickPrimaryButton()
         }
-    }
-}
+    };
 
-internal object PaymentMethodTypeProvider : TestParameterValuesProvider() {
-    override fun provideValues(context: Context?): List<PaymentMethodType> {
-        return listOf(
-            PaymentMethodType.Card,
-            PaymentMethodType.UsBankAccount,
-        )
-    }
+    abstract fun paymentMethodSetup()
+
+    abstract fun fillOutFormDetails(composeTestRule: ComposeTestRule)
 }

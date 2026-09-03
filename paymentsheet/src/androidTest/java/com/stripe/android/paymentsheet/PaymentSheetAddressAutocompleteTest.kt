@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.text.SpannableString
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -17,10 +16,8 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 @OptIn(AddressAutocompletePreview::class)
-@RunWith(TestParameterInjector::class)
 class PaymentSheetAddressAutocompleteTest {
     private val placesClientProxyTestRule = PlacesClientProxyTestRule()
 
