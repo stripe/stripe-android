@@ -137,6 +137,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = initializationMode,
             customerMetadata = customerMetadata,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 
         assertThat(result).isInstanceOf<LinkState>()
