@@ -93,7 +93,8 @@ internal class LinkControllerInteractor @Inject constructor(
                     LinkState.LoginState.LoggedIn ->
                         LinkController.SessionState.LoggedIn
                 },
-                consumerSessionClientSecret = account.clientSecret
+                consumerSessionClientSecret = account.clientSecret,
+                linkSessionKey = account.linkSessionKey,
             )
         }
     }
