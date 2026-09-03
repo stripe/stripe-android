@@ -8,6 +8,8 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
+import com.stripe.android.paymentsheet.addresselement.CheckoutShippingAddressHandler
+import com.stripe.android.paymentsheet.addresselement.DefaultCheckoutShippingAddressHandler
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
@@ -101,5 +103,10 @@ internal class AddressElementViewModelModule {
     interface Bindings {
         @Binds
         fun bindsAddressElementNavigator(navigator: NavHostAddressElementNavigator): AddressElementNavigator
+
+        @Binds
+        fun bindsCheckoutShippingAddressHandler(
+            handler: DefaultCheckoutShippingAddressHandler,
+        ): CheckoutShippingAddressHandler
     }
 }

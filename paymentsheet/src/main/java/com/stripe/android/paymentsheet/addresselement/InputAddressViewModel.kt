@@ -4,12 +4,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerReferences
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -35,6 +32,7 @@ internal class InputAddressViewModel @Inject constructor(
     val navigator: AddressElementNavigator,
     private val processingState: AddressElementActivityProcessingState,
     private val eventReporter: AddressLauncherEventReporter,
+    private val checkoutShippingAddressHandler: CheckoutShippingAddressHandler,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
 ) : ViewModel(), AutocompleteAddressInteractor {
@@ -254,7 +252,6 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    @OptIn(CheckoutSessionPreview::class)
     private fun saveCheckoutShippingAddress(
         controllerInstanceId: String,
         addressDetails: AddressDetails,
@@ -265,16 +262,7 @@ internal class InputAddressViewModel @Inject constructor(
         _formEnabled.value = false
         viewModelScope.launch {
             val result = try {
-                val controller = CheckoutControllerReferences[controllerInstanceId]
-                    ?: error("Checkout controller is unavailable.")
-                val address = CheckoutController.Address()
-                    .city(addressDetails.address?.city)
-                    .country(requireNotNull(addressDetails.address?.country))
-                    .line1(addressDetails.address?.line1)
-                    .line2(addressDetails.address?.line2)
-                    .postalCode(addressDetails.address?.postalCode)
-                    .state(addressDetails.address?.state)
-                controller.updateShippingAddress(addressDetails.name, address)
+                checkoutShippingAddressHandler.update(controllerInstanceId, addressDetails)
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
