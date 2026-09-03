@@ -1,5 +1,6 @@
 package com.stripe.android.connect.webview
 
+import android.annotation.SuppressLint
 import android.app.DownloadManager.STATUS_PAUSED
 import android.app.DownloadManager.STATUS_PENDING
 import android.app.DownloadManager.STATUS_RUNNING
@@ -12,6 +13,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@SuppressLint("TestResourceCleanup")
 internal class StripeDownloadListener(
     private val context: Context,
     private val stripeDownloadManager: StripeDownloadManager = StripeDownloadManagerImpl(context),
