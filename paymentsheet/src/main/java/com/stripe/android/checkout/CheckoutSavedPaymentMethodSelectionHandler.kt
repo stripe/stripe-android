@@ -4,8 +4,6 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSavedPaymentMethodSelectionHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.billingDetails
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,10 +12,7 @@ import javax.inject.Inject
 
 @OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
 internal class CheckoutSavedPaymentMethodSelectionHandler @Inject constructor(
-    private val stateHolder: CheckoutControllerStateHolder,
-    private val operationCoordinator: CheckoutOperationCoordinator,
-    private val taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
-    private val stateLoader: CheckoutStateLoader,
+    private val checkoutController: CheckoutController,
     private val immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : EmbeddedSavedPaymentMethodSelectionHandler {
@@ -33,27 +28,7 @@ internal class CheckoutSavedPaymentMethodSelectionHandler @Inject constructor(
         _pendingSelection.value = selection
         _error.value = null
         coroutineScope.launch {
-            operationCoordinator.runMutation {
-                runCatching {
-                    val state = requireNotNull(stateHolder.state)
-                    val address = selection.billingDetails?.address?.toCheckoutAddress()
-                    val response = if (address != null) {
-                        taxRegionUpdater.updateServerStateIfNeeded(
-                            checkoutSessionResponse = state.checkoutSessionResponse,
-                            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                            address = address,
-                        ).getOrThrow()
-                    } else {
-                        state.checkoutSessionResponse
-                    }
-                    stateLoader.reload(
-                        state.copy(
-                            checkoutSessionResponse = response,
-                            paymentSelection = selection,
-                        )
-                    )
-                }
-            }.fold(
+            checkoutController.selectSavedPaymentMethod(selection).fold(
                 onSuccess = {
                     _pendingSelection.value = null
                     _error.value = null
