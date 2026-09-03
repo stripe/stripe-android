@@ -3,8 +3,6 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -14,7 +12,6 @@ import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
@@ -39,13 +36,8 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationDefinition
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -61,7 +53,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
@@ -451,10 +442,10 @@ class CheckoutSessionConfirmationInterceptorTest {
             bodyPart("shipping[name]", "Controller Shipping"),
             bodyPart("shipping[address][line1]", "123 Controller Street"),
             bodyPart("shipping[address][line2]", "Unit 4"),
-            bodyPart("shipping[address][city]", "San Francisco"),
-            bodyPart("shipping[address][state]", "CA"),
-            bodyPart("shipping[address][postal_code]", "94111"),
-            bodyPart("shipping[address][country]", "US"),
+            bodyPart("shipping[address][city]", "Controller City"),
+            bodyPart("shipping[address][state]", "NY"),
+            bodyPart("shipping[address][postal_code]", "10001"),
+            bodyPart("shipping[address][country]", "CA"),
             not(hasBodyPart("shipping[phone]")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
@@ -469,10 +460,10 @@ class CheckoutSessionConfirmationInterceptorTest {
             bodyPart("shipping[name]", "Controller Shipping"),
             bodyPart("shipping[address][line1]", "123 Controller Street"),
             bodyPart("shipping[address][line2]", "Unit 4"),
-            bodyPart("shipping[address][city]", "San Francisco"),
-            bodyPart("shipping[address][state]", "CA"),
-            bodyPart("shipping[address][postal_code]", "94111"),
-            bodyPart("shipping[address][country]", "US"),
+            bodyPart("shipping[address][city]", "Controller City"),
+            bodyPart("shipping[address][state]", "NY"),
+            bodyPart("shipping[address][postal_code]", "10001"),
+            bodyPart("shipping[address][country]", "CA"),
             not(hasBodyPart("shipping[phone]")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
@@ -482,69 +473,23 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Google Pay result shipping takes precedence over controller shipping at Checkout confirmation`() =
+    fun `intercept with saved payment method prefers option shipping over controller shipping`() =
         runScenario {
             networkRule.checkoutConfirm(
-                bodyPart("shipping[name]", "Google Pay Shipping"),
+                bodyPart("shipping[name]", "Jenny Rosen"),
                 bodyPart("shipping[address][line1]", "510 Townsend St"),
                 bodyPart("shipping[address][line2]", "Floor 3"),
                 bodyPart("shipping[address][city]", "San Francisco"),
                 bodyPart("shipping[address][state]", "CA"),
                 bodyPart("shipping[address][postal_code]", "94103"),
                 bodyPart("shipping[address][country]", "US"),
-                not(bodyPart("shipping[name]", "Controller Shipping")),
-                not(bodyPart("shipping[address][line1]", "123 Controller Street")),
-                not(bodyPart("shipping[address][line2]", "Unit 4")),
-                not(bodyPart("shipping[address][city]", "Controller City")),
-                not(bodyPart("shipping[address][state]", "NY")),
-                not(bodyPart("shipping[address][postal_code]", "10001")),
-                not(bodyPart("shipping[address][country]", "CA")),
-                not(hasBodyPart("shipping[phone]")),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
-            val confirmationArgs = ConfirmationHandler.Args(
-                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    stripeIntent = PaymentIntentFactory.create(),
-                    integrationMetadata = integrationMetadata,
-                    shippingDetails = CONTROLLER_SHIPPING_DETAILS,
-                ),
-                statusBarColor = null,
-            )
-            val googlePayResult = GooglePayConfirmationDefinition(
-                instanceId = "test",
-                context = applicationContext,
-                googlePayPaymentMethodLauncherFactory = mock(),
-                userFacingLogger = null,
-            ).toResult(
-                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                confirmationArgs = confirmationArgs,
-                launcherArgs = EmptyConfirmationLauncherArgs,
-                result = com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result.Completed(
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    shippingInformation = GOOGLE_PAY_SHIPPING_INFORMATION,
-                ),
-            )
-
-            assertThat(googlePayResult).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
-            val nextStep = googlePayResult as ConfirmationDefinition.Result.NextStep
-            assertThat(nextStep.arguments.paymentMethodMetadata.shippingDetails)
-                .isEqualTo(CONTROLLER_SHIPPING_DETAILS)
-
-            IntentConfirmationDefinition(
-                intentConfirmationInterceptorFactory = object : IntentConfirmationInterceptor.Factory {
-                    override suspend fun create(
-                        integrationMetadata: IntegrationMetadata,
-                        customerMetadata: CustomerMetadata?,
-                        clientAttributionMetadata: ClientAttributionMetadata,
-                    ): IntentConfirmationInterceptor = interceptor
-                },
-                paymentLauncherFactory = { _, _ -> error("No payment launcher is needed") },
-            ).action(
-                confirmationOption = nextStep.confirmationOption as PaymentMethodConfirmationOption.Saved,
-                confirmationArgs = nextStep.arguments,
+            interceptSavedPm(
+                shippingInformation = SHIPPING_INFORMATION,
+                shippingValues = CONTROLLER_SHIPPING,
             )
         }
 
@@ -597,13 +542,12 @@ class CheckoutSessionConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
         )
 
-        val integrationMetadata = IntegrationMetadata.CheckoutSession(
-            id = checkoutSessionResponse.id,
-            instancesKey = "test_key",
-            checkoutSessionResponse = checkoutSessionResponse,
-        )
         val interceptor = CheckoutSessionConfirmationInterceptor(
-            integrationMetadata = integrationMetadata,
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = checkoutSessionResponse.id,
+                instancesKey = "test_key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(
                 elementsSessionConfigId = "test_session_id",
@@ -621,7 +565,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         runTest {
             val scenario = Scenario(
                 interceptor = interceptor,
-                integrationMetadata = integrationMetadata,
             )
 
             scenario.block()
@@ -630,7 +573,6 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     private data class Scenario(
         val interceptor: CheckoutSessionConfirmationInterceptor,
-        val integrationMetadata: IntegrationMetadata.CheckoutSession,
     ) {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,
@@ -646,13 +588,11 @@ class CheckoutSessionConfirmationInterceptorTest {
             intent: StripeIntent = PaymentIntentFactory.create(),
             shippingInformation: ShippingInformation? = null,
             shippingValues: ConfirmPaymentIntentParams.Shipping? = null,
-            originatedFromWallet: Boolean = false,
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             interceptor.intercept(
                 intent = intent,
                 confirmationOption = SAVED_PM_OPTION.copy(
                     shippingInformation = shippingInformation,
-                    originatedFromWallet = originatedFromWallet,
                 ),
                 shippingValues = shippingValues,
             )
@@ -696,6 +636,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             phone = "1-800-555-1234",
             address = Address(
                 line1 = "510 Townsend St",
+                line2 = "Floor 3",
                 city = "San Francisco",
                 state = "CA",
                 postalCode = "94103",
@@ -707,53 +648,13 @@ class CheckoutSessionConfirmationInterceptorTest {
             address = Address(
                 line1 = "123 Controller Street",
                 line2 = "Unit 4",
-                city = "San Francisco",
-                state = "CA",
-                postalCode = "94111",
-                country = "US",
-            ),
-            name = "Controller Shipping",
-            phone = "1-800-555-0000",
-        )
-
-        val CONTROLLER_SHIPPING_DETAILS = AddressDetails(
-            name = "Controller Shipping",
-            address = PaymentSheet.Address(
-                line1 = "123 Controller Street",
-                line2 = "Unit 4",
                 city = "Controller City",
                 state = "NY",
                 postalCode = "10001",
                 country = "CA",
             ),
-            phoneNumber = "1-800-555-0000",
-        )
-
-        val GOOGLE_PAY_CONFIRMATION_OPTION = GooglePayConfirmationOption(
-            config = GooglePayConfirmationOption.Config(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                merchantName = "Test merchant",
-                merchantCountryCode = "US",
-                merchantCurrencyCode = "USD",
-                customAmount = null,
-                customLabel = null,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
-                cardBrandFilter = DefaultCardBrandFilter,
-                cardFundingFilter = DefaultCardFundingFilter,
-            ),
-        )
-
-        val GOOGLE_PAY_SHIPPING_INFORMATION = ShippingInformation(
-            name = "Google Pay Shipping",
-            phone = "1-800-555-1234",
-            address = Address(
-                line1 = "510 Townsend St",
-                line2 = "Floor 3",
-                city = "San Francisco",
-                state = "CA",
-                postalCode = "94103",
-                country = "US",
-            ),
+            name = "Controller Shipping",
+            phone = "1-800-555-0000",
         )
 
         val SAVE_ENABLED_CUSTOMER_METADATA = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
