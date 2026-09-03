@@ -25,8 +25,8 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
@@ -74,8 +74,8 @@ internal interface CustomerSheetTestHelper {
         ),
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
-            LpmRepositoryTestHelpers.card,
-            LpmRepositoryTestHelpers.usBankAccount,
+            SupportedPaymentMethodFixtures.card,
+            SupportedPaymentMethodFixtures.usBankAccount,
         ),
         savedPaymentSelection: PaymentSelection? = null,
         paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
