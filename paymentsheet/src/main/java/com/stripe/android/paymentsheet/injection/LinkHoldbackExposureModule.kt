@@ -6,10 +6,9 @@ import com.stripe.android.common.analytics.experiment.DefaultLogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.DefaultLogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.repositories.LinkApiRepository
@@ -21,7 +20,7 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
-import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Qualifier
 import kotlin.coroutines.CoroutineContext
 
@@ -61,8 +60,7 @@ internal class LinkHoldbackExposureModule {
     @LinkDisabledApiRepository
     fun providesLinkRepository(
         application: Application,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
         requestSurface: RequestSurface,
         stripeRepository: StripeRepository,
         @IOContext workContext: CoroutineContext,
@@ -82,8 +80,7 @@ internal class LinkHoldbackExposureModule {
         return LinkApiRepository(
             application = application,
             requestSurface = requestSurface,
-            publishableKeyProvider = publishableKeyProvider,
-            stripeAccountIdProvider = stripeAccountIdProvider,
+            apiConfigProvider = apiConfigProvider,
             stripeRepository = stripeRepository,
             consumersApiService = consumersApiService,
             workContext = workContext,

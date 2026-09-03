@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Base64
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.link.serialization.PopupPayload
 import com.stripe.android.model.PaymentMethod
@@ -15,22 +15,24 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import org.json.JSONObject
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * Contract used to explicitly launch Link as a web view.
  */
 internal class WebLinkActivityContract @Inject internal constructor(
     private val stripeRepository: StripeRepository,
-    private val errorReporter: ErrorReporter
+    private val errorReporter: ErrorReporter,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
-        val paymentConfiguration = PaymentConfiguration.getInstance(context)
+        val apiConfiguration = apiConfigurationProvider.get()
         val payload = PopupPayload.create(
             configuration = input.configuration,
             context = context,
-            publishableKey = paymentConfiguration.publishableKey,
-            stripeAccount = paymentConfiguration.stripeAccountId,
+            publishableKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
             paymentUserAgent = stripeRepository.buildPaymentUserAgent(),
         )
         return LinkForegroundActivity.createIntent(context, payload.toUrl())

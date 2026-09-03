@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testing.CoroutineTestRule
@@ -13,6 +14,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,6 +56,11 @@ internal class LinkControllerCoordinatorTest {
     private val confirmSetupIntentResults = mutableListOf<LinkController.ConfirmSetupIntentResult>()
 
     private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
+
+    @Before
+    fun setup() {
+        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), "pk_test_123")
+    }
 
     private fun createCoordinator(
         activityResult: LinkActivityResult? = null
