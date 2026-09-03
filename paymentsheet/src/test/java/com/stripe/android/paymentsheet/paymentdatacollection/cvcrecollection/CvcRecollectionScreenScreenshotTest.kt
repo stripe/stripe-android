@@ -10,12 +10,7 @@ import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.testing.CleanupTestRule
-import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -33,24 +28,10 @@ class CvcRecollectionScreenScreenshotTest {
         includeStripeTheme = false,
     )
 
-    private val scopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
-
     @get:Rule
     val ruleChain: RuleChain = RuleChain.emptyRuleChain()
-        .around(scopeCleanupRule)
         .around(paparazziRule)
         .around(scopedThemePaparazziRule)
-
-    private fun interactor(cvc: String = "", isTestMode: Boolean = true): CvcRecollectionInteractor {
-        return DefaultCvcRecollectionInteractor(
-            lastFour = "4242",
-            cardBrand = CardBrand.Visa,
-            cvc = cvc,
-            isTestMode = isTestMode,
-            processing = stateFlowOf(false),
-            coroutineScope = scopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
-        )
-    }
 
     @Test
     fun testEmpty() {
@@ -81,15 +62,6 @@ class CvcRecollectionScreenScreenshotTest {
     @Test
     fun testCustomAppearanceTheme() {
         snapshotWithAppearance(PaymentSheetAppearance.CrazyAppearance.appearance)
-    }
-
-    @Test
-    fun testEmptyPaymentScreenDisplayMode() {
-        paparazziRule.snapshot {
-            CvcRecollectionPaymentSheetScreen(
-                interactor = interactor()
-            )
-        }
     }
 
     @Test

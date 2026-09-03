@@ -804,14 +804,14 @@ internal class PaymentSheetTest(
         page.fillOutCardDetails()
 
         page.assertPrimaryButton(
-            expectedStateDescription = "Pay \$50.99",
+            expectedLabel = "Pay \$50.99",
             canPay = true
         )
 
         page.clearCard()
 
         page.assertPrimaryButton(
-            expectedStateDescription = "Pay \$50.99",
+            expectedLabel = "Pay \$50.99",
             canPay = false
         )
 

@@ -2,13 +2,15 @@
 
 package com.stripe.android.paymentsheet
 
-import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Button
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -25,11 +27,9 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
@@ -237,17 +237,17 @@ internal class PaymentSheetPage(
         composeTestRule.waitForIdle()
     }
 
-    fun assertPrimaryButton(expectedStateDescription: String, canPay: Boolean) {
-        onView(withId(R.id.primary_button)).check { view, _ ->
-            val nodeInfo = AccessibilityNodeInfo()
-            view.onInitializeAccessibilityNodeInfo(nodeInfo)
-            assertThat(nodeInfo.stateDescription).isEqualTo(expectedStateDescription)
-            assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
+    fun assertPrimaryButton(expectedLabel: String, canPay: Boolean) {
+        composeTestRule.onNode(
+            hasTestTag(PRIMARY_BUTTON_TEST_TAG)
+                .and(hasParent(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG)))
+        ).apply {
+            assertTextEquals(expectedLabel)
+            assertHasClickAction()
             if (canPay) {
-                assertThat(nodeInfo.isClickable).isTrue()
-                assertThat(nodeInfo.isEnabled).isTrue()
+                assertIsEnabled()
             } else {
-                assertThat(nodeInfo.isEnabled).isFalse()
+                assertIsNotEnabled()
             }
         }
     }

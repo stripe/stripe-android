@@ -7,7 +7,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CustomerStateHolder.Companion.SAVED_CUSTOMER
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -115,24 +114,5 @@ internal class DefaultCustomerStateHolder(
         return card?.fingerprint
             ?: usBankAccount?.fingerprint
             ?: sepaDebit?.fingerprint
-    }
-
-    companion object {
-        fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
-            return DefaultCustomerStateHolder(
-                savedStateHandle = viewModel.savedStateHandle,
-                selection = viewModel.selection,
-                customerMetadata = viewModel.paymentMethodMetadata.mapAsStateFlow {
-                    it?.customerMetadata
-                },
-                paymentMethodMetadataFlow = viewModel.paymentMethodMetadata,
-            )
-        }
-    }
-
-    object Factory : CustomerStateHolder.Factory {
-        override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
-            return DefaultCustomerStateHolder.create(viewModel)
-        }
     }
 }

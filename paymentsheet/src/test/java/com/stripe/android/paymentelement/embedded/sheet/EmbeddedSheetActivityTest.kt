@@ -275,6 +275,7 @@ internal class EmbeddedSheetActivityTest {
                         paymentMethods = paymentMethods,
                     ),
                     promotions = emptyList(),
+                    activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
                     launchMode = EmbeddedLaunchMode.Manage,
                 ),
             )

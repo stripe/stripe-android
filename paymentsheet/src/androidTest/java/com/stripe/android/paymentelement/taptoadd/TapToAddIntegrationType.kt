@@ -33,6 +33,12 @@ internal sealed interface TapToAddIntegrationType {
                 return Complete.entries
             }
         }
+
+        internal object EmbeddedProvider : TestParameterValuesProvider() {
+            override fun provideValues(context: Context?): List<Complete> {
+                return listOf(Embedded)
+            }
+        }
     }
 
     object Provider : TestParameterValuesProvider() {

@@ -35,6 +35,7 @@ import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
@@ -475,7 +476,7 @@ internal class FlowControllerTest(
         }
 
         initializeActivity()
-        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
+        val activityLaunchObserver = ActivityLaunchObserver(EmbeddedSheetActivity::class.java)
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
@@ -1189,7 +1190,7 @@ internal class FlowControllerTest(
             response.testBodyFromFile("consumer-session-lookup-success.json")
         }
 
-        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
+        val activityLaunchObserver = ActivityLaunchObserver(EmbeddedSheetActivity::class.java)
 
         testContext.scenario.onActivity {
             activityLaunchObserver.prepareForLaunch(it)

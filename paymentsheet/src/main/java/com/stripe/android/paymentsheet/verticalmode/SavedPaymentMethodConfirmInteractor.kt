@@ -1,9 +1,5 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import androidx.lifecycle.viewModelScope
-import com.stripe.android.common.spms.DefaultLinkFormElementFactory
-import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
-import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.withLinkState
 import com.stripe.android.core.strings.ResolvableString
@@ -15,7 +11,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -91,32 +86,6 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
 
     override fun close() {
         updateSelectionJob.cancel()
-    }
-
-    companion object {
-        fun create(
-            viewModel: BaseSheetViewModel,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            initialSelection: PaymentSelection.Saved,
-        ): DefaultSavedPaymentMethodConfirmInteractor {
-            return DefaultSavedPaymentMethodConfirmInteractor(
-                initialSelection = initialSelection,
-                displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
-                    PaymentMethod.Type.Card.code
-                )?.displayName.orEmpty(),
-                linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
-                savedPaymentMethodLinkFormHelper = DefaultSavedPaymentMethodLinkFormHelper(
-                    linkInlineSignupAvailability = DefaultLinkInlineSignupAvailability(paymentMethodMetadata),
-                    linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
-                    savedStateHandle = viewModel.savedStateHandle,
-                    linkFormElementFactory = DefaultLinkFormElementFactory,
-                ),
-                processing = viewModel.processing,
-                updateSelection = viewModel::updateSelection,
-                paymentMethodMetadata = paymentMethodMetadata,
-                coroutineScope = viewModel.viewModelScope,
-            )
-        }
     }
 
     class Factory @Inject constructor(

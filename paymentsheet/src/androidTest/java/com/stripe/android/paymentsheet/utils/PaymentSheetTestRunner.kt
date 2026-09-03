@@ -7,10 +7,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
@@ -26,7 +26,7 @@ internal class PaymentSheetTestRunnerContext(
     fun presentPaymentSheet(
         block: PaymentSheet.() -> Unit,
     ) {
-        val activityLaunchObserver = ActivityLaunchObserver(PaymentSheetActivity::class.java)
+        val activityLaunchObserver = ActivityLaunchObserver(EmbeddedSheetActivity::class.java)
         scenario.onActivity {
             activityLaunchObserver.prepareForLaunch(it)
             paymentSheet.block()

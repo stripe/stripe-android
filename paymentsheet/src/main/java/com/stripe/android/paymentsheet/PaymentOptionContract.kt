@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityArgs
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -15,8 +17,11 @@ internal class PaymentOptionContract :
         context: Context,
         input: Args
     ): Intent {
-        return Intent(context, PaymentOptionsActivity::class.java)
-            .putExtra(EXTRA_ARGS, input)
+        return Intent(context, EmbeddedSheetActivity::class.java)
+            .putExtra(
+                SheetActivityArgs.EXTRA_ARGS,
+                SheetActivityArgs.PaymentOptions(input),
+            )
     }
 
     override fun parseResult(
@@ -36,16 +41,5 @@ internal class PaymentOptionContract :
         val productUsage: Set<String>,
         val paymentElementCallbackIdentifier: String,
         val promotions: List<PaymentMethodMessagePromotion>?
-    ) : ActivityStarter.Args {
-        internal companion object {
-            internal fun fromIntent(intent: Intent): Args? {
-                @Suppress("DEPRECATION")
-                return intent.getParcelableExtra(EXTRA_ARGS)
-            }
-        }
-    }
-
-    internal companion object {
-        internal const val EXTRA_ARGS: String = "extra_activity_args"
-    }
+    ) : ActivityStarter.Args
 }
