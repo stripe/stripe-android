@@ -315,7 +315,7 @@ class TestResourceCleanupDetectorTest {
     }
 
     @Test
-    fun `should not detect derived coroutine scope whose owner cancels it`() {
+    fun `should not detect derived coroutine scope whose owner cancels it with named arguments`() {
         lint().files(
             kotlin(
                 "src/main/java/com/stripe/android/example/OwnerFactory.kt",
@@ -326,17 +326,21 @@ class TestResourceCleanupDetectorTest {
                     import kotlinx.coroutines.childScope
 
                     class Owner(
-                        private val coroutineScope: CoroutineScope,
+                        private val id: String,
+                        private val scope: CoroutineScope,
                     ) {
                         fun close() {
-                            coroutineScope.cancel()
+                            scope.cancel()
                         }
                     }
 
                     object OwnerFactory {
                         fun create(parentScope: CoroutineScope): Owner {
                             val coroutineScope = parentScope.childScope()
-                            return Owner(coroutineScope)
+                            return Owner(
+                                scope = coroutineScope,
+                                id = "owner",
+                            )
                         }
                     }
                 """
