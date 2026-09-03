@@ -110,7 +110,7 @@ data class ApiRequest internal constructor(
         }
 
         val apiKeyIsUserKey: Boolean
-            get() = apiKey.startsWith("uk_")
+            get() = ApiKeyValidator.isUserKey(apiKey)
 
         val apiKeyIsLiveMode: Boolean
             get() = !apiKey.contains("test")
