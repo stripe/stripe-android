@@ -50,6 +50,7 @@ internal class CheckoutStateLoader @Inject constructor(
         customerStateHolder.setCustomerState(null)
     }
 
+    @Suppress("LongMethod")
     private suspend fun commit(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
@@ -73,21 +74,38 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
         )
 
+        val expressCheckoutElementConfiguration = commonConfigurationFactory.createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )
+
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(response.id, response)
+
+        val paymentElementLoaderMetadata = PaymentElementLoader.Metadata(
+            isReloadingAfterProcessDeath = false,
+            initializedViaCompose = false,
+        )
+
         val loaderState = paymentElementLoader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                instancesKey = response.id,
-                checkoutSessionResponse = response,
-            ),
+            initializationMode = initializationMode,
             integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
                 isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
                 configuration = embeddedConfig,
-                paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
+                paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout
+                    .asPaymentSheet(),
             ),
-            metadata = PaymentElementLoader.Metadata(
-                isReloadingAfterProcessDeath = false,
-                initializedViaCompose = false,
-            ),
+            metadata = paymentElementLoaderMetadata,
         ).getOrThrow()
+        val expressCheckoutElementLoaderState = expressCheckoutElementConfiguration?.let { eceConfiguration ->
+            paymentElementLoader.load(
+                initializationMode = initializationMode,
+                integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
+                    commonConfiguration = eceConfiguration,
+                ),
+                metadata = paymentElementLoaderMetadata,
+            )
+        }?.getOrThrow()
 
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
@@ -107,7 +125,7 @@ internal class CheckoutStateLoader @Inject constructor(
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
-            expressCheckoutElementPaymentMethodMetadata = loaderState.paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementLoaderState?.paymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
