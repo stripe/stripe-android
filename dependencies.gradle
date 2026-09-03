@@ -257,6 +257,7 @@ ext.testLibs = [
         okhttpMockWebServer  : "com.squareup.okhttp3:mockwebserver:${versions.okhttp}",
         okhttpTls            : "com.squareup.okhttp3:okhttp-tls:${versions.okhttp}",
         robolectric          : "org.robolectric:robolectric:${versions.robolectric}",
+        sdkCommon            : "com.android.tools:sdk-common:32.3.2",
         testOrchestrator     : "androidx.test:orchestrator:${versions.androidTestOrchestrator}",
         testParameterInjector: "com.google.testparameterinjector:test-parameter-injector:${versions.testParameterInjector}",
         turbine              : "app.cash.turbine:turbine:${versions.turbine}",

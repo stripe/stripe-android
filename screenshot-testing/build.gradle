@@ -22,6 +22,9 @@ dependencies {
 
     implementation testLibs.kotlin.reflect
 
+    // Remove once Paparazzi bundles the upstream locale-selection fix.
+    api testLibs.sdkCommon
+
     // Implemented here instead of using plugin which implements with testImplementation
     api("app.cash.paparazzi:paparazzi:${versions.paparazzi}") {
         exclude group: 'jakarta.activation'
