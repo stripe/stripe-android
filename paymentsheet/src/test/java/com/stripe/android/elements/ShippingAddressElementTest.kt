@@ -33,13 +33,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import javax.inject.Provider
 
 internal class ShippingAddressElementTest {
@@ -150,19 +143,17 @@ internal class ShippingAddressElementTest {
             )
         )
 
-        val address = argumentCaptor<CheckoutController.Address.State>()
-        verify(checkoutController).commitShippingAddress(
-            name = eq(addressDetails.name),
-            address = address.capture(),
-        )
-        assertThat(address.firstValue).isEqualTo(
-            CheckoutController.Address.State(
-                city = "San Francisco",
-                country = "US",
-                line1 = "510 Townsend St",
-                line2 = "Floor 2",
-                postalCode = "94103",
-                state = "CA",
+        assertThat(commitShippingAddress.calls.awaitItem()).isEqualTo(
+            FakeCommitShippingAddress.Call(
+                name = addressDetails.name,
+                address = CheckoutController.Address.State(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "510 Townsend St",
+                    line2 = "Floor 2",
+                    postalCode = "94103",
+                    state = "CA",
+                ),
             )
         )
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
@@ -182,10 +173,7 @@ internal class ShippingAddressElementTest {
         registration.dispatch(AddressLauncherResult.Canceled())
 
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
-        verify(checkoutController, never()).commitShippingAddress(
-            name = anyOrNull(),
-            address = any(),
-        )
+        commitShippingAddress.calls.expectNoEvents()
     }
 
     @Test
@@ -207,10 +195,7 @@ internal class ShippingAddressElementTest {
         )
 
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
-        verify(checkoutController, never()).commitShippingAddress(
-            name = anyOrNull(),
-            address = any(),
-        )
+        commitShippingAddress.calls.expectNoEvents()
     }
 
     @Test
@@ -259,7 +244,7 @@ internal class ShippingAddressElementTest {
             PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         )
         val errorReporter = FakeErrorReporter()
-        val checkoutController = mock<CheckoutController>()
+        val commitShippingAddress = FakeCommitShippingAddress()
         val coroutineScope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
 
         suspend fun createElement(): ElementScenario {
@@ -270,7 +255,7 @@ internal class ShippingAddressElementTest {
                 lifecycleOwner = lifecycleOwner,
                 paymentConfiguration = paymentConfiguration,
                 coroutineScope = coroutineScope,
-                checkoutController = checkoutController,
+                commitShippingAddress = commitShippingAddress::invoke,
                 stateHolder = stateHolder,
                 shippingAddressElementStateHolder = shippingAddressElementStateHolder,
                 errorReporter = errorReporter,
@@ -294,7 +279,7 @@ internal class ShippingAddressElementTest {
             lifecycleOwner = element.lifecycleOwner,
             stateHolder = stateHolder,
             shippingAddressElementStateHolder = shippingAddressElementStateHolder,
-            checkoutController = checkoutController,
+            commitShippingAddress = commitShippingAddress,
             paymentConfiguration = paymentConfiguration,
             errorReporter = errorReporter,
             registration = element.registration,
@@ -304,6 +289,7 @@ internal class ShippingAddressElementTest {
         element.ensureAllEventsConsumed()
         paymentConfiguration.getCalls.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
+        commitShippingAddress.ensureAllEventsConsumed()
     }
 
     private class RecordingActivityResultCaller : ActivityResultCaller {
@@ -391,7 +377,7 @@ internal class ShippingAddressElementTest {
         val lifecycleOwner: TestLifecycleOwner,
         val stateHolder: CheckoutControllerStateHolder,
         val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
-        val checkoutController: CheckoutController,
+        val commitShippingAddress: FakeCommitShippingAddress,
         val paymentConfiguration: RecordingProvider<PaymentConfiguration>,
         val errorReporter: FakeErrorReporter,
         val registration: Registration,

@@ -23,18 +23,45 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 
+@OptIn(CheckoutSessionPreview::class)
+internal typealias CommitShippingAddress = suspend (
+    String?,
+    CheckoutController.Address.State,
+) -> Result<Unit>
+
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ShippingAddressElement @Inject internal constructor(
+class ShippingAddressElement internal constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
     private val paymentConfiguration: Provider<PaymentConfiguration>,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    private val checkoutController: CheckoutController,
+    private val commitShippingAddress: CommitShippingAddress,
     private val stateHolder: CheckoutControllerStateHolder,
     private val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
     private val errorReporter: ErrorReporter,
 ) {
+    @Inject
+    internal constructor(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+        paymentConfiguration: Provider<PaymentConfiguration>,
+        @ViewModelScope coroutineScope: CoroutineScope,
+        checkoutController: CheckoutController,
+        stateHolder: CheckoutControllerStateHolder,
+        shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
+        errorReporter: ErrorReporter,
+    ) : this(
+        activityResultCaller = activityResultCaller,
+        lifecycleOwner = lifecycleOwner,
+        paymentConfiguration = paymentConfiguration,
+        coroutineScope = coroutineScope,
+        commitShippingAddress = checkoutController::commitShippingAddress,
+        stateHolder = stateHolder,
+        shippingAddressElementStateHolder = shippingAddressElementStateHolder,
+        errorReporter = errorReporter,
+    )
+
     private val activityLauncher: ActivityResultLauncher<AddressElementActivityContract.Args> =
         activityResultCaller.registerForActivityResult(AddressElementActivityContract) { result ->
             shippingAddressElementStateHolder.isPresenting = false
@@ -42,9 +69,9 @@ class ShippingAddressElement @Inject internal constructor(
                 is AddressLauncherResult.Succeeded -> {
                     result.address.address?.toCheckoutAddress()?.let { address ->
                         coroutineScope.launch {
-                            checkoutController.commitShippingAddress(
-                                name = result.address.name,
-                                address = address,
+                            commitShippingAddress(
+                                result.address.name,
+                                address,
                             )
                         }
                     }

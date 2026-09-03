@@ -714,10 +714,11 @@ internal class CheckoutControllerTest {
     fun `commitShippingAddress stores local details and reloads payment element state`() =
         runMutationScenario {
             val response = committedState().checkoutSessionResponse
+            val address = fullAddress.build()
 
             val result = controller.commitShippingAddress(
                 name = "John",
-                address = fullAddress.build(),
+                address = address,
             )
 
             result.getOrThrow()
@@ -725,10 +726,10 @@ internal class CheckoutControllerTest {
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
-            assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
+            assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
             assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
             assertThat(state.paymentMethodMetadata.shippingDetails?.address).isEqualTo(
-                fullAddress.build().asPaymentSheet()
+                address.asPaymentSheet()
             )
         }
 
