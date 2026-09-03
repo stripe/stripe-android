@@ -63,11 +63,6 @@ private fun CheckoutPlaygroundSettings.Snapshot.contactDetails(
 private fun CheckoutPlaygroundSettings.Snapshot.paymentElementConfiguration(): PaymentElement.Configuration {
     return PaymentElement.Configuration()
         .embeddedViewDisplaysMandateText(this[Controller.payment.embeddedMandate])
-        .billingDetailsCollectionConfiguration(
-            PaymentElement.Configuration.BillingDetailsCollectionConfiguration()
-                .name(this[Controller.payment.billing.name])
-                .address(this[Controller.payment.billing.address])
-        )
         .paymentMethodLayout(this[Controller.payment.layout])
         .opensCardScannerAutomatically(this[Controller.payment.opensCardScanner])
         .preferredNetworks(this[Controller.payment.preferredNetworks])

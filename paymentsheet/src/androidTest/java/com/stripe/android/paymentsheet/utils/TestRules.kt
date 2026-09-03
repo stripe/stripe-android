@@ -35,6 +35,7 @@ class TestRules private constructor(
                 .around(DetectLeaksAfterTestSuccess())
                 .around(FakeGooglePayRepositoryRule())
                 .around(composeTestRule)
+                .around(PrefsTestStoreRule())
                 .let { chain ->
                     retryRule?.let(chain::around) ?: chain
                 }

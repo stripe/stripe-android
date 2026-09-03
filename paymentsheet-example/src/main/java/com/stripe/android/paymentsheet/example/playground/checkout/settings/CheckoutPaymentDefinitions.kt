@@ -19,28 +19,6 @@ internal object CheckoutPaymentDefinitions {
         defaultValue = true,
     )
 
-    val billing = BillingDefinitions()
-
-    internal class BillingDefinitions {
-        val name = enumChoice(
-            key = "payment.billing.name",
-            displayName = "Name",
-            defaultValue = PaymentElement.Configuration.BillingDetailsCollectionConfiguration
-                .CollectionMode.Automatic,
-        )
-        val address = enumChoice(
-            key = "payment.billing.address",
-            displayName = "Address",
-            defaultValue = PaymentElement.Configuration.BillingDetailsCollectionConfiguration
-                .AddressCollectionMode.Automatic,
-        )
-        val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-            key = "payment.billing",
-            displayName = "Billing details collection",
-            children = arrayOf(name, address),
-        )
-    }
-
     val layout = enumChoice(
         key = "payment.layout",
         displayName = "Payment method layout",
@@ -279,7 +257,6 @@ internal object CheckoutPaymentDefinitions {
             children = arrayOf(
                 shouldSetConfiguration,
                 embeddedMandate,
-                billing.configuration,
                 layout,
                 opensCardScanner,
                 preferredNetworks,

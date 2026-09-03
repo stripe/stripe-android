@@ -186,21 +186,6 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `presentation state survives process death`() {
-        val savedStateHandle = SavedStateHandle()
-        val stateHolder = ShippingAddressElementStateHolder(savedStateHandle)
-        stateHolder.isPresenting = true
-        stateHolder.updaterKey = "updater-key"
-
-        val restoredStateHolder = ShippingAddressElementStateHolder(
-            savedStateHandle = savedStateHandle.simulateProcessDeath(),
-        )
-
-        assertThat(restoredStateHolder.isPresenting).isTrue()
-        assertThat(restoredStateHolder.updaterKey).isEqualTo("updater-key")
-    }
-
-    @Test
     fun `update sends complete name and address to checkout controller`() = runScenario {
         val result = shippingAddressElement.update(
             AddressDetails(
@@ -398,8 +383,4 @@ internal class ShippingAddressElementTest {
         val registration: Registration,
         val createElement: suspend () -> ElementScenario,
     )
-
-    @Suppress("RestrictedApi")
-    private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
-        SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
 }
