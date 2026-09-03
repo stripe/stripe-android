@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import app.cash.burst.burstValues
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import app.cash.burst.Burst
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
@@ -16,6 +13,8 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
@@ -30,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_FORM_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -49,10 +49,8 @@ internal class GooglePayTest(
     private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
         ApiConfigurationTestType.PaymentConfigurationOnly,
     ),
-    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
+    private val integrationType: ProductIntegrationType,
 ) {
-
-
     @get:Rule
     val testRules: TestRules = TestRules.create()
 

@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet
 
-import app.cash.burst.Burst
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
+import app.cash.burst.Burst
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
@@ -31,7 +31,7 @@ import org.junit.Test
 
 @Burst
 internal class CustomerSessionCustomerSheetTest(
-    private val integrationType: IntegrationType = IntegrationType.Activity,
+    private val integrationType: IntegrationType,
 ) {
     @get:Rule
     val testRules: TestRules = TestRules.create()

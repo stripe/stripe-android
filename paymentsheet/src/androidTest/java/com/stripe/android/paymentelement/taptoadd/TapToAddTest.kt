@@ -25,15 +25,14 @@ import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
+import kotlin.time.Duration.Companion.seconds
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Rule
 import org.junit.Test
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(TapToAddPreview::class)
 @Burst
 internal class TapToAddTest {
-
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure
     // it happens, but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
@@ -65,7 +64,7 @@ internal class TapToAddTest {
         apiConfigurationTestType: ApiConfigurationTestType = burstValues(
             ApiConfigurationTestType.PaymentConfigurationOnly,
         ),
-        integrationType: TapToAddIntegrationType.Complete = TapToAddIntegrationType.Complete.PaymentSheet
+        integrationType: TapToAddIntegrationType.Complete
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,
@@ -105,7 +104,7 @@ internal class TapToAddTest {
         apiConfigurationTestType: ApiConfigurationTestType = burstValues(
             ApiConfigurationTestType.PaymentConfigurationOnly,
         ),
-        integrationType: TapToAddIntegrationType.Continue = TapToAddIntegrationType.Continue.FlowController
+        integrationType: TapToAddIntegrationType.Continue
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,
@@ -197,7 +196,7 @@ internal class TapToAddTest {
         apiConfigurationTestType: ApiConfigurationTestType = burstValues(
             ApiConfigurationTestType.PaymentConfigurationOnly,
         ),
-        integrationType: TapToAddIntegrationType.Complete = TapToAddIntegrationType.Complete.PaymentSheet,
+        integrationType: TapToAddIntegrationType.Complete,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,

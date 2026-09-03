@@ -1,14 +1,14 @@
 package com.stripe.android.paymentsheet
 
-import app.cash.burst.burstValues
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import app.cash.burst.Burst
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -23,11 +23,9 @@ internal class DefaultPaymentMethodsTest(
     private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
         ApiConfigurationTestType.PaymentConfigurationOnly,
     ),
-    private val integrationType: ProductIntegrationType = ProductIntegrationType.PaymentSheet,
-    private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical,
+    private val integrationType: ProductIntegrationType,
+    private val layoutType: PaymentSheetLayoutType,
 ) {
-
-
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @get:Rule

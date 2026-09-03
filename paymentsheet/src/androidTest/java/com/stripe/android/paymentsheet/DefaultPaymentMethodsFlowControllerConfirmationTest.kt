@@ -1,12 +1,12 @@
 package com.stripe.android.paymentsheet
 
-import app.cash.burst.burstValues
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import app.cash.burst.Burst
 import androidx.compose.ui.test.hasTestTag
 import androidx.test.espresso.intent.rule.IntentsRule
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_BILLING_DETAILS
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ConfirmationType
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -25,10 +25,9 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
     private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
         ApiConfigurationTestType.PaymentConfigurationOnly,
     ),
-    private val confirmationType: ConfirmationType = ConfirmationType.IntentFirst,
-    private val paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
+    private val confirmationType: ConfirmationType,
+    private val paymentMethodType: PaymentMethodType,
 ) {
-
     @get:Rule
     val testRules: TestRules = TestRules.create {
         around(IntentsRule())

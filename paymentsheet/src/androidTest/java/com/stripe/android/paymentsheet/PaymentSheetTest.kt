@@ -1,11 +1,10 @@
 package com.stripe.android.paymentsheet
 
-import app.cash.burst.burstValues
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import app.cash.burst.Burst
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.espresso.intent.rule.IntentsRule
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -21,6 +20,7 @@ import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.UsBankAccountFormTestUtils
@@ -41,9 +41,8 @@ internal class PaymentSheetTest(
     private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
         ApiConfigurationTestType.PaymentConfigurationOnly,
     ),
-    private val integrationType: IntegrationType = IntegrationType.Activity,
+    private val integrationType: IntegrationType,
 ) {
-
     private val networkRule = NetworkRule()
 
     @get:Rule

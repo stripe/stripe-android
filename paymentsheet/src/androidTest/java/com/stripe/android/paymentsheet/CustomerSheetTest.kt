@@ -20,7 +20,7 @@ import org.junit.Test
 
 @Burst
 internal class CustomerSheetTest(
-    private val integrationType: IntegrationType = IntegrationType.Activity,
+    private val integrationType: IntegrationType,
 ) {
     @get:Rule
     val testRules: TestRules = TestRules.create()

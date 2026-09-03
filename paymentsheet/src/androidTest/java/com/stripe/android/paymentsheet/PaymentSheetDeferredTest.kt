@@ -1,8 +1,7 @@
 package com.stripe.android.paymentsheet
 
-import app.cash.burst.burstValues
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -14,6 +13,7 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.MultipleInstancesTestType
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -31,7 +31,6 @@ internal class PaymentSheetDeferredTest(
         ApiConfigurationTestType.PaymentConfigurationOnly,
     ),
 ) {
-
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -767,7 +766,7 @@ internal class PaymentSheetDeferredTest(
 
     @Test
     fun testDeferredIntentWithMultipleInstances(
-        testType: MultipleInstancesTestType = MultipleInstancesTestType.RunWithFirst,
+        testType: MultipleInstancesTestType,
     ) = runMultiplePaymentSheetInstancesTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
