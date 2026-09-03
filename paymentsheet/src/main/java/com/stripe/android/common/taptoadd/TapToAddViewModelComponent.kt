@@ -58,6 +58,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfir
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -66,6 +67,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
@@ -94,6 +96,8 @@ import javax.inject.Singleton
         DefaultIntentConfirmationModule::class,
         LinkInlineSignupConfirmationModule::class,
         PaymentConfigurationModule::class,
+        ApiConfigurationModule::class,
+        ApiRequestOptionsModule::class,
         PaymentElementRequestSurfaceModule::class,
         TapToAddViewModelModule::class,
         TapToAddModule::class,

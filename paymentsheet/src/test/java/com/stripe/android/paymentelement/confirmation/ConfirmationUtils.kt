@@ -161,8 +161,12 @@ internal suspend fun createIntentConfirmationInterceptor(
                         context = ApplicationProvider.getApplicationContext(),
                         publishableKey = "pk",
                     ),
-                    publishableKeyProvider = { "pk" },
-                    stripeAccountIdProvider = { null },
+                    apiConfigurationProvider = {
+                        ApiConfiguration.State(
+                            publishableKey = "pk",
+                            stripeAccountId = null,
+                        )
+                    },
                 )
                 return CheckoutSessionConfirmationInterceptor(
                     integrationMetadata = integrationMetadata,

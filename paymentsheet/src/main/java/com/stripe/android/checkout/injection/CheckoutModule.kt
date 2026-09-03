@@ -2,8 +2,8 @@ package com.stripe.android.checkout.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.DisplayDensity
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.ApiRequest
@@ -32,11 +32,14 @@ internal object CheckoutModule {
 
     @Provides
     fun provideApiRequestOptions(
-        paymentConfiguration: Provider<PaymentConfiguration>
-    ): ApiRequest.Options = ApiRequest.Options(
-        apiKey = paymentConfiguration.get().publishableKey,
-        stripeAccount = paymentConfiguration.get().stripeAccountId,
-    )
+        apiConfigProvider: Provider<ApiConfiguration.State>
+    ): ApiRequest.Options {
+        val apiConfiguration = apiConfigProvider.get()
+        return ApiRequest.Options(
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
+        )
+    }
 
     @Provides
     fun provideStripeImageLoader(context: Context): StripeImageLoader = DefaultStripeImageLoader(context)

@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -963,6 +964,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
                 linkBrand = LinkBrand.Link,
+                apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             ),
             loginState = LinkState.LoginState.LoggedOut,
             signupModeResult = signupModeResult,
