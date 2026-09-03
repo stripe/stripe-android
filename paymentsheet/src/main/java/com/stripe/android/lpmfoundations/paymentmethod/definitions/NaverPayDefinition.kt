@@ -9,7 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.DropdownItemSpec
+import com.stripe.android.ui.core.elements.DropdownItem
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SimpleDropdownConfig
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
@@ -76,11 +76,11 @@ private object NaverPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
     }
 
     private val fundingItems = listOf(
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "card",
             displayText = "Naver Pay Card",
         ),
-        DropdownItemSpec(
+        DropdownItem(
             apiValue = "points",
             displayText = "Naver Pay Money/Point",
         ),
