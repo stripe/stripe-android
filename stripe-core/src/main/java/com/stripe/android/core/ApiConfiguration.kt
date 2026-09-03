@@ -9,7 +9,6 @@ import kotlinx.parcelize.Parcelize
  * payment UI components. When not provided, components fall back to
  * [PaymentConfiguration.getInstance].
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ApiConfiguration(
     private val publishableKey: String,
 ) {
