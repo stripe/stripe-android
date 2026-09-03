@@ -35,7 +35,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -1618,7 +1618,7 @@ internal class PaymentSheetViewModelTest {
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
             paymentMethodMessagePromotionsHelper = null,
         ).createFormArguments(
-            paymentMethodCode = LpmRepositoryTestHelpers.card.code,
+            paymentMethodCode = SupportedPaymentMethodFixtures.card.code,
         )
 
         assertThat(observedArgs).isEqualTo(
