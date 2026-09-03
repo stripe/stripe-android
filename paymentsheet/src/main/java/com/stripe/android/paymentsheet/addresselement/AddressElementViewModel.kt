@@ -14,6 +14,7 @@ internal class AddressElementViewModel @Inject internal constructor(
     val inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
     val autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
 ) : ViewModel() {
+    val processingState = AddressElementActivityProcessingState()
 
     internal class Factory(
         private val applicationSupplier: () -> Application,

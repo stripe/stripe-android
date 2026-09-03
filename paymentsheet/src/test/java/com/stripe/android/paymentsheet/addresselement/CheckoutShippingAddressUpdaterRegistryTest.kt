@@ -35,17 +35,12 @@ internal class CheckoutShippingAddressUpdaterRegistryTest {
     }
 
     @Test
-    fun `busy state is keyed and cleared when registration is removed`() = runTest {
+    fun `remove clears updater registration`() = runTest {
         val key = CheckoutShippingAddressUpdaterRegistry.register(FakeUpdater())
-
-        CheckoutShippingAddressUpdaterRegistry.setBusy(key, true)
-        assertThat(CheckoutShippingAddressUpdaterRegistry.isBusy(key)).isTrue()
-        assertThat(CheckoutShippingAddressUpdaterRegistry.isBusy(null)).isFalse()
 
         CheckoutShippingAddressUpdaterRegistry.remove(key)
 
         assertThat(CheckoutShippingAddressUpdaterRegistry.get(key)).isNull()
-        assertThat(CheckoutShippingAddressUpdaterRegistry.isBusy(key)).isFalse()
     }
 
     private class FakeUpdater : CheckoutShippingAddressUpdaterRegistry.Updater {

@@ -69,8 +69,11 @@ internal class ShippingAddressElementTest {
 
         val launch = activityLauncher.launchCalls.awaitItem()
         assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-        assertThat(launch.input.updaterKey).isNotNull()
-        assertThat(CheckoutShippingAddressUpdaterRegistry.get(launch.input.updaterKey))
+        val updaterKey = requireNotNull(shippingAddressElementStateHolder.updaterKey)
+        assertThat(launch.input.launchMode).isEqualTo(
+            AddressElementActivityContract.LaunchMode.CheckoutShipping(updaterKey)
+        )
+        assertThat(CheckoutShippingAddressUpdaterRegistry.get(updaterKey))
             .isSameInstanceAs(shippingAddressElement)
 
         val config = requireNotNull(launch.input.config)
@@ -102,7 +105,8 @@ internal class ShippingAddressElementTest {
     @Test
     fun `recreated element suppresses presentation while original is active`() = runScenario {
         shippingAddressElement.present()
-        val updaterKey = requireNotNull(activityLauncher.launchCalls.awaitItem().input.updaterKey)
+        activityLauncher.launchCalls.awaitItem()
+        val updaterKey = requireNotNull(shippingAddressElementStateHolder.updaterKey)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
         val recreated = createElement()
@@ -137,7 +141,8 @@ internal class ShippingAddressElementTest {
     fun `result clears presentation and ignores saved address`() = runScenario {
         val originalState = stateHolder.state
         shippingAddressElement.present()
-        val updaterKey = requireNotNull(activityLauncher.launchCalls.awaitItem().input.updaterKey)
+        activityLauncher.launchCalls.awaitItem()
+        val updaterKey = requireNotNull(shippingAddressElementStateHolder.updaterKey)
 
         registration.dispatch(
             AddressLauncherResult.Succeeded(

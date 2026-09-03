@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.injection
 
+import com.stripe.android.paymentsheet.addresselement.AddressElementActivityProcessingState
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
+import dagger.BindsInstance
 import dagger.Subcomponent
 
 @Subcomponent
@@ -9,6 +11,9 @@ internal interface InputAddressViewModelSubcomponent {
 
     @Subcomponent.Factory
     interface Factory {
-        fun create(): InputAddressViewModelSubcomponent
+        fun create(
+            @BindsInstance
+            processingState: AddressElementActivityProcessingState,
+        ): InputAddressViewModelSubcomponent
     }
 }
