@@ -28,6 +28,7 @@ class CheckoutControllerExampleRequestFactoryTest {
                 put("billing_address_collection", false)
             }
         )
+        assertThat(request.body).doesNotContainKey("merchant_country_code")
     }
 
     @Test
@@ -50,6 +51,7 @@ class CheckoutControllerExampleRequestFactoryTest {
                 put("currency", "eur")
                 put("automatic_payment_methods", true)
                 put("automatic_tax", true)
+                put("merchant_country_code", "us_tax")
                 put("shipping_address_collection", true)
                 put("billing_address_collection", true)
             }

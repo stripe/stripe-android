@@ -93,7 +93,12 @@ internal object CheckoutSessionDefinitions {
         key = "session.automatic_tax",
         displayName = "Automatic tax",
         defaultValue = false,
-        updateRequest = { enabled -> put("automatic_tax", enabled) },
+        updateRequest = { enabled ->
+            put("automatic_tax", enabled)
+            if (enabled) {
+                put("merchant_country_code", "us_tax")
+            }
+        },
     )
     val shippingAddressCollection = boolean(
         key = "session.shipping_address_collection",
