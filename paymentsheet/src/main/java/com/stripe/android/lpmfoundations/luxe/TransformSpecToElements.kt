@@ -28,6 +28,7 @@ import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.OTPElementFactory
 
 /**
  * Transform a [LayoutSpec] data object into an Element, which
@@ -57,7 +58,7 @@ internal class TransformSpecToElements(
                 is AffirmTextSpec -> listOf(spec.transform())
                 is EmptyFormSpec -> listOf(EmptyFormElement())
                 is MandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-                is OTPSpec -> listOf(spec.transform())
+                is OTPSpec -> listOf(OTPElementFactory.create())
                 is NameSpec -> listOf(spec.transform(arguments.initialValues))
                 is EmailSpec -> listOf(spec.transform(arguments.initialValues))
                 is PhoneSpec -> listOf(spec.transform(arguments.initialValues))
