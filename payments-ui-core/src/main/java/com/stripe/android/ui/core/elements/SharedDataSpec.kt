@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -12,7 +13,7 @@ import kotlinx.serialization.Serializable
 data class SharedDataSpec(
     @SerialName("type")
     val type: String,
-    @SerialName("fields")
+    @Transient
     val fields: ArrayList<FormItemSpec> = arrayListOf(),
     @SerialName("selector_icon")
     val selectorIcon: SelectorIcon? = null,
