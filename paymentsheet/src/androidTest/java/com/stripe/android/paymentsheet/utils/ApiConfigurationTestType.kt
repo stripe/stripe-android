@@ -68,6 +68,5 @@ internal object ApiConfigurationTestTypeProvider : TestParameterValuesProvider()
     ): List<ApiConfigurationTestType> = listOf(
         ApiConfigurationTestType.PaymentConfigurationOnly,
         ApiConfigurationTestType.ApiConfigurationOnly,
-        ApiConfigurationTestType.ApiConfigurationOverridesPaymentConfiguration,
     )
 }

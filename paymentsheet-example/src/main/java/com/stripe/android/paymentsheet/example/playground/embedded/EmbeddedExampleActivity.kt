@@ -19,7 +19,10 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -27,12 +30,16 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
+import com.stripe.android.ApiConfigurationPreview
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.UseApiConfigurationSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
@@ -44,17 +51,25 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
         supportActionBar?.title = getString(R.string.embedded_example_title)
 
         setContent {
-            CheckoutScreen()
+            val useApiConfiguration = remember {
+                val snapshot = PlaygroundSettings.createFromSharedPreferences(applicationContext).snapshot()
+                UseApiConfigurationSettingsDefinition.isEnabled(snapshot)
+            }
+            CheckoutScreen(useApiConfiguration)
         }
     }
 }
 
 @Composable
-fun CheckoutScreen() {
+@OptIn(ApiConfigurationPreview::class)
+fun CheckoutScreen(useApiConfiguration: Boolean = false) {
     val context = LocalContext.current.applicationContext
+    var prefetchedCheckout by remember { mutableStateOf<CheckoutResult?>(null) }
     val embeddedBuilder = remember {
         EmbeddedPaymentElement.Builder(
-            createIntentCallback = { _, _ -> checkout(context) },
+            createIntentCallback = { _, _ ->
+                (prefetchedCheckout ?: checkout(context, initializePaymentConfiguration = true)).createIntentResult
+            },
             resultCallback = { result -> handlePaymentResult(context, result) },
         )
     }
@@ -62,6 +77,15 @@ fun CheckoutScreen() {
     val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
     LaunchedEffect(embeddedPaymentElement) {
+        val checkoutResult = if (useApiConfiguration) {
+            checkout(context, initializePaymentConfiguration = false).also {
+                prefetchedCheckout = it
+            }
+        } else {
+            null
+        }
+        val configurationBuilder = EmbeddedPaymentElement.Configuration.Builder("Powdur")
+        checkoutResult?.apiConfiguration?.let(configurationBuilder::apiConfiguration)
         val configureResult = embeddedPaymentElement.configure(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -70,7 +94,7 @@ fun CheckoutScreen() {
                 ),
                 // Optional intent configuration options...
             ),
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Powdur").build()
+            configuration = configurationBuilder.build()
         )
         if (configureResult is EmbeddedPaymentElement.ConfigureResult.Failed) {
             Toast.makeText(context, configureResult.error.message, Toast.LENGTH_LONG).show()
@@ -101,7 +125,10 @@ fun CheckoutScreen() {
     }
 }
 
-private suspend fun checkout(context: Context): CreateIntentResult {
+private suspend fun checkout(
+    context: Context,
+    initializePaymentConfiguration: Boolean,
+): CheckoutResult {
     val request = ExampleCheckoutRequest(
         hotDogCount = 1,
         saladCount = 1,
@@ -115,17 +142,30 @@ private suspend fun checkout(context: Context): CreateIntentResult {
         .awaitModel(ExampleCheckoutResponse.serializer())
     return when (apiResult) {
         is Result.Success -> {
-            PaymentConfiguration.init(
-                context = context,
-                publishableKey = apiResult.value.publishableKey,
+            if (initializePaymentConfiguration) {
+                PaymentConfiguration.init(
+                    context = context,
+                    publishableKey = apiResult.value.publishableKey,
+                )
+            }
+            CheckoutResult(
+                createIntentResult = CreateIntentResult.Success(apiResult.value.paymentIntent),
+                apiConfiguration = ApiConfiguration(apiResult.value.publishableKey),
             )
-            CreateIntentResult.Success(apiResult.value.paymentIntent)
         }
         is Result.Failure -> {
-            CreateIntentResult.Failure(apiResult.error)
+            CheckoutResult(
+                createIntentResult = CreateIntentResult.Failure(apiResult.error),
+                apiConfiguration = null,
+            )
         }
     }
 }
+
+private data class CheckoutResult(
+    val createIntentResult: CreateIntentResult,
+    val apiConfiguration: ApiConfiguration?,
+)
 
 private fun handlePaymentResult(context: Context, result: EmbeddedPaymentElement.Result) {
     when (result) {

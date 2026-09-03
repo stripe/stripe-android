@@ -55,6 +55,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundCon
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.UseApiConfigurationSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.countryCode
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -282,10 +283,12 @@ internal class PaymentSheetPlaygroundViewModel(
 
                         // Init PaymentConfiguration with the publishable key returned from the backend,
                         // which will be used on all Stripe API calls
-                        PaymentConfiguration.init(
-                            getApplication(),
-                            response.publishableKey
-                        )
+                        if (!UseApiConfigurationSettingsDefinition.isEnabled(playgroundState.snapshot)) {
+                            PaymentConfiguration.init(
+                                getApplication(),
+                                response.publishableKey
+                            )
+                        }
 
                         if (playgroundState.isNewCustomer) {
                             playgroundSettingsFlow.value?.let { settings ->
@@ -353,10 +356,15 @@ internal class PaymentSheetPlaygroundViewModel(
 
                 // Init PaymentConfiguration with the publishable key returned from the backend,
                 // which will be used on all Stripe API calls
-                PaymentConfiguration.init(
-                    getApplication(),
-                    response.publishableKey
-                )
+                val useApiConfiguration = playgroundSettingsFlow.value
+                    ?.snapshot()
+                    ?.let(UseApiConfigurationSettingsDefinition::isEnabled) == true
+                if (!useApiConfiguration) {
+                    PaymentConfiguration.init(
+                        getApplication(),
+                        response.publishableKey
+                    )
+                }
 
                 if (isNewCustomer) {
                     playgroundSettingsFlow.value?.let { settings ->
