@@ -10,12 +10,12 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 @JsonIgnoreUnknownKeys
 internal data class RetrieveCryptoCustomerResponse(
     val id: String,
-    val requirements: AdditionalKycRequirementsResponse,
+    val requirements: AdditionalKycRequirementsResponse? = null,
 )
 
 @Serializable
 internal data class AdditionalKycRequirementsResponse(
-    val entries: List<AdditionalKycRequirementResponse>,
+    val entries: List<AdditionalKycRequirementResponse> = emptyList(),
 ) {
     fun toAdditionalKycRequirements(): AdditionalKycRequirements {
         val requirements = entries.map { it.toAdditionalKycRequirement() }
@@ -44,6 +44,7 @@ internal data class AdditionalKycRequirementResponse(
     val requestedBy: String,
     @SerialName("awaiting_action_from")
     val awaitingActionFrom: String,
+    val impact: AdditionalKycRequirementImpactResponse? = null,
     @SerialName("requested_reasons")
     val requestedReasons: List<String> = emptyList(),
     val errors: List<AdditionalKycRequirementErrorResponse> = emptyList(),
@@ -51,6 +52,35 @@ internal data class AdditionalKycRequirementResponse(
     val submissionType: String,
     val document: AdditionalKycDocumentRequirementResponse? = null,
     val questionnaire: AdditionalKycQuestionnaireResponse? = null,
+)
+
+@Serializable
+internal data class AdditionalKycRequirementImpactResponse(
+    @SerialName("restricts_capabilities")
+    val restrictsCapabilities: List<AdditionalKycCapabilityImpactResponse> = emptyList(),
+)
+
+@Serializable
+internal data class AdditionalKycCapabilityImpactResponse(
+    val capability: String,
+    val restriction: AdditionalKycCapabilityRestrictionResponse,
+)
+
+@Serializable
+internal data class AdditionalKycCapabilityRestrictionResponse(
+    @SerialName("max_transaction_amount")
+    val maxTransactionAmount: AdditionalKycAmountResponse? = null,
+    @SerialName("lifetime_volume_limit")
+    val lifetimeVolumeLimit: AdditionalKycAmountResponse? = null,
+    @SerialName("lifetime_volume_threshold")
+    val lifetimeVolumeThreshold: AdditionalKycAmountResponse? = null,
+    val regions: List<String> = emptyList(),
+)
+
+@Serializable
+internal data class AdditionalKycAmountResponse(
+    val amount: Long? = null,
+    val currency: String,
 )
 
 @Serializable
@@ -62,12 +92,12 @@ internal data class AdditionalKycRequirementErrorResponse(
 @Serializable
 internal data class AdditionalKycDocumentRequirementResponse(
     @SerialName("accepted_subtypes")
-    val acceptedSubtypes: List<AdditionalKycDocumentSubtypeResponse>,
+    val acceptedSubtypes: List<AdditionalKycDocumentSubtypeResponse> = emptyList(),
     @SerialName("accepted_formats")
-    val acceptedFormats: List<String>,
+    val acceptedFormats: List<String> = emptyList(),
     @SerialName("min_documents")
-    val minDocuments: Int,
-    val instructions: List<String>,
+    val minDocuments: Int = 1,
+    val instructions: List<String> = emptyList(),
     @SerialName("additional_requirements")
     val additionalRequirements: AdditionalKycCollectionRequirementsResponse? = null,
 )
@@ -98,16 +128,13 @@ internal data class AdditionalKycQuestionResponse(
 )
 
 private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(): AdditionalKycRequirement {
-    val normalizedQuestionnaire = when (submissionType) {
-        "document" -> document?.additionalRequirements?.questionnaire
-        "questionnaire" -> questionnaire
-        else -> null
-    }
+    val normalizedQuestionnaire = questionnaire ?: document?.additionalRequirements?.questionnaire
 
     return AdditionalKycRequirement(
         description = description,
         requestedBy = requestedBy,
         awaitingActionFrom = awaitingActionFrom,
+        impact = impact?.toAdditionalKycRequirementImpact(),
         requestedReasons = requestedReasons,
         errors = errors.map { error ->
             AdditionalKycRequirementError(
@@ -118,6 +145,35 @@ private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(): Addit
         submissionType = submissionType,
         document = document?.toAdditionalKycDocumentRequirement(),
         questionnaire = normalizedQuestionnaire?.toAdditionalKycQuestionnaire(),
+    )
+}
+
+private fun AdditionalKycRequirementImpactResponse.toAdditionalKycRequirementImpact():
+    AdditionalKycRequirementImpact {
+    return AdditionalKycRequirementImpact(
+        restrictsCapabilities = restrictsCapabilities.map { capabilityImpact ->
+            AdditionalKycCapabilityImpact(
+                capability = capabilityImpact.capability,
+                restriction = capabilityImpact.restriction.toAdditionalKycCapabilityRestriction(),
+            )
+        }
+    )
+}
+
+private fun AdditionalKycCapabilityRestrictionResponse.toAdditionalKycCapabilityRestriction():
+    AdditionalKycCapabilityRestriction {
+    return AdditionalKycCapabilityRestriction(
+        maxTransactionAmount = maxTransactionAmount?.toAdditionalKycAmount(),
+        lifetimeVolumeLimit = lifetimeVolumeLimit?.toAdditionalKycAmount(),
+        lifetimeVolumeThreshold = lifetimeVolumeThreshold?.toAdditionalKycAmount(),
+        regions = regions,
+    )
+}
+
+private fun AdditionalKycAmountResponse.toAdditionalKycAmount(): AdditionalKycAmount {
+    return AdditionalKycAmount(
+        amount = amount,
+        currency = currency,
     )
 }
 

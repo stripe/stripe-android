@@ -11,11 +11,33 @@ internal data class AdditionalKycRequirement(
     val description: String,
     val requestedBy: String,
     val awaitingActionFrom: String,
+    val impact: AdditionalKycRequirementImpact?,
     val requestedReasons: List<String>,
     val errors: List<AdditionalKycRequirementError>,
     val submissionType: String,
     val document: AdditionalKycDocumentRequirement?,
     val questionnaire: AdditionalKycQuestionnaire?,
+)
+
+internal data class AdditionalKycRequirementImpact(
+    val restrictsCapabilities: List<AdditionalKycCapabilityImpact>,
+)
+
+internal data class AdditionalKycCapabilityImpact(
+    val capability: String,
+    val restriction: AdditionalKycCapabilityRestriction,
+)
+
+internal data class AdditionalKycCapabilityRestriction(
+    val maxTransactionAmount: AdditionalKycAmount?,
+    val lifetimeVolumeLimit: AdditionalKycAmount?,
+    val lifetimeVolumeThreshold: AdditionalKycAmount?,
+    val regions: List<String>,
+)
+
+internal data class AdditionalKycAmount(
+    val amount: Long?,
+    val currency: String,
 )
 
 internal data class AdditionalKycRequirementError(

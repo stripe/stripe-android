@@ -97,6 +97,27 @@ class CryptoApiRepositoryAdditionalKycTest {
     }
 
     @Test
+    fun `minimal fulfillment response is parsed`() = runScenario(
+        responseBody = minimalSubmissionResponse,
+    ) {
+        val result = repository.fulfillAdditionalKycRequirement(
+            liquidityProvider = "swapped",
+            submissionType = "questionnaire",
+            documents = null,
+            questionnaire = null,
+            consumerSessionClientSecret = "secret_123",
+        ).getOrThrow()
+
+        assertThat(result.id).isEqualTo("submission_123")
+        assertThat(result.objectType).isEqualTo("crypto_onramp_kyc_submission")
+        assertThat(result.status).isEqualTo("pending_verification")
+        assertThat(result.liquidityProvider).isNull()
+        assertThat(result.submissionType).isNull()
+        assertThat(result.submittedAt).isNull()
+        assertThat(result.created).isNull()
+    }
+
+    @Test
     fun `optional document subtype and questionnaire are omitted`() = runScenario(
         responseBody = documentSubmissionWithoutOptionalFieldsResponse,
     ) {
@@ -170,10 +191,12 @@ class CryptoApiRepositoryAdditionalKycTest {
         assertThat(document.documentType).isEqualTo("source_of_funds")
         assertThat(document.documentSubtype).isEqualTo("bank_statement")
         assertThat(document.fileIds).containsExactly("file_1", "file_2").inOrder()
+        assertThat(document.status).isEqualTo("pending_verification")
         val questionnaire = requireNotNull(response.questionnaire)
         assertThat(questionnaire.answers.single().questionId).isEqualTo("purchase_purpose")
         assertThat(questionnaire.answers.single().value).isEqualTo("Personal investment")
-        assertThat(response.submittedAt).isEqualTo(1723264800L)
+        assertThat(response.status).isEqualTo("pending_verification")
+        assertThat(response.created).isEqualTo(1723264800L)
     }
 
     private fun runScenario(
@@ -242,7 +265,7 @@ class CryptoApiRepositoryAdditionalKycTest {
                       }
                     ]
                   },
-                  "submitted_at": 1723264800
+                  "created": 1723264800
                 }
             """.trimIndent()
 
@@ -279,6 +302,15 @@ class CryptoApiRepositoryAdditionalKycTest {
                     }
                   ],
                   "submitted_at": 1723264802
+                }
+            """.trimIndent()
+
+        val minimalSubmissionResponse =
+            """
+                {
+                  "id": "submission_123",
+                  "object": "crypto_onramp_kyc_submission",
+                  "status": "pending_verification"
                 }
             """.trimIndent()
     }

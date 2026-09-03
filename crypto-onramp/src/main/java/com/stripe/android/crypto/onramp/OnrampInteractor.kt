@@ -452,7 +452,16 @@ internal class OnrampInteractor @Inject constructor(
             consumerSessionClientSecret = secret,
         ).fold(
             onSuccess = { customer ->
-                Result.success(customer.requirements.toAdditionalKycRequirements())
+                Result.success(
+                    customer.requirements
+                        ?.toAdditionalKycRequirements()
+                        ?: AdditionalKycRequirements(
+                            userActionRequired = emptyList(),
+                            pendingPartnerAction = emptyList(),
+                            pendingStripeAction = emptyList(),
+                            unrecognizedActionOwner = emptyList(),
+                        )
+                )
             },
             onFailure = { error ->
                 val mappedError = mapError(Operation.RetrieveAdditionalKycRequirements, error)

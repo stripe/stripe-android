@@ -39,6 +39,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
     @Test
     fun `documents are uploaded in order before submission`() = runScenario {
         val response = submissionResponse()
+        val expectedDocuments = documentRequests(fileIds = listOf("file_1", "file_2"))
+        val expectedQuestionnaire = questionnaireRequest()
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile))
             .thenReturn(Result.success(StripeFile(id = "file_1")))
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(secondFile))
@@ -47,21 +49,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             cryptoApiRepository.fulfillAdditionalKycRequirement(
                 liquidityProvider = "swapped",
                 submissionType = "document",
-                documents = listOf(
-                    AdditionalKycDocumentSubmissionRequest(
-                        documentType = "source_of_funds",
-                        documentSubtype = "bank_statement",
-                        fileIds = listOf("file_1", "file_2"),
-                    )
-                ),
-                questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
-                    answers = listOf(
-                        AdditionalKycQuestionnaireAnswerRequest(
-                            questionId = "purchase_purpose",
-                            value = "Long-term savings",
-                        )
-                    )
-                ),
+                documents = expectedDocuments,
+                questionnaire = expectedQuestionnaire,
                 consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
             )
         ).thenReturn(Result.success(response))
@@ -77,21 +66,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             verify(cryptoApiRepository).fulfillAdditionalKycRequirement(
                 liquidityProvider = "swapped",
                 submissionType = "document",
-                documents = listOf(
-                    AdditionalKycDocumentSubmissionRequest(
-                        documentType = "source_of_funds",
-                        documentSubtype = "bank_statement",
-                        fileIds = listOf("file_1", "file_2"),
-                    )
-                ),
-                questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
-                    answers = listOf(
-                        AdditionalKycQuestionnaireAnswerRequest(
-                            questionId = "purchase_purpose",
-                            value = "Long-term savings",
-                        )
-                    )
-                ),
+                documents = expectedDocuments,
+                questionnaire = expectedQuestionnaire,
                 consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
             )
         }
@@ -244,6 +220,26 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
 
     private companion object {
         const val CONSUMER_SESSION_CLIENT_SECRET = "secret_123"
+        fun documentRequests(fileIds: List<String>): List<AdditionalKycDocumentSubmissionRequest> {
+            return listOf(
+                AdditionalKycDocumentSubmissionRequest(
+                    documentType = "source_of_funds",
+                    documentSubtype = "bank_statement",
+                    fileIds = fileIds,
+                )
+            )
+        }
+
+        fun questionnaireRequest(): AdditionalKycQuestionnaireSubmissionRequest {
+            return AdditionalKycQuestionnaireSubmissionRequest(
+                answers = listOf(
+                    AdditionalKycQuestionnaireAnswerRequest(
+                        questionId = "purchase_purpose",
+                        value = "Long-term savings",
+                    )
+                )
+            )
+        }
 
         fun documentSubmission(files: List<File>): AdditionalKycSubmission {
             return AdditionalKycSubmission(

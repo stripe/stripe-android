@@ -55,6 +55,20 @@ class OnrampInteractorAdditionalKycRequirementsTest {
     }
 
     @Test
+    fun `customer without requirements returns empty classifications`() = runScenario(
+        repositoryResult = Result.success(
+            RetrieveCryptoCustomerResponse(id = CRYPTO_CUSTOMER_ID)
+        ),
+    ) {
+        val result = interactor.retrieveAdditionalKycRequirements().getOrThrow()
+
+        assertThat(result.userActionRequired).isEmpty()
+        assertThat(result.pendingPartnerAction).isEmpty()
+        assertThat(result.pendingStripeAction).isEmpty()
+        assertThat(result.unrecognizedActionOwner).isEmpty()
+    }
+
+    @Test
     fun `missing crypto customer returns failure without requesting customer`() = runScenario(
         cryptoCustomerId = null,
     ) {

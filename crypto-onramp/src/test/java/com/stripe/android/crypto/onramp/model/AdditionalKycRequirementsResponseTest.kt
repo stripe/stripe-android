@@ -45,6 +45,39 @@ class AdditionalKycRequirementsResponseTest {
     }
 
     @Test
+    fun `requirement impact is mapped`() = runScenario(
+        entries = listOf(
+            requirement(
+                description = "source_of_funds",
+                awaitingActionFrom = "user",
+                impact = AdditionalKycRequirementImpactResponse(
+                    restrictsCapabilities = listOf(
+                        AdditionalKycCapabilityImpactResponse(
+                            capability = "crypto_onramp_transactions",
+                            restriction = AdditionalKycCapabilityRestrictionResponse(
+                                lifetimeVolumeThreshold = AdditionalKycAmountResponse(
+                                    amount = null,
+                                    currency = "eur",
+                                ),
+                                regions = listOf("CO", "PH", "CA"),
+                            ),
+                        )
+                    ),
+                ),
+            )
+        )
+    ) {
+        val capabilityImpact = requireNotNull(requirements.userActionRequired.single().impact)
+            .restrictsCapabilities
+            .single()
+
+        assertThat(capabilityImpact.capability).isEqualTo("crypto_onramp_transactions")
+        assertThat(capabilityImpact.restriction.lifetimeVolumeThreshold?.amount).isNull()
+        assertThat(capabilityImpact.restriction.lifetimeVolumeThreshold?.currency).isEqualTo("eur")
+        assertThat(capabilityImpact.restriction.regions).containsExactly("CO", "PH", "CA").inOrder()
+    }
+
+    @Test
     fun `top-level questionnaire is normalized`() = runScenario(
         entries = listOf(
             requirement(
@@ -81,7 +114,7 @@ class AdditionalKycRequirementsResponseTest {
     }
 
     @Test
-    fun `document submission uses document questionnaire when both locations exist`() = runScenario(
+    fun `top-level questionnaire takes precedence when both locations exist`() = runScenario(
         entries = listOf(
             requirement(
                 description = "source_of_funds",
@@ -97,11 +130,11 @@ class AdditionalKycRequirementsResponseTest {
         val requirement = requirements.userActionRequired.single()
 
         assertThat(requirement.questionnaire?.questions?.single()?.id)
-            .isEqualTo("document_question")
+            .isEqualTo("top_level_question")
     }
 
     @Test
-    fun `questionnaire submission uses top-level questionnaire when both locations exist`() = runScenario(
+    fun `top-level questionnaire takes precedence independent of submission type`() = runScenario(
         entries = listOf(
             requirement(
                 description = "screening_questions",
@@ -140,11 +173,13 @@ class AdditionalKycRequirementsResponseTest {
             submissionType: String = "document",
             document: AdditionalKycDocumentRequirementResponse? = null,
             questionnaire: AdditionalKycQuestionnaireResponse? = null,
+            impact: AdditionalKycRequirementImpactResponse? = null,
         ): AdditionalKycRequirementResponse {
             return AdditionalKycRequirementResponse(
                 description = description,
                 requestedBy = "swapped",
                 awaitingActionFrom = awaitingActionFrom,
+                impact = impact,
                 submissionType = submissionType,
                 document = document,
                 questionnaire = questionnaire,
