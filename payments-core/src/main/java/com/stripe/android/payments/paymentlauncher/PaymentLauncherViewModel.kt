@@ -11,6 +11,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
@@ -419,8 +420,10 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 .create(
                     context = application,
                     enableLogging = arg.enableLogging,
-                    publishableKeyProvider = { arg.publishableKey },
-                    stripeAccountIdProvider = { arg.stripeAccountId },
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = arg.publishableKey,
+                        stripeAccountId = arg.stripeAccountId,
+                    ),
                     productUsage = arg.productUsage,
                     includePaymentSheetNextHandlers = arg.includePaymentSheetNextHandlers,
                 ).viewModelSubcomponentFactory

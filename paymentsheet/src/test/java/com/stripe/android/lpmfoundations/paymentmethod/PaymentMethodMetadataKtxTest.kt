@@ -85,7 +85,6 @@ internal class PaymentMethodMetadataKtxTest {
             orderedPaymentMethodTypesAndWallets = listOf("card"),
             customPaymentMethods = emptyList(),
             externalPaymentMethodData = null,
-            paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
             flags = emptyMap(),
             experimentsData = null,

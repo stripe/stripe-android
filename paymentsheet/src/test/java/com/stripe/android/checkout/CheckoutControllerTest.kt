@@ -16,7 +16,6 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
@@ -32,6 +31,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -266,10 +266,7 @@ internal class CheckoutControllerTest {
     fun `configure upgrades Automatic to Full when session requires billing address`() =
         runConfigureScenario(
             configuration = CheckoutController.Configuration().paymentElement(
-                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
-                    BillingDetailsCollectionConfiguration()
-                        .address(BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
-                )
+                PaymentElement.Configuration()
             ),
             networkSetup = {
                 networkRule.checkoutInit(

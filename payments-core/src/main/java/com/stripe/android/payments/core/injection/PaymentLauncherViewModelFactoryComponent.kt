@@ -1,11 +1,10 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.polling.PollingAnalyticsModule
 import dagger.BindsInstance
@@ -17,6 +16,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentLauncherModule::class,
+        ApiRequestOptionsModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
@@ -37,11 +37,7 @@ internal interface PaymentLauncherViewModelFactoryComponent {
             @Named(ENABLE_LOGGING)
             enableLogging: Boolean,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
-            @BindsInstance
-            @Named(STRIPE_ACCOUNT_ID)
-            stripeAccountIdProvider: () -> String?,
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,

@@ -52,8 +52,6 @@
   <string name="stripe_iban_invalid_country">입력한 IBAN이 잘못되었습니다. \"%s\"은(는) 지원되는 국가 코드가 아닙니다.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN은 두 글자의 국가 코드로 시작해야 합니다.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL 은행</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK 코드가 불완전합니다.</string>
   <!-- Error message when BLIK code is invalid -->

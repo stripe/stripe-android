@@ -52,8 +52,6 @@
   <string name="stripe_iban_invalid_country">The IBAN you entered is invalid, \"%s\" is not a supported country code.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Your IBAN should start with a two-letter country code.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL Bank</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Your BLIK code is incomplete.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -71,6 +69,8 @@
   <string name="stripe_konbini_confirmation_number_label">Phone</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">By confirming your payment with NICEPAY, you allow %s to charge this payment method for future payments in accordance with their terms.</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Select how you want to pay:</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Name on card</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->

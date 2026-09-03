@@ -51,7 +51,8 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         stateHolder.session,
     ) { linkAccountInfo, state, session, ->
         val configuration = state?.configuration?.expressCheckoutElementConfiguration
-        if (configuration == null || session == null) {
+        val paymentMethodMetadata = state?.expressCheckoutElementPaymentMethodMetadata
+        if (configuration == null || paymentMethodMetadata == null || session == null) {
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
                 expressButtons = emptyList(),
                 buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
@@ -62,12 +63,12 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
             expressButtons = session.availableExpressButtonTypes.map { expressButtonType ->
                 when (expressButtonType) {
                     ExpressButtonType.Link -> ExpressButton.Link.create(
-                        paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata,
+                        paymentMethodMetadata = paymentMethodMetadata,
                         linkAccountInfo = linkAccountInfo,
                         buttonTheme = configuration.appearance.buttonTheme,
                     )
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
-                        paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata,
+                        paymentMethodMetadata = paymentMethodMetadata,
                         googlePayConfiguration = expressButtonType.googlePayConfiguration,
                         shippingAddressRequired = configuration.shippingAddressRequired,
                         buttonTheme = configuration.appearance.buttonTheme,

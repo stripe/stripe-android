@@ -20,7 +20,7 @@ internal data class CheckoutControllerState(
     val flagImages: Map<String, Bitmap>?,
     val collectedDetails: CheckoutCollectedDetails,
     val paymentMethodMetadata: PaymentMethodMetadata,
-    val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata,
+    val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata?,
     val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
     val paymentSelection: PaymentSelection?,
     val temporarySelection: String?,

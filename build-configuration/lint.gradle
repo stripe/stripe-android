@@ -1,6 +1,6 @@
 import groovy.xml.XmlSlurper
 
-def enforcedUnitTestLintIssueIds = [
+def enforcedCustomLintIssueIds = [
     'ComposeCleanupRuleUsageIssue',
     'TestResourceCleanup',
 ] as Set
@@ -11,7 +11,51 @@ dependencies {
 
 afterEvaluate {
     def unitTestLintTask = tasks.findByName('lintAnalyzeReleaseUnitTest')
+    def mainLintTask = tasks.findByName('lintAnalyzeRelease')
     def lintReleaseTask = tasks.findByName('lintRelease')
+
+    if (mainLintTask != null && lintReleaseTask != null) {
+        def reportFile = layout.buildDirectory.file(
+            'intermediates/lint_partial_results/release/lintAnalyzeRelease/out/lint-definite.xml'
+        )
+        def mainSourceDir = project.layout.projectDirectory.dir('src/main/java').asFile.absolutePath
+        def checkTask = tasks.register('checkReleaseMainCustomLint') {
+            dependsOn mainLintTask
+            inputs.files(reportFile)
+
+            doLast {
+                def file = reportFile.get().asFile
+
+                if (!file.exists() || file.length() == 0L) {
+                    return
+                }
+
+                def incidents = new XmlSlurper(false, false)
+                    .parse(file)
+                    .incident
+                    .findAll { incident -> incident.@id.text() in enforcedCustomLintIssueIds }
+
+                if (!incidents.isEmpty()) {
+                    def failures = incidents.collect { incident ->
+                        def location = incident.location[0]
+                        def filePath = location.@file.text()
+                            .replaceFirst('^\\$\\{[^}]+}/', "${mainSourceDir}/")
+                        def line = location.@line.text()
+                        def message = incident.@message.text()
+
+                        "${filePath}:${line}: ${message}"
+                    }
+
+                    throw new GradleException(
+                        "Production lint found enforced custom lint violations:\n" +
+                            failures.join('\n')
+                    )
+                }
+            }
+        }
+
+        lintReleaseTask.dependsOn(checkTask)
+    }
 
     if (unitTestLintTask != null && lintReleaseTask != null) {
         def reportFile = layout.buildDirectory.file(
@@ -37,9 +81,7 @@ afterEvaluate {
                 def incidents = new XmlSlurper(false, false)
                     .parse(file)
                     .incident
-                    .findAll { incident ->
-                        incident.@id.text() in enforcedUnitTestLintIssueIds
-                    }
+                    .findAll { incident -> incident.@id.text() in enforcedCustomLintIssueIds }
 
                 if (!incidents.isEmpty()) {
                     def failures = incidents.collect { incident ->

@@ -200,6 +200,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PAYMENT_OPTION_CARD_ART_LOAD_FAILURE(
             eventName = "elements.payment_option.card_art.load_failure"
+        ),
+        CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED(
+            eventName = "checkout.shipping_address_element.present.not_configured"
         )
     }
 

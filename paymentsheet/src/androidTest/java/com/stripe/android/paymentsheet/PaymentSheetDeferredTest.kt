@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -27,7 +29,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class PaymentSheetDeferredTest {
+internal class PaymentSheetDeferredTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -45,6 +50,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -116,6 +122,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentCardPayment_forSetup() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -168,6 +175,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentSavedCardPayment_forSetup() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -228,6 +236,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentCardPaymentWithCustomer() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -313,6 +322,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentWithSavedCard_sendsClientAttributionMetadata() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -376,6 +386,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentCardPaymentWithSaveFor() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -460,6 +471,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentFailedCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -510,6 +522,7 @@ internal class PaymentSheetDeferredTest {
     @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -553,6 +566,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentKonbiniPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -631,6 +645,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredPaymentIntent_withElementsSessionFailure() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -701,6 +716,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredSetupIntent_withElementsSessionFailure() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -755,6 +771,7 @@ internal class PaymentSheetDeferredTest {
         @TestParameter(valuesProvider = MultipleInstancesTestTypeProvider::class)
         testType: MultipleInstancesTestType,
     ) = runMultiplePaymentSheetInstancesTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         testType = testType,
         createIntentCallback = { _, _ ->

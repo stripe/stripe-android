@@ -21,7 +21,7 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
                 configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
             .billingDetailsCollectionConfiguration(
-                configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse)
+                checkoutSessionResponse.toBillingDetailsCollectionConfiguration()
             )
             .preferredNetworks(configuration.paymentElementConfiguration.preferredNetworks)
             .paymentMethodOrder(configuration.paymentElementConfiguration.paymentMethodOrder)
@@ -32,6 +32,7 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .termsDisplay(configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet())
             .appearance(configuration.paymentElementConfiguration.appearance.asPaymentSheet())
             .googlePay(configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse))
+            .link(configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet())
             .defaultBillingDetails(collectedDetails.toBillingDetails(checkoutSessionResponse))
             .shippingDetails(collectedDetails.toShippingDetails())
             .allowsDelayedPaymentMethods(true)
