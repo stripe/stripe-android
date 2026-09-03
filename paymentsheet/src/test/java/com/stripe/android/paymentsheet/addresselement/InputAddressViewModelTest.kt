@@ -1,12 +1,9 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
-
 package com.stripe.android.paymentsheet.addresselement
 
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerReferences
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
@@ -33,9 +30,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -47,6 +41,7 @@ import org.robolectric.RobolectricTestRunner
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
     private val eventReporter = mock<AddressLauncherEventReporter>()
+    private val checkoutShippingAddressHandler = FakeCheckoutShippingAddressHandler()
 
     private fun createViewModel(
         address: AddressDetails? = null,
@@ -66,6 +61,7 @@ class InputAddressViewModelTest {
             navigator,
             processingState,
             eventReporter,
+            checkoutShippingAddressHandler,
             placesClient = null,
         ).also { viewModelStoreRule.track(it) }
     }
@@ -77,8 +73,8 @@ class InputAddressViewModelTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @After
-    fun clearCheckoutControllerReferences() {
-        CheckoutControllerReferences.clear()
+    fun ensureAllHandlerEventsConsumed() {
+        checkoutShippingAddressHandler.ensureAllEventsConsumed()
     }
 
     @Test
@@ -999,11 +995,9 @@ class InputAddressViewModelTest {
     @Test
     fun `checkout save disables form and blocks duplicate submission while update is suspended`() = runTest {
         val updateResult = CompletableDeferred<Result<Unit>>()
-        val controller = mock<CheckoutController>()
-        whenever(controller.updateShippingAddress(anyOrNull(), any())).doSuspendableAnswer {
+        checkoutShippingAddressHandler.result = {
             updateResult.await()
         }
-        CheckoutControllerReferences.register(CONTROLLER_INSTANCE_ID, controller)
         val processingState = AddressElementActivityProcessingState()
         val viewModel = createViewModel(
             launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CONTROLLER_INSTANCE_ID),
@@ -1013,7 +1007,10 @@ class InputAddressViewModelTest {
         viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
         viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
 
-        verify(controller).updateShippingAddress(anyOrNull(), any())
+        assertThat(checkoutShippingAddressHandler.updateCalls.awaitItem()).isEqualTo(
+            CheckoutShippingAddressHandlerCall(CONTROLLER_INSTANCE_ID, EXPECTED_ADDRESS)
+        )
+        checkoutShippingAddressHandler.updateCalls.expectNoEvents()
         assertThat(viewModel.formEnabled.value).isFalse()
         assertThat(viewModel.isProcessing.value).isTrue()
         assertThat(processingState.isProcessing.value).isTrue()
@@ -1029,10 +1026,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `failed checkout save retains values shows error and permits successful retry`() = runTest {
-        val controller = mock<CheckoutController>()
-        whenever(controller.updateShippingAddress(anyOrNull(), any()))
-            .thenReturn(Result.failure(IllegalStateException("Failed")), Result.success(Unit))
-        CheckoutControllerReferences.register(CONTROLLER_INSTANCE_ID, controller)
+        checkoutShippingAddressHandler.result = { Result.failure(IllegalStateException("Failed")) }
         val processingState = AddressElementActivityProcessingState()
         val viewModel = createViewModel(
             address = EXPECTED_ADDRESS,
@@ -1044,6 +1038,9 @@ class InputAddressViewModelTest {
         viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
         runCurrent()
 
+        assertThat(checkoutShippingAddressHandler.updateCalls.awaitItem()).isEqualTo(
+            CheckoutShippingAddressHandlerCall(CONTROLLER_INSTANCE_ID, EXPECTED_ADDRESS)
+        )
         assertThat(viewModel.formEnabled.value).isTrue()
         assertThat(viewModel.isProcessing.value).isFalse()
         assertThat(processingState.isProcessing.value).isFalse()
@@ -1053,19 +1050,20 @@ class InputAddressViewModelTest {
             .isEqualTo(originalFormValues)
         verify(navigator, never()).dismiss(any())
 
+        checkoutShippingAddressHandler.result = { Result.success(Unit) }
         viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
         runCurrent()
 
+        assertThat(checkoutShippingAddressHandler.updateCalls.awaitItem()).isEqualTo(
+            CheckoutShippingAddressHandlerCall(CONTROLLER_INSTANCE_ID, EXPECTED_ADDRESS)
+        )
         assertThat(viewModel.saveError.value).isNull()
         verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
     }
 
     @Test
-    fun `thrown checkout controller update shows retryable error`() = runTest {
-        val controller = mock<CheckoutController>()
-        whenever(controller.updateShippingAddress(anyOrNull(), any()))
-            .thenThrow(IllegalStateException("Failed"))
-        CheckoutControllerReferences.register(CONTROLLER_INSTANCE_ID, controller)
+    fun `thrown checkout handler update shows retryable error`() = runTest {
+        checkoutShippingAddressHandler.result = { throw IllegalStateException("Failed") }
         val viewModel = createViewModel(
             launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CONTROLLER_INSTANCE_ID),
         )
@@ -1073,6 +1071,9 @@ class InputAddressViewModelTest {
         viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
         runCurrent()
 
+        assertThat(checkoutShippingAddressHandler.updateCalls.awaitItem()).isEqualTo(
+            CheckoutShippingAddressHandlerCall(CONTROLLER_INSTANCE_ID, EXPECTED_ADDRESS)
+        )
         assertThat(viewModel.formEnabled.value).isTrue()
         assertThat(viewModel.isProcessing.value).isFalse()
         assertThat(viewModel.saveError.value)
@@ -1081,7 +1082,7 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `missing checkout controller shows retryable error`() = runTest {
+    fun `checkout save sends complete address to handler`() = runTest {
         val viewModel = createViewModel(
             launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CONTROLLER_INSTANCE_ID),
         )
@@ -1089,47 +1090,14 @@ class InputAddressViewModelTest {
         viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
         runCurrent()
 
-        assertThat(viewModel.formEnabled.value).isTrue()
-        assertThat(viewModel.isProcessing.value).isFalse()
-        assertThat(viewModel.saveError.value)
-            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        verify(navigator, never()).dismiss(any())
-    }
-
-    @Test
-    fun `checkout save sends complete name and address to controller`() = runTest {
-        val controller = mock<CheckoutController>()
-        whenever(controller.updateShippingAddress(anyOrNull(), any())).thenReturn(Result.success(Unit))
-        CheckoutControllerReferences.register(CONTROLLER_INSTANCE_ID, controller)
-        val viewModel = createViewModel(
-            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CONTROLLER_INSTANCE_ID),
-        )
-
-        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
-        runCurrent()
-
-        val address = argumentCaptor<CheckoutController.Address>()
-        verify(controller).updateShippingAddress(
-            name = eq("Jenny Rosen"),
-            address = address.capture(),
-        )
-        assertThat(address.firstValue.build()).isEqualTo(
-            CheckoutController.Address.State(
-                city = "San Francisco",
-                country = "US",
-                line1 = "510 Townsend St",
-                line2 = "Floor 2",
-                postalCode = "94103",
-                state = "CA",
-            )
+        assertThat(checkoutShippingAddressHandler.updateCalls.awaitItem()).isEqualTo(
+            CheckoutShippingAddressHandlerCall(CONTROLLER_INSTANCE_ID, EXPECTED_ADDRESS)
         )
     }
 
     @Test
     fun `checkout save cancellation finishes processing without showing retryable error`() = runTest {
-        val controller = mock<CheckoutController>()
-        whenever(controller.updateShippingAddress(anyOrNull(), any())).thenThrow(CancellationException())
-        CheckoutControllerReferences.register(CONTROLLER_INSTANCE_ID, controller)
+        checkoutShippingAddressHandler.result = { throw CancellationException() }
         val processingState = AddressElementActivityProcessingState()
         val viewModel = createViewModel(
             launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping(CONTROLLER_INSTANCE_ID),
@@ -1139,22 +1107,23 @@ class InputAddressViewModelTest {
         viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
         runCurrent()
 
+        assertThat(checkoutShippingAddressHandler.updateCalls.awaitItem()).isEqualTo(
+            CheckoutShippingAddressHandlerCall(CONTROLLER_INSTANCE_ID, EXPECTED_ADDRESS)
+        )
         assertThat(processingState.isProcessing.value).isFalse()
         assertThat(viewModel.saveError.value).isNull()
         verify(navigator, never()).dismiss(any())
     }
 
     @Test
-    fun `standalone save dismisses without calling checkout controller`() = runTest {
-        val controller = mock<CheckoutController>()
-        CheckoutControllerReferences.register(CONTROLLER_INSTANCE_ID, controller)
+    fun `standalone save dismisses without calling checkout handler`() = runTest {
         val viewModel = createViewModel(
             launchMode = AddressElementActivityContract.LaunchMode.Standalone,
         )
 
         viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
 
-        verify(controller, never()).updateShippingAddress(anyOrNull(), any())
+        checkoutShippingAddressHandler.updateCalls.expectNoEvents()
         assertThat(viewModel.isProcessing.value).isFalse()
         assertThat(viewModel.saveError.value).isNull()
         verify(navigator).dismiss(AddressLauncherResult.Succeeded(EXPECTED_ADDRESS))
@@ -1187,12 +1156,38 @@ class InputAddressViewModelTest {
             navigator,
             AddressElementActivityProcessingState(),
             eventReporter,
+            checkoutShippingAddressHandler,
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             ),
         ).also { viewModelStoreRule.track(it) }
     }
+
+    private class FakeCheckoutShippingAddressHandler : CheckoutShippingAddressHandler {
+        val updateCalls = Turbine<CheckoutShippingAddressHandlerCall>()
+        var result: suspend (CheckoutShippingAddressHandlerCall) -> Result<Unit> = {
+            Result.success(Unit)
+        }
+
+        override suspend fun update(
+            controllerInstanceId: String,
+            addressDetails: AddressDetails,
+        ): Result<Unit> {
+            val call = CheckoutShippingAddressHandlerCall(controllerInstanceId, addressDetails)
+            updateCalls.add(call)
+            return result(call)
+        }
+
+        fun ensureAllEventsConsumed() {
+            updateCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    private data class CheckoutShippingAddressHandlerCall(
+        val controllerInstanceId: String,
+        val addressDetails: AddressDetails,
+    )
 
     private companion object {
         const val CONTROLLER_INSTANCE_ID = "InputAddressViewModelTest"
