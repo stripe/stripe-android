@@ -2,16 +2,24 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 @Composable
 internal fun SettingsActions(
     canStart: Boolean,
     onStart: () -> Unit,
-    onReset: () -> Unit,
 ) {
     Button(
         onClick = onStart,
@@ -20,7 +28,56 @@ internal fun SettingsActions(
     ) {
         Text("Create Checkout Session")
     }
-    TextButton(onClick = onReset, modifier = Modifier.fillMaxWidth()) {
-        Text("Reset to defaults")
+}
+
+@Composable
+internal fun SettingsOverflowMenu(
+    onImport: () -> Unit,
+    onExport: () -> Unit,
+    onReset: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    IconButton(
+        onClick = { expanded = true },
+        modifier = Modifier.semantics { contentDescription = "More options" },
+    ) {
+        Text("⋮", style = MaterialTheme.typography.h5)
+    }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+    ) {
+        SettingsDropdownMenuItem(
+            text = "Import settings from JSON",
+            onClick = onImport,
+            onDismiss = { expanded = false },
+        )
+        SettingsDropdownMenuItem(
+            text = "Export settings as JSON",
+            onClick = onExport,
+            onDismiss = { expanded = false },
+        )
+        SettingsDropdownMenuItem(
+            text = "Reset to defaults",
+            onClick = onReset,
+            onDismiss = { expanded = false },
+        )
+    }
+}
+
+@Composable
+private fun SettingsDropdownMenuItem(
+    text: String,
+    onClick: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    DropdownMenuItem(
+        onClick = {
+            onDismiss()
+            onClick()
+        },
+    ) {
+        Text(text)
     }
 }

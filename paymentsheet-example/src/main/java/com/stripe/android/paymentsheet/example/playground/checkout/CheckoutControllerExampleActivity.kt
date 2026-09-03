@@ -35,6 +35,8 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         CheckoutControllerExampleViewModel.factory
     }
 
+    private val settingsImportExport = SettingsImportExport(this) { viewModel.settings }
+
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +111,18 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             } else {
                                 null
                             },
+                            actions = {
+                                if (
+                                    status is CheckoutControllerExampleViewModel.Status.Settings &&
+                                    navigationPath.isEmpty()
+                                ) {
+                                    SettingsOverflowMenu(
+                                        onImport = settingsImportExport::importSettings,
+                                        onExport = settingsImportExport::exportSettings,
+                                        onReset = viewModel.settings::reset,
+                                    )
+                                }
+                            },
                         )
                         if (status is CheckoutControllerExampleViewModel.Status.Settings) {
                             SearchSettingsField(
@@ -164,7 +178,6 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                     canStart = settingValues.isNotEmpty() &&
                                         viewModel.settings.validationErrors().isEmpty(),
                                     onStart = viewModel::start,
-                                    onReset = viewModel.settings::reset,
                                 )
                             }
                         }
