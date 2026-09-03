@@ -69,21 +69,24 @@ internal class AddressElementActivity : ComponentActivity() {
 
             val bottomSheetState = rememberStripeBottomSheetState(
                 confirmValueChange = { targetValue ->
-                    targetValue != ModalBottomSheetValue.Hidden || !isProcessing
+                    targetValue != ModalBottomSheetValue.Hidden ||
+                        !viewModel.processingState.isProcessing.value
                 },
             )
 
             BackHandler {
-                if (!isProcessing) {
+                if (!isProcessing && !viewModel.processingState.isProcessing.value) {
                     viewModel.navigator.onBack()
                 }
             }
 
             viewModel.navigator.onDismiss = { result ->
-                coroutineScope.launch {
-                    bottomSheetState.hide()
-                    setResult(result)
-                    finish()
+                if (!viewModel.processingState.isProcessing.value) {
+                    coroutineScope.launch {
+                        bottomSheetState.hide()
+                        setResult(result)
+                        finish()
+                    }
                 }
             }
 
@@ -101,7 +104,7 @@ internal class AddressElementActivity : ComponentActivity() {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 onDismissed = {
-                    if (!isProcessing) {
+                    if (!isProcessing && !viewModel.processingState.isProcessing.value) {
                         viewModel.navigator.dismiss()
                     }
                 },
