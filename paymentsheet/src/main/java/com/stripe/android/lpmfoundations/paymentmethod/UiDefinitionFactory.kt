@@ -31,6 +31,21 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.CoroutineScope
 
 internal sealed interface UiDefinitionFactory {
+    fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+    ): SupportedPaymentMethod
+
+    fun createFormHeaderInformation(
+        metadata: PaymentMethodMetadata,
+        customerHasSavedPaymentMethods: Boolean,
+        incentive: PaymentMethodIncentive?,
+    ): FormHeaderInformation
+
+    fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: Arguments,
+    ): List<FormElement>
+
     data class Arguments(
         val coroutineScope: CoroutineScope,
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
@@ -132,18 +147,22 @@ internal sealed interface UiDefinitionFactory {
     abstract class Simple : UiDefinitionFactory {
         protected open val supportsAutomaticTaxBillingAddress: Boolean = true
 
-        abstract fun createSupportedPaymentMethod(
+        abstract override fun createSupportedPaymentMethod(
             metadata: PaymentMethodMetadata,
         ): SupportedPaymentMethod
 
-        open fun createFormHeaderInformation(
+        override fun createFormHeaderInformation(
             metadata: PaymentMethodMetadata,
             customerHasSavedPaymentMethods: Boolean,
             incentive: PaymentMethodIncentive?,
         ): FormHeaderInformation {
             return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive)
         }
-        fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement> {
+
+        final override fun createFormElements(
+            metadata: PaymentMethodMetadata,
+            arguments: Arguments,
+        ): List<FormElement> {
             val builder = FormElementsBuilder(
                 arguments = arguments,
                 supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
@@ -153,6 +172,7 @@ internal sealed interface UiDefinitionFactory {
 
             return builder.build()
         }
+
         protected open fun buildFormElements(
             metadata: PaymentMethodMetadata,
             arguments: Arguments,
@@ -161,65 +181,12 @@ internal sealed interface UiDefinitionFactory {
     }
 
     interface Custom : UiDefinitionFactory {
-        fun createSupportedPaymentMethod(
-            metadata: PaymentMethodMetadata,
-        ): SupportedPaymentMethod
-
-        fun createFormHeaderInformation(
+        override fun createFormHeaderInformation(
             metadata: PaymentMethodMetadata,
             customerHasSavedPaymentMethods: Boolean,
             incentive: PaymentMethodIncentive?,
         ): FormHeaderInformation {
             return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive)
-        }
-
-        fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
-    }
-
-    fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-    ): SupportedPaymentMethod = when (this) {
-        is Simple -> createSupportedPaymentMethod(metadata)
-        is Custom -> createSupportedPaymentMethod(metadata)
-    }
-
-    fun formHeaderInformation(
-        metadata: PaymentMethodMetadata,
-        customerHasSavedPaymentMethods: Boolean,
-    ): FormHeaderInformation = when (this) {
-        is Simple -> {
-            createFormHeaderInformation(
-                metadata = metadata,
-                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
-                incentive = metadata.paymentMethodIncentive,
-            )
-        }
-
-        is Custom -> {
-            createFormHeaderInformation(
-                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
-                incentive = metadata.paymentMethodIncentive,
-                metadata = metadata,
-            )
-        }
-    }
-
-    fun formElements(
-        metadata: PaymentMethodMetadata,
-        arguments: Arguments,
-    ): List<FormElement> = when (this) {
-        is Simple -> {
-            createFormElements(
-                metadata = metadata,
-                arguments = arguments,
-            )
-        }
-
-        is Custom -> {
-            createFormElements(
-                metadata = metadata,
-                arguments = arguments,
-            )
         }
     }
 }

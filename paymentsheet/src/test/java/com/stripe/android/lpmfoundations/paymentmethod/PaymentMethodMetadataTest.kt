@@ -270,7 +270,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `sortedSupportedPaymentMethods keeps us_bank_account without a sharedDataSpec`() {
+    fun `sortedSupportedPaymentMethods keeps registered us_bank_account`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "us_bank_account"),

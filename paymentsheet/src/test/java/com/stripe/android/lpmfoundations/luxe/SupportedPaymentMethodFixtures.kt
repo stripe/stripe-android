@@ -8,6 +8,7 @@ internal object SupportedPaymentMethodFixtures {
         displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
         iconResourceNight = null,
+        outlinedIconResource = R.drawable.stripe_ic_paymentsheet_pm_card_outlined,
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
         iconRequiresTinting = true,

@@ -100,9 +100,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
@@ -130,9 +130,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    AffirmDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
@@ -163,9 +163,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    AffirmDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
@@ -197,9 +197,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    KlarnaDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    KlarnaDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
@@ -240,9 +240,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    AffirmDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,

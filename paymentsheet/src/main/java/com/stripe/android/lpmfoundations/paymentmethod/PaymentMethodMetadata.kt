@@ -203,7 +203,7 @@ internal data class PaymentMethodMetadata(
                 ?.createSupportedPaymentMethod(metadata = this)
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory(this).supportedPaymentMethod(this)
+            definition.uiDefinitionFactory(this).createSupportedPaymentMethod(this)
         }
     }
 
@@ -320,9 +320,10 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory(this).formHeaderInformation(
+            definition.uiDefinitionFactory(this).createFormHeaderInformation(
                 metadata = this,
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = paymentMethodIncentive,
             )
         }
     }
@@ -344,7 +345,7 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory(this).formElements(
+            definition.uiDefinitionFactory(this).createFormElements(
                 metadata = this,
                 arguments = uiDefinitionFactoryArgumentsFactory.create(
                     metadata = this,
