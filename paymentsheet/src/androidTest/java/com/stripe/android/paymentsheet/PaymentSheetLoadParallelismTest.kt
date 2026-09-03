@@ -1,5 +1,9 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -30,8 +34,11 @@ import java.util.concurrent.TimeUnit
  * necessary and intentional, as it will likely lead to an increase in our loading latency.
  *
  */
-@RunWith(JUnit4::class)
-internal class PaymentSheetLoadParallelismTest {
+@RunWith(TestParameterInjector::class)
+internal class PaymentSheetLoadParallelismTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
 
     @get:Rule
     val testRules: TestRules = TestRules.create()
@@ -155,6 +162,7 @@ internal class PaymentSheetLoadParallelismTest {
         defaultEmail: Boolean,
         expectedRequestOrdering: RequestOrdering,
     ) = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::expectNoResult,
         successTimeoutSeconds = 15L,

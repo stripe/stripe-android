@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -20,7 +22,10 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CardFundingFilteringPrivatePreview::class)
 @RunWith(TestParameterInjector::class)
-internal class CardNumberControllerNetworkTest {
+internal class CardNumberControllerNetworkTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     // The card-metadata request happens async during card number input. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
@@ -37,6 +42,7 @@ internal class CardNumberControllerNetworkTest {
 
     @Test
     fun testNoCardMetadataRequestWhenAllFundingTypesAllowed() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -74,6 +80,7 @@ internal class CardNumberControllerNetworkTest {
 
     @Test
     fun testCardMetadataRequestMadeWhenFundingTypesRestricted() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -123,6 +130,7 @@ internal class CardNumberControllerNetworkTest {
 
     @Test
     fun testNoWarningForAllowedFundingWithNetworkRequest() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -170,6 +178,7 @@ internal class CardNumberControllerNetworkTest {
 
     @Test
     fun testNoCardMetadataRequestWhenServerFlagDisabled() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
