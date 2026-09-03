@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSavedPaymentMethodSelectionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
@@ -181,6 +182,10 @@ internal class EmbeddedContentUiTest {
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             rowSelectionImmediateActionHandler = immediateActionHandler,
+            savedPaymentMethodSelectionHandler = DefaultEmbeddedSavedPaymentMethodSelectionHandler(
+                selectionHolder = selectionHolder,
+                immediateActionHandler = immediateActionHandler,
+            ),
             coroutineScope = viewModelScope,
             sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,

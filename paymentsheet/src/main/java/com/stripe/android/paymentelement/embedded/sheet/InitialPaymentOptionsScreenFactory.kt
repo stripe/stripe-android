@@ -139,6 +139,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             updateSelection = { updatedSelection, _ ->
                 selectionHolder.setSelection(updatedSelection)
             },
+            selectSavedPaymentMethod = null,
             isCurrentScreen = isCurrentScreen(),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
