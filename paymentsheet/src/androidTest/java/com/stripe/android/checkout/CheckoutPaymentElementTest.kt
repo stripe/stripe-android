@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
@@ -25,18 +26,24 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentelement.embedded.sheet.EMBEDDED_SHEET_LOADING_TEST_TAG
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutPaymentElementTest {
@@ -82,6 +89,55 @@ internal class CheckoutPaymentElementTest {
 
             // Backing out of the form must not clear the previously selected payment method.
             contentPage.assertHasSelectedLpm("cashapp")
+            context.markTestSucceeded()
+        }
+    }
+
+    @Test
+    fun testPresentPaymentOptionsDuringMutationShowsLoadingThenNavigatesToPaymentOptions() {
+        lateinit var controller: CheckoutController
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            setup = {
+                controller = it
+                it.configure(
+                    clientSecret = DEFAULT_CLIENT_SECRET,
+                    configuration = checkoutConfiguration(
+                        PaymentElement.Configuration.PaymentMethodLayout.Vertical
+                    ),
+                ).getOrThrow()
+            },
+        ) { context ->
+            val requestStarted = CountDownLatch(1)
+            val releaseResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                requestStarted.countDown()
+                check(releaseResponse.await(5, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout mutation response."
+                }
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put("customer_email", "checkout@example.com")
+                    json.getJSONObject("elements_session").remove("link_settings")
+                }
+            }
+
+            runBlocking {
+                val mutation = async(Dispatchers.IO) {
+                    controller.applyPromotionCode("10OFF")
+                }
+                assertThat(requestStarted.await(5, TimeUnit.SECONDS)).isTrue()
+
+                context.presentPaymentOptions()
+                testRules.compose.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
+
+                releaseResponse.countDown()
+                mutation.await().getOrThrow()
+            }
+
+            waitForPaymentOptionsLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
+            testRules.compose.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertDoesNotExist()
             context.markTestSucceeded()
         }
     }

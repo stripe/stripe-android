@@ -8,7 +8,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -121,8 +123,16 @@ internal class EmbeddedNavigator private constructor(
         }
     }
 
+    fun resetTo(screens: List<Screen>) {
+        val previousScreen = screen.value
+        navigationHandler.resetTo(screens)
+        onScreenHidden(previousScreen)
+        onScreenShown(screen.value)
+    }
+
     private fun onScreenShown(screen: Screen) {
         when (screen) {
+            is Screen.Loading -> Unit
             is Screen.ManageAll -> eventReporter.onShowManageSavedPaymentMethods()
             is Screen.ManageUpdate -> eventReporter.onShowEditablePaymentOption()
             is Screen.Form -> Unit
@@ -134,6 +144,7 @@ internal class EmbeddedNavigator private constructor(
 
     private fun onScreenHidden(screen: Screen) {
         when (screen) {
+            is Screen.Loading -> Unit
             is Screen.ManageAll -> Unit
             is Screen.ManageUpdate -> eventReporter.onHideEditablePaymentOption()
             is Screen.Form -> Unit
@@ -152,6 +163,21 @@ internal class EmbeddedNavigator private constructor(
         abstract fun title(): StateFlow<ResolvableString?>
 
         abstract fun isPerformingNetworkOperation(): StateFlow<Boolean>
+
+        data object Loading : Screen() {
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(null)
+
+            override fun title(): StateFlow<ResolvableString?> = stateFlowOf(null)
+
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> = stateFlowOf(false)
+
+            @Composable
+            override fun Content() {
+                BottomSheetLoadingIndicator(
+                    modifier = Modifier.testTag(EMBEDDED_SHEET_LOADING_TEST_TAG)
+                )
+            }
+        }
 
         class ManageAll(
             private val interactor: ManageScreenInteractor,

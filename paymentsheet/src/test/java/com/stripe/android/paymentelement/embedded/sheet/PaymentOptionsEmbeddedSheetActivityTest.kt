@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Activity
 import android.app.Application
+import android.content.Intent
 import android.os.Bundle
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -66,7 +67,82 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         .around(PaymentConfigurationTestRule(applicationContext))
 
     @Test
+    fun `loading launch renders loading and back returns cancelled with payment options state`() = launch(
+        selection = null,
+        previousNewSelections = Bundle(),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = true),
+    ) { scenario ->
+        scenario.onActivity { activity ->
+            assertThat(activity.embeddedNavigator.screen.value).isEqualTo(EmbeddedNavigator.Screen.Loading)
+        }
+        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
+
+        Espresso.pressBack()
+        onIdle()
+
+        val result = EmbeddedSheetContract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        ) as EmbeddedActivityResult.Cancelled
+        assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(isLoading = true))
+    }
+
+    @Test
+    fun `ready single top intent initializes from new args exactly once`() = launch(
+        selection = null,
+        previousNewSelections = Bundle(),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = true),
+    ) { scenario ->
+        val horizontalArgs = createArgs(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+        )
+        val readyIntent = EmbeddedSheetContract.createIntent(applicationContext, horizontalArgs)
+        assertThat(readyIntent.flags and Intent.FLAG_ACTIVITY_SINGLE_TOP).isNotEqualTo(0)
+
+        scenario.onActivity { activity ->
+            activity.handleNewIntent(readyIntent)
+        }
+        composeTestRule.waitForIdle()
+        scenario.onActivity { activity ->
+            assertThat(activity.argsHolder.args.value).isEqualTo(horizontalArgs)
+            assertThat(activity.embeddedNavigator.screen.value)
+                .isInstanceOf(EmbeddedNavigator.Screen.HorizontalPaymentOptions::class.java)
+
+            activity.handleNewIntent(
+                EmbeddedSheetContract.createIntent(
+                    applicationContext,
+                    createArgs(
+                        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                        ),
+                        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+                    ),
+                )
+            )
+        }
+        composeTestRule.waitForIdle()
+        scenario.onActivity { activity ->
+            assertThat(activity.argsHolder.args.value).isEqualTo(horizontalArgs)
+            assertThat(activity.embeddedNavigator.screen.value)
+                .isInstanceOf(EmbeddedNavigator.Screen.HorizontalPaymentOptions::class.java)
+        }
+        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertDoesNotExist()
+    }
+
+    @Test
     fun `pressing back returns cancelled result with PaymentOptions launch mode`() = launch { scenario ->
+        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertDoesNotExist()
+
         Espresso.pressBack()
 
         onIdle()
@@ -76,7 +152,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
+            EmbeddedLaunchMode.PaymentOptions(isLoading = false)
         )
     }
 
@@ -91,7 +167,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     customerState = null,
                     checkoutSessionResponse = null,
                     shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.PaymentOptions,
+                    launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
                 )
             )
         }
@@ -103,7 +179,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
         val complete = result as EmbeddedActivityResult.Complete
         assertThat(complete.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
+            EmbeddedLaunchMode.PaymentOptions(isLoading = false)
         )
     }
 
@@ -120,7 +196,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
+            EmbeddedLaunchMode.PaymentOptions(isLoading = false)
         )
     }
 
@@ -194,7 +270,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = activity.selectionHolder,
                 customerStateHolder = activity.customerStateHolder,
-                launchMode = EmbeddedLaunchMode.PaymentOptions,
+                launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
             )
             activity.embeddedNavigator.performAction(
                 EmbeddedNavigator.Action.ReplaceCurrentScreen(originalScreen)
@@ -325,27 +401,44 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         previousNewSelections: Bundle,
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
-                input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-                    productUsage = setOf("EmbeddedPaymentElement"),
-                    statusBarColor = null,
-                    paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
+                input = createArgs(
                     selection = selection,
                     previousNewSelections = previousNewSelections,
+                    paymentMethodMetadata = paymentMethodMetadata,
                     customerState = customerState,
-                    promotions = emptyList(),
-                    launchMode = EmbeddedLaunchMode.PaymentOptions,
+                    launchMode = launchMode,
                 ),
             )
         ).use { scenario ->
             block(scenario)
         }
+    }
+
+    private fun createArgs(
+        selection: PaymentSelection? = null,
+        previousNewSelections: Bundle = Bundle(),
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
+    ): EmbeddedActivityArgs {
+        return EmbeddedActivityArgs(
+            paymentMethodMetadata = paymentMethodMetadata,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            productUsage = setOf("EmbeddedPaymentElement"),
+            statusBarColor = null,
+            paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
+            selection = selection,
+            previousNewSelections = previousNewSelections,
+            customerState = customerState,
+            promotions = emptyList(),
+            launchMode = launchMode,
+        )
     }
 
     private fun checkoutPaymentMethodMetadata(): PaymentMethodMetadata {

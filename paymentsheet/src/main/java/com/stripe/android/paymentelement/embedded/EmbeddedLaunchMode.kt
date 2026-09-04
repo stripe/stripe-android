@@ -14,5 +14,7 @@ internal sealed interface EmbeddedLaunchMode : Parcelable {
     data object Manage : EmbeddedLaunchMode
 
     @Parcelize
-    data object PaymentOptions : EmbeddedLaunchMode
+    data class PaymentOptions(
+        val isLoading: Boolean,
+    ) : EmbeddedLaunchMode
 }

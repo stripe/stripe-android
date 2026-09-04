@@ -251,7 +251,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(isLoading = false),
         )
         activityLauncher.launch(args)
     }

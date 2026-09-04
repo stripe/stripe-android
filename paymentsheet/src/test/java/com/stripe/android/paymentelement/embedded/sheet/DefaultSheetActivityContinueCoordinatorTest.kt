@@ -175,7 +175,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
     private companion object {
         const val ERROR_MESSAGE = "Tax region update failed"
-        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions
+        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(isLoading = false)
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = "cs_test_123",

@@ -21,6 +21,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
@@ -28,7 +29,6 @@ import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageSc
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
-import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
@@ -36,12 +36,13 @@ import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityCont
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedInitialScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
-import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -145,23 +146,54 @@ internal interface EmbeddedActivityModule {
         @Provides
         @Singleton
         fun provideEmbeddedNavigator(
-            launchMode: EmbeddedLaunchMode,
-            formScreenFactory: EmbeddedNavigator.Screen.Form.Factory,
-            initialManageScreenFactory: InitialManageScreenFactory,
-            initialPaymentOptionsScreenFactory: InitialPaymentOptionsScreenFactory,
+            argsHolder: EmbeddedActivityArgsHolder,
+            initialScreenFactory: EmbeddedInitialScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
-            val initialBackStack = when (launchMode) {
-                is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
-                is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
-                is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
-            }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialBackStack = initialBackStack,
+                initialBackStack = initialScreenFactory.create(argsHolder.args.value.launchMode),
             )
+        }
+
+        @Provides
+        fun providePaymentMethodMetadata(argsHolder: EmbeddedActivityArgsHolder): PaymentMethodMetadata {
+            return argsHolder.args.value.paymentMethodMetadata
+        }
+
+        @Provides
+        fun provideConfiguration(argsHolder: EmbeddedActivityArgsHolder): EmbeddedPaymentElement.Configuration {
+            return argsHolder.args.value.configuration
+        }
+
+        @Provides
+        fun provideLaunchMode(argsHolder: EmbeddedActivityArgsHolder): EmbeddedLaunchMode {
+            return argsHolder.args.value.launchMode
+        }
+
+        @Provides
+        @Named(STATUS_BAR_COLOR)
+        fun provideStatusBarColor(argsHolder: EmbeddedActivityArgsHolder): Int? {
+            return argsHolder.args.value.statusBarColor
+        }
+
+        @Provides
+        @Named(PRODUCT_USAGE)
+        fun provideProductUsage(argsHolder: EmbeddedActivityArgsHolder): Set<String> {
+            return argsHolder.args.value.productUsage
+        }
+
+        @Provides
+        @PaymentElementCallbackIdentifier
+        fun providePaymentElementCallbackIdentifier(argsHolder: EmbeddedActivityArgsHolder): String {
+            return argsHolder.args.value.paymentElementCallbackIdentifier
+        }
+
+        @Provides
+        fun providePromotions(argsHolder: EmbeddedActivityArgsHolder): List<PaymentMethodMessagePromotion> {
+            return argsHolder.args.value.promotions
         }
 
         @Provides
@@ -250,9 +282,9 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         fun providePaymentMethodMetadataFlow(
-            paymentMethodMetadata: PaymentMethodMetadata
+            argsHolder: EmbeddedActivityArgsHolder,
         ): StateFlow<PaymentMethodMetadata?> {
-            return stateFlowOf(paymentMethodMetadata)
+            return argsHolder.args.mapAsStateFlow { it.paymentMethodMetadata }
         }
 
         @Provides
