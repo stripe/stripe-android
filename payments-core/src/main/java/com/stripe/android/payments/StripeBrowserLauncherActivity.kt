@@ -11,6 +11,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePaddingRelative
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.view.PaymentAuthWebViewActivity
@@ -42,7 +43,10 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         val args = args
         if (args == null) {
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { "" })
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfiguration = ApiConfiguration.State("", null),
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_NULL_ARGS,
                 )
@@ -76,7 +80,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         } catch (e: ActivityNotFoundException) {
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                publishableKeyProvider = { args.apiConfiguration.publishableKey }
+                apiConfiguration = args.apiConfiguration,
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
@@ -86,7 +90,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         } catch (e: SecurityException) {
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                publishableKeyProvider = { args.apiConfiguration.publishableKey }
+                apiConfiguration = args.apiConfiguration,
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
