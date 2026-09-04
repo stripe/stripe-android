@@ -205,8 +205,6 @@ private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): 
     return CheckoutCollectedDetails(
         email = defaults.email,
         shippingName = defaults.shippingDetails?.name,
-        billingName = defaults.billingDetails?.name,
         shippingAddress = defaults.shippingDetails?.address,
-        billingAddress = defaults.billingDetails?.address,
     )
 }

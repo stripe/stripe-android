@@ -275,7 +275,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `sources the collected billing email over the checkout session customer email`() {
+    fun `sources the collected email over the checkout session customer email`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
@@ -286,24 +286,31 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `populates billing details from the session data`() {
+    fun `populates billing details from configuration defaults`() {
         val result = factory().create(
-            configuration = controllerConfiguration(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            collectedDetails = collectedDetails(
-                billingName = "Jane Billing",
-                billingAddress = Address.State(
-                    city = "Denver",
-                    country = "US",
-                    line1 = "123 Main St",
-                    line2 = "Apt 4",
-                    postalCode = "80202",
-                    state = "CO",
-                ),
-            ),
+            configuration = CheckoutController.Configuration()
+                .defaults(
+                    CheckoutController.Configuration.Defaults().billingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("Jane Billing")
+                            .address(
+                                CheckoutController.Address()
+                                    .city("Denver")
+                                    .country("US")
+                                    .line1("123 Main St")
+                                    .line2("Apt 4")
+                                    .postalCode("80202")
+                                    .state("CO"),
+                            ),
+                    ),
+                )
+                .build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
+            collectedDetails = collectedDetails(),
         )
 
         val billingDetails = requireNotNull(result.defaultBillingDetails)
+        assertThat(billingDetails.email).isEqualTo("checkout@example.com")
         assertThat(billingDetails.name).isEqualTo("Jane Billing")
         val address = requireNotNull(billingDetails.address)
         assertThat(address.city).isEqualTo("Denver")
@@ -377,16 +384,12 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     private fun collectedDetails(
         email: String? = null,
         shippingName: String? = null,
-        billingName: String? = null,
         shippingAddress: Address.State? = null,
-        billingAddress: Address.State? = null,
     ): CheckoutCollectedDetails {
         return CheckoutCollectedDetails(
             email = email,
             shippingName = shippingName,
-            billingName = billingName,
             shippingAddress = shippingAddress,
-            billingAddress = billingAddress,
         )
     }
 }

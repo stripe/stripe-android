@@ -166,7 +166,7 @@ internal class CheckoutControllerTest {
     ) {
         result.getOrThrow()
 
-        val billingAddress = requireNotNull(committedState?.collectedDetails?.billingAddress)
+        val billingAddress = requireNotNull(committedState?.embeddedConfiguration?.defaultBillingDetails?.address)
         assertThat(billingAddress.city).isEqualTo("San Francisco")
         assertThat(billingAddress.country).isEqualTo("US")
         assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
@@ -606,6 +606,8 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
+        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+            .isEqualTo("checkout@example.com")
     }
 
     @Test
