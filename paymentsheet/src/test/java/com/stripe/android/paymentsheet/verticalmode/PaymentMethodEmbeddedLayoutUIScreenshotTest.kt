@@ -133,6 +133,26 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
+    fun testSavedPaymentMethodLoading() {
+        paparazziRule.snapshot {
+            PaymentMethodEmbeddedLayoutUI(
+                paymentMethods = paymentMethods,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                pendingSavedPaymentMethodId = savedPaymentMethod.paymentMethod.id,
+                linkBrand = LinkBrand.Link,
+                isEnabled = false,
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = mock(),
+                appearance = getEmbeddedAppearance(FloatingButton::class),
+            )
+        }
+    }
+
+    @Test
     fun testNewPaymentMethodsOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(

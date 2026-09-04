@@ -39,6 +39,9 @@ internal interface ManageScreenInteractor {
         val isEditing: Boolean,
         val canEdit: Boolean,
         val linkBrand: LinkBrand,
+        val isProcessing: Boolean = false,
+        val pendingPaymentMethodId: String? = null,
+        val error: ResolvableString? = null,
     ) {
         private val containsOnlyCards: Boolean by lazy {
             paymentMethods.isNotEmpty() && paymentMethods.all { it.isCard }
@@ -108,6 +111,10 @@ internal class DefaultManageScreenInteractor(
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
     private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
+    private val processing: StateFlow<Boolean> = com.stripe.android.uicore.utils.stateFlowOf(false),
+    private val pendingPaymentMethodId: StateFlow<String?> = com.stripe.android.uicore.utils.stateFlowOf(null),
+    private val error: StateFlow<ResolvableString?> = com.stripe.android.uicore.utils.stateFlowOf(null),
+    private val navigateBackAfterSelection: Boolean = true,
     dispatcher: CoroutineContext = Dispatchers.Main,
 ) : ManageScreenInteractor {
 
@@ -127,13 +134,22 @@ internal class DefaultManageScreenInteractor(
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
+    private val linkAndOperation = combineAsStateFlow(
+        linkAccount,
+        processing,
+        pendingPaymentMethodId,
+        error,
+    ) { linkAccount, processing, pendingPaymentMethodId, error ->
+        LinkAndOperation(linkAccount, processing, pendingPaymentMethodId, error)
+    }
+
     override val state = combineAsStateFlow(
         displayableSavedPaymentMethods,
         selection,
         editing,
         canEdit,
-        linkAccount,
-    ) { displayablePaymentMethods, paymentSelection, editing, canEdit, linkAccount, ->
+        linkAndOperation,
+    ) { displayablePaymentMethods, paymentSelection, editing, canEdit, linkAndOperation ->
         val currentSelection = if (editing) {
             null
         } else {
@@ -145,7 +161,10 @@ internal class DefaultManageScreenInteractor(
             currentSelection = currentSelection,
             isEditing = editing,
             canEdit = canEdit,
-            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAndOperation.linkAccount.account),
+            isProcessing = linkAndOperation.isProcessing,
+            pendingPaymentMethodId = linkAndOperation.pendingPaymentMethodId,
+            error = linkAndOperation.error,
         )
     }
 
@@ -182,7 +201,9 @@ internal class DefaultManageScreenInteractor(
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
         onSelectPaymentMethod(paymentMethod)
-        safeNavigateBack(true)
+        if (navigateBackAfterSelection) {
+            safeNavigateBack(true)
+        }
     }
 
     private fun safeNavigateBack(withDelay: Boolean) {
@@ -190,6 +211,13 @@ internal class DefaultManageScreenInteractor(
             navigateBack(withDelay)
         }
     }
+
+    private data class LinkAndOperation(
+        val linkAccount: LinkAccountUpdate.Value,
+        val isProcessing: Boolean,
+        val pendingPaymentMethodId: String?,
+        val error: ResolvableString?,
+    )
 
     companion object {
         fun create(
