@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
@@ -448,7 +449,9 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val startCall = fakePassiveChallengeWarmer.awaitStartCall()
 
         assertThat(startCall.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
-        assertThat(startCall.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(startCall.apiConfiguration).isEqualTo(
+            ApiConfiguration.State(launcherArgs.publishableKey, "acct_123")
+        )
         assertThat(startCall.productUsage).isEqualTo(launcherArgs.productUsage)
     }
 
@@ -612,7 +615,9 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     ): PassiveChallengeConfirmationDefinition {
         return PassiveChallengeConfirmationDefinition(
             errorReporter = errorReporter,
-            publishableKeyProvider = { publishableKey },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(publishableKey, "acct_123")
+            },
             productUsage = productUsage,
             passiveChallengeWarmer = passiveChallengeWarmer,
             isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge

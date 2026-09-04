@@ -15,6 +15,7 @@ import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarm
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerCompleted
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerViewModel
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.hcaptcha.FakeHCaptchaService
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
@@ -191,7 +192,7 @@ internal class PassiveChallengeWarmerActivityTest {
 
         private val args = PassiveChallengeWarmerArgs(
             passiveCaptchaParams = passiveCaptchaParams,
-            publishableKey = "pk_123",
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
             productUsage = listOf("PaymentSheet")
         )
     }

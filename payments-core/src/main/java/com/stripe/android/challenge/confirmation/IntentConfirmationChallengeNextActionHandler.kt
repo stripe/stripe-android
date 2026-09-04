@@ -76,7 +76,7 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
         val intentConfirmationChallengeNextActionStarter = intentConfirmationChallengeNextActionStarterFactory(host)
         intentConfirmationChallengeNextActionStarter.start(
             IntentConfirmationChallengeActivityContract.Args(
-                publishableKey = apiConfigProvider.get().publishableKey,
+                apiConfiguration = apiConfigProvider.get(),
                 intent = actionable,
                 productUsage = productUsageTokens
             )

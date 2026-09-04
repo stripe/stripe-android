@@ -8,7 +8,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerActivity.Companion.getArgs
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.model.PassiveCaptchaParams
 import kotlinx.coroutines.flow.Flow
@@ -42,10 +41,7 @@ internal class PassiveChallengeWarmerViewModel @Inject constructor(
                 DaggerPassiveChallengeWarmerActivityComponent.factory()
                     .create(
                         context = app,
-                        apiConfiguration = ApiConfiguration.State(
-                            publishableKey = args.publishableKey,
-                            stripeAccountId = null,
-                        ),
+                        apiConfiguration = args.apiConfiguration,
                         productUsage = args.productUsage.toSet(),
                         passiveCaptchaParams = args.passiveCaptchaParams,
                     )

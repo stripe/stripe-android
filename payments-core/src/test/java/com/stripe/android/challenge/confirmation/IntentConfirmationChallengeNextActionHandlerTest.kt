@@ -59,7 +59,12 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             )
 
             val launchArgs = awaitLaunchCall() as IntentConfirmationChallengeActivityContract.Args
-            assertThat(launchArgs.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            assertThat(launchArgs.apiConfiguration).isEqualTo(
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                )
+            )
             assertThat(launchArgs.intent).isEqualTo(paymentIntent)
         }
     }
