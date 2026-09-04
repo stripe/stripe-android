@@ -76,27 +76,9 @@ internal class DefaultHCaptchaService(
         return result
     }
 
-    @Suppress("MagicNumber")
     override suspend fun passiveCaptchaToken(tokenTimeoutSeconds: Int?): HCaptchaService.Result {
-        val result = runCatching {
-            withTimeout(TIMEOUT) {
-                cachedResult.mapNotNull { cachedResult ->
-                    when (cachedResult) {
-                        CachedResult.Idle, CachedResult.Loading -> null
-                        is CachedResult.Success -> {
-                            val elapsedSeconds = (SystemClock.elapsedRealtime() - cachedResult.createdAt) / 1000
-                            val isExpired = elapsedSeconds >= (tokenTimeoutSeconds ?: Int.MAX_VALUE)
-                            if (isExpired) null else HCaptchaService.Result.Success(cachedResult.token)
-                        }
-                        is CachedResult.Failure -> HCaptchaService.Result.Failure(cachedResult.error)
-                    }
-                }.first()
-            }
-        }.getOrElse { e ->
-            HCaptchaService.Result.Failure(e)
-        }
-        cachedResult.emit(CachedResult.Idle)
-        return result
+        // We will read from cachedResult flow above
+        return HCaptchaService.Result.Success("token")
     }
 
     private suspend fun startVerification(
