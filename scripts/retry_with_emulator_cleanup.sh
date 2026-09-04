@@ -196,11 +196,11 @@ function retry {
       "$@" 2>&1 | tee "$OUTPUT_LOG"
       exit=${PIPESTATUS[0]}
     fi
-    if [ $exit -eq 0 ]; then
+    if [ "$exit" -eq 0 ]; then
       return 0
     fi
-    count=$(($count + 1))
-    if [ $count -lt $retries ]; then
+    count=$((count + 1))
+    if [ "$count" -lt "$retries" ]; then
       capture_attempt_results "$count"
       echo "Retry $count/$retries exited $exit. Checking for known failures..."
       clear_corrupted_orchestrator_cache
@@ -208,7 +208,7 @@ function retry {
       kill_unhealthy_emulators
     else
       echo "Retry $count/$retries exited $exit, no more retries left."
-      return $exit
+      return "$exit"
     fi
   done
 }
