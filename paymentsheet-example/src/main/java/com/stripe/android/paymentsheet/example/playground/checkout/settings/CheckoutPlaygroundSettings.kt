@@ -106,7 +106,7 @@ internal class CheckoutPlaygroundSettings private constructor(
         }
 
         fun applyFeatureFlags() {
-            this[CheckoutPlaygroundDefinitions.Controller.linkType].applyFeatureFlags()
+            this[CheckoutSessionDefinitions.linkType].applyFeatureFlags()
         }
     }
 
