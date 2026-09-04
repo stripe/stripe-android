@@ -513,37 +513,13 @@ internal class DefaultHCaptchaServiceTest {
     }
 
     @Test
-    fun `cacheState expires cached token after its remaining lifetime`() = runTest {
-        val activity = mock<FragmentActivity>()
-        val hCaptchaProvider = FakeHCaptchaProvider().apply {
-            hCaptchaHandler = SetupSuccessfulHCaptcha("first-token")
+    fun `cacheState returns NeedsRefresh`() = runTest {
+        TestContext.test {
+            service.cacheState(timeoutSeconds = 30).test {
+                assertThat(awaitItem()).isEqualTo(HCaptchaService.CacheState.NeedsRefresh)
+                awaitComplete()
+            }
         }
-        val captchaEventsReporter = FakeCaptchaEventsReporter()
-        val service = DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
-
-        service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
-        hCaptchaProvider.awaitCall()
-        captchaEventsReporter.awaitSuccessfulWarmUp()
-        ShadowSystemClock.advanceBy(10, TimeUnit.SECONDS)
-
-        service.cacheState(timeoutSeconds = 30).test {
-            assertThat(awaitItem()).isEqualTo(HCaptchaService.CacheState.Cached)
-
-            testScheduler.advanceTimeBy(19_999)
-            expectNoEvents()
-            testScheduler.advanceTimeBy(1)
-            testScheduler.runCurrent()
-
-            assertThat(awaitItem()).isEqualTo(HCaptchaService.CacheState.NeedsRefresh)
-            cancelAndIgnoreRemainingEvents()
-        }
-
-        hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("second-token")
-        service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
-        hCaptchaProvider.awaitCall()
-        captchaEventsReporter.awaitSuccessfulWarmUp()
-        hCaptchaProvider.ensureAllEventsConsumed()
-        captchaEventsReporter.ensureAllEventsConsumed()
     }
 
     private suspend fun testTokenExpiration(

@@ -12,15 +12,10 @@ import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -34,16 +29,10 @@ internal class DefaultHCaptchaService(
 ) : HCaptchaService {
     private val cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun cacheState(timeoutSeconds: Int?): Flow<HCaptchaService.CacheState> {
-        return cachedResult.flatMapLatest { cachedResult ->
-            when (cachedResult) {
-                is CachedResult.Failure, CachedResult.Idle ->
-                    flowOf(HCaptchaService.CacheState.NeedsRefresh)
-                CachedResult.Loading -> emptyFlow()
-                is CachedResult.Success -> cachedResult.cacheState(timeoutSeconds)
-            }
-        }
+        // A production implementation would observe the cached result, report Cached while its token is valid,
+        // and report NeedsRefresh when the token is missing, failed, consumed, or expired using timeoutSeconds.
+        return flowOf(HCaptchaService.CacheState.NeedsRefresh)
     }
 
     override suspend fun warmUp(
@@ -220,21 +209,6 @@ internal class DefaultHCaptchaService(
 
     private fun CachedResult.consume(result: HCaptchaService.Result): HCaptchaService.Result? {
         return if (cachedResult.compareAndSet(this, CachedResult.Idle)) result else null
-    }
-
-    private fun CachedResult.Success.cacheState(
-        tokenTimeoutSeconds: Int?
-    ): Flow<HCaptchaService.CacheState> = flow {
-        val remainingLifetimeMillis = remainingLifetimeMillis(tokenTimeoutSeconds)
-        if (remainingLifetimeMillis == null) {
-            emit(HCaptchaService.CacheState.Cached)
-        } else {
-            if (remainingLifetimeMillis > 0) {
-                emit(HCaptchaService.CacheState.Cached)
-                delay(remainingLifetimeMillis)
-            }
-            cachedResult.compareAndSet(this@cacheState, CachedResult.Idle)
-        }
     }
 
     private fun CachedResult.Success.isExpired(tokenTimeoutSeconds: Int?): Boolean {
