@@ -3,12 +3,12 @@ package com.stripe.android.utils
 import androidx.activity.result.ActivityResultCaller
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -58,7 +58,7 @@ internal object RecordingLinkPaymentLauncher {
                     PresentCall(
                         configuration = arguments[0] as LinkConfiguration,
                         paymentMethodMetadata = arguments[1] as PaymentMethodMetadata,
-                        linkAccount = arguments[2] as? LinkAccount,
+                        linkAccountInfo = arguments[2] as LinkAccountUpdate.Value,
                         launchMode = arguments[3] as LinkLaunchMode,
                         linkExpressMode = arguments[4] as LinkExpressMode,
                         statusBarColor = arguments[5] as? Int,
@@ -96,7 +96,7 @@ internal object RecordingLinkPaymentLauncher {
     data class PresentCall(
         val configuration: LinkConfiguration,
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val linkAccount: LinkAccount?,
+        val linkAccountInfo: LinkAccountUpdate.Value,
         val launchMode: LinkLaunchMode,
         val linkExpressMode: LinkExpressMode,
         val statusBarColor: Int?,
