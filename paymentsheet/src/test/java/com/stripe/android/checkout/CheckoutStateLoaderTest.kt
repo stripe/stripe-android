@@ -43,11 +43,14 @@ import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(
     CheckoutSessionPreview::class,
@@ -74,6 +77,19 @@ internal class CheckoutStateLoaderTest {
         loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `loadInitial loads payment element and ECE in parallel`() = runScenario(
+        paymentElementLoaderDelay = 1.seconds,
+    ) {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
+
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+        assertThat(testScheduler.currentTime).isEqualTo(1.seconds.inWholeMilliseconds)
     }
 
     @Test
@@ -405,6 +421,7 @@ internal class CheckoutStateLoaderTest {
         isGooglePayAvailable: Boolean = false,
         customer: CustomerState? = null,
         internalRowSelectionCallback: (() -> Unit)? = null,
+        paymentElementLoaderDelay: Duration = Duration.ZERO,
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
@@ -441,6 +458,7 @@ internal class CheckoutStateLoaderTest {
             shouldFail = shouldFail,
             isGooglePayAvailable = isGooglePayAvailable,
             customer = customer,
+            delay = paymentElementLoaderDelay,
         )
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
@@ -460,6 +478,7 @@ internal class CheckoutStateLoaderTest {
             paymentElementLoader = paymentElementLoader,
             chooser = recordingChooser,
             imageLoader = imageLoader,
+            testScheduler = testScheduler,
         ).block()
 
         imageLoader.ensureAllEventsConsumed()
@@ -472,6 +491,7 @@ internal class CheckoutStateLoaderTest {
         val paymentElementLoader: FakePaymentElementLoader,
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
+        val testScheduler: TestCoroutineScheduler,
     )
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,
