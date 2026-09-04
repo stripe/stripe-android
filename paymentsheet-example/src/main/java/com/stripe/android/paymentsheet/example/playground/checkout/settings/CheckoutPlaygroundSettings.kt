@@ -132,6 +132,12 @@ internal class CheckoutPlaygroundSettings private constructor(
         override operator fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T {
             return definition.deserialize(requireNotNull(values[definition])).getOrThrow()
         }
+
+        fun applyFeatureFlags() {
+            CheckoutPlaygroundDefinitions.root.values().forEach { definition ->
+                definition.applyFeatureFlags(this)
+            }
+        }
     }
 
     companion object {
