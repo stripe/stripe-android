@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +31,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
-        initialValues: Map<IdentifierSpec, String?>? = null,
+        initialValues: Map<FormFieldId, String?>? = null,
         linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
         linkInlineHandler: LinkInlineHandler? = null,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
@@ -63,7 +63,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
-        initialValues: Map<IdentifierSpec, String?>? = null,
+        initialValues: Map<FormFieldId, String?>? = null,
         linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
         linkInlineHandler: LinkInlineHandler? = null,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
@@ -110,7 +110,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
      */
     private class InitialValuesOverridingFactory(
         private val delegate: UiDefinitionFactory.Arguments.Factory,
-        private val initialValues: Map<IdentifierSpec, String?>,
+        private val initialValues: Map<FormFieldId, String?>,
     ) : UiDefinitionFactory.Arguments.Factory {
         override fun create(
             metadata: PaymentMethodMetadata,

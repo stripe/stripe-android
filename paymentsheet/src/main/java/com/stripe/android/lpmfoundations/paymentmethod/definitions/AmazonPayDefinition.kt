@@ -9,7 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.MandateTextElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal object AmazonPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.AmazonPay
@@ -47,7 +47,7 @@ private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
         if (AmazonPayDefinition.requiresMandate(metadata)) {
             builder.footer(
                 MandateTextElement(
-                    identifier = IdentifierSpec.Generic("mandate"),
+                    identifier = FormFieldId.Generic("mandate"),
                     stringResId = R.string.stripe_amazon_pay_mandate,
                     args = listOf(arguments.merchantName)
                 )

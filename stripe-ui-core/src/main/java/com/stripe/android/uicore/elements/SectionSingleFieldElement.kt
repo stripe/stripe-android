@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class SectionSingleFieldElement(
-    override val identifier: IdentifierSpec
+    override val identifier: FormFieldId
 ) : SectionFieldElement {
     /**
      * Some fields in the section will have a single input controller.
@@ -23,17 +23,17 @@ abstract class SectionSingleFieldElement(
      */
     override fun sectionFieldErrorController(): SectionFieldValidationController = controller
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> {
         return controller.formFieldValue.mapAsStateFlow { formFieldEntry ->
             listOf(identifier to formFieldEntry)
         }
     }
 
-    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+    override fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) {
         rawValuesMap[identifier]?.let { controller.onRawValueChange(it) }
     }
 
-    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> =
         MutableStateFlow(
             listOf(identifier).takeIf { controller is TextFieldController }
                 ?: emptyList()

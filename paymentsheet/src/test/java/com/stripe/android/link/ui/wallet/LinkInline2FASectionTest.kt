@@ -8,7 +8,7 @@ import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import org.junit.Rule
@@ -44,7 +44,7 @@ internal class LinkInline2FASectionTest {
                     linkBrand = LinkBrand.Onelink,
                 ),
                 otpElement = OTPElement(
-                    identifier = IdentifierSpec.Generic("otp"),
+                    identifier = FormFieldId.Generic("otp"),
                     controller = OTPController(),
                 ),
                 onResend = {},

@@ -20,7 +20,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getSetupFutureUseValue
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -128,7 +128,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
             paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
             paymentMethodExtraParams = extras,
-            brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
+            brand = CardBrand.fromCode(fieldValuePairs[FormFieldId.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
             linkInput = inlineSignupViewState?.userInput?.takeIf {
                 inlineSignupViewState.useLink

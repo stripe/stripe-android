@@ -14,7 +14,7 @@ import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -101,7 +101,7 @@ internal class CardDetailsSectionElementUITest {
                     enabled = true,
                     controller = controller,
                     hiddenIdentifiers = emptySet(),
-                    lastTextFieldIdentifier = IdentifierSpec.PostalCode
+                    lastTextFieldIdentifier = FormFieldId.PostalCode
                 )
             }
         }

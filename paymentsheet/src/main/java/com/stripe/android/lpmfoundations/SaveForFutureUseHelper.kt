@@ -11,7 +11,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal fun isSaveForFutureUseValueChangeable(
     code: PaymentMethodCode,
@@ -89,6 +89,6 @@ private fun getSetAsDefaultInitialValueFromArguments(
     arguments: UiDefinitionFactory.Arguments
 ): Boolean {
     return arguments.initialValues.entries.firstOrNull {
-        it.key.v1.contains(IdentifierSpec.SetAsDefaultPaymentMethod.v1)
+        it.key.v1.contains(FormFieldId.SetAsDefaultPaymentMethod.v1)
     }?.value?.toBoolean() ?: false
 }

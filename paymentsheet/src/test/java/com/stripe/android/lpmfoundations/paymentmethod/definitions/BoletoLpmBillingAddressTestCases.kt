@@ -5,21 +5,21 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val boletoNoBillingAddressRawValues = mapOf(
-    IdentifierSpec.Generic("boleto[tax_id]") to "123.456.789-09",
+    FormFieldId.Generic("boleto[tax_id]") to "123.456.789-09",
 )
 
 private val boletoWithBillingAddressRawValues = boletoNoBillingAddressRawValues + mapOf(
-    IdentifierSpec.Name to "Jane Doe",
-    IdentifierSpec.Email to "jane@example.com",
-    IdentifierSpec.Line1 to "Avenida Paulista 123",
-    IdentifierSpec.Line2 to "Apto 45",
-    IdentifierSpec.City to "Sao Paulo",
-    IdentifierSpec.State to "SP",
-    IdentifierSpec.Country to "BR",
-    IdentifierSpec.PostalCode to "01311000",
+    FormFieldId.Name to "Jane Doe",
+    FormFieldId.Email to "jane@example.com",
+    FormFieldId.Line1 to "Avenida Paulista 123",
+    FormFieldId.Line2 to "Apto 45",
+    FormFieldId.City to "Sao Paulo",
+    FormFieldId.State to "SP",
+    FormFieldId.Country to "BR",
+    FormFieldId.PostalCode to "01311000",
 )
 
 private val boletoNoBillingAddressExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

@@ -12,7 +12,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -49,16 +49,16 @@ private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder
     ) {
-        val taxIdElementIdentifierSpec = IdentifierSpec.Generic("boleto[tax_id]")
+        val taxIdElementFormFieldId = FormFieldId.Generic("boleto[tax_id]")
         val taxIdElement = SimpleTextElement(
-            taxIdElementIdentifierSpec,
+            taxIdElementFormFieldId,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
                     label = resolvableString(R.string.stripe_boleto_tax_id_label),
                     capitalization = KeyboardCapitalization.None,
                     keyboard = KeyboardType.Ascii,
                 ),
-                initialValue = arguments.initialValues[taxIdElementIdentifierSpec],
+                initialValue = arguments.initialValues[taxIdElementFormFieldId],
             )
         )
 

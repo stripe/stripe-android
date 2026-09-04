@@ -6,17 +6,17 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val konbiniFullRawValues = mapOf(
-    IdentifierSpec.Name to "Haruto Tanaka",
-    IdentifierSpec.Email to "haruto.tanaka@example.com",
-    IdentifierSpec.KonbiniConfirmationNumber to "09012345678",
-    IdentifierSpec.Line1 to "1-1 Marunouchi",
-    IdentifierSpec.Line2 to "Chiyoda Building 2F",
-    IdentifierSpec.State to "Tokyo",
-    IdentifierSpec.PostalCode to "100-0005",
-    IdentifierSpec.Country to "JP",
+    FormFieldId.Name to "Haruto Tanaka",
+    FormFieldId.Email to "haruto.tanaka@example.com",
+    FormFieldId.KonbiniConfirmationNumber to "09012345678",
+    FormFieldId.Line1 to "1-1 Marunouchi",
+    FormFieldId.Line2 to "Chiyoda Building 2F",
+    FormFieldId.State to "Tokyo",
+    FormFieldId.PostalCode to "100-0005",
+    FormFieldId.Country to "JP",
 )
 
 private val konbiniNoBillingDetailsExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

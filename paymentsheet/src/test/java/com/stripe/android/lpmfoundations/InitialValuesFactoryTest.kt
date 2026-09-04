@@ -7,7 +7,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import org.junit.Test
 
 class InitialValuesFactoryTest {
@@ -64,20 +64,20 @@ class InitialValuesFactoryTest {
             paymentMethodExtraParams = null,
         )
 
-        assertThat(initialValues).containsEntry(IdentifierSpec.Name, "Jenny Rosen")
-        assertThat(initialValues).containsEntry(IdentifierSpec.Email, "jenny.rosen@example.com")
-        assertThat(initialValues).containsEntry(IdentifierSpec.Phone, "1-800-555-1234")
-        assertThat(initialValues).containsEntry(IdentifierSpec.Line1, "1234 Main St")
-        assertThat(initialValues).containsEntry(IdentifierSpec.Line2, null)
-        assertThat(initialValues).containsEntry(IdentifierSpec.City, "Berlin")
-        assertThat(initialValues).containsEntry(IdentifierSpec.State, "Capital")
-        assertThat(initialValues).containsEntry(IdentifierSpec.PostalCode, "10787")
-        assertThat(initialValues).containsEntry(IdentifierSpec.Country, "DE")
-        assertThat(initialValues).containsEntry(IdentifierSpec.Generic("type"), "card")
-        assertThat(initialValues).containsEntry(IdentifierSpec.CardNumber, "4242424242424242")
-        assertThat(initialValues).containsEntry(IdentifierSpec.CardExpMonth, "1")
-        assertThat(initialValues).containsEntry(IdentifierSpec.CardExpYear, "2024")
-        assertThat(initialValues).containsEntry(IdentifierSpec.CardCvc, "111")
+        assertThat(initialValues).containsEntry(FormFieldId.Name, "Jenny Rosen")
+        assertThat(initialValues).containsEntry(FormFieldId.Email, "jenny.rosen@example.com")
+        assertThat(initialValues).containsEntry(FormFieldId.Phone, "1-800-555-1234")
+        assertThat(initialValues).containsEntry(FormFieldId.Line1, "1234 Main St")
+        assertThat(initialValues).containsEntry(FormFieldId.Line2, null)
+        assertThat(initialValues).containsEntry(FormFieldId.City, "Berlin")
+        assertThat(initialValues).containsEntry(FormFieldId.State, "Capital")
+        assertThat(initialValues).containsEntry(FormFieldId.PostalCode, "10787")
+        assertThat(initialValues).containsEntry(FormFieldId.Country, "DE")
+        assertThat(initialValues).containsEntry(FormFieldId.Generic("type"), "card")
+        assertThat(initialValues).containsEntry(FormFieldId.CardNumber, "4242424242424242")
+        assertThat(initialValues).containsEntry(FormFieldId.CardExpMonth, "1")
+        assertThat(initialValues).containsEntry(FormFieldId.CardExpYear, "2024")
+        assertThat(initialValues).containsEntry(FormFieldId.CardCvc, "111")
     }
 
     @Test
@@ -90,15 +90,15 @@ class InitialValuesFactoryTest {
             )
         ).isEqualTo(
             mapOf(
-                IdentifierSpec.Name to "Jenny Smith",
-                IdentifierSpec.Email to "email.email.com",
-                IdentifierSpec.Phone to null,
-                IdentifierSpec.Line1 to "123 Main Street",
-                IdentifierSpec.Line2 to "APt 1",
-                IdentifierSpec.City to "Dublin",
-                IdentifierSpec.State to "Co. Dublin",
-                IdentifierSpec.PostalCode to "T37 F8HK",
-                IdentifierSpec.Country to "IE"
+                FormFieldId.Name to "Jenny Smith",
+                FormFieldId.Email to "email.email.com",
+                FormFieldId.Phone to null,
+                FormFieldId.Line1 to "123 Main Street",
+                FormFieldId.Line2 to "APt 1",
+                FormFieldId.City to "Dublin",
+                FormFieldId.State to "Co. Dublin",
+                FormFieldId.PostalCode to "T37 F8HK",
+                FormFieldId.Country to "IE"
             )
         )
     }
@@ -132,19 +132,19 @@ class InitialValuesFactoryTest {
             )
         ).isEqualTo(
             mapOf(
-                IdentifierSpec.Name to "Jenny Rosen",
-                IdentifierSpec.Email to "jenny.rosen@example.com",
-                IdentifierSpec.Phone to null,
-                IdentifierSpec.Line1 to "123 Main Street",
-                IdentifierSpec.Line2 to "APt 1",
-                IdentifierSpec.City to "Dublin",
-                IdentifierSpec.State to "Co. Dublin",
-                IdentifierSpec.PostalCode to "T37 F8HK",
-                IdentifierSpec.Country to "IE",
-                IdentifierSpec.Generic("type") to "bacs_debit",
-                IdentifierSpec.Generic("bacs_debit[account_number]") to "00012345",
-                IdentifierSpec.Generic("bacs_debit[sort_code]") to "10-88-00",
-                IdentifierSpec.BacsDebitConfirmed to "true"
+                FormFieldId.Name to "Jenny Rosen",
+                FormFieldId.Email to "jenny.rosen@example.com",
+                FormFieldId.Phone to null,
+                FormFieldId.Line1 to "123 Main Street",
+                FormFieldId.Line2 to "APt 1",
+                FormFieldId.City to "Dublin",
+                FormFieldId.State to "Co. Dublin",
+                FormFieldId.PostalCode to "T37 F8HK",
+                FormFieldId.Country to "IE",
+                FormFieldId.Generic("type") to "bacs_debit",
+                FormFieldId.Generic("bacs_debit[account_number]") to "00012345",
+                FormFieldId.Generic("bacs_debit[sort_code]") to "10-88-00",
+                FormFieldId.BacsDebitConfirmed to "true"
             )
         )
     }

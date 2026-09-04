@@ -14,7 +14,7 @@ import com.stripe.android.ui.core.elements.DropdownItem
 import com.stripe.android.ui.core.elements.SimpleDropdownConfig
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 
 internal object P24Definition : PaymentMethodDefinition {
@@ -36,7 +36,7 @@ internal object P24Definition : PaymentMethodDefinition {
 }
 
 private object P24UiDefinitionFactory : UiDefinitionFactory.Simple() {
-    private val p24BankIdentifier = IdentifierSpec.Generic("p24[bank]")
+    private val p24BankIdentifier = FormFieldId.Generic("p24[bank]")
 
     override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = P24Definition,
