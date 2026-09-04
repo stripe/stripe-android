@@ -3,6 +3,7 @@
 package com.stripe.android.checkout.injection
 
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultRegistry
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.CheckoutPresenter
 import com.stripe.android.checkout.CheckoutPresenterInitializer
@@ -27,6 +28,7 @@ internal interface CheckoutPresenterSubcomponent {
         fun create(
             @BindsInstance activityResultCaller: ActivityResultCaller,
             @BindsInstance lifecycleOwner: LifecycleOwner,
+            @BindsInstance activityResultRegistry: ActivityResultRegistry,
             @BindsInstance @Named(STATUS_BAR_COLOR) statusBarColor: Int?,
         ): CheckoutPresenterSubcomponent
     }
