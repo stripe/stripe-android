@@ -44,7 +44,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
         paymentSheetNextActionHandlers(
             includePaymentSheetNextActionHandlers,
             applicationContext,
-            apiConfigurationProvider.get().publishableKey,
+            apiConfigurationProvider.get(),
         )
     }
 
@@ -151,7 +151,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
 private fun paymentSheetNextActionHandlers(
     includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
-    publishableKey: String,
+    apiConfiguration: ApiConfiguration.State,
 ): Map<NextActionHandlerKey, NextActionHandler> {
     return try {
         if (includePaymentSheetNextActionHandlers) {
@@ -165,8 +165,8 @@ private fun paymentSheetNextActionHandlers(
         }
     } catch (e: Exception) {
         ErrorReporter.createFallbackInstance(
-            applicationContext,
-            apiConfiguration = ApiConfiguration.State(publishableKey, null),
+            context = applicationContext,
+            apiConfiguration = apiConfiguration
         )
             .report(
                 // [PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND] will not be changed to avoid skewed metrics
