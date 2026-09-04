@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.annotation.VisibleForTesting
@@ -5,10 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
@@ -23,10 +29,12 @@ import javax.inject.Named
 import javax.inject.Provider
 
 @Suppress("TooManyFunctions")
-internal class InputAddressViewModel @Inject constructor(
+internal class InputAddressViewModel @Inject internal constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
+    private val processingState: AddressElementActivityProcessingState,
     private val eventReporter: AddressLauncherEventReporter,
+    private val checkoutShippingAddressProcessor: CheckoutShippingAddressProcessor,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
 ) : ViewModel(), AutocompleteAddressInteractor {
@@ -115,6 +123,11 @@ internal class InputAddressViewModel @Inject constructor(
 
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
+
+    val isProcessing: StateFlow<Boolean> = processingState.isProcessing
+
+    private val _saveError = MutableStateFlow<ResolvableString?>(null)
+    val saveError: StateFlow<ResolvableString?> = _saveError.asStateFlow()
 
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
@@ -211,7 +224,6 @@ internal class InputAddressViewModel @Inject constructor(
             addressFormController.elements.forEach { it.onValidationStateChanged(true) }
             return
         }
-        _formEnabled.value = false
         val addressDetails = AddressDetails(
             name = completedFormValues[FormFieldId.Name]?.value,
             address = PaymentSheet.Address(
@@ -225,17 +237,51 @@ internal class InputAddressViewModel @Inject constructor(
             phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
             isCheckboxSelected = checkboxChecked
         )
-        dismissWithAddress(
-            addressDetails = addressDetails,
-            result = when (args) {
-                is AddressElementActivityContract.Args.Standalone -> {
-                    AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
-                }
-                is AddressElementActivityContract.Args.CheckoutShipping -> {
-                    AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
-                }
-            },
-        )
+        when (val args = args) {
+            is AddressElementActivityContract.Args.Standalone -> {
+                _formEnabled.value = false
+                dismissWithAddress(
+                    addressDetails = addressDetails,
+                    result = AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails),
+                )
+            }
+            is AddressElementActivityContract.Args.CheckoutShipping -> {
+                saveCheckoutShippingAddress(
+                    checkoutSessionResponse = args.checkoutSessionResponse,
+                    addressDetails = addressDetails,
+                )
+            }
+        }
+    }
+
+    private fun saveCheckoutShippingAddress(
+        checkoutSessionResponse: CheckoutSessionResponse,
+        addressDetails: AddressDetails,
+    ) {
+        if (!processingState.tryStartProcessing()) return
+
+        _saveError.value = null
+        _formEnabled.value = false
+        viewModelScope.launch {
+            val result = checkoutShippingAddressProcessor.process(checkoutSessionResponse, addressDetails)
+
+            result.fold(
+                onSuccess = { updatedResponse ->
+                    dismissWithAddress(
+                        addressDetails = addressDetails,
+                        result = AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                            address = addressDetails,
+                            updatedResponse = updatedResponse,
+                        ),
+                    )
+                },
+                onFailure = {
+                    processingState.finishProcessing()
+                    _saveError.value = R.string.stripe_something_went_wrong.resolvableString
+                    _formEnabled.value = true
+                },
+            )
+        }
     }
 
     @VisibleForTesting
@@ -365,13 +411,14 @@ internal class InputAddressViewModel @Inject constructor(
 
     internal class Factory(
         private val inputAddressViewModelSubcomponentFactoryProvider:
-        Provider<InputAddressViewModelSubcomponent.Factory>
+        Provider<InputAddressViewModelSubcomponent.Factory>,
+        private val processingState: AddressElementActivityProcessingState,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return inputAddressViewModelSubcomponentFactoryProvider.get()
-                .create().inputAddressViewModel as T
+                .create(processingState).inputAddressViewModel as T
         }
     }
 }

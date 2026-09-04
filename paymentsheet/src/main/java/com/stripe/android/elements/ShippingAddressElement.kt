@@ -16,6 +16,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -25,6 +26,7 @@ import javax.inject.Provider
 @OptIn(CheckoutSessionPreview::class)
 internal fun interface CommitShippingAddress {
     suspend operator fun invoke(
+        updatedCheckoutSessionResponse: CheckoutSessionResponse,
         name: String?,
         address: CheckoutController.Address.State,
     ): Result<Unit>
@@ -77,6 +79,7 @@ class ShippingAddressElement internal constructor(
                         coroutineScope.launch {
                             try {
                                 commitShippingAddress(
+                                    result.updatedResponse,
                                     result.address.name,
                                     address,
                                 )
@@ -126,6 +129,7 @@ class ShippingAddressElement internal constructor(
                     billingAddress = null,
                     useStripeHostedAutocomplete = true,
                 ),
+                checkoutSessionResponse = requireNotNull(stateHolder.state).checkoutSessionResponse,
             )
         )
     }

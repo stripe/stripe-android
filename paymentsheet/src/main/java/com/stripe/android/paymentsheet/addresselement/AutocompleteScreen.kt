@@ -108,7 +108,7 @@ internal fun AutocompleteScreenUI(
         isRootScreen = false,
         backgroundColor = MaterialTheme.colors.surface,
         appBar = { isRoot, onBack ->
-            AddressOptionsAppBar(isRootScreen = isRoot) {
+            AddressOptionsAppBar(isRootScreen = isRoot, enabled = true) {
                 onBack()
             }
         },

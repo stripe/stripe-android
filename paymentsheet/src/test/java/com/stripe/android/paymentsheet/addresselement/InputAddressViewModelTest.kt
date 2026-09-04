@@ -1,13 +1,21 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.addresselement
 
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
@@ -16,8 +24,11 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -47,13 +58,27 @@ class InputAddressViewModelTest {
                     config = currentConfig,
                 )
             },
+        processingState: AddressElementActivityProcessingState = AddressElementActivityProcessingState(),
+        updateCheckoutShippingAddress: FakeUpdateCheckoutShippingAddress = FakeUpdateCheckoutShippingAddress(),
     ): InputAddressViewModel {
         return InputAddressViewModel(
             argsFactory(config),
             navigator,
+            processingState,
             eventReporter,
+            CheckoutShippingAddressProcessor(updateCheckoutShippingAddress::invoke),
             placesClient = null,
         ).also { viewModelStoreRule.track(it) }
+    }
+
+    private fun checkoutArgs(
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ): (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { config ->
+        AddressElementActivityContract.Args.CheckoutShipping(
+            publishableKey = "pk_123",
+            config = config,
+            checkoutSessionResponse = checkoutSessionResponse,
+        )
     }
 
     @get:Rule
@@ -979,32 +1004,172 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `standalone save emits standalone success`() {
-        val viewModel = createViewModel()
-
-        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
-        verify(navigator).dismissWithResult(
-            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+    fun `checkout save sends complete address and dismisses with updated response`() = runTest {
+        val updater = FakeUpdateCheckoutShippingAddress(
+            result = { Result.success(UPDATED_CHECKOUT_SESSION_RESPONSE) },
         )
+        val viewModel = createViewModel(
+            argsFactory = checkoutArgs(CHECKOUT_SESSION_RESPONSE),
+            updateCheckoutShippingAddress = updater,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = true)
+        runCurrent()
+
+        assertThat(updater.calls.awaitItem()).isEqualTo(
+            FakeUpdateCheckoutShippingAddress.Call(
+                checkoutSessionResponse = CHECKOUT_SESSION_RESPONSE,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                address = EXPECTED_CHECKOUT_ADDRESS,
+            )
+        )
+        verify(navigator).dismissWithResult(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                address = EXPECTED_ADDRESS_WITH_CHECKBOX,
+                updatedResponse = UPDATED_CHECKOUT_SESSION_RESPONSE,
+            )
+        )
+        updater.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `checkout shipping save emits checkout success without performing additional work`() {
+    fun `checkout save disables form and blocks duplicate save while update is suspended`() = runTest {
+        val deferred = CompletableDeferred<Result<CheckoutSessionResponse>>()
+        val updater = FakeUpdateCheckoutShippingAddress(result = { deferred.await() })
+        val processingState = AddressElementActivityProcessingState()
         val viewModel = createViewModel(
-            argsFactory = { config ->
-                AddressElementActivityContract.Args.CheckoutShipping(
-                    publishableKey = "pk_123",
-                    config = config,
-                )
-            },
+            argsFactory = checkoutArgs(CHECKOUT_SESSION_RESPONSE),
+            processingState = processingState,
+            updateCheckoutShippingAddress = updater,
         )
 
-        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
 
+        assertThat(updater.calls.awaitItem().address).isEqualTo(EXPECTED_CHECKOUT_ADDRESS)
+        updater.calls.expectNoEvents()
+        assertThat(viewModel.formEnabled.value).isFalse()
+        assertThat(viewModel.isProcessing.value).isTrue()
+
+        deferred.complete(Result.success(UPDATED_CHECKOUT_SESSION_RESPONSE))
+        runCurrent()
+
+        assertThat(viewModel.isProcessing.value).isTrue()
         verify(navigator).dismissWithResult(
-            AddressElementActivityContract.Result.CheckoutShippingSucceeded(EXPECTED_ADDRESS)
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                address = EXPECTED_ADDRESS,
+                updatedResponse = UPDATED_CHECKOUT_SESSION_RESPONSE,
+            )
         )
+        updater.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `failed checkout save retains values shows error and permits retry`() = runTest {
+        var attempt = 0
+        val updater = FakeUpdateCheckoutShippingAddress {
+            if (attempt++ == 0) {
+                Result.failure(IllegalStateException("failed"))
+            } else {
+                Result.success(UPDATED_CHECKOUT_SESSION_RESPONSE)
+            }
+        }
+        val viewModel = createViewModel(
+            address = EXPECTED_ADDRESS,
+            argsFactory = checkoutArgs(CHECKOUT_SESSION_RESPONSE),
+            updateCheckoutShippingAddress = updater,
+        )
+        val originalValues = viewModel.addressFormController.getCurrentFormValues()
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        assertThat(updater.calls.awaitItem().address).isEqualTo(EXPECTED_CHECKOUT_ADDRESS)
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(viewModel.isProcessing.value).isFalse()
+        assertThat(viewModel.saveError.value).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(viewModel.addressFormController.getCurrentFormValues()).isEqualTo(originalValues)
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        assertThat(updater.calls.awaitItem().address).isEqualTo(EXPECTED_CHECKOUT_ADDRESS)
+        assertThat(viewModel.saveError.value).isNull()
+        verify(navigator).dismissWithResult(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                address = EXPECTED_ADDRESS,
+                updatedResponse = UPDATED_CHECKOUT_SESSION_RESPONSE,
+            )
+        )
+        updater.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `thrown checkout save failure shows retryable error`() = runTest {
+        val updater = FakeUpdateCheckoutShippingAddress { throw IllegalStateException("failed") }
+        val viewModel = createViewModel(
+            argsFactory = checkoutArgs(CHECKOUT_SESSION_RESPONSE),
+            updateCheckoutShippingAddress = updater,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        assertThat(updater.calls.awaitItem().address).isEqualTo(EXPECTED_CHECKOUT_ADDRESS)
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(viewModel.isProcessing.value).isFalse()
+        assertThat(viewModel.saveError.value).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        updater.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `disallowed shipping country shows retryable error without update`() = runTest {
+        val updater = FakeUpdateCheckoutShippingAddress()
+        val response = CHECKOUT_SESSION_RESPONSE.copy(allowedShippingCountries = listOf("CA"))
+        val viewModel = createViewModel(
+            argsFactory = checkoutArgs(response),
+            updateCheckoutShippingAddress = updater,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        updater.calls.expectNoEvents()
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(viewModel.isProcessing.value).isFalse()
+        assertThat(viewModel.saveError.value).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        updater.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `checkout save rethrows cancellation`() = runTest {
+        val updater = FakeUpdateCheckoutShippingAddress { throw CancellationException() }
+        val viewModel = createViewModel(
+            argsFactory = checkoutArgs(CHECKOUT_SESSION_RESPONSE),
+            updateCheckoutShippingAddress = updater,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+        runCurrent()
+
+        assertThat(updater.calls.awaitItem().address).isEqualTo(EXPECTED_CHECKOUT_ADDRESS)
+        assertThat(viewModel.isProcessing.value).isTrue()
+        assertThat(viewModel.saveError.value).isNull()
+        updater.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `standalone save dismisses without checkout update`() = runTest {
+        val updater = FakeUpdateCheckoutShippingAddress()
+        val viewModel = createViewModel(updateCheckoutShippingAddress = updater)
+
+        viewModel.clickPrimaryButton(COMPLETED_ADDRESS, checkboxChecked = false)
+
+        updater.calls.expectNoEvents()
+        verify(navigator).dismissWithResult(
+            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        )
+        updater.ensureAllEventsConsumed()
     }
 
     @Test
@@ -1031,7 +1196,9 @@ class InputAddressViewModelTest {
                     .build(),
             ),
             navigator,
+            AddressElementActivityProcessingState(),
             eventReporter,
+            CheckoutShippingAddressProcessor(FakeUpdateCheckoutShippingAddress()::invoke),
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
@@ -1082,6 +1249,23 @@ class InputAddressViewModelTest {
         InputAddressViewModel.ShippingSameAsBillingState.Show(isChecked)
 
     private companion object {
+        val CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+        )
+        val UPDATED_CHECKOUT_SESSION_RESPONSE = CHECKOUT_SESSION_RESPONSE.copy(
+            customerEmail = "updated@example.com",
+        )
+        val COMPLETED_ADDRESS = mapOf(
+            FormFieldId.Name to FormFieldEntry("Jenny Rosen", true),
+            FormFieldId.City to FormFieldEntry("San Francisco", true),
+            FormFieldId.Country to FormFieldEntry("US", true),
+            FormFieldId.Line1 to FormFieldEntry("510 Townsend St", true),
+            FormFieldId.Line2 to FormFieldEntry("Floor 2", true),
+            FormFieldId.PostalCode to FormFieldEntry("94103", true),
+            FormFieldId.State to FormFieldEntry("CA", true),
+            FormFieldId.Phone to FormFieldEntry("5551234567", true),
+        )
         val EXPECTED_ADDRESS = AddressDetails(
             name = "Jenny Rosen",
             address = PaymentSheet.Address(
@@ -1092,18 +1276,48 @@ class InputAddressViewModelTest {
                 postalCode = "94103",
                 state = "CA",
             ),
-            phoneNumber = "+14155551212",
+            phoneNumber = "5551234567",
+            isCheckboxSelected = false,
+        )
+        val EXPECTED_ADDRESS_WITH_CHECKBOX = AddressDetails(
+            name = EXPECTED_ADDRESS.name,
+            address = EXPECTED_ADDRESS.address,
+            phoneNumber = EXPECTED_ADDRESS.phoneNumber,
             isCheckboxSelected = true,
         )
-        val COMPLETED_FORM_VALUES = mapOf(
-            FormFieldId.Name to FormFieldEntry("Jenny Rosen", true),
-            FormFieldId.City to FormFieldEntry("San Francisco", true),
-            FormFieldId.Country to FormFieldEntry("US", true),
-            FormFieldId.Line1 to FormFieldEntry("510 Townsend St", true),
-            FormFieldId.Line2 to FormFieldEntry("Floor 2", true),
-            FormFieldId.Phone to FormFieldEntry("+14155551212", true),
-            FormFieldId.PostalCode to FormFieldEntry("94103", true),
-            FormFieldId.State to FormFieldEntry("CA", true),
+        val EXPECTED_CHECKOUT_ADDRESS = CheckoutController.Address.State(
+            city = "San Francisco",
+            country = "US",
+            line1 = "510 Townsend St",
+            line2 = "Floor 2",
+            postalCode = "94103",
+            state = "CA",
         )
     }
+}
+
+private class FakeUpdateCheckoutShippingAddress(
+    var result: suspend (Call) -> Result<CheckoutSessionResponse> = { Result.success(it.checkoutSessionResponse) },
+) {
+    val calls = Turbine<Call>()
+
+    suspend operator fun invoke(
+        checkoutSessionResponse: CheckoutSessionResponse,
+        addressSource: CheckoutSessionResponse.TaxAddressSource,
+        address: CheckoutController.Address.State,
+    ): Result<CheckoutSessionResponse> {
+        val call = Call(checkoutSessionResponse, addressSource, address)
+        calls.add(call)
+        return result(call)
+    }
+
+    fun ensureAllEventsConsumed() {
+        calls.ensureAllEventsConsumed()
+    }
+
+    data class Call(
+        val checkoutSessionResponse: CheckoutSessionResponse,
+        val addressSource: CheckoutSessionResponse.TaxAddressSource,
+        val address: CheckoutController.Address.State,
+    )
 }
