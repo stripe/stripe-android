@@ -363,6 +363,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
             partialEventName = "checkout.google_pay.unexpected_callback_trigger"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST(
+            partialEventName = "google_pay.dynamic_callbacks.missing_request"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK(
+            partialEventName = "google_pay.dynamic_callbacks.missing_callback"
         );
 
         override val eventName: String
