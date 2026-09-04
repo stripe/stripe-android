@@ -17,9 +17,15 @@ internal object AddressElementActivityContract {
         }
 
         override fun parseResult(resultCode: Int, intent: Intent?): AddressLauncherResult {
-            return when (val result = parseActivityResult(intent)) {
-                Result.Canceled,
-                is Result.CheckoutShippingSucceeded -> AddressLauncherResult.Canceled()
+            val result = intent?.extras?.let {
+                BundleCompat.getParcelable(
+                    it,
+                    EXTRA_RESULT,
+                    StandaloneResult::class.java,
+                )
+            } ?: Result.Canceled
+            return when (result) {
+                Result.Canceled -> AddressLauncherResult.Canceled()
                 is Result.StandaloneSucceeded -> AddressLauncherResult.Succeeded(result.address)
             }
         }
@@ -32,23 +38,18 @@ internal object AddressElementActivityContract {
         }
 
         override fun parseResult(resultCode: Int, intent: Intent?): CheckoutShippingResult {
-            return when (val result = parseActivityResult(intent)) {
-                Result.Canceled -> Result.Canceled
-                is Result.CheckoutShippingSucceeded -> result
-                is Result.StandaloneSucceeded -> Result.Canceled
-            }
+            return intent?.extras?.let {
+                BundleCompat.getParcelable(
+                    it,
+                    EXTRA_RESULT,
+                    CheckoutShippingResult::class.java,
+                )
+            } ?: Result.Canceled
         }
     }
 
     private fun createActivityIntent(context: Context, input: Args): Intent {
         return Intent(context, AddressElementActivity::class.java).putExtra(EXTRA_ARGS, input)
-    }
-
-    private fun parseActivityResult(intent: Intent?): Result {
-        val result = intent?.extras?.let { extras ->
-            BundleCompat.getParcelable(extras, EXTRA_RESULT, Result::class.java)
-        }
-        return result ?: Result.Canceled
     }
 
     /**
