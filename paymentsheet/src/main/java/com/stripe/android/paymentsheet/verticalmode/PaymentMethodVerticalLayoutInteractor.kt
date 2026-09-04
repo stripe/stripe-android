@@ -112,12 +112,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>,
     private val canChangeCbc: StateFlow<Boolean>,
     private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
+    private val verticalPaymentSelectionHandler: VerticalPaymentSelectionHandler,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
-    private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
     private val updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)?,
@@ -146,6 +146,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             )
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                 it is PaymentSheetScreen.VerticalMode
+            }
+            val updateSelection = { selection: PaymentSelection?, isUserInput: Boolean ->
+                if (isUserInput) {
+                    viewModel.handlePaymentMethodSelected(selection)
+                } else {
+                    viewModel.updateSelection(selection)
+                }
             }
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -183,13 +190,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 canRemove = viewModel.customerStateHolder.canRemove,
                 onUpdatePaymentMethod = { viewModel.savedPaymentMethodMutator.updatePaymentMethod(it) },
-                updateSelection = { selection, isUserInput ->
-                    if (isUserInput) {
-                        viewModel.handlePaymentMethodSelected(selection)
-                    } else {
-                        viewModel.updateSelection(selection)
-                    }
-                },
+                updateSelection = updateSelection,
+                verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
+                    updateSelection = { selection, isUserInput -> updateSelection(selection, isUserInput) },
+                    onSelectionComplete = {},
+                ),
                 walletsState = viewModel.walletsState,
                 canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
                     .canUpdateCardExpiryAndBillingDetails,
@@ -438,8 +443,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             iconRequiresTinting = false,
             subtitle = null,
             onClick = {
-                updateSelection(PaymentSelection.GooglePay, false)
-                invokeRowSelectionCallback?.invoke()
+                verticalPaymentSelectionHandler.select(PaymentSelection.GooglePay, false)
             },
         )
     }
@@ -461,8 +465,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             iconRequiresTinting = false,
             subtitle = subtitle,
             onClick = {
-                updateSelection(PaymentSelection.Link(brand = link.linkBrand), false)
-                invokeRowSelectionCallback?.invoke()
+                verticalPaymentSelectionHandler.select(PaymentSelection.Link(brand = link.linkBrand), false)
             },
         )
     }
@@ -582,9 +585,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             is ViewAction.SavedPaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected("saved")
-                val selection = PaymentSelection.Saved(viewAction.savedPaymentMethod)
-                updateSelection(selection, true)
-                invokeRowSelectionCallback?.invoke()
+                verticalPaymentSelectionHandler.select(
+                    PaymentSelection.Saved(viewAction.savedPaymentMethod),
+                    true,
+                )
             }
             is ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionToManageScreen()
