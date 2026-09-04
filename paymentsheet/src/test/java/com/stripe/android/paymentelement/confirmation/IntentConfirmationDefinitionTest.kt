@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
@@ -35,6 +36,41 @@ import org.junit.Test
 
 class IntentConfirmationDefinitionTest {
     @Test
+    fun `key is IntentConfirmation`() {
+        val definition = createIntentConfirmationDefinition()
+
+        assertThat(definition.key).isEqualTo("IntentConfirmation")
+    }
+
+    @Test
+    fun `option returns new payment method confirmation option`() {
+        val definition = createIntentConfirmationDefinition()
+        val option = PaymentMethodConfirmationOption.New(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            optionsParams = null,
+            extraParams = null,
+            shouldSave = false,
+        )
+
+        assertThat(definition.option(option)).isEqualTo(option)
+    }
+
+    @Test
+    fun `option returns saved payment method confirmation option`() {
+        val definition = createIntentConfirmationDefinition()
+
+        assertThat(definition.option(SAVED_PAYMENT_CONFIRMATION_OPTION))
+            .isEqualTo(SAVED_PAYMENT_CONFIRMATION_OPTION)
+    }
+
+    @Test
+    fun `option returns null for an unrelated option`() {
+        val definition = createIntentConfirmationDefinition()
+
+        assertThat(definition.option(FakeConfirmationOption())).isNull()
+    }
+
+    @Test
     fun `'createLauncher' should register and return the activity result launcher`() = runTest {
         val definition = createIntentConfirmationDefinition()
 
@@ -50,6 +86,16 @@ class IntentConfirmationDefinitionTest {
 
             assertThat(createdLauncher).isEqualTo(registeredLauncher)
         }
+    }
+
+    @Test
+    fun `unregister unregisters the activity result launcher`() = runTest {
+        val definition = createIntentConfirmationDefinition()
+        val launcher = FakeActivityResultLauncher<PaymentLauncherContract.Args>()
+
+        definition.unregister(launcher)
+
+        launcher.unregisterCalls.awaitItem()
     }
 
     @Test
@@ -110,6 +156,35 @@ class IntentConfirmationDefinitionTest {
                 CONFIRMATION_PARAMETERS.paymentMethodMetadata.shippingDetails?.toConfirmPaymentIntentShipping()
             )
         }
+
+    @Test
+    fun `On interceptor factory callback error, action should return failure`() = runTest {
+        val definition = createIntentConfirmationDefinition(
+            intentConfirmationInterceptorFactory = object : IntentConfirmationInterceptor.Factory {
+                override suspend fun create(
+                    integrationMetadata: IntegrationMetadata,
+                    customerMetadata: CustomerMetadata?,
+                    clientAttributionMetadata: ClientAttributionMetadata,
+                ): IntentConfirmationInterceptor {
+                    throw CallbackNotFoundException(
+                        message = "CreateIntentCallback must be implemented",
+                        resolvableError = "Callback is missing".resolvableString,
+                        analyticsValue = "callbackNotFound",
+                    )
+                }
+            }
+        )
+
+        val action = definition.action(
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+        ).asFail()
+
+        assertThat(action.cause).isInstanceOf(IllegalStateException::class.java)
+        assertThat(action.cause.message).isEqualTo("CreateIntentCallback must be implemented")
+        assertThat(action.message).isEqualTo("Callback is missing".resolvableString)
+        assertThat(action.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+    }
 
     @Test
     fun `On 'IntentConfirmationInterceptor' complete, should return 'Complete' confirmation action`() = runTest {
