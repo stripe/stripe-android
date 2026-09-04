@@ -208,18 +208,6 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    internal suspend fun updateBillingAddress(
-        name: String?,
-        address: Address,
-    ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
-        copy(
-            collectedDetails = collectedDetails.copy(
-                billingName = name,
-                billingAddress = it,
-            ),
-        )
-    }
-
     /**
      * Runs an async function that calls your server to update the Checkout Session,
      * then automatically refreshes [session] with the latest session data.
@@ -987,7 +975,7 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Builder for an address passed to [updateShippingAddress] and [updateBillingAddress].
+     * Builder for an address passed to [updateShippingAddress].
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

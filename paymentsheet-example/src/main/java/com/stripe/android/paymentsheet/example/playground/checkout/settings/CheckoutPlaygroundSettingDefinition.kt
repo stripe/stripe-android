@@ -20,6 +20,7 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
         val input: Input,
         val isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean,
         private val updateRequest: CheckoutPlaygroundRequestUpdater<T> = {},
+        private val applyFeatureFlags: (T) -> Unit,
         private val encode: (T) -> String,
         private val decode: (String) -> Result<T>,
     ) : CheckoutPlaygroundSettingDefinition {
@@ -38,6 +39,10 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
             settings: CheckoutPlaygroundSettingValues,
         ) {
             updateRequest.invoke(request, settings[this])
+        }
+
+        fun applyFeatureFlags(settings: CheckoutPlaygroundSettingValues) {
+            applyFeatureFlags(settings[this])
         }
 
         data class Option<T>(

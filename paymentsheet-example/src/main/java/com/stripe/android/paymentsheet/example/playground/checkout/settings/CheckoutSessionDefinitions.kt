@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
+import com.stripe.android.paymentsheet.example.playground.applyFeatureFlags
+import com.stripe.android.paymentsheet.example.playground.settings.LinkType
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
@@ -136,6 +138,14 @@ internal object CheckoutSessionDefinitions {
         defaultValue = false,
         updateRequest = { enabled -> put("billing_address_collection", enabled) },
     )
+    val linkType = choice(
+        key = "controller.link_type",
+        displayName = "Link Type",
+        defaultValue = LinkType.ServerControlled,
+        options = LinkType.entries.map { it.value to it },
+        serialize = LinkType::value,
+        applyFeatureFlags = LinkType::applyFeatureFlags,
+    )
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "session",
         displayName = "Checkout Session",
@@ -154,6 +164,7 @@ internal object CheckoutSessionDefinitions {
             adaptivePricingCountry,
             shippingAddressCollection,
             billingAddressCollection,
+            linkType,
         ),
     )
 }
