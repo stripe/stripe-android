@@ -26,7 +26,7 @@ internal object CheckoutPlaygroundDefinitions {
         val linkType = choice(
             key = "controller.link_type",
             displayName = "Link Type",
-            defaultValue = LinkType.Web,
+            defaultValue = LinkType.ServerControlled,
             options = LinkType.entries.map { it.value to it },
             serialize = LinkType::value,
         )
