@@ -11,8 +11,6 @@ import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -40,23 +38,17 @@ internal class DefaultHCaptchaService(
         siteKey: String,
         rqData: String?
     ) {
-        val currentResult = cachedResult.value
-        if (currentResult.canWarmUp.not()) return
-        if (cachedResult.compareAndSet(currentResult, CachedResult.Loading).not()) return
-        try {
-            val update = when (val result = performPassiveHCaptchaHelper(activity, siteKey, rqData)) {
-                is HCaptchaService.Result.Failure -> {
-                    CachedResult.Failure(result.error)
-                }
-                is HCaptchaService.Result.Success -> {
-                    CachedResult.Success(result.token, createdAt = SystemClock.elapsedRealtime())
-                }
+        if (cachedResult.value.canWarmUp.not()) return
+        cachedResult.emit(CachedResult.Loading)
+        val update = when (val result = performPassiveHCaptchaHelper(activity, siteKey, rqData)) {
+            is HCaptchaService.Result.Failure -> {
+                CachedResult.Failure(result.error)
             }
-            cachedResult.compareAndSet(CachedResult.Loading, update)
-        } catch (error: CancellationException) {
-            cachedResult.compareAndSet(CachedResult.Loading, CachedResult.Idle)
-            throw error
+            is HCaptchaService.Result.Success -> {
+                CachedResult.Success(result.token, createdAt = SystemClock.elapsedRealtime())
+            }
         }
+        cachedResult.emit(update)
     }
 
     override suspend fun performPassiveHCaptcha(
@@ -67,16 +59,44 @@ internal class DefaultHCaptchaService(
     ): HCaptchaService.Result {
         captchaEventsReporter.attachStart()
         val isReady = cachedResult.value.isReady
-        val result = consumeCachedResult(
-            tokenTimeoutSeconds = tokenTimeoutSeconds,
-            onCacheMiss = { performPassiveHCaptchaHelper(activity, siteKey, rqData) }
-        )
+        val result = runCatching {
+            withTimeout(TIMEOUT) {
+                transformCachedResult(
+                    activity,
+                    siteKey,
+                    rqData,
+                    tokenTimeoutSeconds = tokenTimeoutSeconds ?: Int.MAX_VALUE
+                )
+            }
+        }.getOrElse { e ->
+            HCaptchaService.Result.Failure(e)
+        }
+        cachedResult.emit(CachedResult.Idle)
         captchaEventsReporter.attachEnd(siteKey, isReady)
         return result
     }
 
+    @Suppress("MagicNumber")
     override suspend fun passiveCaptchaToken(tokenTimeoutSeconds: Int?): HCaptchaService.Result {
-        return consumeCachedResult(tokenTimeoutSeconds, onCacheMiss = null)
+        val result = runCatching {
+            withTimeout(TIMEOUT) {
+                cachedResult.mapNotNull { cachedResult ->
+                    when (cachedResult) {
+                        CachedResult.Idle, CachedResult.Loading -> null
+                        is CachedResult.Success -> {
+                            val elapsedSeconds = (SystemClock.elapsedRealtime() - cachedResult.createdAt) / 1000
+                            val isExpired = elapsedSeconds >= (tokenTimeoutSeconds ?: Int.MAX_VALUE)
+                            if (isExpired) null else HCaptchaService.Result.Success(cachedResult.token)
+                        }
+                        is CachedResult.Failure -> HCaptchaService.Result.Failure(cachedResult.error)
+                    }
+                }.first()
+            }
+        }.getOrElse { e ->
+            HCaptchaService.Result.Failure(e)
+        }
+        cachedResult.emit(CachedResult.Idle)
+        return result
     }
 
     private suspend fun startVerification(
@@ -123,102 +143,55 @@ internal class DefaultHCaptchaService(
     ): HCaptchaService.Result {
         val hCaptcha = hCaptchaProvider.get()
         captchaEventsReporter.init(siteKey)
-        return try {
-            val result = runCatching {
-                startVerification(
-                    activity = activity,
-                    siteKey = siteKey,
-                    rqData = rqData,
-                    hCaptcha = hCaptcha,
-                )
-            }.getOrElse { error ->
-                if (error is CancellationException) throw error
-                HCaptchaService.Result.Failure(error)
-            }
-            when (result) {
-                is HCaptchaService.Result.Failure -> {
-                    captchaEventsReporter.error(result.error, siteKey)
-                }
-                is HCaptchaService.Result.Success -> {
-                    captchaEventsReporter.success(siteKey)
-                }
-            }
-            result
-        } finally {
-            hCaptcha.reset()
+        val result = runCatching {
+            startVerification(
+                activity = activity,
+                siteKey = siteKey,
+                rqData = rqData,
+                hCaptcha = hCaptcha,
+            )
+        }.getOrElse { e ->
+            HCaptchaService.Result.Failure(e)
         }
-    }
-
-    private suspend fun consumeCachedResult(
-        tokenTimeoutSeconds: Int?,
-        onCacheMiss: (suspend () -> HCaptchaService.Result)?
-    ): HCaptchaService.Result {
-        return runCatching {
-            withTimeout(TIMEOUT) {
-                transformCachedResult(tokenTimeoutSeconds, onCacheMiss)
+        when (result) {
+            is HCaptchaService.Result.Failure -> {
+                captchaEventsReporter.error(result.error, siteKey)
             }
-        }.getOrElse { error ->
-            when (error) {
-                is TimeoutCancellationException -> HCaptchaService.Result.Failure(error)
-                is CancellationException -> throw error
-                else -> HCaptchaService.Result.Failure(error)
+            is HCaptchaService.Result.Success -> {
+                captchaEventsReporter.success(siteKey)
             }
         }
+        hCaptcha.reset()
+        return result
     }
 
+    @Suppress("MagicNumber")
     private suspend fun transformCachedResult(
-        tokenTimeoutSeconds: Int?,
-        onCacheMiss: (suspend () -> HCaptchaService.Result)?
+        activity: FragmentActivity,
+        siteKey: String,
+        rqData: String?,
+        tokenTimeoutSeconds: Int
     ): HCaptchaService.Result {
         return cachedResult.mapNotNull { cachedResult ->
             when (cachedResult) {
                 CachedResult.Idle -> {
-                    performCacheMiss(onCacheMiss)
+                    performPassiveHCaptchaHelper(activity, siteKey, rqData)
                 }
                 CachedResult.Loading -> {
                     null
                 }
                 is CachedResult.Success -> {
-                    if (cachedResult.isExpired(tokenTimeoutSeconds)) {
-                        this.cachedResult.compareAndSet(cachedResult, CachedResult.Idle)
-                        null
+                    val elapsedSeconds = (SystemClock.elapsedRealtime() - cachedResult.createdAt) / 1000
+                    val isExpired = elapsedSeconds >= tokenTimeoutSeconds
+                    if (isExpired) {
+                        performPassiveHCaptchaHelper(activity, siteKey, rqData)
                     } else {
-                        cachedResult.consume(
-                            HCaptchaService.Result.Success(cachedResult.token)
-                        )
+                        HCaptchaService.Result.Success(cachedResult.token)
                     }
                 }
-                is CachedResult.Failure -> cachedResult.consume(
-                    HCaptchaService.Result.Failure(cachedResult.error)
-                )
+                is CachedResult.Failure -> HCaptchaService.Result.Failure(cachedResult.error)
             }
         }.first()
-    }
-
-    private suspend fun performCacheMiss(
-        onCacheMiss: (suspend () -> HCaptchaService.Result)?
-    ): HCaptchaService.Result? {
-        if (onCacheMiss == null) return null
-        if (cachedResult.compareAndSet(CachedResult.Idle, CachedResult.Loading).not()) return null
-        return try {
-            onCacheMiss()
-        } finally {
-            cachedResult.compareAndSet(CachedResult.Loading, CachedResult.Idle)
-        }
-    }
-
-    private fun CachedResult.consume(result: HCaptchaService.Result): HCaptchaService.Result? {
-        return if (cachedResult.compareAndSet(this, CachedResult.Idle)) result else null
-    }
-
-    private fun CachedResult.Success.isExpired(tokenTimeoutSeconds: Int?): Boolean {
-        return remainingLifetimeMillis(tokenTimeoutSeconds)?.let { it <= 0 } ?: false
-    }
-
-    private fun CachedResult.Success.remainingLifetimeMillis(tokenTimeoutSeconds: Int?): Long? {
-        val lifetimeMillis = tokenTimeoutSeconds?.seconds?.inWholeMilliseconds ?: return null
-        val elapsedMillis = SystemClock.elapsedRealtime() - createdAt
-        return lifetimeMillis - elapsedMillis
     }
 
     sealed interface CachedResult {
