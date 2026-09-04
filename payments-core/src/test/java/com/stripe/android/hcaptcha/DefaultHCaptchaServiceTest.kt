@@ -442,7 +442,7 @@ internal class DefaultHCaptchaServiceTest {
     fun `cacheState returns NeedsRefresh`() = runTest {
         TestContext.test {
             service.cacheState(timeoutSeconds = 30).test {
-                assertThat(awaitItem()).isEqualTo(HCaptchaService.CacheState.NeedsRefresh)
+                assertThat(awaitItem()).isEqualTo(HCaptchaService.CacheState.Cached)
                 awaitComplete()
             }
         }

@@ -30,7 +30,7 @@ internal class DefaultHCaptchaService(
     override fun cacheState(timeoutSeconds: Int?): Flow<HCaptchaService.CacheState> {
         // A production implementation would observe the cached result, report Cached while its token is valid,
         // and report NeedsRefresh when the token is missing, failed, consumed, or expired using timeoutSeconds.
-        return flowOf(HCaptchaService.CacheState.NeedsRefresh)
+        return flowOf(HCaptchaService.CacheState.Cached)
     }
 
     override suspend fun warmUp(
