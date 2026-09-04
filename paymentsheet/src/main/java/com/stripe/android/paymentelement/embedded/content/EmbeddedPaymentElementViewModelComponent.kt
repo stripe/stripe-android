@@ -23,6 +23,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImm
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -47,6 +48,8 @@ import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
+import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalSavedPaymentMethodSelectionHandler
+import com.stripe.android.paymentsheet.verticalmode.VerticalSavedPaymentMethodSelectionHandler
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -203,6 +206,17 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Suppress("TooManyFunctions")
     companion object {
+        @Provides
+        fun provideVerticalSavedPaymentMethodSelectionHandler(
+            selectionHolder: EmbeddedSelectionHolder,
+            immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+        ): VerticalSavedPaymentMethodSelectionHandler {
+            return ImmediateVerticalSavedPaymentMethodSelectionHandler(
+                updateSelection = selectionHolder::setSelection,
+                onSelectionComplete = immediateActionHandler::invoke,
+            )
+        }
+
         @Provides
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens(): Set<String> = setOf("EmbeddedPaymentElement")
