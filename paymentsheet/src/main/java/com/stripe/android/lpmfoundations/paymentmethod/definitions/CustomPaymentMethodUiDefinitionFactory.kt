@@ -7,7 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentM
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.ui.core.elements.StaticTextElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal class CustomPaymentMethodUiDefinitionFactory(
     private val displayableCustomPaymentMethod: DisplayableCustomPaymentMethod
@@ -35,7 +35,7 @@ internal class CustomPaymentMethodUiDefinitionFactory(
         displayableCustomPaymentMethod.subtitle?.let { subtitle ->
             builder.header(
                 StaticTextElement(
-                    identifier = IdentifierSpec.Generic("CustomPaymentMethodHeader"),
+                    identifier = FormFieldId.Generic("CustomPaymentMethodHeader"),
                     text = subtitle,
                 )
             )

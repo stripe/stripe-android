@@ -12,7 +12,7 @@ import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.LocaleTestRule
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import org.junit.Rule
@@ -34,7 +34,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testDefault() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController()
         )
 
@@ -64,7 +64,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testWithPaymentDetailsMastercard() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController()
         )
 
@@ -102,7 +102,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testWithPaymentDetailsBank() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController()
         )
 
@@ -140,7 +140,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testProcessingState() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController().apply {
                 onValueChanged(0, "123456")
             }
@@ -180,7 +180,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testErrorState() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController().apply {
                 onValueChanged(0, "123")
             }

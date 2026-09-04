@@ -10,7 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BlikConfig
 import com.stripe.android.ui.core.elements.BlikElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 
@@ -48,7 +48,7 @@ private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple() {
         val blikElement = BlikElement(
             controller = SimpleTextFieldController(
                 textFieldConfig = BlikConfig(),
-                initialValue = arguments.initialValues[IdentifierSpec.BlikCode],
+                initialValue = arguments.initialValues[FormFieldId.BlikCode],
             ),
         )
         builder.element(SectionElement.wrap(blikElement))

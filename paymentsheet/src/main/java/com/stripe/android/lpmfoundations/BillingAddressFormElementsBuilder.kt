@@ -14,7 +14,7 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -51,7 +51,7 @@ internal class BillingAddressFormElementsBuilder(
     private fun createCountryElement(requirement: CountryRequirement): FormElement {
         return SectionElement.wrap(
             CountryElement(
-                identifier = IdentifierSpec.Country,
+                identifier = FormFieldId.Country,
                 controller = DropdownFieldController(
                     config = CountryConfig(requirement.allowedCountryCodes),
                     initialValue = requirement.initialValue,
@@ -62,17 +62,17 @@ internal class BillingAddressFormElementsBuilder(
 
     private fun createAddressElements(): List<FormElement> {
         val sameAsShippingElement = arguments.shippingValues
-            ?.get(IdentifierSpec.SameAsShipping)
+            ?.get(FormFieldId.SameAsShipping)
             ?.toBooleanStrictOrNull()
             ?.let { sameAsShipping ->
                 SameAsShippingElement(
-                    identifier = IdentifierSpec.SameAsShipping,
+                    identifier = FormFieldId.SameAsShipping,
                     controller = SameAsShippingController(sameAsShipping),
                 )
             }
         val addressElement = arguments.autocompleteAddressInteractorFactory?.let { interactorFactory ->
             AutocompleteAddressElement(
-                identifier = IdentifierSpec.BillingAddress,
+                identifier = FormFieldId.BillingAddress,
                 initialValues = resolvedInitialValues,
                 countryCodes = fullAddressCountryCodes,
                 sameAsShippingElement = sameAsShippingElement,
@@ -81,7 +81,7 @@ internal class BillingAddressFormElementsBuilder(
                 interactorFactory = interactorFactory,
             )
         } ?: AddressElement(
-            _identifier = IdentifierSpec.BillingAddress,
+            _identifier = FormFieldId.BillingAddress,
             rawValuesMap = resolvedInitialValues,
             countryCodes = fullAddressCountryCodes,
             addressInputMode = AddressInputMode.NoAutocomplete(),
@@ -98,16 +98,16 @@ internal class BillingAddressFormElementsBuilder(
 
     private fun createAutomaticTaxBillingAddressElements(): List<FormElement> {
         val sameAsShippingElement = arguments.shippingValues
-            ?.get(IdentifierSpec.SameAsShipping)
+            ?.get(FormFieldId.SameAsShipping)
             ?.toBooleanStrictOrNull()
             ?.let { sameAsShipping ->
                 SameAsShippingElement(
-                    identifier = IdentifierSpec.SameAsShipping,
+                    identifier = FormFieldId.SameAsShipping,
                     controller = SameAsShippingController(sameAsShipping),
                 )
             }
         val billingAddressElement = BillingAddressElement(
-            identifier = IdentifierSpec.BillingAddress,
+            identifier = FormFieldId.BillingAddress,
             rawValuesMap = resolvedInitialValues,
             countryCodes = automaticTaxCountryCodes,
             autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
@@ -129,7 +129,7 @@ internal data class CountryRequirement(
     val allowedCountryCodes: Set<String>,
     val initialValue: String?,
 ) {
-    fun applyTo(initialValues: Map<IdentifierSpec, String?>): Map<IdentifierSpec, String?> {
-        return initialValues + (IdentifierSpec.Country to initialValue)
+    fun applyTo(initialValues: Map<FormFieldId, String?>): Map<FormFieldId, String?> {
+        return initialValues + (FormFieldId.Country to initialValue)
     }
 }

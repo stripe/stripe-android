@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class SectionElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     val fields: List<SectionFieldElement>,
     override val controller: SectionController
 ) : FormElement {
     constructor(
-        identifier: IdentifierSpec,
+        identifier: FormFieldId,
         field: SectionFieldElement,
         controller: SectionController
     ) : this(identifier, listOf(field), controller)
@@ -22,12 +22,12 @@ data class SectionElement(
 
     override val mandateText: ResolvableString? = fields.firstNotNullOfOrNull { it.mandateText }
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
         combineAsStateFlow(fields.map { it.getFormFieldValueFlow() }) {
             it.toList().flatten()
         }
 
-    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> =
         combineAsStateFlow(
             fields
                 .map {
@@ -64,7 +64,7 @@ data class SectionElement(
                 it.sectionFieldErrorController()
             }
             return SectionElement(
-                IdentifierSpec.Generic("${sectionFieldElements.first().identifier.v1}_section"),
+                FormFieldId.Generic("${sectionFieldElements.first().identifier.v1}_section"),
                 sectionFieldElements,
                 SectionController(
                     label,

@@ -41,7 +41,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.FormInsets
 import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionFieldComposable
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldValidationController
@@ -54,20 +54,20 @@ import com.stripe.android.R as PaymentsCoreR
 internal class CardPillElement(
     val controller: CardPillController,
 ) : SectionFieldElement {
-    override val identifier: IdentifierSpec = IdentifierSpec.Generic("card_scanned_pill")
+    override val identifier: FormFieldId = FormFieldId.Generic("card_scanned_pill")
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
         stateFlowOf(emptyList())
 
     override fun sectionFieldErrorController(): SectionFieldValidationController = controller
 
-    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+    override fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) {
         // No-op
     }
 
-    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> =
         stateFlowOf(emptyList())
 
     override fun onValidationStateChanged(isValidating: Boolean) {
@@ -90,8 +90,8 @@ internal class CardPillController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
     ) {
         CardPillElementUI(
             enabled = enabled,

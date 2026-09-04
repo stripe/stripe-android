@@ -6,7 +6,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -22,10 +22,10 @@ internal enum class ContactInformationCollectionMode {
         ): PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = configuration.name
 
         override fun formElement(
-            initialValues: Map<IdentifierSpec, String?>
+            initialValues: Map<FormFieldId, String?>
         ): FormElement = SectionElement.wrap(
             SimpleTextElement(
-                identifier = IdentifierSpec.Name,
+                identifier = FormFieldId.Name,
                 controller = SimpleTextFieldController(
                     textFieldConfig = SimpleTextFieldConfig(
                         label = resolvableString(CoreR.string.stripe_address_label_full_name),
@@ -33,7 +33,7 @@ internal enum class ContactInformationCollectionMode {
                         keyboard = KeyboardType.Text,
                         optional = false,
                     ),
-                    initialValue = initialValues[IdentifierSpec.Name],
+                    initialValue = initialValues[FormFieldId.Name],
                 )
             )
         )
@@ -44,12 +44,12 @@ internal enum class ContactInformationCollectionMode {
         ): PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = configuration.phone
 
         override fun formElement(
-            initialValues: Map<IdentifierSpec, String?>
+            initialValues: Map<FormFieldId, String?>
         ): FormElement = SectionElement.wrap(
             PhoneNumberElement(
-                identifier = IdentifierSpec.Phone,
+                identifier = FormFieldId.Phone,
                 controller = PhoneNumberController.createPhoneNumberController(
-                    initialValue = initialValues[IdentifierSpec.Phone] ?: "",
+                    initialValue = initialValues[FormFieldId.Phone] ?: "",
                 )
             )
         )
@@ -60,11 +60,11 @@ internal enum class ContactInformationCollectionMode {
         ): PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = configuration.email
 
         override fun formElement(
-            initialValues: Map<IdentifierSpec, String?>
+            initialValues: Map<FormFieldId, String?>
         ): FormElement = SectionElement.wrap(
             EmailElement(
-                identifier = IdentifierSpec.Email,
-                initialValue = initialValues[IdentifierSpec.Email],
+                identifier = FormFieldId.Email,
+                initialValue = initialValues[FormFieldId.Email],
             )
         )
     };
@@ -73,7 +73,7 @@ internal enum class ContactInformationCollectionMode {
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration
     ): PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 
-    abstract fun formElement(initialValues: Map<IdentifierSpec, String?>): FormElement
+    abstract fun formElement(initialValues: Map<FormFieldId, String?>): FormElement
 
     fun isAllowed(configuration: PaymentSheet.BillingDetailsCollectionConfiguration): Boolean {
         val collectionMode = collectionMode(configuration = configuration)

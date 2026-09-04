@@ -11,11 +11,13 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSavedPaymentMethodSele
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory
+import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedWalletsHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentMethodVerticalLayoutInteractorFactory
+import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.EmbeddedWalletsHelper
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -28,6 +30,11 @@ import kotlinx.coroutines.flow.StateFlow
 internal interface PaymentElementModule {
     @Binds
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
+
+    @Binds
+    fun bindsEmbeddedPaymentOptionsPresenter(
+        presenter: DefaultEmbeddedPaymentOptionsPresenter,
+    ): EmbeddedPaymentOptionsPresenter
 
     @Binds
     fun bindsEmbeddedPaymentMethodVerticalLayoutInteractorFactory(

@@ -241,7 +241,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 }
 
 private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
-    return this?.let {
+    return this?.takeIf { it.address?.toParamMap()?.isNotEmpty() == true }?.let {
         ConfirmCheckoutSessionParams.Shipping(
             name = it.name,
             address = it.address,
@@ -250,7 +250,7 @@ private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSes
 }
 
 private fun ConfirmPaymentIntentParams.Shipping?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
-    return this?.let {
+    return this?.takeIf { it.getAddress().toParamMap().isNotEmpty() }?.let {
         ConfirmCheckoutSessionParams.Shipping(
             name = it.getName(),
             address = it.getAddress(),

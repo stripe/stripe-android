@@ -32,6 +32,7 @@ internal fun SettingsActions(
 
 @Composable
 internal fun SettingsOverflowMenu(
+    onRunScenario: () -> Unit,
     onImport: () -> Unit,
     onExport: () -> Unit,
     onReset: () -> Unit,
@@ -48,6 +49,11 @@ internal fun SettingsOverflowMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false },
     ) {
+        SettingsDropdownMenuItem(
+            text = "Run scenario",
+            onClick = onRunScenario,
+            onDismiss = { expanded = false },
+        )
         SettingsDropdownMenuItem(
             text = "Import settings from JSON",
             onClick = onImport,

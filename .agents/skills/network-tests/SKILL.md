@@ -127,6 +127,32 @@ networkRule.checkoutConfirm(
 }
 ```
 
+## Enqueue Responses Next to Their Trigger
+
+Enqueue each response immediately before the operation that causes its request. Do not group responses for separate
+operations at the beginning of a test; doing so obscures which action needs each mock and makes request ordering harder
+to review.
+
+```kotlin
+// Initial load request.
+networkRule.enqueue(consumerLookupMatcher) { response ->
+    response.testBodyFromFile("consumer-session-lookup-success.json")
+}
+testContext.launch()
+
+// Requests triggered by confirmation and its subsequent refresh.
+networkRule.checkoutConfirm { response ->
+    response.testBodyFromFile("checkout-session-confirm.json")
+}
+networkRule.checkoutInit { response ->
+    response.testBodyFromFile("checkout-session-init.json")
+}
+page.clickConfirm()
+```
+
+When one user action triggers several requests asynchronously, enqueue all of those responses immediately before that
+action, keeping them in the same order as the expected requests.
+
 ### bodyPart Encoding
 
 `bodyPart()`, `hasBodyPart()`, and `query(name, value)` auto-decode both the matcher arguments and the request body before comparing. Use plain readable strings — `urlEncode()` is unnecessary:

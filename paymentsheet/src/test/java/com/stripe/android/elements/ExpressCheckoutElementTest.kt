@@ -86,8 +86,8 @@ internal class ExpressCheckoutElementTest {
         val state = ExpressCheckoutElement.Configuration()
             .paymentMethodOrder(
                 listOf(
-                    ExpressCheckoutElement.PaymentMethod.Link(),
-                    ExpressCheckoutElement.PaymentMethod.GooglePay(),
+                    "link",
+                    "google_pay",
                 )
             )
             .build()
@@ -96,6 +96,17 @@ internal class ExpressCheckoutElementTest {
             ExpressCheckoutElement.Configuration.PaymentMethodType.Link,
             ExpressCheckoutElement.Configuration.PaymentMethodType.GooglePay,
         ).inOrder()
+    }
+
+    @Test
+    fun `configuration ignores invalid payment methods in payment method order`() {
+        val state = ExpressCheckoutElement.Configuration()
+            .paymentMethodOrder(listOf("invalid", "link"))
+            .build()
+
+        assertThat(state.paymentMethodOrder).containsExactly(
+            ExpressCheckoutElement.Configuration.PaymentMethodType.Link,
+        )
     }
 
     @Test

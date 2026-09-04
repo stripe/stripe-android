@@ -55,7 +55,7 @@ import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -950,7 +950,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            FormFieldId.Generic("test") to FormFieldEntry("test", true)
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
@@ -2446,7 +2446,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            FormFieldId.Generic("test") to FormFieldEntry("test", true)
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
@@ -2661,7 +2661,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     CustomerSheetViewAction.OnFormFieldValuesCompleted(
                         formFieldValues = FormFieldValues(
                             fieldValuePairs = mapOf(
-                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                                FormFieldId.Generic("test") to FormFieldEntry("test", true)
                             ),
                             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                         )
@@ -3451,7 +3451,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            FormFieldId.Generic("test") to FormFieldEntry("test", true)
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
@@ -3752,7 +3752,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     private companion object {
         val TEST_FORM_VALUES = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                FormFieldId.Generic("test") to FormFieldEntry("test", true)
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Application
 import android.content.Context
+import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.link.LinkActivityContract
@@ -36,6 +37,10 @@ internal object FlowControllerModule {
     @Provides
     @Singleton
     fun providesAppContext(application: Application): Context = application.applicationContext
+
+    @Provides
+    @Singleton
+    fun provideResources(context: Context): Resources = context.resources
 
     @Provides
     @Singleton

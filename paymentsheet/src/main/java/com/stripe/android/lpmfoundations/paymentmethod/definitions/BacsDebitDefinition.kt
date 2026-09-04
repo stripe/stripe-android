@@ -14,7 +14,7 @@ import com.stripe.android.ui.core.elements.BacsDebitAccountNumberConfig
 import com.stripe.android.ui.core.elements.BacsDebitSortCodeConfig
 import com.stripe.android.uicore.elements.CheckboxFieldController
 import com.stripe.android.uicore.elements.CheckboxFieldElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -38,8 +38,8 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
 }
 
 private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    private val sortCodeIdentifier = IdentifierSpec.Generic("bacs_debit[sort_code]")
-    private val accountNumberIdentifier = IdentifierSpec.Generic("bacs_debit[account_number]")
+    private val sortCodeIdentifier = FormFieldId.Generic("bacs_debit[sort_code]")
+    private val accountNumberIdentifier = FormFieldId.Generic("bacs_debit[account_number]")
 
     override fun createSupportedPaymentMethod(
         metadata: PaymentMethodMetadata,
@@ -92,14 +92,14 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
                 if (metadata.mandateAllowed(BacsDebitDefinition.type)) {
                     footer(
                         CheckboxFieldElement(
-                            identifier = IdentifierSpec.BacsDebitConfirmed,
+                            identifier = FormFieldId.BacsDebitConfirmed,
                             controller = CheckboxFieldController(
                                 labelResource = CheckboxFieldController.LabelResource(
                                     R.string.stripe_bacs_confirm_mandate_label,
                                     arguments.merchantName,
                                 ),
                                 debugTag = "BACS_MANDATE_CHECKBOX",
-                                initialValue = arguments.initialValues[IdentifierSpec.BacsDebitConfirmed].toBoolean(),
+                                initialValue = arguments.initialValues[FormFieldId.BacsDebitConfirmed].toBoolean(),
                             ),
                         )
                     )

@@ -33,7 +33,7 @@ import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.DEFAULT_CHECKBOX_TEST_TAG
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -69,8 +69,8 @@ internal class AddPaymentMethodTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-                IdentifierSpec.Name to FormFieldEntry(name, true),
+                FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
+                FormFieldId.Name to FormFieldEntry(name, true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -90,7 +90,7 @@ internal class AddPaymentMethodTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+                FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -116,7 +116,7 @@ internal class AddPaymentMethodTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+                FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -142,7 +142,7 @@ internal class AddPaymentMethodTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+                FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -217,8 +217,8 @@ internal class AddPaymentMethodTest {
         val addressLine1 = "123 Main Street"
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Name to FormFieldEntry(name, true),
-                IdentifierSpec.Line1 to FormFieldEntry(addressLine1, true)
+                FormFieldId.Name to FormFieldEntry(name, true),
+                FormFieldId.Line1 to FormFieldEntry(addressLine1, true)
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -246,8 +246,8 @@ internal class AddPaymentMethodTest {
 
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Name to FormFieldEntry(name, true),
-                IdentifierSpec.Line1 to FormFieldEntry(addressLine1, true)
+                FormFieldId.Name to FormFieldEntry(name, true),
+                FormFieldId.Line1 to FormFieldEntry(addressLine1, true)
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -280,7 +280,7 @@ internal class AddPaymentMethodTest {
         val name = "Joe"
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Name to FormFieldEntry(name, true),
+                FormFieldId.Name to FormFieldEntry(name, true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -338,7 +338,7 @@ internal class AddPaymentMethodTest {
                 AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
                     formValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.SameAsShipping to FormFieldEntry(
+                            FormFieldId.SameAsShipping to FormFieldEntry(
                                 value = "true",
                                 isComplete = true
                             )
@@ -359,7 +359,7 @@ internal class AddPaymentMethodTest {
         )
 
         val formValues = FormFieldValues(
-            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            fieldValuePairs = mapOf(FormFieldId.Name to FormFieldEntry("test", true)),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
@@ -380,7 +380,7 @@ internal class AddPaymentMethodTest {
         )
 
         val formValues = FormFieldValues(
-            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            fieldValuePairs = mapOf(FormFieldId.Name to FormFieldEntry("test", true)),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         )
 
@@ -401,7 +401,7 @@ internal class AddPaymentMethodTest {
         )
 
         val formValues = FormFieldValues(
-            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            fieldValuePairs = mapOf(FormFieldId.Name to FormFieldEntry("test", true)),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
@@ -424,7 +424,7 @@ internal class AddPaymentMethodTest {
         )
 
         val formValues = FormFieldValues(
-            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            fieldValuePairs = mapOf(FormFieldId.Name to FormFieldEntry("test", true)),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
@@ -447,7 +447,7 @@ internal class AddPaymentMethodTest {
         )
 
         val formValues = FormFieldValues(
-            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            fieldValuePairs = mapOf(FormFieldId.Name to FormFieldEntry("test", true)),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         )
 
@@ -464,7 +464,7 @@ internal class AddPaymentMethodTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
+                FormFieldId.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -494,7 +494,7 @@ internal class AddPaymentMethodTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Generic("sepa_debit[iban]") to
+                FormFieldId.Generic("sepa_debit[iban]") to
                     FormFieldEntry("DE89370400440532013000", true),
             ),
             userRequestedReuse = customerRequestedSave,
@@ -525,7 +525,7 @@ internal class AddPaymentMethodTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
+                FormFieldId.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -562,7 +562,7 @@ internal class AddPaymentMethodTest {
 
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -594,7 +594,7 @@ internal class AddPaymentMethodTest {
     fun `transformToPaymentSelection returns null if Link required but no input`() {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -622,8 +622,8 @@ internal class AddPaymentMethodTest {
     fun `transformToExtraParams returns correct params for SepaDebit with setAsDefault`() {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
-                IdentifierSpec.SetAsDefaultPaymentMethod to FormFieldEntry("true", true),
+                FormFieldId.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
+                FormFieldId.SetAsDefaultPaymentMethod to FormFieldEntry("true", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         )
@@ -642,7 +642,7 @@ internal class AddPaymentMethodTest {
     fun `transformToExtraParams returns correct params for SepaDebit without setAsDefault`() {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
+                FormFieldId.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         )
@@ -678,7 +678,7 @@ internal class AddPaymentMethodTest {
             ),
             formElements = listOf(
                 CheckboxFieldElement(
-                    identifier = IdentifierSpec.SameAsShipping,
+                    identifier = FormFieldId.SameAsShipping,
                 )
             ),
             paymentSelection = null,

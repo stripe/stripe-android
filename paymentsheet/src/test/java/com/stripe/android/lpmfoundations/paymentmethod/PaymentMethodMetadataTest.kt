@@ -45,7 +45,7 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.EmailElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -428,7 +428,7 @@ internal class PaymentMethodMetadataTest {
 
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        assertThat(identifiers).contains(FormFieldId.Country)
     }
 
     @Test
@@ -518,7 +518,7 @@ internal class PaymentMethodMetadataTest {
 
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        assertThat(identifiers).contains(FormFieldId.Country)
     }
 
     @Test

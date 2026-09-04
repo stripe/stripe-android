@@ -199,12 +199,15 @@ internal class EmbeddedContentUiTest {
                 coroutineScope = viewModelScope,
                 state = state,
                 verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
-                sheetStateHolder = sheetStateHolder,
                 embeddedWalletsHelper = { stateFlowOf(null) },
                 internalRowSelectionCallback = { internalRowSelectionCallback },
-                customerStateHolder = customerStateHolder,
-                selectionHolder = selectionHolder,
-                errorReporter = errorReporter,
+                paymentOptionsPresenter = DefaultEmbeddedPaymentOptionsPresenter(
+                    state = state,
+                    sheetStateHolder = sheetStateHolder,
+                    customerStateHolder = customerStateHolder,
+                    selectionHolder = selectionHolder,
+                    errorReporter = errorReporter,
+                ),
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
