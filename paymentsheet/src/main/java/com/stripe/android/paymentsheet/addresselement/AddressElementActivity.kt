@@ -75,7 +75,7 @@ internal class AddressElementActivity : ComponentActivity() {
 
             BackHandler {
                 if (!viewModel.navigator.onBack()) {
-                    viewModel.resultStateHolder.setResult(AddressLauncherResult.Canceled())
+                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
                 }
             }
 
@@ -92,7 +92,7 @@ internal class AddressElementActivity : ComponentActivity() {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 onDismissed = {
-                    viewModel.resultStateHolder.setResult(AddressLauncherResult.Canceled())
+                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
                 },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -128,11 +128,11 @@ internal class AddressElementActivity : ComponentActivity() {
         }
     }
 
-    private fun finishWithResult(result: AddressLauncherResult) {
+    private fun finishWithResult(result: AddressElementActivityContract.Result) {
         setResult(
             result.resultCode,
             Intent().putExtras(
-                AddressElementActivityContract.Result(result).toBundle()
+                result.toBundle()
             )
         )
         finish()
