@@ -45,7 +45,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfiguration = ApiConfiguration.State("", null),
+                apiConfigurationProvider = { ApiConfiguration.State("", null) },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_NULL_ARGS,
@@ -80,7 +80,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         } catch (e: ActivityNotFoundException) {
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfiguration = args.apiConfiguration,
+                apiConfigurationProvider = { args.apiConfiguration },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
@@ -90,7 +90,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         } catch (e: SecurityException) {
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfiguration = args.apiConfiguration,
+                apiConfigurationProvider = { args.apiConfiguration },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,

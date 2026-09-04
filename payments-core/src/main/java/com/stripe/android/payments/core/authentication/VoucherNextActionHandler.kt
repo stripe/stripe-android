@@ -30,7 +30,9 @@ internal class VoucherNextActionHandler @Inject constructor(
         if (detailsData.hostedVoucherUrl == null) {
             ErrorReporter.createFallbackInstance(
                 context,
-                apiConfiguration = ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount),
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount)
+                },
             ).report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
                 additionalNonPiiParams = mapOf("next_action_type" to (actionable.nextActionType?.code ?: ""))

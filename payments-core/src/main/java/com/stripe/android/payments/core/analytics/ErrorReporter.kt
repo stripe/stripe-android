@@ -24,6 +24,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -48,13 +49,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
             context: Context,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
-            val paymentConfiguration = PaymentConfiguration.getInstance(context)
             return createFallbackInstance(
                 context = context,
-                apiConfiguration = ApiConfiguration.State(
-                    publishableKey = paymentConfiguration.publishableKey,
-                    stripeAccountId = paymentConfiguration.stripeAccountId,
-                ),
+                apiConfigurationProvider = {
+                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
+                    ApiConfiguration.State(
+                        publishableKey = paymentConfiguration.publishableKey,
+                        stripeAccountId = paymentConfiguration.stripeAccountId,
+                    )
+                },
                 productUsage = productUsage,
             )
         }
@@ -66,14 +69,16 @@ interface ErrorReporter : FraudDetectionErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
-            apiConfiguration: ApiConfiguration.State,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .factory()
                 .create(
                     context = context.applicationContext,
-                    apiConfiguration = apiConfiguration,
+                    apiConfigurationProvider = {
+                        apiConfigurationProvider.get()
+                    },
                     productUsage = productUsage,
                 )
                 .errorReporter
@@ -458,7 +463,7 @@ internal interface DefaultErrorReporterComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
-            apiConfiguration: ApiConfiguration.State,
+            apiConfigurationProvider: () -> ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
@@ -498,7 +503,7 @@ internal interface DefaultErrorReporterModule {
         @Provides
         @Named(PUBLISHABLE_KEY)
         fun providePublishableKeyProvider(
-            apiConfiguration: ApiConfiguration.State,
-        ): () -> String = { apiConfiguration.publishableKey }
+            apiConfigurationProvider: () -> ApiConfiguration.State,
+        ): () -> String = { apiConfigurationProvider().publishableKey }
     }
 }
