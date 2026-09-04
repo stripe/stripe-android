@@ -57,12 +57,18 @@ internal class CheckoutPlaygroundSettings private constructor(
         persist(_values.value.serialized())
     }
 
+    fun applyPreset(preset: CheckoutPlaygroundPreset) {
+        _values.value = currentDefaults() + preset.serializedValues
+        persist(_values.value.serialized())
+    }
+
     fun saveReturningCustomer(customerId: String) {
         returningCustomerId = customerId
         persistReturningCustomerId(customerId)
         _values.value += mapOf(
             CheckoutPlaygroundDefinitions.session.customerId to customerId,
-            CheckoutPlaygroundDefinitions.session.customer to RETURNING_CUSTOMER,
+            CheckoutPlaygroundDefinitions.session.customer to
+                CheckoutPlaygroundDefinitions.session.customer.serialize(CheckoutCustomer.Returning),
         )
         persist(_values.value.serialized())
     }
@@ -132,7 +138,6 @@ internal class CheckoutPlaygroundSettings private constructor(
         private const val PREFERENCES_NAME = "CheckoutControllerPlaygroundSettings"
         private const val PREFERENCES_KEY = "settings_v1"
         private const val RETURNING_CUSTOMER_ID_KEY = "returning_customer_id"
-        private const val RETURNING_CUSTOMER = "returning"
         private const val TAG = "CheckoutSettings"
 
         fun create(context: Context): CheckoutPlaygroundSettings {
@@ -171,6 +176,7 @@ internal class CheckoutPlaygroundSettings private constructor(
 
         fun createInMemory(
             json: String? = null,
+            persist: (Map<String, String>) -> Unit = {},
         ): CheckoutPlaygroundSettings {
             return CheckoutPlaygroundSettings(
                 root = CheckoutPlaygroundDefinitions.root,
@@ -178,7 +184,7 @@ internal class CheckoutPlaygroundSettings private constructor(
                 initialValues = json?.let(::decodeValues).orEmpty(),
                 initialReturningCustomerId = null,
                 logWarning = {},
-                persist = {},
+                persist = persist,
                 persistReturningCustomerId = {},
             )
         }
