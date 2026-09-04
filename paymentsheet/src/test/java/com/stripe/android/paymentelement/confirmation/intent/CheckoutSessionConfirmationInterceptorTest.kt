@@ -455,6 +455,18 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
+    fun `intercept with new payment method omits empty controller shipping`() = runScenario {
+        networkRule.checkoutConfirm(
+            not(hasBodyPart("shipping[name]")),
+            not(hasBodyPart("shipping[address][line1]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm(shippingValues = EMPTY_CONTROLLER_SHIPPING)
+    }
+
+    @Test
     fun `intercept with saved payment method falls back to controller shipping`() = runScenario {
         networkRule.checkoutConfirm(
             bodyPart("shipping[name]", "Controller Shipping"),
@@ -470,6 +482,39 @@ class CheckoutSessionConfirmationInterceptorTest {
         }
 
         interceptSavedPm(shippingValues = CONTROLLER_SHIPPING)
+    }
+
+    @Test
+    fun `intercept with saved payment method omits empty controller shipping`() = runScenario {
+        networkRule.checkoutConfirm(
+            not(hasBodyPart("shipping[name]")),
+            not(hasBodyPart("shipping[address][line1]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(shippingValues = EMPTY_CONTROLLER_SHIPPING)
+    }
+
+    @Test
+    fun `intercept with saved payment method falls back from addressless option shipping`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("shipping[name]", "Controller Shipping"),
+            bodyPart("shipping[address][line1]", "123 Controller Street"),
+            bodyPart("shipping[address][line2]", "Unit 4"),
+            bodyPart("shipping[address][city]", "Controller City"),
+            bodyPart("shipping[address][state]", "NY"),
+            bodyPart("shipping[address][postal_code]", "10001"),
+            bodyPart("shipping[address][country]", "CA"),
+            not(hasBodyPart("shipping[phone]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(
+            shippingInformation = ADDRESSLESS_SHIPPING_INFORMATION,
+            shippingValues = CONTROLLER_SHIPPING,
+        )
     }
 
     @Test
@@ -655,6 +700,16 @@ class CheckoutSessionConfirmationInterceptorTest {
             ),
             name = "Controller Shipping",
             phone = "1-800-555-0000",
+        )
+
+        val EMPTY_CONTROLLER_SHIPPING = ConfirmPaymentIntentParams.Shipping(
+            address = Address(),
+            name = "",
+        )
+
+        val ADDRESSLESS_SHIPPING_INFORMATION = ShippingInformation(
+            address = Address(),
+            name = "Option Shipping",
         )
 
         val SAVE_ENABLED_CUSTOMER_METADATA = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
