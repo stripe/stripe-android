@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
@@ -67,7 +68,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 context = applicationContext,
-                publishableKeyProvider = { "" }
+                apiConfiguration = ApiConfiguration.State("", null),
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
@@ -99,7 +100,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                publishableKeyProvider = { args.apiConfiguration.publishableKey }
+                apiConfiguration = args.apiConfiguration,
             )
                 .report(
                     errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
@@ -144,9 +145,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         error: Throwable?
     ) {
         if (error != null) {
-            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = {
-                requireNotNull(_args).apiConfiguration.publishableKey
-            })
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfiguration = requireNotNull(_args).apiConfiguration,
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
                     stripeException = StripeException.create(error),

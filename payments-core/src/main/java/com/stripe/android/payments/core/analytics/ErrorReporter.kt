@@ -47,11 +47,17 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         fun createFallbackInstance(
             context: Context,
             productUsage: Set<String> = emptySet(),
-        ): ErrorReporter = createFallbackInstance(
-            context = context,
-            publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
-            productUsage = productUsage,
-        )
+        ): ErrorReporter {
+            val paymentConfiguration = PaymentConfiguration.getInstance(context)
+            return createFallbackInstance(
+                context = context,
+                apiConfiguration = ApiConfiguration.State(
+                    publishableKey = paymentConfiguration.publishableKey,
+                    stripeAccountId = paymentConfiguration.stripeAccountId,
+                ),
+                productUsage = productUsage,
+            )
+        }
 
         /**
          * Prefer using an injected version of [ErrorReporter].
@@ -60,14 +66,14 @@ interface ErrorReporter : FraudDetectionErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
-            publishableKeyProvider: () -> String,
+            apiConfiguration: ApiConfiguration.State,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .factory()
                 .create(
                     context = context.applicationContext,
-                    publishableKeyProvider = publishableKeyProvider,
+                    apiConfiguration = apiConfiguration,
                     productUsage = productUsage,
                 )
                 .errorReporter
@@ -452,8 +458,7 @@ internal interface DefaultErrorReporterComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
@@ -491,11 +496,9 @@ internal interface DefaultErrorReporterModule {
         }
 
         @Provides
-        fun provideApiConfiguration(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
-        ): ApiConfiguration.State = ApiConfiguration.State(
-            publishableKey = publishableKeyProvider(),
-            stripeAccountId = null,
-        )
+        @Named(PUBLISHABLE_KEY)
+        fun providePublishableKeyProvider(
+            apiConfiguration: ApiConfiguration.State,
+        ): () -> String = { apiConfiguration.publishableKey }
     }
 }
