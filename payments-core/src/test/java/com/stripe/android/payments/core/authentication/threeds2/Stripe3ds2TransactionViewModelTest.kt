@@ -12,6 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -133,7 +134,7 @@ class Stripe3ds2TransactionViewModelTest {
             ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
             enableLogging = ENABLE_LOGGING,
             statusBarColor = null,
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
             PRODUCT_USAGE
         )
     }

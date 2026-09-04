@@ -97,7 +97,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { args.publishableKey })
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                publishableKeyProvider = { args.apiConfiguration.publishableKey }
+            )
                 .report(
                     errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
                 )
@@ -142,7 +145,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     ) {
         if (error != null) {
             ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = {
-                requireNotNull(_args).publishableKey
+                requireNotNull(_args).apiConfiguration.publishableKey
             })
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,

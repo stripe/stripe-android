@@ -83,7 +83,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 rqData = null,
                 tokenTimeoutSeconds = null
             ),
-            publishableKey = "pk_123",
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
             productUsage = setOf("PaymentSheet")
         )
     }

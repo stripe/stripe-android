@@ -74,14 +74,20 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             launcher.launch(intent)
             viewModel.hasLaunched = true
         } catch (e: ActivityNotFoundException) {
-            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { args.publishableKey })
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                publishableKeyProvider = { args.apiConfiguration.publishableKey }
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),
                 )
             finishWithFailure(args)
         } catch (e: SecurityException) {
-            ErrorReporter.createFallbackInstance(applicationContext, publishableKeyProvider = { args.publishableKey })
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                publishableKeyProvider = { args.apiConfiguration.publishableKey }
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),

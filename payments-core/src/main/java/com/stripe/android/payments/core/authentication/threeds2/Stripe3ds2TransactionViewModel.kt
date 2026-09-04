@@ -11,7 +11,6 @@ import com.google.android.instantapps.InstantApps
 import com.stripe.android.R
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -226,11 +225,10 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 fallbackRedirectUrl,
                 returnUrl = null,
                 enableLogging = args.enableLogging,
-                stripeAccountId = args.requestOptions.stripeAccount,
+                apiConfiguration = args.apiConfiguration,
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
                 shouldCancelSource = true,
                 statusBarColor = args.statusBarColor,
-                publishableKey = threeDS2RequestOptions.apiKey,
                 isInstantApp = isInstantApp,
                 toolbarCustomization = StripeToolbarCustomization().apply {
                     setButtonText(context.getString(R.string.stripe_cancel))
@@ -319,10 +317,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
             .create(
                 context = application,
                 enableLogging = args.enableLogging,
-                apiConfiguration = ApiConfiguration.State(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.requestOptions.stripeAccount,
-                ),
+                apiConfiguration = args.apiConfiguration,
                 productUsage = args.productUsage,
                 isInstantApp = InstantApps.isInstantApp(application),
             )

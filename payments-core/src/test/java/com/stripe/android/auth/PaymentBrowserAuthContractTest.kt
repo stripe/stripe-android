@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.StripeBrowserLauncherActivity
 import com.stripe.android.utils.createTestActivityRule
@@ -105,6 +106,18 @@ class PaymentBrowserAuthContractTest {
         PaymentBrowserAuthContract.Args(parcel)
     }
 
+    @Test
+    fun `parcel round trip preserves api configuration`() {
+        val parcel = Parcel.obtain()
+        ARGS.writeToParcel(parcel, 0)
+        parcel.setDataPosition(0)
+
+        val restoredArgs = PaymentBrowserAuthContract.Args(parcel)
+
+        assertThat(restoredArgs.apiConfiguration).isEqualTo(ARGS.apiConfiguration)
+        parcel.recycle()
+    }
+
     private companion object {
         private val ARGS = PaymentBrowserAuthContract.Args(
             clientSecret = "client_secret",
@@ -113,7 +126,7 @@ class PaymentBrowserAuthContractTest {
             url = "https://mybank.com/auth",
             returnUrl = "myapp://custom",
             statusBarColor = Color.RED,
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
             isInstantApp = false
         )
     }
