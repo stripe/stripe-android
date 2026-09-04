@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.OutlinedIconsAppearance
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -35,6 +36,7 @@ import org.junit.Test
 internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        listOf(LayoutDirection.LeftToRight, LayoutDirection.RightToLeft),
         boxModifier = Modifier
             .padding(16.dp)
     )
