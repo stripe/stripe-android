@@ -8,7 +8,6 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED] Added support for PAYCO.
 * [ADDED] Added support for Korean cards.
 * [ADDED] Added support for Naver Pay.
-* [CHANGED] Express Checkout Element now collects shipping addresses based on the Checkout Session configuration.
 
 ### AddressElement
 * [CHANGED] Use Stripe-hosted address autocomplete by default.
