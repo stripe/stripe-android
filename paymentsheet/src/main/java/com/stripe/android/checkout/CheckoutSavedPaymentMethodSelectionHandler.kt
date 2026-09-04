@@ -28,13 +28,19 @@ internal class CheckoutSavedPaymentMethodSelectionHandler @Inject constructor(
         coroutineScope.launch {
             checkoutController.selectSavedPaymentMethod(selection).fold(
                 onSuccess = {
-                    _state.value = VerticalSavedPaymentMethodSelectionHandler.State.Idle
                     immediateActionHandler.invoke()
+                    _state.value = VerticalSavedPaymentMethodSelectionHandler.State.Idle
                 },
                 onFailure = { error ->
                     _state.value = VerticalSavedPaymentMethodSelectionHandler.State.Failed(error)
                 },
             )
+        }
+    }
+
+    override fun clearFailure() {
+        if (_state.value is VerticalSavedPaymentMethodSelectionHandler.State.Failed) {
+            _state.value = VerticalSavedPaymentMethodSelectionHandler.State.Idle
         }
     }
 }

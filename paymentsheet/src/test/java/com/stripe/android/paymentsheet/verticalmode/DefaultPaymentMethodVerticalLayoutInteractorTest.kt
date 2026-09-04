@@ -119,6 +119,49 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun committedWalletSelection_clearsSavedPaymentMethodSelectionFailure() {
+        val expectedError = IllegalStateException("selection failed")
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
+        runScenario(
+            initialWalletsState = linkAndGooglePayWalletState.copy(
+                walletsAllowedInHeader = emptyList(),
+            ),
+            savedPaymentMethodSelectionHandler = handler,
+        ) {
+            handler.stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Failed(expectedError)
+            assertThat(interactor.state.value.selectionError).isSameInstanceAs(expectedError)
+
+            interactor.state.value.displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
+
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(handler.clearFailureCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(interactor.state.value.selectionError).isNull()
+        }
+        handler.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun enteringPaymentMethodForm_preservesSavedPaymentMethodSelectionFailure() {
+        val expectedError = IllegalStateException("selection failed")
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
+        runScenario(
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            savedPaymentMethodSelectionHandler = handler,
+        ) {
+            handler.stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Failed(expectedError)
+
+            interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+
+            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("cashapp")
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
+            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("cashapp")
+            handler.clearFailureCalls.expectNoEvents()
+            assertThat(interactor.state.value.selectionError).isSameInstanceAs(expectedError)
+        }
+        handler.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun state_usesLinkAccountBrand() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link),
     ) {
@@ -2179,12 +2222,21 @@ private class FakeVerticalSavedPaymentMethodSelectionHandler : VerticalSavedPaym
     )
     override val state: StateFlow<VerticalSavedPaymentMethodSelectionHandler.State> = stateSource
     val selectionCalls = Turbine<PaymentSelection.Saved>()
+    val clearFailureCalls = Turbine<Unit>()
 
     override fun select(selection: PaymentSelection.Saved) {
         selectionCalls.add(selection)
     }
 
+    override fun clearFailure() {
+        clearFailureCalls.add(Unit)
+        if (stateSource.value is VerticalSavedPaymentMethodSelectionHandler.State.Failed) {
+            stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Idle
+        }
+    }
+
     fun ensureAllEventsConsumed() {
         selectionCalls.ensureAllEventsConsumed()
+        clearFailureCalls.ensureAllEventsConsumed()
     }
 }

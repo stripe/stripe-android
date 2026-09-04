@@ -210,18 +210,6 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    internal suspend fun updateBillingAddress(
-        name: String?,
-        address: Address,
-    ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
-        copy(
-            collectedDetails = collectedDetails.copy(
-                billingName = name,
-                billingAddress = it,
-            ),
-        )
-    }
-
     internal suspend fun selectSavedPaymentMethod(
         selection: PaymentSelection.Saved,
     ): kotlin.Result<Unit> {

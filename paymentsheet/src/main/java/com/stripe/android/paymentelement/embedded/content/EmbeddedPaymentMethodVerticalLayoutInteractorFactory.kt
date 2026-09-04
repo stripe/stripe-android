@@ -80,9 +80,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
 
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
-            processing = confirmationHandler.state.mapAsStateFlow {
-                it is ConfirmationHandler.State.Confirming
-            },
+            processing = confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming },
             temporarySelection = selectionHolder.temporarySelection,
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
