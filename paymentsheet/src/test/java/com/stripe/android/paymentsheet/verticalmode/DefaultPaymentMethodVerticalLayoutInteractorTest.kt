@@ -2007,7 +2007,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     selection.value = paymentSelection
                     updateSelectionTurbine.add(isUserInput)
                 },
-                onSelectionComplete = {},
+                onSelectionComplete = null,
             )
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(

@@ -8,10 +8,10 @@ internal fun interface VerticalPaymentSelectionHandler {
 
 internal class ImmediateVerticalPaymentSelectionHandler(
     private val updateSelection: (PaymentSelection, Boolean) -> Unit,
-    private val onSelectionComplete: () -> Unit,
+    private val onSelectionComplete: (() -> Unit)?,
 ) : VerticalPaymentSelectionHandler {
     override fun select(selection: PaymentSelection, isUserInput: Boolean) {
         updateSelection(selection, isUserInput)
-        onSelectionComplete()
+        onSelectionComplete?.invoke()
     }
 }
