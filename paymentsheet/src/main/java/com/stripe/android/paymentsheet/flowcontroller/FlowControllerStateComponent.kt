@@ -25,7 +25,6 @@ import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineScope
@@ -46,7 +45,6 @@ import javax.inject.Singleton
         GooglePayPaymentDataUpdateNoOpModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class,
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
