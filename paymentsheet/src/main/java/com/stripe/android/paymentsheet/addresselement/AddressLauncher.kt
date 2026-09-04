@@ -25,7 +25,8 @@ import kotlinx.parcelize.Parcelize
  */
 class AddressLauncher internal constructor(
     private val application: Application,
-    private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
+    private val activityResultLauncher:
+        ActivityResultLauncher<AddressElementActivityContract.Args.Standalone>
 ) {
     /**
      * Constructor to be used when launching the address element from an Activity.
@@ -39,10 +40,9 @@ class AddressLauncher internal constructor(
     ) : this(
         application = activity.application,
         activityResultLauncher = activity.registerForActivityResult(
-            AddressElementActivityContract
-        ) {
-            callback.onAddressElementActivityResult(it)
-        },
+            AddressElementActivityContract.Standalone,
+            callback::onAddressLauncherResult,
+        ),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -56,10 +56,9 @@ class AddressLauncher internal constructor(
         activityResultLauncher = registerForReactNativeActivityResult(
             activity,
             signal,
-            AddressElementActivityContract
-        ) {
-            callback.onAddressElementActivityResult(it)
-        },
+            AddressElementActivityContract.Standalone,
+            callback::onAddressLauncherResult,
+        ),
     )
 
     /**
@@ -74,10 +73,9 @@ class AddressLauncher internal constructor(
     ) : this(
         application = fragment.requireActivity().application,
         activityResultLauncher = fragment.registerForActivityResult(
-            AddressElementActivityContract
-        ) {
-            callback.onAddressElementActivityResult(it)
-        },
+            AddressElementActivityContract.Standalone,
+            callback::onAddressLauncherResult,
+        ),
     )
 
     @JvmOverloads
@@ -85,10 +83,9 @@ class AddressLauncher internal constructor(
         publishableKey: String,
         configuration: Configuration = Configuration()
     ) {
-        val args = AddressElementActivityContract.Args(
+        val args = AddressElementActivityContract.Args.Standalone(
             publishableKey = publishableKey,
             config = configuration,
-            launchMode = AddressElementActivityContract.LaunchMode.Standalone,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -320,8 +317,8 @@ fun rememberAddressLauncher(
     callback: AddressLauncherResultCallback
 ): AddressLauncher {
     val activityResultLauncher = rememberLauncherForActivityResult(
-        contract = AddressElementActivityContract,
-        onResult = callback::onAddressElementActivityResult
+        contract = AddressElementActivityContract.Standalone,
+        onResult = callback::onAddressLauncherResult,
     )
 
     val context = LocalContext.current
@@ -332,20 +329,4 @@ fun rememberAddressLauncher(
             activityResultLauncher = activityResultLauncher,
         )
     }
-}
-
-internal fun AddressLauncherResultCallback.onAddressElementActivityResult(
-    result: AddressElementActivityContract.Result,
-) {
-    onAddressLauncherResult(
-        when (result) {
-            AddressElementActivityContract.Result.Canceled -> AddressLauncherResult.Canceled()
-            is AddressElementActivityContract.Result.StandaloneSucceeded -> {
-                AddressLauncherResult.Succeeded(result.address)
-            }
-            is AddressElementActivityContract.Result.CheckoutShippingSucceeded -> {
-                AddressLauncherResult.Succeeded(result.address)
-            }
-        }
-    )
 }

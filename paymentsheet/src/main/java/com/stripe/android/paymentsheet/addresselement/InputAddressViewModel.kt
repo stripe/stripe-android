@@ -227,11 +227,11 @@ internal class InputAddressViewModel @Inject constructor(
         )
         dismissWithAddress(
             addressDetails = addressDetails,
-            result = when (args.launchMode) {
-                AddressElementActivityContract.LaunchMode.Standalone -> {
+            result = when (args) {
+                is AddressElementActivityContract.Args.Standalone -> {
                     AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
                 }
-                AddressElementActivityContract.LaunchMode.CheckoutShipping -> {
+                is AddressElementActivityContract.Args.CheckoutShipping -> {
                     AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
                 }
             },
@@ -250,7 +250,7 @@ internal class InputAddressViewModel @Inject constructor(
                 editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
-        navigator.dismiss(result)
+        navigator.dismissWithResult(result)
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {

@@ -40,15 +40,16 @@ class InputAddressViewModelTest {
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
             .build(),
-        launchMode: AddressElementActivityContract.LaunchMode =
-            AddressElementActivityContract.LaunchMode.Standalone,
+        argsFactory:
+            (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
+                AddressElementActivityContract.Args.Standalone(
+                    publishableKey = "pk_123",
+                    config = currentConfig,
+                )
+            },
     ): InputAddressViewModel {
         return InputAddressViewModel(
-            AddressElementActivityContract.Args(
-                publishableKey = "pk_123",
-                config = config,
-                launchMode = launchMode,
-            ),
+            argsFactory(config),
             navigator,
             eventReporter,
             placesClient = null,
@@ -974,7 +975,7 @@ class InputAddressViewModelTest {
 
         assertThat(controller.validationMessage.value).isNotNull()
         assertThat(viewModel.formEnabled.value).isTrue()
-        verify(navigator, never()).dismiss(any())
+        verify(navigator, never()).dismissWithResult(any())
     }
 
     @Test
@@ -983,7 +984,7 @@ class InputAddressViewModelTest {
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
-        verify(navigator).dismiss(
+        verify(navigator).dismissWithResult(
             AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
         )
     }
@@ -991,12 +992,17 @@ class InputAddressViewModelTest {
     @Test
     fun `checkout shipping save emits checkout success without performing additional work`() {
         val viewModel = createViewModel(
-            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping,
+            argsFactory = { config ->
+                AddressElementActivityContract.Args.CheckoutShipping(
+                    publishableKey = "pk_123",
+                    config = config,
+                )
+            },
         )
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
-        verify(navigator).dismiss(
+        verify(navigator).dismissWithResult(
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(EXPECTED_ADDRESS)
         )
     }
@@ -1017,13 +1023,12 @@ class InputAddressViewModelTest {
         autocompleteCountries: Set<String> = emptySet(),
     ): InputAddressViewModel {
         return InputAddressViewModel(
-            AddressElementActivityContract.Args(
+            AddressElementActivityContract.Args.Standalone(
                 publishableKey = "pk_123",
                 config = AddressLauncher.Configuration.Builder()
                     .googlePlacesApiKey(googlePlacesApiKey)
                     .autocompleteCountries(autocompleteCountries)
                     .build(),
-                launchMode = AddressElementActivityContract.LaunchMode.Standalone,
             ),
             navigator,
             eventReporter,

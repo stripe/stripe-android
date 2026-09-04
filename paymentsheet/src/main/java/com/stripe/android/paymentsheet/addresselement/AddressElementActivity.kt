@@ -90,7 +90,7 @@ internal class AddressElementActivity : ComponentActivity() {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 onDismissed = {
-                    viewModel.navigator.dismiss(AddressElementActivityContract.Result.Canceled)
+                    viewModel.navigator.dismissWithResult(AddressElementActivityContract.Result.Canceled)
                 },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {

@@ -25,7 +25,7 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
         return null
     }
 
-    override fun dismiss(result: AddressElementActivityContract.Result) {
+    override fun dismissWithResult(result: AddressElementActivityContract.Result) {
         dismissCalls.add(Call.Dismiss(result))
     }
 
