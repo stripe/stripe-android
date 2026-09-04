@@ -2,6 +2,7 @@ package com.stripe.android.challenge.passive
 
 import android.content.Context
 import android.content.Intent
+import android.view.WindowManager
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -58,6 +59,30 @@ internal class PassiveChallengeWarmerActivityTest {
             scenario.close()
             hCaptchaService.ensureAllEventsConsumed()
         }
+    }
+
+    @Test
+    fun `activity window should not accept focus or touch input while warming up`() = runTest {
+        val hCaptchaService = FakeHCaptchaService().apply {
+            warmUpResult = {
+                delay(5.seconds)
+            }
+        }
+
+        val scenario = launchActivityForResult(hCaptchaService)
+        hCaptchaService.awaitWarmUpCall()
+
+        scenario.onActivity { activity ->
+            val flags = activity.window.attributes.flags
+
+            assertThat(flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+                .isEqualTo(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+            assertThat(flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+                .isEqualTo(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        }
+
+        scenario.close()
+        hCaptchaService.ensureAllEventsConsumed()
     }
 
     @Test
