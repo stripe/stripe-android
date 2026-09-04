@@ -949,7 +949,7 @@
 |    |    |         \--- androidx.fragment:fragment:1.1.0 -> 1.8.9 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.2.21 (*)
 |    +--- com.google.android.material:material:1.13.0 (*)
-|    +--- com.google.android.gms:play-services-wallet:19.5.0
+|    +--- com.google.android.gms:play-services-wallet:20.0.0
 |    |    +--- androidx.fragment:fragment:1.0.0 -> 1.8.9 (*)
 |    |    +--- com.google.android.gms:play-services-base:18.5.0
 |    |    |    +--- androidx.collection:collection:1.0.0 -> 1.5.0 (*)
@@ -996,7 +996,7 @@
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.1 -> 1.10.2 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0 (*)
-|    +--- com.google.android.gms:play-services-wallet:19.5.0 (*)
+|    +--- com.google.android.gms:play-services-wallet:20.0.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
 +--- project :stripe-ui-core (*)
 +--- project :stripe-attestation
@@ -1043,7 +1043,7 @@
 |    +--- androidx.compose.ui:ui:1.7.0 -> 1.10.6 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 -> 1.10.2 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 -> 2.2.21 (*)
-+--- com.google.android.gms:play-services-wallet:19.5.0 (*)
++--- com.google.android.gms:play-services-wallet:20.0.0 (*)
 +--- com.google.android.material:material:1.13.0 (*)
 +--- androidx.compose.ui:ui-tooling-preview:1.10.6 (*)
 +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
