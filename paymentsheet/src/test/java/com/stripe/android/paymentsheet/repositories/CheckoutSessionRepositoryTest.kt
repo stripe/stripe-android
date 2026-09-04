@@ -7,6 +7,7 @@ import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -16,6 +17,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -30,6 +34,7 @@ class CheckoutSessionRepositoryTest {
     )
 
     private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+    private val hCaptchaService = mock<HCaptchaService>()
 
     private val repository = CheckoutSessionRepository(
         clientParams = clientParams,
@@ -39,6 +44,7 @@ class CheckoutSessionRepositoryTest {
             context = ApplicationProvider.getApplicationContext(),
             publishableKey = "pk_test_123",
         ),
+        hCaptchaService = hCaptchaService,
         publishableKeyProvider = { "pk_test_123" },
         stripeAccountIdProvider = { null },
     )
@@ -124,5 +130,26 @@ class CheckoutSessionRepositoryTest {
         assertThat(result.isFailure).isTrue()
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.adaptive_pricing.currency_toggled.failed")
+    }
+
+    @Test
+    fun `applyPromotionCode sends passive captcha token`() = runTest {
+        whenever(hCaptchaService.passiveCaptchaToken(Int.MAX_VALUE))
+            .thenReturn(HCaptchaService.Result.Success("captcha-token"))
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "SAVE10"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("passive_captcha_token", "captcha-token"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.applyPromotionCode(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            promotionCode = "SAVE10",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        verify(hCaptchaService).passiveCaptchaToken(Int.MAX_VALUE)
     }
 }

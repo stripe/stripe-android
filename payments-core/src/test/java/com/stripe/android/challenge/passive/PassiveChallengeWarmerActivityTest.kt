@@ -12,15 +12,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerActivity
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerArgs
-import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerCompleted
-import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerViewModel
 import com.stripe.android.hcaptcha.FakeHCaptchaService
 import com.stripe.android.hcaptcha.HCaptchaService
-import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -38,21 +34,18 @@ internal class PassiveChallengeWarmerActivityTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `activity should dismiss result after warmUp`() {
+    fun `activity should remain active after warmUp`() {
         runTest {
             val hCaptchaService = FakeHCaptchaService().apply {
                 warmUpResult = { }
             }
 
             val scenario = launchActivityForResult(hCaptchaService)
-            advanceUntilIdle()
 
+            hCaptchaService.awaitCacheStateCall()
             hCaptchaService.awaitWarmUpCall()
 
-            assertThat(scenario.getResult().resultCode).isEqualTo(PassiveChallengeWarmerActivity.RESULT_COMPLETE)
-
-            val result = extractActivityResult(scenario)
-            assertThat(result).isInstanceOf<PassiveChallengeWarmerCompleted>()
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.RESUMED)
 
             scenario.close()
             hCaptchaService.ensureAllEventsConsumed()
@@ -69,18 +62,13 @@ internal class PassiveChallengeWarmerActivityTest {
 
         val scenario = launchActivityForResult(hCaptchaService)
 
+        hCaptchaService.awaitCacheStateCall()
         hCaptchaService.awaitWarmUpCall()
 
         scenario.recreate()
 
-        advanceUntilIdle()
-
+        hCaptchaService.awaitCacheStateCall()
         hCaptchaService.awaitWarmUpCall()
-
-        assertThat(scenario.getResult().resultCode).isEqualTo(PassiveChallengeWarmerActivity.RESULT_COMPLETE)
-
-        val result = extractActivityResult(scenario)
-        assertThat(result).isInstanceOf<PassiveChallengeWarmerCompleted>()
 
         scenario.close()
         hCaptchaService.ensureAllEventsConsumed()
@@ -154,18 +142,6 @@ internal class PassiveChallengeWarmerActivityTest {
         PassiveChallengeWarmerActivity::class.java
     ).apply {
         putExtra(PassiveChallengeWarmerActivity.EXTRA_ARGS, args)
-    }
-
-    private fun extractActivityResult(
-        scenario: InjectableActivityScenario<PassiveChallengeWarmerActivity>
-    ): PassiveChallengeWarmerCompleted? {
-        return scenario.getResult().resultData?.extras?.let {
-            BundleCompat.getParcelable(
-                it,
-                PassiveChallengeWarmerContract.EXTRA_RESULT,
-                PassiveChallengeWarmerCompleted::class.java
-            )
-        }
     }
 
     private fun createTestViewModelFactory(

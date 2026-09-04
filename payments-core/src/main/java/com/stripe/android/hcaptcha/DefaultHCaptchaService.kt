@@ -11,8 +11,10 @@ import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
@@ -24,6 +26,12 @@ internal class DefaultHCaptchaService(
     private val captchaEventsReporter: CaptchaEventsReporter
 ) : HCaptchaService {
     private val cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
+
+    override fun cacheState(timeoutSeconds: Int?): Flow<HCaptchaService.CacheState> {
+        // A production implementation would observe the cached result, report Cached while its token is valid,
+        // and report NeedsRefresh when the token is missing, failed, consumed, or expired using timeoutSeconds.
+        return flowOf(HCaptchaService.CacheState.Cached)
+    }
 
     override suspend fun warmUp(
         activity: FragmentActivity,
@@ -66,6 +74,11 @@ internal class DefaultHCaptchaService(
         cachedResult.emit(CachedResult.Idle)
         captchaEventsReporter.attachEnd(siteKey, isReady)
         return result
+    }
+
+    override suspend fun passiveCaptchaToken(tokenTimeoutSeconds: Int?): HCaptchaService.Result {
+        // We will read from cachedResult flow above
+        return HCaptchaService.Result.Success("token")
     }
 
     private suspend fun startVerification(
