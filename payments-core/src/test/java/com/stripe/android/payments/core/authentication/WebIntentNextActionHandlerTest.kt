@@ -213,6 +213,9 @@ class WebIntentNextActionHandlerTest {
         assertThat(args.url).isEqualTo(expectedUrl)
         assertThat(args.referrer).isEqualTo(expectedReferrer)
         assertThat(args.returnUrl).isEqualTo(expectedReturnUrl)
+        assertThat(args.apiConfiguration).isEqualTo(
+            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ACCOUNT_ID)
+        )
         assertThat(args.shouldCancelIntentOnUserNavigation).isEqualTo(
             expectedShouldCancelIntentOnUserNavigation
         )

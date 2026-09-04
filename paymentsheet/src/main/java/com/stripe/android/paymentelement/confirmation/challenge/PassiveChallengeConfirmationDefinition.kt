@@ -108,7 +108,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = PassiveChallengeActivityContract.Args(
                     passiveCaptchaParams,
-                    publishableKey = apiConfigurationProvider.get().publishableKey,
+                    apiConfiguration = apiConfigurationProvider.get(),
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,

@@ -73,7 +73,7 @@ internal class Stripe3DS2NextActionHandler @Inject constructor(
                 requestOptions,
                 enableLogging = enableLogging,
                 host.statusBarColor,
-                apiConfigProvider.get().publishableKey,
+                apiConfigProvider.get(),
                 productUsage
             )
         )

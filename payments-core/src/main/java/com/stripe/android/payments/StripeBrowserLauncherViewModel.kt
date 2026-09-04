@@ -86,7 +86,7 @@ internal class StripeBrowserLauncherViewModel(
             PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 sourceId = url.lastPathSegment.orEmpty(),
-                stripeAccountId = args.stripeAccountId,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 canCancelSource = args.shouldCancelSource
             ).toBundle()
         )
@@ -103,7 +103,7 @@ internal class StripeBrowserLauncherViewModel(
             PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 sourceId = url.lastPathSegment.orEmpty(),
-                stripeAccountId = args.stripeAccountId,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 canCancelSource = args.shouldCancelSource,
                 flowOutcome = StripeIntentResult.Outcome.FAILED,
                 exception = exception,
@@ -136,7 +136,7 @@ internal class StripeBrowserLauncherViewModel(
                 analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = application,
-                    publishableKeyProvider = { args.publishableKey },
+                    publishableKeyProvider = { args.apiConfiguration.publishableKey },
                 ),
                 browserCapabilities = browserCapabilitiesSupplier.get(),
                 customTabsPackage = CustomTabsClient.getPackageName(application, null),
